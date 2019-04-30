@@ -12,6 +12,7 @@
 /* Andrea Orlati(aorlati@ira.inaf.it) 31/01/2008      changed the algorithm of selectPoint()                                          */
 /* Andrea Orlati(aorlati@ira.inaf.it) 31/01/2008      fixed a bug in selectPoint() that causes  problem when longitude crosses the 360  */
 /* Andrea Orlati(aorlati@ira.inaf.it) 08/09/2010      added the averagePoint method */
+/* Giuseppe Carboni(giuseppe.carboni@inaf.it) 30/04/2019 changed algorithm and return value of selectPoint() */
 
 #include <acstimeEpochHelper.h>
 #include "Definitions.h"
@@ -117,8 +118,9 @@ public:
 	 * @param time the mark of time used to select the point
 	 * @param azimuth azimuth coordinate of the point
 	 * @param elevation elevation coordinate of the point 
+	 * @return false if the returned value is uncertain, true otherwise
 	 */
-	void selectPoint(const TIMEVALUE& time,double& azimuth,double& elevation) const;
+	bool selectPoint(const TIMEVALUE& time,double& azimuth,double& elevation) const;
 	
 	/**
 	 * This method can be used to get a point given two marks of time. The point is the result of the average of all points included between the two marks.

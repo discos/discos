@@ -230,7 +230,8 @@ void CBossCore::getObservedHorizontal(TIMEVALUE& time,TIMEDIFFERENCE& duration,d
 	}
 	else {
 		TIMEVALUE midTime(time.value().value+duration.value().value/2);
-		m_observedHorizontals.selectPoint(midTime,az,el);
+		if(!m_observedHorizontals.selectPoint(midTime,az,el))
+			ACS_LOG(LM_FULL_INFO,"CBossCore::getObservedHorizontal()", (LM_WARNING, "ACU COORDINATES UNCERTAINTY!"));
 	}
 }
 
@@ -248,7 +249,8 @@ void CBossCore::getObservedEquatorial(TIMEVALUE& time,TIMEDIFFERENCE& duration,d
 	else {
 		//printf("Short integration\n");
 		TIMEVALUE midTime(time.value().value+duration.value().value/2);
-		m_observedEquatorials.selectPoint(midTime,ra,dec);
+		if(!m_observedEquatorials.selectPoint(midTime,ra,dec))
+			ACS_LOG(LM_FULL_INFO,"CBossCore::getObservedEquatorial()", (LM_WARNING, "ACU COORDINATES UNCERTAINTY!"));
 	}
 }
 
@@ -264,7 +266,8 @@ void CBossCore::getObservedGalactic(TIMEVALUE& time,TIMEDIFFERENCE& duration,dou
 	}
 	else {
 		TIMEVALUE midTime(time.value().value+duration.value().value/2);
-		m_observedGalactics.selectPoint(midTime,lng,lat);
+		if(!m_observedGalactics.selectPoint(midTime,lng,lat))
+			ACS_LOG(LM_FULL_INFO,"CBossCore::getObservedGalactic()", (LM_WARNING, "ACU COORDINATES UNCERTAINTY!"));
 	}
 }
 
@@ -273,7 +276,8 @@ void CBossCore::getRawHorizontal(const TIMEVALUE& time,double& az,double& el) co
 	//IRA::CString tempo;
 	//IRA::CIRATools::timeToStr(time.value().value,tempo);
 	//printf("getRaw: %s ",(const char *)tempo);
-	m_rawCoordinates.selectPoint(time,az,el);
+	if(!m_rawCoordinates.selectPoint(time,az,el))
+		ACS_LOG(LM_FULL_INFO,"CBossCore::getRawHorizontal()", (LM_WARNING, "ACU COORDINATES UNCERTAINTY!"));
 	//printf("%lf %lf\n",az,el);
 }
 

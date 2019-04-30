@@ -8,6 +8,8 @@
 using namespace IRA;
 
 #define _TOLLERENCE 1.0
+#define _WAIT_TIME 10000
+#define _MAX_WAIT_TIME _WAIT_TIME * 200
 
 CTimeTaggedCircularArray::CTimeTaggedCircularArray(const unsigned& positions,
 		bool isRadians) : m_array(NULL), m_size(positions)
@@ -101,84 +103,82 @@ void CTimeTaggedCircularArray::addOffsets(const double& azOff,const double& elOf
 	}
 }
 
-void CTimeTaggedCircularArray::selectPoint(const TIMEVALUE& time,double& azimuth,double& elevation) const
+bool CTimeTaggedCircularArray::selectPoint(const TIMEVALUE& time, double& azimuth, double& elevation) const
 {
-	unsigned ss=elements();
-	unsigned pp=0;
-	TArrayRecord m1,m2;
-	long long dx1,dx2;
-	double slope;
-	int  i;
-	double maxEdge=360.0-_TOLLERENCE;
-	double minEdge=_TOLLERENCE;
+	// We wait for a point newer than the last one we have in store to arrive.
+	unsigned total = 0;
+	while(time > m_array[(m_head + elements() - 1) % m_size].time) {
+		if(total >= _MAX_WAIT_TIME) {
+			// Waited for 2 whole seconds, return the last coordinates out of desperation
+			unsigned ss = elements();
+			azimuth = m_array[(m_head + ss - 1) % m_size].azimuth;
+			elevation = m_array[(m_head + ss - 1) % m_size].elevation;
+			return false;
+		}
+		total += _WAIT_TIME;
+		CIRATools::Wait(_WAIT_TIME);
+	}
 
-	if (ss<=1) {
-		azimuth=m_lastAzimuth;
-		elevation=m_lastElevation;
-		return;
-	}
-	for (i=ss-1;i>=0;i--) { //at least two elements are present
-		pp=(m_head+i)%m_size;
-		if (time==m_array[pp].time) { //the requested time is there
-			azimuth=m_array[pp].azimuth; 
-			elevation=m_array[pp].elevation;
-			return;
+	TArrayRecord m1, m2;
+	unsigned pp = m_head;
+	for(int i = elements() - 1; i >= 0; i--) {
+		pp = (m_head + i) % m_size;
+		if (time == m_array[pp].time) {
+			//the requested time is there
+			azimuth = m_array[pp].azimuth;
+			elevation = m_array[pp].elevation;
+			return true;
 		}
-		else if (time>m_array[pp].time) {
-			if ((unsigned)i==ss-1) {  // the requested time is greater than all other entries in the array
-				m2=m_array[(m_head+ss-1)%m_size];
-				m1=m_array[(m_head+ss-2)%m_size];
-				break;
-			}
-			else { // the requested time is in between two entries
-				m1=m_array[pp];
-				m2=m_array[(m_head+i+1)%m_size];
-				break;
-			}
+		else if(time > m_array[pp].time) {
+			// the requested time is in between two entries
+			m1 = m_array[pp];
+			m2 = m_array[(m_head + i + 1) % m_size];
+			break;
 		}
 	}
-	// in that case the requested time is smaller than all other points in the vector
-	if (pp==m_head) {
-		/*m1=m_array[m_head];
-		m2=m_array[(m_head+1)%m_size];*/
-		azimuth=m_array[m_head].azimuth;
-		elevation=m_array[m_head].elevation;
-		return;
+
+	if(pp == m_head) {
+		// The requested time is smaller than all other points in the vector
+		azimuth = m_array[m_head].azimuth;
+		elevation = m_array[m_head].elevation;
+		return false;
 	}
-	// now compute the linear fit
-	TIMEVALUE second(m2.time);
-	TIMEVALUE first(m1.time);
-	dx1=CIRATools::timeSubtract(second,first);
-	dx2=CIRATools::timeSubtract(time,first);
-	// we need to take into account that 359.999 and 0.001 are close and not separated by a round angle
-	if (m_isRad) {
-		maxEdge*=DD2R;
-		minEdge*=DD2R;
+
+	double weight = double(CIRATools::timeSubtract(time, TIMEVALUE(m1.time))) / double(CIRATools::timeSubtract(TIMEVALUE(m2.time), TIMEVALUE(m1.time)));
+
+	double maxEdge = 360.0 - _TOLLERENCE;
+	double minEdge = _TOLLERENCE;
+
+	if(m_isRad) {
+		// We take into account that 359.999 and 0.001 are close and not separated by a round angle
+		maxEdge *= DD2R;
+		minEdge *= DD2R;
 	}
-	if (m1.azimuth<m2.azimuth) {
-		if ((m1.azimuth<minEdge)&&(m2.azimuth>maxEdge)) {
-			if (m_isRad) m1.azimuth+=D2PI;
-			else m1.azimuth+=360;
-		}		
-	}
-	else {
-		if ((m2.azimuth<minEdge)&&(m1.azimuth>maxEdge)) {
-			if (m_isRad) m2.azimuth+=D2PI;
-			else m2.azimuth+=360;
-		}		
-	}
-	// now compute the result......
-	slope=(m2.azimuth-m1.azimuth)/(double)dx1;
-	azimuth=slope*dx2+m1.azimuth;
-	if (m_isRad) {
-		azimuth=slaDranrm(azimuth);
+
+	if(m1.azimuth < m2.azimuth) {
+		if((m1.azimuth < minEdge) && (m2.azimuth > maxEdge)) {
+			if(m_isRad) m1.azimuth += D2PI;
+			else m1.azimuth += 360;
+		}
 	}
 	else {
-		 double w=dmod(azimuth,360.0);
-		 azimuth=(w>=0.0)?w:w+360.0;		
+		if((m2.azimuth < minEdge) && (m1.azimuth > maxEdge)) {
+			if (m_isRad) m2.azimuth += D2PI;
+			else m2.azimuth += 360;
+		}
 	}
-	slope=(m2.elevation-m1.elevation)/(double)dx1;
-	elevation=slope*dx2+m1.elevation;
+
+	// Now compute the result
+	double tmp_azimuth = (1 - weight) * m1.azimuth + weight * m2.azimuth;
+	if(m_isRad) tmp_azimuth = slaDranrm(tmp_azimuth);
+	else {
+		tmp_azimuth = dmod(tmp_azimuth, 360.0);
+		tmp_azimuth = (tmp_azimuth >= 0.0) ? tmp_azimuth : tmp_azimuth + 360.0;
+	}
+	azimuth = tmp_azimuth;
+
+	elevation = (1 - weight) * m1.elevation + weight * m2.elevation;
+	return true;
 }
 
 void CTimeTaggedCircularArray::averagePoint(const TIMEVALUE& startTime,const TIMEVALUE& stopTime,double& azimuth,double& elevation) const
