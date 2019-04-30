@@ -137,7 +137,7 @@ bool CTimeTaggedCircularArray::selectPoint(const TIMEVALUE& time, double& azimut
 		}
 	}
 
-	if(pp == m_head) {
+	if(pp == m_head && time < m_array[m_head].time) {
 		// The requested time is smaller than all other points in the vector
 		azimuth = m_array[m_head].azimuth;
 		elevation = m_array[m_head].elevation;
