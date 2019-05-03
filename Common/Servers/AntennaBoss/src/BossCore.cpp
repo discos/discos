@@ -951,7 +951,7 @@ void CBossCore::getAllattributes()
 {	
 }
 
-void CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntCallOperationExImpl,
+bool CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntCallOperationExImpl,
 		ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl)
 {
 	ACS::Time time;
@@ -966,7 +966,7 @@ void CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,Co
 	loadMount(m_mount,m_mountError); // throw ComponentErrors::CouldntGetComponentExImpl
 	try {
 		m_mount->getEncoderCoordinates(time,az,el,azOff,elOff,m_lastAzimuthSection);
-		if(time == m_lastEncoderRead) return;
+		if(time == m_lastEncoderRead) return false;
 	}
 	catch (CORBA::SystemException& ex) {
 		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CBossCore::updateAttributes()");
@@ -1115,6 +1115,8 @@ void CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,Co
 			}
 		}
 	}
+
+    return true;
 }
 
 void CBossCore::publishData() throw (ComponentErrors::NotificationChannelErrorExImpl)
