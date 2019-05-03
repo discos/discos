@@ -35,6 +35,7 @@ CBossCore::CBossCore(ContainerServices *service,CConfiguration *conf,acscomponen
 	m_cbUnstow=m_callbackUnstow->_this();
 	m_cbStow=m_callbackStow->_this();
 	m_cbSetup=m_callbackSetup->_this();
+	m_lastEncoderRead = ACS::Time(0);
 }
 
 CBossCore::~CBossCore()
@@ -965,6 +966,7 @@ void CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,Co
 	loadMount(m_mount,m_mountError); // throw ComponentErrors::CouldntGetComponentExImpl
 	try {
 		m_mount->getEncoderCoordinates(time,az,el,azOff,elOff,m_lastAzimuthSection);
+		if(time == m_lastEncoderRead) return;
 	}
 	catch (CORBA::SystemException& ex) {
 		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CBossCore::updateAttributes()");
