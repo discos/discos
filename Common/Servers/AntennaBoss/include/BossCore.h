@@ -835,7 +835,7 @@ private:
 	 * Stores the parameters of the last commanded scan.
 	 */
 	Antenna::TTrackingParameters m_lastScanParameters;
-	
+
 	/** 
 	 * This method loads into the mount a coordinate for a given time. It uses the commanded generator in order to provide the required coordinates.
 	 * The coordinates are corrected for pointing model and refraction (if <i>m_correctionEnable</i> is set) then commanded to the mount (if the flag
@@ -868,8 +868,9 @@ private:
 	 * @throw ComponentErrors::CouldntCallOperationExImpl
 	 * @throw ComponentErrors::UnexpectedExImpl
 	 * @throw ComponentErrors::CouldntGetComponentExImpl
+     * @returns true if the attributes have been updated, false otherwise
 	*/ 
-	void updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntCallOperationExImpl,
+	bool updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntCallOperationExImpl,
 			ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl);
 	
 	/**
