@@ -31,7 +31,7 @@ void CWatchingThread::onStart()
 		IRA::CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("WATCHINGTHREAD:runLoop");
 		try {
 			//printf("updateAttributes\n");
-			resource->updateAttributes();
+			if(!resource->updateAttributes()) return;
 		}
 		catch (ACSErr::ACSbaseExImpl& E) {
 			_ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl,_dummy,E,"CWatchingThread::runLoop()");
