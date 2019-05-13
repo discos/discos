@@ -26,7 +26,7 @@ CRefractionCore::~CRefractionCore()
 
 void CRefractionCore::initialize(maci::ContainerServices *Services) throw (ComponentErrors::CDBAccessExImpl)
 {
-    m_byebye = false;
+	m_byebye = false;
 	_GET_STRING_ATTRIBUTE("ObservatoryInterface","Observatory interface is ",m_observatoryComp);
 	_GET_STRING_ATTRIBUTE("WeatherStationInterface","Weather station interface is ",m_weatherComp);
 	ACS_LOG(LM_FULL_INFO,"CRefractionCore::initialize()",(LM_INFO,"CRefractionCore::initialize"));	
@@ -100,8 +100,9 @@ void CRefractionCore::execute() throw (ComponentErrors::CouldntGetComponentExImp
 
 void CRefractionCore::cleanUp()
 {
-	baci::ThreadSyncGuard guard(&m_mutex);
-    try {
+	baci::ThreadSyncGuard guardMeteoData(&m_meteoDataMutex);
+	baci::ThreadSyncGuard guardParameters(&m_parametersMutex);
+	try {
 		m_services->releaseComponent((const char*)m_meteodata->name());
 	}
 	catch (maciErrType::CannotReleaseComponentExImpl& ex) {
@@ -113,9 +114,9 @@ void CRefractionCore::cleanUp()
 
 void CRefractionCore::getCorrection(double obsZenithDistance,double waveLen, double *corZenithDistance)
 {
-    AUTO_TRACE("CRefractionCore::getCorrection()");
+	AUTO_TRACE("CRefractionCore::getCorrection()");
 	//double elevation;
-	baci::ThreadSyncGuard guard(&m_mutex);
+	baci::ThreadSyncGuard guardParametes(&m_parametersMutex);
 	//elevation = 90.0 - obsZenithDistance*DR2D;
 	//if (elevation >= 0.0 && elevation <= 90.0) {
 	if ((obsZenithDistance>=0.0) && (obsZenithDistance<=(DPI/2.0))) {
@@ -125,34 +126,35 @@ void CRefractionCore::getCorrection(double obsZenithDistance,double waveLen, dou
 		double phi = m_site.getLatitude(); // radians
 		double tlr = 0.0065;
 		double eps = 1e-8;
-		
+
 		slaRefro(obsZenithDistance, hm, tdk, m_pressure, m_humidity, wl, phi, tlr, eps, corZenithDistance);
 	}
-	else
-		corZenithDistance = 0;
+	else corZenithDistance = 0;
 }
 
 void CRefractionCore::getMeteoParameters()
 {
-    AUTO_TRACE("CRefractionCore::getMeteoParameters()");
+	AUTO_TRACE("CRefractionCore::getMeteoParameters()");
 	m_temperature=0.0;
 	m_humidity=0.5;
 	m_pressure=1000;
-    Weather::parameters pars;
+	Weather::parameters pars;
 
-    try {
-	// keep the mutex for thread execution to avoid long waits
-	// before to call the getData function from meteo component
-	baci::ThreadSyncGuard guard(&m_mutex);
-        pars=m_meteodata->getData();
-    	//m_temperature = m_meteodata->getTemperature();
-    	//m_humidity = (m_meteodata->getHumidity())/100.0; // because slaRefro needs humidity value beetwen 0.0 and 1.0
-    	//m_pressure = m_meteodata->getPressure();
-	m_temperature=pars.temperature;
-	m_humidity=pars.humidity/100.0;
-	m_pressure=pars.pressure;
-	//printf("t: %lf h: %lf p: %lf\n",m_temperature,m_humidity,m_pressure);
-    }
+	try {
+		// keep the meteoData mutex for thread execution to avoid long waits
+		// before to call the getData function from meteo component
+		baci::ThreadSyncGuard guardMeteoData(&m_meteoDataMutex);
+		pars=m_meteodata->getData();
+		//m_temperature = m_meteodata->getTemperature();
+		//m_humidity = (m_meteodata->getHumidity())/100.0; // because slaRefro needs humidity value beetwen 0.0 and 1.0
+		//m_pressure = m_meteodata->getPressure();
+
+		baci::ThreadSyncGuard guardParameters(&m_parametersMutex);
+		m_temperature=pars.temperature;
+		m_humidity=pars.humidity/100.0;
+		m_pressure=pars.pressure;
+		//printf("t: %lf h: %lf p: %lf\n",m_temperature,m_humidity,m_pressure);
+	}
 	catch (CORBA::SystemException& ex) {
 		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRefractionCore::getMeteoParameters()");
 		impl.setName(ex._name());

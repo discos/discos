@@ -110,9 +110,10 @@ private:
     double m_pressure;
 
 	/**
-	 * Thread sync mutex
+	 * Thread sync mutexes
 	 */
-	BACIMutex m_mutex;
+	BACIMutex m_meteoDataMutex;
+	BACIMutex m_parametersMutex;
 
 };
 
