@@ -140,7 +140,7 @@ void CCommandLine::Init(CConfiguration *config) throw (ComponentErrors::SocketEr
 		throw Impl;
 	}
 
-    m_ifDistributor = Receivers::GenericIFDistributor::_nil();
+    /*m_ifDistributor = Receivers::GenericIFDistributor::_nil();
     try {
 	    m_ifDistributor = m_services->getComponent<Receivers::GenericIFDistributor>("RECEIVERS/SRTIFDistributor");
 	}
@@ -148,7 +148,7 @@ void CCommandLine::Init(CConfiguration *config) throw (ComponentErrors::SocketEr
 	    _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CCommadLine::Init()");
 		Impl.setComponentName("RECEIVERS/SRTIFDistributor");
 		throw Impl;
-	}
+	}*/
 
     char *Station;
     IRA::CString cStation;
@@ -519,7 +519,7 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
                 }
                 ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"TOTALPOWER_FILTER_CONFIGURED %ld,FILTER=%lf",inputId,filter));
             }
-            if ((m_SL00==true || m_SL00S==true) && m_stationSRT == true) {
+            /*if ((m_SL00==true || m_SL00S==true) && m_stationSRT == true) {
                 try {
                     if (newBW==128.00) {
                         m_ifDistributor->setup("BW-NARROW");
@@ -542,7 +542,7 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 	                _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCommandLine::setAttenuation()");
 		            impl.log(LM_ERROR);
 	            }
-            }
+            }*/
         }
 	}
     catch (...) {
@@ -773,10 +773,10 @@ void CCommandLine::setDefaultConfiguration(const IRA::CString & config) throw (C
         m_inputsNumber=m_sectionsNumber;
         m_SL00=true;
         m_SK77=m_SK03=m_SK06=m_SK00=m_SC00=m_SP00=m_SK77S=m_SK03S=m_SK06S=m_SK00S=m_SC00S=m_SL00S=m_SP00S=false;
-        if (m_stationSRT == true) {
+        /*if (m_stationSRT == true) {
             m_ifDistributor->setup("BW-UNFILTERED");
             ACS_LOG(LM_FULL_INFO,"CCommandLine::setDefaultConfiguration()",(LM_NOTICE,"IFDISTRIBUTOR_BW-UNFILTERED_CONFIGURED"));
-        }
+        }*/
     }
     if (config.Compare("SP00")==0) {
         m_filter = 730.0;
@@ -825,10 +825,10 @@ void CCommandLine::setDefaultConfiguration(const IRA::CString & config) throw (C
         m_sectionsNumber=m_sectionsNumber/2;
         m_SL00S=true;
         m_SK77=m_SK03=m_SK06=m_SK00=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK03S=m_SK06S=m_SK00S=m_SC00S=m_SP00S=false;
-        if (m_stationSRT == true) {
+        /*if (m_stationSRT == true) {
             m_ifDistributor->setup("BW-UNFILTERED");
             ACS_LOG(LM_FULL_INFO,"CCommandLine::setDefaultConfiguration()",(LM_NOTICE,"IFDISTRIBUTOR_BW-UNFILTERED_CONFIGURED"));
-        }
+        }*/
     }
     if (config.Compare("SP00S")==0) {
         m_filter = 730.0;

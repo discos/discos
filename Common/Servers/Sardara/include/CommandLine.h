@@ -485,7 +485,7 @@ private:
 
     ContainerServices* m_services;
     Backends::TotalPower_var m_totalPower;
-    Receivers::GenericIFDistributor_var m_ifDistributor;
+    //Receivers::GenericIFDistributor_var m_ifDistributor;
 
 	/**
 	 * List the fields of the backend status 
