@@ -101,6 +101,7 @@ void CRefractionCore::execute() throw (ComponentErrors::CouldntGetComponentExImp
 void CRefractionCore::cleanUp()
 {
 	baci::ThreadSyncGuard guardMeteoData(&m_meteoDataMutex);
+	baci::ThreadSyncGuard guardParameters(&m_parametersMutex);
 	try {
 		m_services->releaseComponent((const char*)m_meteodata->name());
 	}
