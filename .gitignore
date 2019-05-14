@@ -36,6 +36,8 @@ Common/Interfaces/ManagmentInterface/idl/CustomLogger.idl
 Common/Interfaces/ReceiversInterface/idl/DewarPositionerDefinitions.idl
 Common/Interfaces/XBackendInterface/idl/XBackends.idl
 Common/Misc/PMUpdate/src/PMUpdate_gui.py
+Noto/Errors/NotoActiveSurfaceErrors/idl/ASErrors.idl
+Noto/Interfaces/NotoActiveSurfaceInterface/idl/NotoActiveSurfaceBoss.idl
 SRT/Clients/SRTActiveSurfaceGUIClient/include/SRTActiveSurfaceGUI.h
 SRT/Clients/SRTActiveSurfaceGUIClient/src/moc_SRTActiveSurfaceCore.cpp
 SRT/Clients/SRTActiveSurfaceGUIClient/src/moc_SRTActiveSurfaceGUIui.cpp
