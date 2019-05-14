@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+# -*- coding: utf-8 -*-
 from Acspy.Clients.SimpleClient import PySimpleClient
 import Acspy.Common.Err
 import maciErrType
@@ -285,6 +286,11 @@ class Application(Qt.QDialog,calibrationtool_ui.Ui_CalibrationToolDialog):
 		self.thread.run=False  
                 try:
  		     self.simpleClient.releaseComponent(self.componentname)
+ 		     self.simpleClient.releaseComponent(self.scheduler._get_name())
+ 		     self.simpleClient.releaseComponent(self.boss._get_name())
+     
+
+
 		     self.simpleClient.disconnect()
                 except Exception,ex:
                       print "exception"
