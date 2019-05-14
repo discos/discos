@@ -7,7 +7,7 @@
 	ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,"Trying to get property "#NAME"...")); \
 	NAME=component->NAME(); \
 	if (NAME.ptr()!=TYPE::_nil()) { \
-		ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_DEBUG,"OK, reference is: %x",NAME.ptr())); \
+		ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_DEBUG,"OK, reference is: %lx",(long)NAME.ptr())); \
 	} \
 	else { \
 		_EXCPT(ClientErrors::CouldntAccessPropertyExImpl,impl,MODULE_NAME"::Main()"); \
@@ -208,6 +208,7 @@ int main(int argc, char *argv[]) {
 	// Component declaration 
 	COMPONENT_DECLARATION component;
 	DEWAR_DECLARATION dewar;
+	bool dewarReady=false;
 		
 
 	/* Add frame controls declaration */
@@ -310,23 +311,49 @@ int main(int argc, char *argv[]) {
 		goto ErrorLabel;
 	}
 	component=COMPONENT_INTERFACE::_narrow(obj.in());
-	ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_DEBUG,"Receivers Boss reference is: %d",component.ptr()));
+	ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_DEBUG,"Receivers Boss reference is: %ld",(long)component.ptr()));
 	ACE_OS::sleep(1);
-
 	try {
-		info=client.manager()->get_default_component(client.handle(),DEWAR_INTERFACE_TPYE);
-		obj=info->reference;
-		if (CORBA::is_nil(obj.in())) {
+		maci::ComponentInfoSeq_var cInfo;
+		maci::HandleSeq handles;
+		handles.length(0);
+		IRA::CString cName,cType;
+		cName="";
+		cType=DEWAR_INTERFACE_TPYE;
+		cInfo=client.manager()->get_component_info(client.handle(),handles,(const char *)cName,
+			(const char *)cType,(CORBA::Boolean)false);
+		for(unsigned k=0;k<cInfo->length();k++) {
+			printf("type: %s\n",(const char *)cInfo[k].type);
+			if (cInfo[k].type==DEWAR_INTERFACE_TPYE) {
+				ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_NOTICE,"Dewar positioner found"));
+				dewarReady=true;
+				break;
+			}
+		}		
+	}
+	catch (...) {
+		dewarReady=false;
+	}
+	if (dewarReady) {
+		try {
+			info=client.manager()->get_default_component(client.handle(),DEWAR_INTERFACE_TPYE);
+			obj=info->reference;
+			if (CORBA::is_nil(obj.in())) {
+				ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_NOTICE,"Dewar positioner not available"));
+				dewar=DEWAR_INTERFACE::_nil();
+			}
+			else {
+				dewar=DEWAR_INTERFACE::_narrow(obj.in());
+				ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_DEBUG,"Dewar reference is: %ld",(long)dewar.ptr()));
+			}
+		}
+		catch(...) {
 			ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_NOTICE,"Dewar positioner not available"));
 			dewar=DEWAR_INTERFACE::_nil();
 		}
-		else {
-			dewar=DEWAR_INTERFACE::_narrow(obj.in());
-			ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_DEBUG,"Dewar reference is: %d",dewar.ptr()));
-		}
 	}
-	catch(...) {
-		ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_NOTICE,"Dewar positioner not available"));
+	else {
+		dewar=DEWAR_INTERFACE::_nil();
 	}
 	ACE_OS::sleep(1);
 	try {

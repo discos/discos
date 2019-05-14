@@ -14,8 +14,9 @@
   	<cdb:_ string="WEATHERSTATION/WeatherStation"/>  	
   	<cdb:_ string="ANTENNA/Boss"/>
   	<cdb:_ string="RECEIVERS/Boss"/>
-  	<cdb:_ string="MANAGEMENT/Palmiro"/>
+  	<cdb:_ string="MANAGEMENT/Ducezio"/>
   	<cdb:_ string="MANAGEMENT/CustomLogger"/>
+  	<cdb:_ string="MANAGEMENT/ExternalClients"/>
   </Startup>
 
   <ServiceComponents>

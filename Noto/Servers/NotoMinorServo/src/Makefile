@@ -88,7 +88,7 @@ LIBRARIES_L     =
 #NotoMinorServoBossImpl_LIBS = lanStubs usdStubs MinorServoBossStubs NotoMinorServoBossStubs AntennaDefinitionsStubs ManagmentDefinitionsStubs AntennaBossStubs ComponentErrors ASErrors ManagementErrors AntennaErrors IRALibrary ParserErrors
 
 NotoMinorServoBossImpl_OBJECTS = NotoMinorServoBossImpl Configuration NotoMinorServoBossCore NotoMinorServoBossWatchingThread NotoMinorServoBossWorkingThread
-NotoMinorServoBossImpl_LIBS = NotoMinorServoBossStubs AntennaDefinitionsStubs ManagmentDefinitionsStubs AntennaBossStubs ComponentErrors ManagementErrors AntennaErrors IRALibrary ParserErrors
+NotoMinorServoBossImpl_LIBS = NotoMinorServoBossStubs AntennaDefinitionsStubs ManagmentDefinitionsStubs AntennaBossStubs ComponentErrors ManagementErrors AntennaErrors IRALibrary ParserErrors DiscosVersion
 #
 # Scripts (public and local)
 # ----------------------------

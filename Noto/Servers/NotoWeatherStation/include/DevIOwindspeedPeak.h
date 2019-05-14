@@ -68,9 +68,6 @@ public:
 			CSecAreaResourceWrapper<MeteoSocket> sock=m_socket->Get();
 
 			m_val=	sock->getWindSpeed();
-
-			timestamp=getTimeStamp();  //complition time
-		return m_val;
 		}
 		catch (ComponentErrors::SocketErrorExImpl& E) {
 			_ADD_BACKTRACE(ComponentErrors::SocketErrorExImpl,dummy,E,"DevIOWindspeed::read()");
@@ -83,15 +80,11 @@ public:
 			dummy.setReason("Property could not be read");
 			//_IRA_LOGGUARD_LOG_EXCEPTION(m_logGuard,dummy,LM_DEBUG);
 			throw dummy;
-		}  catch (...)
-                  {
-                   cout << "Unexpected exc windspeed peak" << endl;
-                  
-                  
-                  }
-                  				
-
-
+		}  catch (...) {
+			cout << "Unexpected exc windspeed peak" << endl; 
+      }
+      timestamp=getTimeStamp();  //complition time
+		return m_val;
 	}
 	/**
 	 * It writes values into controller. Unused because the properties are read-only.

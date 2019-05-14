@@ -11,7 +11,7 @@
 	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
 	<inputPort>GREGORIAN</inputPort>
 	<inputPortDB>7</inputPortDB>
-	<inputPortBW>2350</inputPortBW>
+	<inputPortBW>2350</inputPortBW>	
 	<beams>7</beams>
 	<section_boards>0 1 2 3</section_boards>
 	<polarizations>L R L R</polarizations>
@@ -24,8 +24,8 @@
  	<sections>2</sections>
  	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
  	<inputPort>GREGORIAN</inputPort>
- 	<inputPortDB>10</inputPortDB>
- 	<inputPortBW>300</inputPortBW>
+	<inputPortDB>10</inputPortDB>
+	<inputPortBW>300</inputPortBW> 	
  	<beams>1</beams>
  	<section_boards>0 1</section_boards>
  	<polarizations>L R</polarizations>
@@ -53,7 +53,7 @@
  	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
  	<inputPort>GREGORIAN GREGORIAN PRIMARY PRIMARY</inputPort>
  	<inputPortDB>13 13 7 7</inputPortDB>
- 	<inputPortBW>2350 2350 2350 2350</inputPortBW>
+ 	<inputPortBW>2350 2350 2350 2350</inputPortBW> 	
  	<beams>1</beams>
  	<section_boards>2 3</section_boards>
  	<polarizations>L R</polarizations>
@@ -62,12 +62,12 @@
 </Configuration>
 
 <Configuration>
-	<configurationID>LLP</configurationID>
+	<configurationID>CHCL</configurationID>
  	<sections>2</sections>
  	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
  	<inputPort>GREGORIAN GREGORIAN PRIMARY PRIMARY</inputPort>
- 	<inputPortDB>2 2 7 7</inputPortDB>
- 	<inputPortBW>300 300 300 300</inputPortBW>
+ 	<inputPortDB>13 13 7 7</inputPortDB>
+ 	<inputPortBW>2350 2350 2350 2350</inputPortBW> 	
  	<beams>1</beams>
  	<section_boards>2 3</section_boards>
  	<polarizations>L R</polarizations>
@@ -80,7 +80,7 @@
  	<sections>2</sections>
  	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
  	<inputPort>GREGORIAN</inputPort>
- 	<inputPortDB>8</inputPortDB>
+	<inputPortDB>8</inputPortDB>
  	<inputPortBW>1250</inputPortBW>
  	<beams>1</beams>
  	<section_boards>0 1</section_boards>

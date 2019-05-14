@@ -8,5 +8,5 @@
              xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              ObservatoryInterface="IDL:alma/Antenna/Observatory:1.0" 
-             WeatherStationInterface="IDL:alma/Weather/NotoWeatherStation:1.0"
+             WeatherStationInterface="IDL:alma/Weather/GenericWeatherStation:1.0"
 />

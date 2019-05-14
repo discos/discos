@@ -1,0 +1,73 @@
+#! /bin/bash
+# ********************************************************************************************* 
+# Istituto Nazionale di Astrofisica                                                                     
+# 
+#
+# This code is under GNU General Public Licence (GPL).                                              
+#                                                                                                     
+# Who                                  when            What                                             
+# Andrea Orlati(andrea.orlati@inaf.it) 07/12/2018      Creation                                  
+#************************************************************************
+#   NAME
+# 
+#   SYNOPSIS
+# 
+#   DESCRIPTION
+#
+#   Starts the containers required by discos, Noto flavour
+#
+#   FILES
+#
+#   ENVIRONMENT
+#
+#   RETURN VALUES
+#
+#   CAUTIONS
+#
+#   EXAMPLES
+#
+#   SEE ALSO
+#
+#   BUGS
+
+#MASTERHOST will be replaced by make file @installation time with proper server address
+
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStart && touch $ACS_TMP/acsDone.lock'"
+while ! [ -f $ACS_TMP/acsDone.lock ];
+do
+	echo #
+    sleep 1
+done
+rm -f $ACS_TMP/acsDone.lock
+echo "...ACS is up and running!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp LoggerContainer > /dev/null 2>&1 &'"
+echo "...LoggerContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp WeatherStationContainer > /dev/null 2>&1 &'"
+echo "...WeatherStationContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp MountContainer > /dev/null 2>&1 &'"
+echo "...MountContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp FrontEndsContainer > /dev/null 2>&1 &'"
+echo "...FrontEndsContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp AntennaContainer > /dev/null 2>&1 &'"
+echo "...AntennaContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp LocalOscillatorContainer > /dev/null 2>&1 &'"
+echo "...LocalOscillatorContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp ReceiversContainer > /dev/null 2>&1 &'"
+echo "...ReceiversContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp TotalPowerContainer > /dev/null 2>&1 &'"
+echo "...TotalPowerContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp ManagementContainer > /dev/null 2>&1 &'"
+echo "...ManagementContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp FitsZillaContainer > /dev/null 2>&1 &'"
+echo "...FitsZillaContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp CalibrationToolContainer > /dev/null 2>&1 &'"
+echo "...CalibrationToolContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp PointContainer > /dev/null 2>&1 &'"
+echo "...PointContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp NotoActiveSurfaceContainer > /dev/null 2>&1 &'"
+echo "...NotoActiveSurfaceContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp NotoMinorServoContainer > /dev/null 2>&1 &'"
+echo "...NotoMinorServoContainer!"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'acsStartContainer -cpp ExternalClientsContainer > /dev/null 2>&1 &'"
+echo "...ExternalClientsContainer!"
+

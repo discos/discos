@@ -8,7 +8,7 @@
 # who       when      what
 # --------  --------  ----------------------------------------------
 # manager  03/02/15  created
-#
+# orlati   07/12/18  changed in order to comply with new discos bootup procedure
 
 #*******************************************************************************
 # This Makefile follows VLT Standards (see Makefile(5) for more).
@@ -16,6 +16,12 @@
 # REMARKS
 #    None
 #------------------------------------------------------------------------
+
+ifndef MANAGER_REFERENCE
+	MASTER:=$(HOST)
+else
+	MASTER:=$(shell echo $(MANAGER_REFERENCE) | cut -d: -f 3)
+endif
 
 #
 # user definable C-compilation flags
@@ -66,8 +72,11 @@ lllll_OBJECTS   =
 #
 # Scripts (public and local)
 # ----------------------------
-SCRIPTS         = escsnoto escsConsole
-SCRIPTS_L       =
+#SCRIPTS         = escsnoto escsConsole
+#SCRIPTS_L       =
+
+# new bootup scripts (discos):
+SCRIPTS=discosup discosdown discosConsole
 
 #
 # TCL scripts (public and local)
@@ -162,7 +171,8 @@ ASCII_TO_MIF =
 #
 # other files to be installed
 #----------------------------
-INSTALL_FILES      = ../app-defaults/escs_command_center
+#INSTALL_FILES      = ../app-defaults/escs_command_center
+INSTALL_FILES = ../app-defaults/discosStartup.xml
 
 # list of all possible C-sources (used to create automatic dependencies)
 # ------------------------------
@@ -184,13 +194,19 @@ ifneq ($(MAKEDIRTMP),\#error\#)
    include $(MAKEDIR)/acsMakefile
 endif
 
+.PHONY: all
+.DEFAULT_GOAL:=all
+
 #
 # TARGETS
 # -------
 all:	do_all
+	@sed -i 's/MASTERHOST/$(MASTER)/g' ../bin/discosup
+	@sed -i 's/MASTERHOST/$(MASTER)/g' ../bin/discosdown
 	@echo " . . . 'all' done" 
 
-clean : clean_all 
+clean : clean_all
+	@rm -f $(INTROOT)/app-defaults/discosStartup.xml
 	@echo " . . . clean done"
 
 clean_dist : clean_all clean_dist_all 
@@ -200,6 +216,11 @@ man   : do_man
 	@echo " . . . man page(s) done"
 
 install : install_all
+	@sed -i 's/MASTERHOST/$(MASTER)/g' $(INTROOT)/app-defaults/discosStartup.xml
+	@chmod 700 $(INTROOT)/app-defaults/discosStartup.xml 
+	@chmod 700 $(INTROOT)/bin/discosdown
+	@chmod 700 $(INTROOT)/bin/discosup
+	@chmod 700 $(INTROOT)/bin/subr
 	@echo " . . . installation done"
 
 

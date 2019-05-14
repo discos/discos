@@ -6,8 +6,10 @@
 /*                                                                           */
 /* This code is under GNU General Public Licence (GPL).                      */
 /*                                                                           */
-/* Who					When		What                 */
-/* Sergio Poppi				18/02/2010      Creation             */
+/* Who					When		       What                                    */
+/* Sergio Poppi		18/02/2010      Creation                                */
+/* Andrea Orlati     28/11/2018      attributes and methods moved to generic */
+/*                                   interface 										  */ 
 /*                                                                           */
 /* ***************************************************************************/
 
@@ -26,36 +28,7 @@ module Weather{
 	interface NotoWeatherStation : GenericWeatherStation
 	 {
 
-			
-		/**
-		* get the humidity
-		* @return double	
-		*
-		*  	
-		*	
-		*	
-		*/
-		double getHumidity();
-		/**
-		* get the temperature
-		* @return double	
-		*	
-		*	
-		*/
-		double getTemperature();
-		/**
-		* get the pressure
-		* @return double	
-		*	
-		*	
-		*/
 		double getWindspeed();
-		double getPressure();
-                double getWindSpeedAverage();
-                double getWindspeedPeak();
-                double getWindDir();
-
-                readonly attribute ACS::RWdouble windspeedpeak;
 
 	 };
 

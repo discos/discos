@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<NoiseMarkLookUpTable xmlns="urn:schemas-cosylab-com:NoiseMarkLookUpTable:1.0"
+             	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+				xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>6483.0</SkyFrequency><NoiseMark>21.4496290323</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>6499.0</SkyFrequency><NoiseMark>21.359516129</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>6528.0</SkyFrequency><NoiseMark>21.0573636364</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>6544.0</SkyFrequency><NoiseMark>20.6147121212</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>6573.0</SkyFrequency><NoiseMark>20.7856461538</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>6589.0</SkyFrequency><NoiseMark>20.5240606061</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>6618.0</SkyFrequency><NoiseMark>20.5948688525</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>6634.0</SkyFrequency><NoiseMark>20.5051692308</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>6663.0</SkyFrequency><NoiseMark>20.2947462687</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>6679.0</SkyFrequency><NoiseMark>20.1334461538</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>6695.0</SkyFrequency><NoiseMark>19.8892857143</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>6708.0</SkyFrequency><NoiseMark>19.9920447761</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>6724.0</SkyFrequency><NoiseMark>20.1362153846</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>6753.0</SkyFrequency><NoiseMark>20.628734375</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>6769.0</SkyFrequency><NoiseMark>20.3865245902</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>6798.0</SkyFrequency><NoiseMark>20.4506190476</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>6814.0</SkyFrequency><NoiseMark>20.149046875</NoiseMark></MarkEntry>
+
+
+
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>6483.0</SkyFrequency><NoiseMark>24.59525</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>6499.0</SkyFrequency><NoiseMark>23.199</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>6528.0</SkyFrequency><NoiseMark>22.9308214286</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>6544.0</SkyFrequency><NoiseMark>23.2187169811</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>6573.0</SkyFrequency><NoiseMark>21.580537037</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>6589.0</SkyFrequency><NoiseMark>22.2862807018</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>6618.0</SkyFrequency><NoiseMark>21.1983928571</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>6634.0</SkyFrequency><NoiseMark>20.2848070175</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>6663.0</SkyFrequency><NoiseMark>19.9063684211</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>6679.0</SkyFrequency><NoiseMark>20.0140172414</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>6695.0</SkyFrequency><NoiseMark>19.3034285714</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>6708.0</SkyFrequency><NoiseMark>20.2514137931</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>6724.0</SkyFrequency><NoiseMark>20.4172372881</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>6753.0</SkyFrequency><NoiseMark>21.7070555556</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>6769.0</SkyFrequency><NoiseMark>21.6352692308</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>6798.0</SkyFrequency><NoiseMark>21.716754717</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>6814.0</SkyFrequency><NoiseMark>21.8438867925</NoiseMark></MarkEntry>
+
+
+</NoiseMarkLookUpTable>

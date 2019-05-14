@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<DMedConfiguration xmlns="urn:schemas-cosylab-com:DMedConfiguration:1.0"
+             	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+				xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				IP="192.168.51.28"
+				PORT="5003">
+
+    <Configuration name="sole">
+    	<Board number="6">
+    		<Attenuator ID="0" Value="10.0"/>
+    		<Attenuator ID="1" Value="7.0"/>
+    		<Attenuator ID="2" Value="0.0"/>
+    		<Attenuator ID="3" Value="10.0"/>    		
+    	</Board>
+    	<Board number="8">
+    		<Attenuator ID="0" Value="26.0"/>
+    		<Attenuator ID="1" Value="10.0"/>
+    		<Attenuator ID="2" Value="29.0"/>
+    		<Attenuator ID="3" Value="10.0"/> 
+    	</Board>
+    	<Board number="9">
+    		<Attenuator ID="0" Value="15.0"/>
+    		<Attenuator ID="1" Value="10.0"/>
+    		<Attenuator ID="2" Value="13.0"/>
+    		<Attenuator ID="3" Value="10.0"/>     	
+    	</Board>
+     	<Board number="10">
+    		<Attenuator ID="0" Value="23.0"/>
+    		<Attenuator ID="1" Value="10.0"/>
+    		<Attenuator ID="2" Value="22.0"/>
+    		<Attenuator ID="3" Value="10.0"/>      	
+    	</Board>  	
+    </Configuration>
+
+
+    <Configuration name="KKC">
+    	<Board number="6">
+    		<Attenuator ID="0" Value="10.0"/>
+    		<Attenuator ID="1" Value="10.0"/>
+    		<Attenuator ID="2" Value="10.0"/>
+    		<Attenuator ID="3" Value="10.0"/>    		
+    	</Board>
+    	<Board number="8">
+    		<Attenuator ID="0" Value="10.0"/>
+    		<Attenuator ID="1" Value="10.0"/>
+    		<Attenuator ID="2" Value="10.0"/>
+    		<Attenuator ID="3" Value="10.0"/> 
+    	</Board>
+    	<Board number="9">
+    		<Attenuator ID="0" Value="10.0"/>
+    		<Attenuator ID="1" Value="10.0"/>
+    		<Attenuator ID="2" Value="10.0"/>
+    		<Attenuator ID="3" Value="10.0"/>     	
+    	</Board>
+     	<Board number="10">
+    		<Attenuator ID="0" Value="10.0"/>
+    		<Attenuator ID="1" Value="10.0"/>
+    		<Attenuator ID="2" Value="10.0"/>
+    		<Attenuator ID="3" Value="10.0"/>      	
+    	</Board>  	
+    </Configuration> 
+ 
+ 
+
+</DMedConfiguration>

@@ -61,14 +61,14 @@ LIBRARIES_L     =
 
 #
 # <brief description of lllll library>
-SRTKBandMFReceiverImpl_OBJECTS   =  Configuration SRTKBandMFReceiverImpl ComponentCore SRTKBandMFCore MonitorThread utils
+SRTKBandMFReceiverImpl_OBJECTS   =  SRTKBandMFReceiverImpl SRTKBandMFCore MonitorThread 
 SRTKBandMFReceiverImpl_LIBS = IRALibrary ComponentErrors ManagementErrors ReceiversErrors CommonReceiverInterfaceStubs \
-							  GenericReceiverStubs SRTKBandMFStubs \
+							  GenericReceiverStubs SRTKBandMFStubs MFKBandCore\
                    LocalOscillatorInterfaceStubs ReceiversDefinitionsStubs ManagmentDefinitionsStubs
 
-SRTKBandDerotatorImpl_OBJECTS = SRTKBandDerotatorImpl sensorSocket icdSocket utils StatusUpdater
+SRTKBandDerotatorImpl_OBJECTS = SRTKBandDerotatorImpl sensorSocket icdSocket StatusUpdater
 SRTKBandDerotatorImpl_LIBS = GenericDerotatorStubs SRTKBandDerotatorStubs IRALibrary ComponentErrors DerotatorErrors \
-                   ManagmentDefinitionsStubs ManagementErrors
+                   ManagmentDefinitionsStubs ManagementErrors MFKBandCore
 
 #
 # Scripts (public and local)

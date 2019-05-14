@@ -23,8 +23,6 @@
 # different code is required until new specific component to control the receivers for Medicina are written
 ifeq ($(STATION),Medicina)
 	USER_CFLAGS = -U 'COMPILE_TARGET_STANDARD' -U 'COMPILE_TARGET_NT' -D 'COMPILE_TARGET_MED'
-else ifeq ($(STATION),Noto)
-	USER_CFLAGS = -U 'COMPILE_TARGET_MED' -U 'COMPILE_TARGET_NT' -D 'COMPILE_TARGET_STANDARD'
 else
 	USER_CFLAGS = -U 'COMPILE_TARGET_MED' -U 'COMPILE_TARGET_NT' -D 'COMPILE_TARGET_STANDARD'
 endif
@@ -44,7 +42,11 @@ endif
 # C programs (public and local)
 # -----------------------------
 EXECUTABLES     =
-EXECUTABLES_L   = 
+EXECUTABLES_L   = TestMedicinaSXKL
+
+TestMedicinaSXKL_OBJECTS = TestMedicinaSXKL
+TestMedicinaSXKL_LIBS = IRALibrary
+
 
 #
 # <brief description of xxxxx program>
@@ -54,10 +56,10 @@ ifeq ($(STATION),Noto)
 	ReceiversBossImpl_LIBS      = IRALibrary ComponentErrors CommonReceiverInterfaceStubs ReceiversBossStubs ReceiversDefinitionsStubs AntennaDefinitionsStubs GenericReceiverStubs \
 				      DewarPositionerStubs ManagmentDefinitionsStubs DewarPositionerDefinitionsStubs ManagementErrors ParserErrors ReceiversErrors acsnc \
 				      BackendsDefinitionsStubs TotalPowerStubs GenericBackendStubs BackendsErrors bulkDataStubs bulkDataReceiverStubs \
-				      bulkDataCallback bulkDataSenderStubs 
+				      bulkDataCallback bulkDataSenderStubs DiscosVersion
 else
 	ReceiversBossImpl_LIBS      = IRALibrary ComponentErrors CommonReceiverInterfaceStubs ReceiversBossStubs ReceiversDefinitionsStubs AntennaDefinitionsStubs GenericReceiverStubs \
-				      DewarPositionerStubs ManagmentDefinitionsStubs DewarPositionerDefinitionsStubs ManagementErrors ParserErrors ReceiversErrors acsnc
+				      DewarPositionerStubs ManagmentDefinitionsStubs DewarPositionerDefinitionsStubs ManagementErrors ParserErrors ReceiversErrors acsnc DiscosVersion
 endif
 
 #
