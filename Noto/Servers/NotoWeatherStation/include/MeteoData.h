@@ -41,7 +41,7 @@ enum { HEATINGTEMP, HEATINGVOLTAGE,SUPPLYVOLTAGE,RIFVOLTAGE,
 	HAILACC,HAILDURATION,HAILINTENSITY,HAILPEAK};
 
 
-static const char *COMMANDS[NSENSORS]={ 
+/*static const char *COMMANDS[NSENSORS]={ 
 
  "th01",
  "vh01",
@@ -63,7 +63,7 @@ static const char *COMMANDS[NSENSORS]={
  "hc01", 
 "hd01", 
 "hi01", 
-"hp01"};  
+"hp01"};*/  
 
      
 class MeteoData

@@ -67,7 +67,6 @@ std::vector<BYTE> MicroControllerBoard::receive(void) throw (MicroControllerBoar
     std::vector<BYTE> data, clean_data;
     
     std::ostringstream msg_stream;
-    
     // Receive the response one byte at once 
     try {
         for(size_t j = 0; j < MCB_HT_COUNTER; j++) {
@@ -129,7 +128,7 @@ std::vector<BYTE> MicroControllerBoard::receive(void) throw (MicroControllerBoar
             if(msg[MCB_BASE_ANSWER_LENGTH])
                 throw MicroControllerBoardEx("An error occurs. Error code: " + any2string(int(msg[MCB_BASE_ANSWER_LENGTH])));
 
-            // If the answer shoud have data and there aren't any errors, then continue the reception
+            // If the answer should have data and there aren't any errors, then continue the reception
             if(has_data_cmd) {
                 data.clear();
                 clean_data.clear();
@@ -140,7 +139,7 @@ std::vector<BYTE> MicroControllerBoard::receive(void) throw (MicroControllerBoar
                     m_answer.push_back(msg[MCB_BASE_ANSWER_LENGTH]);
                 }
                 else
-                    throw MicroControllerBoardEx("Error: data lenght not received.");
+                    throw MicroControllerBoardEx("Error: data length not received.");
 
                 // Get the parameters
                 for(int i=MCB_BASE_ANSWER_LENGTH + 1; i < MCB_BASE_ANSWER_LENGTH + 1 + int(msg[MCB_BASE_ANSWER_LENGTH]); i++) {
@@ -180,8 +179,11 @@ std::vector<BYTE> MicroControllerBoard::receive(void) throw (MicroControllerBoar
             pthread_mutex_unlock(&m_socket_mutex); 
             
             // Check if master and slave are the same for answer and request
-            if(m_request[MCB_CMD_SLAVE] != m_answer[MCB_CMD_MASTER])
-                throw MicroControllerBoardEx("Mismatch between master and slave addresses of request and answer.");
+            //printf("slave, master: %x, %x \n",m_request[MCB_CMD_SLAVE],m_answer[MCB_CMD_MASTER]);
+            //printf("slave pos, master pos: %d, %d \n",MCB_CMD_SLAVE,MCB_CMD_MASTER);
+            //This check has been removed, since when the message has been sent broadcast 7F
+            /*if(m_request[MCB_CMD_SLAVE] != m_answer[MCB_CMD_MASTER])
+                throw MicroControllerBoardEx("Mismatch between master and slave addresses of request and answer.");*/
             
             // Check if answer and request have the same command type
             if(m_request[MCB_CMD_COMMAND] != m_answer[MCB_CMD_COMMAND])
@@ -247,7 +249,6 @@ void MicroControllerBoard::send(const BYTE command, std::vector<BYTE> parameters
                     m_parameters.push_back(*iter);
                 }
             }
-
             // If the command is extended, put the checksum in the request
             if(m_command_type <= MCB_CMD_TYPE_MAX_EXT) {
                 m_request.push_back(computeChecksum(m_request));

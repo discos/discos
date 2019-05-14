@@ -11,9 +11,10 @@ xmlns="urn:schemas-cosylab-com:NotoWeatherStation:1.0"
 	
 	<temperature description="current temperature" />
 	<winddir description="instantaneous wind direction" />
-	<windspeed description="instantaneous wind direction" />
+	<windspeed description="instantaneous wind speed" />
+	<windspeedpeak description="peak wind speed" />
 	<humidity  description="Humidity" />	
 	<pressure description="pressure" />
-        <windspeedpeak description="windspeed peak" />
+   <autoparkThreshold description="wind speed threshold" />
 
 </WeatherStation>

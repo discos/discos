@@ -34,11 +34,11 @@ COMMON_LIBRARIES:=SlaLibrary IRALibrary DiscosVersion TextWindowLibrary ParserLi
 COMMON_SERVERS:=AntennaBoss Observatory OTF PointingModel Refraction SkySource \
                 Moon FitsWriter Scheduler ReceiversBoss ExternalClients \
                 CalibrationTool TotalPower NoiseGenerator CustomLogger \
-                XBackend PyDewarPositioner Sardara PyLocalOscillator #DBBC
+                XBackend PyDewarPositioner Sardara PyLocalOscillator MFKBandBaseReceiver
 COMMON_CLIENTS:=AntennaBossTextClient ObservatoryTextClient \
                 GenericBackendTextClient ReceiversBossTextClient \
                 SystemTerminal CaltoolClient CustomLoggingClient \
-                SchedulerTextClient
+                SchedulerTextClient MeteoClient
 
 COMMON_MISC:=Plotter KStars Scripts getTemplateForTests PMUpdate InjectCommand UserTools
 
@@ -47,28 +47,29 @@ COMMON_SIMULATORS:= TCPGenericProtocolSim ReceiverBoardSim
 SRT_DOC:=SRTDox
 SRT_ERRORS:=SRTActiveSurfaceErrors
 SRT_INTERFACES:=SRTAntennaInterface SRTActiveSurfaceInterface \
-                SRTWeatherStationInterface SRTReceiversInterface
+                SRTReceiversInterface
 SRT_LIBRARIES:=SRTMinorServoLibrary
 SRT_SERVERS:=SRTMount SRTActiveSurfaceLanServer SRTActiveSurfaceUSDServer \
              SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver \
-             SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver SRTPyIFDistributor
+             SRT7GHzReceiver SRTLPBandReceiver SRTPyIFDistributor WeatherStation
 SRT_CLIENTS:=SRTActiveSurfaceGUIClient SRTMountTextClient \
-             MinorServoBossTextClient MeteoClient
+             MinorServoBossTextClient
 SRT_MISC:=SRTScripts
 
 MED_DOC:=MEDDox
 MED_ERRORS:=
-MED_INTERFACES:=MedicinaAntennaInterface MedicinaWeatherStationInterface
+MED_INTERFACES:=MedicinaAntennaInterface MedicinaReceiversInterface
 MED_LIBRARIES:=
-MED_SERVERS:=MedicinaMount MedWeatherStation MedicinaMinorServo
-MED_CLIENTS:=MedicinaMountTextClient 
+MED_SERVERS:=MedicinaMount MedicinaMinorServo WeatherStation MedicinaPyDMed MedicinaKBandDualFReceiver
+MED_CLIENTS:=MedicinaMountTextClient
 MED_MISC:=MedScripts
 
 NT_DOC:=NTDox
 NT_ERRORS:=NotoActiveSurfaceErrors
-NT_INTERFACES:=NotoAntennaInterface NotoReceiversInterface NotoWeatherStationInterface NotoActiveSurfaceInterface
+NT_INTERFACES:=NotoAntennaInterface NotoReceiversInterface NotoWeatherStationInterface NotoActiveSurfaceInterface \
+                NotoMinorServoInterface
 NT_LIBRARIES:=
-NT_SERVERS:= NotoReceivers NotoMount NotoWeatherStation NotoActiveSurface
+NT_SERVERS:= NotoReceivers NotoMount NotoWeatherStation NotoActiveSurface NotoMinorServo NotoPyLocalOscillator
 NT_CLIENTS:=NotoMountTextClient 
 NT_MISC:=NotoScripts
 

@@ -11,7 +11,7 @@
 	ManagerRetry="10"
 	ImplLang="cpp"
 	Recovery="false">
-	
+
 	<Autoload>
 		<cdb:_ string="baci" />
 	</Autoload>

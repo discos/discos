@@ -17,7 +17,7 @@
                TimeTollerance="250000"
                RepetitionCacheTime="2000000"
                RepetitionExpireTime="5000000"
-               DataPort="16001"
+               DataPort="6001"
                DataIPAddress="192.167.189.8"            	   
                DataLatency="3000000"
                SenderSleepTime="300000"
@@ -25,7 +25,7 @@
                ControlSleepTime="900000"
                ControlResponseTime="1000000"
                BoardsNumber="4"
-               DataBufferSize="64">
+               DataBufferSize="64">            	   
 	<time/>
 	<backendName/>
 	<bandWidth/>

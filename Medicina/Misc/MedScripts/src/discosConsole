@@ -35,7 +35,7 @@ CL_HELP=
 CL_STOP=
 
 function printUsage {
-   echo "Start interactive console for the ESCS system"
+   echo "Start interactive console for the DISCOS system"
    echo ""
         echo "Usage: `basename $0` [OPTIONS]  "
         echo "Options: "

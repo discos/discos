@@ -10,6 +10,7 @@
 	receiversSetup=CCC
 	asOn
 	device=0
+	calmux=TotalPower
 	calOff
 	setAttenuation=0,15
 	setAttenuation=1,5
@@ -22,6 +23,7 @@
 	initialize=MMC
 	receiversSetup=MMC
 	device=0
+	calmux=TotalPower
 	calOff
 	setAttenuation=0,0
 	setAttenuation=1,4	
@@ -34,6 +36,7 @@
 	initialize=KKC
 	receiversSetup=KKC
 	device=0
+	calmux=TotalPower
 	calOff
 </body>
 </Procedure>
@@ -44,6 +47,7 @@
 	initialize=QQC
 	receiversSetup=QQC
 	device=0
+	calmux=TotalPower
 	calOff
 </body>
 </Procedure>
@@ -54,6 +58,7 @@
 	initialize=SXP
 	receiversSetup=SXP
 	device=0
+	calmux=TotalPower
 	calOff
 </body>
 </Procedure>

@@ -116,6 +116,10 @@ int main(int argc, char *argv[])
 	double lst;
 	TIMEVALUE myUt;
 	TIMEDIFFERENCE myLst;
+	if (argc<3) {
+		printf ("missing argument\n");
+		return 0;
+	}
 	parseUT(IRA::CString(argv[1]),utTime);
 	parseLST(IRA::CString(argv[2]),lstTime);
 	

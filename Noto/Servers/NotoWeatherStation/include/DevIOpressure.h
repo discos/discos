@@ -61,16 +61,12 @@ public:
 	{
 		// get the CommandLine .......
 		try {
-                        CError err;
+         CError err;
 			CSecAreaResourceWrapper<MeteoSocket> sock=m_socket->Get();
 /*                        err=sock->connection();*/
                         
-                        cout <<"SOCK" << sock->isConnected()  <<endl;
+         //cout <<"SOCK" << sock->isConnected()  <<endl;
   			m_val=sock->getPressure();
-                        timestamp=getTimeStamp();
-/*                        err=sock->disconnection();  //complition time*/
-                       return m_val;
-
 		}
 		catch (ACSErr::ACSbaseExImpl& E) {
 			_ADD_BACKTRACE(ComponentErrors::PropertyErrorExImpl,dummy,E,"DevIOPressure::read()");
@@ -78,15 +74,15 @@ public:
 			dummy.setReason("Property could not be read");
 			//_IRA_LOGGUARD_LOG_EXCEPTION(m_logGuard,dummy,LM_DEBUG);
 			throw dummy;
-                            return m_val;
-                    
 		} catch (...)
                   {
                    cout << "unexpected exc Devio pressure" << endl;
                   
                   
                   }
-        return m_val;
+      timestamp=getTimeStamp();
+/*                        err=sock->disconnection();  //complition time*/
+      return m_val;
                    				
 	}
 	/**

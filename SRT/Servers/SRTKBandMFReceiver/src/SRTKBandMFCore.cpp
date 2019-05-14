@@ -2,7 +2,13 @@
 
 #define NUMBER_OF_STAGES 5 // Amplification stages
 
-SRTKBandMFCore::SRTKBandMFCore() {}
+SRTKBandMFCore::SRTKBandMFCore() {
+    voltage2mbar=voltage2mbarF;
+    voltage2Kelvin=voltage2KelvinF;
+    voltage2Celsius=voltage2CelsiusF;
+    currentConverter=currentConverterF;
+    voltageConverter=voltageConverterF;	
+}
 
 SRTKBandMFCore::~SRTKBandMFCore() {}
 
@@ -16,7 +22,6 @@ void SRTKBandMFCore::initialize(maci::ContainerServices* services)
     CComponentCore::initialize(services);
 }
 
-
 ACS::doubleSeq SRTKBandMFCore::getStageValues(const IRA::ReceiverControl::FetValue& control, DWORD ifs, DWORD stage)
 {
     baci::ThreadSyncGuard guard(&m_mutex);
@@ -26,42 +31,58 @@ ACS::doubleSeq SRTKBandMFCore::getStageValues(const IRA::ReceiverControl::FetVal
     for(size_t i=0; i<getFeeds(); i++)
         values[i] = 0.0;
     if (ifs >= m_configuration.getIFs() || stage > NUMBER_OF_STAGES || stage < 1)
-        return values;
-
+        return values;   	
     // Left Channel
     if(m_polarization[ifs] == (long)Receivers::RCV_LCP) {
         if (control == IRA::ReceiverControl::DRAIN_VOLTAGE) {
-            for(size_t i=0; i<getFeeds(); i++)
-                values[i] = (m_vdStageValues[stage-1]).left_channel[i];
+        		if (getFeeds()>m_vdStageValues[stage-1].left_channel.size())
+    				return values;
+            for(size_t i=0; i<getFeeds(); i++) {
+            	values[i] = (m_vdStageValues[stage-1]).left_channel[i];
+            }
         }
         else {
             if (control == IRA::ReceiverControl::DRAIN_CURRENT) {
-                for(size_t i=0; i<getFeeds(); i++)
-                    values[i] = (m_idStageValues[stage-1]).left_channel[i];
+           		if (getFeeds()>m_idStageValues[stage-1].left_channel.size())
+    					return values;
+               for(size_t i=0; i<getFeeds(); i++)
+               	values[i] = (m_idStageValues[stage-1]).left_channel[i];
             }
             else {
-                for(size_t i=0; i<getFeeds(); i++)
-                    values[i] = (m_vgStageValues[stage-1]).left_channel[i];
+            	if (getFeeds()>m_vgStageValues[stage-1].left_channel.size())
+    					return values;
+               for(size_t i=0; i<getFeeds(); i++)
+               	values[i] = (m_vgStageValues[stage-1]).left_channel[i];
             }
         }
     }
-
     // Right Channel
     if (m_polarization[ifs] == (long)Receivers::RCV_RCP) {
-        if (control==IRA::ReceiverControl::DRAIN_VOLTAGE)
-            for(size_t i=0; i<getFeeds(); i++)
+        if (control==IRA::ReceiverControl::DRAIN_VOLTAGE) {
+        		if (getFeeds()>m_vdStageValues[stage-1].right_channel.size())
+    				return values;
+            for(size_t i=0;i<getFeeds();i++)
                 values[i] = (m_vdStageValues[stage-1]).right_channel[i];
-        else 
-            if (control == IRA::ReceiverControl::DRAIN_CURRENT) 
-                for(size_t i=0; i<getFeeds(); i++)
-                    values[i] = (m_idStageValues[stage-1]).right_channel[i];
-            else 
-                for(size_t i=0; i<getFeeds(); i++)
-                    values[i] = (m_vgStageValues[stage-1]).right_channel[i];
+        }
+        else {
+            if (control == IRA::ReceiverControl::DRAIN_CURRENT) {
+            	if (getFeeds()>m_idStageValues[stage-1].right_channel.size())
+    					return values; 
+               for(size_t i=0; i<getFeeds(); i++)
+               	values[i] = (m_idStageValues[stage-1]).right_channel[i];
+            }
+            else { 
+            	if (getFeeds()>m_vgStageValues[stage-1].right_channel.size())
+    					return values;
+               for(size_t i=0; i<getFeeds(); i++)
+               	values[i] = (m_vgStageValues[stage-1]).right_channel[i];
+            }
+       }
     }
 
     return values;
 }
+
 
 
 void SRTKBandMFCore::setMode(const char * mode) throw (

@@ -44,7 +44,7 @@ void CCommandSocket::init(CConfiguration *config,IRA::CSecureArea<CCommonData> *
 	m_currentScanStartEpoch=0;
 }
 
-void CCommandSocket::stop() throw (TimeoutExImpl,SocketErrorExImpl,ConnectionExImpl,AntennaBusyExImpl,NakExImpl)
+void CCommandSocket::stop() throw (TimeoutExImpl,SocketErrorExImpl,ConnectionExImpl,AntennaBusyExImpl,AntennaErrors::NakExImpl)
 {
 	// Stop command does not need to check the connection or the busy flag, before
 	IRA::CTimeoutSync guard(&m_syncMutex,m_pConfiguration->controlSocketResponseTime(),m_pConfiguration->controlSocketDutyCycle());
@@ -79,7 +79,7 @@ void CCommandSocket::activate() throw (ComponentErrors::TimeoutExImpl,ComponentE
 	activate_command();
 }
 
-void CCommandSocket::deactivate() throw (TimeoutExImpl,SocketErrorExImpl,ConnectionExImpl,AntennaBusyExImpl,NakExImpl)
+void CCommandSocket::deactivate() throw (TimeoutExImpl,SocketErrorExImpl,ConnectionExImpl,AntennaBusyExImpl,AntennaErrors::NakExImpl)
 {
 	if (!checkConnection()) {
 		_THROW_EXCPT(ConnectionExImpl,"CCommandSocket::deactivate()");
@@ -95,7 +95,7 @@ void CCommandSocket::deactivate() throw (TimeoutExImpl,SocketErrorExImpl,Connect
 	deactivate_command();
 }
 
-void CCommandSocket::resetErrors() throw (TimeoutExImpl,SocketErrorExImpl,ConnectionExImpl,AntennaBusyExImpl,NakExImpl)
+void CCommandSocket::resetErrors() throw (TimeoutExImpl,SocketErrorExImpl,ConnectionExImpl,AntennaBusyExImpl,AntennaErrors::NakExImpl)
 {
 	if (!checkConnection()) {
 		_THROW_EXCPT(ConnectionExImpl,"CCommandSocket::resetErrors()");
@@ -112,7 +112,7 @@ void CCommandSocket::resetErrors() throw (TimeoutExImpl,SocketErrorExImpl,Connec
 	resetErrors_command();
 }
 
-void CCommandSocket::setOffsets(const double& azOff,const double& elOff) throw (TimeoutExImpl,SocketErrorExImpl,ConnectionExImpl,AntennaBusyExImpl,NakExImpl,OperationNotPermittedExImpl)
+void CCommandSocket::setOffsets(const double& azOff,const double& elOff) throw (TimeoutExImpl,SocketErrorExImpl,ConnectionExImpl,AntennaBusyExImpl,AntennaErrors::NakExImpl,OperationNotPermittedExImpl)
 {
 	Antenna::TCommonModes azMode,elMode;
 	if (!checkConnection()) {
@@ -141,7 +141,7 @@ void CCommandSocket::setOffsets(const double& azOff,const double& elOff) throw (
 	setOffsets_command(azOff,elOff);	
 }
 
-void CCommandSocket::setTime(const ACS::Time& time) throw (TimeoutExImpl,SocketErrorExImpl,ConnectionExImpl,AntennaBusyExImpl,NakExImpl)
+void CCommandSocket::setTime(const ACS::Time& time) throw (TimeoutExImpl,SocketErrorExImpl,ConnectionExImpl,AntennaBusyExImpl,AntennaErrors::NakExImpl)
 {
 	if (!checkConnection()) {
 		_THROW_EXCPT(ConnectionExImpl,"CCommandSocket::setTime()");
@@ -271,7 +271,7 @@ void CCommandSocket::programTrack(const double& az,const double& el,const ACS::T
 			}
 			data.Release(); // this is fundamental in order to avoid starvation of other thread......
 			// waits for the ACU to respond....or eventually raise a timeout
-			waitAck(now.value().value); // throw NakExImpl and TimeoutExImpl
+			waitAck(now.value().value); // throw AntennaErrors::NakExImpl and TimeoutExImpl
 			m_lastScanEpoch=now.value().value;
 		}
 	}
@@ -294,7 +294,7 @@ void CCommandSocket::programTrack(const double& az,const double& el,const ACS::T
 }
 
 void CCommandSocket::changeMode(const Antenna::TCommonModes& azMode,const Antenna::TCommonModes& elMode) throw (TimeoutExImpl,SocketErrorExImpl,ConnectionExImpl,AntennaBusyExImpl,
-		NakExImpl,ValidationErrorExImpl)
+		AntennaErrors::NakExImpl,ValidationErrorExImpl)
 {
 	if (!checkConnection()) {
 		_THROW_EXCPT(ConnectionExImpl,"CCommandSocket::changeMode()");
@@ -369,7 +369,7 @@ void CCommandSocket::unstow() throw (ComponentErrors::TimeoutExImpl,ComponentErr
 	unstow_command();	
 }
 
-void CCommandSocket::preset(const double& az,const double& el) throw (TimeoutExImpl,SocketErrorExImpl,ConnectionExImpl,AntennaBusyExImpl,NakExImpl,OperationNotPermittedExImpl)
+void CCommandSocket::preset(const double& az,const double& el) throw (TimeoutExImpl,SocketErrorExImpl,ConnectionExImpl,AntennaBusyExImpl,AntennaErrors::NakExImpl,OperationNotPermittedExImpl)
 {
 	double newAz,newEl;
 	double azOff,elOff;
@@ -422,7 +422,7 @@ void CCommandSocket::preset(const double& az,const double& el) throw (TimeoutExI
 	preset_command(finalAz,finalEl);
 }
 
-void CCommandSocket::rates(const double& azRate,const double& elRate) throw (TimeoutExImpl,SocketErrorExImpl,ConnectionExImpl,AntennaBusyExImpl,NakExImpl,OperationNotPermittedExImpl)
+void CCommandSocket::rates(const double& azRate,const double& elRate) throw (TimeoutExImpl,SocketErrorExImpl,ConnectionExImpl,AntennaBusyExImpl,AntennaErrors::NakExImpl,OperationNotPermittedExImpl)
 {
 	autoArray<BYTE> message; //it will also free the buffer......
 	autoArray<CACUProtocol::TCommand> command;
@@ -466,7 +466,7 @@ void CCommandSocket::rates(const double& azRate,const double& elRate) throw (Tim
 	}
 	data.Release(); // this is fundamental in order to avoid starvation of other thread......
 	// waits for the ACU to respond....or eventually raise a timeout
-	waitAck(now.value().value); // throw NakExImpl and TimeoutExImpl
+	waitAck(now.value().value); // throw AntennaErrors::NakExImpl and TimeoutExImpl
 	ACS_LOG(LM_FULL_INFO,"CCommandSocket::rates()",(LM_NOTICE,"RATES_COMMANDED %lf,%lf degrees/sec",az,el));
 }
 
@@ -585,7 +585,7 @@ void CCommandSocket::onConnect(int ErrorCode)
 
 // ********************* PRIVATE **************************************/
 
-void CCommandSocket::stow_command() throw (TimeoutExImpl,SocketErrorExImpl,NakExImpl)
+void CCommandSocket::stow_command() throw (TimeoutExImpl,SocketErrorExImpl,AntennaErrors::NakExImpl)
 {
 	autoArray<BYTE> message; //it will also free the buffer......
 	autoArray<CACUProtocol::TCommand> command;
@@ -603,13 +603,13 @@ void CCommandSocket::stow_command() throw (TimeoutExImpl,SocketErrorExImpl,NakEx
 	}
 	data.Release(); // this is fundamental in order to avoid starvation of other thread......
 	// waits for the ACU to respond....or eventually raise a timeout
-	waitAck(now.value().value); // throw NakExImpl and TimeoutExImpl
+	waitAck(now.value().value); // throw AntennaErrors::NakExImpl and TimeoutExImpl
 	CSecAreaResourceWrapper<CCommonData> dataAgain=m_pData->Get();
 	dataAgain->setControlLineState(Antenna::ACU_BSY);
 	ACS_LOG(LM_FULL_INFO,"CStatusSocket::stow()",(LM_NOTICE,"SEND_ANTENNA_TO_STOW"));
 }
 
-void CCommandSocket::unstow_command() throw (TimeoutExImpl,SocketErrorExImpl,NakExImpl)
+void CCommandSocket::unstow_command() throw (TimeoutExImpl,SocketErrorExImpl,AntennaErrors::NakExImpl)
 {
 	autoArray<BYTE> message; //it will also free the buffer......
 	autoArray<CACUProtocol::TCommand> command;
@@ -627,13 +627,13 @@ void CCommandSocket::unstow_command() throw (TimeoutExImpl,SocketErrorExImpl,Nak
 	}
 	data.Release(); // this is fundamental in order to avoid starvation of other thread......
 	// waits for the ACU to respond....or eventually raise a timeout
-	waitAck(now.value().value); // throw NakExImpl and TimeoutExImpl
+	waitAck(now.value().value); // throw AntennaErrors::NakExImpl and TimeoutExImpl
 	CSecAreaResourceWrapper<CCommonData> dataAgain=m_pData->Get();
 	dataAgain->setControlLineState(Antenna::ACU_BSY);
 	ACS_LOG(LM_FULL_INFO,"CStatusSocket::stow()",(LM_NOTICE,"EXTRACTING_ANTENNA_STOW_PINS"));
 }
 
-void CCommandSocket::deactivate_command() throw (TimeoutExImpl,SocketErrorExImpl,NakExImpl)
+void CCommandSocket::deactivate_command() throw (TimeoutExImpl,SocketErrorExImpl,AntennaErrors::NakExImpl)
 {
 	autoArray<BYTE> message; //it will also free the buffer......
 	autoArray<CACUProtocol::TCommand> command;
@@ -659,10 +659,10 @@ void CCommandSocket::deactivate_command() throw (TimeoutExImpl,SocketErrorExImpl
 	}
 	data.Release(); // this is fundamental in order to avoid starvation of other thread......
 	// waits for the ACU to respond....or eventually raise a timeout
-	waitAck(now.value().value); // throw NakExImpl and TimeoutExImpl
+	waitAck(now.value().value); // throw AntennaErrors::NakExImpl and TimeoutExImpl
 }
 
-void CCommandSocket::activate_command() throw (TimeoutExImpl,SocketErrorExImpl,NakExImpl)
+void CCommandSocket::activate_command() throw (TimeoutExImpl,SocketErrorExImpl,AntennaErrors::NakExImpl)
 {
 	autoArray<BYTE> message; //it will also free the buffer......
 	autoArray<CACUProtocol::TCommand> command;
@@ -707,12 +707,12 @@ void CCommandSocket::activate_command() throw (TimeoutExImpl,SocketErrorExImpl,N
 	}
 	data.Release(); // this is fundamental in order to avoid starvation of other thread......
 	// waits for the ACU to respond....or eventually raise a timeout
-	waitAck(now.value().value); // throw NakExImpl and TimeoutExImpl
+	waitAck(now.value().value); // throw AntennaErrors::NakExImpl and TimeoutExImpl
 	IRA::CIRATools::Wait(6,500000); // wait for the real completion of the activate operation
 	ACS_LOG(LM_FULL_INFO,"CStatusSocket::activate_command()",(LM_NOTICE,"AXIS_ARE_NOW_ACTIVE"));
 }
 
-void CCommandSocket::changeMode_command(const Antenna::TCommonModes& mode) throw (TimeoutExImpl,SocketErrorExImpl,NakExImpl)
+void CCommandSocket::changeMode_command(const Antenna::TCommonModes& mode) throw (TimeoutExImpl,SocketErrorExImpl,AntennaErrors::NakExImpl)
 {
 	autoArray<BYTE> message; //it will also free the buffer......
 	autoArray<CACUProtocol::TCommand> command;
@@ -755,13 +755,13 @@ void CCommandSocket::changeMode_command(const Antenna::TCommonModes& mode) throw
 		IRA::CIRATools::getTime(now);
 	}
 	data.Release(); // this is crucial in order to avoid starvation of other thread......
-	waitAck(now.value().value); // throw NakExImpl and TimeoutExImpl
+	waitAck(now.value().value); // throw AntennaErrors::NakExImpl and TimeoutExImpl
 	CSecAreaResourceWrapper<CCommonData> dataAgain=m_pData->Get();
 	dataAgain->setCommandedMode(mode,mode);
 	ACS_LOG(LM_FULL_INFO,"CCommandSocket::changeMode_command()",(LM_NOTICE,"NEW_ACU_MODE %s",(const char *)modeName));
 }
 
-void CCommandSocket::setOffsets_command(const double& azOff,const double& elOff) throw (TimeoutExImpl,SocketErrorExImpl,NakExImpl)
+void CCommandSocket::setOffsets_command(const double& azOff,const double& elOff) throw (TimeoutExImpl,SocketErrorExImpl,AntennaErrors::NakExImpl)
 {
 	autoArray<BYTE> message; //it will also free the buffer......
 	autoArray<CACUProtocol::TCommand> command;
@@ -779,13 +779,13 @@ void CCommandSocket::setOffsets_command(const double& azOff,const double& elOff)
 	}
 	data.Release(); // this is fundamental in order to avoid starvation of other thread......
 	// waits for the ACU to respond....or eventually raise a timeout
-	waitAck(now.value().value); // throw NakExImpl and TimeoutExImpl
+	waitAck(now.value().value); // throw AntennaErrors::NakExImpl and TimeoutExImpl
 	CSecAreaResourceWrapper<CCommonData> dataAgain=m_pData->Get();
 	dataAgain->setCommandedOffsets(azOff,elOff);
 	ACS_LOG(LM_FULL_INFO,"CCommandSocket::setOffsets_command()",(LM_NOTICE,"NEW_POSITION_OFFSETS %lf,%lf",azOff,elOff));	
 }
 
-void CCommandSocket::preset_command(const double& az,const double& el) throw (TimeoutExImpl,SocketErrorExImpl,NakExImpl)
+void CCommandSocket::preset_command(const double& az,const double& el) throw (TimeoutExImpl,SocketErrorExImpl,AntennaErrors::NakExImpl)
 {
 	autoArray<BYTE> message; //it will also free the buffer......
 	autoArray<CACUProtocol::TCommand> command;
@@ -803,10 +803,10 @@ void CCommandSocket::preset_command(const double& az,const double& el) throw (Ti
 	}
 	data.Release(); // this is fundamental in order to avoid starvation of other thread......
 	// waits for the ACU to respond....or eventually raise a timeout
-	waitAck(now.value().value); // throw NakExImpl and TimeoutExImpl
+	waitAck(now.value().value); // throw AntennaErrors::NakExImpl and TimeoutExImpl
 }
 
-void CCommandSocket::stop_command() throw (TimeoutExImpl,SocketErrorExImpl,NakExImpl)
+void CCommandSocket::stop_command() throw (TimeoutExImpl,SocketErrorExImpl,AntennaErrors::NakExImpl)
 {
 	autoArray<BYTE> message; //it will also free the buffer......
 	autoArray<CACUProtocol::TCommand> command;
@@ -825,13 +825,13 @@ void CCommandSocket::stop_command() throw (TimeoutExImpl,SocketErrorExImpl,NakEx
 	}
 	data.Release(); // this is crucial in order to avoid starvation of other thread......
 	// waits for the ACU to respond....or eventually raise a timeout
-	waitAck(now.value().value); // throw NakExImpl and TimeoutExImpl
+	waitAck(now.value().value); // throw AntennaErrors::NakExImpl and TimeoutExImpl
 	CSecAreaResourceWrapper<CCommonData> dataAgain=m_pData->Get();
 	dataAgain->setCommandedMode(Antenna::ACU_STOP,Antenna::ACU_STOP);
 	ACS_LOG(LM_FULL_INFO,"CCommandSocket::stop_command()",(LM_NOTICE,"MOUNT_STOPPED"));
 }
 
-void CCommandSocket::resetErrors_command() throw (TimeoutExImpl,SocketErrorExImpl,NakExImpl)
+void CCommandSocket::resetErrors_command() throw (TimeoutExImpl,SocketErrorExImpl,AntennaErrors::NakExImpl)
 {
 	autoArray<BYTE> message; //it will also free the buffer......
 	WORD len;
@@ -849,11 +849,11 @@ void CCommandSocket::resetErrors_command() throw (TimeoutExImpl,SocketErrorExImp
 	// This command does not expect an answer from the ACU, so we do not wait
 	//data.Release(); // this is crucial in order to avoid starvation of other thread......
 	// waits for the ACU to respond....or eventually raise a timeout
-	//waitAck(now.value().value); // throw NakExImpl and TimeoutExImpl
+	//waitAck(now.value().value); // throw AntennaErrors::NakExImpl and TimeoutExImpl
 	ACS_LOG(LM_FULL_INFO,"CCommandSocket::resetErrors_command()",(LM_NOTICE,"MOUNT_ERRORS_ACKNOWLEGDED"));
 }
 
-void CCommandSocket::setTime_command(const ACS::Time& time) throw (TimeoutExImpl,SocketErrorExImpl,NakExImpl)
+void CCommandSocket::setTime_command(const ACS::Time& time) throw (TimeoutExImpl,SocketErrorExImpl,AntennaErrors::NakExImpl)
 {
 	autoArray<BYTE> message; //it will also free the buffer......
 	autoArray<CACUProtocol::TCommand> command;
@@ -873,7 +873,7 @@ void CCommandSocket::setTime_command(const ACS::Time& time) throw (TimeoutExImpl
 	}
 	data.Release(); // this is crucial in order to avoid starvation of other thread......
 	// waits for the ACU to respond....or eventually raise a timeout
-	waitAck(now.value().value); // throw NakExImpl and TimeoutExImpl
+	waitAck(now.value().value); // throw AntennaErrors::NakExImpl and TimeoutExImpl
 	ACS_LOG(LM_FULL_INFO,"CCommandSocket::setTime_command()",(LM_NOTICE,"MOUNT_TIME_SYNCHRONIZED"));	
 }
 
@@ -896,7 +896,7 @@ void CCommandSocket::setTimeOffset_command(const double& seconds) throw (Compone
 	}
 	data.Release(); // this is crucial in order to avoid starvation of other thread......
 	// waits for the ACU to respond....or eventually raise a timeout
-	waitAck(now.value().value); // throw NakExImpl and TimeoutExImpl
+	waitAck(now.value().value); // throw AntennaErrors::NakExImpl and TimeoutExImpl
 	ACS_LOG(LM_FULL_INFO,"CCommandSocket::setTimeOffset_command()",(LM_NOTICE,"DELTA_TIME_SECONDS %lf",seconds));		
 }
 
