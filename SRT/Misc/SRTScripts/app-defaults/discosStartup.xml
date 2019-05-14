@@ -14,7 +14,7 @@
     <toolAgainstInterfaceRepository></toolAgainstInterfaceRepository>
     <toolAgainstNameService></toolAgainstNameService>
     <containers>
-        <select>21</select>
+        <select>32</select>
         <againstManagerHost></againstManagerHost>
         <againstManagerPort></againstManagerPort>
         <againstCDB></againstCDB>
@@ -136,7 +136,7 @@
             <remoteHost>MASTERHOST</remoteHost>
             <remoteAccount>discos</remoteAccount>
         </container>
-        <container>
+        <!--container>
             <name>PyIFDistributorContainer</name>
             <type>py</type>
             <heapSizeMB></heapSizeMB>
@@ -144,7 +144,7 @@
             <scriptBase>0</scriptBase>
             <remoteHost>MASTERHOST</remoteHost>
             <remoteAccount>discos</remoteAccount>
-        </container>
+        </container-->
         <container>
             <name>ReceiversContainer</name>
             <type>cpp</type>
@@ -226,7 +226,6 @@
             <remoteHost>MASTERHOST</remoteHost>
             <remoteAccount>discos</remoteAccount>
         </container>
-
         <container>
             <name>RFIMonitoringContainer</name>
             <type>cpp</type>

@@ -5,18 +5,18 @@
 				xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-<SynthesizerEntry><Frequency>0.0</Frequency><OutputPower>13.0</OutputPower></SynthesizerEntry>
+<SynthesizerEntry><Frequency>0.0</Frequency><OutputPower>19.0</OutputPower></SynthesizerEntry>
 
-<SynthesizerEntry><Frequency>400.0</Frequency><OutputPower>13.0</OutputPower></SynthesizerEntry>
+<SynthesizerEntry><Frequency>400.0</Frequency><OutputPower>19.0</OutputPower></SynthesizerEntry>
 
-<SynthesizerEntry><Frequency>800.0</Frequency><OutputPower>13.0</OutputPower></SynthesizerEntry>
+<SynthesizerEntry><Frequency>800.0</Frequency><OutputPower>19.0</OutputPower></SynthesizerEntry>
 
-<SynthesizerEntry><Frequency>1200.0</Frequency><OutputPower>13.0</OutputPower></SynthesizerEntry>
+<SynthesizerEntry><Frequency>1200.0</Frequency><OutputPower>19.0</OutputPower></SynthesizerEntry>
 
-<SynthesizerEntry><Frequency>1600.0</Frequency><OutputPower>13.0</OutputPower></SynthesizerEntry>
+<SynthesizerEntry><Frequency>1600.0</Frequency><OutputPower>19.0</OutputPower></SynthesizerEntry>
 
-<SynthesizerEntry><Frequency>2000.0</Frequency><OutputPower>13.0</OutputPower></SynthesizerEntry>
+<SynthesizerEntry><Frequency>2000.0</Frequency><OutputPower>19.0</OutputPower></SynthesizerEntry>
 
-<SynthesizerEntry><Frequency>2400.0</Frequency><OutputPower>13.0</OutputPower></SynthesizerEntry>
+<SynthesizerEntry><Frequency>2400.0</Frequency><OutputPower>19.0</OutputPower></SynthesizerEntry>
 
 </LocalOscillatorLookUpTable>
