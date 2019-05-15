@@ -388,7 +388,7 @@ public:
 	 * greater than the <i>m_stopTime</i>.
 	 *
 	 */
-	bool getFakeDump(ACS::Time& time,bool& calOn,char *& memory,char *& buffer,bool& tracking,long& buffSize);
+	bool getFakeDump(ACS::Time& time,const long& delay,bool& calOn,char *& memory,char *& buffer,bool& tracking,long& buffSize);
 	
 	/**
 	 * return the size of the dump buffer

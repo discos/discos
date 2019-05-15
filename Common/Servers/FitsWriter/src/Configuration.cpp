@@ -62,6 +62,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	_GET_DWORD_ATTRIBUTE("MeteoParameterDutyCycle","Weather sensor enquire gap  (uSec)",m_meteoParameterDutyCycle);
 	_GET_DWORD_ATTRIBUTE("TrackingFlagDutyCycle","Tracking flag enquire gap  (uSec)",m_trackingFlagDutyCycle);
 	_GET_DWORD_ATTRIBUTE("MinorServoEnquireMinGap","Minor Servo enquire gap  (uSec)",m_minorServoEnquireMinGap);
+	_GET_DWORD_ATTRIBUTE("FakeDataTimeDelay","Time delay if fake timestamps generation  (uSec)",m_fakeDataTimeDelay);
 	_GET_STRING_ATTRIBUTE("AntennaBossInterface","Antenna Boss component interface is ",m_antennaBossComp);
 	_GET_STRING_ATTRIBUTE("ObservatoryInterface","Observatory component is ",m_observatoryComp);
 	_GET_STRING_ATTRIBUTE("ReceiversBossInterface","Receivers Boss component interface is ",m_receiversBossComp);
