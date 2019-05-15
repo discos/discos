@@ -34,6 +34,7 @@
 #include "Callback.h"
 #include "SlewCheck.h"
 #include <FrequencyTracking.h>
+#include <fstream>
 
 using namespace IRA;
 using namespace maci;
@@ -835,6 +836,8 @@ private:
 	 * Stores the parameters of the last commanded scan.
 	 */
 	Antenna::TTrackingParameters m_lastScanParameters;
+
+	std::fstream outFile;
 
 	/** 
 	 * This method loads into the mount a coordinate for a given time. It uses the commanded generator in order to provide the required coordinates.

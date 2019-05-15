@@ -14,19 +14,20 @@
              MinPointNumber="25"
              MaxPointNumber="250"
              GapTime="100000"
-	     	 CoordinateIntegration="1000000"
-	     	 CutOffElevation="70.0"
-	     	 SkydipElevationRange="15.0-90.0"
+             CoordinateIntegration="1000000"
+             CutOffElevation="70.0"
+             SkydipElevationRange="15.0-90.0"
              MountInstance="ANTENNA/Mount"
              ObservatoryInterface="IDL:alma/Antenna/Observatory:1.0" 
              PointingModelInstance="ANTENNA/PointingModel"
              RefractionInstance="ANTENNA/Refraction"
-         	 Sidereal="IDL:alma/Antenna/SkySource:1.0"
-         	 Sun=""
-         	 Moon="IDL:alma/Antenna/Moon:1.0"
-         	 Satellite=""
-         	 SolarSystemBody=""
-         	 Otf="IDL:alma/Antenna/OTF:1.0">
+             Sidereal="IDL:alma/Antenna/SkySource:1.0"
+             Sun=""
+             Moon="IDL:alma/Antenna/Moon:1.0"
+             Satellite=""
+             SolarSystemBody=""
+             Otf="IDL:alma/Antenna/OTF:1.0"
+             CoordinatesFilename="/tmp/coordinates.txt">
              
 <target/>
 <targetRightAscension/>
