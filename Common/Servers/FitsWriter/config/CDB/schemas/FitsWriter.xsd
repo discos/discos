@@ -52,6 +52,8 @@
 	 <xs:attribute name="TrackingFlagDutyCycle" type="xs:unsignedLong" use="required" />
 	 <!-- limit the enquire rate to the minor servo subsystem. It is the minimum time between two enquires (microseconds) -->
 	 <xs:attribute name="MinorServoEnquireMinGap" type="xs:unsignedLong" use="required" />	
+	 <!-- this time set the time delay used when generating fake timestamps (microseconds) -->
+	 <xs:attribute name="FakeDataTimeDelay" type="xs:unsignedLong" use="required" />
 	 <!-- the interface of the component that leads the Antenna subsystem -->
 	 <xs:attribute name="AntennaBossInterface" type="xs:string" use="required" />
 	 <!-- the interface of component that stores observatory information -->

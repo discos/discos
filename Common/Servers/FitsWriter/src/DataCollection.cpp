@@ -228,13 +228,14 @@ long CDataCollection::getDumpCollectionSize()
 	return m_dumpCollection.getCollectionSize();
 }
 
-bool CDataCollection::getFakeDump(ACS::Time& time,bool& calOn,char *& memory,char *& buffer,bool& tracking,long& buffSize)
+bool CDataCollection::getFakeDump(ACS::Time& time,const long& delay,bool& calOn,char *& memory,char *& buffer,bool& tracking,long& buffSize)
 {
 	long size=0;
 	TIMEVALUE clock;
 	ACS::Time now;
 	IRA::CIRATools::getTime(clock);
 	now=clock.value().value;
+	now-=delay*10;
 	//IRA::CString outString;
 	//IRA::CIRATools::timeToStr(now,outString);
 	//cout << "current time " << (const char *) outString << endl;

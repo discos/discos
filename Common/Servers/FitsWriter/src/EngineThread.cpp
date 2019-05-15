@@ -109,7 +109,7 @@ bool CEngineThread::processData()
 
 	if (m_data->getIsNoData()) {
 		//IRA::CString outString;
-		if (!m_data->getFakeDump(time,calOn,bufferCopy,buffer,tracking,buffSize)) return false;
+		if (!m_data->getFakeDump(time,m_config->getFakeDataTimeDelay(),calOn,bufferCopy,buffer,tracking,buffSize)) return false;
 		//IRA::CIRATools::timeToStr(time,outString);
 	}
 	else {
