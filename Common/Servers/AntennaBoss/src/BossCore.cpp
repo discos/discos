@@ -1056,7 +1056,9 @@ bool CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,Co
 		}
 		catch (AntennaErrors::AntennaErrorsEx& ex) {
 			//This error is due to the fact that the pointing model is not configured yet.....so it is not an error itself.
+			//We just set the pointing offsets to 0.0 and change the boss status to WARNING in order to notify the user in some way
 			m_pointingAzOffset=m_pointingElOffset=0.0;
+			changeBossStatus(Management::MNG_WARNING);
 		}
 		catch (CORBA::SystemException& ex) {
 			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CBossCore::updateAttributes()");
