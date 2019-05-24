@@ -19,7 +19,8 @@ class IsSlewingTest(unittest.TestCase):
         """Verify the DewarPositioner.isSlewing() method"""
         self.positioner.setup('KKG')
         time.sleep(2)
-        self.derotator.setPosition(1.5)
+        self.derotator.setPosition(5.5)
+        time.sleep(0.5)
         self.assertEqual(self.derotator.isSlewing(), True)
         self.assertEqual(self.positioner.isSlewing(), self.derotator.isSlewing())
         time.sleep(3)
