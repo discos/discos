@@ -318,13 +318,13 @@ int main(int argc, char *argv[]) {
 		maci::HandleSeq handles;
 		handles.length(0);
 		IRA::CString cName,cType;
-		cName="";
+		cName="*";
 		cType=DEWAR_INTERFACE_TPYE;
 		cInfo=client.manager()->get_component_info(client.handle(),handles,(const char *)cName,
 			(const char *)cType,(CORBA::Boolean)false);
 		for(unsigned k=0;k<cInfo->length();k++) {
 			printf("type: %s\n",(const char *)cInfo[k].type);
-			if (cInfo[k].type==DEWAR_INTERFACE_TPYE) {
+			if (strcmp(cInfo[k].type, DEWAR_INTERFACE_TPYE) == 0) {
 				ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_NOTICE,"Dewar positioner found"));
 				dewarReady=true;
 				break;
