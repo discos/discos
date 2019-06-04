@@ -6,7 +6,7 @@
 	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:log="urn:schemas-cosylab-com:LoggingConfig:1.0"
-	Timeout="150.0"
+	Timeout="30.0"
 	UseIFR="true"
 	ManagerRetry="10"
 	ImplLang="cpp"
@@ -15,7 +15,7 @@
 	<Autoload>
 		<cdb:_ string="baci" />
 	</Autoload>
-
+	
 	<LoggingConfig
 		centralizedLogger="Log"
 		minLogLevel="5"

@@ -8,10 +8,11 @@
            xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               
-	Name="EXTERNALCLIENTS"
+	Name="ExternalClients"
 	Code="ExternalClientsImpl"
 	Type="IDL:alma/Management/ExternalClients:1.0"
-	Container="ManagementContainer"
+	Container="ExternalClientsContainer"
 	Default="true"
     ImplLang="cpp"
+    Autostart="true"
 />
