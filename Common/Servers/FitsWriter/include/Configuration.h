@@ -65,6 +65,11 @@ public:
 	const long& getRepetitionCacheTime() const { return m_repetitionCacheTime; }
 	
 	/**
+	 * @return the number of microseconds to be applied when generating timestamps in fake mode
+	*/
+	const long& getFakeDataTimeDelay() const { return m_fakeDataTimeDelay; }
+
+	/**
 	 * @return the number of microseconds that the log filter will take as expiration time for a log message
 	*/
 	const long& getRepetitionExpireTime() const { return m_repetitionExpireTime; }
@@ -118,7 +123,8 @@ private:
 	long m_repetitionExpireTime;
 	long m_meteoParameterDutyCycle;
 	long m_trackingFlagDutyCycle;
-    long m_minorServoEnquireMinGap;
+	long m_minorServoEnquireMinGap;
+	long m_fakeDataTimeDelay;
 	IRA::CString m_antennaBossComp;
 	IRA::CString m_observatoryComp;
 	IRA::CString m_receiversBossComp;
