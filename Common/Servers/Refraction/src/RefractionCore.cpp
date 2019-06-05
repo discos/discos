@@ -18,6 +18,9 @@
 CRefractionCore::CRefractionCore(ContainerServices *service,acscomponent::ACSComponentImpl *me) : 
 	m_services(service)
 {
+	m_temperature=0.0;
+	m_humidity=0.5;
+	m_pressure=1000;
 }
 
 CRefractionCore::~CRefractionCore()
@@ -135,9 +138,6 @@ void CRefractionCore::getCorrection(double obsZenithDistance,double waveLen, dou
 void CRefractionCore::getMeteoParameters()
 {
 	AUTO_TRACE("CRefractionCore::getMeteoParameters()");
-	m_temperature=0.0;
-	m_humidity=0.5;
-	m_pressure=1000;
 	Weather::parameters pars;
 
 	try {
