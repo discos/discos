@@ -126,6 +126,11 @@ public:
 	 * @return the interface of the dynamic component that have to used to compute satellite tracking
 	*/
 	const CString& getSatelliteInterface() const { return m_satelliteInterface; }
+
+	/**
+	 * @return the name of the text file in which to save every set of ACU received coordinates
+	*/
+	const CString& getCoordinatesFilename() const { return m_coordinatesFile; }
 	
 	/**
 	 * @return  the maximum speed in azimuth (rad/sec)
@@ -220,6 +225,7 @@ private:
 	double m_maxElevationAvoidance;
 	double m_skydipElDown;
 	double m_skydipElUp;
+	CString m_coordinatesFile;
 };
 
 #endif /*CONFIGURATION_H_*/

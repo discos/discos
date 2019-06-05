@@ -95,6 +95,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	_GET_DOUBLE_ATTRIBUTE_E("MaxElevationAvoidance","Suggested upper elevation limit  for source observation(degrees):",m_maxElevationAvoidance,"DataBlock/Mount");
 	_GET_DOUBLE_ATTRIBUTE("CutOffElevation","The cut off elevation is (degrees):",m_cutOffElevation);
 	_GET_STRING_ATTRIBUTE("SkydipElevationRange","The skydip elevation range is (degrees):",temp);
+	_GET_STRING_ATTRIBUTE("CoordinatesFilename", "The text file path in which the received coordinates will be written:", m_coordinatesFile);
 
 	if (sscanf((const char *)temp,"%lf-%lf",&m_skydipElDown,&m_skydipElUp)!=2) {
 		_EXCPT(ComponentErrors::CDBAccessExImpl,dummy,"CConfiguration::Init()");

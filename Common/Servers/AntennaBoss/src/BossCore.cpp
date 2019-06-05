@@ -112,7 +112,16 @@ void CBossCore::initialize() throw (ComponentErrors::UnexpectedExImpl)
 	m_generator=Antenna::EphemGenerator::_nil();
 	m_generatorFlux=Antenna::EphemGenerator::_nil();
 	m_mountError=false;
-	m_siderealGenerator=m_otfGenerator=m_moonGenerator=m_sunGenerator=m_satelliteGenerator=m_solarBodyGenerator=Antenna::EphemGenerator::_nil();	
+	m_siderealGenerator=m_otfGenerator=m_moonGenerator=m_sunGenerator=m_satelliteGenerator=m_solarBodyGenerator=Antenna::EphemGenerator::_nil();
+	IRA::CString coordinatesFile = m_config->getCoordinatesFilename();
+	if(coordinatesFile != "")
+	{
+		outFile.open((const char *)coordinatesFile, std::fstream::out | std::fstream::app);
+		if(!outFile.is_open())
+		{
+			ACS_LOG(LM_FULL_INFO,"CBossCore::initialize()", (LM_ERROR,"Cannot open '%s' text file to write coordinates!", (const char *)coordinatesFile));
+		}
+	}
 }
 
 void CBossCore::execute() throw (ComponentErrors::CouldntGetComponentExImpl,
@@ -208,6 +217,7 @@ void CBossCore::cleanUp()
 	catch (ComponentErrors::CouldntReleaseComponentExImpl& ex) {
 		ex.log(LM_DEBUG);
 	}
+	if(outFile.is_open()) outFile.close();
 	_IRA_LOGFILTER_FLUSH;
 	_IRA_LOGFILTER_DESTROY;
 	unloadPointingModel(m_pointingModel);
@@ -956,7 +966,7 @@ bool CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,Co
 {
 	ACS::Time time;
 	double az,el,azOff,elOff;
-	double pAngle, appRa, appDec;
+	double pAngle,appRa,appDec;
 	double lng,lat;
 	double ra,dec;
 	m_trackingTime=0;
@@ -1005,6 +1015,11 @@ bool CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,Co
 	az*=DD2R; el*=DD2R;
 	//bring the azimuth inside the 0-2Pi.
 	az=slaDranrm(az);
+	if (outFile.is_open()) {
+		IRA::CString outString;
+		CIRATools::timeToStr(time, outString);
+		outFile << (const char *)outString << " " << az << " " << el << " ";
+	}
 	if (m_correctionEnable && m_correctionEnable_scan) {
 		loadRefraction(m_refraction); // throw ComponentErrors::CouldntGetComponentExImpl
 		loadPointingModel(m_pointingModel); // throw ComponentErrors::CouldntGetComponentExImpl
@@ -1034,14 +1049,16 @@ bool CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,Co
 		el-=m_refractionOffset;
 		try {
 			m_pointingModel->getAzElOffsets(az,el,m_pointingAzOffset,m_pointingElOffset);
+			// subtract the offsets coming from the pointing model
+			az-=m_pointingAzOffset; el-=m_pointingElOffset;
+			// bring the azimuth again in the correct range (0-2PI)
+			az=slaDranrm(az);
 		}
-		catch (AntennaErrors::AntennaErrorsEx& ex) {  
+		catch (AntennaErrors::AntennaErrorsEx& ex) {
 			//This error is due to the fact that the pointing model is not configured yet.....so it is not an error itself.
-			_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CBossCore::updateAttributes()");
-			impl.setComponentName((const char*)m_pointingModel->name());
-			impl.setOperationName("getAzElOffsets()");
+			//We just set the pointing offsets to 0.0 and change the boss status to WARNING in order to notify the user in some way
+			m_pointingAzOffset=m_pointingElOffset=0.0;
 			changeBossStatus(Management::MNG_WARNING);
-			throw impl;  // in this case throw the exception......it will be the watching thread to log it
 		}
 		catch (CORBA::SystemException& ex) {
 			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CBossCore::updateAttributes()");
@@ -1055,10 +1072,6 @@ bool CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,Co
 			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CBossCore::updateAttributes()");
 			throw impl;
 		}
-		// subtract the offsets coming from the pointing model
-		az-=m_pointingAzOffset; el-=m_pointingElOffset;
-		// bring the azimuth again in the correct range (0-2PI)
-		az=slaDranrm(az);
 	}
 	else {
 		m_pointingAzOffset=m_pointingElOffset=m_refractionOffset=0.0;
@@ -1068,6 +1081,9 @@ bool CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,Co
 	IRA::CSkySource:: horizontalToEquatorial(dateTime,m_site,az,el,appRa,appDec,pAngle);
 	IRA::CSkySource::apparentToJ2000(appRa,appDec,dateTime,ra,dec);
 	m_observedEquatorials.addPoint(ra,dec,timeMark);
+	if (outFile.is_open()) {
+		outFile << az << " " << el << " " << ra << " " << dec << endl;
+	}
 	IRA::CSkySource::equatorialToGalactic(ra,dec,lng,lat);
 	m_observedGalactics.addPoint(lng,lat,timeMark);
 	if (m_integrationStartTime==0) { //integration not started...then start it
