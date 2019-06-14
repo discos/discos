@@ -14,5 +14,6 @@
         Container="WeatherStationContainer"
         Default="true"
         ImplLang="cpp"
+        KeepAliveTime="-1"
 />
 
