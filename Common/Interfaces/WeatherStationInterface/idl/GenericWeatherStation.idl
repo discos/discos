@@ -37,7 +37,9 @@ module Weather {
 		double temperature;
 		double humidity;
 		double pressure;
-		double wind;	
+		double windspeed;
+		double winddir;
+		double windspeedpeak;
 /*		short doy;
 		short year;
 		short hh;
