@@ -17,6 +17,13 @@ NotoWeatherStationImpl::NotoWeatherStationImpl(
              m_windspeedPeak(this),
              m_autoparkThreshold(this)
 {	
+    m_parameters.temperature = 0.0;
+    m_parameters.humidity = 0.0;
+    m_parameters.pressure = 0.0;
+    m_parameters.windspeed = 0.0;
+    m_parameters.winddir = 0.0;
+    m_parameters.windspeedpeak = 0.0;
+
 	AUTO_TRACE("NotoWeatherStationImpl::NotoWeatherStationImpl");
 }
 
@@ -57,16 +64,18 @@ void NotoWeatherStationImpl::execute() throw (ACSErr::ACSbaseExImpl)
 
 void NotoWeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 {
-
 	MeteoSocket *sock;
 	ACS::Time timestamp;
-	try {
-		  if 			(CIRATools::getDBValue(getContainerServices(),"IPAddress",ADDRESS) && CIRATools::getDBValue(getContainerServices(),"port",PORT))
+	try
+    {
+        double threadSleepTime;
+        if (CIRATools::getDBValue(getContainerServices(),"IPAddress",ADDRESS) &&
+            CIRATools::getDBValue(getContainerServices(),"port",PORT) &&
+            CIRATools::getDBValue(getContainerServices(),"UpdatingThreadTime", threadSleepTime))
 		{
 			ACS_LOG(LM_FULL_INFO,"NotoWeatherStationImpl::initialize()",(LM_INFO,"IP address %s, Port %d ",(const char *) ADDRESS,PORT));
-
-
-		} else
+		}
+        else
 		{
 			 ACS_LOG(LM_FULL_INFO,"NotoWeatherStationImpl::initialize()",(LM_ERROR,"Error getting IP address from CDB" ));
 		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"NotoWeatherStationImpl::initialize()");
@@ -88,8 +97,10 @@ void NotoWeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
       
       
       m_autoparkThreshold->getDevIO()->write(60.0,timestamp);           
-		m_controlThread_p = getContainerServices()->getThreadManager()->create<CMeteoParamUpdaterThread, MeteoSocket*>("MeteoParam Updater",sock );
-      m_controlThread_p->setSleepTime(5*10000000);
+
+      NotoWeatherStationImpl* self_p = this;
+      m_controlThread_p = getContainerServices()->getThreadManager()->create<CMeteoParamUpdaterThread, NotoWeatherStationImpl*>("MeteoParam Updater", self_p);
+      m_controlThread_p->setSleepTime(threadSleepTime*10);
 //              m_controlThread_p->setResponseTime(60*1000000);
       m_controlThread_p->resume();
                 
@@ -266,70 +277,117 @@ CORBA::Double NotoWeatherStationImpl::getHumidity() throw (ACSErr::ACSbaseEx, CO
 	return humidity;
 }
 
-Weather::parameters NotoWeatherStationImpl::getData() throw (ACSErr::ACSbaseEx, CORBA::SystemException)
+Weather::parameters NotoWeatherStationImpl::getData()
 {
-	Weather::parameters mp;
-        AUTO_TRACE("NotoWeatherStationImpl::getData");
-	CError err;
-	CString rdata;
-	CSecAreaResourceWrapper<MeteoSocket> sock=m_socket->Get();
-	double temperature;
-	double winddir;
-	double windspeed;
-	double pressure;
-	double humidity;
-	
-//	sock->sendCMD(err,CString("wx\n"));
-//	sock->receiveData(err,rdata);
-        
-
-	
-	ACSErr::Completion_var completion;
-
-	temperature = m_temperature->get_sync(completion.out());
-	winddir     = m_winddir->get_sync(completion.out());
-	windspeed   = m_windspeed->get_sync(completion.out());
-	pressure    = m_pressure->get_sync(completion.out());
-	humidity    = m_humidity->get_sync(completion.out());
-	
-
-//  	cout <<"received"<< len << endl;
-//	string ss;
-//	string srecv;
-//	srecv=string((const char*)rdata);
-//	vector<string> vrecv;
-//
-//	istringstream  ist(srecv); // string stream
-//	while (ist >> ss) vrecv.push_back(ss) ;// split the string
-//	int ndata=vrecv.size();
-//	if (ndata > 3)
-//
-//	{
-// 		temperature = atof(vrecv[ndata-3].c_str());
-//		pressure = atof(vrecv[ndata-2].c_str());
-//		humidity  = atof(vrecv[ndata-1].c_str());
-//
-////		windspeed  = atof(vrecv[ndata-1].c_str());
-//
-//	} else
-//	{
-//		 ACS_LOG(LM_FULL_INFO,"MeteoSocket::update()",(LM_ERROR,"Not enough data from meteo server"));
-//	}
-	
-
-	mp.temperature=temperature;
-	mp.humidity   =humidity;
- 	mp.wind       =windspeed;
-	mp.pressure   =pressure;
-	
-
-	return mp;
+    AUTO_TRACE("NotoWeatherStationImpl::getData");
+    baci::ThreadSyncGuard guardMeteoParameters(&m_meteoParametersMutex);
+    return m_parameters;
 }
- 
 
-//pdate();
+void NotoWeatherStationImpl::updateData() throw (ACSErr::ACSbaseEx, CORBA::SystemException)
+{
+    AUTO_TRACE("NotoWeatherStationImpl::updateData");
+    Weather::parameters mp;
 
+    try
+    {
+        ACSErr::Completion_var completion;
+        mp.temperature = m_temperature->get_sync(completion.out());
+    }
+    catch (ACSErr::ACSbaseExImpl& E)
+    {
+        E.log(LM_DEBUG);
+        throw E.getACSbaseEx();
+    }
+    catch (...)
+    {
+        _EXCPT(ComponentErrors::UnexpectedExImpl, E, "NotoWeatherStationImpl::updateData");
+        throw E.getACSbaseEx();
+    }
 
+    try
+    {
+        ACSErr::Completion_var completion;
+        mp.humidity = m_humidity->get_sync(completion.out());
+    }
+    catch (ACSErr::ACSbaseExImpl& E)
+    {
+        E.log(LM_DEBUG);
+        throw E.getACSbaseEx();
+    }
+    catch (...)
+    {
+        _EXCPT(ComponentErrors::UnexpectedExImpl, E, "NotoWeatherStationImpl::updateData");
+        throw E.getACSbaseEx();
+    }
+
+    try
+    {
+        ACSErr::Completion_var completion;
+        mp.pressure = m_pressure->get_sync(completion.out());
+    }
+    catch (ACSErr::ACSbaseExImpl& E)
+    {
+        E.log(LM_DEBUG);
+        throw E.getACSbaseEx();
+    }
+    catch (...)
+    {
+        _EXCPT(ComponentErrors::UnexpectedExImpl, E, "NotoWeatherStationImpl::updateData");
+        throw E.getACSbaseEx();
+    }
+
+    try
+    {
+        ACSErr::Completion_var completion;
+        mp.windspeed = m_windspeed->get_sync(completion.out());
+    }
+    catch (ACSErr::ACSbaseExImpl& E)
+    {
+        E.log(LM_DEBUG);
+        throw E.getACSbaseEx();
+    }
+    catch (...)
+    {
+        _EXCPT(ComponentErrors::UnexpectedExImpl, E, "NotoWeatherStationImpl::updateData");
+        throw E.getACSbaseEx();
+    }
+
+    try
+    {
+        ACSErr::Completion_var completion;
+        mp.winddir = m_winddir->get_sync(completion.out());
+    }
+    catch (ACSErr::ACSbaseExImpl& E)
+    {
+        E.log(LM_DEBUG);
+        throw E.getACSbaseEx();
+    }
+    catch (...)
+    {
+        _EXCPT(ComponentErrors::UnexpectedExImpl, E, "NotoWeatherStationImpl::updateData");
+        throw E.getACSbaseEx();
+    }
+
+    try
+    {
+        ACSErr::Completion_var completion;
+        mp.windspeedpeak = m_windspeedPeak->get_sync(completion.out());
+    }
+    catch (ACSErr::ACSbaseExImpl& E)
+    {
+        E.log(LM_DEBUG);
+        throw E.getACSbaseEx();
+    }
+    catch (...)
+    {
+        _EXCPT(ComponentErrors::UnexpectedExImpl, E, "NotoWeatherStationImpl::updateData");
+        throw E.getACSbaseEx();
+    }
+
+    baci::ThreadSyncGuard guardMeteoParameters(&m_meteoParametersMutex);
+    m_parameters = mp;
+}
 
 ACS::RWdouble_ptr
 NotoWeatherStationImpl::temperature ()
