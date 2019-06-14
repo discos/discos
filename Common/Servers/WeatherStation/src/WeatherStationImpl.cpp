@@ -92,14 +92,15 @@ void WeatherStationImpl::aboutToAbort() throw (ACSErr::ACSbaseExImpl)
 
 Weather::parameters WeatherStationImpl::getData()
 {
+    AUTO_TRACE("WeatherStationImpl::getData");
     baci::ThreadSyncGuard guardMeteoParameters(&m_meteoParametersMutex);
     return m_parameters;
 }
 
 void WeatherStationImpl::updateData() throw (ACSErr::ACSbaseEx,CORBA::SystemException)
 {
+    AUTO_TRACE("WeatherStationImpl::updateData");
     Weather::parameters mp;
-    AUTO_TRACE("WeatherStationImpl::getData");
 
     try
     {
@@ -113,7 +114,7 @@ void WeatherStationImpl::updateData() throw (ACSErr::ACSbaseEx,CORBA::SystemExce
     }
     catch (...)
     {
-        _EXCPT(ComponentErrors::UnexpectedExImpl,E,"WeatherStationImpl::getData");
+        _EXCPT(ComponentErrors::UnexpectedExImpl,E,"WeatherStationImpl::updateData");
         throw E.getACSbaseEx();
     }
 
@@ -129,7 +130,7 @@ void WeatherStationImpl::updateData() throw (ACSErr::ACSbaseEx,CORBA::SystemExce
     }
     catch (...)
     {
-        _EXCPT(ComponentErrors::UnexpectedExImpl,E,"WeatherStationImpl::getData");
+        _EXCPT(ComponentErrors::UnexpectedExImpl,E,"WeatherStationImpl::updateData");
         throw E.getACSbaseEx();
     }
 
@@ -145,7 +146,7 @@ void WeatherStationImpl::updateData() throw (ACSErr::ACSbaseEx,CORBA::SystemExce
     }
     catch (...)
     {
-        _EXCPT(ComponentErrors::UnexpectedExImpl,E,"WeatherStationImpl::getData");
+        _EXCPT(ComponentErrors::UnexpectedExImpl,E,"WeatherStationImpl::updateData");
         throw E.getACSbaseEx();
     }
 
@@ -161,7 +162,7 @@ void WeatherStationImpl::updateData() throw (ACSErr::ACSbaseEx,CORBA::SystemExce
     }
     catch (...)
     {
-        _EXCPT(ComponentErrors::UnexpectedExImpl,E,"WeatherStationImpl::getData");
+        _EXCPT(ComponentErrors::UnexpectedExImpl,E,"WeatherStationImpl::updateData");
         throw E.getACSbaseEx();
     }
 
@@ -177,7 +178,7 @@ void WeatherStationImpl::updateData() throw (ACSErr::ACSbaseEx,CORBA::SystemExce
     }
     catch (...)
     {
-        _EXCPT(ComponentErrors::UnexpectedExImpl,E,"WeatherStationImpl::getData");
+        _EXCPT(ComponentErrors::UnexpectedExImpl,E,"WeatherStationImpl::updateData");
         throw E.getACSbaseEx();
     }
 
@@ -193,7 +194,7 @@ void WeatherStationImpl::updateData() throw (ACSErr::ACSbaseEx,CORBA::SystemExce
     }
     catch (...)
     {
-        _EXCPT(ComponentErrors::UnexpectedExImpl,E,"WeatherStationImpl::getData");
+        _EXCPT(ComponentErrors::UnexpectedExImpl,E,"WeatherStationImpl::updateData");
         throw E.getACSbaseEx();
     }
 
@@ -393,7 +394,7 @@ void WeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 
         WeatherStationImpl* self_p =this;
         m_controlThread_p = getContainerServices()->getThreadManager()->create<CUpdatingThread, WeatherStationImpl*>("MeteoStation", self_p);
-        m_controlThread_p->setSleepTime(threadSleepTime);
+        m_controlThread_p->setSleepTime(threadSleepTime*10);
         //m_controlThread_p->setResponseTime(60*1000000);
         m_controlThread_p->resume();
         m_parser=new CParser<WeatherSocket>(sock,10);
