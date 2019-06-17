@@ -64,7 +64,7 @@ EXECUTABLES_L   =
 
 #
 # <brief description of xxxxx program>
-WeatherStationImpl_OBJECTS   =	 WeatherStationImpl    WeatherSocket WindCheckerThread 
+WeatherStationImpl_OBJECTS   =	 WeatherStationImpl    WeatherSocket UpdatingThread
 #xxxxx_LDFLAGS   =
 WeatherStationImpl_LIBS      =ComponentErrors \
 			IRALibrary\

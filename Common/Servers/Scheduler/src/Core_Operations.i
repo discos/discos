@@ -314,7 +314,7 @@ void CCore::_getWeatherStationParameters(double &temp,double& hum,double& pres, 
 	temp=m_weatherPar.temperature;
 	hum=m_weatherPar.humidity;
 	pres=m_weatherPar.pressure;
-	wind=m_weatherPar.wind;
+	wind=m_weatherPar.windspeed;
 }
 
 void CCore::_initRecording(const long& scanid) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,

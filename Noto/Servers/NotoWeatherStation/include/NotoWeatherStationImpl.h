@@ -70,32 +70,26 @@ Not all the paramters from the station have been implemented.
 
 using ACS::ThreadBase;
 
-class MeteoSocket;
-
+class NotoWeatherStationImpl;
 
 class CMeteoParamUpdaterThread : public ACS::Thread
 {
+public:
+    CMeteoParamUpdaterThread (const ACE_CString& name,
+                              NotoWeatherStationImpl* weatherStation,
+                              const ACS::TimeInterval& responseTime=ThreadBase::defaultResponseTime,
+                              const ACS::TimeInterval& sleepTime=ThreadBase::defaultSleepTime);
 
- public:
-         CMeteoParamUpdaterThread (const ACE_CString& name,
-                        MeteoSocket*   socket,
-                        const ACS::TimeInterval& responseTime=ThreadBase::defaultResponseTime,
-                        const ACS::TimeInterval& sleepTime=ThreadBase::defaultSleepTime) ;
+    ~CMeteoParamUpdaterThread() { ACS_TRACE("CMeteoParamUpdaterThread::~CMeteoParamUpdaterThread"); }
+    virtual void onStop();
+    virtual void onStart();
+    virtual void runLoop();
 
-         ~CMeteoParamUpdaterThread() { ACS_TRACE("CMeteoParamUpdaterThread::~CMeteoParamUpdaterThread"); }
-         virtual void onStop();
-         virtual void onStart();
-         virtual void runLoop();
-
- private:
-                int loopCounter_m;
-                int m_threshold; // wind threshold in km/h
-                MeteoSocket  * m_socket;
-
+private:
+    int loopCounter_m;
+    int m_threshold; // wind threshold in km/h
+    NotoWeatherStationImpl* m_weatherstation_p;
 };
-
-
-
 
 
 class  NotoWeatherStationImpl:     public virtual CharacteristicComponentImpl,     //Standard component superclass  
@@ -120,7 +114,8 @@ public:
 	virtual ~NotoWeatherStationImpl(); 
 
 
-	virtual Weather::parameters getData() throw (ACSErr::ACSbaseEx, CORBA::SystemException);
+	virtual Weather::parameters getData();
+	virtual void updateData() throw (ACSErr::ACSbaseEx, CORBA::SystemException);
 
 	virtual CORBA::Double getTemperature() throw (ACSErr::ACSbaseEx, CORBA::SystemException);
 	virtual	CORBA::Double getPressure() throw (ACSErr::ACSbaseEx, CORBA::SystemException);
@@ -189,28 +184,23 @@ public:
 	*/
  
 private:
-	
- 	
- 
-	void deleteAll();
-	CSecureArea<MeteoSocket> *m_socket;
-
-	CError err;
-        CString ADDRESS;
-	unsigned int PORT;
-	SmartPropertyPointer<RWdouble> m_temperature;
-	SmartPropertyPointer<RWdouble> m_winddir;
-	SmartPropertyPointer<RWdouble> m_windspeed;
-	SmartPropertyPointer<RWdouble> m_humidity;
-	SmartPropertyPointer<RWdouble> m_pressure;
-   SmartPropertyPointer<RWdouble> m_windspeedPeak;
-   SmartPropertyPointer<ROdouble> m_autoparkThreshold;
-   CMeteoParamUpdaterThread *m_controlThread_p;
-        
-	SimpleParser::CParser<MeteoSocket> * m_parser;
-
+    void deleteAll();
+    CSecureArea<MeteoSocket> *m_socket;
+    CError err;
+    CString ADDRESS;
+    unsigned int PORT;
+    SmartPropertyPointer<RWdouble> m_temperature;
+    SmartPropertyPointer<RWdouble> m_winddir;
+    SmartPropertyPointer<RWdouble> m_windspeed;
+    SmartPropertyPointer<RWdouble> m_humidity;
+    SmartPropertyPointer<RWdouble> m_pressure;
+    SmartPropertyPointer<RWdouble> m_windspeedPeak;
+    SmartPropertyPointer<ROdouble> m_autoparkThreshold;
+    CMeteoParamUpdaterThread *m_controlThread_p;
+    SimpleParser::CParser<MeteoSocket> * m_parser;
     void operator=(const NotoWeatherStationImpl&);
-		
+    Weather::parameters m_parameters;
+    BACIMutex m_meteoParametersMutex;
 };
 
 
