@@ -13,7 +13,7 @@
              RepetitionExpireTime="5000000"
              MinPointNumber="25"
              MaxPointNumber="250"
-             GapTime="100000"
+             GapTime="200000"
              CoordinateIntegration="1000000"
              CutOffElevation="70.0"
              SkydipElevationRange="15.0-90.0"
