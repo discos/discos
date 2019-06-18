@@ -105,43 +105,48 @@ void CTimeTaggedCircularArray::addOffsets(const double& azOff,const double& elOf
 
 bool CTimeTaggedCircularArray::selectPoint(const TIMEVALUE& time, double& azimuth, double& elevation) const
 {
+	bool retval = true;
+	TArrayRecord m1, m2;
+
 	// We wait for a point newer than the last one we have in store to arrive.
 	unsigned total = 0;
 	while(time > m_array[(m_head + elements() - 1) % m_size].time) {
 		if(total >= _MAX_WAIT_TIME) {
-			// Waited for 2 whole seconds, return the last coordinates out of desperation
+			// Waited for 2 whole seconds, use the last known slope
 			unsigned ss = elements();
-			azimuth = m_array[(m_head + ss - 1) % m_size].azimuth;
-			elevation = m_array[(m_head + ss - 1) % m_size].elevation;
-			return false;
+			m1 = m_array[(m_head + ss - 2) % m_size];
+			m2 = m_array[(m_head + ss - 1) % m_size];
+			retval = false;
+			break;
 		}
 		total += _WAIT_TIME;
 		CIRATools::Wait(_WAIT_TIME);
 	}
 
-	TArrayRecord m1, m2;
-	unsigned pp = m_head;
-	for(int i = elements() - 1; i >= 0; i--) {
-		pp = (m_head + i) % m_size;
-		if (time == m_array[pp].time) {
-			//the requested time is there
-			azimuth = m_array[pp].azimuth;
-			elevation = m_array[pp].elevation;
-			return true;
+	if(retval) {
+		unsigned pp = m_head;
+		for(int i = elements() - 1; i >= 0; i--) {
+			pp = (m_head + i) % m_size;
+			if (time == m_array[pp].time) {
+				//the requested time is there
+				azimuth = m_array[pp].azimuth;
+				elevation = m_array[pp].elevation;
+				return true;
+			}
+			else if(time > m_array[pp].time) {
+				// the requested time is in between two entries
+				m1 = m_array[pp];
+				m2 = m_array[(m_head + i + 1) % m_size];
+				break;
+			}
 		}
-		else if(time > m_array[pp].time) {
-			// the requested time is in between two entries
-			m1 = m_array[pp];
-			m2 = m_array[(m_head + i + 1) % m_size];
-			break;
-		}
-	}
 
-	if(pp == m_head && time < m_array[m_head].time) {
-		// The requested time is smaller than all other points in the vector
-		azimuth = m_array[m_head].azimuth;
-		elevation = m_array[m_head].elevation;
-		return false;
+		if(pp == m_head && time < m_array[m_head].time) {
+			// The requested time is smaller than all other points in the vector
+			azimuth = m_array[m_head].azimuth;
+			elevation = m_array[m_head].elevation;
+			return false;
+		}
 	}
 
 	double weight = double(CIRATools::timeSubtract(time, TIMEVALUE(m1.time))) / double(CIRATools::timeSubtract(TIMEVALUE(m2.time), TIMEVALUE(m1.time)));
@@ -178,7 +183,7 @@ bool CTimeTaggedCircularArray::selectPoint(const TIMEVALUE& time, double& azimut
 	azimuth = tmp_azimuth;
 
 	elevation = (1 - weight) * m1.elevation + weight * m2.elevation;
-	return true;
+	return retval;
 }
 
 void CTimeTaggedCircularArray::averagePoint(const TIMEVALUE& startTime,const TIMEVALUE& stopTime,double& azimuth,double& elevation) const
