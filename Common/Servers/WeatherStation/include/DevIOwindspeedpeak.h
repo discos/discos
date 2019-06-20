@@ -30,7 +30,7 @@ public:
 	*/
 	DevIOWindspeedpeak()
 	{		
-		AUTO_TRACE("DevIOWindspeed::DevIOWindspeed()");		
+		AUTO_TRACE("DevIOWindspeedpeak::DevIOWindspeedpeak()");
 	}
 
 	/**
@@ -38,7 +38,7 @@ public:
 	*/ 
 	~DevIOWindspeedpeak()
 	{
-		ACS_TRACE("DevIOWindspeed::~DevIOWindspeed()");		
+		ACS_TRACE("DevIOWindspeedpeak::~DevIOWindspeedpeak()");
 	}
 
 	/** 
@@ -46,7 +46,7 @@ public:
 	*/
 	bool initializeValue()
 	{		
-		AUTO_TRACE("DevIOWindspeed::initializeValue()");		
+		AUTO_TRACE("DevIOWindspeedpeak::initializeValue()");
 		return false;
 	}
 	
@@ -80,4 +80,4 @@ private:
 
 
 
-#endif /*DevIOWindspeed_H_*/
+#endif /*DevIOWindspeedpeak_H_*/

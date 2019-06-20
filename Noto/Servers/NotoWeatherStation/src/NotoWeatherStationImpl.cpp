@@ -86,13 +86,12 @@ void NotoWeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		
 		sock=new MeteoSocket(ADDRESS,PORT);
  		m_socket =new CSecureArea<MeteoSocket>(sock);
-		m_temperature=new RWdouble(getContainerServices()->getName()+":temperature", getComponent(), new DevIOTemperature(m_socket),true);
-		
-		m_winddir=new RWdouble(getContainerServices()->getName()+":winddir", getComponent(), new DevIOWinddir(m_socket),true);
-		m_windspeed=new RWdouble(getContainerServices()->getName()+":windspeed", getComponent(), new DevIOWindspeed(m_socket),true);
-		m_humidity=new RWdouble(getContainerServices()->getName()+":humidity", getComponent(), new DevIOHumidity(m_socket),true);
-		m_pressure=new RWdouble(getContainerServices()->getName()+":pressure", getComponent(), new DevIOPressure(m_socket),true);
-	   m_windspeedPeak=new RWdouble(getContainerServices()->getName()+":windspeedpeak", getComponent(), new DevIOWindspeedPeak(m_socket),true);
+		m_temperature=new RWdouble(getContainerServices()->getName()+":temperature", getComponent(), new DevIOTemperature(),true);
+		m_winddir=new RWdouble(getContainerServices()->getName()+":winddir", getComponent(), new DevIOWinddir(),true);
+		m_windspeed=new RWdouble(getContainerServices()->getName()+":windspeed", getComponent(), new DevIOWindspeed(),true);
+		m_humidity=new RWdouble(getContainerServices()->getName()+":humidity", getComponent(), new DevIOHumidity(),true);
+		m_pressure=new RWdouble(getContainerServices()->getName()+":pressure", getComponent(), new DevIOPressure(),true);
+	   m_windspeedPeak=new RWdouble(getContainerServices()->getName()+":windspeedpeak", getComponent(), new DevIOWindspeedPeak(),true);
    	m_autoparkThreshold=new ROdouble(getContainerServices()->getName()+":autoparkThreshold",getComponent());            
       
       
@@ -288,11 +287,12 @@ void NotoWeatherStationImpl::updateData() throw (ACSErr::ACSbaseEx, CORBA::Syste
 {
     AUTO_TRACE("NotoWeatherStationImpl::updateData");
     Weather::parameters mp;
+    CSecAreaResourceWrapper<MeteoSocket> sock = m_socket->Get();
 
     try
     {
-        ACSErr::Completion_var completion;
-        mp.temperature = m_temperature->get_sync(completion.out());
+        mp.temperature = sock->getTemperature();
+        m_temperature->set_sync(CORBA::Double(mp.temperature));
     }
     catch (ACSErr::ACSbaseExImpl& E)
     {
@@ -307,8 +307,8 @@ void NotoWeatherStationImpl::updateData() throw (ACSErr::ACSbaseEx, CORBA::Syste
 
     try
     {
-        ACSErr::Completion_var completion;
-        mp.humidity = m_humidity->get_sync(completion.out());
+        mp.humidity = sock->getHumidity();
+        m_humidity->set_sync(CORBA::Double(mp.humidity));
     }
     catch (ACSErr::ACSbaseExImpl& E)
     {
@@ -323,8 +323,8 @@ void NotoWeatherStationImpl::updateData() throw (ACSErr::ACSbaseEx, CORBA::Syste
 
     try
     {
-        ACSErr::Completion_var completion;
-        mp.pressure = m_pressure->get_sync(completion.out());
+        mp.pressure = sock->getPressure();
+        m_pressure->set_sync(CORBA::Double(mp.pressure));
     }
     catch (ACSErr::ACSbaseExImpl& E)
     {
@@ -339,8 +339,8 @@ void NotoWeatherStationImpl::updateData() throw (ACSErr::ACSbaseEx, CORBA::Syste
 
     try
     {
-        ACSErr::Completion_var completion;
-        mp.windspeed = m_windspeed->get_sync(completion.out());
+        mp.windspeed = sock->getWindSpeed();
+        m_windspeed->set_sync(CORBA::Double(mp.windspeed));
     }
     catch (ACSErr::ACSbaseExImpl& E)
     {
@@ -355,8 +355,8 @@ void NotoWeatherStationImpl::updateData() throw (ACSErr::ACSbaseEx, CORBA::Syste
 
     try
     {
-        ACSErr::Completion_var completion;
-        mp.winddir = m_winddir->get_sync(completion.out());
+        mp.winddir = sock->getWindDir();
+        m_winddir->set_sync(CORBA::Double(mp.winddir));
     }
     catch (ACSErr::ACSbaseExImpl& E)
     {
@@ -371,8 +371,8 @@ void NotoWeatherStationImpl::updateData() throw (ACSErr::ACSbaseEx, CORBA::Syste
 
     try
     {
-        ACSErr::Completion_var completion;
-        mp.windspeedpeak = m_windspeedPeak->get_sync(completion.out());
+        mp.windspeedpeak = sock->getWindspeedPeak();
+        m_windspeedPeak->set_sync(CORBA::Double(mp.windspeedpeak));
     }
     catch (ACSErr::ACSbaseExImpl& E)
     {
