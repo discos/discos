@@ -10,15 +10,13 @@
 /* Who                                when            What                                              */
 /* Sergio  Poppi(spoppi@oa-cagliari.inaf.it)  	02/01/2009     Creation                                         */
 
-
+#include <baci.h>
 #include <baciDevIO.h>
 #include <IRA>
-#include <map>
-#include "MeteoSocket.h"
- using namespace IRA;
+using namespace IRA;
 
 /**
- * This class is derived from template DevIO and it is used by the temperature  property  of the MeteoStation component
+ * This class is derived from template DevIO and it is used by the temperature property of the MeteoStation component
  * @author <a href=mailto:spoppi@oa-cagliari.inaf.it>Sergio Poppi</a>,
  * Istituto di Radioastronomia, Italia<br> 
 */
@@ -28,11 +26,9 @@ public:
 	
  	/** 
 	 * Constructor
-	 * @param Socket pointer to a SecureArea that proctects a the  socket. This object must be already initialized and configured.
 	*/
-	DevIOTemperature(CSecureArea<MeteoSocket>* socket ):m_socket(socket)
+	DevIOTemperature()
 	{		
- 		m_initparser=false;
 		AUTO_TRACE("DevIOTemperature::DevIOTemperature()");		
 	}
 
@@ -55,44 +51,30 @@ public:
 	
 	/**
 	 * Used to read the property value.
-	 * @throw ComponentErrors::PropertyError
 	 * @param timestamp epoch when the operation completes
 	*/ 
-	CORBA::Double  read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
+	CORBA::Double read(ACS::Time& timestamp)
 	{
-		// get the CommandLine .......
-		try {
-			CSecAreaResourceWrapper<MeteoSocket> sock=m_socket->Get();
- 			m_val=sock->getTemperature();
-		}
-		catch (ACSErr::ACSbaseExImpl& E) {
-			_ADD_BACKTRACE(ComponentErrors::PropertyErrorExImpl,dummy,E,"DevIOTemperature::read()");
-			dummy.setPropertyName("systemTemperature");
-			dummy.setReason("Property could not be read");
-			//_IRA_LOGGUARD_LOG_EXCEPTION(m_logGuard,dummy,LM_DEBUG);
-			throw dummy;
-                       // return m_val;
-		} catch (...) {
-                  
-                     cout << "Devio temp unexpected except" << endl;
-      }
-		timestamp=getTimeStamp();  //complition time
+		timestamp = getTimeStamp();
+        baci::ThreadSyncGuard guard(&m_mutex);
 		return m_val;
 	}
+
 	/**
-	 * It writes values into controller. Unused because the properties are read-only.
+	 * It writes values into controller.
+     * @param value the new value to set
+	 * @param timestamp epoch when the operation completes
 	*/ 
-	void write(const CORBA::Double& value, ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
+	void write(const CORBA::Double& value, ACS::Time& timestamp)
 	{
-		timestamp=getTimeStamp();
-		return;
+		timestamp = getTimeStamp();
+        baci::ThreadSyncGuard guard(&m_mutex);
+        m_val = value;
 	}
 	
 private:
-	CSecureArea<MeteoSocket>* m_socket;
-
 	CORBA::Double m_val;
-	bool m_initparser;
+    BACIMutex m_mutex;
  };
 
 
