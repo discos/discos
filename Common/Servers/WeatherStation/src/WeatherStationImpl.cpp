@@ -106,7 +106,7 @@ void WeatherStationImpl::updateData() throw (ACSErr::ACSbaseEx,CORBA::SystemExce
     try
     {
         mp.temperature = sock->getTemperature();
-        m_temperature->set_sync(mp.temperature);
+        m_temperature->set_sync(CORBA::Double(mp.temperature));
     }
     catch (ACSErr::ACSbaseExImpl& E)
     {
@@ -138,7 +138,7 @@ void WeatherStationImpl::updateData() throw (ACSErr::ACSbaseEx,CORBA::SystemExce
     try
     {
         mp.pressure = sock->getPressure();
-        m_pressure->set_sync(mp.pressure);
+        m_pressure->set_sync(CORBA::Double(mp.pressure));
     }
     catch (ACSErr::ACSbaseExImpl& E)
     {
@@ -154,7 +154,7 @@ void WeatherStationImpl::updateData() throw (ACSErr::ACSbaseEx,CORBA::SystemExce
     try
     {
         mp.windspeed = sock->getWind();
-        m_windspeed->set_sync(mp.windspeed);
+        m_windspeed->set_sync(CORBA::Double(mp.windspeed));
     }
     catch (ACSErr::ACSbaseExImpl& E)
     {
@@ -170,7 +170,7 @@ void WeatherStationImpl::updateData() throw (ACSErr::ACSbaseEx,CORBA::SystemExce
     try
     {
         mp.winddir = sock->getWinDir();
-        m_winddir->set_sync(mp.winddir);
+        m_winddir->set_sync(CORBA::Double(mp.winddir));
     }
     catch (ACSErr::ACSbaseExImpl& E)
     {
@@ -186,7 +186,7 @@ void WeatherStationImpl::updateData() throw (ACSErr::ACSbaseEx,CORBA::SystemExce
     try
     {
         mp.windspeedpeak = sock->getWindSpeedPeak();
-        m_windspeedpeak->set_sync(mp.windspeedpeak);
+        m_windspeedpeak->set_sync(CORBA::Double(mp.windspeedpeak));
     }
     catch (ACSErr::ACSbaseExImpl& E)
     {
