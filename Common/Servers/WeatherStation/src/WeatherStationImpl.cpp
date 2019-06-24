@@ -101,11 +101,12 @@ void WeatherStationImpl::updateData() throw (ACSErr::ACSbaseEx,CORBA::SystemExce
 {
     AUTO_TRACE("WeatherStationImpl::updateData");
     Weather::parameters mp;
+    CSecAreaResourceWrapper<WeatherSocket> sock = m_socket->Get();
 
     try
     {
-        ACSErr::Completion_var completion;
-        mp.temperature = m_temperature->get_sync(completion.out());
+        mp.temperature = sock->getTemperature();
+        m_temperature->set_sync(CORBA::Double(mp.temperature));
     }
     catch (ACSErr::ACSbaseExImpl& E)
     {
@@ -120,8 +121,8 @@ void WeatherStationImpl::updateData() throw (ACSErr::ACSbaseEx,CORBA::SystemExce
 
     try
     {
-        ACSErr::Completion_var completion;
-        mp.humidity = m_humidity->get_sync(completion.out());
+        mp.humidity = sock->getHumidity();
+        m_humidity->set_sync(CORBA::Double(mp.humidity));
     }
     catch (ACSErr::ACSbaseExImpl& E)
     {
@@ -136,8 +137,8 @@ void WeatherStationImpl::updateData() throw (ACSErr::ACSbaseEx,CORBA::SystemExce
 
     try
     {
-        ACSErr::Completion_var completion;
-        mp.pressure = m_pressure->get_sync(completion.out());
+        mp.pressure = sock->getPressure();
+        m_pressure->set_sync(CORBA::Double(mp.pressure));
     }
     catch (ACSErr::ACSbaseExImpl& E)
     {
@@ -152,8 +153,8 @@ void WeatherStationImpl::updateData() throw (ACSErr::ACSbaseEx,CORBA::SystemExce
 
     try
     {
-        ACSErr::Completion_var completion;
-        mp.windspeed = m_windspeed->get_sync(completion.out());
+        mp.windspeed = sock->getWind();
+        m_windspeed->set_sync(CORBA::Double(mp.windspeed));
     }
     catch (ACSErr::ACSbaseExImpl& E)
     {
@@ -168,8 +169,8 @@ void WeatherStationImpl::updateData() throw (ACSErr::ACSbaseEx,CORBA::SystemExce
 
     try
     {
-        ACSErr::Completion_var completion;
-        mp.winddir = m_winddir->get_sync(completion.out());
+        mp.winddir = sock->getWinDir();
+        m_winddir->set_sync(CORBA::Double(mp.winddir));
     }
     catch (ACSErr::ACSbaseExImpl& E)
     {
@@ -184,8 +185,8 @@ void WeatherStationImpl::updateData() throw (ACSErr::ACSbaseEx,CORBA::SystemExce
 
     try
     {
-        ACSErr::Completion_var completion;
-        mp.windspeedpeak = m_windspeedpeak->get_sync(completion.out());
+        mp.windspeedpeak = sock->getWindSpeedPeak();
+        m_windspeedpeak->set_sync(CORBA::Double(mp.windspeedpeak));
     }
     catch (ACSErr::ACSbaseExImpl& E)
     {
@@ -382,12 +383,12 @@ void WeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
         //m_elevationStatus=m_property->get_sync(completion)
         sock=new WeatherSocket(ADDRESS,PORT);
         m_socket =new CSecureArea<WeatherSocket>(sock);
-        m_temperature=new RWdouble(getContainerServices()->getName()+":temperature", getComponent(), new DevIOTemperature(m_socket),true);
-        m_winddir=new RWdouble(getContainerServices()->getName()+":winddir", getComponent(), new DevIOWinddir(m_socket),true);
-        m_windspeed=new RWdouble(getContainerServices()->getName()+":windspeed", getComponent(), new DevIOWindspeed(m_socket),true);
-        m_windspeedpeak=new RWdouble(getContainerServices()->getName()+":windspeedpeak", getComponent(), new DevIOWindspeedpeak(m_socket),true);
-        m_humidity=new RWdouble(getContainerServices()->getName()+":humidity", getComponent(), new DevIOHumidity(m_socket),true);
-        m_pressure=new RWdouble(getContainerServices()->getName()+":pressure", getComponent(), new DevIOPressure(m_socket),true);
+        m_temperature=new RWdouble(getContainerServices()->getName()+":temperature", getComponent(), new DevIOTemperature(),true);
+        m_winddir=new RWdouble(getContainerServices()->getName()+":winddir", getComponent(), new DevIOWinddir(),true);
+        m_windspeed=new RWdouble(getContainerServices()->getName()+":windspeed", getComponent(), new DevIOWindspeed(),true);
+        m_windspeedpeak=new RWdouble(getContainerServices()->getName()+":windspeedpeak", getComponent(), new DevIOWindspeedpeak(),true);
+        m_humidity=new RWdouble(getContainerServices()->getName()+":humidity", getComponent(), new DevIOHumidity(),true);
+        m_pressure=new RWdouble(getContainerServices()->getName()+":pressure", getComponent(), new DevIOPressure(),true);
         m_autoParkThreshold=new ROdouble(getContainerServices()->getName()+":autoparkThreshold", getComponent());
 
         m_autoParkThreshold->getDevIO()->write(m_threshold,timestamp);
