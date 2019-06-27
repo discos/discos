@@ -174,8 +174,32 @@ void CCommandSocket::setTimeOffset(const double& seconds) throw (ComponentErrors
 	setTimeOffset_command(seconds);	
 }
 
-void CCommandSocket::programTrack(const double& az,const double& el,const ACS::Time& time,bool clear) throw (ComponentErrors::ComponentErrorsExImpl,AntennaErrors::AntennaErrorsExImpl)
+void CCommandSocket::programTrack(const double& az, const double& el, const ACS::Time& time, bool clear) {
+	TProgramTrackPoint point;
+	point.az = az;
+	point.el = el;
+	point.time = time;
+	point.clear = clear;
+
+	baci::ThreadSyncGuard guard(&m_programTrackPointsMutex);
+	m_programTrackPointsQueue.push_back(point);
+}
+
+void CCommandSocket::sendProgramTrackPoint() throw (ComponentErrors::ComponentErrorsExImpl,AntennaErrors::AntennaErrorsExImpl)
 {
+	TProgramTrackPoint point;
+
+	baci::ThreadSyncGuard guard(&m_programTrackPointsMutex);
+	if(m_programTrackPointsQueue.empty()) return;
+	point = m_programTrackPointsQueue.front();
+	m_programTrackPointsQueue.pop_front();
+	guard.release();
+
+	double az = point.az;
+	double el = point.el;
+	ACS::Time time = point.time;
+	bool clear = point.clear;
+
 	autoArray<BYTE> message; //it will also free the buffer......
 	autoArray<CACUProtocol::TCommand> command;
 	WORD commNum;
@@ -188,20 +212,20 @@ void CCommandSocket::programTrack(const double& az,const double& el,const ACS::T
 	Antenna::TCommonModes azMode,elMode;
 	try {
 		if (!checkConnection()) {
-			_THROW_EXCPT(ConnectionExImpl,"CCommandSocket::programTrack()");
+			_THROW_EXCPT(ConnectionExImpl,"CCommandSocket::sendProgramTrackPoint()");
 		}
 		if (checkIsBusy()) {
-			_THROW_EXCPT(AntennaBusyExImpl,"CCommandSocket::programTrack()");
+			_THROW_EXCPT(AntennaBusyExImpl,"CCommandSocket::sendProgramTrackPoint()");
 		}
 		IRA::CTimeoutSync guard(&m_syncMutex,m_pConfiguration->controlSocketResponseTime(),m_pConfiguration->controlSocketDutyCycle());
 		if (!guard.acquire()) {
-			_EXCPT(ComponentErrors::TimeoutExImpl,ex,"CCommandSocket::programTrack()");
+			_EXCPT(ComponentErrors::TimeoutExImpl,ex,"CCommandSocket::sendProgramTrackPoint()");
 			throw ex;
 		}
 		CSecAreaResourceWrapper<CCommonData> data=m_pData->Get();
 		data->getActualMode(azMode,elMode);
 		if ((azMode!=Antenna::ACU_PROGRAMTRACK) || (elMode!=Antenna::ACU_PROGRAMTRACK)) {
-			_EXCPT(AntennaErrors::OperationNotPermittedExImpl,impl,"CCommandSocket::programTrack()");
+			_EXCPT(AntennaErrors::OperationNotPermittedExImpl,impl,"CCommandSocket::sendProgramTrackPoint()");
 			impl.setReason("program track mode not configured");
 			throw impl;
 		}
@@ -251,7 +275,7 @@ void CCommandSocket::programTrack(const double& az,const double& el,const ACS::T
 		m_ptTable[m_ptSize].elevation=finalEl;
 		m_ptTable[m_ptSize].timeMark=time;
 		data->addProgramTrackStackPoint(m_ptTable[m_ptSize].azimuth,m_ptTable[m_ptSize].elevation,m_ptTable[m_ptSize].timeMark); // add commanded points to stack
-		m_ptSize++;	
+		m_ptSize++;
 		if (m_ptSize>=CACUProtocol::PROGRAMTRACK_TABLE_MINIMUM_LENGTH) { // the cache is full...time to send data points to the ACU
 			if (m_lastScanEpoch==0) {
 				m_currentScanStartEpoch=m_ptTable[0].timeMark;
@@ -725,7 +749,7 @@ void CCommandSocket::changeMode_command(const Antenna::TCommonModes& mode) throw
 	if (mode==Antenna::ACU_PRESET) {
 		az=data->azimuthStatus()->actualPosition();   //set the current values for az and el.
 		el=data->elevationStatus()->actualPosition();
-		len=m_protocol.preset(az,el,0.0001,0.0001,message,command,commNum);  // get the buffer to be sent!     
+		len=m_protocol.preset(az,el,0.0001,0.0001,message,command,commNum);  // get the buffer to be sent!
 		modeName=CACUProtocol::modesIDL2String(Antenna::ACU_PRESET);
 	}
 	else if (mode==Antenna::ACU_RATE) {

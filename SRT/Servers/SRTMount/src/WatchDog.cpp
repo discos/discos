@@ -32,10 +32,30 @@ void CWatchDog::runLoop()
 {
 	try {
 		m_param->commandSocket->connectSocket();
+		m_param->commandSocket->sendProgramTrackPoint();
 	}
 	catch (ComponentErrors::SocketErrorExImpl& ex) {
 		_ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl,impl,ex,"CWatchDog::runLoop()");
 		impl.setReason("Cannot connect command socket");
 		_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
-	}	 
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		_ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl,impl,ex,"CWatchDog::runLoop()");
+		impl.setReason("Something went wrong while commanding a tracking point to the antenna");
+		_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
+	}
+	catch (AntennaErrors::AntennaErrorsExImpl& ex) {
+		_ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl,impl,ex,"CWatchDog::runLoop()");
+		impl.setReason("Something went wrong while commanding a tracking point to the antenna");
+		_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
+	}
+
+	try {
+		m_param->statusSocket->connectSocket();
+	}
+	catch (ComponentErrors::SocketErrorExImpl& ex) {
+		_ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl,impl,ex,"CWatchDog::runLoop()");
+		impl.setReason("Cannot connect status socket");
+		_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
+	}
 }
