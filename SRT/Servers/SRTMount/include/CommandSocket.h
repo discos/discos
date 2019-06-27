@@ -19,6 +19,8 @@
 #include "Configuration.h"
 #include "ACUProtocol.h"
 
+class CWatchDog;
+
 /**
  * This class is inherited from the IRA::CSocket class. It takes charge of the management of the socket used to command the SRT ACU via the remote interface. 
   * if the remote side disconnects or a problem affects the comunication line, this class try to reconnect to the ACU until the communication is up again..
@@ -28,6 +30,8 @@
 */
 class CCommandSocket: public IRA::CSocket
 {
+friend class CWatchDog;
+
 public:
 	/**
 	 * Constructor.
@@ -62,7 +66,7 @@ public:
 		
 	/**
 	 * This method can be used to command the telescope to fixed position. Range check are performed before commanding, if a value is beyond the hardware limits of the telescope,
-	 * this value is forced inside. The azimuth coordinate commanded effectively to the ACU depands on the current position and on cable wrapping considerations.   
+	 * this value is forced inside. The azimuth coordinate commanded effectively to the ACU depands on the current position and on cable wrapping considerations.
 	 * @param az azimuth position in degrees.
 	 * @param el elevation positions in degrees. 
 	 * @throw ComponentErrors::TimeoutExImpl
@@ -76,8 +80,7 @@ public:
 			AntennaErrors::AntennaBusyExImpl,AntennaErrors::NakExImpl,AntennaErrors::OperationNotPermittedExImpl);
 	
 	/**
-	 * This method can be used to command the telescope to program track position. Range check are performed before commanding, if a value is beyond the hardware limits of the telescope,
-	 * this value is forced inside. The azimuth coordinate commanded effectively to the ACU depands on the current position and on cable wrapping considerations.   
+	 * This method can be used to enqueue program track position to be sent to the telescope.
 	 * @param az azimuth position in degrees.
 	 * @param el elevation positions in degrees. 
 	 * @param time timestamp 
@@ -85,10 +88,8 @@ public:
 	 * @throw ComponentErrors::ComponentErrorsExImpl
 	 * @thorw AntennaErrors::AntennaErrorsExImpl
 	*/
-	void programTrack(const double& az,const double& el,const ACS::Time& time,bool clear) throw (ComponentErrors::ComponentErrorsExImpl,AntennaErrors::AntennaErrorsExImpl); 
-	//throw (AntennaErrors::NakExImpl,AntennaErrors::ConnectionExImpl,AntennaErrors::AntennaBusyExImpl,
-	//		ComponentErrors::TimeoutExImpl,AntennaErrors::OperationNotPermittedExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::ValidationErrorExImpl);
-	
+	void programTrack(const double& az,const double& el,const ACS::Time& time,bool clear);
+
 	/**
 	 * This function can be used to command new axis mode to the ACU. Even if the methods allows for different mode for elevation and azimuth it fails if the modes are not the same.
 	 * the accepted modes are <i>Antenna::ACU_RATE</i>, <i>Antenna::ACU_PRESET</i> and <i>Antenna::ACU_PROGRAMTRACK</i>. 
@@ -274,6 +275,17 @@ private:
 
 	CConfiguration * m_pConfiguration;
 	IRA::CSecureArea<CCommonData> * m_pData;
+
+	typedef struct {
+		double az;
+		double el;
+		ACS::Time time;
+		bool clear;
+	} TProgramTrackPoint;
+
+	BACIMutex m_programTrackPointsMutex;
+	std::deque<TProgramTrackPoint> m_programTrackPointsQueue;
+	std::deque<TProgramTrackPoint> m_programTrackPointsQueue;
 	
 	CACUProtocol m_protocol;
 
@@ -298,7 +310,7 @@ private:
 	ACS::Time m_lastScanEpoch;
 
 	ACS::Time m_currentScanStartEpoch;
-	
+
 	/**
 	 * This methods will check is the axis of the telescope are active, if not it will activate them. 
 	 * An active axis has the control loop closed, the servo amplifier enabled and the brakes open.
@@ -423,7 +435,14 @@ private:
 	 * @return true if the antenna is busy
 	 */
 	bool checkIsBusy();
-	
+
+	/**
+	 * This method sends enqueued program track points to the telescope. Range check are performed before commanding, if a value is beyond the hardware limits of the telescope,
+	 * this value is forced inside. The azimuth coordinate commanded effectively to the ACU depands on the current position and on cable wrapping considerations.
+	 * @throw ComponentErrors::ComponentErrorsExImpl
+	 * @thorw AntennaErrors::AntennaErrorsExImpl
+	*/
+	void sendProgramTrackPoint() throw (ComponentErrors::ComponentErrorsExImpl,AntennaErrors::AntennaErrorsExImpl);
 };
 
 

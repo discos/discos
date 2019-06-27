@@ -12,7 +12,7 @@
 		StatusPort="13001"
 		StowTimeout="820000000"
 		UnStowTimeout="120000000"
-		WatchDogThreadPeriod="500000"
+		WatchDogThreadPeriod="25000"
 		RepetitionCacheTime="7000000"
 		RepetitionExpireTime="10000000"
 		StatusSocketTimeout="250000"
