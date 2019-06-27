@@ -285,7 +285,6 @@ private:
 
 	BACIMutex m_programTrackPointsMutex;
 	std::deque<TProgramTrackPoint> m_programTrackPointsQueue;
-	std::deque<TProgramTrackPoint> m_programTrackPointsQueue;
 	
 	CACUProtocol m_protocol;
 
