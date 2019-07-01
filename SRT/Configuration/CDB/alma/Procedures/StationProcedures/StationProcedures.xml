@@ -13,7 +13,7 @@
 	device=0
 	calOff
 	restFrequency=0
-	antennaAzEl=0d,0d
+	azelOffsets=0d,0d
 </body>
 </Procedure>
 
@@ -28,7 +28,7 @@
 	device=0
 	calOff
 	restFrequency=0
-	antennaAzEl=0d,0d
+	azelOffsets=0d,0d
 </body>
 </Procedure>
 
@@ -43,7 +43,7 @@
 	device=0
 	calOff
 	restFrequency=0
-	antennaAzEl=0d,0d
+	azelOffsets=0d,0d
 </body>
 </Procedure>
 
@@ -58,7 +58,7 @@
 	device=0
 	calOff
 	restFrequency=0
-	antennaAzEl=0d,0d
+	azelOffsets=0d,0d
 </body>
 </Procedure>
 
@@ -73,7 +73,7 @@
 	device=0
 	calOff
 	restFrequency=0
-	antennaAzEl=0d,0d
+	azelOffsets=0d,0d
 </body>
 </Procedure>
 
@@ -87,7 +87,7 @@
 	device=0
 	restFrequency=0
     setLO=7500
-	antennaAzEl=0d,0d
+	azelOffsets=0d,0d
 </body>
 </Procedure>
 
@@ -101,7 +101,7 @@
     device=0
     calOff
     restFrequency=0
-    antennaAzEl=0d,0d
+    azelOffsets=0d,0d
 </body>
 </Procedure>
 
