@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<NoiseMarkLookUpTable xmlns="urn:schemas-cosylab-com:NoiseMarkLookUpTable:1.0"
+             	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+				xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>2070</SkyFrequency><NoiseMark>12.383343</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>2120</SkyFrequency><NoiseMark>12.1654992</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>2170</SkyFrequency><NoiseMark>9.7857232</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>2220</SkyFrequency><NoiseMark>8.5015386</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>2270</SkyFrequency><NoiseMark>6.960234</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>2320</SkyFrequency><NoiseMark>7.5913356</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>2370</SkyFrequency><NoiseMark>8.3916044</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>2420</SkyFrequency><NoiseMark>9.3622958</NoiseMark></MarkEntry>
+
+
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>2070</SkyFrequency><NoiseMark>10.9293844</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>2120</SkyFrequency><NoiseMark>10.5091652</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>2170</SkyFrequency><NoiseMark>9.1850646</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>2220</SkyFrequency><NoiseMark>7.6236028</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>2270</SkyFrequency><NoiseMark>6.481643</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>2320</SkyFrequency><NoiseMark>6.6663262</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>2370</SkyFrequency><NoiseMark>7.4410634</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>2420</SkyFrequency><NoiseMark>7.9726618</NoiseMark></MarkEntry>
+
+</NoiseMarkLookUpTable>

@@ -52,11 +52,33 @@
 </body>
 </Procedure>
 
-<Procedure name="setupSXP" args="0">
+<Procedure name="setupXXP" args="0">
 <body>
 	antennaSetup=PRIM
-	initialize=SXP
-	receiversSetup=SXP
+	initialize=XXP
+	receiversSetup=XXP
+	device=0
+	calmux=TotalPower
+	calOff
+</body>
+</Procedure>
+
+<Procedure name="setupLLP" args="0">
+<body>
+	antennaSetup=LL
+	initialize=LLP
+	receiversSetup=LLP
+	device=0
+	calmux=TotalPower
+	calOff
+</body>
+</Procedure>
+
+<Procedure name="setupSSP" args="0">
+<body>
+	antennaSetup=PRIM
+	initialize=SSP
+	receiversSetup=SSP
 	device=0
 	calmux=TotalPower
 	calOff

@@ -5,6 +5,6 @@
 				xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-<SynthesizerEntry><Frequency>2020.0</Frequency><OutputPower>16</OutputPower></SynthesizerEntry>
+<SynthesizerEntry><Frequency>2020.0</Frequency><OutputPower>0</OutputPower></SynthesizerEntry>
 
 </LocalOscillatorLookUpTable>
