@@ -19,9 +19,9 @@ void CMeteoParamUpdaterThread::runLoop()
     {
         m_weatherstation_p->updateData();
     }
-    catch(ComponentErrors::SocketErrorExImpl &ex)
+    catch(...)
     {
-        ACS_LOG(LM_FULL_INFO, "CMeteoParamUpdaterThread::runLoop()", (LM_WARNING, "Could not update meteo parameters"));
+        ACS_LOG(LM_FULL_INFO, "CMeteoParamUpdaterThread::runLoop()", (LM_WARNING, "Could not update weather parameters"));
     }
 }
 

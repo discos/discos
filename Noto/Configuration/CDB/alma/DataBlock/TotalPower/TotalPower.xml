@@ -62,17 +62,59 @@
 </Configuration>
 
 <Configuration>
-	<configurationID>SXP</configurationID>
+	<configurationID>XXP</configurationID>
 	<sections>2</sections>
 	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
-	<inputPort>GREGORIAN</inputPort>
+	<inputPort>PRIMARY</inputPort>
+	<inputPortDB>7</inputPortDB>
+	<inputPortBW>2350</inputPortBW>
+	<beams>1</beams>
+	<section_boards>0 1</section_boards>
+	<polarizations>L R</polarizations>
+	<feed>0 0</feed>
+	<IF>0 1</IF>
+</Configuration>
+
+<Configuration>
+	<configurationID>LLP</configurationID>
+	<sections>2</sections>
+	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
+	<inputPort>PRIMARY</inputPort>
+	<inputPortDB>3</inputPortDB>
+	<inputPortBW>2350</inputPortBW>
+	<beams>1</beams>
+	<section_boards>0 1</section_boards>
+	<polarizations>L R</polarizations>
+	<feed>0 0</feed>
+	<IF>0 1</IF>
+</Configuration>
+
+<Configuration>
+	<configurationID>SSP</configurationID>
+	<sections>2</sections>
+	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
+	<inputPort>PRIMARY</inputPort>
 	<inputPortDB>7</inputPortDB>
 	<inputPortBW>730</inputPortBW>
 	<beams>1</beams>
 	<section_boards>0 1</section_boards>
-	<polarizations>R R</polarizations>
-	<feed>0 1</feed>
-	<IF>0 0</IF>
+	<polarizations>L R</polarizations>
+	<feed>0 0</feed>
+	<IF>0 1</IF>
+</Configuration>
+
+<Configuration>
+	<configurationID>LNP</configurationID>
+	<sections>2</sections>
+	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
+	<inputPort>PRIMARY</inputPort>
+	<inputPortDB>0</inputPortDB>
+	<inputPortBW>2350</inputPortBW>
+	<beams>1</beams>
+	<section_boards>1 2</section_boards>
+	<polarizations>L R</polarizations>
+	<feed>0 0</feed>
+	<IF>0 1</IF>
 </Configuration>
 
 </TotalPowerSetup>

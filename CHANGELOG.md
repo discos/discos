@@ -31,6 +31,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/
 	issue #369 - Now the Noto StationProcedures performs a default setup to the CalMux device letting it set the
 	calibration noise mark coming from TotalPower as the default one.
 
+    issue #419 - Completed integration and configuration of new primary focus receiver SXL, in Noto.
+
 ### Changed
 
 	issue #316 - several related commits. The operation releated to the Medicina K band receivers now relys on a

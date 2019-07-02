@@ -72,6 +72,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	_GET_STRING_ATTRIBUTE("HPIBIPAddress","HPIB device IP address:",m_HPIBIPAddress,"");
 	_GET_DWORD_ATTRIBUTE("HPIBPort","HPIB device port:",m_HPIBPort,"");
 	_GET_STRING_ATTRIBUTE("LocalOscillatorInstance","Local oscillator instance:",m_localOscillatorInstance,"");
+	_GET_STRING_ATTRIBUTE("LocalOscillatorEnabledReceivers","Receivers with a Local oscillator:",m_LocalOscillatorEnabledReceivers,"");
 	_GET_STRING_ATTRIBUTE("FocusSelectorInterface","Focus Selector instance:",m_fsInterface,"");
 	m_IFs=2;
 	m_feeds=1;
