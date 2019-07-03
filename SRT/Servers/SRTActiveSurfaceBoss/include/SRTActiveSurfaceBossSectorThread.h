@@ -1,14 +1,14 @@
-#ifndef _SRTACTIVESURFACEBOSSSECTOR8THREAD_H_
-#define _SRTACTIVESURFACEBOSSSECTOR8THREAD_H_
+#ifndef _SRTACTIVESURFACEBOSSSECTORTHREAD_H_
+#define _SRTACTIVESURFACEBOSSSECTORTHREAD_H_
 
 /* ********************************************************************************* */
 /* OAC Osservatorio Astronomico di Cagliari                                          */
-/* $Id: SRTActiveSurfaceBossSector8Thread.h,v 1.1 2010-07-26 12:36:49 c.migoni Exp $ */
+/* $Id: SRTActiveSurfaceBossSector1Thread.h,v 1.1 2010-07-26 12:36:49 c.migoni Exp $ */
 /*                                                                                   */
 /* This code is under GNU General Public Licence (GPL).                              */
 /*                                                                                   */
-/* Who                                  when        What                             */
-/* Carlo Migoni (migoni@ca.astro.it)   09/07/2010  Creation                          */
+/* Who                                          when        What                     */
+/* Giuseppe Carboni (giuseppe.carboni@inaf.it)  02/07/2019  Creation                 */
 
 #include <acsThread.h>
 #include <IRA>
@@ -16,24 +16,24 @@
 #include <ComponentErrors.h>
 
 /**
- * This class implements a Sector8 thread. This thread is in charge of updating the active surface
+ * This class implements a Sector thread. This thread is in charge of updating the active surface
 */
-class CSRTActiveSurfaceBossSector8Thread : public ACS::Thread
+class CSRTActiveSurfaceBossSectorThread : public ACS::Thread
 {
 public:
-	/**
+    /**
      * Constructor().
      * @param name thread name
      * @param responseTime thread's heartbeat response time in 100ns unit. Default value is 1s.
      * @param sleepTime thread's sleep time in 100ns unit. Default value is 100ms.
     */
-	CSRTActiveSurfaceBossSector8Thread(const ACE_CString& name,CSRTActiveSurfaceBossCore *param, 
-			const ACS::TimeInterval& responseTime=ThreadBase::defaultResponseTime,const ACS::TimeInterval& sleepTime=ThreadBase::defaultSleepTime);
+    CSRTActiveSurfaceBossSectorThread(const ACE_CString& name, CSRTActiveSurfaceBossCore *param,
+            const ACS::TimeInterval& responseTime=ThreadBase::defaultResponseTime,const ACS::TimeInterval& sleepTime=ThreadBase::defaultSleepTime);
 
-	/**
-	 * Destructor.
+    /**
+     * Destructor.
     */
-    ~CSRTActiveSurfaceBossSector8Thread();
+    ~CSRTActiveSurfaceBossSectorThread();
 
      /**
      * This method is executed once when the thread starts.
@@ -51,10 +51,16 @@ public:
      */
      virtual void run();
 
+     /**
+      * This method is used to set the sector to be initialized. It MUST be called before starting the thread execution
+     */
+     virtual void setSector(int sector);
+
 private:
 
-	IRA::CSecureArea<CSRTActiveSurfaceBossCore> *m_core;
-	CSRTActiveSurfaceBossCore *boss;
+    IRA::CSecureArea<CSRTActiveSurfaceBossCore> *m_core;
+    CSRTActiveSurfaceBossCore *boss;
+    int m_sector;
 };
 
-#endif /*_SRTACTIVESURFACEBOSSSECTOR8THREAD_H_*/
+#endif /*_SRTACTIVESURFACEBOSSSECTORTHREAD_H_*/
