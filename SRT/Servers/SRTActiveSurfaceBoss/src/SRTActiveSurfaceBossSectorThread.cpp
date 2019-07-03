@@ -5,7 +5,7 @@ CSRTActiveSurfaceBossSectorThread::CSRTActiveSurfaceBossSectorThread(const ACE_C
 {
     AUTO_TRACE("CSRTActiveSurfaceBossSectorThread::CSRTActiveSurfaceBossSectorThread()");
     boss = param;
-    m_sector = 0;
+    m_sector = -1;
 }
 
 CSRTActiveSurfaceBossSectorThread::~CSRTActiveSurfaceBossSectorThread()
