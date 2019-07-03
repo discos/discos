@@ -1376,7 +1376,7 @@ void CSRTActiveSurfaceBossCore::watchingActiveSurfaceStatus() throw (ComponentEr
 
 void CSRTActiveSurfaceBossCore::sectorActiveSurface(int sector) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx)
 {
-	if (sector == 0) {
+	if (sector == -1) {
 		ACS_SHORT_LOG ((LM_INFO, "You have to set a sector first!"));
 		exit(-1);
 	}
