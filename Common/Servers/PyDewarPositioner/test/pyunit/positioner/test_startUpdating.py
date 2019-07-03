@@ -301,6 +301,22 @@ class PositionerStartUpdatingTest(unittest.TestCase):
         finally:
             self.p.stopUpdating()
 
+    def test_cannotUpdateDuringRewind(self):
+        """Cannot execute startUpdating() when a rewind is in progress."""
+        self.cdbconf.setup('KKG')
+        self.cdbconf.setConfiguration('CUSTOM')
+        latitude, az, el = [radians(50)] * 3
+        site_info = {'latitude': latitude}
+
+        self.p.setup(site_info, self.source, self.device)
+        try:
+            self.p.control.isRewinding = True
+            self.assertRaises(NotAllowedError, self.p.startUpdating,
+                MNG_TRACK, ANT_NORTH, az, el, None, None)
+        finally:
+            self.p.stopUpdating()
+            self.p.control.isRewinding = False
+ 
 
 if __name__ == '__main__':
     unittest.main()

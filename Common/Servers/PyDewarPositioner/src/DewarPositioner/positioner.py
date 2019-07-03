@@ -159,6 +159,8 @@ class Positioner(object):
                 raise NotAllowedError('no source available')
             elif str(sector) not in sectors:
                 raise NotAllowedError('sector %s not in %s' %(sector, sectors))
+            elif self.isRewinding():
+                raise NotAllowedError('the positioner is rewinding')
             else:
                 if self.isUpdating():
                     self.stopUpdating()
