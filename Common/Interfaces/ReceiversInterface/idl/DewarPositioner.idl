@@ -97,7 +97,7 @@ module Receivers {
         /** Start the parallactic angle correction 
          * 
          * It raises a NotAllowedEx either when the updating mode is not yet selected
-         * or the positioner not configured.
+         * or the positioner not configured or there is a rewind in progress.
          *
          * @param axis the scan axis
          * @param sector the antenna sector (NORTH or SOUTH)
