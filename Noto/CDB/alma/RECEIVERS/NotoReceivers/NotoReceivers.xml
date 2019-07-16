@@ -11,6 +11,7 @@
 				HPIBIPAddress="192.167.187.201"
 				HPIBPort="1234"
 				LocalOscillatorInstance="RECEIVERS/LocalOscillator"
+				LocalOscillatorEnabledReceivers="KKC QQC CCC MMC"				
 				FocusSelectorInterface="IDL:alma/Backends/TotalPower:1.0"
 >
 			<LO description="Sequence of local oscillator values for each IF chain"/>

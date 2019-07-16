@@ -63,6 +63,8 @@
 		<xs:attribute name="HPIBPort" type="xs:unsignedShort" use="required" />
 		<!-- Instance of the associated device that will set the local oscillator -->
 		<xs:attribute name="LocalOscillatorInstance" type="xs:string" use="required" />
+		<!-- list of receivers with an associated local oscillator -->
+		<xs:attribute name="LocalOscillatorEnabledReceivers" type="xs:string" use="required" />
 		<!-- Instance of the Total Power backend, required to switch on/off the calibration diode -->
 		<xs:attribute name="FocusSelectorInterface" type="xs:string" use="required" />
       </xs:extension>	

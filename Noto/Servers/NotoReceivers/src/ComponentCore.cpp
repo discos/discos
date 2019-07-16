@@ -3,6 +3,7 @@
 #include "Tone.h"
 
 #define IS_LO_AVAIL m_configuration.getLocalOscillatorInstance()!=""
+#define IS_LO_TUNABLE m_configuration.getLocalOscillatorEnabledReceivers().Find(m_setup)>0 
 
 //_IRA_LOGFILTER_IMPORT;
 
@@ -274,6 +275,10 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::Val
         ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"KEEP_CURRENT_LOCAL_OSCILLATOR %lf",m_localOscillatorValue));
         return;
     }
+    //if (m_configuration.getLOMin()[0]==m_configuration.getLOMax()[0]) {
+    //    ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"KEEP_CURRENT_LOCAL_OSCILLATOR %lf",m_localOscillatorValue));
+    //    return;
+    //}
     // now check if the requested value match the limits
     if (lo[0]<m_configuration.getLOMin()[0]) {
         _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::setLO");
@@ -297,7 +302,7 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::Val
     // make sure the synthesizer component is available
     loadLocalOscillator(); // throw (ComponentErrors::CouldntGetComponentExImpl)
     try {
-    	if (IS_LO_AVAIL) m_localOscillatorDevice->set(amp,trueValue);
+    	if ((IS_LO_AVAIL) && (IS_LO_TUNABLE)) m_localOscillatorDevice->set(amp,trueValue);
     }
     catch (CORBA::SystemException& ex) {
         m_localOscillatorFault=true;

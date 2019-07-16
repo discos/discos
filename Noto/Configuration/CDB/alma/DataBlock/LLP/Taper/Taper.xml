@@ -5,9 +5,7 @@
 				xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-<TaperEntry><Frequency>2280</Frequency><Taper>-30.52</Taper></TaperEntry>
-
-<TaperEntry><Frequency>8380</Frequency><Taper>-16.37</Taper></TaperEntry>
-
+<TaperEntry><Frequency>1400</Frequency><Taper>-16.32</Taper></TaperEntry>
+<TaperEntry><Frequency>1650</Frequency><Taper>-16.32</Taper></TaperEntry>
 
 </TaperLookUpTable>

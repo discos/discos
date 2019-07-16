@@ -283,12 +283,28 @@ Weather::parameters NotoWeatherStationImpl::getData()
     return m_parameters;
 }
 
+/** 
+ * It is not clear whiy the methos should raise an Ex exception.... generally it should be revieved how error and exception are handled.
+*/
 void NotoWeatherStationImpl::updateData() throw (ACSErr::ACSbaseEx, CORBA::SystemException)
 {
     AUTO_TRACE("NotoWeatherStationImpl::updateData");
     Weather::parameters mp;
+	     
+    
     CSecAreaResourceWrapper<MeteoSocket> sock = m_socket->Get();
-
+	 try {
+	 	sock->updateParam();
+	 }    
+	 catch (ComponentErrors::SocketErrorExImpl& ex) {
+	 	  ex.log(LM_DEBUG);
+        throw ex.getACSbaseEx();
+	 }
+    catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl, E, "NotoWeatherStationImpl::updateData");
+		E.log(LM_DEBUG);
+      throw E.getACSbaseEx();
+    }
     try
     {
         mp.temperature = sock->getTemperature();

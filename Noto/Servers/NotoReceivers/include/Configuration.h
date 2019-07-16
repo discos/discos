@@ -72,6 +72,12 @@ public:
 	 * @return the instance of the local oscillator component  that the receiver will use to drive the set its LO
 	 */
 	inline const IRA::CString& getLocalOscillatorInstance() const { return m_localOscillatorInstance; }
+	
+	/**
+	 * @return the receivers with a local oscillator (tunable)
+	 */
+	inline const IRA::CString& getLocalOscillatorEnabledReceivers() const { return m_LocalOscillatorEnabledReceivers; }
+	
 
 	/**
 	 * @return the interface of the focus selector component that the receiver will use to drive the set its LO
@@ -207,6 +213,7 @@ private:
 	DDWORD m_watchDogResponseTime;
 	DDWORD m_watchDogSleepTime;
 	IRA::CString m_localOscillatorInstance;
+	IRA::CString m_LocalOscillatorEnabledReceivers;
 	IRA::CString m_fsInterface;
 
 	IRA::CString m_mode;

@@ -29,12 +29,12 @@ exitFlag=False
 def readPipe(pipeName):
 	print "Opening pipe......"
 	pipeIn=os.open(pipeName,os.O_RDONLY|os.O_NONBLOCK)
-	print "Pipe openened for reading......"
+	print "Pipe opened for reading......"
 	while not exitFlag:
 		try:
 			pipeString=os.read(pipeIn,64)
 			if len(pipeString)>0:
-				print "receieved offsets %s"%pipeString
+				print "received offsets %s"%pipeString
 				info=pipeString.split(',')
 				print info
 				offsets[0]=float(info[0])
