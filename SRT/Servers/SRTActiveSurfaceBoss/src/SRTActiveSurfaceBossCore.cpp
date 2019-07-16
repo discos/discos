@@ -142,79 +142,54 @@ void CSRTActiveSurfaceBossCore::cleanUp()
 {
 	ACS_LOG(LM_FULL_INFO, "CSRTActiveSurfaceBossCore::cleanUp()", (LM_INFO,"CSRTActiveSurfaceBossCore::cleanUp"));
 
-    	char serial_usd[23];
-	char graf[5], mecc[4];
+	char serial_usd[23], graf[5], mecc[4];
 
 	ACS_LOG(LM_FULL_INFO, "CSRTActiveSurfaceBossCore::cleanUp()", (LM_INFO,"Releasing usd...wait"));
-	ifstream usdTable(s_usdTable);
-	usdTable.seekg(0, ios::beg);
-	for (int i = firstUSD; i <= lastUSD; i++) {
-		usdTable >> lanIndex >> circleIndex >> usdCircleIndex >> serial_usd >> graf >> mecc;
-		try {
-			if (!CORBA::is_nil(usd[circleIndex][usdCircleIndex])) {
-				//printf("releasing usd = %s\n", (const char*)serial_usd);
-				m_services->releaseComponent((const char*)serial_usd);
-			}
-		}
-		catch (maciErrType::CannotReleaseComponentExImpl & ex)
-		{
-			_ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::cleanUp()");
-            		Impl.setComponentName((const char *)serial_usd);
-            		Impl.log(LM_DEBUG);
-		}
-	}
-/*
-    	ACS_LOG(LM_FULL_INFO, "CSRTActiveSurfaceBossCore::cleanUp()", (LM_INFO,"Releasing lan...wait"));
-	for (int s = 1; s <= 8; s++)
-	{
-		for (int l = 1; l <= 12; l++)
-		{
-			lanCobName.Format("AS/SECTOR%02d/LAN%02d",s, l);
-			ACS_SHORT_LOG((LM_INFO, "Releasing component: %s", (const char*)lanCobName));
-			//printf("releasing lan = %s\n", (const char*)lanCobName);
-			try {
-				if (!CORBA::is_nil(lan[s][l])) {
-					m_services->releaseComponent((const char*)lanCobName);
-				}
-			}
-			catch (maciErrType::CannotReleaseComponentExImpl & ex)
-			{
-				_ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::cleanUp()");
-            			Impl.setComponentName((const char *)lanCobName);
-            			Impl.log(LM_DEBUG);
-			}
-		}
-	}
 
+    for(int sector = 0; sector < SECTORS; sector++)
+    {
+        std::stringstream value;
+        value << CDBPATH;
+        value << "alma/AS/tab_convUSD_S";
+        value << sector+1;
+        value << ".txt";
 
-    	ACS_LOG(LM_FULL_INFO, "CSRTActiveSurfaceBossCore::cleanUp()", (LM_INFO,"Releasing usd...wait"));
-	ifstream usdTable(s_usdTable);
-	usdTable.seekg(0, ios::beg);
-	for (int i = firstUSD; i <= lastUSD; i++) {
-		usdTable >> lanIndex >> circleIndex >> usdCircleIndex >> serial_usd >> graf >> mecc;
-		try {
-			if (!CORBA::is_nil(usd[circleIndex][usdCircleIndex])) {
-				m_services->releaseComponent((const char*)serial_usd);
-			}
-		}
-		catch (maciErrType::CannotReleaseComponentExImpl & ex)
-		{
-			_ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::cleanUp()");
-            		Impl.setComponentName((const char *)serial_usd);
-            		Impl.log(LM_DEBUG);
-		}
-	}
-*/
-    	try {
-		m_services->releaseComponent((const char*)m_antennaBoss->name());
-	}
-	catch (maciErrType::CannotReleaseComponentExImpl& ex) {
-		_ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::cleanUp()");
-		Impl.setComponentName((const char *)m_antennaBoss->name());
-		Impl.log(LM_DEBUG);
-	}
+        ifstream usdTable(value.str().c_str());
+        std::string buffer;
 
-	//delete [] actuatorsCorrections;
+        while(getline(usdTable, buffer))
+        {
+            std::stringstream line;
+            line << buffer;
+            line >> lanIndex >> circleIndex >> usdCircleIndex >> serial_usd >> graf >> mecc;
+
+            try
+            {
+                if(!CORBA::is_nil(usd[circleIndex][usdCircleIndex]))
+                {
+                    printf("releasing usd = %s\n", serial_usd);
+                    m_services->releaseComponent((const char*)serial_usd);
+                }
+            }
+            catch(maciErrType::CannotReleaseComponentExImpl& ex)
+            {
+                _ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::cleanUp()");
+                Impl.setComponentName((const char *)serial_usd);
+                Impl.log(LM_DEBUG);
+            }
+        }
+    }
+
+    try
+    {
+        m_services->releaseComponent((const char*)m_antennaBoss->name());
+    }
+    catch(maciErrType::CannotReleaseComponentExImpl& ex)
+    {
+        _ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::cleanUp()");
+        Impl.setComponentName((const char *)m_antennaBoss->name());
+        Impl.log(LM_DEBUG);
+    }
 }
 
 void CSRTActiveSurfaceBossCore::reset (int circle, int actuator, int radius) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentNotActiveExImpl)
