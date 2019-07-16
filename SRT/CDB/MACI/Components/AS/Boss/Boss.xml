@@ -12,6 +12,7 @@
 	Code="SRTActiveSurfaceBossImpl"
 	Type="IDL:alma/ActiveSurface/SRTActiveSurfaceBoss:1.0"
 	Container="SRTActiveSurfaceContainer"
-    ImplLang="cpp"
-    Default="true"
+	ImplLang="cpp"
+	Default="true"
+	KeepAliveTime="-1"
 />

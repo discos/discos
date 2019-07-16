@@ -29,16 +29,8 @@
 #include <ASErrors.h>
 #include <ManagementErrors.h>
 #include "SRTActiveSurfaceBossCore.h"
-#include "SRTActiveSurfaceBossWatchingThread.h"
 #include "SRTActiveSurfaceBossWorkingThread.h"
-#include "SRTActiveSurfaceBossSector1Thread.h"
-#include "SRTActiveSurfaceBossSector2Thread.h"
-#include "SRTActiveSurfaceBossSector3Thread.h"
-#include "SRTActiveSurfaceBossSector4Thread.h"
-#include "SRTActiveSurfaceBossSector5Thread.h"
-#include "SRTActiveSurfaceBossSector6Thread.h"
-#include "SRTActiveSurfaceBossSector7Thread.h"
-#include "SRTActiveSurfaceBossSector8Thread.h"
+#include "SRTActiveSurfaceBossSectorThread.h"
 #include <SP_parser.h>
 
 #define LOOPSTATUSTIME 10000000 // 1.0 second
@@ -114,35 +106,35 @@ class SRTActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl, publ
 	*/	
 	virtual void aboutToAbort();
 
-    /**
-     * Returns a reference to the status property Implementation of IDL interface.
+	/**
+	 * Returns a reference to the status property Implementation of IDL interface.
 	 * @return pointer to read-only ROTSystemStatus property status
 	*/
 	virtual Management::ROTSystemStatus_ptr status() throw (CORBA::SystemException);
 	
 	/**
-     * Returns a reference to the enable property implementation of IDL interface.
+	 * Returns a reference to the enable property implementation of IDL interface.
 	 * @return pointer to read-only ROTBoolean  property enabled
 	*/
 	virtual Management::ROTBoolean_ptr enabled() throw (CORBA::SystemException);
 
 	/**
-     * Returns a reference to the enable property implementation of IDL interface.
+	 * Returns a reference to the enable property implementation of IDL interface.
 	 * @return pointer to read-only ROTBoolean  property enabled
 	*/
 	virtual ActiveSurface::ROTASProfile_ptr pprofile() throw (CORBA::SystemException);
 
 	/**
-     * Returns a reference to the tracking property implementation of IDL interface.
+	 * Returns a reference to the tracking property implementation of IDL interface.
 	 * @return pointer to read-only ROTBoolean  property enabled
 	*/
 	virtual Management::ROTBoolean_ptr tracking() throw (CORBA::SystemException);
 
-    /**
+	/**
 	 *  This method can be called in order to disable the automatic update of the surface.
 	 * @throw CORBA::SystemException 
 	*/	
-    void asOff() throw (CORBA::SystemException);
+	void asOff() throw (CORBA::SystemException);
 		
 	/**
 	 *  This method can be called in order to enable the automatic update of the surface.
@@ -150,7 +142,7 @@ class SRTActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl, publ
 	*/		
 	void asOn() throw (CORBA::SystemException);
 
-    /**
+	/**
 	 * This is the command line interpreter for the sub-system. All the attributes and all the methods exposed by the boss can be
 	 * called. That means a full set of operation for standard observation, but not full control of the system.
 	 * @param the string that contains the command line to be parsed
@@ -176,67 +168,58 @@ class SRTActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl, publ
 	 */
 	void setup(const char *config) throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorEx);
 
-    void stop ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
+	void stop ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
-    //void setup ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
+	//void setup ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
-    void stow ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
+	void stow ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
-    void refPos ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
+	void refPos ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
-    void update ( CORBA::Double elevation) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
+	void update ( CORBA::Double elevation) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
-    void move ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius, CORBA::Long incr) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
+	void move ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius, CORBA::Long incr) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
-    void correction ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius, CORBA::Double correction) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
+	void correction ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius, CORBA::Double correction) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
-    void setProfile ( ActiveSurface::TASProfile profile) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
+	void setProfile ( ActiveSurface::TASProfile profile) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
-    void usdStatus4GUIClient( CORBA::Long circle,  CORBA::Long actuator, CORBA::Long_out status) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
+	void usdStatus4GUIClient( CORBA::Long circle,  CORBA::Long actuator, CORBA::Long_out status) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
-    void setActuator (CORBA::Long circle, CORBA::Long actuator, CORBA::Long_out actPos, CORBA::Long_out cmdPos, CORBA::Long_out Fmin, CORBA::Long_out Fmax, CORBA::Long_out acc, CORBA::Long_out delay) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
+	void setActuator (CORBA::Long circle, CORBA::Long actuator, CORBA::Long_out actPos, CORBA::Long_out cmdPos, CORBA::Long_out Fmin, CORBA::Long_out Fmax, CORBA::Long_out acc, CORBA::Long_out delay) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
-    void up ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
+	void up ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
-    void down ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
+	void down ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
-    void bottom ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
+	void bottom ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
-    void top ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
+	void top ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
-    void reset ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
+	void reset ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
-    void calibrate ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
+	void calibrate ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
-    void calVer ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
+	void calVer ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
-    void recoverUSD( CORBA::Long circle,  CORBA::Long actuator) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx );
+	void recoverUSD( CORBA::Long circle,  CORBA::Long actuator) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx );
 
 	private:
-    /**
+	/**
 	* pointer to Container Services
 	*/
 	ContainerServices* cs;
 
-	CSRTActiveSurfaceBossWatchingThread *m_watchingThread;
-
 	CSRTActiveSurfaceBossWorkingThread *m_workingThread;
 
-	CSRTActiveSurfaceBossSector1Thread *m_sector1Thread;
-	CSRTActiveSurfaceBossSector2Thread *m_sector2Thread;
-	CSRTActiveSurfaceBossSector3Thread *m_sector3Thread;
-	CSRTActiveSurfaceBossSector4Thread *m_sector4Thread;
-	CSRTActiveSurfaceBossSector5Thread *m_sector5Thread;
-	CSRTActiveSurfaceBossSector6Thread *m_sector6Thread;
-	CSRTActiveSurfaceBossSector7Thread *m_sector7Thread;
-	CSRTActiveSurfaceBossSector8Thread *m_sector8Thread;
+	std::vector<CSRTActiveSurfaceBossSectorThread*> m_sectorThread;
 
 	SimpleParser::CParser<CSRTActiveSurfaceBossCore> *m_parser;
 
-    	SmartPropertyPointer < ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus), POA_Management::ROTSystemStatus> > m_pstatus;
-    
+	SmartPropertyPointer < ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus), POA_Management::ROTSystemStatus> > m_pstatus;
+
 	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>  > m_penabled;
-    	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(ActiveSurface::TASProfile), POA_ActiveSurface::ROTASProfile> > m_pprofile;
+	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(ActiveSurface::TASProfile), POA_ActiveSurface::ROTASProfile> > m_pprofile;
 	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean> > m_ptracking;
 	IRA::CSecureArea<CSRTActiveSurfaceBossCore> *m_core;
 

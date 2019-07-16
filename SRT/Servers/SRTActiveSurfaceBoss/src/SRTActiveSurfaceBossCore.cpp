@@ -18,20 +18,20 @@ void CSRTActiveSurfaceBossCore::initialize()
 {
 	ACS_LOG(LM_FULL_INFO,"CSRTActiveSurfaceBossCore::initialize()",(LM_INFO,"CSRTActiveSurfaceBossCore::initialize"));
 
-    m_enable = false;
+	m_enable = false;
 	m_tracking = false;
-    m_status = Management::MNG_WARNING;
+	m_status = Management::MNG_WARNING;
 	m_profile = ActiveSurface::AS_SHAPED_FIXED;
-    AutoUpdate = false;
-    actuatorcounter = circlecounter = totacts = 1;
-	m_sector1 = false;
-	m_sector2 = false;
-	m_sector3 = false;
-	m_sector4 = false;
-	m_sector5 = false;
-	m_sector6 = false;
-	m_sector7 = false;
-	m_sector8 = false;
+	AutoUpdate = false;
+	actuatorcounter = circlecounter = totacts = 1;
+	for(int i = 0; i < SECTORS; i++)
+	{
+		m_sector.push_back(false);
+		usdCounters.push_back(0);
+		lanIndexes.push_back(0);
+		circleIndexes.push_back(0);
+		usdCircleIndexes.push_back(0);
+	}
 	m_profileSetted = false;
 	m_ASup = false;
 }
@@ -142,79 +142,54 @@ void CSRTActiveSurfaceBossCore::cleanUp()
 {
 	ACS_LOG(LM_FULL_INFO, "CSRTActiveSurfaceBossCore::cleanUp()", (LM_INFO,"CSRTActiveSurfaceBossCore::cleanUp"));
 
-    	char serial_usd[23];
-	char graf[5], mecc[4];
+	char serial_usd[23], graf[5], mecc[4];
 
 	ACS_LOG(LM_FULL_INFO, "CSRTActiveSurfaceBossCore::cleanUp()", (LM_INFO,"Releasing usd...wait"));
-	ifstream usdTable(s_usdTable);
-	usdTable.seekg(0, ios::beg);
-	for (int i = firstUSD; i <= lastUSD; i++) {
-		usdTable >> lanIndex >> circleIndex >> usdCircleIndex >> serial_usd >> graf >> mecc;
-		try {
-			if (!CORBA::is_nil(usd[circleIndex][usdCircleIndex])) {
-				//printf("releasing usd = %s\n", (const char*)serial_usd);
-				m_services->releaseComponent((const char*)serial_usd);
-			}
-		}
-		catch (maciErrType::CannotReleaseComponentExImpl & ex)
-		{
-			_ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::cleanUp()");
-            		Impl.setComponentName((const char *)serial_usd);
-            		Impl.log(LM_DEBUG);
-		}
-	}
-/*
-    	ACS_LOG(LM_FULL_INFO, "CSRTActiveSurfaceBossCore::cleanUp()", (LM_INFO,"Releasing lan...wait"));
-	for (int s = 1; s <= 8; s++)
-	{
-		for (int l = 1; l <= 12; l++)
-		{
-			lanCobName.Format("AS/SECTOR%02d/LAN%02d",s, l);
-			ACS_SHORT_LOG((LM_INFO, "Releasing component: %s", (const char*)lanCobName));
-			//printf("releasing lan = %s\n", (const char*)lanCobName);
-			try {
-				if (!CORBA::is_nil(lan[s][l])) {
-					m_services->releaseComponent((const char*)lanCobName);
-				}
-			}
-			catch (maciErrType::CannotReleaseComponentExImpl & ex)
-			{
-				_ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::cleanUp()");
-            			Impl.setComponentName((const char *)lanCobName);
-            			Impl.log(LM_DEBUG);
-			}
-		}
-	}
 
+    for(int sector = 0; sector < SECTORS; sector++)
+    {
+        std::stringstream value;
+        value << CDBPATH;
+        value << "alma/AS/tab_convUSD_S";
+        value << sector+1;
+        value << ".txt";
 
-    	ACS_LOG(LM_FULL_INFO, "CSRTActiveSurfaceBossCore::cleanUp()", (LM_INFO,"Releasing usd...wait"));
-	ifstream usdTable(s_usdTable);
-	usdTable.seekg(0, ios::beg);
-	for (int i = firstUSD; i <= lastUSD; i++) {
-		usdTable >> lanIndex >> circleIndex >> usdCircleIndex >> serial_usd >> graf >> mecc;
-		try {
-			if (!CORBA::is_nil(usd[circleIndex][usdCircleIndex])) {
-				m_services->releaseComponent((const char*)serial_usd);
-			}
-		}
-		catch (maciErrType::CannotReleaseComponentExImpl & ex)
-		{
-			_ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::cleanUp()");
-            		Impl.setComponentName((const char *)serial_usd);
-            		Impl.log(LM_DEBUG);
-		}
-	}
-*/
-    	try {
-		m_services->releaseComponent((const char*)m_antennaBoss->name());
-	}
-	catch (maciErrType::CannotReleaseComponentExImpl& ex) {
-		_ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::cleanUp()");
-		Impl.setComponentName((const char *)m_antennaBoss->name());
-		Impl.log(LM_DEBUG);
-	}
+        ifstream usdTable(value.str().c_str());
+        std::string buffer;
 
-	//delete [] actuatorsCorrections;
+        while(getline(usdTable, buffer))
+        {
+            std::stringstream line;
+            line << buffer;
+            line >> lanIndex >> circleIndex >> usdCircleIndex >> serial_usd >> graf >> mecc;
+
+            try
+            {
+                if(!CORBA::is_nil(usd[circleIndex][usdCircleIndex]))
+                {
+                    printf("releasing usd = %s\n", serial_usd);
+                    m_services->releaseComponent((const char*)serial_usd);
+                }
+            }
+            catch(maciErrType::CannotReleaseComponentExImpl& ex)
+            {
+                _ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::cleanUp()");
+                Impl.setComponentName((const char *)serial_usd);
+                Impl.log(LM_DEBUG);
+            }
+        }
+    }
+
+    try
+    {
+        m_services->releaseComponent((const char*)m_antennaBoss->name());
+    }
+    catch(maciErrType::CannotReleaseComponentExImpl& ex)
+    {
+        _ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::cleanUp()");
+        Impl.setComponentName((const char *)m_antennaBoss->name());
+        Impl.log(LM_DEBUG);
+    }
 }
 
 void CSRTActiveSurfaceBossCore::reset (int circle, int actuator, int radius) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentNotActiveExImpl)
@@ -1374,370 +1349,146 @@ void CSRTActiveSurfaceBossCore::watchingActiveSurfaceStatus() throw (ComponentEr
     //printf("NO error\n");
 }
 
-void CSRTActiveSurfaceBossCore::sector1ActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx)
+void CSRTActiveSurfaceBossCore::sectorActiveSurface(int sector) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx)
 {
-	printf("sector1 start\n");
-	char serial_usd[23];
-	char graf[5], mecc[4];
-	std::string value = CDBPATH + "alma/AS/tab_convUSD_S1.txt";
-	int i;
-
-	ifstream usdTableS1(value.c_str());
-	if (!usdTableS1) {
-		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value.c_str()));
+	if (sector == -1) {
+		ACS_SHORT_LOG ((LM_INFO, "You have to set a sector first!"));
 		exit(-1);
 	}
-	// Get reference to usd components
-	for (i = 1; i <= 139; i++) {
-		usdTableS1 >> lanIndexS1 >> circleIndexS1 >> usdCircleIndexS1 >> serial_usd >> graf >> mecc;
-        	usd[circleIndexS1][usdCircleIndexS1] = ActiveSurface::USD::_nil();
-        	try {
-			printf("S1: circleIndexS1 = %d, usdCircleIndexS1 = %d\n", circleIndexS1, usdCircleIndexS1);
-            		usd[circleIndexS1][usdCircleIndexS1] = m_services->getComponent<ActiveSurface::USD>(serial_usd);
-			lanradius[circleIndexS1][lanIndexS1] = usd[circleIndexS1][usdCircleIndexS1];
-			usdCounterS1++;
-        	}
-        	catch (maciErrType::CannotGetComponentExImpl& ex) {
-            		_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::sector1ActiveSurface()");
-            		Impl.setComponentName(serial_usd);
-            		Impl.log(LM_DEBUG);
-	    	}
-    	}
-	printf("sector1 done\n");
-	m_sector1 = true;
-}
 
-void CSRTActiveSurfaceBossCore::sector2ActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx)
-{
-	printf("sector2 start\n");
+	printf("sector%d start\n", sector+1);
 	char serial_usd[23];
 	char graf[5], mecc[4];
-	std::string value = CDBPATH + "alma/AS/tab_convUSD_S2.txt";
-	int i;
+	std::stringstream value;
+	value << CDBPATH;
+	value << "alma/AS/tab_convUSD_S";
+	value << sector+1;
+	value << ".txt";
 
-	ifstream usdTableS2(value.c_str());
-	if (!usdTableS2) {
-		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value.c_str()));
+	ifstream usdTable(value.str().c_str());
+	if (!usdTable) {
+		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value.str().c_str()));
 		exit(-1);
 	}
+
 	// Get reference to usd components
-	for (i = 1; i <= 140; i++) {
-		usdTableS2 >> lanIndexS2 >> circleIndexS2 >> usdCircleIndexS2 >> serial_usd >> graf >> mecc;
-        	usd[circleIndexS2][usdCircleIndexS2] = ActiveSurface::USD::_nil();
-        	try {
-			printf("S2: circleIndexS2 = %d, usdCircleIndexS2 = %d\n", circleIndexS2, usdCircleIndexS2);
-            		usd[circleIndexS2][usdCircleIndexS2] = m_services->getComponent<ActiveSurface::USD>(serial_usd);
-			lanradius[circleIndexS2][lanIndexS2] = usd[circleIndexS2][usdCircleIndexS2];
-			usdCounterS2++;
-        	}
-        	catch (maciErrType::CannotGetComponentExImpl& ex) {
-            		_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::sector2ActiveSurface()");
-            		Impl.setComponentName(serial_usd);
-            		Impl.log(LM_DEBUG);
-	    	}
-    	}
+	while (usdTable >> lanIndexes[sector] >> circleIndexes[sector] >> usdCircleIndexes[sector] >> serial_usd >> graf >> mecc)
+	{
+		usd[circleIndexes[sector]][usdCircleIndexes[sector]] = ActiveSurface::USD::_nil();
 
-	printf("sector2 done\n");
-	m_sector2 = true;
-}
-
-void CSRTActiveSurfaceBossCore::sector3ActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx)
-{
-	printf("sector3 start\n");
-	char serial_usd[23];
-	char graf[5], mecc[4];
-	std::string value = CDBPATH + "alma/AS/tab_convUSD_S3.txt";
-	int i;
-
-	ifstream usdTableS3(value.c_str());
-	if (!usdTableS3) {
-		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value.c_str()));
-		exit(-1);
+		try
+		{
+			printf("S%d: circleIndexS%d = %d, usdCircleIndexS%d = %d\n", sector+1, sector+1, circleIndexes[sector], sector+1, usdCircleIndexes[sector]);
+			usd[circleIndexes[sector]][usdCircleIndexes[sector]] = m_services->getComponent<ActiveSurface::USD>(serial_usd);
+			lanradius[circleIndexes[sector]][lanIndexes[sector]] = usd[circleIndexes[sector]][usdCircleIndexes[sector]];
+			usdCounters[sector]++;
+		}
+		catch (maciErrType::CannotGetComponentExImpl& ex)
+		{
+			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::sectorActiveSurface()");
+			Impl.setComponentName(serial_usd);
+			Impl.log(LM_DEBUG);
+		}
 	}
-	// Get reference to usd components
-	for (i = 1; i <= 139; i++) {
-		usdTableS3 >> lanIndexS3 >> circleIndexS3 >> usdCircleIndexS3 >> serial_usd >> graf >> mecc;
-        	usd[circleIndexS3][usdCircleIndexS3] = ActiveSurface::USD::_nil();
-        	try {
-			printf("S3: circleIndexS3 = %d, usdCircleIndexS3 = %d\n", circleIndexS3, usdCircleIndexS3);
-            		usd[circleIndexS3][usdCircleIndexS3] = m_services->getComponent<ActiveSurface::USD>(serial_usd);
-			lanradius[circleIndexS3][lanIndexS3] = usd[circleIndexS3][usdCircleIndexS3];
-			usdCounterS3++;
-        	}
-        	catch (maciErrType::CannotGetComponentExImpl& ex) {
-            		_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::sector3ActiveSurface()");
-            		Impl.setComponentName(serial_usd);
-            		Impl.log(LM_DEBUG);
-	    	}
-    	}
 
-	printf("sector3 done\n");
-	m_sector3 = true;
-}
-
-void CSRTActiveSurfaceBossCore::sector4ActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx)
-{
-	printf("sector4 start\n");
-	char serial_usd[23];
-	char graf[5], mecc[4];
-	std::string value = CDBPATH + "alma/AS/tab_convUSD_S4.txt";
-	int i;
-
-	ifstream usdTableS4(value.c_str());
-	if (!usdTableS4) {
-		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value.c_str()));
-		exit(-1);
-	}
-	// Get reference to usd components
-	for (i = 1; i <= 140; i++) {
-		usdTableS4 >> lanIndexS4 >> circleIndexS4 >> usdCircleIndexS4 >> serial_usd >> graf >> mecc;
-        	usd[circleIndexS4][usdCircleIndexS4] = ActiveSurface::USD::_nil();
-        	try {
-			printf("S4: circleIndexS4 = %d, usdCircleIndexS4 = %d\n", circleIndexS4, usdCircleIndexS4);
-            		usd[circleIndexS4][usdCircleIndexS4] = m_services->getComponent<ActiveSurface::USD>(serial_usd);
-			lanradius[circleIndexS4][lanIndexS4] = usd[circleIndexS4][usdCircleIndexS4];
-			usdCounterS4++;
-        	}
-        	catch (maciErrType::CannotGetComponentExImpl& ex) {
-            		_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::sector2ActiveSurface()");
-            		Impl.setComponentName(serial_usd);
-            		Impl.log(LM_DEBUG);
-	    	}
-    	}
-
-	printf("sector4 done\n");
-	m_sector4 = true;
-}
-
-void CSRTActiveSurfaceBossCore::sector5ActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx)
-{
-	printf("sector5 start\n");
-	char serial_usd[23];
-	char graf[5], mecc[4];
-	std::string value = CDBPATH + "alma/AS/tab_convUSD_S5.txt";
-	int i;
-
-	ifstream usdTableS5(value.c_str());
-	if (!usdTableS5) {
-		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value.c_str()));
-		exit(-1);
-	}
-	// Get reference to usd components
-	for (i = 1; i <= 139; i++) {
-		usdTableS5 >> lanIndexS5 >> circleIndexS5 >> usdCircleIndexS5 >> serial_usd >> graf >> mecc;
-        	usd[circleIndexS5][usdCircleIndexS5] = ActiveSurface::USD::_nil();
-        	try {
-			printf("S5: circleIndexS5 = %d, usdCircleIndexS5 = %d\n", circleIndexS5, usdCircleIndexS5);
-            		usd[circleIndexS5][usdCircleIndexS5] = m_services->getComponent<ActiveSurface::USD>(serial_usd);
-			lanradius[circleIndexS5][lanIndexS5] = usd[circleIndexS5][usdCircleIndexS5];
-			usdCounterS5++;
-        	}
-        	catch (maciErrType::CannotGetComponentExImpl& ex) {
-            		_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::sector5ActiveSurface()");
-            		Impl.setComponentName(serial_usd);
-            		Impl.log(LM_DEBUG);
-	    	}
-    	}
-
-	printf("sector5 done\n");
-	m_sector5 = true;
-}
-
-void CSRTActiveSurfaceBossCore::sector6ActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx)
-{
-	printf("sector6 start\n");
-	char serial_usd[23];
-	char graf[5], mecc[4];
-	std::string value = CDBPATH + "alma/AS/tab_convUSD_S6.txt";
-	int i;
-
-	ifstream usdTableS6(value.c_str());
-	if (!usdTableS6) {
-		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value.c_str()));
-		exit(-1);
-	}
-	// Get reference to usd components
-	for (i = 1; i <= 140; i++) {
-		usdTableS6 >> lanIndexS6 >> circleIndexS6 >> usdCircleIndexS6 >> serial_usd >> graf >> mecc;
-        	usd[circleIndexS6][usdCircleIndexS6] = ActiveSurface::USD::_nil();
-        	try {
-			printf("S6: circleIndexS6 = %d, usdCircleIndexS6 = %d\n", circleIndexS6, usdCircleIndexS6);
-            		usd[circleIndexS6][usdCircleIndexS6] = m_services->getComponent<ActiveSurface::USD>(serial_usd);
-			lanradius[circleIndexS6][lanIndexS6] = usd[circleIndexS6][usdCircleIndexS6];
-			usdCounterS6++;
-        	}
-        	catch (maciErrType::CannotGetComponentExImpl& ex) {
-            		_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::sector2ActiveSurface()");
-            		Impl.setComponentName(serial_usd);
-            		Impl.log(LM_DEBUG);
-	    	}
-    	}
-
-	printf("sector6 done\n");
-	m_sector6 = true;
-}
-
-void CSRTActiveSurfaceBossCore::sector7ActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx)
-{
-	printf("sector7 start\n");
-	char serial_usd[23];
-	char graf[5], mecc[4];
-	std::string value = CDBPATH + "alma/AS/tab_convUSD_S7.txt";
-	int i;
-
-	ifstream usdTableS7(value.c_str());
-	if (!usdTableS7) {
-		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value.c_str()));
-		exit(-1);
-	}
-	// Get reference to usd components
-	for (i = 1; i <= 139; i++) {
-		usdTableS7 >> lanIndexS7 >> circleIndexS7 >> usdCircleIndexS7 >> serial_usd >> graf >> mecc;
-        	usd[circleIndexS7][usdCircleIndexS7] = ActiveSurface::USD::_nil();
-        	try {
-			printf("S7: circleIndexS7 = %d, usdCircleIndexS7 = %d\n", circleIndexS7, usdCircleIndexS7);
-            		usd[circleIndexS7][usdCircleIndexS7] = m_services->getComponent<ActiveSurface::USD>(serial_usd);
-			lanradius[circleIndexS7][lanIndexS7] = usd[circleIndexS7][usdCircleIndexS7];
-			usdCounterS7++;
-        	}
-        	catch (maciErrType::CannotGetComponentExImpl& ex) {
-            		_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::sector3ActiveSurface()");
-            		Impl.setComponentName(serial_usd);
-            		Impl.log(LM_DEBUG);
-	    	}
-    	}
-
-	printf("sector7 done\n");
-	m_sector7 = true;
-}
-
-void CSRTActiveSurfaceBossCore::sector8ActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx)
-{
-	printf("sector8 start\n");
-	char serial_usd[23];
-	char graf[5], mecc[4];
-	std::string value = CDBPATH + "alma/AS/tab_convUSD_S8.txt";
-	int i;
-
-	ifstream usdTableS8(value.c_str());
-	if (!usdTableS8) {
-		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value.c_str()));
-		exit(-1);
-	}
-	// Get reference to usd components
-	for (i = 1; i <= 140; i++) {
-		usdTableS8 >> lanIndexS8 >> circleIndexS8 >> usdCircleIndexS8 >> serial_usd >> graf >> mecc;
-        	usd[circleIndexS8][usdCircleIndexS8] = ActiveSurface::USD::_nil();
-        	try {
-			printf("S8: circleIndexS8 = %d, usdCircleIndexS8 = %d\n", circleIndexS8, usdCircleIndexS8);
-            		usd[circleIndexS8][usdCircleIndexS8] = m_services->getComponent<ActiveSurface::USD>(serial_usd);
-			lanradius[circleIndexS8][lanIndexS8] = usd[circleIndexS8][usdCircleIndexS8];
-			usdCounterS8++;
-        	}
-        	catch (maciErrType::CannotGetComponentExImpl& ex) {
-            		_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::sector2ActiveSurface()");
-            		Impl.setComponentName(serial_usd);
-            		Impl.log(LM_DEBUG);
-	    	}
-    	}
-
-	printf("sector8 done\n");
-	m_sector8 = true;
+	printf("sector%d done\n", sector+1);
+	m_sector[sector] = true;
 }
 
 void CSRTActiveSurfaceBossCore::workingActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx)
 {
-    if (AutoUpdate) {
-        TIMEVALUE now;
-        double azimuth=0.0;
-        double elevation=0.0;
+	if (AutoUpdate) {
+		TIMEVALUE now;
+		double azimuth=0.0;
+		double elevation=0.0;
 
 		IRA::CIRATools::getTime(now);
 
 		if (!CORBA::is_nil(m_antennaBoss)) {
-            try {
-	            m_antennaBoss->getRawCoordinates(now.value().value, azimuth, elevation);
-        	}
-        	catch (CORBA::SystemException& ex) {
-            	_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CSRTActiveSurfaceBossCore::workingActiveSurface()");
-            	impl.setName(ex._name());
-		        impl.setMinor(ex.minor());
-            	m_status=Management::MNG_WARNING;
+			try {
+				m_antennaBoss->getRawCoordinates(now.value().value, azimuth, elevation);
+			}
+			catch (CORBA::SystemException& ex) {
+				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CSRTActiveSurfaceBossCore::workingActiveSurface()");
+				impl.setName(ex._name());
+				impl.setMinor(ex.minor());
+				m_status=Management::MNG_WARNING;
 				//asPark();
-            	throw impl;
-	    	}
-        	azimuth = 0.0;
-        	try {
-            	onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, elevation*DR2D, 0, 0, m_profile);
-        	}
-        	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
-                ex.log(LM_DEBUG);
-            	throw ex.getComponentErrorsEx();
-        	}
+				throw impl;
+			}
+			azimuth = 0.0;
+			try {
+				onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, elevation*DR2D, 0, 0, m_profile);
+			}
+			catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+				ex.log(LM_DEBUG);
+				throw ex.getComponentErrorsEx();
+			}
 		}
-    }
+	}
 }
 
 void CSRTActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newProfile) throw (ComponentErrors::ComponentErrorsExImpl)
 {
 	int s, i, l;
 
-	if ((m_sector1 == true)&&(m_sector2 == true)&&(m_sector3 == true)&&(m_sector4 == true)&&(m_sector5 == true)&&(m_sector6 == true)&&(m_sector7 == true)&&(m_sector8 == true)) {
-		//printf("setProfile corrections\n");
-    		ifstream usdCorrections (USDTABLECORRECTIONS);
-    		if (!usdCorrections) {
-        		ACS_SHORT_LOG ((LM_INFO, "File %s not found", USDTABLECORRECTIONS));
+	bool all_sectors = true;
+	for(unsigned int i = 0; i < SECTORS; i++)
+		if(!m_sector[i]) all_sectors = false;
+
+	if (all_sectors)
+	{
+		ifstream usdCorrections (USDTABLECORRECTIONS);
+		if (!usdCorrections) {
+			ACS_SHORT_LOG ((LM_INFO, "File %s not found", USDTABLECORRECTIONS));
 			exit(-1);
 		}
 		actuatorsCorrections.length(NPOSITIONS);
 		for (i = 1; i <= CIRCLES; i++) {
 			for (l = 1; l <= actuatorsInCircle[i]; l++) {
-		//		printf ("Corrections = ");
+				//printf ("Corrections = ");
 				for (s = 0; s < NPOSITIONS; s++) {
-        				usdCorrections >> actuatorsCorrections[s];
+					usdCorrections >> actuatorsCorrections[s];
 					//printf ("%f ", actuatorsCorrections[s]);
-        			}
-		//		printf("\n");
+				}
+				//printf("\n");
 				if (!CORBA::is_nil(usd[i][l])) {
-		//			printf("i = %d, l = %d\n", i, l);
+					//printf("i = %d, l = %d\n", i, l);
 					usd[i][l]->posTable(actuatorsCorrections, NPOSITIONS, DELTAEL, THRESHOLDPOS);
 				}
 			}
 		}
-		m_sector1 = false;
-		m_sector2 = false;
-		m_sector3 = false;
-		m_sector4 = false;
-		m_sector5 = false;
-		m_sector6 = false;
-		m_sector7 = false;
-		m_sector8 = false;
-		usdCounter = usdCounterS1 + usdCounterS2 + usdCounterS3 + usdCounterS4 + usdCounterS5 + usdCounterS6 + usdCounterS7 + usdCounterS8;
+
+		usdCounter = 0;
+		for(unsigned int i = 0; i < SECTORS; i++) {
+			m_sector[i] = false;
+			usdCounter += usdCounters[i];
+		}
 
 		m_ASup=true;
-        	m_status=Management::MNG_OK;
+		m_status=Management::MNG_OK;
 
 		if (usdCounter < (int)lastUSD*WARNINGUSDPERCENT) {
-        		m_status=Management::MNG_WARNING;
+			m_status=Management::MNG_WARNING;
 		}
-    	if (usdCounter < (int)lastUSD*ERRORUSDPERCENT) {
-        	m_status=Management::MNG_FAILURE;
+		if (usdCounter < (int)lastUSD*ERRORUSDPERCENT) {
+			m_status=Management::MNG_FAILURE;
 			m_ASup=false;
 		}
 	}
 
 	if (m_ASup == true) {
-        asOff();
+		asOff();
 		CIRATools::Wait(1000000);
 		_SET_CDB_CORE(profile, newProfile,"SRTActiveSurfaceBossCore::setProfile")
 		m_profile = newProfile;
 		try {
-        		onewayAction(ActiveSurface::AS_PROFILE, 0, 0, 0, 0, 0, 0, newProfile);
-        }
-        catch (ComponentErrors::ComponentErrorsExImpl& ex) {
-        	ex.log(LM_DEBUG);
-        	throw ex.getComponentErrorsEx();
-        }
+			onewayAction(ActiveSurface::AS_PROFILE, 0, 0, 0, 0, 0, 0, newProfile);
+		}
+		catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+			ex.log(LM_DEBUG);
+			throw ex.getComponentErrorsEx();
+		}
 		m_profileSetted = true;
 		asOn();
 	}
