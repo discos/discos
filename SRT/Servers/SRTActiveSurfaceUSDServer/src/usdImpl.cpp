@@ -38,6 +38,7 @@ USDImpl::USDImpl(const ACE_CString& CompName, maci::ContainerServices* container
     	m_userOffset_sp(this)	
 { 
 	ACS_SHORT_LOG((LM_INFO,"::USDImpl::USDImpl: constructor;Constructor!"));
+    actuatorsCorrections = NULL;
 }
 
 void USDImpl::initialize() throw (ACSErr::ACSbaseExImpl)
@@ -255,7 +256,10 @@ void USDImpl::cleanUp()
 		 m_pLan = ActiveSurface::lan::_nil();
 	}
 
-	delete [] actuatorsCorrections;
+    if(actuatorsCorrections != NULL)
+    {
+        delete [] actuatorsCorrections;
+    }
 }
 
  
@@ -271,11 +275,14 @@ void USDImpl::aboutToAbort()
 		ACS_SHORT_LOG((LM_INFO, "cannot release lan component %s", (const char*)lanCobName));
 	}
 
-	delete [] actuatorsCorrections;
-
 	// be sure to set the reference to nil
 	//m_pLan = MOD_LAN::lan::_nil();
 	m_pLan = ActiveSurface::lan::_nil();
+
+    if(actuatorsCorrections != NULL)
+    {
+        delete [] actuatorsCorrections;
+    }
 }
 
 void USDImpl::reset() 	throw (CORBA::SystemException,ASErrors::ASErrorsEx)

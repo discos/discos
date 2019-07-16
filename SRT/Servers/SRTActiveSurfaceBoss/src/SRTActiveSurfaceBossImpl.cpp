@@ -93,19 +93,7 @@ void SRTActiveSurfaceBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"SRTActiveSurfaceBossImpl::initialize()");
 		throw dummy;
 	}
-    	boss->initialize();
-    	try {
-		m_watchingThread=getContainerServices()->getThreadManager()->create<CSRTActiveSurfaceBossWatchingThread,CSecureArea<CSRTActiveSurfaceBossCore> *>
-		  ("SRTACTIVESURFACEBOSSWATCHER",m_core);
-	}
-	catch (acsthreadErrType::acsthreadErrTypeExImpl& ex) {
-		_ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,_dummy,ex,"SRTActiveSurfaceBossImpl::initialize()");
-		throw _dummy;
-	}
-	catch (...) {
-		_THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"SRTActiveSurfaceBossImpl::initialize()");
-	}
-
+    boss->initialize();
 	try {
 		m_workingThread=getContainerServices()->getThreadManager()->create<CSRTActiveSurfaceBossWorkingThread,CSecureArea<CSRTActiveSurfaceBossCore> *>
 		  ("SRTACTIVESURFACEBOSSWORKER",m_core);
@@ -173,10 +161,6 @@ void SRTActiveSurfaceBossImpl::execute() throw (ACSErr::ACSbaseExImpl)
 		_ADD_BACKTRACE(ComponentErrors::InitializationProblemExImpl,_dummy,E,"SRTActiveSurfaceBossImpl::execute()");
 		throw _dummy;
 	}
-	//starts the loop status thread....
-	//m_watchingThread->resume();
-	//m_watchingThread->setSleepTime(LOOPSTATUSTIME);
-
 	//starts the loop working thread....
 	m_workingThread->resume();
 	m_workingThread->setSleepTime(LOOPWORKINGTIME);
@@ -192,30 +176,40 @@ void SRTActiveSurfaceBossImpl::execute() throw (ACSErr::ACSbaseExImpl)
 
 void SRTActiveSurfaceBossImpl::cleanUp()
 {
-	AUTO_TRACE("SRTActiveSurfaceBossImpl::cleanUp()");
-    	CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore>  core=m_core->Get();
-   	if (m_workingThread!=NULL) m_workingThread->suspend();
-   	if (m_watchingThread!=NULL) m_watchingThread->suspend();
+    AUTO_TRACE("SRTActiveSurfaceBossImpl::cleanUp()");
+   	if (m_workingThread!=NULL)
+    {
+        m_workingThread->suspend();
     	getContainerServices()->getThreadManager()->destroy(m_workingThread);
-    	getContainerServices()->getThreadManager()->destroy(m_watchingThread);
-    	ACS_LOG(LM_FULL_INFO,"SRTActiveSurfaceBossImpl::cleanUp()",(LM_INFO,"SRTActiveSurfaceBossImpl::THREADS_TERMINATED"));
+    }
+    for(int i = 0; i < m_sectorThread.size(); i++)
+    {
+        if(m_sectorThread[i] != NULL)
+        {
+            m_sectorThread[i]->suspend();
+    	    getContainerServices()->getThreadManager()->destroy(m_sectorThread[i]);
+        }
+    }
+    ACS_LOG(LM_FULL_INFO,"SRTActiveSurfaceBossImpl::cleanUp()",(LM_INFO,"SRTActiveSurfaceBossImpl::THREADS_TERMINATED"));
+    if (m_parser!=NULL) delete m_parser;
+    ACS_LOG(LM_FULL_INFO,"SRTActiveSurfaceBossImpl::cleanUp()",(LM_INFO,"SRTActiveSurfaceBossImpl::PARSER_FREED"));
+    CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> core = m_core->Get();
 	core->cleanUp();
-	ACS_LOG(LM_FULL_INFO,"SRTActiveSurfaceBossImpl::cleanUp()",(LM_INFO,"SRTActiveSurfaceBossImpl::BOSS_CORE_FREED"));
-    	if (m_parser!=NULL) delete m_parser;
-	ACS_LOG(LM_FULL_INFO,"SRTActiveSurfaceBossImpl::cleanUp()",(LM_INFO,"SRTActiveSurfaceBossImpl::PARSER_FREED"));
-	CharacteristicComponentImpl::cleanUp();
+    ACS_LOG(LM_FULL_INFO,"SRTActiveSurfaceBossImpl::cleanUp()",(LM_INFO,"SRTActiveSurfaceBossImpl::BOSS_CORE_FREED"));
+    CharacteristicComponentImpl::cleanUp();
 }
 
 void SRTActiveSurfaceBossImpl::aboutToAbort()
 {
 	AUTO_TRACE("SRTActiveSurfaceBossImpl::aboutToAbort()");
-    	if (m_workingThread!=NULL) m_workingThread->suspend();
-    	if (m_watchingThread!=NULL) m_watchingThread->suspend();
-    	getContainerServices()->getThreadManager()->destroy(m_workingThread);
-    	getContainerServices()->getThreadManager()->destroy(m_watchingThread);
+    if (m_workingThread!=NULL)
+    {
+        m_workingThread->suspend();
+        getContainerServices()->getThreadManager()->destroy(m_workingThread);
+    }
 	CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore>  core=m_core->Get(); 
 	core->cleanUp();
-    	if (m_parser!=NULL) delete m_parser;
+    if (m_parser!=NULL) delete m_parser;
 }
 
 void SRTActiveSurfaceBossImpl::stop (CORBA::Long circle, CORBA::Long actuator, CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)

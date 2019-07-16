@@ -29,7 +29,6 @@
 #include <ASErrors.h>
 #include <ManagementErrors.h>
 #include "SRTActiveSurfaceBossCore.h"
-#include "SRTActiveSurfaceBossWatchingThread.h"
 #include "SRTActiveSurfaceBossWorkingThread.h"
 #include "SRTActiveSurfaceBossSectorThread.h"
 #include <SP_parser.h>
@@ -210,8 +209,6 @@ class SRTActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl, publ
 	* pointer to Container Services
 	*/
 	ContainerServices* cs;
-
-	CSRTActiveSurfaceBossWatchingThread *m_watchingThread;
 
 	CSRTActiveSurfaceBossWorkingThread *m_workingThread;
 
