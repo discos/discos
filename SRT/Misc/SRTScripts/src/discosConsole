@@ -103,7 +103,7 @@ antennaBossTui
 sleep 0.5s
 genericBackendTui BACKENDS/TotalPower
 sleep 0.5s
-genericBackendTui BACKENDS/XBackends
+genericBackendTui BACKENDS/Sardara
 sleep 0.5s
 operatorInput
 sleep 0.5s
