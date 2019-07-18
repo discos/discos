@@ -84,11 +84,22 @@ void SRTMountImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	ACS_LOG(LM_FULL_INFO,"SRTMountImpl::initialize()",(LM_INFO,"ACTIVATING_LOG_REPETITION_FILTER"));
 	_IRA_LOGFILTER_ACTIVATE(m_compConfiguration.repetitionCacheTime(),m_compConfiguration.expireCacheTime());
 	ACS_LOG(LM_FULL_INFO,"SRTMountImpl::initialize()",(LM_INFO,"THREAD_CREATION"));
-	m_watchDogParam.commandSocket=&m_commandSocket;
-	m_watchDogParam.statusSocket=&m_statusSocket;
-	CWatchDog::TThreadParameter *tmpParam=&m_watchDogParam;
+	m_watchingThreadParam.commandSocket=&m_commandSocket;
+	m_watchingThreadParam.statusSocket=&m_statusSocket;
+	CWatchingThread::TThreadParameter *tmpParam=&m_watchingThreadParam;
 	try {
-		m_watchDog=getContainerServices()->getThreadManager()->create<CWatchDog,CWatchDog::TThreadParameter*>("SRTMOUNTSUPERVISOR",tmpParam);
+		m_watchingThread=getContainerServices()->getThreadManager()->create<CWatchingThread,CWatchingThread::TThreadParameter*>("SRTMOUNTSUPERVISOR",tmpParam);
+	}
+	catch (acsthreadErrType::acsthreadErrTypeExImpl& ex) {
+		_ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,_dummy,ex,"SRTMountImpl::initialize()");
+		throw _dummy;
+	}
+	catch (...) {
+		_THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"SRTMountImpl::initialize()");
+	}
+	try {
+        CCommandSocket* tmpCmdSock = &m_commandSocket;
+		m_workingThread=getContainerServices()->getThreadManager()->create<CWorkingThread,CCommandSocket*>("SRTMOUNTWORKER",tmpCmdSock);
 	}
 	catch (acsthreadErrType::acsthreadErrTypeExImpl& ex) {
 		_ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,_dummy,ex,"SRTMountImpl::initialize()");
@@ -187,10 +198,14 @@ void SRTMountImpl::execute() throw (ACSErr::ACSbaseExImpl)
 	m_commandSocket.init(&m_compConfiguration,&m_commonData); // this could throw an exception.....
 	
 	//start the threads....
-	m_watchDog->setSleepTime(m_compConfiguration.watchDogThreadPeriod()*10);
-	m_watchDog->resume();
-		
-	ACS_LOG(LM_FULL_INFO,"SRTMountImpl::execute()",(LM_INFO,"CONTROL_THREAD_STARTED"));
+	m_watchingThread->setSleepTime(m_compConfiguration.watchingThreadPeriod()*10);
+	m_watchingThread->resume();
+	ACS_LOG(LM_FULL_INFO,"SRTMountImpl::execute()",(LM_INFO,"WATCHING_THREAD_STARTED"));
+
+	m_workingThread->setSleepTime(m_compConfiguration.workingThreadPeriod()*10);
+	m_workingThread->resume();
+	ACS_LOG(LM_FULL_INFO,"SRTMountImpl::execute()",(LM_INFO,"WORKING_THREAD_STARTED"));
+
 	try {
 		startPropertiesMonitoring();
 	}
@@ -209,15 +224,21 @@ void SRTMountImpl::cleanUp()
 {
 	AUTO_TRACE("SRTMountImpl::cleanUp()");
 	stopPropertiesMonitoring();	
-	if (m_watchDog!=NULL) {
-		m_watchDog->suspend();
+	if (m_watchingThread!=NULL) {
+		m_watchingThread->suspend();
+	}
+	if (m_workingThread!=NULL) {
+		m_workingThread->suspend();
 	}
 	m_commandSocket.cleanUp();
 	ACS_LOG(LM_FULL_INFO,"SRTMountImpl::cleanUp()",(LM_INFO,"CONTROL_SOCKET_CLOSED"));
 	m_statusSocket.cleanUp();
 	ACS_LOG(LM_FULL_INFO,"SRTMountImpl::cleanUp()",(LM_INFO,"STATUS_SOCKET_CLOSED"));
-	if (m_watchDog!=NULL) {
-		getContainerServices()->getThreadManager()->destroy(m_watchDog);
+	if (m_watchingThread!=NULL) {
+		getContainerServices()->getThreadManager()->destroy(m_watchingThread);
+	}
+	if (m_workingThread!=NULL) {
+		getContainerServices()->getThreadManager()->destroy(m_workingThread);
 	}
 	_IRA_LOGFILTER_FLUSH;
 	_IRA_LOGFILTER_DESTROY;
@@ -227,14 +248,20 @@ void SRTMountImpl::cleanUp()
 void SRTMountImpl::aboutToAbort()
 {
 	AUTO_TRACE("SRTMountImpl::aboutToAbort()");
-	if (m_watchDog!=NULL) {
-		m_watchDog->suspend();
+	if (m_watchingThread!=NULL) {
+		m_watchingThread->suspend();
+	}
+	if (m_workingThread!=NULL) {
+		m_workingThread->suspend();
 	}
 	m_commandSocket.cleanUp();
 	m_statusSocket.cleanUp();
-	if (m_watchDog!=NULL) {
-		getContainerServices()->getThreadManager()->destroy(m_watchDog);
-	}	
+	if (m_watchingThread!=NULL) {
+		getContainerServices()->getThreadManager()->destroy(m_watchingThread);
+	}
+	if (m_workingThread!=NULL) {
+		getContainerServices()->getThreadManager()->destroy(m_workingThread);
+	}
 	_IRA_LOGFILTER_FLUSH;
 	_IRA_LOGFILTER_DESTROY;
 }

@@ -19,8 +19,6 @@
 #include "Configuration.h"
 #include "ACUProtocol.h"
 
-class CWatchDog;
-
 /**
  * This class is inherited from the IRA::CSocket class. It takes charge of the management of the socket used to command the SRT ACU via the remote interface. 
   * if the remote side disconnects or a problem affects the comunication line, this class try to reconnect to the ACU until the communication is up again..
@@ -28,10 +26,11 @@ class CWatchDog;
  * Istituto di Radioastronomia, Italia
  * <br> 
 */
+class CWorkingThread;
+
 class CCommandSocket: public IRA::CSocket
 {
-friend class CWatchDog;
-
+friend class CWorkingThread;
 public:
 	/**
 	 * Constructor.
@@ -88,7 +87,7 @@ public:
 	 * @throw ComponentErrors::ComponentErrorsExImpl
 	 * @thorw AntennaErrors::AntennaErrorsExImpl
 	*/
-	void programTrack(const double& az,const double& el,const ACS::Time& time,bool clear);
+	void programTrack(const double& az,const double& el,const ACS::Time& time,bool clear) throw (ComponentErrors::ComponentErrorsExImpl,AntennaErrors::AntennaErrorsExImpl);
 
 	/**
 	 * This function can be used to command new axis mode to the ACU. Even if the methods allows for different mode for elevation and azimuth it fails if the modes are not the same.
@@ -285,7 +284,8 @@ private:
 
 	BACIMutex m_programTrackPointsMutex;
 	std::deque<TProgramTrackPoint> m_programTrackPointsQueue;
-	
+	bool m_restartTracking;
+
 	CACUProtocol m_protocol;
 
 	bool m_bTimedout;
@@ -441,7 +441,7 @@ private:
 	 * @throw ComponentErrors::ComponentErrorsExImpl
 	 * @thorw AntennaErrors::AntennaErrorsExImpl
 	*/
-	void sendProgramTrackPoint() throw (ComponentErrors::ComponentErrorsExImpl,AntennaErrors::AntennaErrorsExImpl);
+	void sendProgramTrackPoints();
 };
 
 

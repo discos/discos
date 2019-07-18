@@ -13,6 +13,7 @@ CCommandSocket::CCommandSocket()
 	m_pConfiguration=NULL;
 	m_pData=NULL;
 	m_bTimedout=false;
+	m_restartTracking=false;
 }
 
 CCommandSocket::~CCommandSocket()
@@ -174,7 +175,17 @@ void CCommandSocket::setTimeOffset(const double& seconds) throw (ComponentErrors
 	setTimeOffset_command(seconds);	
 }
 
-void CCommandSocket::programTrack(const double& az, const double& el, const ACS::Time& time, bool clear) {
+void CCommandSocket::programTrack(const double& az, const double& el, const ACS::Time& time, bool clear) throw (ComponentErrors::ComponentErrorsExImpl,AntennaErrors::AntennaErrorsExImpl) {
+    if(m_restartTracking)
+    {
+		m_restartTracking = false;
+		m_ptSize=0;
+		m_lastScanEpoch=0;
+		CSecAreaResourceWrapper<CCommonData> data=m_pData->Get();
+		data->clearProgramTrackStack();
+		_THROW_EXCPT(AntennaErrors::NakExImpl,"CCommandSocket::programTrack()")
+    }
+
 	TProgramTrackPoint point;
 	point.az = az;
 	point.el = el;
@@ -185,7 +196,7 @@ void CCommandSocket::programTrack(const double& az, const double& el, const ACS:
 	m_programTrackPointsQueue.push_back(point);
 }
 
-void CCommandSocket::sendProgramTrackPoint() throw (ComponentErrors::ComponentErrorsExImpl,AntennaErrors::AntennaErrorsExImpl)
+void CCommandSocket::sendProgramTrackPoints()
 {
 	TProgramTrackPoint point;
 
@@ -300,20 +311,10 @@ void CCommandSocket::sendProgramTrackPoint() throw (ComponentErrors::ComponentEr
 		}
 	}
 	catch (AntennaErrors::AntennaErrorsExImpl& ex) { // in case of error we need to start the tracking from the scatch in order to avoid different time gaps
-		//clear
-		m_ptSize=0;
-		m_lastScanEpoch=0;
-		CSecAreaResourceWrapper<CCommonData> data=m_pData->Get();
-		data->clearProgramTrackStack();
-		throw ex; // let the exception go up....
+		m_restartTracking = true;
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
-		//clear
-		m_ptSize=0;
-		m_lastScanEpoch=0;
-		CSecAreaResourceWrapper<CCommonData> data=m_pData->Get();
-		data->clearProgramTrackStack();
-		throw ex; // let the exception go up....
+		m_restartTracking = true;
 	}
 }
 

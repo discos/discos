@@ -28,7 +28,8 @@
 #include "CommandSocket.h"
 #include "StatusSocket.h"
 #include "CommonData.h"
-#include "WatchDog.h"
+#include "WatchingThread.h"
+#include "WorkingThread.h"
 
 using namespace baci;
 
@@ -54,7 +55,7 @@ class SRTMountImpl: public CharacteristicComponentImpl,
 {
 
 public:
-	
+
 	/** 
 	* Constructor.
 	* @param CompName component's name. This is also the name that will be used to find the configuration data for the component in the Configuration Database.
@@ -681,12 +682,17 @@ private:
 	/**
 	 * pointer to the watch dog thread
 	 */
-	CWatchDog *m_watchDog;
+	CWatchingThread *m_watchingThread;
+
+	/**
+	 * pointer to the working thread
+	 */
+	CWorkingThread *m_workingThread;
 	
 	/**
 	 * Parameter data structure for the wath dog
 	 */
-	CWatchDog::TThreadParameter m_watchDogParam;	
+	CWatchingThread::TThreadParameter m_watchingThreadParam;
 };
 
 #endif /*!_H*/

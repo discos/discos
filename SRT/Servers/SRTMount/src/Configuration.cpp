@@ -54,7 +54,8 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	_GET_DWORD_ATTRIBUTE("ControlSocketDutyCycle","Control socket duty cycle (uSec):",m_controlSocketDutyCycle,"");
 	_GET_DWORD_ATTRIBUTE("RepetitionCacheTime","RepetitionCacheTime (uSec):",m_dwrepetitionCacheTime,"");
 	_GET_DWORD_ATTRIBUTE("RepetitionExpireTime","RepetitionExpireTime (uSec):",m_dwexpireCacheTime,"");
-	_GET_DWORD_ATTRIBUTE("WatchDogThreadPeriod","Watch dog thread execution period (uSec):",m_dwwatchDogThreadPeriod,"");
+	_GET_DWORD_ATTRIBUTE("WatchingThreadPeriod","Watch dog thread execution period (uSec):",m_dwwatchingThreadPeriod,"");
+	_GET_DWORD_ATTRIBUTE("WorkingThreadPeriod","Working thread execution period (uSec):",m_dwworkingThreadPeriod,"");
 	_GET_DWORD_ATTRIBUTE("StowTimeout","Timeout on stowing operation (uSec):",m_dwstowTimeout,"");
 	_GET_DWORD_ATTRIBUTE("UnStowTimeout","Timeout on unstowing operation (uSec):",m_dwunstowTimeout,"");
 
@@ -90,7 +91,8 @@ void CConfiguration::init() throw (ComponentErrors::CDBAccessExImpl)
 	m_azimuthRateUpperLimit=0.4;
 	m_elevationRateLowerLimit=-0.25;
 	m_elevationRateUpperLimit=0.25;
-	m_dwwatchDogThreadPeriod=500000; // half a second
+	m_dwwatchingThreadPeriod=500000; // half a second
+	m_dwworkingThreadPeriod=30000; // 30 milliseconds
 	m_dwstowTimeout=360000000; // four minutes...240 seconds
 	m_dwunstowTimeout=30000000; // 30 seconds
 	m_timeSource="EXT";

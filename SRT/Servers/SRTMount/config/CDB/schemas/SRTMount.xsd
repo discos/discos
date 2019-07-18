@@ -134,8 +134,10 @@
 		<xs:attribute name="StowTimeout" type="xs:unsignedLong" use="required" />
 		<!-- time out for unstow procedure (microseconds) -->
 		<xs:attribute name="UnStowTimeout" type="xs:unsignedLong" use="required" />
-		<!-- WatchDog duty cycle(microseconds) -->
-		<xs:attribute name="WatchDogThreadPeriod" type="xs:unsignedLong" use="required" />
+		<!-- WatchingThread duty cycle(microseconds) -->
+		<xs:attribute name="WatchingThreadPeriod" type="xs:unsignedLong" use="required" />
+		<!-- WorkingThread duty cycle(microseconds) -->
+		<xs:attribute name="WorkingThreadPeriod" type="xs:unsignedLong" use="required" />
 		<!-- the cache time (microseconds) for logging repetition filter -->
 		<xs:attribute name="RepetitionCacheTime" type="xs:unsignedLong" use="required" />
 		<!-- the expire time (microseconds) for logging repetition filter -->
