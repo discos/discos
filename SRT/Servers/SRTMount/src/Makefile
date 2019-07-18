@@ -61,7 +61,7 @@ INCLUDES        =
 # ----------------------------
 LIBRARIES       = SRTMountImpl
 #LIBRARIES_L     =
-SRTMountImpl_OBJECTS = ACUProtocol CommandSocket StatusSocket Configuration CommonData SRTMountImpl WatchDog
+SRTMountImpl_OBJECTS = ACUProtocol CommandSocket StatusSocket Configuration CommonData SRTMountImpl WatchingThread WorkingThread
 SRTMountImpl_LIBS = SRTMountStubs MountStubs IRALibrary AntennaDefinitionsStubs ComponentErrors AntennaErrors ManagementErrors ManagmentDefinitionsStubs
 
 #

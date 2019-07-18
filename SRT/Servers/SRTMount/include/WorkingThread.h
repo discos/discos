@@ -1,28 +1,25 @@
-#ifndef _WATCHDOG_H_
-#define _WATCHDOG_H_
+#ifndef _WORKINGTHREAD_H_
+#define _WORKINGTHREAD_H_
 
 /* ************************************************************************************************************* */
 /* IRA Istituto di Radioastronomia                                                                               */
-/* $Id: WatchDog.h,v 1.1 2010-12-28 19:07:55 a.orlati Exp $										         */
+/* $Id: WorkingThread.h,v 1.1 2010-12-28 19:07:55 a.orlati Exp $										         */
 /*                                                                                                               */
 /* This code is under GNU General Public Licence (GPL).                                                          */
 /*                                                                                                               */
-/* Who                                            when             What                                                       */
+/* Who                                 when            What                                                      */
 /* Andrea Orlati(aorlati@ira.inaf.it)  28/12/2010      Creation                                                  */
 
 #include <acsThread.h>
 #include <IRA>
+#include "CommandSocket.h"
 
 /**
- * This class implements a watching thread. This thread is in charge of checking the component functionality and in case to try to recover from error situations  
+ * This class implements a working thread. This thread is in charge of sending the enqueued tracking points to the antenna
 */
-class CWatchDog : public ACS::Thread
+class CWorkingThread : public ACS::Thread
 {
 public:
-	typedef struct {
-		CCommandSocket * commandSocket;
-		CStatusSocket * statusSocket;
-	} TThreadParameter;
 	/**
      * Constructor().
      * @param name thread name
@@ -30,13 +27,13 @@ public:
      * @param responseTime thread's heartbeat response time in 100ns unit. Default value is 1s.
      * @param sleepTime thread's sleep time in 100ns unit. Default value is 100ms.
     */
-	CWatchDog(const ACE_CString& name,TThreadParameter *parameter, 
+	CWorkingThread(const ACE_CString& name, CCommandSocket *socket, 
 			const ACS::TimeInterval& responseTime=ThreadBase::defaultResponseTime,const ACS::TimeInterval& sleepTime=ThreadBase::defaultSleepTime);
 
 	/**
 	 * Destructor.
     */
-    ~CWatchDog();
+    ~CWorkingThread();
 
      /**
      * This method is executed once when the thread starts.
@@ -54,9 +51,7 @@ public:
      */
      virtual void runLoop();
 private:
-	TThreadParameter * m_param;
+    CCommandSocket * m_socket;
 };
 
 #endif
-
-

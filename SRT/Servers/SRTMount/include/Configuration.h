@@ -74,9 +74,11 @@ public:
 	/** Get the duty cycle of the socket waiting for status message from the ACU (microseconds) */
 	inline DDWORD statusSocketDutyCycle() const { return m_statusSocketDutyCycle; }
 	
-	/** Gets the control thread 8watch dog) period between two executions (microseconds) */
-	inline DWORD watchDogThreadPeriod() const { return m_dwwatchDogThreadPeriod; }
-	
+	/** Gets the control thread (watch dog) period between two executions (microseconds) */
+	inline DWORD watchingThreadPeriod() const { return m_dwwatchingThreadPeriod; }
+
+	/** Gets the working thread period between two executions (microseconds) */
+	inline DWORD workingThreadPeriod() const { return m_dwworkingThreadPeriod; }
 	
 	/** Gets the cache time for the logging repetition filter (microseconds) */
 	inline DDWORD repetitionCacheTime() const { return m_dwrepetitionCacheTime; }
@@ -134,7 +136,9 @@ private:
 	
 	DDWORD m_dwexpireCacheTime;
 	
-	DDWORD m_dwwatchDogThreadPeriod;
+	DDWORD m_dwwatchingThreadPeriod;
+
+	DDWORD m_dwworkingThreadPeriod;
 	
 	DDWORD m_dwstowTimeout;
 	
