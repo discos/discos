@@ -285,6 +285,7 @@ private:
 	BACIMutex m_programTrackPointsMutex;
 	std::deque<TProgramTrackPoint> m_programTrackPointsQueue;
 	bool m_restartTracking;
+	unsigned int m_restartTrackingErrorCode;
 
 	CACUProtocol m_protocol;
 
