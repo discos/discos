@@ -14,6 +14,7 @@ CCommandSocket::CCommandSocket()
 	m_pData=NULL;
 	m_bTimedout=false;
 	m_restartTracking=false;
+	m_restartTrackingErrorCode=0;
 }
 
 CCommandSocket::~CCommandSocket()
@@ -179,11 +180,22 @@ void CCommandSocket::programTrack(const double& az, const double& el, const ACS:
     if(m_restartTracking)
     {
 		m_restartTracking = false;
-		m_ptSize=0;
-		m_lastScanEpoch=0;
-		CSecAreaResourceWrapper<CCommonData> data=m_pData->Get();
-		data->clearProgramTrackStack();
-		_THROW_EXCPT(AntennaErrors::NakExImpl,"CCommandSocket::programTrack()")
+		unsigned int errCode = m_restartTrackingErrorCode;
+		m_restartTrackingErrorCode = 0;
+
+		switch(errCode)
+		{
+			case 1: _THROW_EXCPT(AntennaErrors::ConnectionExImpl,"CCommandSocket::programTrack()")
+					break;
+			case 2: _THROW_EXCPT(AntennaErrors::AntennaBusyExImpl,"CCommandSocket::programTrack()")
+					break;
+			case 3: _THROW_EXCPT(AntennaErrors::OperationNotPermittedExImpl,"CCommandSocket::programTrack()")
+					break;
+			case 4: _THROW_EXCPT(AntennaErrors::NakExImpl,"CCommandSocket::programTrack()")
+					break;
+			case 5: _THROW_EXCPT(ComponentErrors::TimeoutExImpl,"CCommandSocket::programTrack()")
+					break;
+		}
     }
 
 	TProgramTrackPoint point;
@@ -223,21 +235,23 @@ void CCommandSocket::sendProgramTrackPoints()
 	Antenna::TCommonModes azMode,elMode;
 	try {
 		if (!checkConnection()) {
+			m_restartTrackingErrorCode = 1;
 			_THROW_EXCPT(ConnectionExImpl,"CCommandSocket::sendProgramTrackPoint()");
 		}
 		if (checkIsBusy()) {
+			m_restartTrackingErrorCode = 2;
 			_THROW_EXCPT(AntennaBusyExImpl,"CCommandSocket::sendProgramTrackPoint()");
 		}
 		IRA::CTimeoutSync guard(&m_syncMutex,m_pConfiguration->controlSocketResponseTime(),m_pConfiguration->controlSocketDutyCycle());
 		if (!guard.acquire()) {
-			_EXCPT(ComponentErrors::TimeoutExImpl,ex,"CCommandSocket::sendProgramTrackPoint()");
-			throw ex;
+			_THROW_EXCPT(ComponentErrors::TimeoutExImpl,"CCommandSocket::sendProgramTrackPoint()");
 		}
 		CSecAreaResourceWrapper<CCommonData> data=m_pData->Get();
 		data->getActualMode(azMode,elMode);
 		if ((azMode!=Antenna::ACU_PROGRAMTRACK) || (elMode!=Antenna::ACU_PROGRAMTRACK)) {
 			_EXCPT(AntennaErrors::OperationNotPermittedExImpl,impl,"CCommandSocket::sendProgramTrackPoint()");
 			impl.setReason("program track mode not configured");
+			m_restartTrackingErrorCode = 3;
 			throw impl;
 		}
 		if (clear) {  //new scan!!!!
@@ -311,9 +325,24 @@ void CCommandSocket::sendProgramTrackPoints()
 		}
 	}
 	catch (AntennaErrors::AntennaErrorsExImpl& ex) { // in case of error we need to start the tracking from the scatch in order to avoid different time gaps
+		ACS_LOG(LM_FULL_INFO,"CCommandSocket::sendProgramTrackPoints()",(LM_WARNING,"An AntennaError was raised while loading some tracking points"));
+		m_ptSize=0;
+		m_lastScanEpoch=0;
+		CSecAreaResourceWrapper<CCommonData> data=m_pData->Get();
+		data->clearProgramTrackStack();
+		if (m_restartTrackingErrorCode == 0) {
+			//Exception raised by waitAck
+			m_restartTrackingErrorCode = 4;
+		}
 		m_restartTracking = true;
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ACS_LOG(LM_FULL_INFO,"CCommandSocket::sendProgramTrackPoints()",(LM_WARNING,"A ComponentError was raised while loading some tracking points"));
+		m_ptSize=0;
+		m_lastScanEpoch=0;
+		CSecAreaResourceWrapper<CCommonData> data=m_pData->Get();
+		data->clearProgramTrackStack();
+		m_restartTrackingErrorCode = 5;
 		m_restartTracking = true;
 	}
 }
