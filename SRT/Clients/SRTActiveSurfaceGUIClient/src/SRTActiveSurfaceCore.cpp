@@ -72,44 +72,8 @@ void SRTActiveSurfaceCore::run(void)
     ACS::pattern asProfile_val;
 
 
-    while (monitor == true) {
-
-        bossStatus_var = tASBoss->status();
-        bossStatus_val = bossStatus_var->get_sync(completion.out());
-        switch (bossStatus_val) {
-            case (Management::MNG_OK):
-                ASstatusCode = 0;
-                break;
-            case (Management::MNG_WARNING):
-                ASstatusCode = -1;
-                break;
-            case (Management::MNG_FAILURE):
-                ASstatusCode = -2;
-                break;
-        }
-        emit setGUIasStatusCode();
-
-        asProfile_var = tASBoss->pprofile();
-        asProfile_val = asProfile_var->get_sync(completion.out());
-        switch (asProfile_val) {
-            case (ActiveSurface::AS_SHAPED):
-                asProfileCode = 0;
-                break;
-            case (ActiveSurface::AS_SHAPED_FIXED):
-                asProfileCode = 1;
-                break;
-            case (ActiveSurface::AS_PARABOLIC):
-                asProfileCode = 2;
-                break;
-            case (ActiveSurface::AS_PARABOLIC_FIXED):
-                asProfileCode = 3;
-                break;
-            case (ActiveSurface::AS_PARK):
-                asProfileCode = 4;
-                break;
-        }
-        emit setGUIasProfileCode();
-
+    while (monitor == true)
+    {
         if (totalactuators >= 1 && totalactuators <= 24) // 1 circle
             i= 1;
         if (totalactuators >= 25 && totalactuators <= 48)  // 2 circle
@@ -151,6 +115,47 @@ void SRTActiveSurfaceCore::run(void)
 			totalactuators == 817 || totalactuators == 913 || totalactuators == 1009 ||
             totalactuators == 1105 || totalactuators == 1113 || totalactuators == 1117)      
             l = 1;
+
+        //set the current USD color to yellow to identify which one is being checked
+        theActuatorStatusColorString = "background-color: rgb(255, 255, 0);";
+        emit setGUIActuatorColor(i, l, theActuatorStatusColorString);
+		CIRATools::Wait(0,10000);
+
+        bossStatus_var = tASBoss->status();
+        bossStatus_val = bossStatus_var->get_sync(completion.out());
+        switch (bossStatus_val) {
+            case (Management::MNG_OK):
+                ASstatusCode = 0;
+                break;
+            case (Management::MNG_WARNING):
+                ASstatusCode = -1;
+                break;
+            case (Management::MNG_FAILURE):
+                ASstatusCode = -2;
+                break;
+        }
+        emit setGUIasStatusCode();
+
+        asProfile_var = tASBoss->pprofile();
+        asProfile_val = asProfile_var->get_sync(completion.out());
+        switch (asProfile_val) {
+            case (ActiveSurface::AS_SHAPED):
+                asProfileCode = 0;
+                break;
+            case (ActiveSurface::AS_SHAPED_FIXED):
+                asProfileCode = 1;
+                break;
+            case (ActiveSurface::AS_PARABOLIC):
+                asProfileCode = 2;
+                break;
+            case (ActiveSurface::AS_PARABOLIC_FIXED):
+                asProfileCode = 3;
+                break;
+            case (ActiveSurface::AS_PARK):
+                asProfileCode = 4;
+                break;
+        }
+        emit setGUIasProfileCode();
 
         try {
             tASBoss->usdStatus4GUIClient(i,l,status);
@@ -216,7 +221,6 @@ void SRTActiveSurfaceCore::run(void)
 		actuatorcounter = l;
 		totacts = totalactuators;
 
-		CIRATools::Wait(0,100000);
 	} // end of while
 }
 

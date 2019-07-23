@@ -1,7 +1,7 @@
 #include "SRTActiveSurfaceBossWorkingThread.h"
 
-CSRTActiveSurfaceBossWorkingThread::CSRTActiveSurfaceBossWorkingThread(const ACE_CString& name,IRA::CSecureArea<CSRTActiveSurfaceBossCore>  *param, 
-			const ACS::TimeInterval& responseTime,const ACS::TimeInterval& sleepTime) : ACS::Thread(name,responseTime,sleepTime), m_core(param)
+CSRTActiveSurfaceBossWorkingThread::CSRTActiveSurfaceBossWorkingThread(const ACE_CString& name,CSRTActiveSurfaceBossCore *param,
+			const ACS::TimeInterval& responseTime,const ACS::TimeInterval& sleepTime) : ACS::Thread(name,responseTime,sleepTime), boss(param)
 {
 	AUTO_TRACE("CSRTActiveSurfaceBossWorkingThread::CSRTActiveSurfaceBossWorkingThread()");
 }
@@ -23,10 +23,8 @@ void CSRTActiveSurfaceBossWorkingThread::onStop()
 
 void CSRTActiveSurfaceBossWorkingThread::runLoop()
 {
-    IRA::CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
-
     try {
-        resource->workingActiveSurface();
+        boss->workingActiveSurface();
     }
     catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);

@@ -121,7 +121,7 @@ void USDImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	
 	try {
 		stop();			// terminate any ongoing movement
-		_GET_PROP(status,m_status,"usdImpl::initialize()")
+		updateStatus();
 		if(!(m_calibrate && m_status&ENBL)) {
             		reset(); // load the default params.
 		}
@@ -133,6 +133,7 @@ void USDImpl::initialize() throw (ACSErr::ACSbaseExImpl)
     			_SET_LDEF(acc,"USDImpl::reset()");
 			_SET_LDEF(uBits,"USDImpl::reset()");
 		}
+		updateStatus();
 	}
 	catch (ASErrors::ASErrorsEx& ex)
 	{
@@ -200,7 +201,7 @@ void USDImpl::execute() throw (ACSErr::ACSbaseExImpl)
 		stop();			// terminate any ongoing movement
         printf("calibrate = %d\n", m_calibrate);
         printf("ENBL      = %d\n", m_status&ENBL);
-		_GET_PROP(status,m_status,"usdImpl::initialize()")
+		updateStatus();
         printf("calibrate = %d\n", m_calibrate);
         printf("ENBL      = %d\n", m_status&ENBL);
 		if(!(m_calibrate && m_status&ENBL)) {
@@ -345,7 +346,7 @@ void USDImpl::calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 		
 		ifp=1;
 		CIRATools::Wait(3,0);
-		_GET_PROP(status,m_status,"usdImpl::calibrate()")
+		updateStatus();
 		if(m_status&MRUN) {
 			ACS_DEBUG("::usdImpl::calibrate","camma begin not found!");
 			_THROW_EX(USDStillRunning,"::usdImpl::calibrate()",ifp);
@@ -369,7 +370,7 @@ void USDImpl::calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 		
 		ifp=2;
 		CIRATools::Wait(3,0);
-		_GET_PROP(status,m_status,"usdImpl::calibrate()")
+		updateStatus();
 		if(m_status&MRUN) {
 			ACS_DEBUG("::usdImpl::calibrate","camma end not found!");
 			printf("inside if\n");
@@ -451,7 +452,7 @@ void USDImpl::calVer() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
     	
 	try {
 		action(CPOS,m_top<<USxS,4);			// top
-		_GET_PROP(status,m_status,"usdImpl::calibrate()")
+		updateStatus();
 		 
 		ifp=10;
 		if(stillRunning(m_top)) {	
@@ -485,7 +486,7 @@ void USDImpl::calVer() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 			
 		action(CPOS, m_bottom<<USxS,4);		// to bottom
 		ifp=20;
-		_GET_PROP(status,m_status,"usdImpl::calibrate()")
+		updateStatus();
 			
 		if(stillRunning(m_bottom)) {	
 			action(STOP);
@@ -505,7 +506,7 @@ void USDImpl::calVer() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 		
 		action(CPOS,0,4);	//to zero
 		ifp=30;
-		_GET_PROP(status,m_status,"usdImpl::calibrate()")
+		updateStatus();
 			
 		if(stillRunning(0)) 	{	
 			action(STOP);
@@ -615,8 +616,8 @@ void USDImpl::update (CORBA::Double elevation) throw (CORBA::SystemException,ASE
 			// diffPos = labs(actpos-updatePos);
 			// printf("threshold = %d\n", threshold);
 			// if (diffPos >= threshold) {
-				// printf("diff >= threshold: %ld\n", diffPos);
-			//_GET_PROP(status,m_status,"usdImpl::update()")
+			// printf("diff >= threshold: %ld\n", diffPos);
+			// updateStatus();
 			//running = m_status&MRUN;
 			//if (running == false)
 			//	_SET_PROP(cmdPos,updatePos,"usdImpl::update()")
@@ -628,7 +629,7 @@ void USDImpl::update (CORBA::Double elevation) throw (CORBA::SystemException,ASE
         if (updatePos < -21000)
             updatePos = -21000;
 		//printf("upPosStep = %ld\n",updatePos);
-		_GET_PROP(status,m_status,"usdImpl::update()")
+		updateStatus();
 		running = m_status&MRUN;
 		if (running == false)
 			_SET_PROP(cmdPos,updatePos,"usdImpl::update()")
@@ -748,7 +749,17 @@ bool USDImpl::compCheck(ACSErr::CompletionImpl& comp)
 		exImplCheck(ex);
    	return true;
 	}
-} 
+}
+
+void USDImpl::updateStatus()
+{
+	_GET_PROP(status, m_status, "usdImpl::updateStatus()")
+}
+
+int USDImpl::getStatus()
+{
+	return m_status;
+}
 
 void USDImpl::action( int act,int par,int nb) throw (ASErrors::ASErrorsExImpl)
 {
@@ -781,7 +792,7 @@ bool USDImpl::stillRunning(long pos) throw (ASErrors::ASErrorsExImpl)
 		
 		for(endt=time(NULL)+tout; time(NULL)<endt;CIRATools::Wait(0,500000)) // loop every 1/2 sec
 		{
-			_GET_PROP(status,m_status,"usdImpl::stillRunning()")
+			updateStatus();
 			if(!(m_status&MRUN)) break;				// exit if stopped
 		}
 	}
@@ -802,8 +813,8 @@ bool USDImpl::chkCal() throw (ASErrors::ASErrorsExImpl)
 
  	try {
 		_GET_PROP(actPos,fgiro,"USDImpl::chkCal()")
-		_GET_PROP(status,m_status,"usdImpl::calibrate()")
-			fgiro%=m_step_giro;
+		updateStatus();
+		fgiro%=m_step_giro;
 
 	}
 	_CATCH_EXCP_THROW_EXIMPL(CORBA::SystemException,ASErrors::corbaErrorExImpl,"USDImpl::chkCal()",m_status)

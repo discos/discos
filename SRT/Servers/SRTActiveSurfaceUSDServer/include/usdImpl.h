@@ -495,6 +495,10 @@ class USDImpl: public CharacteristicComponentImpl,public virtual POA_ActiveSurfa
     	*/
 	bool compCheck(ACSErr::CompletionImpl& );
 
+	int getStatus();
+
+	void updateStatus();
+
     	/** 
     	* flag rappresenting the availability of the module.
     	* It is available if is comunicating. After five times USD doesn't respond, the flag is set to FALSE to inhibit any further activity.
