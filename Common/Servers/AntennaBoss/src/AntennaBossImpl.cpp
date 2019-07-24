@@ -151,8 +151,8 @@ void AntennaBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	}
 	boss->initialize(); //could throw (ComponentErrors::UnexpectedExImpl)
 	try {
-		m_watchingThread=getContainerServices()->getThreadManager()->create<CWatchingThread,CSecureArea<CBossCore> *>
-		  ("BOSSWATCHER",m_core);
+		m_watchingThread=getContainerServices()->getThreadManager()->create<CWatchingThread,CBossCore*>
+		  ("BOSSWATCHER",boss);
 		m_workingThread=getContainerServices()->getThreadManager()->create<CWorkingThread,CSecureArea<CBossCore> *>
 		  ("BOSSWORKER",m_core);
 	}

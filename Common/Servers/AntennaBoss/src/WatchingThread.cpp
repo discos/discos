@@ -5,8 +5,8 @@
 
 _IRA_LOGFILTER_IMPORT;
 
-CWatchingThread::CWatchingThread(const ACE_CString& name,IRA::CSecureArea<CBossCore>  *param, 
-			const ACS::TimeInterval& responseTime,const ACS::TimeInterval& sleepTime) : ACS::Thread(name,responseTime,sleepTime), m_core(param)
+CWatchingThread::CWatchingThread(const ACE_CString& name,CBossCore *param,
+			const ACS::TimeInterval& responseTime,const ACS::TimeInterval& sleepTime) : ACS::Thread(name,responseTime,sleepTime), boss(param)
 {
 	AUTO_TRACE("CWatchingThread::CWatchingThread()");
 }
@@ -28,10 +28,8 @@ void CWatchingThread::onStart()
 
  void CWatchingThread::runLoop()
  {
-		IRA::CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("WATCHINGTHREAD:runLoop");
 		try {
-			//printf("updateAttributes\n");
-			if(!resource->updateAttributes()) return;
+			if(!boss->updateAttributes()) return;
 		}
 		catch (ACSErr::ACSbaseExImpl& E) {
 			_ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl,_dummy,E,"CWatchingThread::runLoop()");
@@ -39,7 +37,7 @@ void CWatchingThread::onStart()
 			_IRA_LOGFILTER_LOG_EXCEPTION(_dummy,LM_ERROR);
 		}
 		try {
-			resource->checkStatus();
+			boss->checkStatus();
 		}
 		catch (ACSErr::ACSbaseExImpl& E) {
 			_ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl,_dummy,E,"CWatchingThread::runLoop()");
@@ -47,7 +45,7 @@ void CWatchingThread::onStart()
 			_IRA_LOGFILTER_LOG_EXCEPTION(_dummy,LM_ERROR);
 		}
 		try {
-			resource->publishData();
+			boss->publishData();
 		}
 		catch (ACSErr::ACSbaseExImpl& E) {
 			_ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl,_dummy,E,"CWatchingThread::runLoop()");
