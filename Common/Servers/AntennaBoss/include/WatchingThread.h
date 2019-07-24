@@ -27,7 +27,7 @@ public:
      * @param responseTime thread's heartbeat response time in 100ns unit. Default value is 1s.
      * @param sleepTime thread's sleep time in 100ns unit. Default value is 100ms.
     */
-	CWatchingThread(const ACE_CString& name,IRA::CSecureArea<CBossCore>  *param, 
+	CWatchingThread(const ACE_CString& name,CBossCore *param,
 			const ACS::TimeInterval& responseTime=ThreadBase::defaultResponseTime,const ACS::TimeInterval& sleepTime=ThreadBase::defaultSleepTime);
 
 	/**
@@ -51,7 +51,7 @@ public:
      */
      virtual void runLoop();
 private:
-	IRA::CSecureArea<CBossCore> *m_core;
+	CBossCore *boss;
 };
 
 #endif /*WATCHINGTHREAD_H_*/
