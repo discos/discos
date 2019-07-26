@@ -1393,6 +1393,7 @@ void CBossCore::changeBossStatus(const Management::TSystemStatus& status)
 
 void CBossCore::loadMount(Antenna::Mount_var& ref,bool& errorDetected) const throw (ComponentErrors::CouldntGetComponentExImpl)
 {
+	ThreadSyncGuard guard(&m_mountMutex);  // We take the mutex in order to avoid concurrency errors between the WatchingThread and the WorkingThread
 	if ((ref!=Antenna::Mount::_nil()) && (errorDetected)) { // if reference was already taken, but an error was found....dispose the reference
 		try {
 			m_services->releaseComponent((const char*)ref->name());
@@ -1423,6 +1424,7 @@ void CBossCore::loadMount(Antenna::Mount_var& ref,bool& errorDetected) const thr
 
 void CBossCore::unloadMount(Antenna::Mount_var& ref) const
 {
+	ThreadSyncGuard guard(&m_mountMutex);  // We take the mutex in order to avoid concurrency errors between the WatchingThread and the WorkingThread
 	if (!CORBA::is_nil(ref)) {
 		try {
 			m_services->releaseComponent((const char*)ref->name());
@@ -1442,6 +1444,7 @@ void CBossCore::unloadMount(Antenna::Mount_var& ref) const
 
 void CBossCore::loadPointingModel(Antenna::PointingModel_var& ref) const throw (ComponentErrors::CouldntGetComponentExImpl)
 {
+	ThreadSyncGuard guard(&m_pmMutex);  // We take the mutex in order to avoid concurrency errors between the WatchingThread and the WorkingThread
 	if (CORBA::is_nil(ref)) {  //only if it has not been retrieved yet
 		try {
 			ref=m_services->getComponent<Antenna::PointingModel>((const char*)m_config->getPointingModelInstance());
@@ -1457,6 +1460,7 @@ void CBossCore::loadPointingModel(Antenna::PointingModel_var& ref) const throw (
 
 void CBossCore::loadRefraction(Antenna::Refraction_var& ref) const throw (ComponentErrors::CouldntGetComponentExImpl)
 {
+	ThreadSyncGuard guard(&m_refractionMutex);  // We take the mutex in order to avoid concurrency errors between the WatchingThread and the WorkingThread
 	if (CORBA::is_nil(ref)) {  //only if it has not been retrieved yet
 		try {
 			ref=m_services->getComponent<Antenna::Refraction>((const char*)m_config->getRefractionInstance());
@@ -1472,6 +1476,7 @@ void CBossCore::loadRefraction(Antenna::Refraction_var& ref) const throw (Compon
 
 void CBossCore::unloadPointingModel(Antenna::PointingModel_var& ref) const
 {
+	ThreadSyncGuard guard(&m_pmMutex);  // We take the mutex in order to avoid concurrency errors between the WatchingThread and the WorkingThread
 	if (!CORBA::is_nil(ref)) {
 		try {
 			m_services->releaseComponent((const char*)ref->name());
@@ -1487,6 +1492,7 @@ void CBossCore::unloadPointingModel(Antenna::PointingModel_var& ref) const
 
 void CBossCore::unloadRefraction(Antenna::Refraction_var& ref) const
 {
+	ThreadSyncGuard guard(&m_refractionMutex);  // We take the mutex in order to avoid concurrency errors between the WatchingThread and the WorkingThread
 	if (!CORBA::is_nil(ref)) {
 		try {
 			m_services->releaseComponent((const char*)ref->name());

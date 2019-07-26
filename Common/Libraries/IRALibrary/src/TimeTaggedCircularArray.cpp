@@ -25,11 +25,13 @@ CTimeTaggedCircularArray::~CTimeTaggedCircularArray()
 
 void CTimeTaggedCircularArray::empty()
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	m_head=m_free=0;	
 }
 
 bool CTimeTaggedCircularArray::addPoint(const double& azimuth,const double& elevation,const TIMEVALUE& time)
-{	
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
 	TIMEVALUE *tmp;
 	if (isEmpty()) {
 	}
@@ -47,6 +49,7 @@ bool CTimeTaggedCircularArray::addPoint(const double& azimuth,const double& elev
 
 bool CTimeTaggedCircularArray::getPoint(unsigned pos,double& azimuth,double& elevation,TIMEVALUE& time) const
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	unsigned ss,pp;
 	if (isEmpty()) return false;
 	ss=elements();
@@ -60,21 +63,25 @@ bool CTimeTaggedCircularArray::getPoint(unsigned pos,double& azimuth,double& ele
 
 const double& CTimeTaggedCircularArray::getLastAzimuth() const
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	return m_lastAzimuth;
 }
 
-const double& CTimeTaggedCircularArray::getLastElevation() const 
+const double& CTimeTaggedCircularArray::getLastElevation() const
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	return m_lastElevation;
 }
 
 const TIMEVALUE& CTimeTaggedCircularArray::getLastTime() const
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	return m_lastTime;
 }
 
 unsigned CTimeTaggedCircularArray::elements() const
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	if (isEmpty()) return 0;
 	if (m_head>m_free) return (m_size-m_head)+m_free;
 	else return m_free-m_head;
@@ -82,6 +89,7 @@ unsigned CTimeTaggedCircularArray::elements() const
 
 void CTimeTaggedCircularArray::purge(const TIMEVALUE& time)
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	unsigned ss=elements();
 	unsigned pp=0;
 	for (unsigned i=0;i<ss;i++) {
@@ -93,6 +101,7 @@ void CTimeTaggedCircularArray::purge(const TIMEVALUE& time)
 
 void CTimeTaggedCircularArray::addOffsets(const double& azOff,const double& elOff,const TIMEVALUE& time)
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	unsigned ss=elements();
 	unsigned pp=0;
 	for (unsigned i=0;i<ss;i++) {
@@ -103,6 +112,7 @@ void CTimeTaggedCircularArray::addOffsets(const double& azOff,const double& elOf
 
 void CTimeTaggedCircularArray::selectPoint(const TIMEVALUE& time,double& azimuth,double& elevation) const
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	unsigned ss=elements();
 	unsigned pp=0;
 	TArrayRecord m1,m2;
@@ -185,6 +195,7 @@ void CTimeTaggedCircularArray::selectPoint(const TIMEVALUE& time,double& azimuth
 
 void CTimeTaggedCircularArray::averagePoint(const TIMEVALUE& startTime,const TIMEVALUE& stopTime,double& azimuth,double& elevation) const
 {
+	baci::ThreadSyncGuard guard(&m_mutex);
 	unsigned scroller;
 	unsigned elem=elements();
 	double avgAz=0.0,avgEl=0.0;

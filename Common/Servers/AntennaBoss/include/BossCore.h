@@ -640,6 +640,10 @@ private:
 	 */
 	Antenna::Refraction_var m_refraction;
 	/**
+	 * Mutexes in order to synchronize loadMount, unloadMount, loadRefraction, unloadRefraction, loadPointingModel, unloadPointingModel
+	*/
+	mutable BACIMutex m_mountMutex, m_pmMutex, m_refractionMutex;
+	/**
 	 * if this flag is false no action is taken by the component
 	*/ 
 	bool m_enable;
