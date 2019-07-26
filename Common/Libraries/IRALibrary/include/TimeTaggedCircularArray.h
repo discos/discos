@@ -12,6 +12,7 @@
 /* Andrea Orlati(aorlati@ira.inaf.it) 31/01/2008      changed the algorithm of selectPoint()                                          */
 /* Andrea Orlati(aorlati@ira.inaf.it) 31/01/2008      fixed a bug in selectPoint() that causes  problem when longitude crosses the 360  */
 /* Andrea Orlati(aorlati@ira.inaf.it) 08/09/2010      added the averagePoint method */
+/* G. Carboni(giuseppe.carboni@inaf.it) 26/07/2019    the class is now thread safe                      */
 
 #include <acstimeEpochHelper.h>
 #include "Definitions.h"
@@ -161,6 +162,7 @@ protected:
 private:
 	CTimeTaggedCircularArray(const CTimeTaggedCircularArray&);
 	const CTimeTaggedCircularArray& operator =(const CTimeTaggedCircularArray& src);
+	mutable BACIMutex m_mutex;
 };
 	
 }
