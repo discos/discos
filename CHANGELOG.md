@@ -6,18 +6,47 @@ and this project adheres to [Semantic Versioning](http://semver.org/
 
 ## [discos1.0.2] 01-08-2019
 ### Added
+
+    issue #261 - Added startup procedure scripts also for Noto and Medicina. The startup command is 'discos --start'. Also command line scripts are now avialble 'discosup' and 'discosdown'. The console can be start with 'discosConsole --start'.
+
+    issue #325 - Added command 'dmed=<config>' to control the Medicina DMed (IF distributor). The device just allows to setup a set of programmable attenuators in order to control the singal levels. The `config` select which configuration to apply between a set of predefined one.
+
+    issue #323 - The metClient moved to common part as it is now the general cleint for weather stations. Also the autopark wind threshld is now read from configuration instead of being hardcoded.
+
+    issue #324 - Full support for CHC receiver at Medicina telescope now added. The receiver will be available under two diffent configurations: 1.2GHz and 150MHz bandwidth. The respective setup are achived by issuing the following procedures "SETUPCHC" and "SETUPCHCL".
+
+    issue #361 - Written the PyCalMux component and integrated into the Noto line. Station procedures now execute the 'calmux=<configuration>' script in order to commute to the TotalPower noise calibration channel.
+
+    issue #368 - Added a 'calmux' command to the OperatorInput commands list. Internally it calls the `setup` method of the PyCalmux component.
+
+	issue #369 - Now the Noto StationProcedures perform a default setup to the CalMux device letting it set the calibration noise mark coming from TotalPower as the default one.
+
+    issue #419 - Completed integration and configuration of new primary focus receiver SXL, in Noto.
+
 ### Changed
 
-    - The TimeTaggedCircularArray class is now thread safe.
-    - The SRT Active Surface now is monitored by 8 threads (the same threads that perform its initialization). The USDs statuses are updated inside these threads (roughly once every 15 seconds). The `usdStatus4GUI` method now returns the last read status of the given USD instead of interrogating the hardware in real time.
-    - The changes brought to the SRT Active Surface allowed its GUI to be improved. Since now it asks for the last known status of every USD without interrogating the hardware in real time, the thread is able to go from USD to USD in 10ms instead of 100ms. A complete loop of the USDs now lasts less than 15 seconds, the UI therefore appears much more responsive to the users, allowing them to send commands to the AS earlier than before (the startup time of the whole AS is approximately the same, but the UI catches up more quickly when the ASBoss is ready).
-    - Minor fixes were introduced in the SRT test CDB.
+    issue #316 - Several related commits. The operation releated to the Medicina K band receivers now relies on a new component which is derived directly form the SRT one. Large part of the code is shared between the two servants.
+
+    issue #301 - Noto Weather station has now Generic interface. In this way the MeteoClient can be used in Noto as wll as Medicina and SRT.
+
+    issue #423 - The SRT Active Surface now is monitored by 8 threads (the same threads that perform its initialization). The USDs statuses are updated inside these threads (roughly once every 15 seconds). The 'usdStatus4GUI' method now returns the last read status of the given USD instead of interrogating the hardware in real time. The changes brought to the SRT Active Surface allowed its GUI to be improved. Since now it asks for the last known status of every USD without interrogating the hardware in real time, the thread is able to go from USD to USD in 10ms instead of 100ms. A complete loop of the USDs now lasts less than 15 seconds, the UI therefore appears much more responsive to the users, allowing them to send commands to the AS earlier than it was in the previous release (the startup time of the whole AS is approximately the same, but the UI catches up more quickly when the ASBoss is ready).
+
+    issue #404 - Minor fixes were introduced in the SRT test CDB.
+
+    no issue - The TimeTaggedCircularArray class is now thread safe.
 
 ### Fixed
 
-    - The AntennaBoss WatchingThread is now free to read updated values from the mount component without starving. This was tested in the SRT environment with the ACU simulator. No tests were carried on in the Medicina/Noto environments, but due to the different socket nature of the ACU, this should not be an issue. In a simulated environment, a time gap in the coordinates set happens roughly once every 100000 readings (during source tracking).
-    - The WeatherStation component `getData` method now returns the last known set of weather parameters, without interrogating the hardware every time it was called. Previously, having N clients calling this method resulted in having N times the socket busy. One of the clients was for example the Refraction component, which introduced additional latencies and time gaps into the AntennaBoss WatchingThread.
-    - The Refraction `getCorrection` method now returns a VALUE of 0 when the antenna is pointing to the zenith (or when the elvation is encoded with more than 90 degrees). Previously, the method returned a POINTER equal to 0, which surprisingly never caused any issue other than flooding the jlog with a warning message.
-    - Fixed an issue in the ReceiversBossTui that was preventing the UI to find any derotator in the system.
+    issue #366 - Now the PyCalmux component is kept alive after it gets instanced for the first time in order to avoid setting the default values to the controlled device every time the component is retrieved from some client.
+
+	issue #367 - The PyCalmux component now uses a smarter way to open a socket to the CalMux device in order to avoid raising unwanted socket errors.
+
+    issue #431 - The AntennaBoss WatchingThread is now free to read updated values from the mount component without starving. This was tested in the SRT environment with the ACU simulator. No tests were carried on in the Medicina/Noto environments, but due to the different socket nature of the ACU, this should not be an issue. In a simulated environment, a time gap in the coordinates set happens roughly once every 100000 readings (during source tracking).
+
+    issue #411 - The WeatherStation component 'getData' method now returns the last known set of weather parameters, without interrogating the hardware every time it was called. Previously, having N clients calling this method resulted in having N times the socket busy. One of the clients was for example the Refraction component, which introduced additional latencies and time gaps into the AntennaBoss WatchingThread.
+
+    issue #382 - The Refraction 'getCorrection' method now returns a VALUE of 0 when the antenna is pointing to the zenith (or when the elvation is encoded with more than 90 degrees). Previously, the method returned a POINTER equal to 0, which surprisingly never caused any issue other than flooding the jlog with a warning message.
+
+    issue #402 - Fixed an issue in the ReceiversBossTui that was preventing the UI to find any derotator in the system.
 
 ##
