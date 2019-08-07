@@ -228,6 +228,10 @@ private:
     bool m_profileSetted;
 
     bool m_ASup;
+
+    double m_elevationUpdateStep;
+
+    double m_lastCmdElevation;
 };
 
 #endif /*SRTACTIVESURFACEBOSSCORE_H_*/
