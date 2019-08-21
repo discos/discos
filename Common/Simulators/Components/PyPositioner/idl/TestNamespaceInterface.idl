@@ -1,0 +1,58 @@
+/*************************************************\
+ *  Author: Marco Buttu <marco.buttu@inaf.it>
+\*************************************************/
+
+#ifndef __TESTNAMESPACE_INTERFACE__IDL__ 
+#define __TESTNAMESPACE_INTERFACE__IDL__ 
+
+#include <baci.idl>
+#include <ComponentErrors.idl>
+
+#pragma prefix "alma"
+
+
+module TestNamespaceInterface {
+
+    struct PositionerDataBlock {
+        boolean ready;
+    }; 
+ 
+    const string POSITIONER_DATA_CHANNEL = "PositionerData";
+
+
+    interface Positioner: ACS::CharacteristicComponent
+    {
+   
+        /** Set the position */
+        void setPosition(in double position) 
+            raises (ComponentErrors::ComponentErrorsEx);
+
+
+        /** Return the actual position */
+        double getPosition();
+
+
+        /** Set a dummy sequence */
+        void setSequence(in ACS::doubleSeq seq);
+
+
+        /** Return a dummy sequence */
+        ACS::doubleSeq getSequence();
+
+
+        /** This property reports the status (4 bits pattern) of the Positioner. */
+        readonly attribute ACS::ROpattern status;
+
+        /** This property reports the position of the Positioner. */
+        readonly attribute ACS::ROdouble position;
+
+        /** This property reports the current of the Positioner engine. */
+        readonly attribute ACS::ROdouble current;
+
+        /** A dummy sequence */
+        readonly attribute ACS::ROdoubleSeq seq;
+
+    };
+};
+
+#endif
