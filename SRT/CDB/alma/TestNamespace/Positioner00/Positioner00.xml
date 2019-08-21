@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<Positioner
+    xmlns="urn:schemas-cosylab-com:Positioner:1.0" 
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" 
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+>
+
+    <status
+        description="integer that represents the Positioner status" 
+    />
+
+    <position
+        description="Device position"
+    />
+
+    <current
+        description="Engine current"
+    />
+
+
+    <seq
+        description="a dummy sequence" 
+    />
+
+</Positioner>
