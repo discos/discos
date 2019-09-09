@@ -229,9 +229,7 @@ private:
 
     bool m_ASup;
 
-    double m_elevationUpdateStep;
-
-    double m_lastCmdElevation;
+    bool m_setupCompleted;
 };
 
 #endif /*SRTACTIVESURFACEBOSSCORE_H_*/

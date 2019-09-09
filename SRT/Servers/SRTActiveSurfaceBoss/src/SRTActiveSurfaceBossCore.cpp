@@ -19,9 +19,6 @@ void CSRTActiveSurfaceBossCore::initialize()
 {
 	ACS_LOG(LM_FULL_INFO,"CSRTActiveSurfaceBossCore::initialize()",(LM_INFO,"CSRTActiveSurfaceBossCore::initialize"));
 
-	if(!CIRATools::getDBValue(m_services,"ElevationUpdateStep",m_elevationUpdateStep))
-		m_elevationUpdateStep = 0.1;  //a tenth of degree
-
 	m_enable = false;
 	m_tracking = false;
 	m_status = Management::MNG_WARNING;
@@ -44,7 +41,7 @@ void CSRTActiveSurfaceBossCore::initialize()
 
 	m_profileSetted = false;
 	m_ASup = false;
-	m_lastCmdElevation = -1.0;  //This will ensure the first elevation to be commanded will have a delta greater than half a degree
+	m_setupCompleted = false;
 }
 
 void CSRTActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetComponentExImpl)
@@ -1021,8 +1018,10 @@ void CSRTActiveSurfaceBossCore::onewayAction(ActiveSurface::TASOneWayAction onew
 							case ActiveSurface::AS_PROFILE:
 								usd[i][l]->setProfile(profile);
 								break;
+							case ActiveSurface::AS_STATUSUPDATE:
+								usd[i][l]->updateStatus();
+								break;
 						}
-						CIRATools::Wait(100); //this allows the status4GUI method to be completed without starving
 					}
 					catch (ASErrors::ASErrorsEx& E)
 					{
@@ -1043,6 +1042,7 @@ void CSRTActiveSurfaceBossCore::onewayAction(ActiveSurface::TASOneWayAction onew
 						_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CSRTActiveSurfaceBossCore::onewayAction()");
 						impl.log();
 					}
+					CIRATools::Wait(10);
 				}
 				else
 				{
@@ -1097,8 +1097,10 @@ void CSRTActiveSurfaceBossCore::onewayAction(ActiveSurface::TASOneWayAction onew
 							break;
 						case ActiveSurface::AS_PROFILE:
 							break;
+						case ActiveSurface::AS_STATUSUPDATE:
+							usd[circle][l]->updateStatus();
+							break;
 					}
-					CIRATools::Wait(100); //this allows the status4GUI method to be completed without starving
 				}
 				catch (ComponentErrors::ComponentErrorsEx& E)
 				{
@@ -1119,6 +1121,7 @@ void CSRTActiveSurfaceBossCore::onewayAction(ActiveSurface::TASOneWayAction onew
 					_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CSRTActiveSurfaceBossCore::oneWayAction()");
 					impl.log();
 				}
+				CIRATools::Wait(10);
 			}
 			else
 			{
@@ -1179,8 +1182,10 @@ void CSRTActiveSurfaceBossCore::onewayAction(ActiveSurface::TASOneWayAction onew
 							break;
 						case ActiveSurface::AS_PROFILE:
 							break;
+						case ActiveSurface::AS_STATUSUPDATE:
+							lanradius[l+jumpradius][radius]->updateStatus();
+							break;
 					}
-					CIRATools::Wait(100); //this allows the status4GUI method to be completed without starving
 				}
 				catch (ComponentErrors::ComponentErrorsEx& E)
 				{
@@ -1201,6 +1206,7 @@ void CSRTActiveSurfaceBossCore::onewayAction(ActiveSurface::TASOneWayAction onew
 					_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CSRTActiveSurfaceBossCore::oneWayAction()");
 					impl.log();
 				}
+				CIRATools::Wait(10);
 			}
 			else
 			{
@@ -1251,6 +1257,9 @@ void CSRTActiveSurfaceBossCore::onewayAction(ActiveSurface::TASOneWayAction onew
 						usd[circle][actuator]->move(incr*MM2STEP);
 						break;
 					case ActiveSurface::AS_PROFILE:
+						break;
+					case ActiveSurface::AS_STATUSUPDATE:
+						usd[circle][actuator]->updateStatus();
 						break;
 				}
 			}
@@ -1379,7 +1388,7 @@ void CSRTActiveSurfaceBossCore::watchingActiveSurfaceStatus() throw (ComponentEr
 
 void CSRTActiveSurfaceBossCore::checkUSD(int sector, int lanIndex, int circleIndex, int usdCircleIndex, std::string serial_usd) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx)
 {
-	if(CORBA::is_nil(usd[circleIndex][usdCircleIndex]))
+	if (CORBA::is_nil(usd[circleIndex][usdCircleIndex]))
 	{
 		try
 		{
@@ -1393,10 +1402,6 @@ void CSRTActiveSurfaceBossCore::checkUSD(int sector, int lanIndex, int circleInd
 			Impl.log(LM_DEBUG);
 		}
 	}
-	else
-	{
-		usd[circleIndex][usdCircleIndex]->updateStatus();
-	}
 }
 
 void CSRTActiveSurfaceBossCore::sectorSetupCompleted(int sector)
@@ -1406,47 +1411,66 @@ void CSRTActiveSurfaceBossCore::sectorSetupCompleted(int sector)
 		printf("sector%d done\n", sector+1);
 		m_sector[sector] = true;
 	}
+
+	bool all_sectors = true;
+	for(unsigned int i = 0; i < SECTORS; i++)
+		if(!m_sector[i]) all_sectors = false;
+
+	if (all_sectors)
+	{
+		m_setupCompleted = true;
+	}
 }
 
 void CSRTActiveSurfaceBossCore::workingActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx)
 {
-	if (AutoUpdate)
+	if (m_setupCompleted) //this means the setup phase has ended
 	{
-		TIMEVALUE now;
-		double azimuth=0.0;
-		double elevation=0.0;
-
-		IRA::CIRATools::getTime(now);
-
-		if (!CORBA::is_nil(m_antennaBoss))
+		try
 		{
 			try
 			{
-				m_antennaBoss->getRawCoordinates(now.value().value, azimuth, elevation);
-				elevation *= DR2D;
+				onewayAction(ActiveSurface::AS_STATUSUPDATE, 0, 0, 0, 0, 0, 0, m_profile);
 			}
-			catch (CORBA::SystemException& ex)
+			catch (ComponentErrors::ComponentErrorsExImpl& ex)
 			{
-				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CSRTActiveSurfaceBossCore::workingActiveSurface()");
-				impl.setName(ex._name());
-				impl.setMinor(ex.minor());
-				m_status=Management::MNG_WARNING;
-				//asPark();
-				throw impl;
+				ex.log(LM_DEBUG);
+				throw ex.getComponentErrorsEx();
 			}
-			if (fabs(elevation - m_lastCmdElevation) >= m_elevationUpdateStep)
+
+			if (AutoUpdate)
 			{
-				try
+				if (!CORBA::is_nil(m_antennaBoss))
 				{
-					onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, elevation, 0, 0, m_profile);
-					m_lastCmdElevation = elevation;
-				}
-				catch (ComponentErrors::ComponentErrorsExImpl& ex)
-				{
-					ex.log(LM_DEBUG);
-					throw ex.getComponentErrorsEx();
+					TIMEVALUE now;
+					double azimuth=0.0;
+					double elevation=0.0;
+
+					IRA::CIRATools::getTime(now);
+				
+					m_antennaBoss->getRawCoordinates(now.value().value, azimuth, elevation);
+					elevation *= DR2D;
+
+					try
+					{
+						onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, elevation, 0, 0, m_profile);
+					}
+					catch (ComponentErrors::ComponentErrorsExImpl& ex)
+					{
+						ex.log(LM_DEBUG);
+						throw ex.getComponentErrorsEx();
+					}
 				}
 			}
+		}
+		catch (CORBA::SystemException& ex)
+		{
+			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CSRTActiveSurfaceBossCore::workingActiveSurface()");
+			impl.setName(ex._name());
+			impl.setMinor(ex.minor());
+			m_status=Management::MNG_WARNING;
+			//asPark();
+			throw impl;
 		}
 	}
 }
@@ -1455,11 +1479,7 @@ void CSRTActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newP
 {
 	int s, i, l;
 
-	bool all_sectors = true;
-	for(unsigned int i = 0; i < SECTORS; i++)
-		if(!m_sector[i]) all_sectors = false;
-
-	if (all_sectors)
+	if (m_setupCompleted)
 	{
 		ifstream usdCorrections (USDTABLECORRECTIONS);
 		if (!usdCorrections) {
@@ -1484,7 +1504,6 @@ void CSRTActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newP
 
 		usdCounter = 0;
 		for(unsigned int i = 0; i < SECTORS; i++) {
-			m_sector[i] = false;
 			usdCounter += usdCounters[i];
 		}
 
@@ -1665,9 +1684,6 @@ void CSRTActiveSurfaceBossCore::setActuator(int circle, int actuator, long int& 
 
 void CSRTActiveSurfaceBossCore::usdStatus4GUIClient(int circle, int actuator, CORBA::Long_out status) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl)
 {
-	ACS::ROpattern_var status_var;
-	ACSErr::Completion_var completion;
-
 	if (!CORBA::is_nil(usd[circle][actuator]))
 	{
 		try
