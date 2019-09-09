@@ -18,15 +18,15 @@ void CSRTActiveSurfaceBossWorkingThread::onStart()
 
 void CSRTActiveSurfaceBossWorkingThread::onStop()
 {
-	 AUTO_TRACE("CSRTActiveSurfaceBossWorkingThread::onStop()");
+	AUTO_TRACE("CSRTActiveSurfaceBossWorkingThread::onStop()");
 }
 
 void CSRTActiveSurfaceBossWorkingThread::runLoop()
 {
-    try {
-        boss->workingActiveSurface();
-    }
-    catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+	try {
+		boss->workingActiveSurface();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
-    }
+	}
 }

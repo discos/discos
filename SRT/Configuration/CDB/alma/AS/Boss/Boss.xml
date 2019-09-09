@@ -386,7 +386,7 @@
    -   Tue Jun 26 14:34:39 UTC 2018 modified by jDAL
    -   Tue Jun 26 14:35:27 UTC 2018 modified by jDAL
 -->
-<SRTActiveSurfaceBoss xmlns="urn:schemas-cosylab-com:SRTActiveSurfaceBoss:1.0" xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" WatchingThreadTime="200000" RepetitionCacheTime="2000000" RepetitionExpireTime="5000000" ElevationUpdateStep="0.1" profile="4">
+<SRTActiveSurfaceBoss xmlns="urn:schemas-cosylab-com:SRTActiveSurfaceBoss:1.0" xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" WatchingThreadTime="200000" RepetitionCacheTime="2000000" RepetitionExpireTime="5000000" profile="4">
 	<status />
 	<enabled />
 	<pprofile />

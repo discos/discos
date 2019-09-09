@@ -31,7 +31,7 @@ void CSRTActiveSurfaceBossSectorThread::prepare(int sector)
     if(m_ready) return;
     m_ready = true;
 
-    //for setup phase we set the sleep time to 1ms in order to be fast
+    //we set the sleep time to 1ms in order to be fast
     this->setSleepTime(10000);
 
     m_sector = sector;
@@ -77,8 +77,7 @@ void CSRTActiveSurfaceBossSectorThread::runLoop()
     m_index++;
     if(m_index == m_usd_count)
     {
-        this->setSleepTime(1000000); //setup phase ended, set the sleep time at 100ms
         boss->sectorSetupCompleted(m_sector);
-        m_index = 0;
+        this->suspend();
     }
 }

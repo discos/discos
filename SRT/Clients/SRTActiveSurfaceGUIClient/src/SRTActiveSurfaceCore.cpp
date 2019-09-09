@@ -74,6 +74,10 @@ void SRTActiveSurfaceCore::run(void)
 
     while (monitor == true)
     {
+        TIMEVALUE clock;
+        CIRATools::getTime(clock);
+        ACS::Time t0 = clock.value().value;
+
         if (totalactuators >= 1 && totalactuators <= 24) // 1 circle
             i= 1;
         if (totalactuators >= 25 && totalactuators <= 48)  // 2 circle
@@ -119,7 +123,6 @@ void SRTActiveSurfaceCore::run(void)
         //set the current USD color to yellow to identify which one is being checked
         theActuatorStatusColorString = "background-color: rgb(255, 255, 0);";
         emit setGUIActuatorColor(i, l, theActuatorStatusColorString);
-		CIRATools::Wait(0,10000);
 
         bossStatus_var = tASBoss->status();
         bossStatus_val = bossStatus_var->get_sync(completion.out());
@@ -134,7 +137,6 @@ void SRTActiveSurfaceCore::run(void)
                 ASstatusCode = -2;
                 break;
         }
-        emit setGUIasStatusCode();
 
         asProfile_var = tASBoss->pprofile();
         asProfile_val = asProfile_var->get_sync(completion.out());
@@ -155,7 +157,6 @@ void SRTActiveSurfaceCore::run(void)
                 asProfileCode = 4;
                 break;
         }
-        emit setGUIasProfileCode();
 
         try {
             tASBoss->usdStatus4GUIClient(i,l,status);
@@ -171,7 +172,6 @@ void SRTActiveSurfaceCore::run(void)
             //setactuatorcolor(i, l, ActuatorStatus_color);
             fromRun = true;
             //theCircle = i; theActuator = l;
-            emit setGUIActuatorColor(i, l, theActuatorStatusColorString);
             //fromRun = false;
         }
         catch (ComponentErrors::ComponentNotActiveExImpl& ex) {
@@ -181,7 +181,6 @@ void SRTActiveSurfaceCore::run(void)
             // setactuatorcolor(i, l, ActuatorStatus_color);
             fromRun = true;
             //theCircle = i; theActuator = l;
-            emit setGUIActuatorColor(i, l, theActuatorStatusColorString);
             //fromRun = false;
             ex.log(LM_DEBUG);
         }
@@ -191,7 +190,6 @@ void SRTActiveSurfaceCore::run(void)
             // setactuatorcolor(i, l, ActuatorStatus_color);
             fromRun = true;
             //theCircle = i; theActuator = l;
-            emit setGUIActuatorColor(i, l, theActuatorStatusColorString);
             //fromRun = false;
             _EXCPT(ClientErrors::CORBAProblemExImpl,impl,"SRTActiveSurfaceGUIClient::SRTActiveSurfaceCore::run()");
             impl.setName(sysEx._name());
@@ -205,22 +203,32 @@ void SRTActiveSurfaceCore::run(void)
             // setactuatorcolor(i, l, ActuatorStatus_color);
             fromRun = true;
             //theCircle = i; theActuator = l;
-            emit setGUIActuatorColor(i, l, theActuatorStatusColorString);
             //fromRun = false;
             _EXCPT(ClientErrors::UnknownExImpl,impl,"SRTActiveSurfaceGUIClient::SRTActiveSurfaceCore::run()");
             impl.log();
 		//printf("usd %d_%d unknown ex\n", i, l);
         }
-		
-		totalactuators++;
-		l++;
-		if (totalactuators == 1117) {
-		    i = l = totalactuators = 1;
-		}
-		circlecounter = i;
-		actuatorcounter = l;
-		totacts = totalactuators;
 
+        CIRATools::getTime(clock);
+        ACS::Time t1 = clock.value().value;
+        int elapsed = (t1 - t0) / 10;
+
+        //wait for 10ms minus the elapsed time since the start of this iteration
+        CIRATools::Wait(0, std::max(0, 10000 - elapsed));
+
+        // finally update the GUI
+        emit setGUIasStatusCode();
+        emit setGUIasProfileCode();
+        emit setGUIActuatorColor(i, l, theActuatorStatusColorString);
+
+        totalactuators++;
+        l++;
+        if (totalactuators == 1117) {
+            i = l = totalactuators = 1;
+        }
+        circlecounter = i;
+        actuatorcounter = l;
+        totacts = totalactuators;
 	} // end of while
 }
 
