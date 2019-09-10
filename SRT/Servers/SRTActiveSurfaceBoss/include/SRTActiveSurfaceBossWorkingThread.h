@@ -27,7 +27,7 @@ public:
      * @param responseTime thread's heartbeat response time in 100ns unit. Default value is 1s.
      * @param sleepTime thread's sleep time in 100ns unit. Default value is 100ms.
     */
-	CSRTActiveSurfaceBossWorkingThread(const ACE_CString& name,CSRTActiveSurfaceBossCore *param,
+	CSRTActiveSurfaceBossWorkingThread(const ACE_CString& name,IRA::CSecureArea<CSRTActiveSurfaceBossCore>  *param, 
 			const ACS::TimeInterval& responseTime=ThreadBase::defaultResponseTime,const ACS::TimeInterval& sleepTime=ThreadBase::defaultSleepTime);
 
 	/**
@@ -52,7 +52,8 @@ public:
      virtual void runLoop();
 
 private:
-	CSRTActiveSurfaceBossCore *boss;
+
+	IRA::CSecureArea<CSRTActiveSurfaceBossCore> *m_core;
 };
 
 #endif /*_SRTACTIVESURFACEBOSSWORKINGTHREAD_H_*/

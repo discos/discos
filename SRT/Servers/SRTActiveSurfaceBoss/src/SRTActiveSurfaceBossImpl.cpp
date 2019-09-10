@@ -95,8 +95,8 @@ void SRTActiveSurfaceBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	}
     boss->initialize();
 	try {
-		m_workingThread=getContainerServices()->getThreadManager()->create<CSRTActiveSurfaceBossWorkingThread,CSRTActiveSurfaceBossCore *>
-		  ("SRTACTIVESURFACEBOSSWORKER",boss);
+		m_workingThread=getContainerServices()->getThreadManager()->create<CSRTActiveSurfaceBossWorkingThread,CSecureArea<CSRTActiveSurfaceBossCore> *>
+		  ("SRTACTIVESURFACEBOSSWORKER",m_core);
 	}
 	catch (acsthreadErrType::acsthreadErrTypeExImpl& ex) {
 		_ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,_dummy,ex,"SRTActiveSurfaceBossImpl::initialize()");
@@ -113,7 +113,7 @@ void SRTActiveSurfaceBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		threadName << sector+1;
 		try {
 			CSRTActiveSurfaceBossSectorThread* sectorThread = getContainerServices()->getThreadManager()->create<CSRTActiveSurfaceBossSectorThread,CSRTActiveSurfaceBossCore *> (threadName.str().c_str(), boss);
-			sectorThread->prepare(sector);
+			sectorThread->setSector(sector);
 			m_sectorThread.push_back(sectorThread);
 		}
 		catch (acsthreadErrType::acsthreadErrTypeExImpl& ex) {
@@ -165,8 +165,9 @@ void SRTActiveSurfaceBossImpl::execute() throw (ACSErr::ACSbaseExImpl)
 	m_workingThread->resume();
 	m_workingThread->setSleepTime(LOOPWORKINGTIME);
 
-	for(unsigned int i = 0; i < m_sectorThread.size(); i++)
+	for(int i = 0; i < m_sectorThread.size(); i++)
 	{
+		m_sectorThread[i]->setSleepTime(SECTORTIME);
 		m_sectorThread[i]->resume();
 	}
 
@@ -181,7 +182,7 @@ void SRTActiveSurfaceBossImpl::cleanUp()
         m_workingThread->suspend();
     	getContainerServices()->getThreadManager()->destroy(m_workingThread);
     }
-    for(unsigned int i = 0; i < m_sectorThread.size(); i++)
+    for(int i = 0; i < m_sectorThread.size(); i++)
     {
         if(m_sectorThread[i] != NULL)
         {
@@ -423,8 +424,9 @@ void SRTActiveSurfaceBossImpl::usdStatus4GUIClient (CORBA::Long circle, CORBA::L
 {
 	AUTO_TRACE("SRTActiveSurfaceBossImpl::usdStatus4GUIClient()");
 
+    CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
     try {
-        boss->usdStatus4GUIClient(circle, actuator, status);
+        resource->usdStatus4GUIClient(circle, actuator, status);
     }
     catch (ComponentErrors::ComponentErrorsExImpl& ex) {
         ex.log(LM_DEBUG);
