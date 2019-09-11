@@ -121,10 +121,6 @@ public:
 
     void sectorActiveSurface(int sector) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx);
 
-    void checkUSD(int sector, int lanIndex, int circleIndex, int usdCircleIndex, std::string serial_usd) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx);
-
-    void sectorSetupCompleted(int sector);
-
     void watchingActiveSurfaceStatus() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl);
 
     void usdStatus4GUIClient(int circle, int actuator, CORBA::Long_out status) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl);

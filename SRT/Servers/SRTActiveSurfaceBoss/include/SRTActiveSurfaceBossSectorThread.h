@@ -49,21 +49,18 @@ public:
       * This method overrides the thread implementation class.
       * The thread can be exited by calling ACS::ThreadBase::stop or ACS::ThreadBase::exit command.
      */
-     virtual void runLoop();
+     virtual void run();
 
      /**
       * This method is used to set the sector to be initialized. It MUST be called before starting the thread execution
      */
-     virtual void prepare(int sector);
+     virtual void setSector(int sector);
 
 private:
 
     IRA::CSecureArea<CSRTActiveSurfaceBossCore> *m_core;
     CSRTActiveSurfaceBossCore *boss;
-    int m_sector, m_index, m_usd_count;
-    bool m_ready;
-    std::vector<int> m_lanIndexes, m_circleIndexes, m_usdCircleIndexes;
-    std::vector<std::string> m_serial_usds;
+    int m_sector;
 };
 
 #endif /*_SRTACTIVESURFACEBOSSSECTORTHREAD_H_*/

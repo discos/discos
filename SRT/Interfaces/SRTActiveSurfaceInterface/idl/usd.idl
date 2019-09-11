@@ -185,16 +185,6 @@ module ActiveSurface
     	*/
     	oneway void top();
     	oneway void bottom();
-
-        /**
-        *   Get the last read status of the USD
-        */
-        long getStatus();
-
-        /**
-        *   Update the status of the USD
-        */
-        oneway void updateStatus();
 	};
 
 };

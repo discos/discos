@@ -28,16 +28,10 @@ void CSRTActiveSurfaceBossCore::initialize()
 	{
 		m_sector.push_back(false);
 		usdCounters.push_back(0);
+		lanIndexes.push_back(0);
+		circleIndexes.push_back(0);
+		usdCircleIndexes.push_back(0);
 	}
-
-	for(int i = 0; i < CIRCLES+2; i++)
-	{
-		for(int j = 0; j < ACTUATORS+2; j++)
-		{
-			usd[i][j] = ActiveSurface::USD::_nil();
-		}
-	}
-
 	m_profileSetted = false;
 	m_ASup = false;
 }
@@ -152,54 +146,55 @@ void CSRTActiveSurfaceBossCore::cleanUp()
 
 	ACS_LOG(LM_FULL_INFO, "CSRTActiveSurfaceBossCore::cleanUp()", (LM_INFO,"Releasing usd...wait"));
 
-	for(int sector = 0; sector < SECTORS; sector++)
-	{
-		std::stringstream value;
-		value << CDBPATH;
-		value << "alma/AS/tab_convUSD_S";
-		value << sector+1;
-		value << ".txt";
+    for(int sector = 0; sector < SECTORS; sector++)
+    {
+        std::stringstream value;
+        value << CDBPATH;
+        value << "alma/AS/tab_convUSD_S";
+        value << sector+1;
+        value << ".txt";
 
-		ifstream usdTable(value.str().c_str());
-		std::string buffer;
+        ifstream usdTable(value.str().c_str());
+        std::string buffer;
 
-		while(getline(usdTable, buffer))
-		{
-			std::stringstream line;
-			line << buffer;
-			line >> lanIndex >> circleIndex >> usdCircleIndex >> serial_usd >> graf >> mecc;
+        while(getline(usdTable, buffer))
+        {
+            std::stringstream line;
+            line << buffer;
+            line >> lanIndex >> circleIndex >> usdCircleIndex >> serial_usd >> graf >> mecc;
 
-			try
-			{
-				if (!CORBA::is_nil(usd[circleIndex][usdCircleIndex]))
-				{
-					printf("releasing usd = %s\n", serial_usd);
-					m_services->releaseComponent((const char*)serial_usd);
-				}
-			}
-			catch (maciErrType::CannotReleaseComponentExImpl & ex)
-			{
-				_ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::cleanUp()");
-				Impl.setComponentName((const char *)serial_usd);
-				Impl.log(LM_DEBUG);
-			}
-		}
-	}
-	try
-	{
-		m_services->releaseComponent((const char*)m_antennaBoss->name());
-	}
-	catch (maciErrType::CannotReleaseComponentExImpl& ex)
-	{
-		_ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::cleanUp()");
-		Impl.setComponentName((const char *)m_antennaBoss->name());
-		Impl.log(LM_DEBUG);
-	}
+            try
+            {
+                if(!CORBA::is_nil(usd[circleIndex][usdCircleIndex]))
+                {
+                    printf("releasing usd = %s\n", serial_usd);
+                    m_services->releaseComponent((const char*)serial_usd);
+                }
+            }
+            catch(maciErrType::CannotReleaseComponentExImpl& ex)
+            {
+                _ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::cleanUp()");
+                Impl.setComponentName((const char *)serial_usd);
+                Impl.log(LM_DEBUG);
+            }
+        }
+    }
+
+    try
+    {
+        m_services->releaseComponent((const char*)m_antennaBoss->name());
+    }
+    catch(maciErrType::CannotReleaseComponentExImpl& ex)
+    {
+        _ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::cleanUp()");
+        Impl.setComponentName((const char *)m_antennaBoss->name());
+        Impl.log(LM_DEBUG);
+    }
 }
 
 void CSRTActiveSurfaceBossCore::reset (int circle, int actuator, int radius) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentNotActiveExImpl)
 {
-    if (circle == 0 && actuator == 0 && radius == 0) // ALL
+    if (circle == 0 && actuator == 0 &&radius == 0) // ALL
 	{
         	int i, l;
 		for (i = 1; i <= CIRCLES; i++)
@@ -1024,7 +1019,7 @@ void CSRTActiveSurfaceBossCore::onewayAction(ActiveSurface::TASOneWayAction onew
                                 				usd[i][l]->setProfile(profile);
                                 			break;
                         			}
-						CIRATools::Wait(100); //this allows the status4GUI method to be completed without starving
+						//CIRATools::Wait(500);
 					}
 					catch (ASErrors::ASErrorsEx& E) {
 						_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,E,"CSRTActiveSurfaceBossCore::onewayAction()");
@@ -1097,7 +1092,7 @@ void CSRTActiveSurfaceBossCore::onewayAction(ActiveSurface::TASOneWayAction onew
                         case ActiveSurface::AS_PROFILE:
                             break;
                     }
-					CIRATools::Wait(100); //this allows the status4GUI method to be completed without starving
+					//CIRATools::Wait(LOOPTIME);
                 }
 				catch (ComponentErrors::ComponentErrorsEx& E) {
 					    _ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,E,"CSRTActiveSurfaceBossCore::oneWayAction()");
@@ -1169,7 +1164,7 @@ void CSRTActiveSurfaceBossCore::onewayAction(ActiveSurface::TASOneWayAction onew
                         case ActiveSurface::AS_PROFILE:
                             break;
                     }
-					CIRATools::Wait(100); //this allows the status4GUI method to be completed without starving
+					//CIRATools::Wait(LOOPTIME);
                 }
                 catch (ComponentErrors::ComponentErrorsEx& E) {
 					    _ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,E,"CSRTActiveSurfaceBossCore::oneWayAction()");
@@ -1354,38 +1349,50 @@ void CSRTActiveSurfaceBossCore::watchingActiveSurfaceStatus() throw (ComponentEr
     //printf("NO error\n");
 }
 
-void CSRTActiveSurfaceBossCore::checkUSD(int sector, int lanIndex, int circleIndex, int usdCircleIndex, std::string serial_usd) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx)
+void CSRTActiveSurfaceBossCore::sectorActiveSurface(int sector) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx)
 {
-	if(CORBA::is_nil(usd[circleIndex][usdCircleIndex]))
+	if (sector == -1) {
+		ACS_SHORT_LOG ((LM_INFO, "You have to set a sector first!"));
+		exit(-1);
+	}
+
+	printf("sector%d start\n", sector+1);
+	char serial_usd[23];
+	char graf[5], mecc[4];
+	std::stringstream value;
+	value << CDBPATH;
+	value << "alma/AS/tab_convUSD_S";
+	value << sector+1;
+	value << ".txt";
+
+	ifstream usdTable(value.str().c_str());
+	if (!usdTable) {
+		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value.str().c_str()));
+		exit(-1);
+	}
+
+	// Get reference to usd components
+	while (usdTable >> lanIndexes[sector] >> circleIndexes[sector] >> usdCircleIndexes[sector] >> serial_usd >> graf >> mecc)
 	{
+		usd[circleIndexes[sector]][usdCircleIndexes[sector]] = ActiveSurface::USD::_nil();
+
 		try
 		{
-			printf("S%d: circleIndexS%d = %d, usdCircleIndexS%d = %d\n", sector+1, sector+1, circleIndex, sector+1, usdCircleIndex);
-
-
-			lanradius[circleIndex][lanIndex] = usd[circleIndex][usdCircleIndex] = m_services->getComponent<ActiveSurface::USD>(serial_usd.c_str());
+			printf("S%d: circleIndexS%d = %d, usdCircleIndexS%d = %d\n", sector+1, sector+1, circleIndexes[sector], sector+1, usdCircleIndexes[sector]);
+			usd[circleIndexes[sector]][usdCircleIndexes[sector]] = m_services->getComponent<ActiveSurface::USD>(serial_usd);
+			lanradius[circleIndexes[sector]][lanIndexes[sector]] = usd[circleIndexes[sector]][usdCircleIndexes[sector]];
 			usdCounters[sector]++;
 		}
 		catch (maciErrType::CannotGetComponentExImpl& ex)
 		{
-			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::checkUSD()");
-			Impl.setComponentName(serial_usd.c_str());
+			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::sectorActiveSurface()");
+			Impl.setComponentName(serial_usd);
 			Impl.log(LM_DEBUG);
 		}
 	}
-	else
-	{
-		usd[circleIndex][usdCircleIndex]->updateStatus();
-	}
-}
 
-void CSRTActiveSurfaceBossCore::sectorSetupCompleted(int sector)
-{
-	if(!m_sector[sector])
-	{
-		printf("sector%d done\n", sector+1);
-		m_sector[sector] = true;
-	}
+	printf("sector%d done\n", sector+1);
+	m_sector[sector] = true;
 }
 
 void CSRTActiveSurfaceBossCore::workingActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx)
@@ -1636,26 +1643,30 @@ void CSRTActiveSurfaceBossCore::setActuator(int circle, int actuator, long int& 
 void CSRTActiveSurfaceBossCore::usdStatus4GUIClient(int circle, int actuator, CORBA::Long_out status) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl)
 {
 	ACS::ROpattern_var status_var;
-	ACSErr::Completion_var completion;
+    	ACSErr::Completion_var completion;
 
-	if (!CORBA::is_nil(usd[circle][actuator]))
-	{
-		try
-		{
-			status = usd[circle][actuator]->getStatus();
-		}
-		catch (CORBA::SystemException& ex)
-		{
-			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CSRTActiveSurfaceBossCore::usdStatus4GUIClient()");
-			impl.setName(ex._name());
+    	if (!CORBA::is_nil(usd[circle][actuator])) {
+        	try {
+            		status_var = usd[circle][actuator]->status ();
+            		status = status_var->get_sync (completion.out ());
+        	}
+        	catch (CORBA::SystemException& ex) {
+            		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CSRTActiveSurfaceBossCore::usdStatus4GUIClient()");
+            		impl.setName(ex._name());
 			impl.setMinor(ex.minor());
-			throw impl;
+            		throw impl;
 		}
-	}
-	else
-	{
-		_THROW_EXCPT(ComponentErrors::ComponentNotActiveExImpl,"CSRTActiveSurfaceBossCore::usdStatus4GUIClient()");
-	}
+        /*CompletionImpl local(completion);
+        if (!local.isErrorFree()) {
+            _ADD_BACKTRACE(ComponentErrors::CouldntGetAttributeExImpl,impl,local,"CSRTActiveSurfaceBossCore::usdStatus4GUIClient()");
+			impl.setComponentName((const char*)usd[circle][actuator]->name());
+			impl.setAttributeName("usd status");
+			throw impl;
+		}*/
+    	}
+    	else {
+        	_THROW_EXCPT(ComponentErrors::ComponentNotActiveExImpl,"CSRTActiveSurfaceBossCore::usdStatus4GUIClient()");
+    	}
 }
 
 void CSRTActiveSurfaceBossCore::recoverUSD(int circleIndex, int usdCircleIndex) throw (ComponentErrors::CouldntGetComponentExImpl)
@@ -1983,4 +1994,3 @@ void CSRTActiveSurfaceBossCore::checkAScompletionerrors (char *str, int circle, 
       break;
     }
 }
-
