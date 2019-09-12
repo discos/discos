@@ -73,6 +73,9 @@ void SRTActiveSurfaceCore::run(void)
 
 
     while (monitor == true) {
+        TIMEVALUE clock;
+        CIRATools::getTime(clock);
+        ACS::Time t0 = clock.value().value;
 
         bossStatus_var = tASBoss->status();
         bossStatus_val = bossStatus_var->get_sync(completion.out());
@@ -216,8 +219,13 @@ void SRTActiveSurfaceCore::run(void)
 		actuatorcounter = l;
 		totacts = totalactuators;
 
-		CIRATools::Wait(0,100000);
-	} // end of while
+        CIRATools::getTime(clock);
+        ACS::Time t1 = clock.value().value;
+        int elapsed = (t1 - t0) / 10; //Time is expressed in hundreds of nanoseconds, we convert it to microseconds in order to use it with the Wait function
+
+        if(elapsed < 100000)
+            CIRATools::Wait(100000 - elapsed);
+    } // end of while
 }
 
 void SRTActiveSurfaceCore::setactuator(int circle, int actuator)
