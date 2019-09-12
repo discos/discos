@@ -224,9 +224,7 @@ void SRTActiveSurfaceCore::run(void)
         int elapsed = (t1 - t0) / 10; //Time is expressed in hundreds of nanoseconds, we convert it to microseconds in order to use it with the Wait function
 
         if(elapsed < 100000)
-        {
-            CIRATools::Wait(std::max(0, 100000 - elapsed));
-        }
+            CIRATools::Wait(100000 - elapsed);
     } // end of while
 }
 
