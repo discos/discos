@@ -567,7 +567,7 @@ void USDImpl::posTable (const ACS::doubleSeq& theActuatorsCorrections, CORBA::Lo
 	if(elevations != NULL)
 		delete [] elevations;
 	actuatorsCorrections = new double [parPositions];
-	elevations = new double [parPositions];
+	elevations = new double [parPositions-1];
 	for (int s = 0; s < parPositions; s++) {
 		actuatorsCorrections [s] = theActuatorsCorrections[s];
 		if (s < parPositions-1)
