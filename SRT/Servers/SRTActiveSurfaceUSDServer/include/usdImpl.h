@@ -563,6 +563,7 @@ class USDImpl: public CharacteristicComponentImpl,public virtual POA_ActiveSurfa
 	* threshold between actual and updated position
 	*/
 	double *actuatorsCorrections;
+	double *elevations;
 	int parPositions;
 	double deltaEL;
 	int threshold;
@@ -572,6 +573,11 @@ class USDImpl: public CharacteristicComponentImpl,public virtual POA_ActiveSurfa
 	*/
 	double m_cammaLenD;
 	double m_cammaPosD;
+
+	/**
+	* last commanded position (steps)
+	*/
+	int m_lastCmdStep;
 
     	/**
     	* usefull range in step
