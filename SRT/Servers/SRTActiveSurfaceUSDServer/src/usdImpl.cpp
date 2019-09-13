@@ -38,7 +38,8 @@ USDImpl::USDImpl(const ACE_CString& CompName, maci::ContainerServices* container
     	m_userOffset_sp(this)	
 { 
 	ACS_SHORT_LOG((LM_INFO,"::USDImpl::USDImpl: constructor;Constructor!"));
-    actuatorsCorrections = NULL;
+	actuatorsCorrections = NULL;
+	elevations = NULL;
 }
 
 void USDImpl::initialize() throw (ACSErr::ACSbaseExImpl)
@@ -65,6 +66,7 @@ void USDImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		ASErrors::CDBAccessErrorExImpl exImpl(__FILE__,__LINE__,"USDImpl::initialize() - Error reading CDB parameters");
 		throw acsErrTypeLifeCycle::LifeCycleExImpl(exImpl,__FILE__,__LINE__,"USDImpl::initialize()");
 	}
+	m_lastCmdStep = 30000; // a value outside of range -21000/+21000 will never be commanded, so the next commanded position will for sure be different
 	m_step2deg=(double)(360./m_step_giro);
 	m_step_res=(double)(1./pow(2,m_rs));
 	m_top=-m_zeroRef;
@@ -260,6 +262,11 @@ void USDImpl::cleanUp()
     {
         delete [] actuatorsCorrections;
     }
+
+    if(elevations != NULL)
+    {
+        delete [] elevations;
+    }
 }
 
  
@@ -282,6 +289,11 @@ void USDImpl::aboutToAbort()
     if(actuatorsCorrections != NULL)
     {
         delete [] actuatorsCorrections;
+    }
+
+    if(elevations != NULL)
+    {
+        delete [] elevations;
     }
 }
 
@@ -546,93 +558,60 @@ void USDImpl:: writeCalibration(CORBA::Double_out cammaLenD, CORBA::Double_out c
 
 void USDImpl::posTable (const ACS::doubleSeq& theActuatorsCorrections, CORBA::Long theParPositions, CORBA::Double theDeltaEL, CORBA::Long theThreshold)
 {
-	int s;
-
 	parPositions = theParPositions;
 	deltaEL = theDeltaEL;
 	threshold = theThreshold;
 
+	if(actuatorsCorrections != NULL)
+		delete [] actuatorsCorrections;
+	if(elevations != NULL)
+		delete [] elevations;
 	actuatorsCorrections = new double [parPositions];
-	//printf ("corrections = ");
-	//printf ("threshold in posTable = %d\n", threshold);
-	for (s = 0; s < parPositions; s++) {
+	elevations = new double [parPositions-1];
+	for (int s = 0; s < parPositions; s++) {
 		actuatorsCorrections [s] = theActuatorsCorrections[s];
-	//	printf ("%f ", actuatorsCorrections [s]);
+		if (s < parPositions-1)
+			elevations[s] = (s+1)*deltaEL;
 	}
-	//printf("\n");
 }
 
 void USDImpl::update (CORBA::Double elevation) throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 {
 	double updatePosMM = 0.0;
-	long updatePos;//, actpos, diffPos;
-	int k;
-	double elevations[parPositions-1];
-	bool running;
+	long updatePos;
 
 	try {
-		for (k = 0; k < parPositions-1; k++)
-			elevations [k] = (k+1)*deltaEL;
-		if (m_profile == 1 || m_profile == 3) { // FIXED positions
-			if (m_profile == 1) { // SHAPED FIXED
-				//printf("shaped fixed\n");
-				updatePosMM = actuatorsCorrections[parPositions-5]; // 45
-			}
-			if (m_profile == 3) { // PARABOLIC FIXED
-				//printf("parabolic fixed\n");
-				updatePosMM = actuatorsCorrections[parPositions-5] + actuatorsCorrections[parPositions-1]; // 45 + P
-			}
-			//printf("parabFix = %f,",actuatorsCorrections[parPositions-1]);
-			//updatePosMM = actuatorsCorrections[parPositions-1];
-		//	updatePos = (CORBA::Long)(updatePosMM*MM2STEP);
-			//printf("upPosStep = %ld\n",updatePos);
-		//	_SET_PROP(cmdPos,updatePos,"usdImpl::calibrate()")
-		}
-		else { // SHAPED
-			//printf("shaped\n");
-			if (elevation <= 15.0) {
+		if (m_profile == 1) // SHAPED FIXED
+			updatePosMM = actuatorsCorrections[parPositions-5]; // 45
+		if (m_profile == 3) // PARABOLIC FIXED
+			updatePosMM = actuatorsCorrections[parPositions-5] + actuatorsCorrections[parPositions-1]; // 45 + P
+		else // SHAPED
+		{
+			if (elevation <= 15.0)
 				updatePosMM = actuatorsCorrections[0];
-				// printf("elevation = %f, upPosMM = %f,",elevation,updatePosMM);
-			}
-			else if (elevation >= 90 ) {
+			else if (elevation >= 90 )
 				updatePosMM = actuatorsCorrections[parPositions-2];
-				// printf("elevation = %f, upPosMM = %f,",elevation,updatePosMM);
-			}
-			else {
-				k = (int)(floor(elevation/deltaEL));
+			else
+			{
+				int k = (int)(floor(elevation/deltaEL));
 				updatePosMM = ((elevation-elevations[k-1])/deltaEL)*(actuatorsCorrections[k]-actuatorsCorrections[k-1])+actuatorsCorrections[k-1];
-				// printf("elevation = %f, upPosMM = %f,",elevation,updatePosMM);
 			}
-			if (m_profile == 2) { // SHAPED + PARABOLIC
-			//	printf("parabolic\n");
+			if (m_profile == 2) // SHAPED + PARABOLIC
 				updatePosMM += actuatorsCorrections[parPositions-1];
-				// printf("elevation = %f, upPosMM parab = %f,",elevation,updatePosMM);
-			}
-		//	updatePos = (CORBA::Long)(updatePosMM*MM2STEP);
-			// printf("upPosStep = %ld\n",updatePos);
-			// _GET_PROP(actPos,actpos,"usdImpl::update()")
-			// printf("actpos = %ld\n", actpos);
-			// diffPos = labs(actpos-updatePos);
-			// printf("threshold = %d\n", threshold);
-			// if (diffPos >= threshold) {
-				// printf("diff >= threshold: %ld\n", diffPos);
-			//_GET_PROP(status,m_status,"usdImpl::update()")
-			//running = m_status&MRUN;
-			//if (running == false)
-			//	_SET_PROP(cmdPos,updatePos,"usdImpl::update()")
-			// }
 		}
 		updatePos = (CORBA::Long)(updatePosMM*MM2STEP);
-        if (updatePos > 21000)
-            updatePos = 21000;
-        if (updatePos < -21000)
-            updatePos = -21000;
-		//printf("upPosStep = %ld\n",updatePos);
-		_GET_PROP(status,m_status,"usdImpl::update()")
-		running = m_status&MRUN;
-		if (running == false)
-			_SET_PROP(cmdPos,updatePos,"usdImpl::update()")
-		//_SET_PROP(cmdPos,updatePos,"usdImpl::calibrate()")
+		if (updatePos > 21000)
+			updatePos = 21000;
+		if (updatePos < -21000)
+			updatePos = -21000;
+		if (updatePos == m_lastCmdStep)
+			return;
+		_GET_PROP(status,m_status,"usdImpl::calibrate()")
+		bool running = m_status&MRUN;
+		if (running)
+			return;
+		_SET_PROP(cmdPos,updatePos,"usdImpl::update()")
+		m_lastCmdStep = updatePos;
 	}
 	_CATCH_EXCP_THROW_EX(CORBA::SystemException,corbaError,"::usdImpl::update()",m_addr)	// for CORBA
 	_CATCH_EXCP_THROW_EX(ASErrors::DevIOErrorEx,DevIOError,"::usdImpl::update()",m_addr)	// for _GET_PROP
