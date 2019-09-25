@@ -570,13 +570,16 @@ bool CProtocol::decodeFPGATime(const DWORD& clock,const double& sampleRate,const
 	second=clockT % 60;
 	period=1.0/sampleRate; // sample rate is MHz so period is in microseconds
 	//micro=(long)(period*((double)counter-0.5)); // take the mean time
-	micro=(long)(period*((double)counter)); // I'd like to assign the time to the start of the sample!
+	// timestamp marks the start of the sample according the Total Power documentation
+	micro=(long)(period*((double)counter)); 
 	bkndTime.day(day);
 	bkndTime.hour(hour);
 	bkndTime.minute(minute);
 	bkndTime.second(second);
 	bkndTime.microSecond(micro);
 	temp=bkndTime.value().value;
+	// this allows to cope with the fact that the TP is always one sample time behind the effective timemark
+	// provided with the data buffer.
 	temp-=(long long)(period*10);   // we have to shift back the time of one period...because the sample is referred to the period before.
 	bkndTime.value(temp);
 	getReferenceTime(tm);
