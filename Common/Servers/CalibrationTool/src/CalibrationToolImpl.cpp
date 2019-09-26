@@ -22,8 +22,8 @@
 #include "DevIOSourceFlux.h"
 
 
-static char *rcsId="@(#) $Id: CalibrationToolImpl.cpp,v 1.5 2011-03-11 12:27:21 c.migoni Exp $";
-static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
+//static char *rcsId="@(#) $Id: CalibrationToolImpl.cpp,v 1.5 2011-03-11 12:27:21 c.migoni Exp $";
+//static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
 
 #define WORKTHREADNAME "CALIBRATIONTOOLENGINE"
 #define COLLECTORTHREADNAME "COLLECTORTHREAD"

@@ -59,6 +59,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/
 ## [discosX.X.x]
 ### Added
 ### Changed
-### Added
+	  issue #454 - Timestamp of the Fits now is reffered to the middle of the sample accordingly to all others metadata
 ### Fixed
      issue #452 - The Total Power component erronously assigned a timestamp to the samples in case more samples were needed to reach total integration time

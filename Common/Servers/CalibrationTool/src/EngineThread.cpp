@@ -171,7 +171,10 @@ bool CEngineThread::processData ()
     //CSecAreaResourceWrapper < CDataCollection > data = m_dataWrapper->Get ();
 
     // get tsys from devices
-    if (!m_data->getDump (time, calOn, bufferCopy, buffer, tracking, buffSize))   return false;
+    if (!m_data->getDump (time, calOn, bufferCopy, buffer, tracking, buffSize)) return false;
+	 //The timestamp must be referred to the mid time of the sample. Since time is the beginning 
+	 //(see idl documentation of generic backed), I need to add half integration time.
+	 time+=(ACS::Time)(m_data->getIntegrationTime()*10000*0.5);    
     tS.value (time);
     CalibrationTool_private::getTsysFromBuffer (buffer, m_data->getInputsNumber (), m_ptsys);
 
