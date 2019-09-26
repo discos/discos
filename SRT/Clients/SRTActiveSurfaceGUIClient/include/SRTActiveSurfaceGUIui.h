@@ -19,7 +19,6 @@ class SRTActiveSurfaceGUI : public QWidget, public Ui_SRTActiveSurfaceGUI
 
     public slots:
         void Quit();
-        void manager();
         void move();
         void setprofile();
         void correction();

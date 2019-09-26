@@ -69,7 +69,7 @@ USER_LIB = 	-lACE \
 #
 # C programs (public and local)
 # -----------------------------
-EXECUTABLES     = SRTActiveSurfaceGUIClient
+EXECUTABLES     = SRTActiveSurfaceGUIClient SRTActiveSurfaceManagementGUIClient
 EXECUTABLES_L   = 
 
 #
@@ -136,6 +136,8 @@ QT_COMPILE_FILES = $(subst .cpp,,$(QT_UI_FILES_MOC) $(QT_UI_FILES_EXTERN_MOC_H) 
 # <brief description of xxxxx program>
 SRTActiveSurfaceGUIClient_OBJECTS   = $(QT_COMPILE_FILES) SRTActiveSurfaceGUIui SRTActiveSurfaceCore SRTActiveSurfaceClientEventLoop SRTActiveSurfaceGUIClient 
 SRTActiveSurfaceGUIClient_LIBS      = IRALibrary ActiveSurfaceBossStubs SRTActiveSurfaceBossStubs ASErrors ComponentErrors ClientErrors ManagementErrors ManagmentDefinitionsStubs
+SRTActiveSurfaceManagementGUIClient_OBJECTS   = $(QT_COMPILE_FILES) SRTActiveSurfaceManagementGUIui SRTActiveSurfaceCore SRTActiveSurfaceClientEventLoop SRTActiveSurfaceGUIClient 
+SRTActiveSurfaceManagementGUIClient_LIBS      = IRALibrary ActiveSurfaceBossStubs SRTActiveSurfaceBossStubs ASErrors ComponentErrors ClientErrors ManagementErrors ManagmentDefinitionsStubs
 
 $(PROG)_OBJECTS            = $(PROG)
 $(PROG)_LDFLAGS            =
@@ -145,6 +147,7 @@ $(PROG)_LIBS               = C++
 #
 # special compilation flags for single c sources
 #yyyyy_CFLAGS   = 
+SRTActiveSurfaceManagementGUIui_CFLAGS   = -DMANAGEMENT
 
 #
 # Includes (.h) files (public only)
@@ -325,6 +328,7 @@ man   : do_man
 	@echo " . . . man page(s) done"
 
 install : install_all
+	@chmod 700 $(INTROOT)/bin/SRTActiveSurfaceManagementGUIClient
 	@echo " . . . installation done"
 
 

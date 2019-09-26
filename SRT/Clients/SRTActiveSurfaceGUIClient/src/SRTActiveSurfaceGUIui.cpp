@@ -5,7 +5,6 @@
 #include <QtGui/QPalette>
 #include <QtGui/QBrush>
 
-int passwordcheck = 0;
 int thecircle, theactuator, theradius;
 int tcircle, tactuator, tradius;
 
@@ -22,6 +21,12 @@ SRTActiveSurfaceGUI::SRTActiveSurfaceGUI(QWidget *parent) : QWidget(parent)
     QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIActuatorStatusLabels()), this, SLOT(changeGUIActuatorStatusLabels()));
     QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIasStatusCode()), this, SLOT(changeGUIasStatusCode()));
     QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIasProfileCode()), this, SLOT(changeGUIasProfileCode()));
+
+#ifdef MANAGEMENT
+    buttonGroup1->setEnabled(true);
+#else
+    buttonGroup1->setVisible(false);
+#endif
 }
 
 void SRTActiveSurfaceGUI::setParameters(maci::SimpleClient* theClient, ActiveSurface::SRTActiveSurfaceBoss_var theASBoss)
@@ -6230,29 +6235,6 @@ void SRTActiveSurfaceGUI::setactuator17_4()
 {
     thecircle=17; theactuator=4; theradius=0;
     mySRTActiveSurfaceCore.setactuator(17, 4);
-}
-
-void SRTActiveSurfaceGUI::manager()
-{
-    ManagerPasswordlineEdit->setEnabled(true);
-    if (passwordcheck == 0) {
-        QString str;
-        str = "enter password & press Enter";
-        ////ManagerLabel->setStyleSheet(QString::fromUtf8("background-color: rgb(255, 255, 0);"));
-        ManagerLabel->setText(str);
-        str = ManagerPasswordlineEdit->text();
-        if (str=="sbasilio") {
-            buttonGroup1->setEnabled(true);
-            passwordcheck=1;
-            ManagerLabel->clear();
-            ////ManagerLabel->setStyleSheet(QString::fromUtf8("background-color: rgb(85, 255, 0);"));
-            str = "password ok";
-            ManagerLabel->setText(str);
-            ManagerPasswordlineEdit->clear();
-        } 
-        else
-            passwordcheck = 0;
-     }
 }
 
 void SRTActiveSurfaceGUI::move()
