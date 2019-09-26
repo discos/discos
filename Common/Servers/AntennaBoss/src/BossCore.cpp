@@ -230,35 +230,32 @@ void CBossCore::getObservedHorizontal(TIMEVALUE& time,TIMEDIFFERENCE& duration,d
 	if (duration.value().value>m_config->getCoordinateIntegrationPeriod()) {
 		double ra,dec;
 		IRA::CSkySource converter;
-		TIMEVALUE stopTime(time.value());
-		TIMEVALUE midTime(time.value().value+duration.value().value/2);
-		stopTime+=duration.value();
-		m_integratedObservedEquatorial.averagePoint(time,stopTime,ra,dec);
+		TIMEVALUE startTime(time.value().value-duration.value().value/2);
+		TIMEVALUE stopTime(time.value().value+duration.value().value/2);
+		TIMEVALUE midTime(time.value().value);
+		m_integratedObservedEquatorial.averagePoint(startTime,stopTime,ra,dec);
 		converter.setInputEquatorial(ra,dec,IRA::CSkySource::SS_J2000);
 		IRA::CDateTime dateTime(midTime,m_dut1);
 		converter.process(dateTime,m_site);
 		converter.getApparentHorizontal(az,el);
 	}
 	else {
-		TIMEVALUE midTime(time.value().value+duration.value().value/2);
+		//the integration time is not added anymore since we suppose the correct time is requested from caller
+		TIMEVALUE midTime(time.value().value/*+duration.value().value/2*/);
 		m_observedHorizontals.selectPoint(midTime,az,el);
 	}
 }
 
 void CBossCore::getObservedEquatorial(TIMEVALUE& time,TIMEDIFFERENCE& duration,double&ra,double& dec) const
 {
-	//printf("duration, integration %llu, %lu\n",duration.value().value,m_config->getCoordinateIntegrationPeriod());
 	if (duration.value().value>m_config->getCoordinateIntegrationPeriod()) {
-		//printf("Long integration\n");
-		TIMEVALUE stopTime(time.value());
-		stopTime+=duration.value();
-		//printf("time %llu, stop %llu\n",time.value().value,stopTime.value().value);
-		m_integratedObservedEquatorial.averagePoint(time,stopTime,ra,dec);
-		//printf("ra %lf, dec %lf\n",ra,dec);
+		TIMEVALUE startTime(time.value().value-duration.value().value/2);
+		TIMEVALUE stopTime(time.value().value+duration.value().value/2);
+		m_integratedObservedEquatorial.averagePoint(startTime,stopTime,ra,dec);
 	}
 	else {
-		//printf("Short integration\n");
-		TIMEVALUE midTime(time.value().value+duration.value().value/2);
+		//the integration time is not added anymore since we suppose the correct time is requested from caller
+		TIMEVALUE midTime(time.value().value/*+duration.value().value/2*/);
 		m_observedEquatorials.selectPoint(midTime,ra,dec);
 	}
 }
@@ -268,13 +265,14 @@ void CBossCore::getObservedGalactic(TIMEVALUE& time,TIMEDIFFERENCE& duration,dou
 	if (duration.value().value>m_config->getCoordinateIntegrationPeriod()) {
 		double ra,dec;
 		IRA::CSkySource converter;
-		TIMEVALUE stopTime(time.value());
-		stopTime+=duration.value();
-		m_integratedObservedEquatorial.averagePoint(time,stopTime,ra,dec);
+		TIMEVALUE startTime(time.value().value-duration.value().value/2);
+		TIMEVALUE stopTime(time.value().value+duration.value().value/2);
+		m_integratedObservedEquatorial.averagePoint(startTime,stopTime,ra,dec);
 		IRA::CSkySource::equatorialToGalactic(ra,dec,lng,lat);
 	}
 	else {
-		TIMEVALUE midTime(time.value().value+duration.value().value/2);
+		//the integration time is not added anymore since we suppose the correct time is requested from caller
+		TIMEVALUE midTime(time.value().value/*+duration.value().value/2*/);
 		m_observedGalactics.selectPoint(midTime,lng,lat);
 	}
 }
