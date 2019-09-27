@@ -8,4 +8,4 @@
 # Andrea Orlati(aorlati@ira.inaf.it) 08/08/2013      Creation                                  
 #************************************************************************
 
-xterm -geometry 60x17+0+241 +sb -title Scheduler -e /bin/bash --login -c _tui_SchedulerTextClient &
+xterm -geometry 60x17+938+571 +sb -title Scheduler -e /bin/bash --login -c _tui_SchedulerTextClient &
