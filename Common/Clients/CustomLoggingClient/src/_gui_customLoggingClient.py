@@ -78,6 +78,7 @@ if __name__ == '__main__':
         root = tk.Tk()
         root.wm_title("ACS custom logging client")
         root.resizable(tk.YES, tk.YES)
+        root.geometry('934x256')
         app = App(root)
         consumer = Consumer(Management.CUSTOM_LOGGING_CHANNEL_NAME)
         consumer.addSubscription(Management.CustomLoggingData, app.handler)
