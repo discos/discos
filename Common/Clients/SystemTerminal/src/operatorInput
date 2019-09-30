@@ -8,4 +8,4 @@
 # Andrea Orlati(aorlati@ira.inaf.it) 26/07/2010      Creation                                  
 #************************************************************************
 
-xterm -geometry 115x15+283+449 -sb -title OperatorInput -e /bin/bash --login -c "_tui_SysTerm $1" &
+xterm -geometry 152x20+0+475 -sb -title OperatorInput -e /bin/bash --login -c "_tui_SysTerm $1" &
