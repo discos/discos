@@ -132,7 +132,7 @@ void CRefractionCore::getCorrection(double obsZenithDistance,double waveLen, dou
 
 		slaRefro(obsZenithDistance, hm, tdk, m_pressure, m_humidity, wl, phi, tlr, eps, corZenithDistance);
 	}
-	else *corZenithDistance = 0;
+	else *corZenithDistance = (double)0;
 }
 
 void CRefractionCore::getMeteoParameters()
