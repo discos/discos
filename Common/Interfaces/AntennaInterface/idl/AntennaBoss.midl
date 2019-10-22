@@ -612,7 +612,7 @@ module Antenna {
 		 * In case duration is greter than the configured coordinate integration time, the returned coordinates are the result of the average over the duration interval that starts
 		 * from <i>timestamp</i>.
 		 * @throw CORBA::SystemExcpetion
-		 * @param timestamp the input timestamp
+		 * @param timestamp the input timestamp (best practice is to use the middle of your reference time)
 		 * @param duration duration of the integration, if greater than coordinate integration time the returned values are not instantaneous but are averaged 
 		 *        over the provided interval.
 		 * @param ra the returned observed right ascension in radians 
@@ -625,7 +625,7 @@ module Antenna {
 		 * referes to must be provided. It is highly probable that these cordinates are not "real" (directly read from the antenna) but they are the result of 
 		 * an interpolation. They are obtained by converting the corresponding J2000 observed equatorial coordinates.
 		 * @throw CORBA::SystemExcpetion
-		 * @param timestamp the input timestamp
+		 * @param timestamp the input timestamp (best practice is to use the middle of your reference time)
 		 * @param duration duration of the integration, if greater than coordinate integration time the returned values are not instantaneous but are averaged 
 		 *        over the provided interval.
 		 * @param ra the returned observed galactic longitude in radians 
@@ -638,7 +638,7 @@ module Antenna {
 		 * referes to must be provided. It is highly probable that these cordinates are not "real" (directly read from the antenna) but they are the result of 
 		 * an interpolation. They are obtained by the encoders coordinates depurated by instrumental effects..
 		 * @throw CORBA::SystemExcpetion
-		 * @param timestamp the input timestamp
+		 * @param timestamp the input timestamp (best practice is to use the middle of your reference time)
 		 * @param duration duration of the integration, if greater than coordinate integration time the returned values are not instantaneous but are averaged 
 		 *        over the provided interval. 
 		 * @param ra the returned observed azimuth in radians 

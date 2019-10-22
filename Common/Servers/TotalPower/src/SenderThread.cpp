@@ -275,8 +275,10 @@ void CSenderThread::computeSample(TSampleRecord& samp,TIMEVALUE& sampleTime,DWOR
 	samp.counts++; //increase the number of accumulations
 	if (samp.counts==samp.accumulations) { // if the required number of accumulations is reached.....
 		// computes the mean time
-		ACS::Time diff=samp.start.value().value+(sampleTime.value().value-samp.start.value().value)/2;
-		samp.start.value(diff);
+		// this code was deleted because we want assign the timestamp at the beginning of the sample even 
+		// when more than one integration is required.
+		//ACS::Time diff=samp.start.value().value+(sampleTime.value().value-samp.start.value().value)/2;
+		//samp.start.value(diff);
 		// now send the data		
 		SAMPLETYPE sample[MAX_SECTION_NUMBER];
 		double  tsys[MAX_SECTION_NUMBER],allTsys[MAX_SECTION_NUMBER];

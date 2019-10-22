@@ -1,1 +1,1 @@
-xterm -geometry 60x15+200+200 +sb -title MinorServo -e /bin/bash --login -c "_tui_MinorServoBossTextClient $1" &
+xterm -geometry 60x15+938+826 +sb -title MinorServo -e /bin/bash --login -c "_tui_MinorServoBossTextClient $1" &

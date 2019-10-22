@@ -116,6 +116,11 @@ bool CEngineThread::processData()
 		if (!m_data->getDump(time,calOn,bufferCopy,buffer,tracking,buffSize)) return false;
 	}
 
+	//integration is multiplied by 10000 because internally we have the value in millesec while the method requires 100ns.
+	integrationTime=m_data->getIntegrationTime()*10000;
+	//The timestamp must be referred to the mid time of the sample. Since time is the beginning 
+	//(see idl documentation of generic backed), I need to add half integration time.
+	time+=(ACS::Time)(integrationTime*0.5);
 	TIMEVALUE tS;
 	tS.value(time);
 #ifdef FW_DEBUG
@@ -126,8 +131,6 @@ bool CEngineThread::processData()
 	CFitsWriter::TDataHeader tdh;
 	CDateTime tConverter(tS,m_data->getDut1()); 
 	tdh.time=tConverter.getMJD();
-	//integration is multiplied by 10000 because internally we have the value in millesec while the method requires 100ns.
-	integrationTime=m_data->getIntegrationTime()*10000;
 #endif
 	try {
 		CCommonTools::getAntennaBoss(m_antennaBoss,m_service,m_config->getAntennaBossComponent(),antennaBossError);
