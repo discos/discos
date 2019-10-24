@@ -609,9 +609,17 @@ void CCommandLine::setup(const char *conf) throw (BackendsErrors::BackendBusyExI
 	if (!initializeConfiguration(conf)) {
 		_EXCPT(BackendsErrors::ConfigurationErrorExImpl,impl,"CCommandLine::setup()");
 		throw impl;
+	}
+
+    IRA::CIRATools::Wait(1,0);
+	setDefaultConfiguration(); //could throw exceptions........
+
+    IRA::CIRATools::Wait(1,0);
+    if (!setupConfiguration(conf)) {
+		_EXCPT(BackendsErrors::ConfigurationErrorExImpl,impl,"CCommandLine::setup()");
+		throw impl;
 	}	
-	//setDefaultConfiguration(); //could throw exceptions........
-	//ACS_LOG(LM_FULL_INFO,"CCommandLine::initializeConfiguration()",(LM_NOTICE,"BACKEND_INITIALIZED: %s",conf)); 
+	ACS_LOG(LM_FULL_INFO,"CCommandLine::initializeConfiguration()",(LM_NOTICE,"BACKEND_INITIALIZED: %s",conf)); 
 }
 
 
@@ -1215,7 +1223,7 @@ long CCommandLine::searchFeed(long ChIn)
 
 bool CCommandLine::initializeConfiguration(const IRA::CString & config) 
 {
-    if (start == true) {
+    //if (start == true) {
 	long i=0;
 	for( i=0;i<MAX_INPUT_NUMBER;i++) {
 		m_attenuation[i]=gainToAttenuation(DEFAULT_GAIN);//DEFAULT_ATTENUATION;
@@ -1268,9 +1276,6 @@ bool CCommandLine::initializeConfiguration(const IRA::CString & config)
 	if(m_beams*2>MAX_ADC_NUMBER) m_beams=MAX_ADC_NUMBER/2;
 	for( i=0;i<m_beams*2;i++) m_ChIn[i]=(long)(i/2);//{0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,-1,-1};//Mapping Feed to ChIn
 	for( i=(m_beams)*2;i<(MAX_ADC_NUMBER);i++) m_ChIn[i]=-1;//-1 non è connesso
-
-        
-
 
 	//if (DEFAULT_MODE8BIT)
 	//	m_mode8bit=true;
@@ -1391,21 +1396,25 @@ AUTO_TRACE("CCommandLine::setMode8bit()");
 		if(j==MAX_ADC_NUMBER) j=0;
 		else j++;
 	}
-    start=false;
-    }
-    else {
-		m_XarcosC=false;
+//    start=false;
+//    }
+    return true;
+}
+
+bool CCommandLine::setupConfiguration (const IRA::CString & config)
+{
+    m_XarcosC=false;
 	    m_XarcosK00 = false;
 	    m_XarcosK77 = false;
 	    m_XarcosK03 = false;
 	    m_XarcosK06 = false;
 	    m_XarcosK01 = false;
-        start = true;
-        IRA::CIRATools::Wait(1,0);
-		setup("NNNN");
-        setDefaultConfiguration();
-        start = false;
-        IRA::CIRATools::Wait(2,0);
+        //start = true;
+        //IRA::CIRATools::Wait(1,0);
+		//setup("NNNN");
+        //setDefaultConfiguration();
+        //start = false;
+        //IRA::CIRATools::Wait(2,0);
     //printf("initialize configuration end\n");
 	//IRA::CIRATools::Wait(2,0);
     if (config=="XK77") { //in order to add a new configuration add an other if
@@ -1528,7 +1537,7 @@ AUTO_TRACE("CCommandLine::setMode8bit()");
     }
     else
         return false;
-    }
+    //}
 	//ACS_LOG(LM_FULL_INFO,"CCommandLine::initializeConfiguration()",(LM_NOTICE,"BACKEND_INITIALIZED: %s",config)); 
 	return true;
 }
