@@ -584,6 +584,7 @@ private:
 	double m_tpiZero[MAX_INPUT_NUMBER];
 
 	bool initializeConfiguration(const IRA::CString & config);
+	bool setupConfiguration(const IRA::CString & config);
 	
 	/**
 	 * Check if the connection is still up and ready. If a previuos call timed out it will check the status of the connection.
