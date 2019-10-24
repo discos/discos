@@ -56,11 +56,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/
 
     issue #402 - Fixed an issue in the ReceiversBossTui that was preventing the UI to find any derotator in the system.
 
-## [discos1.0.3]
+## [discos1.0.3] 24-10-2019
 ### Added
 ### Changed
     issue #454 - Timestamp of the Fits now is referred to the middle of the sample according to all others metadata
     issue #455 - The SRT Active Surface GUI has been splitted into a management GUI and a user GUI
     issue #459 - The DiscosConsole layout has been reviewed. The console windows now open without overlapping
+    issue #463 - X band receiver pointing model updated
+    issue #469 - XBackend initialization and setup procedure improved
+    some other minor refinements
 ### Fixed
     issue #452 - The Total Power component erroneously assigned a timestamp to the samples in case more samples were needed to reach total integration time
