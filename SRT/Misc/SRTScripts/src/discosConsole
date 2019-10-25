@@ -91,25 +91,25 @@ if [ "$CL_STOP" ] ; then
    exit
 fi
 
-schedulerTui
-sleep 0.5s
 mountTui
 sleep 0.5s
-minorservoBossTui
+operatorInput
+sleep 0.5s
+loggingDisplay
+sleep 0.5s
+antennaBossTui
 sleep 0.5s
 observatoryTui
 sleep 0.5s
-antennaBossTui
+receiversBossTui
+sleep 0.5s
+schedulerTui
+sleep 0.5s
+minorservoBossTui
 sleep 0.5s
 genericBackendTui BACKENDS/TotalPower
 sleep 0.5s
 genericBackendTui BACKENDS/Sardara
-sleep 0.5s
-operatorInput
-sleep 0.5s
-receiversBossTui
-sleep 0.5s
-loggingDisplay
 
 
 #
