@@ -68,6 +68,8 @@
 
 #define MM2STEP	1400 //(42000 STEP / 30 MM)
 
+#define MAX_FAILURES 5
+
 // specific macro
   /** 	@#define _ADD_MEMBER(OBJ,MEMB)
      *  This macro add extra data to an error/compl. object. MEMB must be real variable or constant
@@ -494,6 +496,11 @@ class USDImpl: public CharacteristicComponentImpl,public virtual POA_ActiveSurfa
      	* @return true if comp is an error completion else false
     	*/
 	bool compCheck(ACSErr::CompletionImpl& );
+
+    	/** 
+    	* this counts the consecutive times the USD does not respond
+    	*/
+	int m_failures;
 
     	/** 
     	* flag rappresenting the availability of the module.
