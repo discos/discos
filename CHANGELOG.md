@@ -56,7 +56,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/
 
     issue #402 - Fixed an issue in the ReceiversBossTui that was preventing the UI to find any derotator in the system.
 
-## [discos1.0.3] 24-10-2019
+## [discos1.0.3] 25-10-2019
 ### Added
 ### Changed
     issue #454 - Timestamp of the Fits now is referred to the middle of the sample according to all others metadata
@@ -67,3 +67,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/
     some other minor refinements
 ### Fixed
     issue #452 - The Total Power component erroneously assigned a timestamp to the samples in case more samples were needed to reach total integration time
+    issue #473 - The SRT AS USDs now retry 5 times to communicate with the hardware before setting their state to unavailable
