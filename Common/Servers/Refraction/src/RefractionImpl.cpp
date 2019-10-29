@@ -98,7 +98,7 @@ void RefractionImpl::getCorrection (CORBA::Double obsZenithDistance,CORBA::Doubl
     //CSecAreaResourceWrapper<CRefractionCore> resource=m_core->Get();
 
 	//resource->getCorrection(obsZenithDistance, &corZenithDistance);	
-	boss->getCorrection(obsZenithDistance,waveLength,&corZenithDistance);
+	boss->getCorrection(obsZenithDistance,waveLength,corZenithDistance);
 }
 
 /* --------------- [ MACI DLL support functions ] -----------------*/

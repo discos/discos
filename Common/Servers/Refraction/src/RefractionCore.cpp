@@ -115,7 +115,7 @@ void CRefractionCore::cleanUp()
 	}
 }
 
-void CRefractionCore::getCorrection(double obsZenithDistance,double waveLen, double *corZenithDistance)
+void CRefractionCore::getCorrection(double obsZenithDistance,double waveLen, double &corZenithDistance)
 {
 	AUTO_TRACE("CRefractionCore::getCorrection()");
 	//double elevation;
@@ -130,9 +130,9 @@ void CRefractionCore::getCorrection(double obsZenithDistance,double waveLen, dou
 		double tlr = 0.0065;
 		double eps = 1e-8;
 
-		slaRefro(obsZenithDistance, hm, tdk, m_pressure, m_humidity, wl, phi, tlr, eps, corZenithDistance);
+		slaRefro(obsZenithDistance, hm, tdk, m_pressure, m_humidity, wl, phi, tlr, eps, *corZenithDistance);
 	}
-	else *corZenithDistance = (double)0;
+	else corZenithDistance = 0.0;
 }
 
 void CRefractionCore::getMeteoParameters()
