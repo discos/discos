@@ -130,7 +130,7 @@ void CRefractionCore::getCorrection(double obsZenithDistance,double waveLen, dou
 		double tlr = 0.0065;
 		double eps = 1e-8;
 
-		slaRefro(obsZenithDistance, hm, tdk, m_pressure, m_humidity, wl, phi, tlr, eps, *corZenithDistance);
+		slaRefro(obsZenithDistance, hm, tdk, m_pressure, m_humidity, wl, phi, tlr, eps, &corZenithDistance);
 	}
 	else corZenithDistance = 0.0;
 }
