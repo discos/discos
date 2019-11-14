@@ -180,6 +180,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc.setData('Reason', reason)
             raise exc.getComponentErrorsEx()
 
+
     def park(self):
         logger.logNotice('parking the derotator')
         try:
@@ -202,6 +203,11 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         finally:
             self._setDefaultSetup()
         logger.logNotice('derotator parked')
+
+
+    def clearSource(self):
+        logger.logNotice('cleaning the parallacting angle sign')
+        self.positioner._clearSign()
 
 
     def getPosition(self):
@@ -272,6 +278,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc = ComponentErrorsImpl.UnexpectedExImpl()
             exc.setData('Reason', ex.message)
             raise exc.getComponentErrorsEx()
+
 
     def getCmdPosition(self):
         try:

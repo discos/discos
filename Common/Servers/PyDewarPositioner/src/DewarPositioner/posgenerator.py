@@ -2,6 +2,7 @@
 import datetime
 import time
 from math import sin, cos, tan, atan2, degrees
+import numpy
 from IRAPy import logger
 from Acspy.Common.TimeHelper import getTimeStamp
 
@@ -26,7 +27,7 @@ class PosGenerator(object):
 
     # TODO: refactoring required, in order to put all the parallactic and
     # galacticParallactic common code in one place
-    def parallactic(self, source, siteInfo):
+    def parallactic(self, source, siteInfo, initial_sign=None):
         """Return the parallactic angle"""
         try:
             latitude = siteInfo['latitude']
@@ -43,7 +44,8 @@ class PosGenerator(object):
                 t = getTimeStamp().value + 1*10*6 # 100 ms in the future
                 coordinates = source.getApparentCoordinates(t) # Values in radians
                 az, el = coordinates[:2] # The first two elements are (az, el)
-                position = PosGenerator.getParallacticAngle(latitude, az, el)
+                position = PosGenerator.getParallacticAngle(
+                        latitude, az, el, initial_sign)
                 yield position
                 last_zerodiv_time = datetime.datetime.now()
             except ZeroDivisionError:
@@ -64,7 +66,7 @@ class PosGenerator(object):
                 logger.logNotice('%s: %s' %(raeson, ex.message))
                 raise PosGeneratorError(raeson)
 
-    def galacticParallactic(self, source, siteInfo):
+    def galacticParallactic(self, source, siteInfo, initial_sign=None):
         """Return the galactic parallactic angle"""
         try:
             latitude = siteInfo['latitude']
@@ -81,7 +83,8 @@ class PosGenerator(object):
                 t = getTimeStamp().value + 1*10*6 # 100 ms in the future
                 coordinates = source.getApparentCoordinates(t) # Values in radians
                 az, el, ra, dec = coordinates[:4] 
-                pg = PosGenerator.getGalacticParallacticAngle(latitude, az, el, ra, dec)
+                pg = PosGenerator.getGalacticParallacticAngle(
+                        latitude, az, el, ra, dec, initial_sign)
                 yield pg
                 last_zerodiv_time = datetime.datetime.now()
             except ZeroDivisionError:
@@ -103,10 +106,19 @@ class PosGenerator(object):
                 raise PosGeneratorError(raeson)
 
     @staticmethod
-    def getParallacticAngle(latitude, az, el):
+    def getParallacticAngle(latitude, az, el, initial_sign=None):
         """Arguments in radians"""
         p = atan2(-sin(az), tan(latitude)*cos(el) - sin(el)*cos(az))
-        return degrees(p)
+        p = degrees(p)
+        # Remember the sign of the first scan of the map
+        sign_p = int(numpy.sign(p))
+        if initial_sign is None or (sign_p == initial_sign) or (sign_p == 0):
+            angle = p
+        elif initial_sign == -1:
+            angle = initial_sign * (180 + 180%p)
+        elif initial_sign == +1:
+            angle = initial_sign * (180 + p%180)
+        return angle
 
     @staticmethod
     def getGalacticAngle(ra, dec):
@@ -121,9 +133,9 @@ class PosGenerator(object):
         return degrees(g)
 
     @staticmethod
-    def getGalacticParallacticAngle(latitude, az, el, ra, dec):
+    def getGalacticParallacticAngle(latitude, az, el, ra, dec, initial_sign):
         """Arguments in radians"""
-        p = PosGenerator.getParallacticAngle(latitude, az, el)
+        p = PosGenerator.getParallacticAngle(latitude, az, el, initial_sign)
         g = PosGenerator.getGalacticAngle(ra, dec)
         return p + g
 

@@ -135,6 +135,41 @@ class PositionerStartUpdatingTest(unittest.TestCase):
         finally:
             self.p.stopUpdating()
 
+    def test_change_of_sign_negative_to_positive(self):
+        "The parallactic angle do not have to change from -180 to 180 degrees"
+        site_info = {'latitude': radians(39.49)}
+        posgen = PosGenerator()
+        gen = posgen.parallactic(self.source, site_info, initial_sign=-1)
+        azs = [radians(i) for i in (40, 20, 0, 360, 340, 320)]
+        els = [radians(i) for i in (81, 83, 85, 85, 83, 81)]
+        p0 = None
+        for az, el in zip(azs, els):
+            self.source.setAzimuth(az)
+            self.source.setElevation(el)
+            angle = gen.next()
+            self.assertIsNotNone(angle)
+            if p0:
+                delta = abs(angle - p0)
+                self.assertLess(delta, 180)
+            p0 = angle
+
+    def test_change_of_sign_positive_to_negative(self):
+        "The parallactic angle do not have to change from 180 to -180 degrees"
+        site_info = {'latitude': radians(39.49)}
+        posgen = PosGenerator()
+        gen = posgen.parallactic(self.source, site_info, initial_sign=+1)
+        azs = reversed([radians(i) for i in (40, 20, 0, 360, 340, 320)])
+        els = reversed([radians(i) for i in (81, 83, 85, 85, 83, 81)])
+        p0 = None
+        for az, el in zip(azs, els):
+            self.source.setAzimuth(az)
+            self.source.setElevation(el)
+            angle = gen.next()
+            self.assertIsNotNone(angle)
+            if p0:
+                delta = abs(angle - p0)
+                self.assertLess(delta, 180)
+            p0 = angle
 
     def test_custom_auto_rewinding(self):
         self.cdbconf.setup('KKG')
@@ -301,6 +336,22 @@ class PositionerStartUpdatingTest(unittest.TestCase):
         finally:
             self.p.stopUpdating()
 
+    def test_cannotUpdateDuringRewind(self):
+        """Cannot execute startUpdating() when a rewind is in progress."""
+        self.cdbconf.setup('KKG')
+        self.cdbconf.setConfiguration('CUSTOM')
+        latitude, az, el = [radians(50)] * 3
+        site_info = {'latitude': latitude}
+
+        self.p.setup(site_info, self.source, self.device)
+        try:
+            self.p.control.isRewinding = True
+            self.assertRaises(NotAllowedError, self.p.startUpdating,
+                MNG_TRACK, ANT_NORTH, az, el, None, None)
+        finally:
+            self.p.stopUpdating()
+            self.p.control.isRewinding = False
+ 
 
 if __name__ == '__main__':
     unittest.main()

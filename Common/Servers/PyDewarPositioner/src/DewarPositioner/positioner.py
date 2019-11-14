@@ -54,6 +54,7 @@ class Positioner(object):
             self.device = device
             self.device.setup()
             self._clearOffset()
+            self._clearSign()
             self.is_setup = True
             time.sleep(0.4) # Give the device the time to accomplish the setup
             self.control.updateScanInfo({'iStaticPos': setupPosition})
@@ -159,6 +160,8 @@ class Positioner(object):
                 raise NotAllowedError('no source available')
             elif str(sector) not in sectors:
                 raise NotAllowedError('sector %s not in %s' %(sector, sectors))
+            elif self.isRewinding():
+                raise NotAllowedError('the positioner is rewinding')
             else:
                 if self.isUpdating():
                     self.stopUpdating()
@@ -183,18 +186,22 @@ class Positioner(object):
                     else:
                         posgen = getattr(self.posgen, functionName) 
                         angle_mapping = self.posgen.mapping[functionName]
-                        getAngleFunction = self.posgen.mapping[functionName]['getAngleFunction']
-                        coordinateFrame = self.posgen.mapping[functionName]['coordinateFrame']
+                        getAngleFunction = angle_mapping['getAngleFunction']
+                        coordinateFrame = angle_mapping['coordinateFrame']
                         lat = self.siteInfo['latitude']
                         try:
                             if coordinateFrame == 'horizontal':
-                                iParallacticPos = getAngleFunction(lat, az, el)
+                                iParallacticPos = getAngleFunction(lat, az, el, self.sign)
                             elif coordinateFrame == 'equatorial':
-                                iParallacticPos = getAngleFunction(lat, az, el, ra, dec)
+                                iParallacticPos = getAngleFunction(lat, az, el, ra, dec, self.sign)
                             else:
                                 raise PositionerError('coordinate frame %s unknown' %coordinateFrame)
                         except ZeroDivisionError:
                             raise NotAllowedError('zero division error computing p(%.2f, %.2f)' %(az, el))
+
+                        # Remember the sign of the first scan of the map
+                        if self.sign is not None:
+                            self.sign = int(numpy.sign(iParallacticPos))
 
                         self.control.setScanInfo(
                             axis=axis, 
@@ -670,12 +677,16 @@ class Positioner(object):
         finally:
             Positioner.generalLock.release()
 
+    def _clearSign(self):
+        self.sign = None
+
     def _setDefault(self):
         self.t = None
         self.is_setup = False
         self.control = Control()
         self.conf.clearConfiguration()
         self._clearOffset()
+        self._clearSign()
 
 
 class Control(object):
