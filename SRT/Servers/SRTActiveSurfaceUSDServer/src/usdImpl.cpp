@@ -97,6 +97,7 @@ void USDImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	ACS_SHORT_LOG((LM_INFO,"lan linked!"));
 
 	m_available = true;
+	m_failures = 0;
 	
 	ACE_CString CompName(this->name());
 	
@@ -662,35 +663,35 @@ void USDImpl::exImplCheck(ASErrors::ASErrorsExImpl ex)
             {
              //   _THROW_EX(LibrarySocketError,"::usdImpl::exImplCheck()",err);
 			    ACS_SHORT_LOG((LM_CRITICAL,"Critical exception %d",err));
-                m_available=false;
+                m_failures++;
                 break;
             }
 		case ASErrors::USDConnectionError: 
             {
              //   _THROW_EX(USDConnectionError,"::usdImpl::exImplCheck()",err);
 			    ACS_SHORT_LOG((LM_CRITICAL,"Critical exception %d",err));
-                m_available=false;
+                m_failures++;
                 break;
             }
 		case ASErrors::USDTimeout: 
             {
              //   _THROW_EX(USDTimeout,"::usdImpl::exImplCheck()",err);
 			    ACS_SHORT_LOG((LM_CRITICAL,"Critical exception %d",err));
-                m_available=false;
+                m_failures++;
                 break;
             }
 		case ASErrors::SocketTOut:
             {
              //   _THROW_EX(SocketTOut,"::usdImpl::exImplCheck()",err);
 			    ACS_SHORT_LOG((LM_CRITICAL,"Critical exception %d",err));
-                m_available=false;
+                m_failures++;
                 break;
             }
 		case ASErrors::SocketFail: 
 		    {
              //   _THROW_EX(SocketFail,"::usdImpl::exImplCheck()",err);
 			    ACS_SHORT_LOG((LM_CRITICAL,"Critical exception %d",err));
-                m_available=false;
+                m_failures++;
 			    break;
             }
 
@@ -702,6 +703,8 @@ void USDImpl::exImplCheck(ASErrors::ASErrorsExImpl ex)
 			    break;
             }
 	}
+	if (m_failures == MAX_FAILURES)
+		m_available=false;
     
 	ex.log();
 }
@@ -719,7 +722,8 @@ bool USDImpl::compCheck(ACSErr::CompletionImpl& comp)
 	ACS_TRACE("USDImpl::compCheck()");
 
 	if(comp.isErrorFree())	{
-	return false;
+		m_failures = 0;
+		return false;
 	} else {
 		// convert a completion in C++ excpt
 		ASErrors::USDErrorExImpl ex(comp.getErrorTraceHelper()->getErrorTrace()); // senza accodamento

@@ -71,7 +71,7 @@ public:
 	 * @param waveLen  wave length in meters
 	 * @param corrected corrected zenith distance
 	*/
-    void getCorrection(double observed, double waveLen, double *corrected);
+    void getCorrection(double observed, double waveLen, double& corrected);
 
 	/**
 	 * This function gets meteo parameters from metrology component every one
