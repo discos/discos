@@ -52,6 +52,16 @@ module Receivers {
         void setup(in string code) raises (ComponentErrors::ComponentErrorsEx);
 
 
+        /** Call clearSource() before starting a scan over a new source.
+         * 
+         * This method has been introduced to avoid a change of sign of the
+         * parallactic angle at 180°.
+         * The issue is reported here: https://github.com/discos/discos/issues/328
+         *
+         */
+        void clearSource();
+
+
         /** Put the derotator in the park position and reset the configuration
          *  
          * This method sets the default values:
@@ -97,7 +107,7 @@ module Receivers {
         /** Start the parallactic angle correction 
          * 
          * It raises a NotAllowedEx either when the updating mode is not yet selected
-         * or the positioner not configured.
+         * or the positioner not configured or there is a rewind in progress.
          *
          * @param axis the scan axis
          * @param sector the antenna sector (NORTH or SOUTH)
