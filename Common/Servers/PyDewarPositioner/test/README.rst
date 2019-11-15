@@ -1,9 +1,29 @@
 *******************
 Containers to start
 *******************
-- acsStartContainer -py AntennaBossSimContainer
-- acsStartContainer -py DerotatorContainer
-- acsStartContainer -py DerotatorPositionerContainer
+Modify SRT/CDB/MACI/Components/ANTENNA/Boss/Boss.xml in the following way::
+
+    <?xml version='1.0' encoding='ISO-8859-1'?>
+    <Component xmlns="urn:schemas-cosylab-com:Component:1.0" 
+               xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+               xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  
+        Name="Boss"
+        Code="AntennaBossSim.AntennaBossSimImpl"
+        Type="IDL:alma/Antenna/AntennaBoss:1.0"
+        Container="AntennaBossSimContainer"
+        Default="true"
+        KeepAliveTime="-1"
+        ImplLang="py"
+    />
+
+Run ACS and the three containers:: 
+
+$ acsStart
+$ acsStartContainer -py AntennaBossSimContainer
+$ acsStartContainer -py DerotatorContainer
+$ acsStartContainer -py DerotatorPositionerContainer
 
 *****************************
 Content of the test directory

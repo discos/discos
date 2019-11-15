@@ -62,8 +62,8 @@ class AntennaBossSimImpl(AntennaBoss, CI, Subsystem, CC, Services, Lcycle):
         
     def getApparentCoordinates(self, t):
         """Return (az, el, ra, dec) + (jepoch, lon, lat)"""
-        coordinates = self.history.get(t) + (0, 0, 0)
-        return tuple(coordinates)
+        coordinates = tuple(self.history.get(t)) + (0, 0, 0)
+        return coordinates
 
     def getRawCoordinates(self, t):
         """Return (az, el)"""
@@ -100,7 +100,6 @@ class History(object):
             self.history.append(data)
             self.history.sort(key=operator.itemgetter(0))
             self.history = self.history[-2**15:] # Last 2**15 positions
-        # print 'position inserted in the history: ', position
 
     def clean(self, since=0):
         target_time = since if since else getTimeStamp().value

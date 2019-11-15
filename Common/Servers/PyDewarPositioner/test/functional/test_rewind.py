@@ -83,6 +83,7 @@ class StartUpdatingTest(unittest.TestCase):
         # after prepare_negative_oor(), startUpdating() will cause oor
         self.positioner.startUpdating(MNG_TRACK, ANT_SOUTH, az, el, 0, 0)
         time.sleep(0.5)
+        self.assertTrue(self.positioner.isRewindingRequired())
         steps = 2
         self.positioner.rewind(steps) 
         self.assertTrue(self.positioner.isUpdating())
@@ -309,7 +310,7 @@ class StartUpdatingTest(unittest.TestCase):
         #    -7.7330295207687838
         az = math.radians(170)
         el = math.radians(45)
-        parallactic = PosGenerator.getParallacticAngle(self.lat, az, el) # -0.77
+        parallactic = PosGenerator.getParallacticAngle(self.lat, az, el) # -7.7
         min_limit = self.device.getMinLimit() # -85.77 degrees for the K Band
         self.antenna.setOffsets(az, el, ANT_HORIZONTAL)
         target = Pis + parallactic 
