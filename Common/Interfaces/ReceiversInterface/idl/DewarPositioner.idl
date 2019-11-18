@@ -102,6 +102,51 @@ module Receivers {
          * @throw ComponentErrors::ComponentErrorsEx
          */
         void clearOffset() raises (ComponentErrors::ComponentErrorsEx);
+        
+
+        /** Check if the updating is feasible at the required starting time.
+         *
+         *
+         * @param starting_time the UTC time the scan is required to start,
+         *        0 in case the scan is required to start immediately
+         * @param axis the scan axis
+         * @param sector the antenna sector (NORTH or SOUTH)
+         * @param azimuth the azimuth (radians) at the beginning of the scan
+         * @param elevation the elevation (radians) at the beginning of the scan
+         * @param ra the RA (radians) at the beginning of the scan
+         * @param dec the DEC (radians) at the beginning of the scan
+         * @param feasible_time the closest time for the dewar positioner to be
+         *        able to execute the scan.
+         *
+         * To clarity the interface behavior, let's see some examples.
+         *
+         * 1) starting_time=0: checkUpdating() returns True in case it is ready to
+         *    start the updating right now, and sets feasible_time to 0.
+         *    In case it is not ready, it returns False and sets feasible_time to
+         *    the closest time required for the dewar positionre to be ready.
+         *
+         * 2) starting_time>0: let's supposte starting_time is 2 seconds in the future;
+         *    in that case, if the dewar positioner is able to start the updating
+         *    in two seconds, then it sets feasible_time=starting_time and returns True.
+         *    In case it is not able to start the updating at starting_time, it returns
+         *    False and sets feasible_time to the closest time for the dewar positioner
+         *    to be able to execute the scan.
+         *
+         * It raises ComponentErrors::ComponentErrorsEx in case of unexpected input
+         * parameters, i.e. starting_time<0.
+         *
+         */
+        bool checkUpdating(
+            in ACS::Time starting_time,
+            in Management::TScanAxis axis,
+            in Antenna::TAzimuthSection sector,
+            in double azimuth,
+            in double elevation,
+            in double ra,
+            in double dec,
+            out ACS::Time feasible_time,
+        ) raises (ComponentErrors::ComponentErrorsEx);
+
 
         
         /** Start the parallactic angle correction 
