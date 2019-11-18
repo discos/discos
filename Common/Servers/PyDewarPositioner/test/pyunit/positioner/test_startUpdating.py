@@ -171,6 +171,26 @@ class PositionerStartUpdatingTest(unittest.TestCase):
                 self.assertLess(delta, 180)
             p0 = angle
 
+
+    def test_clearSource(self):
+        "Put the parallactic angle sign to None"
+        self.cdbconf.setup('KKG')
+        self.cdbconf.setConfiguration('CUSTOM')
+        latitude = radians(50)
+        site_info = {'latitude': latitude}
+        self.p.setup(site_info, self.source, self.device)
+        az = radians(45)
+        el  = radians(45)
+        self.source.setAzimuth(az)
+        self.source.setElevation(el)
+        self.assertIsNone(self.p.sign)
+        self.p.startUpdating(MNG_TRACK, ANT_NORTH, az, el, None, None)
+        time.sleep(0.5)
+        self.assertIsNotNone(self.p.sign)
+        self.p._clearSign()
+        self.assertIsNone(self.p.sign)
+
+
     def test_custom_auto_rewinding(self):
         self.cdbconf.setup('KKG')
         self.cdbconf.setConfiguration('CUSTOM')

@@ -2,6 +2,7 @@ from __future__ import with_statement
 import threading
 import datetime
 import time
+import numpy
 
 import Management
 import Antenna
@@ -200,7 +201,7 @@ class Positioner(object):
                             raise NotAllowedError('zero division error computing p(%.2f, %.2f)' %(az, el))
 
                         # Remember the sign of the first scan of the map
-                        if self.sign is not None:
+                        if self.sign is None:
                             self.sign = int(numpy.sign(iParallacticPos))
 
                         self.control.setScanInfo(
