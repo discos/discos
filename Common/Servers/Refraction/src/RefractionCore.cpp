@@ -122,7 +122,7 @@ void CRefractionCore::getCorrection(double obsZenithDistance,double waveLen, dou
 	baci::ThreadSyncGuard guardParametes(&m_parametersMutex);
 	//elevation = 90.0 - obsZenithDistance*DR2D;
 	//if (elevation >= 0.0 && elevation <= 90.0) {
-	if ((obsZenithDistance>=0.0) && (obsZenithDistance<=(DPI/2.0))) {
+	if (obsZenithDistance>=0.0 && obsZenithDistance<DPIBY2) {
 		double hm = m_site.getHeight(); // meters
 		double tdk = m_temperature + 273.0;
 		double wl = waveLen*1000000; //micro meters
