@@ -56,6 +56,7 @@ AntennaBossImpl::AntennaBossImpl(const ACE_CString &CompName,maci::ContainerServ
 	m_pdeclinationOffset(this),
 	m_plongitudeOffset(this),
 	m_platitudeOffset(this),
+	m_boss(NULL),
 	m_core(NULL)
 {	
 	AUTO_TRACE("AntennaBossImpl::AntennaBossImpl()");
@@ -71,7 +72,6 @@ AntennaBossImpl::~AntennaBossImpl()
 void AntennaBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 {
 	AUTO_TRACE("AntennaBossImpl::initialize()");
-	CBossCore *boss;
 	ACS_LOG(LM_FULL_INFO,"AntennaBossImpl::initialize()",(LM_INFO,"AntennaBoss::COMPSTATE_INITIALIZING"));
 	try {
 		m_config.init(getContainerServices());    //throw CDBAcessExImpl;
@@ -81,8 +81,8 @@ void AntennaBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		throw _dummy;
 	}
 	try {
-		boss=(CBossCore *)new CBossCore(getContainerServices(),&m_config,this);
-		m_core=new IRA::CSecureArea<CBossCore>(boss);
+		m_boss=(CBossCore *)new CBossCore(getContainerServices(),&m_config,this);
+		m_core=new IRA::CSecureArea<CBossCore>(m_boss);
 		m_ptarget=new ROstring(getContainerServices()->getName()+":target",getComponent(),new DevIOTargetName(m_core),true);
 		m_prawAzimuth=new ROdouble(getContainerServices()->getName()+":rawAzimuth",getComponent(),
 				new DevIORawHorizontal(m_core,DevIORawHorizontal::AZIMUTH),true);
@@ -143,16 +143,16 @@ void AntennaBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 				new DevIOOffsets(m_core,DevIOOffsets::LATITUDEOFF),true);
 		
 		// create the parser for command line execution
-		m_parser =  new SimpleParser::CParser<CBossCore>(boss,10);
+		m_parser =  new SimpleParser::CParser<CBossCore>(m_boss,10);
 	}
 	catch (std::bad_alloc& ex) {
 		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"AntennaBossImpl::initialize()");
 		throw dummy;
 	}
-	boss->initialize(); //could throw (ComponentErrors::UnexpectedExImpl)
+	m_boss->initialize(); //could throw (ComponentErrors::UnexpectedExImpl)
 	try {
 		m_watchingThread=getContainerServices()->getThreadManager()->create<CWatchingThread,CBossCore*>
-		  ("BOSSWATCHER",boss);
+		  ("BOSSWATCHER",m_boss);
 		m_workingThread=getContainerServices()->getThreadManager()->create<CWorkingThread,CSecureArea<CBossCore> *>
 		  ("BOSSWORKER",m_core);
 	}
@@ -164,30 +164,30 @@ void AntennaBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		_THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"AntennaBossImpl::initialize()");
 	}
 	// inform the boss core of the thread in charge of trajectory update
-	boss->setWorkingThread(m_workingThread);
+	m_boss->setWorkingThread(m_workingThread);
 	// configure the parser.....
-	m_parser->add("antennaDisable",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::disable),0);
-	m_parser->add("antennaEnable",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::enable),0);
-	m_parser->add("antennaCorrectionOn",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::enableCorrection),0);
-	m_parser->add("antennaCorrectionOff",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::disableCorrection),0);
-	m_parser->add("antennaPark",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::stow),0);
-	m_parser->add("antennaStop",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::stop),0);
-	m_parser->add("antennaAzEl",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::setPreset),0);
-	m_parser->add("antennaTrack",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::setProgramTrack),0);
-	m_parser->add("antennaUnstow",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::unstow),0);
-	m_parser->add("antennaSetup",new function1<CBossCore,non_constant,void_type,I<string_type> >(boss,&CBossCore::setup),1);
-	m_parser->add("preset",new function2<CBossCore,non_constant,void_type,I<angle_type<rad> >,I<angle_type<rad> > >(boss,&CBossCore::preset),2);
-	//m_parser->add("vlsr",new function1<CBossCore,non_constant,void_type,I<double_type> >(boss,&CBossCore::setVlsr),1);
-	m_parser->add("fwhm",new function2<CBossCore,non_constant,void_type,I<angle_type<rad> >, I<double_type> >(boss,&CBossCore::setFWHM),2);
-	m_parser->add("azelOffsets",new function2<CBossCore,non_constant,void_type,I<angleOffset_type<rad> >,I<angleOffset_type<rad> > >(boss,&CBossCore::setHorizontalOffsets),2);
-	m_parser->add("radecOffsets",new function2<CBossCore,non_constant,void_type,I<angleOffset_type<rad> >,I<angleOffset_type<rad> > >(boss,&CBossCore::setEquatorialOffsets),2);
-	m_parser->add("lonlatOffsets",new function2<CBossCore,non_constant,void_type,I<angleOffset_type<rad> >,I<angleOffset_type<rad> > >(boss,&CBossCore::setGalacticOffsets),2);
-	//m_parser->add("skydipOTF",new function3<CBossCore,non_constant,time_type,I<elevation_type<rad,false> >,I<elevation_type<rad,false> >,I<interval_type> >(boss,&CBossCore::skydip),3);
-	m_parser->add("antennaReset",new function0<CBossCore,non_constant,void_type >(boss,&CBossCore::resetFailures),0);
-	//m_parser->add("goOff",new function2<CBossCore,non_constant,void_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<double_type > >(boss,&CBossCore::goOff),2);
+	m_parser->add("antennaDisable",new function0<CBossCore,non_constant,void_type >(m_boss,&CBossCore::disable),0);
+	m_parser->add("antennaEnable",new function0<CBossCore,non_constant,void_type >(m_boss,&CBossCore::enable),0);
+	m_parser->add("antennaCorrectionOn",new function0<CBossCore,non_constant,void_type >(m_boss,&CBossCore::enableCorrection),0);
+	m_parser->add("antennaCorrectionOff",new function0<CBossCore,non_constant,void_type >(m_boss,&CBossCore::disableCorrection),0);
+	m_parser->add("antennaPark",new function0<CBossCore,non_constant,void_type >(m_boss,&CBossCore::stow),0);
+	m_parser->add("antennaStop",new function0<CBossCore,non_constant,void_type >(m_boss,&CBossCore::stop),0);
+	m_parser->add("antennaAzEl",new function0<CBossCore,non_constant,void_type >(m_boss,&CBossCore::setPreset),0);
+	m_parser->add("antennaTrack",new function0<CBossCore,non_constant,void_type >(m_boss,&CBossCore::setProgramTrack),0);
+	m_parser->add("antennaUnstow",new function0<CBossCore,non_constant,void_type >(m_boss,&CBossCore::unstow),0);
+	m_parser->add("antennaSetup",new function1<CBossCore,non_constant,void_type,I<string_type> >(m_boss,&CBossCore::setup),1);
+	m_parser->add("preset",new function2<CBossCore,non_constant,void_type,I<angle_type<rad> >,I<angle_type<rad> > >(m_boss,&CBossCore::preset),2);
+	//m_parser->add("vlsr",new function1<CBossCore,non_constant,void_type,I<double_type> >(m_boss,&CBossCore::setVlsr),1);
+	m_parser->add("fwhm",new function2<CBossCore,non_constant,void_type,I<angle_type<rad> >, I<double_type> >(m_boss,&CBossCore::setFWHM),2);
+	m_parser->add("azelOffsets",new function2<CBossCore,non_constant,void_type,I<angleOffset_type<rad> >,I<angleOffset_type<rad> > >(m_boss,&CBossCore::setHorizontalOffsets),2);
+	m_parser->add("radecOffsets",new function2<CBossCore,non_constant,void_type,I<angleOffset_type<rad> >,I<angleOffset_type<rad> > >(m_boss,&CBossCore::setEquatorialOffsets),2);
+	m_parser->add("lonlatOffsets",new function2<CBossCore,non_constant,void_type,I<angleOffset_type<rad> >,I<angleOffset_type<rad> > >(m_boss,&CBossCore::setGalacticOffsets),2);
+	//m_parser->add("skydipOTF",new function3<CBossCore,non_constant,time_type,I<elevation_type<rad,false> >,I<elevation_type<rad,false> >,I<interval_type> >(m_boss,&CBossCore::skydip),3);
+	m_parser->add("antennaReset",new function0<CBossCore,non_constant,void_type >(m_boss,&CBossCore::resetFailures),0);
+	//m_parser->add("goOff",new function2<CBossCore,non_constant,void_type,I<enum_type<AntennaFrame2String,Antenna::TCoordinateFrame > >,I<double_type > >(m_boss,&CBossCore::goOff),2);
 	m_parser->add("radialVelocity",new function3<CBossCore,non_constant,void_type,I<  basic_type<double,double_converter,VRad_WildCard> >,
 			I<enum_type<ReferenceFrame_converter,Antenna::TReferenceFrame,ReferenceFrame_WildCard> >,
-			I<enum_type<VradDefinition_converter,Antenna::TVradDefinition,VradDefinition_WildCard> >  >(boss,&CBossCore::radialVelocity),3);
+			I<enum_type<VradDefinition_converter,Antenna::TVradDefinition,VradDefinition_WildCard> >  >(m_boss,&CBossCore::radialVelocity),3);
 	ACS_LOG(LM_FULL_INFO,"AntennaBossImpl::initialize()",(LM_INFO,"COMPSTATE_INITIALIZED"));
 }
 
@@ -543,9 +543,12 @@ void AntennaBossImpl::getRawCoordinates(ACS::Time time,CORBA::Double_out az,CORB
 {	
 	double Az=0.0;
 	double El=0.0;
+	//workaround for strange behavior: this method seems so be called at startup before initialize() completes
+	//this result in a segmentation fault because m_boss is not initialized yet. Has it something to do with the
+	//CoordinateGrabber? it strangely uses the methods that are affected by this problem.
+	if (!m_boss) return;
 	TIMEVALUE requestTime(time);
-	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:getRawcoordinate");
-	resource->getRawHorizontal(requestTime,Az,El);
+	m_boss->getRawHorizontal(requestTime,Az,El);
 	az=(CORBA::Double)Az;
 	el=(CORBA::Double)El;
 }
@@ -562,14 +565,10 @@ void AntennaBossImpl::getObservedEquatorial(ACS::Time time,ACS::TimeInterval dur
 {
 	double Ra=0.0;
 	double Dec=0.0;
-	//workaround for strange behavior: this method seems so be called at startup before initialize() completes
-	//this result in a segmentation fault because m_core is not created yet. Has it something to do with the
-	//CoordinateGrabber? it strangely uses the methods that are affected by this problem.
-	if (!m_core) return;  
+	if (!m_boss) return;
 	TIMEVALUE requestTime(time);
 	TIMEDIFFERENCE requestedDuration(duration);
-	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:getObservedEquatorial");
-	resource->getObservedEquatorial(requestTime,requestedDuration,Ra,Dec);
+	m_boss->getObservedEquatorial(requestTime,requestedDuration,Ra,Dec);
 	ra=(CORBA::Double)Ra;
 	dec=(CORBA::Double)Dec;
 }
@@ -579,11 +578,10 @@ void AntennaBossImpl::getObservedGalactic(ACS::Time time,ACS::TimeInterval durat
 {
 	double Long=0.0;
 	double Lat=0.0;
-	if (!m_core) return;
+	if (!m_boss) return;
 	TIMEVALUE requestTime(time);
 	TIMEDIFFERENCE requestedDuration(duration);
-	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:getObservedgalactic");
-	resource->getObservedGalactic(requestTime,requestedDuration,Long,Lat);
+	m_boss->getObservedGalactic(requestTime,requestedDuration,Long,Lat);
 	longitude=(CORBA::Double)Long;
 	latitude=(CORBA::Double)Lat;
 }
@@ -593,12 +591,10 @@ void AntennaBossImpl::getObservedHorizontal(ACS::Time time,ACS::TimeInterval dur
 {
 	double Az=0.0;
 	double El=0.0;
-	// see GetObservedEquatorial for a comment
-	if (!m_core) return;
+	if (!m_boss) return;
 	TIMEVALUE requestTime(time);
 	TIMEDIFFERENCE requestedDuration(duration);
-	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:getObservedHorizontal");
-	resource->getObservedHorizontal(requestTime,requestedDuration,Az,El);
+	m_boss->getObservedHorizontal(requestTime,requestedDuration,Az,El);
 	az=(CORBA::Double)Az;
 	el=(CORBA::Double)El;
 }

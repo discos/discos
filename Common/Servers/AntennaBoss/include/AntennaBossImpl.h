@@ -673,6 +673,7 @@ private:
 	SmartPropertyPointer<ROdouble> m_pdeclinationOffset;
 	SmartPropertyPointer<ROdouble> m_plongitudeOffset;
 	SmartPropertyPointer<ROdouble> m_platitudeOffset;
+	CBossCore *m_boss;
 	IRA::CSecureArea<CBossCore> *m_core;
 	CWorkingThread *m_workingThread;
 	CWatchingThread *m_watchingThread;
