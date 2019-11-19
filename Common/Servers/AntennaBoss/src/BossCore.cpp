@@ -1023,7 +1023,7 @@ bool CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,Co
 		loadPointingModel(m_pointingModel); // throw ComponentErrors::CouldntGetComponentExImpl
 		// get Offset from refraction;
 		try {
-			m_refraction->getCorrection(DPI/2.0-el,m_waveLength,m_refractionOffset);
+			m_refraction->getCorrection(DPIBY2-el,m_waveLength,m_refractionOffset);
 		}
 		catch (AntennaErrors::AntennaErrorsEx& ex) {  
 			_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CBossCore::updateAttributes()");
@@ -1249,7 +1249,7 @@ void CBossCore::loadTrackingPoint(const TIMEVALUE& time,bool restart) throw (Com
 		refOff=0.0;
 		try {
 			if (el>0.0) {
-				m_refraction->getCorrection(DPI/2.0-el,m_waveLength,refOff);
+				m_refraction->getCorrection(DPIBY2-el,m_waveLength,refOff);
 			}
 		}
 		catch (AntennaErrors::AntennaErrorsEx& ex) {

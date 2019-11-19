@@ -841,7 +841,7 @@ bool CIRATools::latitudeToRad(const IRA::CString& lat,double& rad,bool complete,
 		res=sexagesimalAngleToRad(lat,rad,complete,delimiter);
 	}
 	if (complete) {
-		if ((rad<-(DPI/2)) || (rad>(DPI/2))) return false;
+		if (rad<-DPIBY2 || rad>DPIBY2) return false;
 		else return res;
 	}
 	else return res;
@@ -915,7 +915,7 @@ bool CIRATools::elevationToRad(const IRA::CString& el,double& rad,bool complete)
 {
 	bool res=angleToRad(el,rad);
 	if (complete) {
-		if ((rad<0) || (rad>DPI/2)) return false;
+		if (rad<0 || rad>DPIBY2) return false;
 		else return res;
 	}
 	else return res;
