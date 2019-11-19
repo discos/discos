@@ -136,7 +136,7 @@ module Receivers {
          * parameters, i.e. starting_time<0.
          *
          */
-        bool checkUpdating(
+        boolean checkUpdating(
             in ACS::Time starting_time,
             in Management::TScanAxis axis,
             in Antenna::TAzimuthSection sector,
@@ -144,7 +144,7 @@ module Receivers {
             in double elevation,
             in double ra,
             in double dec,
-            out ACS::Time feasible_time,
+            out ACS::Time feasible_time
         ) raises (ComponentErrors::ComponentErrorsEx);
 
 
