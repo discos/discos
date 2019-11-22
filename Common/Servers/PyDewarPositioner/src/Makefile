@@ -5,7 +5,7 @@
 
 CDB_SCHEMAS = DewarPositioner
 
-PY_SCRIPTS_L = derotatorPosition
+PY_SCRIPTS_L =
 PY_MODULES =
 PY_PACKAGES = DewarPositioner
 

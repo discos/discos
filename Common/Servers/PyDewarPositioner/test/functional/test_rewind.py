@@ -126,8 +126,25 @@ class StartUpdatingTest(unittest.TestCase):
 
         self.positioner.stopUpdating()
 
-        # Second step: we do not call stopUpdating(), and we choose (az, el) 
+        # In case abs(target - min_limit) > step/2, than
+        # expected = target + 2*step (because of round())
+        Pis = -60
+        self.positioner.setPosition(Pis) 
+        # Final angle -123, lower than the min limit (-85.77)
+        target = Pis + parallactic 
+        self.assertLess(target, min_limit)
+        expected = target + 120
+        self.positioner.startUpdating(MNG_TRACK, ANT_SOUTH, az, el, 0, 0)
+        time.sleep(0.5)
+        self.assertAlmostEqual(expected, self.device.getActPosition(), delta=0.1)
+
+        self.positioner.stopUpdating()
+
+        # Third step: we do not call stopUpdating(), and we choose (az, el) 
         # in order to have a parallactic angle in range
+        Pis = -30
+        # Final angle -93, lower than the min limit (-85.77)
+        self.positioner.setPosition(Pis) 
         az = math.radians(120)
         el = math.radians(45)
         parallactic = PosGenerator.getParallacticAngle(self.lat, az, el) # -42.78

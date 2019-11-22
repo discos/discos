@@ -353,8 +353,32 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         res += 'rewindingOffset: %.4f' %info.rewindingOffset
         return res
         
+
     def getScanInfo(self):
         return ScanInfo(**self.positioner.getScanInfo())
+
+
+    def checkUpdating(self, stime, axis, sector, az, el, ra, dec):
+        try:
+            return self.positioner.checkUpdating(
+                stime, axis, sector, az, el, ra, dec
+            )
+        except PositionerError, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.OperationErrorExImpl()
+            exc.setReason(ex.message)
+            raise exc.getComponentErrorsEx()
+        except NotAllowedError, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.NotAllowedExImpl()
+            exc.setReason(ex.message)
+            raise exc.getComponentErrorsEx()
+        except Exception, ex:
+            logger.logError(ex.message)
+            exc = ComponentErrorsImpl.UnexpectedExImpl(ex.message)
+            exc.setReason(ex.message)
+            raise exc.getComponentErrorsEx()
+
 
     def startUpdating(self, axis, sector, az, el, ra, dec):
         logger.logNotice('starting the derotator position updating')
@@ -570,22 +594,22 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
 
 
     def setConfiguration(self, confCode):
-        if self.positioner.isUpdating():
+        if self.positioner.isUpdating() and not self.isRewinding():
             self.positioner.stopUpdating()
-        # The unit of time is `seconds`
-        max_wait_time = 2 
-        counter = 0
-        step = 0.2
-        while self.positioner.isUpdating():
-            self.positioner.stopUpdating()
-            time.sleep(step)
-            counter += step
-            if counter > max_wait_time:
-                reason = "cannot stop the position updating"
-                logger.logError(reason)
-                exc = ComponentErrorsImpl.OperationErrorExImpl()
-                exc.setReason(reason)
-                raise exc.getComponentErrorsEx()
+            # The unit of time is `seconds`
+            max_wait_time = 2 
+            counter = 0
+            step = 0.2
+            while self.positioner.isUpdating():
+                self.positioner.stopUpdating()
+                time.sleep(step)
+                counter += step
+                if counter > max_wait_time:
+                    reason = "cannot stop the position updating"
+                    logger.logError(reason)
+                    exc = ComponentErrorsImpl.OperationErrorExImpl()
+                    exc.setReason(reason)
+                    raise exc.getComponentErrorsEx()
         try:
             self.positioner.control.clearScanInfo()
             self.cdbconf.setConfiguration(confCode.upper())

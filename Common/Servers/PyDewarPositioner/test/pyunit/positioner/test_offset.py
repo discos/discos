@@ -60,7 +60,7 @@ class PositionerOffsetTest(unittest.TestCase):
         )
 
     def _test_out_of_range(self):
-        """Cause a rewind in case the offset is out of range"""
+        """Rewind in case the offset is out of range"""
         self.cdbconf.setup('KKG')
         self.cdbconf.setConfiguration('CUSTOM_OPT')
         az, el, latitude = [radians(50)] * 3

@@ -1,4 +1,4 @@
-from __future__ import with_statement
+from __future__ import with_statement, division
 import unittest
 import mocker
 import random
@@ -224,6 +224,52 @@ class PositionerStartUpdatingTest(unittest.TestCase):
             self.p.stopUpdating()
 
 
+    def test_startUpdating_during_rewind(self):
+        """When you call startUpdating during a rewind, the updating must
+        continue with the new parameters"""
+        self.cdbconf.setup('KKG')
+        self.cdbconf.setConfiguration('CUSTOM')
+        latitude = radians(39.49)
+        site_info = {'latitude': latitude}
+        self.p.setup(site_info, self.source, self.device)
+        self.p.setRewindingMode('AUTO')
+        
+        Pis = -23
+        self.cdbconf.updateInitialPositions(Pis)
+        try:
+            # Az and el in radians; the related parallactic angle is -63
+            az, el = 1.2217, 0.6109
+            parallactic = PosGenerator.getParallacticAngle(latitude, az, el)
+            target = Pis + parallactic
+            min_limit = self.device.getMinLimit()
+            # The final angle is -86, lower than the min limit (-85.77)
+            self.assertLess(target, min_limit)
+
+            self.source.setAzimuth(az)
+            self.source.setElevation(el)
+            sleep_time = 5.0
+            try:
+                setPosition = self.device.setPosition
+                def mockSetPosition(value):
+                    setPosition(value)
+                    time.sleep(sleep_time)
+                self.device.setPosition = mockSetPosition
+                self.p.startUpdating(MNG_TRACK, ANT_NORTH, az, el, None, None)
+                time.sleep(sleep_time/2)
+                self.cdbconf.updateInitialPositions(0)
+                az, el = 0.6109, 0.6109
+                self.p.startUpdating(MNG_TRACK, ANT_SOUTH, az, el, None, None)
+                time.sleep(sleep_time/2 + 1)
+            finally:
+                self.device.setPosition = setPosition
+            ppos = PosGenerator.getParallacticAngle(latitude, az, el)
+            self.assertEqual(self.p.control.scanInfo['iParallacticPos'], ppos)
+            self.assertEqual(self.p.control.scanInfo['sector'], ANT_SOUTH)
+            self.assertTrue(self.p.isUpdating())
+        finally:
+            self.p.stopUpdating()
+
+
     def test_custom_opt(self):
         self.cdbconf.setup('KKG')
         self.cdbconf.setConfiguration('CUSTOM_OPT')
@@ -356,22 +402,6 @@ class PositionerStartUpdatingTest(unittest.TestCase):
         finally:
             self.p.stopUpdating()
 
-    def test_cannotUpdateDuringRewind(self):
-        """Cannot execute startUpdating() when a rewind is in progress."""
-        self.cdbconf.setup('KKG')
-        self.cdbconf.setConfiguration('CUSTOM')
-        latitude, az, el = [radians(50)] * 3
-        site_info = {'latitude': latitude}
-
-        self.p.setup(site_info, self.source, self.device)
-        try:
-            self.p.control.isRewinding = True
-            self.assertRaises(NotAllowedError, self.p.startUpdating,
-                MNG_TRACK, ANT_NORTH, az, el, None, None)
-        finally:
-            self.p.stopUpdating()
-            self.p.control.isRewinding = False
- 
 
 if __name__ == '__main__':
     unittest.main()

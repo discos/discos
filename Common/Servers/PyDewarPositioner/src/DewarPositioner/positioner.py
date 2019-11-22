@@ -1,4 +1,4 @@
-from __future__ import with_statement
+from __future__ import with_statement, division
 import threading
 import datetime
 import time
@@ -143,6 +143,78 @@ class Positioner(object):
                 %(self.control.target, self.device.getMinLimit(), self.device.getMaxLimit()))
 
 
+    def checkUpdating(self, stime, axis, sector, az, el, ra, dec):
+        sectors = ('ANT_NORTH', 'ANT_SOUTH')
+        if not self.isSetup():
+            raise NotAllowedError('positioner not configured: a setup() is required')
+        elif str(axis) == 'MNG_BEAMPARK':
+            return (True, stime)
+        elif self.conf.getAttribute('DynamicUpdatingAllowed') != 'true':
+            raise NotAllowedError('dynamic updating not allowed')
+        elif not self.siteInfo:
+            raise NotAllowedError('no site information available')
+        elif str(sector) not in sectors:
+            raise NotAllowedError('sector %s not in %s' %(sector, sectors))
+
+        updatingConf = self.conf.getUpdatingConfiguration(str(axis))
+        initialPosition = float(updatingConf['initialPosition']) + self.control.user_position
+        functionName = updatingConf['functionName']
+        posgen = getattr(self.posgen, functionName) 
+        angle_mapping = self.posgen.mapping[functionName]
+        getAngleFunction = angle_mapping['getAngleFunction']
+        coordinateFrame = angle_mapping['coordinateFrame']
+        lat = self.siteInfo['latitude']
+        try:
+            if coordinateFrame == 'horizontal':
+                iParallacticPos = getAngleFunction(lat, az, el)
+            elif coordinateFrame == 'equatorial':
+                iParallacticPos = getAngleFunction(lat, az, el, ra, dec)
+            else:
+                raise PositionerError('coordinate frame %s unknown' % coordinateFrame)
+        except ZeroDivisionError:
+            raise NotAllowedError('zero division error computing p(%.2f, %.2f)' %(az, el))
+
+        Pis = initialPosition + self.control.offset
+        Pip = iParallacticPos
+        if self.isConfigured():
+            isOptimized = (self.conf.getAttribute('AddInitialParallactic') == 'false')
+        else:
+            isOptimized = False
+        target = Pis if isOptimized else Pis + Pip
+
+        future_time = 0
+        ready = True
+
+        if self.isRewinding():
+            # rdistance -> rewinding distance, rtime -> rewinding time
+            rdistance = abs(self.getPosition() - self.getCmdPosition())
+            speed = self.device.getSpeed()
+            # Safety factor of 1.2
+            rtime_distance = round((1.2 * rdistance)/speed, 4)
+            rtime = getTimeStamp().value + int(rtime_distance * 10**7)
+            # tdistance -> target distance, ttime -> target time
+            # After rewinding, the derotator has to move to the target
+            tdistance = abs(self.getCmdPosition() - target)
+            # Safety factor of 1.2
+            ttime_distance = round((1.2 * tdistance)/speed, 4)
+            ttime = getTimeStamp().value + int(ttime_distance)
+            future_time = rtime + ttime
+        else:
+            distance = abs(self.getPosition() - target)
+            # Safety factor of 1.2
+            time_distance = round((1.2 * distance)/speed, 4)
+            future_time = getTimeStamp().value + int(time_distance)
+
+        if stime == 0 and (future_time - getTimeStamp().value) < 3*10**7:  # 3 seconds
+            ready = True
+        elif stime >= future_time:
+            ready = True
+        else:
+            ready = False
+
+        return (ready, future_time)
+
+
     def startUpdating(self, axis, sector, az, el, ra, dec):
         sectors = ('ANT_NORTH', 'ANT_SOUTH')
         try:
@@ -161,11 +233,7 @@ class Positioner(object):
                 raise NotAllowedError('no source available')
             elif str(sector) not in sectors:
                 raise NotAllowedError('sector %s not in %s' %(sector, sectors))
-            elif self.isRewinding():
-                raise NotAllowedError('the positioner is rewinding')
             else:
-                if self.isUpdating():
-                    self.stopUpdating()
                 try:
                     updatingConf = self.conf.getUpdatingConfiguration(str(axis))
                     initialPosition = float(updatingConf['initialPosition']) + self.control.user_position
@@ -183,6 +251,9 @@ class Positioner(object):
                             dParallacticPos=0,
                             rewindingOffset=0,
                         )
+                        # Stop even if a rewinding is in progress
+                        self.stopUpdating()
+                        # Move to the target static position
                         self._start(self.posgen.goto, position)
                     else:
                         posgen = getattr(self.posgen, functionName) 
@@ -201,8 +272,7 @@ class Positioner(object):
                             raise NotAllowedError('zero division error computing p(%.2f, %.2f)' %(az, el))
 
                         # Remember the sign of the first scan of the map
-                        if self.sign is None:
-                            self.sign = int(numpy.sign(iParallacticPos))
+                        self.sign = int(numpy.sign(iParallacticPos))
 
                         self.control.setScanInfo(
                             axis=axis, 
@@ -212,7 +282,15 @@ class Positioner(object):
                             dParallacticPos=0,
                             rewindingOffset=0,
                         )
-                        self._start(posgen, self.source, self.siteInfo)
+
+                        if self.isRewinding():
+                            pass
+                        elif self.isUpdating():
+                            self.stopUpdating()
+                            self._start(posgen, self.source, self.siteInfo)
+                        else:
+                            self._start(posgen, self.source, self.siteInfo)
+
                     self.control.mustUpdate = True
                 except Exception, ex:
                     raise PositionerError('configuration problem: %s' %ex.message)
@@ -343,7 +421,7 @@ class Positioner(object):
         #   * SOUTH: the derotator must go closer to the lower limit
         #   * NORTH: the derotator must go closer to the higher limit
         #
-        # The name space is the distance between the target position and the
+        # `space` is the distance between the target position and the
         # limit (lower in case of SOUTH, higher in case of NORTH)
         min_limit = self.device.getMinLimit()
         max_limit = self.device.getMaxLimit()
@@ -357,7 +435,7 @@ class Positioner(object):
                 numberOfSteps = int(space // self.device.getStep())
             elif target - delta <= min_limit:
                 sign = +1
-                numberOfSteps = int(space // self.device.getStep()) + 1
+                numberOfSteps = int(round(space / self.device.getStep())) + 1
             else:
                 raise ValueError('cannot get the rewinding parameters: ' \
                                  'target %.2f in range' %target)
@@ -365,7 +443,7 @@ class Positioner(object):
             space = abs(target - max_limit)
             if target + delta >= max_limit:
                 sign = -1
-                numberOfSteps = int(space // self.device.getStep()) + 1
+                numberOfSteps = int(round(space / self.device.getStep())) + 1
             elif target - delta <= min_limit:
                 sign = +1
                 numberOfSteps = int(space // self.device.getStep())
@@ -373,7 +451,7 @@ class Positioner(object):
                 raise ValueError('cannot get the rewinding parameters: ' \
                                  'target %.2f in range' %target)
         else:
-            raise ValueError('sector %s unknown' %sector)
+            raise ValueError('sector %s unknown' % sector)
 
         if steps == None:
             n = numberOfSteps
