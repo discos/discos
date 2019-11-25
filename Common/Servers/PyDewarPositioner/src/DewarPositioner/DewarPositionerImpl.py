@@ -359,6 +359,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
 
 
     def checkUpdating(self, stime, axis, sector, az, el, ra, dec):
+        print('In checkUpdating()')
         try:
             return self.positioner.checkUpdating(
                 stime, axis, sector, az, el, ra, dec
@@ -374,9 +375,10 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             exc.setReason(ex.message)
             raise exc.getComponentErrorsEx()
         except Exception, ex:
-            logger.logError(ex.message)
-            exc = ComponentErrorsImpl.UnexpectedExImpl(ex.message)
-            exc.setReason(ex.message)
+            reason = ex.getReason() if hasattr(ex, 'getReason') else ex.message
+            exc = ComponentErrorsImpl.OperationErrorExImpl()
+            logger.logError(reason)
+            exc.setReason(reason)
             raise exc.getComponentErrorsEx()
 
 

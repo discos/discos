@@ -185,10 +185,10 @@ class Positioner(object):
         future_time = 0
         ready = True
 
+        speed = self.device.getSpeed()
         if self.isRewinding():
             # rdistance -> rewinding distance, rtime -> rewinding time
             rdistance = abs(self.getPosition() - self.getCmdPosition())
-            speed = self.device.getSpeed()
             # Safety factor of 1.2
             rtime_distance = round((1.2 * rdistance)/speed, 4)
             rtime = getTimeStamp().value + int(rtime_distance * 10**7)
@@ -203,10 +203,14 @@ class Positioner(object):
             distance = abs(self.getPosition() - target)
             # Safety factor of 1.2
             time_distance = round((1.2 * distance)/speed, 4)
-            future_time = getTimeStamp().value + int(time_distance)
+            future_time = getTimeStamp().value + int(time_distance * 10**7)
 
-        if stime == 0 and (future_time - getTimeStamp().value) < 3*10**7:  # 3 seconds
+        tolerance = 2*10**7  # 2 seconds
+        now = getTimeStamp().value
+        if stime == 0 and (future_time - now) < tolerance:
             ready = True
+        elif stime == 0 and (future_time - now) >= tolerance:
+            ready = False
         elif stime >= future_time:
             ready = True
         else:
