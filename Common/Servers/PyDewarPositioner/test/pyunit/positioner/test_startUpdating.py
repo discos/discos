@@ -22,9 +22,11 @@ class PositionerStartUpdatingTest(unittest.TestCase):
         self.cdbconf.attributes['UpdatingTime'] = 0.1
         self.p = Positioner(self.cdbconf)
 
+
     def tearDown(self):
         self.p.park()
  
+
     def test_alreadyUpdating(self):
         """The call to startUpdating() have to stop and start again a new updating"""
         self.cdbconf.setup('KKG')
@@ -43,6 +45,7 @@ class PositionerStartUpdatingTest(unittest.TestCase):
         finally:
             self.p.stopUpdating()
  
+
     def test_cannotSetPosition(self):
         """Cannot set position during an updating"""
         self.cdbconf.setup('KKG')
@@ -58,6 +61,7 @@ class PositionerStartUpdatingTest(unittest.TestCase):
         finally:
             self.p.stopUpdating()
  
+
     def test_do_nothing_with_axis_MNG_BEAMPARK(self):
         """Do nothing in case the axis is MNG_BEAMPARK"""
         self.cdbconf.setup('KKG')
@@ -72,6 +76,7 @@ class PositionerStartUpdatingTest(unittest.TestCase):
             self.assertFalse(self.p.isUpdating())
         finally:
             self.p.stopUpdating()
+
 
     def test_notYetConfigured(self):
         """Verify startUpdating()"""
@@ -110,6 +115,7 @@ class PositionerStartUpdatingTest(unittest.TestCase):
         self.cdbconf.UpdatingPosition['ANT_NORTH'] = [10, 'fooName'] # [position, functionName]
         self.assertRaises(PositionerError, self.p.startUpdating, axis, sector, 1, 1, None, None)
 
+
     def test_custom(self):
         self.cdbconf.setup('KKG')
         self.cdbconf.setConfiguration('CUSTOM')
@@ -135,6 +141,7 @@ class PositionerStartUpdatingTest(unittest.TestCase):
         finally:
             self.p.stopUpdating()
 
+
     def test_change_of_sign_negative_to_positive(self):
         "The parallactic angle do not have to change from -180 to 180 degrees"
         site_info = {'latitude': radians(39.49)}
@@ -152,6 +159,7 @@ class PositionerStartUpdatingTest(unittest.TestCase):
                 delta = abs(angle - p0)
                 self.assertLess(delta, 180)
             p0 = angle
+
 
     def test_change_of_sign_positive_to_negative(self):
         "The parallactic angle do not have to change from 180 to -180 degrees"
@@ -296,6 +304,7 @@ class PositionerStartUpdatingTest(unittest.TestCase):
         finally:
             self.p.stopUpdating()
 
+
     def test_bsc(self):
         self.cdbconf.setup('KKG')
         self.cdbconf.setConfiguration('BSC')
@@ -321,6 +330,7 @@ class PositionerStartUpdatingTest(unittest.TestCase):
                 self.assertAlmostEqual(expected, self.device.getActPosition(), places=2)
         finally:
             self.p.stopUpdating()
+
 
     def test_bsc_opt(self):
         self.cdbconf.setup('KKG')
@@ -349,6 +359,7 @@ class PositionerStartUpdatingTest(unittest.TestCase):
         finally:
             self.p.stopUpdating()
 
+
     def test_BSC_staticX(self):
         self.cdbconf.setup('KKG')
         self.cdbconf.setConfiguration('BSC')
@@ -374,6 +385,7 @@ class PositionerStartUpdatingTest(unittest.TestCase):
             self.assertEqual(expected, self.device.getActPosition())
         finally:
             self.p.stopUpdating()
+
 
     def test_CUSTOM_staticX(self):
         self.cdbconf.setup('KKG')

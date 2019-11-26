@@ -359,7 +359,6 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
 
 
     def checkUpdating(self, stime, axis, sector, az, el, ra, dec):
-        print('In checkUpdating()')
         try:
             return self.positioner.checkUpdating(
                 stime, axis, sector, az, el, ra, dec

@@ -4,6 +4,7 @@ import time
 from Antenna import ANT_HORIZONTAL, ANT_NORTH, ANT_SOUTH
 from Management import MNG_TRACK, MNG_BEAMPARK
 from DewarPositioner.posgenerator import PosGenerator
+from DewarPositioner.positioner import TOLERANCE, SAFETY_FACTOR
 
 from Acspy.Clients.SimpleClient import PySimpleClient
 from Acspy.Common.TimeHelper import getTimeStamp
@@ -11,7 +12,7 @@ from ComponentErrors import ComponentErrorsEx
 
 
 class TestCheckUpdating(unittest.TestCase):
-    """Test the DewarPositioner.startUpdating() end-to-end method"""
+    """Test the DewarPositioner.checkUpdating() end-to-end method"""
     def setUp(self):
         self.client = PySimpleClient()
         self.device = self.client.getComponent('RECEIVERS/SRTKBandDerotator')
@@ -19,7 +20,7 @@ class TestCheckUpdating(unittest.TestCase):
         self.positioner = self.client.getComponent('RECEIVERS/DewarPositioner')
         self.positioner.setup('KKG')
         self.positioner.setConfiguration('custom')
-        self.lat = 0.689 # 39.5 degrees
+        self.lat = 0.689  # 39.5 degrees
 
     def tearDown(self):
         if self.positioner.isReady():
@@ -30,24 +31,17 @@ class TestCheckUpdating(unittest.TestCase):
         self.client.releaseComponent('RECEIVERS/DewarPositioner')
 
 
-    def _test_system_not_ready(self):
+    def test_system_not_ready(self):
         """Raise ComponentErrorsEx when the system is not ready"""
         with self.assertRaisesRegexp(ComponentErrorsEx, 'positioner not configured'):
             self.positioner.park()
             time.sleep(0.5)
-            starting_time = getTimeStamp().value + 100000000
-            az, el, ra, dec = 0, 0, 0, 0
-            self.positioner.checkUpdating(
-                    starting_time,
-                    MNG_TRACK,
-                    ANT_SOUTH,
-                    az, el, ra, dec
-            )
+            self.positioner.checkUpdating(0, MNG_TRACK, ANT_SOUTH, 0, 0, 0, 0)
 
 
-    def _test_mng_beampark(self):
+    def test_mng_beampark(self):
         """Return (True, starting_time) when axis is MNG_BEAMPARK"""
-        starting_time = getTimeStamp().value + 100000000
+        starting_time = getTimeStamp().value + 10**7  # 1 sec in the future
         az, el, ra, dec = 0, 0, 0, 0
         value, feasible_time = self.positioner.checkUpdating(
                 starting_time,
@@ -61,9 +55,9 @@ class TestCheckUpdating(unittest.TestCase):
 
     def test_starting_time_0_feasible_time_less_than_tolerance(self):
         """We have starting_time == 0 and the system is ready (because
-        it requires less than 2 seconds to reach the position). In this case
-        it has to return True and a feasible_time less than current time
-        plus the tolerance."""
+        it requires less than a 2 seconds TOLERANCE to reach the position).
+        In this case it has to return True and a feasible_time less than
+        current time plus the TOLERANCE."""
         starting_time = 0
         az, el, ra, dec = 0.6109, 0.6109, 0, 0  # 0.6109 -> 35 degrees
         self.antenna.setOffsets(az, el, ANT_HORIZONTAL)
@@ -80,14 +74,15 @@ class TestCheckUpdating(unittest.TestCase):
         )
         self.assertEqual(value, True)
         self.assertGreater(feasible_time, timestamp)
-        self.assertLess(feasible_time, timestamp + 10**7)  # 1 sec
+        self.assertLess(feasible_time, timestamp + TOLERANCE)
 
 
     def test_starting_time_0_feasible_time_greater_than_tolerance(self):
         """We have starting_time == 0 but the system is not ready (because
-        it requires more than 2 seconds to reach the position). In this case
-        it has to return False and a feasible_time greater or equal to the
-        time required to reach the posizion."""
+        it requires more than 2 seconds TOLERANCE to reach the position).
+        In this case it has to return False and a feasible_time greater
+        than the time required to reach the posizion, and less than the
+        required time moltiplied for a safety factor."""
         starting_time = 0
         az, el = 1.2217, 0.6109 # 70 degrees, 35 degrees
         p0 = 0
@@ -105,7 +100,7 @@ class TestCheckUpdating(unittest.TestCase):
         self.assertEqual(value, False)
         minimum_time = timestamp + int(required_time)
         self.assertGreater(feasible_time, minimum_time)
-        safety_time = int(1.3*minimum_time)
+        safety_time = int(SAFETY_FACTOR * minimum_time)
         self.assertLess(feasible_time, safety_time)
 
 
@@ -130,7 +125,7 @@ class TestCheckUpdating(unittest.TestCase):
         )
         self.assertEqual(value, True)
         self.assertLess(feasible_time, starting_time)
-        self.assertGreater(feasible_time, required_time)
+        self.assertGreater(feasible_time, timestamp)
 
 
     def test_starting_time_not_0_feasible_time_greater_than_starting_time(self):
@@ -144,7 +139,8 @@ class TestCheckUpdating(unittest.TestCase):
         speed = self.device.getSpeed()
         required_time = abs(p1 - p0)/speed * 10**7
         timestamp = getTimeStamp().value
-        # Starting time is 2 seconds more than the required time
+        # The required_time does not add the SAFETY_FACTOR, so the
+        # feasbile_time is greater than starting_time
         starting_time = timestamp + int(required_time)
         value, feasible_time = self.positioner.checkUpdating(
                 starting_time,
@@ -154,7 +150,7 @@ class TestCheckUpdating(unittest.TestCase):
         )
         self.assertEqual(value, False)
         self.assertGreater(feasible_time, starting_time)
-        safety_time = timestamp + int(required_time*1.2) + 2*10**7
+        safety_time = timestamp + int(required_time * SAFETY_FACTOR)
         self.assertLess(feasible_time, safety_time)
 
 

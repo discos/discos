@@ -16,6 +16,10 @@ from IRAPy import logger
 __docformat__ = 'restructuredtext'
 
 
+TOLERANCE = 2*10**7   # 2 seconds
+SAFETY_FACTOR = 1.2
+
+
 class Positioner(object):
     generalLock = threading.Lock()
     rewindingLock = threading.Lock()
@@ -189,27 +193,23 @@ class Positioner(object):
         if self.isRewinding():
             # rdistance -> rewinding distance, rtime -> rewinding time
             rdistance = abs(self.getPosition() - self.getCmdPosition())
-            # Safety factor of 1.2
-            rtime_distance = round((1.2 * rdistance)/speed, 4)
+            rtime_distance = round((SAFETY_FACTOR * rdistance)/speed, 4)
             rtime = getTimeStamp().value + int(rtime_distance * 10**7)
             # tdistance -> target distance, ttime -> target time
             # After rewinding, the derotator has to move to the target
             tdistance = abs(self.getCmdPosition() - target)
-            # Safety factor of 1.2
-            ttime_distance = round((1.2 * tdistance)/speed, 4)
+            ttime_distance = round((SAFETY_FACTOR * tdistance)/speed, 4)
             ttime = getTimeStamp().value + int(ttime_distance)
             future_time = rtime + ttime
         else:
             distance = abs(self.getPosition() - target)
-            # Safety factor of 1.2
-            time_distance = round((1.2 * distance)/speed, 4)
+            time_distance = round((SAFETY_FACTOR * distance)/speed, 4)
             future_time = getTimeStamp().value + int(time_distance * 10**7)
 
-        tolerance = 2*10**7  # 2 seconds
         now = getTimeStamp().value
-        if stime == 0 and (future_time - now) < tolerance:
+        if stime == 0 and (future_time - now) < TOLERANCE:
             ready = True
-        elif stime == 0 and (future_time - now) >= tolerance:
+        elif stime == 0 and (future_time - now) >= TOLERANCE:
             ready = False
         elif stime >= future_time:
             ready = True
