@@ -1642,13 +1642,9 @@ void CSRTActiveSurfaceBossCore::setActuator(int circle, int actuator, long int& 
 
 void CSRTActiveSurfaceBossCore::usdStatus4GUIClient(int circle, int actuator, CORBA::Long_out status) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl)
 {
-	ACS::ROpattern_var status_var;
-    	ACSErr::Completion_var completion;
-
     	if (!CORBA::is_nil(usd[circle][actuator])) {
         	try {
-            		status_var = usd[circle][actuator]->status ();
-            		status = status_var->get_sync (completion.out ());
+                usd[circle][actuator]->getStatus(status);
         	}
         	catch (CORBA::SystemException& ex) {
             		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CSRTActiveSurfaceBossCore::usdStatus4GUIClient()");
