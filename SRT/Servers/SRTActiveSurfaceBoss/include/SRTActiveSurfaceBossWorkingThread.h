@@ -52,7 +52,7 @@ public:
      virtual void runLoop();
 
 private:
-
+	ACS::TimeInterval m_sleepTime;
 	IRA::CSecureArea<CSRTActiveSurfaceBossCore> *m_core;
 };
 
