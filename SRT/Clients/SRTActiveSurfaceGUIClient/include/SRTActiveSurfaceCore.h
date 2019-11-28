@@ -58,7 +58,6 @@ class SRTActiveSurfaceCore : public QThread
 
 	    bool monitor;
         int theCircle, theActuator, theRadius;
-        const char* theActuatorStatusColorString;
 	    QString ActuatorActualPosition_str;
 	    QString ActuatorCommandedPosition_str;
 	    QString mm_ActuatorActualPosition_str;
@@ -75,13 +74,11 @@ class SRTActiveSurfaceCore : public QThread
         int ASstatusCode;
         int asProfileCode;
 
-	    bool callfromfunction, fromRun;
-
     signals:
-        int setGUIActuatorColor(int, int, const char*);
-        int setGUIAllActuators();
-        int setGUIcircleORradius();
-        int setGUIActuator();
+        int setGUIActuatorColor(int, int, const char*, bool);
+        int setGUIAllActuators(bool callfromfunction = false);
+        int setGUIcircleORradius(bool callfromfunction = false);
+        int setGUIActuator(bool callfromfunction = false);
         int setGUIActuatorStatusEnblLabel();
         int setGUIActuatorValues();
         int setGUIActuatorStatusLabels();

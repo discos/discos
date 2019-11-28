@@ -25,7 +25,6 @@ void SRTActiveSurfaceCore::setGUI(SRTActiveSurfaceGUI* theGUI)
 	tGUI=theGUI;
     tGUI->EnableButton->setPaletteBackgroundColor(QColor(0,170,0));
 	actuatorcounter = circlecounter = totacts = 1;
-	callfromfunction = false;
 }
 
 void SRTActiveSurfaceCore::setSimpleClient (maci::SimpleClient* theClient)
@@ -46,8 +45,6 @@ void SRTActiveSurfaceCore::setASBoss (ActiveSurface::SRTActiveSurfaceBoss_var AS
 {
     tASBoss = ASBoss;
     actuatorcounter = circlecounter = totacts = 1;
-	callfromfunction = false;
-    fromRun = false;
 }
 
 void SRTActiveSurfaceCore::stop (void)
@@ -72,7 +69,8 @@ void SRTActiveSurfaceCore::run(void)
     ACS::pattern asProfile_val;
 
 
-    while (monitor == true) {
+    while (monitor == true)
+    {
         TIMEVALUE clock;
         CIRATools::getTime(clock);
         ACS::Time t0 = clock.value().value;
@@ -155,77 +153,56 @@ void SRTActiveSurfaceCore::run(void)
             totalactuators == 1105 || totalactuators == 1113 || totalactuators == 1117)      
             l = 1;
 
-        try {
+        // Change the color of the current USD to yellow in order to have a visual feedback of where the loop actually is
+        const char* theActuatorStatusColorString = "background-color: rgb(255, 255, 0);";
+        emit setGUIActuatorColor(i, l, theActuatorStatusColorString, true);
+
+        try
+        {
             tASBoss->usdStatus4GUIClient(i,l,status);
-            if ((status & ENBL) == 0)  {// usd not enabled
-                //ActuatorStatus_color.setRgb( 255, 0, 0 );
-		//printf("usd %d_%d not enabled\n", i, l);
+            if ((status & ENBL) == 0)
+            {
                 theActuatorStatusColorString = "background-color: rgb(255, 0, 0);";
             }
-            else {
-		        //ActuatorStatus_color.setRgb( 0, 170, 0 );
+            else
+            {
                 theActuatorStatusColorString = "background-color: rgb(85, 255, 0);";
             }
-            //setactuatorcolor(i, l, ActuatorStatus_color);
-            fromRun = true;
-            //theCircle = i; theActuator = l;
-            emit setGUIActuatorColor(i, l, theActuatorStatusColorString);
-            //fromRun = false;
         }
-        catch (ComponentErrors::ComponentNotActiveExImpl& ex) {
-        //catch (ComponentErrors::ComponentErrorsExImpl& ex) {
-			//ActuatorStatus_color.setRgb( 255, 255, 0 );
-            theActuatorStatusColorString = "background-color: rgb(255, 255, 0);";
-            // setactuatorcolor(i, l, ActuatorStatus_color);
-            fromRun = true;
-            //theCircle = i; theActuator = l;
-            emit setGUIActuatorColor(i, l, theActuatorStatusColorString);
-            //fromRun = false;
+        catch (ComponentErrors::ComponentNotActiveExImpl& ex)
+        {
             ex.log(LM_DEBUG);
         }
-        catch (CORBA::SystemException& sysEx) {
-			//ActuatorStatus_color.setRgb( 255, 0, 0 );
+        catch (CORBA::SystemException& sysEx)
+        {
             theActuatorStatusColorString = "background-color: rgb(255, 0, 0);";
-            // setactuatorcolor(i, l, ActuatorStatus_color);
-            fromRun = true;
-            //theCircle = i; theActuator = l;
-            emit setGUIActuatorColor(i, l, theActuatorStatusColorString);
-            //fromRun = false;
             _EXCPT(ClientErrors::CORBAProblemExImpl,impl,"SRTActiveSurfaceGUIClient::SRTActiveSurfaceCore::run()");
             impl.setName(sysEx._name());
-		impl.setMinor(sysEx.minor());
-		impl.log();
-		//printf("usd %d_%d corba ex\n", i, l);
+		    impl.setMinor(sysEx.minor());
+		    impl.log();
         }
-        catch (...) {
-			//ActuatorStatus_color.setRgb( 255, 0, 0 );
+        catch (...)
+        {
             theActuatorStatusColorString = "background-color: rgb(255, 0, 0);";
-            // setactuatorcolor(i, l, ActuatorStatus_color);
-            fromRun = true;
-            //theCircle = i; theActuator = l;
-            emit setGUIActuatorColor(i, l, theActuatorStatusColorString);
-            //fromRun = false;
             _EXCPT(ClientErrors::UnknownExImpl,impl,"SRTActiveSurfaceGUIClient::SRTActiveSurfaceCore::run()");
             impl.log();
-		//printf("usd %d_%d unknown ex\n", i, l);
         }
-		
-		totalactuators++;
-		l++;
-		if (totalactuators == 1117) {
-		    i = l = totalactuators = 1;
-		}
-		circlecounter = i;
-		actuatorcounter = l;
-		totacts = totalactuators;
 
         CIRATools::getTime(clock);
         ACS::Time t1 = clock.value().value;
-        int elapsed = (t1 - t0) / 10; //Time is expressed in hundreds of nanoseconds, we convert it to microseconds in order to use it with the Wait function
+        int elapsed = (t1 - t0) / 10;
+        CIRATools::Wait(std::max(25000 - elapsed, 0));
 
-        if(elapsed < 100000)
-            CIRATools::Wait(100000 - elapsed);
-    } // end of while
+        emit setGUIActuatorColor(i, l, theActuatorStatusColorString, true);
+
+		totalactuators++;
+		l++;
+		if (totalactuators == 1117)
+		    i = l = totalactuators = 1;
+		circlecounter = i;
+		actuatorcounter = l;
+		totacts = totalactuators;
+    }
 }
 
 void SRTActiveSurfaceCore::setactuator(int circle, int actuator)
@@ -266,8 +243,6 @@ void SRTActiveSurfaceCore::setactuator(int circle, int actuator)
     */
     //theCircle = circle;
     //theActuator = actuator;
-
-    fromRun = false;
 
     emit setGUIActuator();
 
@@ -344,15 +319,15 @@ void SRTActiveSurfaceCore::setactuator(int circle, int actuator)
     
             emit setGUIActuatorValues();
 
-            theActuatorStatusColorString = "background-color: rgb(85, 255, 0);";
             //ActuatorStatus_color.setRgb( 0, 170, 0 );
             //setactuatorcolor(circle, actuator, ActuatorStatus_color);
             //theCircle = i; theActuator = l;
-            emit setGUIActuatorColor(circle, actuator, theActuatorStatusColorString);
+            emit setGUIActuatorColor(circle, actuator, "background-color: rgb(85, 255, 0);", false);
 
 		    //setactuatorstatuslabels(circle,actuator);
-            CORBA::Long status;
-            tASBoss->usdStatus4GUIClient(circle, actuator, status);
+            //The status has been updated right before this if-else section, there is no need to ask it again
+            //CORBA::Long status;
+            //tASBoss->usdStatus4GUIClient(circle, actuator, status);
             if ((status & MRUN) == 0) {
                 ActuatorStatusRunLabelCode = -1;
 		        //tGUI->ActuatorStatusRunLabel->clear();
@@ -451,8 +426,6 @@ void SRTActiveSurfaceCore::recoverUSD(int circle, int actuator)
 
 void SRTActiveSurfaceCore::stopUSD(int circle, int actuator, int radius)
 {
-	callfromfunction = true;
-
     // disable automatic update
     disableAutoUpdate();
 
@@ -475,23 +448,19 @@ void SRTActiveSurfaceCore::stopUSD(int circle, int actuator, int radius)
 
 	if (circle == 0 && actuator == 0 && radius == 0)
         // setallactuators(); // ALL
-        emit setGUIAllActuators();
+        emit setGUIAllActuators(true);
     else if ((circle != 0 && actuator == 0 && radius == 0) || // CIRCLE
              (circle == 0 && actuator == 0 && radius != 0)) {   // RADIUS
         //setcircleORradius(circle, radius);
         theCircle = circle; theRadius = radius;
-        emit setGUIcircleORradius();
+        emit setGUIcircleORradius(true);
     }
     else
         setactuator(circle,actuator);
-
-    callfromfunction = false;
 }
 
 void SRTActiveSurfaceCore::reset(int circle, int actuator, int radius)
 {
-	callfromfunction = true;
-
     try {
         tASBoss->reset(circle, actuator, radius);
     }
@@ -511,23 +480,19 @@ void SRTActiveSurfaceCore::reset(int circle, int actuator, int radius)
 
 	if (circle == 0 && actuator == 0 && radius == 0)
         // setallactuators(); // ALL
-        emit setGUIAllActuators();
+        emit setGUIAllActuators(true);
     else if ((circle != 0 && actuator == 0 && radius == 0) || // CIRCLE
              (circle == 0 && actuator == 0 && radius != 0)) { // RADIUS
         //setcircleORradius(circle, radius);
         theCircle = circle; theRadius = radius;
-        emit setGUIcircleORradius();
+        emit setGUIcircleORradius(true);
     }
     else
         setactuator(circle,actuator);
-
-    callfromfunction = false;
 }
 
 void SRTActiveSurfaceCore::up(int circle, int actuator, int radius)
 {
-	callfromfunction = true;
-
     try {
         tASBoss->up(circle, actuator, radius);
     }
@@ -547,23 +512,19 @@ void SRTActiveSurfaceCore::up(int circle, int actuator, int radius)
 
 	if (circle == 0 && actuator == 0 && radius == 0)
         //setallactuators(); // ALL
-        emit setGUIAllActuators();
+        emit setGUIAllActuators(true);
     else if ((circle != 0 && actuator == 0 && radius == 0) || // CIRCLE
              (circle == 0 && actuator == 0 && radius != 0)) { // RADIUS
         //setcircleORradius(circle, radius);
         theCircle = circle; theRadius = radius;
-        emit setGUIcircleORradius();
+        emit setGUIcircleORradius(true);
     }
     else
         setactuator(circle,actuator);
-
-    callfromfunction = false;
 }
 
 void SRTActiveSurfaceCore::down(int circle, int actuator, int radius)
 {
-	callfromfunction = true;
-
     try {
         tASBoss->down(circle, actuator, radius);
     }
@@ -583,23 +544,19 @@ void SRTActiveSurfaceCore::down(int circle, int actuator, int radius)
 
 	if (circle == 0 && actuator == 0 && radius == 0)
         //setallactuators(); // ALL
-        emit setGUIAllActuators();
+        emit setGUIAllActuators(true);
     else if ((circle != 0 && actuator == 0 && radius == 0) || // CIRCLE
              (circle == 0 && actuator == 0 && radius != 0)) { // RADIUS
         //setcircleORradius(circle, radius);
         theCircle = circle; theRadius = radius;
-        emit setGUIcircleORradius();
+        emit setGUIcircleORradius(true);
     }
     else
         setactuator(circle,actuator);
-
-    callfromfunction = false;
 }
 
 void SRTActiveSurfaceCore::top(int circle, int actuator, int radius)
 {
-	callfromfunction = true;
-
     try {
         tASBoss->top(circle, actuator, radius);
     }
@@ -619,23 +576,19 @@ void SRTActiveSurfaceCore::top(int circle, int actuator, int radius)
 
 	if (circle == 0 && actuator == 0 && radius == 0)
         //setallactuators(); // ALL
-        emit setGUIAllActuators();
+        emit setGUIAllActuators(true);
     else if ((circle != 0 && actuator == 0 && radius == 0) || // CIRCLE
              (circle == 0 && actuator == 0 && radius != 0)) { // RADIUS
         //setcircleORradius(circle, radius);
         theCircle = circle; theRadius = radius;
-        emit setGUIcircleORradius();
+        emit setGUIcircleORradius(true);
     }
     else
         setactuator(circle,actuator);
-
-    callfromfunction = false;
 }
 
 void SRTActiveSurfaceCore::bottom(int circle, int actuator, int radius)
 {
-	callfromfunction = true;
-
     try {
         tASBoss->bottom(circle, actuator, radius);
     }
@@ -655,22 +608,19 @@ void SRTActiveSurfaceCore::bottom(int circle, int actuator, int radius)
 
 	if (circle == 0 && actuator == 0 && radius == 0)
         //setallactuators(); // ALL
-        emit setGUIAllActuators();
+        emit setGUIAllActuators(true);
     else if ((circle != 0 && actuator == 0 && radius == 0) || // CIRCLE
              (circle == 0 && actuator == 0 && radius != 0)) { // RADIUS
         //setcircleORradius(circle, radius);
         theCircle = circle; theRadius = radius;
-        emit setGUIcircleORradius();
+        emit setGUIcircleORradius(true);
     }
     else
         setactuator(circle,actuator);
-
-    callfromfunction = false;
 }
 
 void SRTActiveSurfaceCore::calibrate(int circle, int actuator, int radius)
 {
-	callfromfunction = true;
 	char str[28];
 
 	sprintf(str,"SRTAS_Calibration %d %d %d &", circle, actuator, radius);
@@ -678,17 +628,15 @@ void SRTActiveSurfaceCore::calibrate(int circle, int actuator, int radius)
 
 	if (circle == 0 && actuator == 0 && radius == 0)
         //setallactuators(); // ALL
-        emit setGUIAllActuators();
+        emit setGUIAllActuators(true);
     else if ((circle != 0 && actuator == 0 && radius == 0) || // CIRCLE
              (circle == 0 && actuator == 0 && radius != 0)) { // RADIUS
         //setcircleORradius(circle, radius);
         theCircle = circle; theRadius = radius;
-        emit setGUIcircleORradius();
+        emit setGUIcircleORradius(true);
     }
     else
         setactuator(circle,actuator);
-
-    callfromfunction = false;
 }
 
 void SRTActiveSurfaceCore::calVer(int circle, int actuator, int radius)
@@ -719,7 +667,7 @@ void SRTActiveSurfaceCore::calVer(int circle, int actuator, int radius)
              (circle == 0 && actuator == 0 && radius != 0)) { // RADIUS
         //setcircleORradius(circle, radius);
         theCircle = circle; theRadius = radius;
-        emit setGUIcircleORradius();
+        emit setGUIcircleORradius(true);
     }
     else
         setactuator(circle,actuator);
@@ -749,8 +697,6 @@ void SRTActiveSurfaceCore::park()
 
 void SRTActiveSurfaceCore::stow(int circle, int actuator, int radius)
 {
-	callfromfunction = true;
-
     try {
         tASBoss->stow(circle, actuator, radius);
     }
@@ -770,23 +716,19 @@ void SRTActiveSurfaceCore::stow(int circle, int actuator, int radius)
 
 	if (circle == 0 && actuator == 0 && radius == 0)
         //setallactuators(); // ALL
-        emit setGUIAllActuators();
+        emit setGUIAllActuators(true);
     else if ((circle != 0 && actuator == 0 && radius == 0) || // CIRCLE
              (circle == 0 && actuator == 0 && radius != 0)) { // RADIUS
         //setcircleORradius(circle, radius);
         theCircle = circle; theRadius = radius;
-        emit setGUIcircleORradius();
+        emit setGUIcircleORradius(true);
     }
     else
         setactuator(circle,actuator);
-
-    callfromfunction = false;
 }
 
 void SRTActiveSurfaceCore::move(int circle, int actuator, int radius, long incr)
 {
-	callfromfunction = true;
-
     try {
         tASBoss->move(circle, actuator, radius, incr);
     }
@@ -806,17 +748,15 @@ void SRTActiveSurfaceCore::move(int circle, int actuator, int radius, long incr)
 
 	if (circle == 0 && actuator == 0 && radius == 0)
         //setallactuators(); // ALL
-        emit setGUIAllActuators();
+        emit setGUIAllActuators(true);
     else if ((circle != 0 && actuator == 0 && radius == 0) || // CIRCLE
              (circle == 0 && actuator == 0 && radius != 0)) { // RADIUS
         //setcircleORradius(circle, radius);
         theCircle = circle; theRadius = radius;
-        emit setGUIcircleORradius();
+        emit setGUIcircleORradius(true);
     }
     else
         setactuator(circle,actuator);
-
-    callfromfunction = false;
 }
 
 void SRTActiveSurfaceCore::setProfile(long int profile)
@@ -833,8 +773,6 @@ void SRTActiveSurfaceCore::setProfile(long int profile)
 
 void SRTActiveSurfaceCore::correction(int circle, int actuator, int radius, double correction)
 {
-	callfromfunction = true;
-
     try {
         tASBoss->correction(circle, actuator, radius, correction);
     }
@@ -854,23 +792,19 @@ void SRTActiveSurfaceCore::correction(int circle, int actuator, int radius, doub
 
 	if (circle == 0 && actuator == 0 && radius == 0)
         //setallactuators(); // ALL
-        emit setGUIAllActuators();
+        emit setGUIAllActuators(true);
     else if ((circle != 0 && actuator == 0 && radius == 0) || // CIRCLE
              (circle == 0 && actuator == 0 && radius != 0)) { // RADIUS
         //setcircleORradius(circle, radius);
         theCircle = circle; theRadius = radius;
-        emit setGUIcircleORradius();
+        emit setGUIcircleORradius(true);
     }
     else
         setactuator(circle,actuator);
-
-    callfromfunction = false;
 }
 
 void SRTActiveSurfaceCore::update(double elevation)
 {
-	callfromfunction = true;
-
     try {
         tASBoss->update(elevation);
     }
@@ -889,15 +823,11 @@ void SRTActiveSurfaceCore::update(double elevation)
     }
 
     //setallactuators(); // ALL
-    emit setGUIAllActuators();
-
-    callfromfunction = false;
+    emit setGUIAllActuators(true);
 }
 
 void SRTActiveSurfaceCore::setup(int circle, int actuator, int radius)
 {
-	callfromfunction = true;
-
     try {
         //tASBoss->setup(circle, actuator, radius);
     }
@@ -917,23 +847,19 @@ void SRTActiveSurfaceCore::setup(int circle, int actuator, int radius)
 
 	if (circle == 0 && actuator == 0 && radius == 0)
         //setallactuators(); // ALL
-        emit setGUIAllActuators();
+        emit setGUIAllActuators(true);
     else if ((circle != 0 && actuator == 0 && radius == 0) || // CIRCLE
              (circle == 0 && actuator == 0 && radius != 0)) { // RADIUS
         //setcircleORradius(circle, radius);
         theCircle = circle; theRadius = radius;
-        emit setGUIcircleORradius();
+        emit setGUIcircleORradius(true);
     }
     else
         setactuator(circle,actuator);
-
-    callfromfunction = false;
 }
 
 void SRTActiveSurfaceCore::refPos(int circle, int actuator, int radius)
 {
-	callfromfunction = true;
-
     try {
         tASBoss->refPos(circle, actuator, radius);
     }
@@ -953,17 +879,15 @@ void SRTActiveSurfaceCore::refPos(int circle, int actuator, int radius)
 
 	if (circle == 0 && actuator == 0 && radius == 0)
         //setallactuators(); // ALL
-        emit setGUIAllActuators();
+        emit setGUIAllActuators(true);
     else if ((circle != 0 && actuator == 0 && radius == 0) || // CIRCLE
              (circle == 0 && actuator == 0 && radius != 0)) { // RADIUS
         //setcircleORradius(circle, radius);
         theCircle = circle; theRadius = radius;
-        emit setGUIcircleORradius();
+        emit setGUIcircleORradius(true);
     }
     else
         setactuator(circle,actuator);
-
-    callfromfunction = false;
 }
 
 void SRTActiveSurfaceCore::enableAutoUpdate()
