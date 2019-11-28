@@ -12,10 +12,10 @@ SRTActiveSurfaceGUI::SRTActiveSurfaceGUI(QWidget *parent) : QWidget(parent)
 {
     setupUi(this);
 
-    QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIActuatorColor(int,int,const char*)), this, SLOT(changeGUIActuatorColor(int,int,const char*)));
-    QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIAllActuators()), this, SLOT(changeGUIAllActuators()));
-    QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIcircleORradius()), this, SLOT(changeGUIcircleORradius()));
-    QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIActuator()), this, SLOT(changeGUIActuator()));
+    QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIActuatorColor(int,int,const char*,bool)), this, SLOT(changeGUIActuatorColor(int,int,const char*,bool)));
+    QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIAllActuators(bool)), this, SLOT(changeGUIAllActuators(bool)));
+    QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIcircleORradius(bool)), this, SLOT(changeGUIcircleORradius(bool)));
+    QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIActuator(bool)), this, SLOT(changeGUIActuator(bool)));
     QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIActuatorStatusEnblLabel()), this, SLOT(changeGUIActuatorStatusEnblLabel()));
     QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIActuatorValues()), this, SLOT(changeGUIActuatorValues()));
     QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIActuatorStatusLabels()), this, SLOT(changeGUIActuatorStatusLabels()));
@@ -6664,13 +6664,10 @@ void SRTActiveSurfaceGUI::recoverUSD()
     }
 }
 
-void SRTActiveSurfaceGUI::changeGUIActuatorColor(int circle, int actuator, const char* theActuatorStatusColorString)
+void SRTActiveSurfaceGUI::changeGUIActuatorColor(int tcircle, int tactuator, const char* theActuatorStatusColorString, bool fromRun)
 {
-    if (mySRTActiveSurfaceCore.fromRun == true) {
-        tcircle = circle;
-        tactuator = actuator;
-    }
-    else {
+    if (!fromRun)
+    {
         tcircle = thecircle;
         tactuator = theactuator;
     }
@@ -10096,14 +10093,14 @@ void SRTActiveSurfaceGUI::changeGUIActuatorColor(int circle, int actuator, const
 }
 
 
-void SRTActiveSurfaceGUI::changeGUIAllActuators()
+void SRTActiveSurfaceGUI::changeGUIAllActuators(bool callfromfunction)
 {
 	QString ActuatorNumber_str;
 	ActuatorNumber_str = QString("%1").arg("ALL");
 	ActuatorNumberlineEdit->clear();
 	ActuatorNumberlineEdit->insert(ActuatorNumber_str);
 
-	if (mySRTActiveSurfaceCore.callfromfunction == false)
+	if (!callfromfunction)
 	{
 		QString str;
 		str = QString("%1").arg("ALL");
@@ -10132,7 +10129,7 @@ void SRTActiveSurfaceGUI::clearactuatorslineedit()
 	ActuatorStatusRunLabel->clear();
 }
 
-void SRTActiveSurfaceGUI::changeGUIcircleORradius()
+void SRTActiveSurfaceGUI::changeGUIcircleORradius(bool callfromfunction)
 {
     //int circle = mySRTActiveSurfaceCore.theCircle;
     //int radius = mySRTActiveSurfaceCore.theRadius;
@@ -10146,7 +10143,7 @@ void SRTActiveSurfaceGUI::changeGUIcircleORradius()
 	ActuatorNumberlineEdit->clear();
 	ActuatorNumberlineEdit->insert(ActuatorNumber_str);
 
-	if (mySRTActiveSurfaceCore.callfromfunction == false)
+	if (!callfromfunction)
 	{
 		ManagerLabel->clear();
 		////ManagerLabel->setStyleSheet(QString::fromUtf8("background-color: rgb(85, 255, 0);"));
@@ -10156,7 +10153,7 @@ void SRTActiveSurfaceGUI::changeGUIcircleORradius()
 	clearactuatorslineedit();
 }
 
-void SRTActiveSurfaceGUI::changeGUIActuator()
+void SRTActiveSurfaceGUI::changeGUIActuator(bool callfromfunction)
 {
     //int circle = mySRTActiveSurfaceCore.theCircle;
     //int actuator = mySRTActiveSurfaceCore.theActuator;
@@ -10166,7 +10163,7 @@ void SRTActiveSurfaceGUI::changeGUIActuator()
     ActuatorNumberlineEdit->clear();
 	ActuatorNumberlineEdit->insert(ActuatorNumber_str);
 
-	if (mySRTActiveSurfaceCore.callfromfunction == false)
+	if (!callfromfunction)
 	{
 		ManagerLabel->clear();
 		////ManagerLabel->setStyleSheet(QString::fromUtf8("background-color: rgb(85, 255, 0);"));

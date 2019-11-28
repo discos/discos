@@ -1289,10 +1289,10 @@ class SRTActiveSurfaceGUI : public QWidget, public Ui_SRTActiveSurfaceGUI
         void setactuator17_4();
 
     private slots:
-        void changeGUIActuatorColor(int, int, const char*);
-        void changeGUIAllActuators();
-        void changeGUIcircleORradius();
-        void changeGUIActuator();
+        void changeGUIActuatorColor(int, int, const char*, bool);
+        void changeGUIAllActuators(bool callfromfunction = false);
+        void changeGUIcircleORradius(bool callfromfunction = false);
+        void changeGUIActuator(bool callfromfunction = false);
         void changeGUIActuatorStatusEnblLabel();
         void changeGUIActuatorValues();
         void changeGUIActuatorStatusLabels();
