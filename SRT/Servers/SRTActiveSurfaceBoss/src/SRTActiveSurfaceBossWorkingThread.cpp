@@ -42,6 +42,5 @@ void CSRTActiveSurfaceBossWorkingThread::runLoop()
 	IRA::CIRATools::getTime(now);
 	ACS::Time t1 = now.value().value;
 	ACS::TimeInterval elapsed = t1 - t0;
-	if(elapsed < m_sleepTime)
-		this->setSleepTime(m_sleepTime - elapsed);
+	this->setSleepTime(std::max(long(m_sleepTime - elapsed), (long)0));
 }
