@@ -71,8 +71,6 @@ class SRTActiveSurfaceCore : public QThread
         int ActuatorStatusCammLabelCode;
         int ActuatorStatusLoopLabelCode;
         int ActuatorStatusCalLabelCode;
-        int ASstatusCode;
-        int asProfileCode;
 
     signals:
         int setGUIActuatorColor(int, int, const char*, bool);
@@ -82,8 +80,8 @@ class SRTActiveSurfaceCore : public QThread
         int setGUIActuatorStatusEnblLabel();
         int setGUIActuatorValues();
         int setGUIActuatorStatusLabels();
-        int setGUIasStatusCode();
-        int setGUIasProfileCode();
+        int setGUIasStatusCode(int);
+        int setGUIasProfileCode(int);
         
 	private:
 	    ActiveSurface::SRTActiveSurfaceBoss_var tASBoss;

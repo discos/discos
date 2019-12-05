@@ -1,0 +1,47 @@
+/*********************************************************************/
+/* OAC Osservatorio Astronomico di Cagliari                          */
+/*                                                                   */
+/* This code is under GNU General Public Licence (GPL).              */
+/*                                                                   */
+/* Who                                          when        what     */
+/* Giuseppe Carboni (giuseppe.carboni@inaf.it)  04/12/2019  Creation */
+/*********************************************************************/
+
+#ifndef _SRTACTIVESURFACECOMMON_IDL_
+
+#define _SRTACTIVESURFACECOMMON_IDL_
+
+#include <baci.idl>
+#include <enumpropMACRO.idl>
+
+#pragma prefix "alma"
+
+module ActiveSurface {
+
+    enum TASOneWayAction {
+        AS_STOP,
+        AS_SETUP,
+        AS_STOW,
+        AS_REFPOS,
+        AS_UP,
+        AS_DOWN,
+        AS_BOTTOM,
+        AS_TOP,
+        AS_UPDATE,
+        AS_CORRECTION,
+        AS_MOVE,
+        AS_PROFILE
+    };
+    ACS_ENUM(TASOneWayAction);
+
+    enum TASProfile {
+        AS_SHAPED,
+        AS_SHAPED_FIXED,
+        AS_PARABOLIC,
+        AS_PARABOLIC_FIXED,
+        AS_PARK
+    };
+    ACS_ENUM(TASProfile);
+};
+
+#endif
