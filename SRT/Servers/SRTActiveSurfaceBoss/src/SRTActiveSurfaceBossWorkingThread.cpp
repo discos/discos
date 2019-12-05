@@ -24,11 +24,11 @@ void CSRTActiveSurfaceBossWorkingThread::onStop()
 
 void CSRTActiveSurfaceBossWorkingThread::runLoop()
 {
+	IRA::CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
+
 	TIMEVALUE now;
 	IRA::CIRATools::getTime(now);
 	ACS::Time t0 = now.value().value;
-
-	IRA::CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
 	try
 	{
 		resource->workingActiveSurface();
