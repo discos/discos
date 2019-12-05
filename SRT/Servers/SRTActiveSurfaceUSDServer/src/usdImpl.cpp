@@ -540,15 +540,19 @@ void USDImpl::update(CORBA::Double elevation) throw (CORBA::SystemException, ASE
 
 	try
 	{
-		if(m_profile == 1) // SHAPED FIXED
+		if(actuatorsCorrections == NULL) // No profile set yet, return without doing anything else
+		{
+			return;
+		}
+		else if(m_profile == ActiveSurface::AS_SHAPED_FIXED)
 		{
 			updatePosMM = actuatorsCorrections[parPositions - 5]; // 45
 		}
-		if(m_profile == 3) // PARABOLIC FIXED
+		else if(m_profile == ActiveSurface::AS_PARABOLIC_FIXED)
 		{
 			updatePosMM = actuatorsCorrections[parPositions - 5] + actuatorsCorrections[parPositions - 1]; // 45 + P
 		}
-		else // SHAPED
+		else // SHAPED OR PARABOLIC
 		{
 			if(elevation <= 15.0)
 			{
@@ -563,7 +567,7 @@ void USDImpl::update(CORBA::Double elevation) throw (CORBA::SystemException, ASE
 				int k = (int)(floor(elevation / deltaEL));
 				updatePosMM = ((elevation - elevations[k - 1]) / deltaEL) * (actuatorsCorrections[k] - actuatorsCorrections[k - 1]) + actuatorsCorrections[k - 1];
 			}
-			if(m_profile == 2) // SHAPED + PARABOLIC
+			if(m_profile == ActiveSurface::AS_PARABOLIC) // add constant offset to SHAPED position
 			{
 				updatePosMM += actuatorsCorrections[parPositions - 1];
 			}

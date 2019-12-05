@@ -130,13 +130,14 @@ CDB_SCHEMAS =
 #
 # IDL Files and flags
 # 
-IDL_FILES = lan usd SRTActiveSurfaceBoss
+IDL_FILES = lan usd SRTActiveSurfaceBoss SRTActiveSurfaceCommon
 IDL_TAO_FLAGS =
 USER_IDL =
 lanStubs_LIBS = baciStubs ASErrorsStubs
-usdStubs_LIBS = baciStubs ASErrorsStubs
+usdStubs_LIBS = baciStubs ASErrorsStubs SRTActiveSurfaceCommonStubs
 SRTActiveSurfaceBossStubs_LIBS = baciStubs ComponentErrorsStubs ASErrorsStubs \
-    ManagmentDefinitionsStubs ActiveSurfaceBossStubs
+    ManagmentDefinitionsStubs ActiveSurfaceBossStubs SRTActiveSurfaceCommonStubs
+SRTActiveSurfaceCommonStubs_LIBS = baciStubs
 
 #
 # Jarfiles and their directories

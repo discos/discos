@@ -15,6 +15,7 @@
 
 #include <baci.idl>
 #include <ASErrors.idl>
+#include <SRTActiveSurfaceCommon.idl>
 
 #pragma prefix "alma"
 
