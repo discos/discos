@@ -1296,8 +1296,8 @@ class SRTActiveSurfaceGUI : public QWidget, public Ui_SRTActiveSurfaceGUI
         void changeGUIActuatorStatusEnblLabel();
         void changeGUIActuatorValues();
         void changeGUIActuatorStatusLabels();
-        void changeGUIasStatusCode();
-        void changeGUIasProfileCode();
+        void changeGUIasStatusCode(int);
+        void changeGUIasProfileCode(int);
 
     private:
         SRTActiveSurfaceCore mySRTActiveSurfaceCore;

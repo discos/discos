@@ -59,15 +59,10 @@ void SRTActiveSurfaceCore::run(void)
 	int l = actuatorcounter;
 	int totalactuators = totacts;
 	ACSErr::Completion_var completion;
-	ACS::ROpattern_var status_var;
     CORBA::Long status;
 
     Management::ROTSystemStatus_var bossStatus_var;
-    ACS::pattern bossStatus_val;
-
     ActiveSurface::ROTASProfile_var asProfile_var;
-    ACS::pattern asProfile_val;
-
 
     while (monitor == true)
     {
@@ -76,40 +71,10 @@ void SRTActiveSurfaceCore::run(void)
         ACS::Time t0 = clock.value().value;
 
         bossStatus_var = tASBoss->status();
-        bossStatus_val = bossStatus_var->get_sync(completion.out());
-        switch (bossStatus_val) {
-            case (Management::MNG_OK):
-                ASstatusCode = 0;
-                break;
-            case (Management::MNG_WARNING):
-                ASstatusCode = -1;
-                break;
-            case (Management::MNG_FAILURE):
-                ASstatusCode = -2;
-                break;
-        }
-        emit setGUIasStatusCode();
+        emit setGUIasStatusCode((int)bossStatus_var->get_sync(completion.out()));
 
         asProfile_var = tASBoss->pprofile();
-        asProfile_val = asProfile_var->get_sync(completion.out());
-        switch (asProfile_val) {
-            case (ActiveSurface::AS_SHAPED):
-                asProfileCode = 0;
-                break;
-            case (ActiveSurface::AS_SHAPED_FIXED):
-                asProfileCode = 1;
-                break;
-            case (ActiveSurface::AS_PARABOLIC):
-                asProfileCode = 2;
-                break;
-            case (ActiveSurface::AS_PARABOLIC_FIXED):
-                asProfileCode = 3;
-                break;
-            case (ActiveSurface::AS_PARK):
-                asProfileCode = 4;
-                break;
-        }
-        emit setGUIasProfileCode();
+        emit setGUIasProfileCode((int)asProfile_var->get_sync(completion.out()));
 
         if (totalactuators >= 1 && totalactuators <= 24) // 1 circle
             i= 1;

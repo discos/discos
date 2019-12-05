@@ -19,8 +19,8 @@ SRTActiveSurfaceGUI::SRTActiveSurfaceGUI(QWidget *parent) : QWidget(parent)
     QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIActuatorStatusEnblLabel()), this, SLOT(changeGUIActuatorStatusEnblLabel()));
     QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIActuatorValues()), this, SLOT(changeGUIActuatorValues()));
     QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIActuatorStatusLabels()), this, SLOT(changeGUIActuatorStatusLabels()));
-    QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIasStatusCode()), this, SLOT(changeGUIasStatusCode()));
-    QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIasProfileCode()), this, SLOT(changeGUIasProfileCode()));
+    QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIasStatusCode(int)), this, SLOT(changeGUIasStatusCode(int)));
+    QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIasProfileCode(int)), this, SLOT(changeGUIasProfileCode(int)));
 
 #ifdef MANAGEMENT
     buttonGroup1->setEnabled(true);
@@ -10206,43 +10206,50 @@ void SRTActiveSurfaceGUI::changeGUIActuatorValues()
 	ActuatorAccelerationlineEdit->insert(mySRTActiveSurfaceCore.ActuatorAcceleration_str);
 }
 
-void SRTActiveSurfaceGUI::changeGUIasStatusCode()
+void SRTActiveSurfaceGUI::changeGUIasStatusCode(int asStatusCode)
 {
-    switch (mySRTActiveSurfaceCore.ASstatusCode) {
-        case (0):
-            StatuslineEdit_2->setStyleSheet(QApplication::translate("SRTActiveSurfaceGUI", "background-color: rgb(85, 255, 0);", 0, QApplication::UnicodeUTF8));
-            StatuslineEdit_2->setText(QApplication::translate("SRTActiveSurfaceGUI", "OK", 0, QApplication::UnicodeUTF8));
+    std::string asStatusColorString, asStatusString;
+
+    switch (asStatusCode) {
+        case (Management::MNG_OK):
+            asStatusColorString = "background-color: rgb(85, 255, 0);";
+            asStatusString = "OK";
             break;
-        case (-1):
-            StatuslineEdit_2->setStyleSheet(QApplication::translate("SRTActiveSurfaceGUI", "background-color: rgb(255, 255, 0);", 0, QApplication::UnicodeUTF8));
-            StatuslineEdit_2->setText(QApplication::translate("SRTActiveSurfaceGUI", "WARNING", 0, QApplication::UnicodeUTF8));
+        case (Management::MNG_WARNING):
+            asStatusColorString = "background-color: rgb(255, 255, 0);";
+            asStatusString = "WARNING";
             break;
-        case (-2):
-            StatuslineEdit_2->setStyleSheet(QApplication::translate("SRTActiveSurfaceGUI", "background-color: rgb(255, 0, 0);", 0, QApplication::UnicodeUTF8));
-            StatuslineEdit_2->setText(QApplication::translate("SRTActiveSurfaceGUI", "FAILURE", 0, QApplication::UnicodeUTF8));
+        case (Management::MNG_FAILURE):
+            asStatusColorString = "background-color: rgb(255, 0, 0);";
+            asStatusString = "FAILURE";
             break;
     }
+
+    StatuslineEdit_2->setStyleSheet(QApplication::translate("SRTActiveSurfaceGUI", asStatusColorString.c_str(), 0, QApplication::UnicodeUTF8));
+    StatuslineEdit_2->setText(QApplication::translate("SRTActiveSurfaceGUI", asStatusString.c_str(), 0, QApplication::UnicodeUTF8));
 }
 
-void SRTActiveSurfaceGUI::changeGUIasProfileCode()
+void SRTActiveSurfaceGUI::changeGUIasProfileCode(int asProfileCode)
 {
-    switch (mySRTActiveSurfaceCore.asProfileCode) {
-        case (0):
-            ProfilelineEdit_2->setText(QApplication::translate("SRTActiveSurfaceGUI", "SHAPED", 0, QApplication::UnicodeUTF8));
+    std::string asProfileString;
+    switch (asProfileCode) {
+        case (ActiveSurface::AS_SHAPED):
+            asProfileString = "SHAPED";
             break;
-        case (1):
-            ProfilelineEdit_2->setText(QApplication::translate("SRTActiveSurfaceGUI", "SHAPED FIXED", 0, QApplication::UnicodeUTF8));
+        case (ActiveSurface::AS_SHAPED_FIXED):
+            asProfileString = "SHAPED FIXED";
             break;
-        case (2):
-            ProfilelineEdit_2->setText(QApplication::translate("SRTActiveSurfaceGUI", "PARABOLIC", 0, QApplication::UnicodeUTF8));
+        case (ActiveSurface::AS_PARABOLIC):
+            asProfileString = "PARABOLIC";
             break;
-        case (3):
-            ProfilelineEdit_2->setText(QApplication::translate("SRTActiveSurfaceGUI", "PARABOLIC FIXED", 0, QApplication::UnicodeUTF8));
+        case (ActiveSurface::AS_PARABOLIC_FIXED):
+            asProfileString = "PARABOLIC FIXED";
             break;
-        case (4):
-            ProfilelineEdit_2->setText(QApplication::translate("SRTActiveSurfaceGUI", "PARK", 0, QApplication::UnicodeUTF8));
+        case (ActiveSurface::AS_PARK):
+            asProfileString = "PARK";
             break;
     }
+    ProfilelineEdit_2->setText(QApplication::translate("SRTActiveSurfaceGUI", asProfileString.c_str(), 0, QApplication::UnicodeUTF8));
 }
 
 void SRTActiveSurfaceGUI::changeGUIActuatorStatusLabels()
