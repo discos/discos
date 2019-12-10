@@ -1349,52 +1349,6 @@ void CSRTActiveSurfaceBossCore::watchingActiveSurfaceStatus() throw (ComponentEr
     //printf("NO error\n");
 }
 
-void CSRTActiveSurfaceBossCore::sectorActiveSurface(int sector) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx)
-{
-	if (sector == -1) {
-		ACS_SHORT_LOG ((LM_INFO, "You have to set a sector first!"));
-		exit(-1);
-	}
-
-	printf("sector%d start\n", sector+1);
-	char serial_usd[23];
-	char graf[5], mecc[4];
-	std::stringstream value;
-	value << CDBPATH;
-	value << "alma/AS/tab_convUSD_S";
-	value << sector+1;
-	value << ".txt";
-
-	ifstream usdTable(value.str().c_str());
-	if (!usdTable) {
-		ACS_SHORT_LOG ((LM_INFO, "File %s not found", value.str().c_str()));
-		exit(-1);
-	}
-
-	// Get reference to usd components
-	while (usdTable >> lanIndexes[sector] >> circleIndexes[sector] >> usdCircleIndexes[sector] >> serial_usd >> graf >> mecc)
-	{
-		usd[circleIndexes[sector]][usdCircleIndexes[sector]] = ActiveSurface::USD::_nil();
-
-		try
-		{
-			printf("S%d: circleIndexS%d = %d, usdCircleIndexS%d = %d\n", sector+1, sector+1, circleIndexes[sector], sector+1, usdCircleIndexes[sector]);
-			usd[circleIndexes[sector]][usdCircleIndexes[sector]] = m_services->getComponent<ActiveSurface::USD>(serial_usd);
-			lanradius[circleIndexes[sector]][lanIndexes[sector]] = usd[circleIndexes[sector]][usdCircleIndexes[sector]];
-			usdCounters[sector]++;
-		}
-		catch (maciErrType::CannotGetComponentExImpl& ex)
-		{
-			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CSRTActiveSurfaceBossCore::sectorActiveSurface()");
-			Impl.setComponentName(serial_usd);
-			Impl.log(LM_DEBUG);
-		}
-	}
-
-	printf("sector%d done\n", sector+1);
-	m_sector[sector] = true;
-}
-
 void CSRTActiveSurfaceBossCore::workingActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx)
 {
 	if (AutoUpdate) {

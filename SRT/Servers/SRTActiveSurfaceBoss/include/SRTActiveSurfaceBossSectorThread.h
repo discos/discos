@@ -1,14 +1,15 @@
 #ifndef _SRTACTIVESURFACEBOSSSECTORTHREAD_H_
 #define _SRTACTIVESURFACEBOSSSECTORTHREAD_H_
 
-/* ********************************************************************************* */
+/*************************************************************************************/
 /* OAC Osservatorio Astronomico di Cagliari                                          */
 /* $Id: SRTActiveSurfaceBossSector1Thread.h,v 1.1 2010-07-26 12:36:49 c.migoni Exp $ */
 /*                                                                                   */
 /* This code is under GNU General Public Licence (GPL).                              */
 /*                                                                                   */
-/* Who                                          when        What                     */
-/* Giuseppe Carboni (giuseppe.carboni@inaf.it)  02/07/2019  Creation                 */
+/* Who                                            When        What                   */
+/* Giuseppe Carboni (giuseppe.carboni@inaf.it)    02/07/2019    Creation             */
+/*************************************************************************************/
 
 #include <acsThread.h>
 #include <IRA>
@@ -49,18 +50,14 @@ public:
       * This method overrides the thread implementation class.
       * The thread can be exited by calling ACS::ThreadBase::stop or ACS::ThreadBase::exit command.
      */
-     virtual void run();
-
-     /**
-      * This method is used to set the sector to be initialized. It MUST be called before starting the thread execution
-     */
-     virtual void setSector(int sector);
+     virtual void runLoop();
 
 private:
-
-    IRA::CSecureArea<CSRTActiveSurfaceBossCore> *m_core;
-    CSRTActiveSurfaceBossCore *boss;
+    CSRTActiveSurfaceBossCore *m_boss;
     int m_sector;
+    std::string m_thread_name;
+    std::ifstream m_usdTable;
+    ACS::Time timestart;
 };
 
 #endif /*_SRTACTIVESURFACEBOSSSECTORTHREAD_H_*/
