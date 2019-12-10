@@ -79,6 +79,7 @@ class CSRTActiveSurfaceBossCore {
     friend class SRTActiveSurfaceBossImpl;
     friend class CSRTActiveSurfaceBossWatchingThread;
     friend class CSRTActiveSurfaceBossWorkingThread;
+    friend class CSRTActiveSurfaceBossSectorThread;
 public:
     /**
      * Constructor. Default Constructor.
@@ -118,8 +119,6 @@ public:
     void onewayAction(ActiveSurface::TASOneWayAction onewayAction, int circle, int actuator, int radius, double elevation, double correction, long incr, ActiveSurface::TASProfile profile) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentNotActiveExImpl);
 
     void workingActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx);
-
-    void sectorActiveSurface(int sector) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx);
 
     void watchingActiveSurfaceStatus() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl);
 
