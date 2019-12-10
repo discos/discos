@@ -110,13 +110,11 @@ public:
     */
     virtual void cleanUp();
 
-    void reset(int circle, int actuator, int radius) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentNotActiveExImpl);
-
     void calibrate(int circle, int actuator, int radius) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl);
 
     void calVer(int circle, int actuator, int radius) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl);
 
-    void onewayAction(ActiveSurface::TASOneWayAction onewayAction, int circle, int actuator, int radius, double elevation, double correction, long incr, ActiveSurface::TASProfile profile) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentNotActiveExImpl);
+    void onewayAction(ActiveSurface::TASOneWayAction action, int circle, int actuator, int radius, double elevation, double correction, long incr, ActiveSurface::TASProfile profile);
 
     void workingActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx);
 
@@ -156,12 +154,12 @@ public:
     void enableAutoUpdate();
 
     void checkASerrors(const char* str, int circle, int actuator, ASErrors::ASErrorsEx Ex);
-
-    void checkAScompletionerrors (char *str, int circle, int actuator, CompletionImpl comp);
+    void checkASerrors(const char *str, int circle, int actuator, CompletionImpl comp);
+    void checkASerrors(const char *str, int circle, int actuator, int code);
 
     void asSetup() throw (ComponentErrors::ComponentErrorsEx);
 
-       void asOn();
+    void asOn();
 
     void asOff() throw (ComponentErrors::ComponentErrorsEx);
 
@@ -170,6 +168,7 @@ public:
     void setProfile (const ActiveSurface::TASProfile& profile) throw (ComponentErrors::ComponentErrorsExImpl);
 
 private:
+    std::map<int, std::string> m_error_strings;
     ContainerServices* m_services;
 
     ActiveSurface::USD_var usd[CIRCLES+1][ACTUATORS+1];
@@ -180,11 +179,8 @@ private:
 
     IRA::CString lanCobName;
 
-    int usdCounter, lanIndex, circleIndex, usdCircleIndex;
+    int usdCounter;
     std::vector<int> usdCounters;
-    std::vector<int> lanIndexes;
-    std::vector<int> circleIndexes;
-    std::vector<int> usdCircleIndexes;
     int actuatorcounter, circlecounter, totacts;
     ACS::doubleSeq actuatorsCorrections;
 
@@ -207,6 +203,8 @@ private:
     void setradius(int radius, int &actuatorsradius, int &jumpradius);
 
     void setserial (int circle, int actuator, int &lanIndex, char *serial_usd);
+
+    void singleUSDonewayAction(ActiveSurface::TASOneWayAction action, ActiveSurface::USD_var usd, double elevation, double correction, long incr, ActiveSurface::TASProfile profile);
 
     Antenna::AntennaBoss_var m_antennaBoss;
 
