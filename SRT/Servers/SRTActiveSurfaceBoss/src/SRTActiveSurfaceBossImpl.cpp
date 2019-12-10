@@ -426,7 +426,7 @@ void SRTActiveSurfaceBossImpl::reset (CORBA::Long circle, CORBA::Long actuator, 
     CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
     try
     {
-        resource->reset(circle, actuator, radius);
+        resource->onewayAction(ActiveSurface::AS_RESET, circle, actuator, radius, 0, 0, 0, m_profile);
     }
     catch (ComponentErrors::ComponentErrorsExImpl& ex)
     {
@@ -595,7 +595,6 @@ CORBA::Boolean SRTActiveSurfaceBossImpl::command(const char *cmd,CORBA::String_o
     }
     answer=CORBA::string_dup((const char *)out);
     return res;
-    //return CORBA::string_dup((const char *)out);
 }
 
 _PROPERTY_REFERENCE_CPP(SRTActiveSurfaceBossImpl,Management::ROTSystemStatus,m_pstatus,status);
