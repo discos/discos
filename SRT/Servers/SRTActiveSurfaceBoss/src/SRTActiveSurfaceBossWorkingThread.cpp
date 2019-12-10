@@ -29,6 +29,7 @@ void CSRTActiveSurfaceBossWorkingThread::runLoop()
 	TIMEVALUE now;
 	IRA::CIRATools::getTime(now);
 	ACS::Time t0 = now.value().value;
+
 	try
 	{
 		resource->workingActiveSurface();
