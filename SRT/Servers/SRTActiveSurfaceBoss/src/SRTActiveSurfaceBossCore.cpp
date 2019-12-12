@@ -1219,7 +1219,7 @@ void CSRTActiveSurfaceBossCore::onewayAction(ActiveSurface::TASOneWayAction acti
     }
 }
 
-void CSRTActiveSurfaceBossCore::watchingActiveSurfaceStatus() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl)
+/*void CSRTActiveSurfaceBossCore::watchingActiveSurfaceStatus() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl)
 {
     ACS::ROpattern_var status_var;
     ACSErr::Completion_var completion;
@@ -1321,7 +1321,7 @@ void CSRTActiveSurfaceBossCore::watchingActiveSurfaceStatus() throw (ComponentEr
         _THROW_EXCPT(ComponentErrors::ComponentNotActiveExImpl,"CSRTActiveSurfaceBossCore::watchingActiveSurfaceStatus()");
     }
     //printf("NO error\n");
-}
+}*/
 
 void CSRTActiveSurfaceBossCore::workingActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx)
 {
