@@ -66,7 +66,7 @@ using namespace ComponentErrors;
 using namespace std;
 
 class SRTActiveSurfaceBossImpl;
-class CSRTActiveSurfaceBossWatchingThread;
+//class CSRTActiveSurfaceBossWatchingThread;
 class CSRTActiveSurfaceBossWorkingThread;
 
 /**
@@ -77,7 +77,7 @@ class CSRTActiveSurfaceBossWorkingThread;
  */
 class CSRTActiveSurfaceBossCore {
     friend class SRTActiveSurfaceBossImpl;
-    friend class CSRTActiveSurfaceBossWatchingThread;
+    //friend class CSRTActiveSurfaceBossWatchingThread;
     friend class CSRTActiveSurfaceBossWorkingThread;
     friend class CSRTActiveSurfaceBossSectorThread;
 public:
@@ -118,7 +118,7 @@ public:
 
     void workingActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx);
 
-    void watchingActiveSurfaceStatus() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl);
+    //void watchingActiveSurfaceStatus() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl);
 
     void usdStatus4GUIClient(int circle, int actuator, CORBA::Long_out status) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl);
 
