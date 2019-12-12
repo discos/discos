@@ -30,7 +30,8 @@ module ActiveSurface {
         AS_UPDATE,
         AS_CORRECTION,
         AS_MOVE,
-        AS_PROFILE
+        AS_PROFILE,
+        AS_RESET
     };
     ACS_ENUM(TASOneWayAction);
 
