@@ -23,7 +23,7 @@ class PositionerImpl(POA, cc, services, lcycle):
         cc.__init__(self)
         services.__init__(self)
         self.position = 0
-        self.sequence = (1.1, 2.2, 3.3)
+        self.sequence = [1.1, 2.2, 3.3]
 
     def initialize(self):
         addProperty(self, 'status', devio_ref=GenericDevIO())
