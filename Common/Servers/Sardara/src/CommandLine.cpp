@@ -41,21 +41,37 @@ CCommandLine::CCommandLine(ContainerServices *service): CSocket(),
 	m_backendStatus=0;
 	setStatus(NOTCNTD);
 	m_setTpiIntegration=true;
-    m_SK77=false;
-    m_SK03=false;
-    m_SK06=false;
     m_SK00=false;
+    m_SK01=false;
+    m_SK02=false;
+    m_SK03=false;
+    m_SK04=false;
+    m_SK05=false;
+    m_SK06=false;
+    m_SK77=false;
     m_SC00=false;
     m_SL00=false;
     m_SP00=false;
-    m_SK77S=false;
-    m_SK03S=false;
-    m_SK06S=false;
     m_SK00S=false;
+    m_SK01S=false;
+    m_SK02S=false;
+    m_SK03S=false;
+    m_SK04S=false;
+    m_SK05S=false;
+    m_SK06S=false;
+    m_SK77S=false;
     m_SC00S=false;
     m_SL00S=false;
     m_SP00S=false;
+    // SARDARA Medicina configurations
+    m_SCC00=false;
+    m_SCH00=false;
+    m_SCC00S=false;
+    m_SCH00S=false;
     m_stationSRT=false;
+    m_stationMED=false;
+    m_sectionsNumber=0;
+    m_inputsNumber=0;
 }
 
 CCommandLine::~CCommandLine()
@@ -156,8 +172,10 @@ void CCommandLine::Init(CConfiguration *config) throw (ComponentErrors::SocketEr
     cStation = IRA::CString (Station);
     if((cStation.Compare("SRT")==0))
         m_stationSRT = true;
+    if((cStation.Compare("Medicina")==0))
+        m_stationMED = true;
 
-    try {
+    /*try {
         setup (m_configuration->getConfiguration());
     }
     catch (...) {
@@ -165,7 +183,7 @@ void CCommandLine::Init(CConfiguration *config) throw (ComponentErrors::SocketEr
     }
 
 	//Waits a bit so that everything can settle down
-	IRA::CIRATools::Wait(0,200000);
+	IRA::CIRATools::Wait(0,200000);*/
 }
 
 void CCommandLine::stopDataAcquisition() throw (BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
@@ -437,6 +455,7 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
     else
         newBins = m_bins[inputId];
 
+    if (m_stationSRT == true) {
 	try {
         Message request = Command::setSection(inputId, newFreq, newBW, newFeed, newPol, newSR, newBins);
         Message reply = sendBackendCommand(request);
@@ -444,7 +463,7 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 		    for (int j=0;j<m_sectionsNumber;j++)
                 m_sampleRate[j]=newSR; //the given sample rate is taken also for all the others
 		    m_commonSampleRate=newSR;
-            if (m_SK00S==true || m_SC00S==true || m_SK77S==true || m_SK03S==true || m_SK06S==true || m_SL00S==true || m_SP00S==true) {
+            if (m_SK00S==true || m_SC00S==true || m_SK77S==true || m_SK03S==true || m_SK06S==true || m_SL00S==true || m_SP00S==true || m_SK01S==true || m_SK02S==true || m_SK04S==true || m_SK05S==true) {
                 m_frequency[2*inputId]=newFreq;
                 m_frequency[2*inputId+1]=newFreq;
                 m_bandWidth[2*inputId]=newBW;
@@ -466,7 +485,8 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
         	    temp="FULL_STOKES";
 		    ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"SECTION_CONFIGURED %ld,FREQ=%lf,BW=%lf,FEED=%ld,POL=%s,SR=%lf,BINS=%ld",inputId,m_frequency[inputId],newBW,m_feedNumber[inputId],
 				(const char *)temp,newSR,m_bins[inputId]));		
-            if (m_SK00==true || m_SC00==true || m_SK00S==true || m_SC00S==true || m_SK77==true || m_SK77S==true || m_SK03==true || m_SK03S==true || m_SK06==true || m_SK06S==true) {
+            if (m_SK00==true || m_SC00==true || m_SK00S==true || m_SC00S==true || m_SK77==true || m_SK77S==true || m_SK03==true || m_SK03S==true || m_SK06==true || m_SK06S==true || m_SK01==true || m_SK01S==true
+                    || m_SK02==true || m_SK02S==true || m_SK04==true || m_SK04S==true || m_SK05==true || m_SK05S==true) {
                 if (newBW==420.00)
                     filter=300.00;
                 if (newBW==1500.00)
@@ -478,6 +498,26 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
                         m_totalPower->setSection(2*inputId,-1, filter, -1, -1, -1, -1);
                         m_totalPower->setSection(2*inputId+1,-1, filter, -1, -1, -1, -1);
                     }
+                    else if (m_SK01S==true) {
+                        if (inputId == 0) {
+                            m_totalPower->setSection(inputId,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+1,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 1) {
+                            m_totalPower->setSection(inputId+1,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+2,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK02S==true) {
+                        if (inputId == 0) {
+                            m_totalPower->setSection(inputId,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+1,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 1) {
+                            m_totalPower->setSection(inputId+3,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+4,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
                     else if (m_SK03S==true) {
                         if (inputId == 0) {
                             m_totalPower->setSection(inputId,-1, filter, -1, -1, -1, -1);
@@ -486,6 +526,26 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
                         if (inputId == 1) {
                             m_totalPower->setSection(inputId+5,-1, filter, -1, -1, -1, -1);
                             m_totalPower->setSection(inputId+6,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK04S==true) {
+                        if (inputId == 0) {
+                            m_totalPower->setSection(inputId,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+1,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 1) {
+                            m_totalPower->setSection(inputId+7,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+8,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK05S==true) {
+                        if (inputId == 0) {
+                            m_totalPower->setSection(inputId,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+1,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 1) {
+                            m_totalPower->setSection(inputId+9,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+10,-1, filter, -1, -1, -1, -1);
                         }
                     }
                     else if (m_SK06S==true) {
@@ -498,12 +558,44 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
                             m_totalPower->setSection(inputId+12,-1, filter, -1, -1, -1, -1);
                         }
                     }
+                    else if (m_SK01==true) {
+                        if (inputId == 0 || inputId == 1) {
+                            m_totalPower->setSection(inputId,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 2 || inputId == 3) {
+                            m_totalPower->setSection(inputId,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK02==true) {
+                        if (inputId == 0 || inputId == 1) {
+                            m_totalPower->setSection(inputId,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 2 || inputId == 3) {
+                            m_totalPower->setSection(inputId+2,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
                     else if (m_SK03==true) {
                         if (inputId == 0 || inputId == 1) {
                             m_totalPower->setSection(inputId,-1, filter, -1, -1, -1, -1);
                         }
                         if (inputId == 2 || inputId == 3) {
                             m_totalPower->setSection(inputId+4,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK04==true) {
+                        if (inputId == 0 || inputId == 1) {
+                            m_totalPower->setSection(inputId,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 2 || inputId == 3) {
+                            m_totalPower->setSection(inputId+6,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK01==true) {
+                        if (inputId == 0 || inputId == 1) {
+                            m_totalPower->setSection(inputId,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 2 || inputId == 3) {
+                            m_totalPower->setSection(inputId+8,-1, filter, -1, -1, -1, -1);
                         }
                     }
                     else if (m_SK06==true) {
@@ -547,6 +639,78 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 	}
     catch (...) {
         ACS_LOG(LM_FULL_INFO,"CCommandLine::setSection()",(LM_NOTICE,"BACKEND_SARDARA_SET_SECTION ERROR")); 
+    }
+    }
+    if (m_stationMED == true) {
+	try {
+        Message request = Command::setSection(inputId, newFreq, newBW, newFeed, newPol, newSR, newBins);
+        Message reply = sendBackendCommand(request);
+        if (reply.is_success_reply()) {
+		    for (int j=0;j<m_sectionsNumber;j++)
+                m_sampleRate[j]=newSR; //the given sample rate is taken also for all the others
+		    m_commonSampleRate=newSR;
+            if (m_SK00S==true || m_SCC00S==true || m_SCH00S==true || m_SK01S==true || m_SL00S==true || m_SP00S==true) {
+                m_frequency[2*inputId]=newFreq;
+                m_frequency[2*inputId+1]=newFreq;
+                m_bandWidth[2*inputId]=newBW;
+                m_bandWidth[2*inputId+1]=newBW;
+            }
+            else {
+                m_frequency[inputId]=newFreq;
+                m_bandWidth[inputId]=newBW;
+            }
+            m_feedNumber[inputId]=newFeed;
+            m_bins[inputId]=newBins;
+		    m_polarization[inputId]=newPol;
+		    IRA::CString temp;
+		    if (m_polarization[inputId]==Backends::BKND_LCP)
+			    temp="LCP";
+            else if (m_polarization[inputId]==Backends::BKND_RCP)
+			    temp="RCP";
+            else
+        	    temp="FULL_STOKES";
+		    ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"SECTION_CONFIGURED %ld,FREQ=%lf,BW=%lf,FEED=%ld,POL=%s,SR=%lf,BINS=%ld",inputId,m_frequency[inputId],newBW,m_feedNumber[inputId],
+				(const char *)temp,newSR,m_bins[inputId]));		
+            if (m_SK00==true || m_SCC00==true || m_SK00S==true || m_SCC00S==true || m_SK01==true || m_SK01S==true || m_SCH00==true || m_SCH00S==true) {
+                if (newBW==420.00)
+                    filter=300.00;
+                if (newBW==1500.00)
+                    filter=1250.00;
+                if (newBW==2300.00)
+                    filter=2350.00;
+                if (newBW == 420.00 || newBW == 1500.00 || newBW == 2300.00) {
+                    if (m_SK00S==true || m_SCC00S==true || m_SCH00S==true) {
+                        m_totalPower->setSection(2*inputId,-1, filter, -1, -1, -1, -1);
+                        m_totalPower->setSection(2*inputId+1,-1, filter, -1, -1, -1, -1);
+                    }
+                    else if (m_SK01S==true) {
+                        if (inputId == 0) {
+                            m_totalPower->setSection(inputId,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+1,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 1) {
+                            m_totalPower->setSection(inputId+1,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+2,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK01==true) {
+                        if (inputId == 0 || inputId == 1) {
+                            m_totalPower->setSection(inputId,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 2 || inputId == 3) {
+                            m_totalPower->setSection(inputId,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else
+                        m_totalPower->setSection(inputId,-1, filter, -1, -1, -1, -1);
+                }
+                ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"TOTALPOWER_FILTER_CONFIGURED %ld,FILTER=%lf",inputId,filter));
+            }
+        }
+	}
+    catch (...) {
+        ACS_LOG(LM_FULL_INFO,"CCommandLine::setSection()",(LM_NOTICE,"BACKEND_SARDARA_SET_SECTION ERROR")); 
+    }
     }
 }
 
@@ -738,23 +902,12 @@ void CCommandLine::setDefaultConfiguration(const IRA::CString & config) throw (C
 		ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,BackendsErrors::MalformedAnswerExImpl,BackendsErrors::ReplyNotValidExImpl,BackendsErrors::BackendFailExImpl)
 {
 	AUTO_TRACE("CCommandLine::setDefaultConfiguration()");
+    if (m_stationSRT==true) {
     if (config.Compare("SK77")==0) {
         m_filter=1250.0;
         m_inputsNumber=m_sectionsNumber;
         m_SK77=true;
-        m_SK00=m_SK03=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK03S=m_SK06S=m_SK00S=m_SC00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SK03")==0) {
-        m_filter=1250.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_SK03=true;
-        m_SK77=m_SK06=m_SK00=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK03S=m_SK06S=m_SK00S=m_SC00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SK06")==0) {
-        m_filter=1250.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_SK06=true;
-        m_SK77=m_SK03=m_SK00=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK03S=m_SK06S=m_SK00S=m_SC00S=m_SL00S=m_SP00S=false;
+        m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SK00S=m_SC00S=m_SL00S=m_SP00S=false;
     }
     if (config.Compare("SK00")==0) {
         m_filter=1250.0;
@@ -762,17 +915,53 @@ void CCommandLine::setDefaultConfiguration(const IRA::CString & config) throw (C
         m_SK00=true;
         m_SK77=m_SK03=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK03S=m_SK06S=m_SK00S=m_SC00S=m_SL00S=m_SP00S=false;
     }
+    if (config.Compare("SK01")==0) {
+        m_filter=1250.0;
+        m_inputsNumber=m_sectionsNumber;
+        m_SK01=true;
+        m_SK77=m_SK00=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
+    }
+    if (config.Compare("SK02")==0) {
+        m_filter=1250.0;
+        m_inputsNumber=m_sectionsNumber;
+        m_SK02=true;
+        m_SK77=m_SK00=m_SK01=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
+    }
+    if (config.Compare("SK03")==0) {
+        m_filter=1250.0;
+        m_inputsNumber=m_sectionsNumber;
+        m_SK03=true;
+        m_SK77=m_SK00=m_SK01=m_SK02=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
+    }
+    if (config.Compare("SK04")==0) {
+        m_filter=1250.0;
+        m_inputsNumber=m_sectionsNumber;
+        m_SK04=true;
+        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
+    }
+    if (config.Compare("SK05")==0) {
+        m_filter=1250.0;
+        m_inputsNumber=m_sectionsNumber;
+        m_SK05=true;
+        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
+    }
+    if (config.Compare("SK06")==0) {
+        m_filter=1250.0;
+        m_inputsNumber=m_sectionsNumber;
+        m_SK06=true;
+        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
+    }
     if (config.Compare("SC00")==0) {
         m_filter=1250.0;
         m_inputsNumber=m_sectionsNumber;
         m_SC00=true;
-        m_SK77=m_SK03=m_SK06=m_SK00=m_SL00=m_SP00=m_SK77S=m_SK03S=m_SK06S=m_SK00S=m_SC00S=m_SL00S=m_SP00S=false;
+        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
     }
     if (config.Compare("SL00")==0) {
         m_filter = 2300.0;
         m_inputsNumber=m_sectionsNumber;
         m_SL00=true;
-        m_SK77=m_SK03=m_SK06=m_SK00=m_SC00=m_SP00=m_SK77S=m_SK03S=m_SK06S=m_SK00S=m_SC00S=m_SL00S=m_SP00S=false;
+        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
         /*if (m_stationSRT == true) {
             m_ifDistributor->setup("BW-UNFILTERED");
             ACS_LOG(LM_FULL_INFO,"CCommandLine::setDefaultConfiguration()",(LM_NOTICE,"IFDISTRIBUTOR_BW-UNFILTERED_CONFIGURED"));
@@ -782,49 +971,77 @@ void CCommandLine::setDefaultConfiguration(const IRA::CString & config) throw (C
         m_filter = 730.0;
         m_inputsNumber=m_sectionsNumber;
         m_SP00=true;
-        m_SK77=m_SK03=m_SK06=m_SK00=m_SC00=m_SL00=m_SK77S=m_SK03S=m_SK06S=m_SK00S=m_SC00S=m_SL00S=m_SP00S=false;
+        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
     }
     if (config.Compare("SK77S")==0) {
         m_filter=1250.0;
         m_inputsNumber=m_sectionsNumber;
         m_sectionsNumber=m_sectionsNumber/2;
         m_SK77S=true;
-        m_SK77=m_SK03=m_SK06=m_SK00=m_SC00=m_SL00=m_SP00=m_SK03S=m_SK06S=m_SK00S=m_SC00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SK03S")==0) {
-        m_filter=1250.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_sectionsNumber=m_sectionsNumber/2;
-        m_SK03S=true;
-        m_SK77=m_SK03=m_SK06=m_SK00=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK06S=m_SK00S=m_SC00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SK06S")==0) {
-        m_filter=1250.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_sectionsNumber=m_sectionsNumber/2;
-        m_SK06S=true;
-        m_SK77=m_SK03=m_SK06=m_SK00=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK03S=m_SK00S=m_SC00S=m_SL00S=m_SP00S=false;
+        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
     }
     if (config.Compare("SK00S")==0) {
         m_filter=1250.0;
         m_inputsNumber=m_sectionsNumber;
         m_sectionsNumber=m_sectionsNumber/2;
         m_SK00S=true;
-        m_SK77=m_SK03=m_SK06=m_SK00=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK03S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
+        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
+    }
+    if (config.Compare("SK01S")==0) {
+        m_filter=1250.0;
+        m_inputsNumber=m_sectionsNumber;
+        m_sectionsNumber=m_sectionsNumber/2;
+        m_SK01S=true;
+        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
+    }
+    if (config.Compare("SK02S")==0) {
+        m_filter=1250.0;
+        m_inputsNumber=m_sectionsNumber;
+        m_sectionsNumber=m_sectionsNumber/2;
+        m_SK02S=true;
+        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
+    }
+    if (config.Compare("SK03S")==0) {
+        m_filter=1250.0;
+        m_inputsNumber=m_sectionsNumber;
+        m_sectionsNumber=m_sectionsNumber/2;
+        m_SK03S=true;
+        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
+    }
+    if (config.Compare("SK04S")==0) {
+        m_filter=1250.0;
+        m_inputsNumber=m_sectionsNumber;
+        m_sectionsNumber=m_sectionsNumber/2;
+        m_SK04S=true;
+        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
+    }
+    if (config.Compare("SK05S")==0) {
+        m_filter=1250.0;
+        m_inputsNumber=m_sectionsNumber;
+        m_sectionsNumber=m_sectionsNumber/2;
+        m_SK05S=true;
+        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
+    }
+    if (config.Compare("SK06S")==0) {
+        m_filter=1250.0;
+        m_inputsNumber=m_sectionsNumber;
+        m_sectionsNumber=m_sectionsNumber/2;
+        m_SK06S=true;
+        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SC00S=m_SL00S=m_SP00S=false;
     }
     if (config.Compare("SC00S")==0) {
         m_filter=1250.0;
         m_inputsNumber=m_sectionsNumber;
         m_sectionsNumber=m_sectionsNumber/2;
         m_SC00S=true;
-        m_SK77=m_SK03=m_SK06=m_SK00=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK03S=m_SK06S=m_SK00S=m_SL00S=m_SP00S=false;
+        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SL00S=m_SP00S=false;
     }
     if (config.Compare("SL00S")==0) {
         m_filter = 2300.0;
         m_inputsNumber=m_sectionsNumber;
         m_sectionsNumber=m_sectionsNumber/2;
         m_SL00S=true;
-        m_SK77=m_SK03=m_SK06=m_SK00=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK03S=m_SK06S=m_SK00S=m_SC00S=m_SP00S=false;
+        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SP00S=false;
         /*if (m_stationSRT == true) {
             m_ifDistributor->setup("BW-UNFILTERED");
             ACS_LOG(LM_FULL_INFO,"CCommandLine::setDefaultConfiguration()",(LM_NOTICE,"IFDISTRIBUTOR_BW-UNFILTERED_CONFIGURED"));
@@ -835,7 +1052,92 @@ void CCommandLine::setDefaultConfiguration(const IRA::CString & config) throw (C
         m_inputsNumber=m_sectionsNumber;
         m_sectionsNumber=m_sectionsNumber/2;
         m_SP00S=true;
-        m_SK77=m_SK03=m_SK06=m_SK00=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK03S=m_SK06S=m_SK00S=m_SC00S=m_SL00S=false;
+        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=false;
+    }
+    }
+    if (m_stationMED==true) {
+    if (config.Compare("SK01")==0) {
+        m_filter=1250.0;
+        m_inputsNumber=m_sectionsNumber;
+        m_SK01=true;
+        m_SK00=m_SCC00=m_SCH00=m_SL00=m_SP00=m_SK01S=m_SK00S=m_SCC00S=m_SCH00S=m_SL00S=m_SP00S=false;
+    }
+    if (config.Compare("SK00")==0) {
+        m_filter=1250.0;
+        m_inputsNumber=m_sectionsNumber;
+        m_SK00=true;
+        m_SK01=m_SCC00=m_SCH00=m_SL00=m_SP00=m_SK01S=m_SK00S=m_SCC00S=m_SCH00S=m_SL00S=m_SP00S=false;
+    }
+    if (config.Compare("SCC00")==0) {
+        m_filter=1250.0;
+        m_inputsNumber=m_sectionsNumber;
+        m_SCC00=true;
+        m_SK00=m_SK01=m_SL00=m_SP00=m_SK00S=m_SK01S=m_SCH00=m_SCC00S=m_SCH00S=m_SL00S=m_SP00S=false;
+    }
+    if (config.Compare("SCH00")==0) {
+        m_filter=1250.0;
+        m_inputsNumber=m_sectionsNumber;
+        m_SCH00=true;
+        m_SK00=m_SK01=m_SL00=m_SP00=m_SCC00=m_SK00S=m_SK01S=m_SCC00S=m_SCH00S=m_SL00S=m_SP00S=false;
+    }
+    if (config.Compare("SL00")==0) {
+        m_filter = 2300.0;
+        m_inputsNumber=m_sectionsNumber;
+        m_SL00=true;
+        m_SK00=m_SK01=m_SCC00=m_SP00=m_SCH00=m_SK00S=m_SK01S=m_SCC00S=m_SCH00S=m_SL00S=m_SP00S=false;
+    }
+    if (config.Compare("SP00")==0) {
+        m_filter = 730.0;
+        m_inputsNumber=m_sectionsNumber;
+        m_SP00=true;
+        m_SK00=m_SK01=m_SCC00=m_SCH00=m_SL00=m_SK00S=m_SK01S=m_SCC00S=m_SCH00S=m_SL00S=m_SP00S=false;
+    }
+    if (config.Compare("SK00S")==0) {
+        m_filter=1250.0;
+        m_inputsNumber=m_sectionsNumber;
+        m_sectionsNumber=m_sectionsNumber/2;
+        m_SK00S=true;
+        m_SK00=m_SK01=m_SCC00=m_SCH00=m_SL00=m_SP00=m_SK01S=m_SCC00S=m_SCH00S=m_SL00S=m_SP00S=false;
+    }
+    if (config.Compare("SK01S")==0) {
+        m_filter=1250.0;
+        m_inputsNumber=m_sectionsNumber;
+        m_sectionsNumber=m_sectionsNumber/2;
+        m_SK01S=true;
+        m_SK00=m_SK01=m_SCC00=m_SCH00=m_SL00=m_SP00=m_SK00S=m_SCC00S=m_SCH00S=m_SL00S=m_SP00S=false;
+    }
+    if (config.Compare("SCC00S")==0) {
+        m_filter=1250.0;
+        m_inputsNumber=m_sectionsNumber;
+        m_sectionsNumber=m_sectionsNumber/2;
+        m_SCC00S=true;
+        m_SK00=m_SK01=m_SCC00=m_SCH00=m_SL00=m_SP00=m_SK00S=m_SK01S=m_SCH00S=m_SL00S=m_SP00S=false;
+    }
+    if (config.Compare("SCH00S")==0) {
+        m_filter=1250.0;
+        m_inputsNumber=m_sectionsNumber;
+        m_sectionsNumber=m_sectionsNumber/2;
+        m_SCH00S=true;
+        m_SK00=m_SK01=m_SCC00=m_SCH00=m_SL00=m_SP00=m_SK00S=m_SK01S=m_SCC00S=m_SL00S=m_SP00S=false;
+    }
+    if (config.Compare("SL00S")==0) {
+        m_filter = 2300.0;
+        m_inputsNumber=m_sectionsNumber;
+        m_sectionsNumber=m_sectionsNumber/2;
+        m_SL00S=true;
+        m_SK00=m_SK01=m_SCC00=m_SCH00=m_SL00=m_SP00=m_SK00S=m_SK01S=m_SCC00S=m_SCH00S=m_SP00S=false;
+        /*if (m_stationSRT == true) {
+            m_ifDistributor->setup("BW-UNFILTERED");
+            ACS_LOG(LM_FULL_INFO,"CCommandLine::setDefaultConfiguration()",(LM_NOTICE,"IFDISTRIBUTOR_BW-UNFILTERED_CONFIGURED"));
+        }*/
+    }
+    if (config.Compare("SP00S")==0) {
+        m_filter = 730.0;
+        m_inputsNumber=m_sectionsNumber;
+        m_sectionsNumber=m_sectionsNumber/2;
+        m_SP00S=true;
+        m_SK00=m_SK01=m_SCC00=m_SCH00=m_SL00=m_SP00=m_SK00S=m_SK01S=m_SCC00S=m_SCH00S=m_SL00S=false;
+    }
     }
 }
 
@@ -905,12 +1207,36 @@ void CCommandLine::setup(const char *conf) throw (BackendsErrors::BackendBusyExI
     	if(reply.is_success_reply()) {
             setDefaultConfiguration(conf);
             for (int i=0;i<m_inputsNumber;i++) {
+                if (m_SK02S==true || m_SK02==true) {
+                    if (i == 0 || i == 1) {
+                        m_totalPower->setSection(i,-1, m_filter, -1, -1, -1, -1);
+                    }
+                    if (i == 2 || i == 3) {
+                        m_totalPower->setSection(i+2,-1, m_filter, -1, -1, -1, -1);
+                    }
+                }
                 if (m_SK03S==true || m_SK03==true) {
                     if (i == 0 || i == 1) {
                         m_totalPower->setSection(i,-1, m_filter, -1, -1, -1, -1);
                     }
                     if (i == 2 || i == 3) {
                         m_totalPower->setSection(i+4,-1, m_filter, -1, -1, -1, -1);
+                    }
+                }
+                if (m_SK04S==true || m_SK04==true) {
+                    if (i == 0 || i == 1) {
+                        m_totalPower->setSection(i,-1, m_filter, -1, -1, -1, -1);
+                    }
+                    if (i == 2 || i == 3) {
+                        m_totalPower->setSection(i+6,-1, m_filter, -1, -1, -1, -1);
+                    }
+                }
+                if (m_SK05S==true || m_SK03==true) {
+                    if (i == 0 || i == 1) {
+                        m_totalPower->setSection(i,-1, m_filter, -1, -1, -1, -1);
+                    }
+                    if (i == 2 || i == 3) {
+                        m_totalPower->setSection(i+8,-1, m_filter, -1, -1, -1, -1);
                     }
                 }
                 else if (m_SK06S==true || m_SK06==true) {
@@ -1208,7 +1534,8 @@ void CCommandLine::getPolarization(ACS::longSeq& pol) const
 {
 	pol.length(m_sectionsNumber);
 	for (int i=0;i<m_sectionsNumber;i++) {
-        if (m_SK77S==true || m_SC00S==true || m_SK00S==true || m_SL00S==true || m_SP00S==true)
+        if (m_SK77S==true || m_SC00S==true || m_SK00S==true || m_SL00S==true || m_SP00S==true || m_SK01S==true || m_SK02S==true || m_SK03S==true || m_SK04S==true || m_SK05S==true || m_SK06S==true
+                || m_SCC00S==true || m_SCH00S==true)
             pol[i]=2;
         else
             pol[i]=(long)m_polarization[i];
@@ -1229,12 +1556,20 @@ void CCommandLine::getFeedAttr(ACS::longSeq& feed) const
 	for (int i=0;i<m_sectionsNumber;i++) {
         if (m_SK77S == true)
 		    feed[i]=m_feedNumber[2*i];
-        else if (m_SK03S == true || m_SK06S == true) {
+        else if (m_SK01S == true || m_SK02S == true || m_SK03S==true || m_SK04S==true || m_SK05S==true || m_SK06S==true) {
             if (i < 1)
                 feed[i] = 0;
             else {
+                if (m_SK01S == true)
+                    feed[i] = 1;
+                if (m_SK02S == true)
+                    feed[i] = 2;
                 if (m_SK03S == true)
                     feed[i] = 3;
+                if (m_SK04S == true)
+                    feed[i] = 4;
+                if (m_SK05S == true)
+                    feed[i] = 5;
                 if (m_SK06S == true)
                     feed[i] = 6;
                 }
@@ -1264,9 +1599,9 @@ void CCommandLine::getInputSectionAttr(ACS::longSeq& inpSection) const
 {
     long index=0;
 
-	if (m_SK00==true || m_SC00==true || m_SK77==true || m_SK03==true || m_SK06==true || m_SL00==true || m_SP00==true)
+	if (m_SK00==true || m_SC00==true || m_SK77==true || m_SK03==true || m_SK06==true || m_SL00==true || m_SP00==true || m_SK01==true || m_SK02==true || m_SK04==true || m_SK05==true || m_SCC00==true || m_SCH00==true)
         index = m_inputsNumber;
-	if (m_SK00S==true || m_SC00S==true || m_SK77S==true || m_SK03S==true || m_SK06S==true || m_SL00S==true || m_SP00S==true)
+	if (m_SK00S==true || m_SC00S==true || m_SK77S==true || m_SK03S==true || m_SK06S==true || m_SL00S==true || m_SP00S==true || m_SK01S==true || m_SK02S==true || m_SK04S==true || m_SK05S==true || m_SCC00S==true || m_SCH00S==true)
         index = m_sectionsNumber;
 
     inpSection.length(index);
