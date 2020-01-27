@@ -21,6 +21,36 @@
 </Configuration>
 
 <Configuration>
+	<configurationID>SK01</configurationID>
+	<sections>4</sections>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<inputPort>GREGORIAN</inputPort>
+	<beams>2</beams>
+ 	<bandWidth>1500.0</bandWidth>
+ 	<attenuation>7.0</attenuation>		
+	<section_boards>0 1 2 3</section_boards>
+	<polarizations>L R L R</polarizations>
+	<feed>0 0 1 1</feed>
+	<IF>0 1 0 1</IF>
+	<bins>1024</bins>
+</Configuration>
+
+<Configuration>
+	<configurationID>SK02</configurationID>
+	<sections>4</sections>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<inputPort>GREGORIAN</inputPort>
+	<beams>2</beams>
+ 	<bandWidth>1500.0</bandWidth>
+ 	<attenuation>7.0</attenuation>		
+	<section_boards>0 1 2 3</section_boards>
+	<polarizations>L R L R</polarizations>
+	<feed>0 0 2 2</feed>
+	<IF>0 1 0 1</IF>
+	<bins>1024</bins>
+</Configuration>
+
+<Configuration>
 	<configurationID>SK03</configurationID>
 	<sections>4</sections>
 	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
@@ -31,6 +61,36 @@
 	<section_boards>0 1 2 3</section_boards>
 	<polarizations>L R L R</polarizations>
 	<feed>0 0 3 3</feed>
+	<IF>0 1 0 1</IF>
+	<bins>1024</bins>
+</Configuration>
+
+<Configuration>
+	<configurationID>SK04</configurationID>
+	<sections>4</sections>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<inputPort>GREGORIAN</inputPort>
+	<beams>2</beams>
+ 	<bandWidth>1500.0</bandWidth>
+ 	<attenuation>7.0</attenuation>		
+	<section_boards>0 1 2 3</section_boards>
+	<polarizations>L R L R</polarizations>
+	<feed>0 0 4 4</feed>
+	<IF>0 1 0 1</IF>
+	<bins>1024</bins>
+</Configuration>
+
+<Configuration>
+	<configurationID>SK05</configurationID>
+	<sections>4</sections>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<inputPort>GREGORIAN</inputPort>
+	<beams>2</beams>
+ 	<bandWidth>1500.0</bandWidth>
+ 	<attenuation>7.0</attenuation>		
+	<section_boards>0 1 2 3</section_boards>
+	<polarizations>L R L R</polarizations>
+	<feed>0 0 5 5</feed>
 	<IF>0 1 0 1</IF>
 	<bins>1024</bins>
 </Configuration>
@@ -126,6 +186,36 @@
 </Configuration>
 
 <Configuration>
+	<configurationID>SK01S</configurationID>
+	<sections>4</sections>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<inputPort>GREGORIAN</inputPort>
+	<beams>2</beams>
+ 	<bandWidth>1500.0</bandWidth>
+ 	<attenuation>7.0</attenuation>		
+	<section_boards>0 1 2 3</section_boards>
+	<polarizations>S S S S</polarizations>
+	<feed>0 0 1 1</feed>
+	<IF>0 1 0 1</IF>
+	<bins>1024</bins>
+</Configuration>
+
+<Configuration>
+	<configurationID>SK02S</configurationID>
+	<sections>4</sections>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<inputPort>GREGORIAN</inputPort>
+	<beams>2</beams>
+ 	<bandWidth>1500.0</bandWidth>
+ 	<attenuation>7.0</attenuation>		
+	<section_boards>0 1 2 3</section_boards>
+	<polarizations>S S S S</polarizations>
+	<feed>0 0 2 2</feed>
+	<IF>0 1 0 1</IF>
+	<bins>1024</bins>
+</Configuration>
+
+<Configuration>
 	<configurationID>SK03S</configurationID>
 	<sections>4</sections>
 	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
@@ -136,6 +226,36 @@
 	<section_boards>0 1 2 3</section_boards>
 	<polarizations>S S S S</polarizations>
 	<feed>0 0 3 3</feed>
+	<IF>0 1 0 1</IF>
+	<bins>1024</bins>
+</Configuration>
+
+<Configuration>
+	<configurationID>SK04S</configurationID>
+	<sections>4</sections>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<inputPort>GREGORIAN</inputPort>
+	<beams>2</beams>
+ 	<bandWidth>1500.0</bandWidth>
+ 	<attenuation>7.0</attenuation>		
+	<section_boards>0 1 2 3</section_boards>
+	<polarizations>S S S S</polarizations>
+	<feed>0 0 4 4</feed>
+	<IF>0 1 0 1</IF>
+	<bins>1024</bins>
+</Configuration>
+
+<Configuration>
+	<configurationID>SK05S</configurationID>
+	<sections>4</sections>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<inputPort>GREGORIAN</inputPort>
+	<beams>2</beams>
+ 	<bandWidth>1500.0</bandWidth>
+ 	<attenuation>7.0</attenuation>		
+	<section_boards>0 1 2 3</section_boards>
+	<polarizations>S S S S</polarizations>
+	<feed>0 0 5 5</feed>
 	<IF>0 1 0 1</IF>
 	<bins>1024</bins>
 </Configuration>

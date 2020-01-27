@@ -751,21 +751,34 @@ private:
 	inline void clearStatusField(TstatusFields field) { m_backendStatus &= ~(1 << field); }
 
     bool m_SK77;
-    bool m_SK03;
-    bool m_SK06;
     bool m_SK00;
+    bool m_SK01;
+    bool m_SK02;
+    bool m_SK03;
+    bool m_SK04;
+    bool m_SK05;
+    bool m_SK06;
     bool m_SC00;
     bool m_SL00;
     bool m_SP00;
     bool m_SK77S;
-    bool m_SK03S;
-    bool m_SK06S;
     bool m_SK00S;
+    bool m_SK01S;
+    bool m_SK02S;
+    bool m_SK03S;
+    bool m_SK04S;
+    bool m_SK05S;
+    bool m_SK06S;
     bool m_SC00S;
     bool m_SL00S;
     bool m_SP00S;
+    bool m_SCC00;
+    bool m_SCH00;
+    bool m_SCC00S;
+    bool m_SCH00S;
 
     bool m_stationSRT;
+    bool m_stationMED;
 	
 };
 
