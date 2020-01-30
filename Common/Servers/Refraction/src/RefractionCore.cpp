@@ -118,10 +118,8 @@ void CRefractionCore::cleanUp()
 void CRefractionCore::getCorrection(double obsZenithDistance,double waveLen, double &corZenithDistance)
 {
 	AUTO_TRACE("CRefractionCore::getCorrection()");
-	//double elevation;
+	double correction = 0.0;
 	baci::ThreadSyncGuard guardParametes(&m_parametersMutex);
-	//elevation = 90.0 - obsZenithDistance*DR2D;
-	//if (elevation >= 0.0 && elevation <= 90.0) {
 	if (obsZenithDistance>=0.0 && obsZenithDistance<DPIBY2) {
 		double hm = m_site.getHeight(); // meters
 		double tdk = m_temperature + 273.0;
@@ -130,9 +128,14 @@ void CRefractionCore::getCorrection(double obsZenithDistance,double waveLen, dou
 		double tlr = 0.0065;
 		double eps = 1e-8;
 
-		slaRefro(obsZenithDistance, hm, tdk, m_pressure, m_humidity, wl, phi, tlr, eps, &corZenithDistance);
+		slaRefro(obsZenithDistance, hm, tdk, m_pressure, m_humidity, wl, phi, tlr, eps, &correction);
+		correction = std::min(correction, 2.0e17);
+		if(correction < 1.0e-9) {
+			correction = 0.0;
+		}
 	}
-	else corZenithDistance = 0.0;
+
+	corZenithDistance = correction;
 }
 
 void CRefractionCore::getMeteoParameters()
