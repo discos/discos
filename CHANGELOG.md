@@ -68,3 +68,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/
 ### Fixed
     issue #452 - The Total Power component erroneously assigned a timestamp to the samples in case more samples were needed to reach total integration time
     issue #473 - The SRT AS USDs now retry 5 times to communicate with the hardware before setting their state to unavailable
+
+## [discos1.0.4] 03-02-2020
+### Added
+    issue #505 - CALMUX integrated and tested into the SRT production line (it has been successfully tested with DBBC and DFB backends)
+### Changed
+    issue #477 - removed the SecureArea from some AntennaBoss methods
+    issue #476 - replaced all occurrencies of DPI/2 with the defined variable DPIBY2, this should improve precision
+    issue #489 - new focus curve for SRT X band receiver
+    issue #506 - each SRT local oscillator now has its dedicated container
+    issue #510 - fixed SRT TotalPower CDB configuration in order to use the correct IP address
+### Fixed
+    issue #433 - limited refraction correction values to a meaningful range in order to avoid flooding the jlog with warning messages whenever the elevation is close to 90 degrees
+    issue #502 - removed last service daemon reference from Manager.xml io SRT production line
