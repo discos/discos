@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
 	_CP_ printf("Horizontal coordinates:\tazimuth %.8lf°, elevation %.8lf°\n",az*DR2D,el*DR2D);
 
 
-	double obsZenithDistance=(DPI/2.0)-el;
+	double obsZenithDistance=DPIBY2-el;
 	double corZenithDistance;
 	double tdk = 13 + 273.0; // temperature
 	double wl = 36000.0;

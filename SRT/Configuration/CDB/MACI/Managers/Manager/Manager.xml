@@ -33,7 +33,6 @@
     </ServiceComponents>
 
     <ServiceDaemons>
-        <cdb:_ string="nuraghe-mng.srt.inaf.it"/> 
     </ServiceDaemons>
 
 

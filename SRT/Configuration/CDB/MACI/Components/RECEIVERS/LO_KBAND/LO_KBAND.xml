@@ -11,7 +11,7 @@
 	Name="LO_KBAND"
 	Code="LocalOscillatorImpl.LocalOscillator"
 	Type="IDL:alma/Receivers/LocalOscillator:1.0"
-	Container="LocalOscillatorLPContainer"
+	Container="LocalOscillatorKContainer"
 	KeepAliveTime="10"
 	Default="false"
     ImplLang="py"
