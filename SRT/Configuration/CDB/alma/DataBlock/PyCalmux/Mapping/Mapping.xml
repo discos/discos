@@ -6,5 +6,6 @@
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
 <BackendEntry><Backend>DBBC</Backend><Channel>6</Channel><Polarity>0</Polarity></BackendEntry>
+<BackendEntry><Backend>DFB</Backend><Channel>8</Channel><Polarity>0</Polarity></BackendEntry>
 
 </CalMuxTable>
