@@ -81,7 +81,7 @@ public:
 	 * logs the COMPSTATE_OPERATIONAL
 	 * @throw ACSErr::ACSbaseExImpl
 	*/
-	virtual void execute() throw (ACSErr::ACSbaseExImpl);
+	virtual void execute();
 	
 	/** 
 	 * Called by the container before destroying the server in a normal situation. This function takes charge of 
