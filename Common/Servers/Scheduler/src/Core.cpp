@@ -29,7 +29,9 @@ void CCore::initialize()
 	m_lastWeatherTime=0;
 }
 
-void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::MemoryAllocationExImpl,ManagementErrors::ProcedureFileLoadingErrorExImpl)
+void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,
+  ComponentErrors::MemoryAllocationExImpl,ManagementErrors::ProcedureFileLoadingErrorExImpl,
+  ComponentErrors::UnexpectedExImpl)
 {
 	Antenna::TSiteInformation_var site;
 	Antenna::Observatory_var observatory=Antenna::Observatory::_nil();
@@ -51,6 +53,8 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 		Impl.setComponentName((const char*)m_config->getObservatoryComponent());
 		throw Impl;				
 	}
+	/*catch (...) {
+	}*/
 	ACS_LOG(LM_FULL_INFO,"CCore::execute()",(LM_INFO,"OBSERVATORY_LOCATED"));	
 	try	{	
 		site=observatory->getSiteSummary();  //throw CORBA::SYSTEMEXCEPTION
@@ -72,8 +76,9 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 		Impl.setComponentName((const char*)observatory->name());
 		throw Impl;
 	}
-	RESOURCE_EXEC;
 	loadCustomLogger(m_customLogger,m_customLoggerError); // throw ComponentErrors::CouldntGetComponentExImpl
+	
+	RESOURCE_EXEC;
 
 	// spawn schedule executor thread........
 	try {
@@ -90,6 +95,14 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	m_schedExecuter->initialize(m_services,m_dut1,m_site,m_config); // throw (ComponentErrors::TimerErrorExImpl)
 	ACS::TimeInterval sleepTime=m_config->getScheduleExecutorSleepTime()*10;
 	m_schedExecuter->setSleepTime(sleepTime);
+
+   try {
+		m_parser=new CParser<CCore>(this,10,true);\
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CCore::execute()");
+		throw dummy;
+	}
 
 	//add local commands
 	m_parser->add("tsys",new function1<CCore,non_constant,void_type,O<doubleSeq_type> >(this,&CCore::_callTSys),0);

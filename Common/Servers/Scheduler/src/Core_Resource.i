@@ -247,16 +247,19 @@ void CCore::loadCustomLogger(Management::CustomLogger_var& ref,bool& errorDetect
 			ACS_LOG(LM_FULL_INFO,"CCore::loadCustomLogger()",(LM_INFO,"CUSTOMLOGGER_LOCATED"));
 		}
 		catch (maciErrType::CannotGetComponentExImpl& ex) {
+			ref=Management::CustomLogger::_nil();
 			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CCore::loadCustomLogger()");
 			Impl.setComponentName((const char*)m_config->getCustomLoggerComponent());
 			throw Impl;
 		}
 		catch (maciErrType::NoPermissionExImpl& ex) {
+			ref=Management::CustomLogger::_nil();
 			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CCore::loadCustomLogger()");
 			Impl.setComponentName((const char*)m_config->getCustomLoggerComponent());
 			throw Impl;
 		}
 		catch (maciErrType::NoDefaultComponentExImpl& ex) {
+			ref=Management::CustomLogger::_nil();
 			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CCore::loadCustomLogger()");
 			Impl.setComponentName((const char*)m_config->getCustomLoggerComponent());
 			throw Impl;

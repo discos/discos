@@ -68,8 +68,10 @@ public:
 	 * @throw ComponentErrors::TimerErrorExImpl
 	 * @throw ComponentErrors::CouldntGetComponentExImpl
 	 * @thorw ManagementErrors::ProcedureFileLoadingErrorExImpl
+	 * @throw ComponentErrors::UnexpectedExImpl
 	*/
-	virtual void execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::MemoryAllocationExImpl,ManagementErrors::ProcedureFileLoadingErrorExImpl);
+	virtual void execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::MemoryAllocationExImpl,
+	  ManagementErrors::ProcedureFileLoadingErrorExImpl,ComponentErrors::UnexpectedExImpl);
 	
 	/**
 	 * This function initializes the core, all preliminary operation are performed here.
@@ -132,7 +134,7 @@ private:
 	/**
 	 * pointer to the configuration object
 	 */
-	 CConfiguration*  m_config;
+	 CConfiguration* m_config;
 	/**
 	 * pointer to the container services
 	 */
