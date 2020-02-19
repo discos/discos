@@ -232,7 +232,26 @@ bool CFitsWriter::create()
 	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY8,m_lastError)) return false;
 	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY9,m_lastError)) return false;
 	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY10,m_lastError)) return false;
-	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY11,m_lastError)) return false;	
+	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY11,m_lastError)) return false;
+	
+	if (!CFitsTools::primaryHeaderComment(pFits,CREDITS1,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderComment(pFits,CREDITS2,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderComment(pFits,CREDITS3,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderComment(pFits,CREDITS4,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderComment(pFits,CREDITS5,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderComment(pFits,CREDITS6,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderComment(pFits,CREDITS7,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderComment(pFits,CREDITS8,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderComment(pFits,CREDITS9,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderComment(pFits,CREDITS10,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderComment(pFits,CREDITS11,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderComment(pFits,CREDITS12,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderComment(pFits,CREDITS13,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderComment(pFits,CREDITS14,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderComment(pFits,CREDITS15,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderComment(pFits,CREDITS16,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderComment(pFits,CREDITS17,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderComment(pFits,CREDITS18,m_lastError)) return false;	
 	return true;
 };
 

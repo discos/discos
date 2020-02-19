@@ -22,7 +22,7 @@
 #define FITS_VERSION10 "V.1.12"
 #define FITS_VERSION11 "V.1.2"
 
-#define CURRENT_VERSION FITS_VERSION10
+#define CURRENT_VERSION FITS_VERSION11
 
 #define DEFAULT_COMMENT CURRENT_VERSION" Created by  S. Righini, M. Bartolini  & A. Orlati"
 
@@ -37,5 +37,26 @@
 #define HISTORY9 FITS_VERSION9" Added the keyword SIGNAL in main header of each sub scan fits"
 #define HISTORY10 FITS_VERSION10" Summary.fits has now a number of meaningful keywords"
 #define HISTORY11 FITS_VERSION11" Frequency and bandwidth columns added to Section table reporting backend sampled band"
+
+#define CREDITS1  " "
+#define CREDITS2  "These data are property of:"
+#define CREDITS3  " "
+#define CREDITS4  "Istituto Nazionale di Astrofisica-INAF"
+#define CREDITS5  "National Institute for Astrophysics-INAF"
+#define CREDITS6  "via del Parco Mellini 84"
+#define CREDITS7  "00136 Roma (ITALY)"
+#define CREDITS8  " "
+#define CREDITS9  "Permission is granted for publication and reproduction of this"
+#define CREDITS10 "material for scholarly, educational, and private non-commercial"
+#define CREDITS11 "use. Inquiries for potential commercial uses should be sent to"
+#define CREDITS12 "the address above."
+#define CREDITS13 " "
+#define CREDITS14 "--------------------------------------------------------------"
+#define CREDITS15 " "
+#define CREDITS16 "These data can be retrieved from the site"
+#define CREDITS17 "http://............"
+#define CREDITS18 "under the usage rules reported at that site."
+
+
 
 #endif /* VERSION_H_ */

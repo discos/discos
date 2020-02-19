@@ -81,3 +81,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/
 ### Fixed
     issue #433 - limited refraction correction values to a meaningful range in order to avoid flooding the jlog with warning messages whenever the elevation is close to 90 degrees
     issue #502 - removed last service daemon reference from Manager.xml io SRT production line
+    
+## [discos1.0.5] - 
+## Added
+	issue #504 - added credits clause (regarding INAF data ownership) to fits files headers
+## Fixed
+## Changed    
