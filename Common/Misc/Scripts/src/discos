@@ -1,42 +1,24 @@
 #! /bin/bash
-# ********************************************************************************************* 
-# IRA Istituto di Radioastronomia                                                                      
+# ***********************************************************************
+# IRA Istituto di Radioastronomia
 # 
 #
-# This code is under GNU General Public Licence (GPL).                                              
-#                                                                                                     
-# Who                                  when            What                                             
-# Andrea Orlati(andrea.orlati@inaf.it) 28/06/2018      Creation                                  
+# This code is under GNU General Public Licence (GPL).
+#
+# Who                                           when            What
+# Andrea Orlati(andrea.orlati@inaf.it)          28/06/2018      Creation
+# Giuseppe Carboni(giuseppe.carboni@inaf.it)    25/02/2020      Update
 #************************************************************************
-#   NAME
-# 
-#   SYNOPSIS
-# 
-#   DESCRIPTION
-#
-#   FILES
-#
-#   ENVIRONMENT
-#
-#   RETURN VALUES
-#
-#   CAUTIONS
-#
-#   EXAMPLES
-#
-#   SEE ALSO
-#
-#   BUGS     
-#
 
 LONGOPTS=start,view,help
 SHORTOPTS=svh
 CL_START=
 CL_VIEW=
 CL_HELP=
+GEOMETRY=1920x1080x0x0
 
 function printUsage {
-   echo "Gets the ESCS system started, management priviledges are needed"
+   echo "Starts the DISCOS constrol system"
    echo ""
         echo "Usage: `basename $0` [OPTIONS]  "
         echo "Options: "
@@ -88,12 +70,12 @@ if [ "$CL_HELP" ] ; then
 fi
 
 if [ "$CL_START" ] ; then
-   acscommandcenter -r $INTROOT/app-defaults/discosStartup.xml &
+   acscommandcenter -g $GEOMETRY -r $INTROOT/app-defaults/discosStartup.xml &
    exit
 fi
 
 if [ "$CL_VIEW" ] ; then
-   acscommandcenter -r $INTROOT/app-defaults/discosStartup.xml $MANAGER &
+   acscommandcenter -g $GEOMETRY -r $INTROOT/app-defaults/discosStartup.xml $MANAGER &
 fi
 
 
