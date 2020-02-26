@@ -48,8 +48,9 @@ public:
      */
     CORBA::Double read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
     {
-        m_val = m_pCore->getVertexTemperature();
-        timestamp = getTimeStamp();  //Completion time
+        CConfiguration::BoardValue result = m_pCore->getVertexTemperature();
+        m_val = result.temperature;
+        timestamp = result.timestamp;
         return m_val;
     }
 
@@ -66,6 +67,7 @@ public:
 private:
     CComponentCore* m_pCore;
     double  m_val;
+    ACS::Time m_timestamp_lc;  // Timestamp of last connection
 };
 
 #endif
