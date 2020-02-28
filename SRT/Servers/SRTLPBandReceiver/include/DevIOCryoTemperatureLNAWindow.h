@@ -54,8 +54,9 @@ public:
 	*/
 	CORBA::Double read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
 	{
-		m_val=m_pCore->getCryoLNAWin();
-		timestamp=getTimeStamp();  //Completion time
+        CConfiguration::BoardValue result = m_pCore->getCryoLNAWin();
+        m_val = result.temperature;
+        timestamp = result.timestamp;
 		return m_val;
 	}
 	/**

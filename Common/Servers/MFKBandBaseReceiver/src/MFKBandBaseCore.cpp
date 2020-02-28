@@ -22,8 +22,12 @@ void CComponentCore::initialize(maci::ContainerServices* services)
     m_control=NULL;
     m_localOscillatorDevice=Receivers::LocalOscillator::_nil();
     m_localOscillatorFault=false;
-    m_cryoCoolHead=m_cryoCoolHeadWin= m_cryoLNA=m_cryoLNAWin=m_vacuum=0.0;
-    m_envTemperature=20.0;
+    m_cryoCoolHeadWin.temperature = 0.0;
+    m_cryoLNA.temperature = 0.0;
+    m_cryoLNAWin.temperature = 0.0;
+    m_cryoCoolHead.temperature = 0.0;
+    m_envTemperature.temperature = 20.0;
+    m_vacuum=0.0;
     m_fetValues.VDL=m_fetValues.IDL=m_fetValues.VGL=m_fetValues.VDR=m_fetValues.IDR=m_fetValues.VGR=0.0;
     m_statusWord=0;
     m_ioMarkError = false;
@@ -1027,9 +1031,11 @@ void CComponentCore::updateCryoCoolHead() throw (ReceiversErrors::ReceiverContro
 {
     // Not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
     try {
-        m_cryoCoolHead=m_control->cryoTemperature(0,voltage2Kelvin);
+        m_cryoCoolHead.temperature = m_control->cryoTemperature(0,voltage2Kelvin);
+        m_cryoCoolHead.timestamp = getTimeStamp();
     }
     catch (IRA::ReceiverControlEx& ex) {
+        m_cryoCoolHead.temperature = CEDUMMY;
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateCryoCoolHead()");
         impl.setDetails(ex.what().c_str());
         setStatusBit(CONNECTIONERROR);
@@ -1043,9 +1049,11 @@ void CComponentCore::updateCryoCoolHeadWin() throw (ReceiversErrors::ReceiverCon
 {
     // Not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
     try {
-        m_cryoCoolHeadWin=m_control->cryoTemperature(1,voltage2Kelvin);
+        m_cryoCoolHeadWin.temperature = m_control->cryoTemperature(1,voltage2Kelvin);
+        m_cryoCoolHeadWin.timestamp = getTimeStamp();
     }
     catch (IRA::ReceiverControlEx& ex) {
+        m_cryoCoolHeadWin.temperature = CEDUMMY;
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateCryoCoolHeadWin()");
         impl.setDetails(ex.what().c_str());
         setStatusBit(CONNECTIONERROR);
@@ -1059,9 +1067,11 @@ void CComponentCore::updateCryoLNA() throw (ReceiversErrors::ReceiverControlBoar
 {
     // Not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
     try {
-        m_cryoLNA=m_control->cryoTemperature(3,voltage2Kelvin);
+        m_cryoLNA.temperature = m_control->cryoTemperature(3,voltage2Kelvin);
+        m_cryoLNA.timestamp = getTimeStamp();
     }
     catch (IRA::ReceiverControlEx& ex) {
+        m_cryoLNA.temperature = CEDUMMY;
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateCryoLNA()");
         impl.setDetails(ex.what().c_str());
         setStatusBit(CONNECTIONERROR);
@@ -1075,9 +1085,11 @@ void CComponentCore::updateCryoLNAWin() throw (ReceiversErrors::ReceiverControlB
 {
     // Not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
     try {
-        m_cryoLNAWin=m_control->cryoTemperature(4,voltage2Kelvin);
+        m_cryoLNAWin.temperature = m_control->cryoTemperature(4,voltage2Kelvin);
+        m_cryoLNAWin.timestamp = getTimeStamp();
     }
     catch (IRA::ReceiverControlEx& ex) {
+        m_cryoLNAWin.temperature = CEDUMMY;
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateCryoLNAWin()");
         impl.setDetails(ex.what().c_str());
         setStatusBit(CONNECTIONERROR);
@@ -1091,9 +1103,11 @@ void CComponentCore::updateVertexTemperature() throw (ReceiversErrors::ReceiverC
 {
     // Not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
     try {
-        m_envTemperature =m_control->vertexTemperature(voltage2Celsius);
+        m_envTemperature.temperature = m_control->vertexTemperature(voltage2Celsius);
+        m_envTemperature.timestamp = getTimeStamp();
     }
     catch (IRA::ReceiverControlEx& ex) {
+        m_envTemperature.temperature = CEDUMMY;
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateVertexTemperature()");
         impl.setDetails(ex.what().c_str());
         setStatusBit(CONNECTIONERROR);
