@@ -38,7 +38,7 @@ class StartUpdatingTest(unittest.TestCase):
             self.positioner.setRewindingMode('MANUAL')
             az, el, target = self.prepare_negative_oor() 
             # after prepare_negative_oor(), startUpdating() will cause oor
-            self.positioner.startUpdating(MNG_TRACK, ANT_SOUTH, az, el, 0, 0)
+            self.positioner.startUpdating(MNG_TRACK, ANT_SOUTH, az, el, 0, 0, True)
             time.sleep(0.5)
             self.assertTrue(self.positioner.isRewindingRequired())
             self.positioner.rewind(0)
@@ -49,7 +49,7 @@ class StartUpdatingTest(unittest.TestCase):
             self.positioner.setRewindingMode('MANUAL')
             az, el, target = self.prepare_negative_oor()
             # after prepare_negative_oor(), startUpdating() will cause oor
-            self.positioner.startUpdating(MNG_TRACK, ANT_SOUTH, az, el, 0, 0)
+            self.positioner.startUpdating(MNG_TRACK, ANT_SOUTH, az, el, 0, 0, True)
             time.sleep(0.5)
             self.assertTrue(self.positioner.isRewindingRequired())
             self.positioner.rewind(4)
@@ -59,7 +59,7 @@ class StartUpdatingTest(unittest.TestCase):
         self.positioner.setRewindingMode('MANUAL')
         az, el, target = self.prepare_negative_oor()
         # after prepare_negative_oor(), startUpdating() will cause oor
-        self.positioner.startUpdating(MNG_TRACK, ANT_SOUTH, az, el, 0, 0)
+        self.positioner.startUpdating(MNG_TRACK, ANT_SOUTH, az, el, 0, 0, True)
         time.sleep(0.5)
         self.assertEqual(self.positioner.isRewindingRequired(), True)
         self.assertEqual(self.positioner.isRewinding(), False)
@@ -70,7 +70,7 @@ class StartUpdatingTest(unittest.TestCase):
         self.positioner.setRewindingMode('MANUAL')
         az, el, target = self.prepare_negative_oor()
         # after prepare_negative_oor(), startUpdating() will cause oor
-        self.positioner.startUpdating(MNG_TRACK, ANT_SOUTH, az, el, 0, 0)
+        self.positioner.startUpdating(MNG_TRACK, ANT_SOUTH, az, el, 0, 0, True)
         time.sleep(0.5)
         self.positioner.stopUpdating()
         time.sleep(1)
@@ -81,7 +81,7 @@ class StartUpdatingTest(unittest.TestCase):
         self.positioner.setRewindingMode('MANUAL')
         az, el, target = self.prepare_negative_oor() 
         # after prepare_negative_oor(), startUpdating() will cause oor
-        self.positioner.startUpdating(MNG_TRACK, ANT_SOUTH, az, el, 0, 0)
+        self.positioner.startUpdating(MNG_TRACK, ANT_SOUTH, az, el, 0, 0, True)
         time.sleep(0.5)
         self.assertTrue(self.positioner.isRewindingRequired())
         steps = 2
@@ -120,7 +120,7 @@ class StartUpdatingTest(unittest.TestCase):
         self.assertLess(target, min_limit)
         # If sector is SOUTH, we expect a rewind of 60 degrees: -93 + 60 -> -33
         expected = target + 60
-        self.positioner.startUpdating(MNG_TRACK, ANT_SOUTH, az, el, 0, 0)
+        self.positioner.startUpdating(MNG_TRACK, ANT_SOUTH, az, el, 0, 0, True)
         time.sleep(0.5)
         self.assertAlmostEqual(expected, self.device.getActPosition(), delta=0.1)
 
@@ -134,7 +134,7 @@ class StartUpdatingTest(unittest.TestCase):
         target = Pis + parallactic 
         self.assertLess(target, min_limit)
         expected = target + 120
-        self.positioner.startUpdating(MNG_TRACK, ANT_SOUTH, az, el, 0, 0)
+        self.positioner.startUpdating(MNG_TRACK, ANT_SOUTH, az, el, 0, 0, True)
         time.sleep(0.5)
         self.assertAlmostEqual(expected, self.device.getActPosition(), delta=0.1)
 
@@ -153,7 +153,7 @@ class StartUpdatingTest(unittest.TestCase):
         self.assertGreater(target, min_limit)
         # We do not expect a rewind
         expected = target
-        self.positioner.startUpdating(MNG_TRACK, ANT_SOUTH, az, el, 0, 0)
+        self.positioner.startUpdating(MNG_TRACK, ANT_SOUTH, az, el, 0, 0, False)
         time.sleep(0.5)
         self.assertAlmostEqual(expected, self.device.getActPosition(), delta=0.1)
 
@@ -184,7 +184,7 @@ class StartUpdatingTest(unittest.TestCase):
         self.antenna.setOffsets(az, el, ANT_HORIZONTAL)
         target = Pis + parallactic 
         self.assertLess(target, max_limit)
-        self.positioner.startUpdating(MNG_TRACK, ANT_SOUTH, az, el, 0, 0)
+        self.positioner.startUpdating(MNG_TRACK, ANT_SOUTH, az, el, 0, 0, True)
         time.sleep(0.5)
         self.assertAlmostEqual(target, self.device.getActPosition(), delta=0.1)
         self.assertTrue(self.positioner.isUpdating())
@@ -245,7 +245,7 @@ class StartUpdatingTest(unittest.TestCase):
         self.antenna.setOffsets(az, el, ANT_HORIZONTAL)
         target = Pis + parallactic 
         self.assertLess(target, max_limit)
-        self.positioner.startUpdating(MNG_TRACK, ANT_NORTH, az, el, 0, 0)
+        self.positioner.startUpdating(MNG_TRACK, ANT_NORTH, az, el, 0, 0, True)
         time.sleep(0.5)
         self.assertAlmostEqual(target, self.device.getActPosition(), delta=0.1)
         self.assertTrue(self.positioner.isUpdating())
@@ -294,7 +294,7 @@ class StartUpdatingTest(unittest.TestCase):
         self.antenna.setOffsets(az, el, ANT_HORIZONTAL)
         target = Pis + parallactic 
         self.assertGreater(target, min_limit)
-        self.positioner.startUpdating(MNG_TRACK, ANT_SOUTH, az, el, 0, 0)
+        self.positioner.startUpdating(MNG_TRACK, ANT_SOUTH, az, el, 0, 0, True)
         time.sleep(0.5)
         self.assertAlmostEqual(target, self.device.getActPosition(), delta=0.1)
         self.assertTrue(self.positioner.isUpdating())

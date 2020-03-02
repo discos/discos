@@ -78,7 +78,9 @@ class PositionerOffsetTest(unittest.TestCase):
         expected = Pis - max_rewinding_steps*self.device.getStep() + offset
         self.source.setAzimuth(az)
         self.source.setElevation(el)
-        self.p.startUpdating('MNG_TRACK', 'ANT_NORTH', az, el, None, None)
+        self.p.startUpdating(
+            'MNG_TRACK', 'ANT_NORTH', az, el, None, None, True
+        )
         time.sleep(0.2) if self.using_mock else time.sleep(3)
         self.p.setOffset(offset)
         time.sleep(0.2) if self.using_mock else time.sleep(5)

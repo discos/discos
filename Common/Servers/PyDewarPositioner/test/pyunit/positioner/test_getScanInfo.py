@@ -40,7 +40,9 @@ class PositionerStartUpdatingTest(unittest.TestCase):
         posgen = PosGenerator()
         gen = posgen.parallactic(self.source, site_info)
         self.assertEqual(self.p.getScanInfo()['axis'], Management.MNG_NO_AXIS)
-        self.p.startUpdating(Management.MNG_TRACK, Antenna.ANT_NORTH, az, el, None, None)
+        self.p.startUpdating(
+            Management.MNG_TRACK, Antenna.ANT_NORTH, az, el, None, None, True
+        )
         self.assertEqual(self.p.getScanInfo()['axis'], Management.MNG_TRACK)
         self.p.stopUpdating()
         self.assertEqual(self.p.getScanInfo()['axis'], Management.MNG_NO_AXIS)
@@ -60,7 +62,9 @@ class PositionerStartUpdatingTest(unittest.TestCase):
         self.p.setup(site_info, self.source, self.device)
         az = el = math.radians(60)
         Pip = PosGenerator.getParallacticAngle(latitude, az, el)
-        self.p.startUpdating(Management.MNG_TRACK, Antenna.ANT_NORTH, az, el, None, None)
+        self.p.startUpdating(
+            Management.MNG_TRACK, Antenna.ANT_NORTH, az, el, None, None, True
+        )
         self.assertEqual(self.p.getScanInfo()['iStaticPos'], -19.2)
         self.assertEqual(self.p.getScanInfo()['iParallacticPos'], Pip)
 
@@ -72,7 +76,9 @@ class PositionerStartUpdatingTest(unittest.TestCase):
         self.p.setup(site_info, self.source, self.device)
         posgen = PosGenerator()
         gen = posgen.parallactic(self.source, site_info)
-        self.p.startUpdating(Management.MNG_TRACK, Antenna.ANT_NORTH, az, el, None, None)
+        self.p.startUpdating(
+            Management.MNG_TRACK, Antenna.ANT_NORTH, az, el, None, None, True
+        )
         self.assertEqual(self.p.getScanInfo()['axis'], Management.MNG_TRACK)
         self.p.stopUpdating()
         self.assertEqual(self.p.getScanInfo()['axis'], Management.MNG_NO_AXIS)

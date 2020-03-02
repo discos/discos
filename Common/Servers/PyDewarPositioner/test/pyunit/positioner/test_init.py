@@ -16,7 +16,10 @@ class PositionerInitTest(unittest.TestCase):
         self.assertEqual(p.isTerminated(), True)
         self.assertEqual(p.getOffset(), 0.0)
         self.assertRaises(NotAllowedError, p.getDeviceName)
-        self.assertRaises(NotAllowedError, p.startUpdating, 'axis', 'sector', 1, 1, None, None)
+        self.assertRaises(
+            NotAllowedError,
+            p.startUpdating, 'axis', 'sector', 1, 1, None, None, True
+        )
 
 if __name__ == '__main__':
     unittest.main()

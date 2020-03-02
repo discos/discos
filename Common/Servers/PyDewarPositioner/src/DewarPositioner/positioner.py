@@ -59,7 +59,7 @@ class Positioner(object):
             self.device = device
             self.device.setup()
             self._clearOffset()
-            self._clearSign()
+            self.sign = None
             self.is_setup = True
             time.sleep(0.4) # Give the device the time to accomplish the setup
             self.control.updateScanInfo({'iStaticPos': setupPosition})
@@ -147,8 +147,9 @@ class Positioner(object):
                 %(self.control.target, self.device.getMinLimit(), self.device.getMaxLimit()))
 
 
-    def checkUpdating(self, stime, axis, sector, az, el, ra, dec):
+    def checkUpdating(self, stime, axis, sector, az, el, ra, dec, new_source):
         sectors = ('ANT_NORTH', 'ANT_SOUTH')
+        sign = None if new_source else self.sign
         if not self.isSetup():
             raise NotAllowedError('positioner not configured: a setup() is required')
         elif str(axis) == 'MNG_BEAMPARK':
@@ -170,9 +171,9 @@ class Positioner(object):
         lat = self.siteInfo['latitude']
         try:
             if coordinateFrame == 'horizontal':
-                iParallacticPos = getAngleFunction(lat, az, el)
+                iParallacticPos = getAngleFunction(lat, az, el, sign)
             elif coordinateFrame == 'equatorial':
-                iParallacticPos = getAngleFunction(lat, az, el, ra, dec)
+                iParallacticPos = getAngleFunction(lat, az, el, ra, dec, sign)
             else:
                 raise PositionerError('coordinate frame %s unknown' % coordinateFrame)
         except ZeroDivisionError:
@@ -219,8 +220,9 @@ class Positioner(object):
         return (ready, future_time)
 
 
-    def startUpdating(self, axis, sector, az, el, ra, dec):
+    def startUpdating(self, axis, sector, az, el, ra, dec, new_source):
         sectors = ('ANT_NORTH', 'ANT_SOUTH')
+        sign = None if new_source else self.sign
         try:
             Positioner.generalLock.acquire()
             if not self.isSetup():
@@ -267,9 +269,9 @@ class Positioner(object):
                         lat = self.siteInfo['latitude']
                         try:
                             if coordinateFrame == 'horizontal':
-                                iParallacticPos = getAngleFunction(lat, az, el, self.sign)
+                                iParallacticPos = getAngleFunction(lat, az, el, sign)
                             elif coordinateFrame == 'equatorial':
-                                iParallacticPos = getAngleFunction(lat, az, el, ra, dec, self.sign)
+                                iParallacticPos = getAngleFunction(lat, az, el, ra, dec, sign)
                             else:
                                 raise PositionerError('coordinate frame %s unknown' %coordinateFrame)
                         except ZeroDivisionError:
@@ -760,16 +762,13 @@ class Positioner(object):
         finally:
             Positioner.generalLock.release()
 
-    def _clearSign(self):
-        self.sign = None
-
     def _setDefault(self):
         self.t = None
         self.is_setup = False
         self.control = Control()
         self.conf.clearConfiguration()
         self._clearOffset()
-        self._clearSign()
+        self.sign = None
 
 
 class Control(object):

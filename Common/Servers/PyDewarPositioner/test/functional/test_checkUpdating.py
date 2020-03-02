@@ -36,7 +36,9 @@ class TestCheckUpdating(unittest.TestCase):
         with self.assertRaisesRegexp(ComponentErrorsEx, 'positioner not configured'):
             self.positioner.park()
             time.sleep(0.5)
-            self.positioner.checkUpdating(0, MNG_TRACK, ANT_SOUTH, 0, 0, 0, 0)
+            self.positioner.checkUpdating(
+                0, MNG_TRACK, ANT_SOUTH, 0, 0, 0, 0, False
+            )
 
 
     def test_mng_beampark(self):
@@ -47,7 +49,8 @@ class TestCheckUpdating(unittest.TestCase):
                 starting_time,
                 MNG_BEAMPARK,
                 ANT_SOUTH,
-                az, el, ra, dec
+                az, el, ra, dec,
+                False
         )
         self.assertEqual(value, True)
         self.assertEqual(feasible_time, starting_time)
@@ -61,7 +64,8 @@ class TestCheckUpdating(unittest.TestCase):
         starting_time = 0
         az, el, ra, dec = 0.6109, 0.6109, 0, 0  # 0.6109 -> 35 degrees
         self.antenna.setOffsets(az, el, ANT_HORIZONTAL)
-        self.positioner.startUpdating(MNG_TRACK, ANT_NORTH, az, el, ra, dec)
+        self.positioner.startUpdating(
+            MNG_TRACK, ANT_NORTH, az, el, ra, dec, False)
         time.sleep(0.5)
         self.positioner.stopUpdating()
         time.sleep(0.5)
@@ -70,7 +74,8 @@ class TestCheckUpdating(unittest.TestCase):
                 starting_time,
                 MNG_TRACK,
                 ANT_NORTH,
-                az, el, ra, dec
+                az, el, ra, dec,
+                False  # new_source
         )
         self.assertEqual(value, True)
         self.assertGreater(feasible_time, timestamp)
@@ -95,7 +100,8 @@ class TestCheckUpdating(unittest.TestCase):
                 starting_time,
                 MNG_TRACK,
                 ANT_NORTH,
-                az, el, 0, 0
+                az, el, 0, 0,
+                False  # new_source
         )
         self.assertEqual(value, False)
         minimum_time = timestamp + int(required_time)
@@ -121,7 +127,8 @@ class TestCheckUpdating(unittest.TestCase):
                 starting_time,
                 MNG_TRACK,
                 ANT_NORTH,
-                az, el, 0, 0
+                az, el, 0, 0,
+                False  # new_source
         )
         self.assertEqual(value, True)
         self.assertLess(feasible_time, starting_time)
@@ -146,7 +153,8 @@ class TestCheckUpdating(unittest.TestCase):
                 starting_time,
                 MNG_TRACK,
                 ANT_NORTH,
-                az, el, 0, 0
+                az, el, 0, 0,
+                False  # new_source
         )
         self.assertEqual(value, False)
         self.assertGreater(feasible_time, starting_time)

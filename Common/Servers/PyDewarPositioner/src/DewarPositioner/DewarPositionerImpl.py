@@ -205,11 +205,6 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         logger.logNotice('derotator parked')
 
 
-    def clearSource(self):
-        logger.logNotice('cleaning the parallacting angle sign')
-        self.positioner._clearSign()
-
-
     def getPosition(self):
         try:
             return self.positioner.getPosition()
@@ -358,10 +353,10 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         return ScanInfo(**self.positioner.getScanInfo())
 
 
-    def checkUpdating(self, stime, axis, sector, az, el, ra, dec):
+    def checkUpdating(self, stime, axis, sector, az, el, ra, dec, new_source):
         try:
             return self.positioner.checkUpdating(
-                stime, axis, sector, az, el, ra, dec
+                stime, axis, sector, az, el, ra, dec, new_source
             )
         except PositionerError, ex:
             logger.logError(ex.message)
@@ -381,10 +376,12 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             raise exc.getComponentErrorsEx()
 
 
-    def startUpdating(self, axis, sector, az, el, ra, dec):
+    def startUpdating(self, axis, sector, az, el, ra, dec, new_source):
         logger.logNotice('starting the derotator position updating')
         try:
-            self.positioner.startUpdating(axis, sector, az, el, ra, dec)
+            self.positioner.startUpdating(
+                axis, sector, az, el, ra, dec, new_source
+            )
         except PositionerError, ex:
             logger.logError(ex.message)
             exc = ComponentErrorsImpl.OperationErrorExImpl()
