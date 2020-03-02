@@ -188,10 +188,10 @@ void CComponentCore::externalCalOn() throw (
         throw impl;
     }
     guard.release();
-    if (checkStatusBit(LOCAL)) {
-        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::externalCalOn()");
-        throw impl;
-    }
+    // if (checkStatusBit(LOCAL)) {
+    //     _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::externalCalOn()");
+    //     throw impl;
+    // }
     try {
         m_control->setExtCalibrationOn();
     }
@@ -227,10 +227,10 @@ void CComponentCore::externalCalOff() throw (
         throw impl;
     }
     guard.release();
-    if (checkStatusBit(LOCAL)) {
-        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::externalCalOff()");
-        throw impl;
-    }
+    // if (checkStatusBit(LOCAL)) {
+    //     _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::externalCalOff()");
+    //     throw impl;
+    // }
     try {
         m_control->setExtCalibrationOff();
     }
@@ -277,10 +277,10 @@ void CComponentCore::calOn() throw (
         throw impl;
     }
     // guard.release();
-    if (checkStatusBit(LOCAL)) {
-        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::calOn()");
-        throw impl;
-    }
+    // if (checkStatusBit(LOCAL)) {
+    //     _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::calOn()");
+    //     throw impl;
+    // }
     try {
         m_control->setCalibrationOn();
         m_calDiode=true;
@@ -317,10 +317,10 @@ void CComponentCore::calOff() throw (
         throw impl;
     }
     // guard.release();
-    if (checkStatusBit(LOCAL)) {
-        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::calOff()");
-        throw impl;
-    }
+    // if (checkStatusBit(LOCAL)) {
+    //     _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::calOff()");
+    //     throw impl;
+    // }
     try {
         m_control->setCalibrationOff();
         m_calDiode=false;
@@ -834,10 +834,10 @@ void CComponentCore::updateComponent()
 {
     baci::ThreadSyncGuard guard(&m_mutex);
     m_componentStatus=Management::MNG_OK;
-    if (checkStatusBit(LOCAL)) {
-        setComponentStatus(Management::MNG_FAILURE);
-        _IRA_LOGFILTER_LOG(LM_CRITICAL,"CComponentCore::updateComponent()","RECEVER_NOT_REMOTELY_CONTROLLABLE");
-    }
+    // if (checkStatusBit(LOCAL)) {
+    //     setComponentStatus(Management::MNG_FAILURE);
+    //     _IRA_LOGFILTER_LOG(LM_CRITICAL,"CComponentCore::updateComponent()","RECEVER_NOT_REMOTELY_CONTROLLABLE");
+    // }
     if (checkStatusBit(VACUUMPUMPFAULT)) {
         setComponentStatus(Management::MNG_WARNING);
         _IRA_LOGFILTER_LOG(LM_WARNING,"CComponentCore::updateComponent()","VACUUM_PUMP_FAILURE");
