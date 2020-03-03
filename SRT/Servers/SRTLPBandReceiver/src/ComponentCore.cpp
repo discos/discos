@@ -70,6 +70,22 @@ CConfiguration const * const  CComponentCore::execute() throw (
     
     m_localOscillatorValue = m_configuration.getDefaultLO()[0];
     m_actualMode="";
+
+    if(m_control->isRemoteOn()) {
+        _IRA_LOGFILTER_LOG(
+            LM_INFO,
+            "CComponentCore::execute()",
+            "RECEVER_REMOTELY_CONTROLLABLE"
+        );
+    }
+    else {
+        _IRA_LOGFILTER_LOG(
+            LM_INFO,
+            "CComponentCore::execute()",
+            "RECEVER_NOT_REMOTELY_CONTROLLABLE"
+        );
+    }
+
     return &m_configuration;
 }
 
@@ -237,10 +253,10 @@ void CComponentCore::externalCalOn() throw (
         throw impl;
     }
     guard.release();
-    if (checkStatusBit(LOCAL)) {
-        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::externalCalOn()");
-        throw impl;
-    }
+    // if (checkStatusBit(LOCAL)) {
+    //     _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::externalCalOn()");
+    //     throw impl;
+    // }
     try {
         m_control->setExtCalibrationOn();
     }
@@ -277,10 +293,10 @@ void CComponentCore::externalCalOff() throw (
         throw impl;
     }
     guard.release();
-    if (checkStatusBit(LOCAL)) {
-        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::externalCalOff()");
-        throw impl;
-    }
+    // if (checkStatusBit(LOCAL)) {
+    //     _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::externalCalOff()");
+    //     throw impl;
+    // }
     try {
         m_control->setExtCalibrationOff();
     }
@@ -324,10 +340,10 @@ void CComponentCore::calOn() throw (
         throw impl;
     }
     // guard.release();
-    if (checkStatusBit(LOCAL)) {
-        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::calOn()");
-        throw impl;
-    }
+    // if (checkStatusBit(LOCAL)) {
+    //     _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::calOn()");
+    //     throw impl;
+    // }
     try {
         m_control->setCalibrationOn();
 		  m_calDiode=true;    
@@ -364,10 +380,10 @@ void CComponentCore::calOff() throw (
         throw impl;
     }
     // guard.release();
-    if (checkStatusBit(LOCAL)) {
-        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::calOff()");
-        throw impl;
-    }
+    // if (checkStatusBit(LOCAL)) {
+    //     _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::calOff()");
+    //     throw impl;
+    // }
     try {
         m_control->setCalibrationOff();
         m_calDiode=false;
@@ -1082,6 +1098,22 @@ void CComponentCore::updateIsRemote() throw (ReceiversErrors::ReceiverControlBoa
         setStatusBit(CONNECTIONERROR);
         throw impl;
     }
+
+    if (checkStatusBit(LOCAL) && answer) {
+        _IRA_LOGFILTER_LOG(
+            LM_INFO,
+            "CComponentCore::updateIsRemote()",
+            "RECEVER_SWITCHED_FROM_LOCAL_TO_REMOTE"
+        );
+    }
+    else if (!checkStatusBit(LOCAL) && !answer) {
+        _IRA_LOGFILTER_LOG(
+            LM_INFO,
+            "CComponentCore::updateIsRemote()",
+            "RECEVER_SWITCHED_FROM_REMOTE_TO_LOCAL"
+        );
+    }
+
     if (!answer) {
         setStatusBit(LOCAL);
     }

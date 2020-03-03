@@ -75,14 +75,14 @@ CConfiguration const * const  CComponentCore::execute() throw (
     if(m_control->isRemoteOn()) {
         _IRA_LOGFILTER_LOG(
             LM_INFO,
-            "CComponentCore::updateIsRemote()",
+            "CComponentCore::execute()",
             "RECEVER_REMOTELY_CONTROLLABLE"
         );
     }
     else {
         _IRA_LOGFILTER_LOG(
             LM_INFO,
-            "CComponentCore::updateIsRemote()",
+            "CComponentCore::execute()",
             "RECEVER_NOT_REMOTELY_CONTROLLABLE"
         );
     }

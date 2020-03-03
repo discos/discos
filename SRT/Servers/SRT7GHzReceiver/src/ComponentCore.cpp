@@ -65,6 +65,21 @@ CConfiguration const * const  CComponentCore::execute() throw (ComponentErrors::
         m_localOscillatorValue=m_configuration.getDefaultLO()[i];
     }
     m_setupMode="";
+
+    if(m_control->isRemoteOn()) {
+        _IRA_LOGFILTER_LOG(
+            LM_INFO,
+            "CComponentCore::execute()",
+            "RECEVER_REMOTELY_CONTROLLABLE"
+        );
+    }
+    else {
+        _IRA_LOGFILTER_LOG(
+            LM_INFO,
+            "CComponentCore::execute()",
+            "RECEVER_NOT_REMOTELY_CONTROLLABLE"
+        );
+    }
     return &m_configuration;
 }
 
@@ -162,10 +177,10 @@ void CComponentCore::externalCalOn() throw (
         throw impl;
     }
     guard.release();
-    if (checkStatusBit(LOCAL)) {
-        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::externalCalOn()");
-        throw impl;
-    }
+    // if (checkStatusBit(LOCAL)) {
+    //     _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::externalCalOn()");
+    //     throw impl;
+    // }
     try {
         m_control->setExtCalibrationOn();
     }
@@ -202,10 +217,10 @@ void CComponentCore::externalCalOff() throw (
         throw impl;
     }
     guard.release();
-    if (checkStatusBit(LOCAL)) {
-        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::externalCalOff()");
-        throw impl;
-    }
+    // if (checkStatusBit(LOCAL)) {
+    //     _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::externalCalOff()");
+    //     throw impl;
+    // }
     try {
         m_control->setExtCalibrationOff();
     }
@@ -274,10 +289,10 @@ void CComponentCore::calOn() throw (ReceiversErrors::NoRemoteControlErrorExImpl,
         throw impl;
     }
     // guard.release();
-    if (checkStatusBit(LOCAL)) {
-        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::calOn()");
-        throw impl;
-    }
+    // if (checkStatusBit(LOCAL)) {
+    //     _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::calOn()");
+    //     throw impl;
+    // }
     try {
         m_control->setCalibrationOn();
     }
@@ -301,10 +316,10 @@ void CComponentCore::calOff() throw (ReceiversErrors::NoRemoteControlErrorExImpl
         throw impl;
     }
     // guard.release();
-    if (checkStatusBit(LOCAL)) {
-        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::calOff()");
-        throw impl;
-    }
+    // if (checkStatusBit(LOCAL)) {
+    //     _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::calOff()");
+    //     throw impl;
+    // }
     try {
         m_control->setCalibrationOff();
     }
@@ -698,10 +713,10 @@ void CComponentCore::updateComponent()
 {
     baci::ThreadSyncGuard guard(&m_mutex);
     m_componentStatus=Management::MNG_OK;
-    if (checkStatusBit(LOCAL)) {
-        setComponentStatus(Management::MNG_FAILURE);
-        _IRA_LOGFILTER_LOG(LM_CRITICAL,"CComponentCore::updateComponent()","RECEVER_NOT_REMOTELY_CONTROLLABLE");
-    }
+    // if (checkStatusBit(LOCAL)) {
+    //     setComponentStatus(Management::MNG_FAILURE);
+    //     _IRA_LOGFILTER_LOG(LM_CRITICAL,"CComponentCore::updateComponent()","RECEVER_NOT_REMOTELY_CONTROLLABLE");
+    // }
     if (checkStatusBit(VACUUMPUMPFAULT)) {
         setComponentStatus(Management::MNG_WARNING);
         _IRA_LOGFILTER_LOG(LM_WARNING,"CComponentCore::updateComponent()","VACUUM_PUMP_FAILURE");
@@ -837,6 +852,22 @@ void CComponentCore::updateIsRemote() throw (ReceiversErrors::ReceiverControlBoa
         setStatusBit(CONNECTIONERROR);
         throw impl;
     }
+
+    if (checkStatusBit(LOCAL) && answer) {
+        _IRA_LOGFILTER_LOG(
+            LM_INFO,
+            "CComponentCore::updateIsRemote()",
+            "RECEVER_SWITCHED_FROM_LOCAL_TO_REMOTE"
+        );
+    }
+    else if (!checkStatusBit(LOCAL) && !answer) {
+        _IRA_LOGFILTER_LOG(
+            LM_INFO,
+            "CComponentCore::updateIsRemote()",
+            "RECEVER_SWITCHED_FROM_REMOTE_TO_LOCAL"
+        );
+    }
+
     if (!answer) setStatusBit(LOCAL);
     else clearStatusBit(LOCAL);
     clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
