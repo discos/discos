@@ -71,6 +71,22 @@ CConfiguration const * const  CComponentCore::execute() throw (
     }
     m_localOscillatorValue=0.0;
     m_setupMode="";
+
+    if(m_control->isRemoteOn()) {
+        _IRA_LOGFILTER_LOG(
+            LM_INFO,
+            "CComponentCore::updateIsRemote()",
+            "RECEVER_REMOTELY_CONTROLLABLE"
+        );
+    }
+    else {
+        _IRA_LOGFILTER_LOG(
+            LM_INFO,
+            "CComponentCore::updateIsRemote()",
+            "RECEVER_NOT_REMOTELY_CONTROLLABLE"
+        );
+    }
+
     return &m_configuration;
 }
 
@@ -985,6 +1001,22 @@ void CComponentCore::updateIsRemote() throw (ReceiversErrors::ReceiverControlBoa
         setStatusBit(CONNECTIONERROR);
         throw impl;
     }
+
+    if (checkStatusBit(LOCAL) && answer) {
+        _IRA_LOGFILTER_LOG(
+            LM_INFO,
+            "CComponentCore::updateIsRemote()",
+            "RECEVER_SWITCHED_FROM_LOCAL_TO_REMOTE"
+        );
+    }
+    else if (!checkStatusBit(LOCAL) && !answer) {
+        _IRA_LOGFILTER_LOG(
+            LM_INFO,
+            "CComponentCore::updateIsRemote()",
+            "RECEVER_SWITCHED_FROM_REMOTE_TO_LOCAL"
+        );
+    }
+
     if (!answer) setStatusBit(LOCAL);
     else clearStatusBit(LOCAL);
     clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
