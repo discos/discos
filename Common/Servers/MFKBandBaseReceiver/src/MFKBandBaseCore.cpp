@@ -76,14 +76,14 @@ CConfiguration const * const  CComponentCore::execute() throw (
         _IRA_LOGFILTER_LOG(
             LM_INFO,
             "CComponentCore::execute()",
-            "RECEVER_REMOTELY_CONTROLLABLE"
+            "RECEIVER_REMOTELY_CONTROLLABLE"
         );
     }
     else {
         _IRA_LOGFILTER_LOG(
             LM_INFO,
             "CComponentCore::execute()",
-            "RECEVER_NOT_REMOTELY_CONTROLLABLE"
+            "RECEIVER_NOT_REMOTELY_CONTROLLABLE"
         );
     }
 
@@ -852,7 +852,7 @@ void CComponentCore::updateComponent()
     m_componentStatus=Management::MNG_OK;
     // if (checkStatusBit(LOCAL)) {
     //     setComponentStatus(Management::MNG_FAILURE);
-    //     _IRA_LOGFILTER_LOG(LM_CRITICAL,"CComponentCore::updateComponent()","RECEVER_NOT_REMOTELY_CONTROLLABLE");
+    //     _IRA_LOGFILTER_LOG(LM_CRITICAL,"CComponentCore::updateComponent()","RECEIVER_NOT_REMOTELY_CONTROLLABLE");
     // }
     if (checkStatusBit(VACUUMPUMPFAULT)) {
         setComponentStatus(Management::MNG_WARNING);
@@ -1006,14 +1006,14 @@ void CComponentCore::updateIsRemote() throw (ReceiversErrors::ReceiverControlBoa
         _IRA_LOGFILTER_LOG(
             LM_INFO,
             "CComponentCore::updateIsRemote()",
-            "RECEVER_SWITCHED_FROM_LOCAL_TO_REMOTE"
+            "RECEIVER_SWITCHED_FROM_LOCAL_TO_REMOTE"
         );
     }
     else if (!checkStatusBit(LOCAL) && !answer) {
         _IRA_LOGFILTER_LOG(
             LM_INFO,
             "CComponentCore::updateIsRemote()",
-            "RECEVER_SWITCHED_FROM_REMOTE_TO_LOCAL"
+            "RECEIVER_SWITCHED_FROM_REMOTE_TO_LOCAL"
         );
     }
 
