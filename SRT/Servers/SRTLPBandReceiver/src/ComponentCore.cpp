@@ -70,22 +70,6 @@ CConfiguration const * const  CComponentCore::execute() throw (
     
     m_localOscillatorValue = m_configuration.getDefaultLO()[0];
     m_actualMode="";
-
-    if(m_control->isRemoteOn()) {
-        _IRA_LOGFILTER_LOG(
-            LM_INFO,
-            "CComponentCore::execute()",
-            "RECEIVER_REMOTELY_CONTROLLABLE"
-        );
-    }
-    else {
-        _IRA_LOGFILTER_LOG(
-            LM_INFO,
-            "CComponentCore::execute()",
-            "RECEIVER_NOT_REMOTELY_CONTROLLABLE"
-        );
-    }
-
     return &m_configuration;
 }
 
