@@ -357,10 +357,10 @@ void CComponentCore::vacuumSensorOn() throw (ReceiversErrors::NoRemoteControlErr
 
 void CComponentCore::lnaOff() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
 {
-    if (checkStatusBit(LOCAL)) {
-        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::lnaOff()");
-        throw impl;
-    }
+    // if (checkStatusBit(LOCAL)) {
+    //     _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::lnaOff()");
+    //     throw impl;
+    // }
     try {
         m_control-> turnRightLNAsOff();
         m_control-> turnLeftLNAsOff();
@@ -376,10 +376,10 @@ void CComponentCore::lnaOff() throw (ReceiversErrors::NoRemoteControlErrorExImpl
 
 void CComponentCore::lnaOn() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
 {
-    if (checkStatusBit(LOCAL)) {
-        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::lnaOn()");
-        throw impl;
-    }
+    // if (checkStatusBit(LOCAL)) {
+    //     _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::lnaOn()");
+    //     throw impl;
+    // }
     try {
         m_control-> turnRightLNAsOn();
         m_control-> turnLeftLNAsOn();

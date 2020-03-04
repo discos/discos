@@ -170,7 +170,7 @@ void CComponentCore::activate() throw (
     m_calDiode=false; 
     guard.release();
     
-	 lnaOn(); // Throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
+	lnaOn(); // Throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
     externalCalOff();
     
 }
@@ -393,10 +393,10 @@ void CComponentCore::lnaOff() throw (
         ReceiversErrors::ReceiverControlBoardErrorExImpl
         )
 {
-    if (checkStatusBit(LOCAL)) {
-        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::lnaOff()");
-        throw impl;
-    }
+    // if (checkStatusBit(LOCAL)) {
+    //     _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::lnaOff()");
+    //     throw impl;
+    // }
     try {
         m_control-> turnRightLNAsOff();
         m_control-> turnLeftLNAsOff();
