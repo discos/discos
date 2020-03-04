@@ -416,10 +416,10 @@ void CComponentCore::lnaOn() throw (
         ReceiversErrors::ReceiverControlBoardErrorExImpl
         )
 {
-    if (checkStatusBit(LOCAL)) {
-        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::lnaOn()");
-        throw impl;
-    }
+    // if (checkStatusBit(LOCAL)) {
+    //     _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::lnaOn()");
+    //     throw impl;
+    // }
     try {
         m_control-> turnRightLNAsOn();
         m_control-> turnLeftLNAsOn();
