@@ -1102,14 +1102,14 @@ void CComponentCore::updateIsRemote() throw (ReceiversErrors::ReceiverControlBoa
 
     if (checkStatusBit(LOCAL) && answer) {
         _IRA_LOGFILTER_LOG(
-            LM_INFO,
+            LM_NOTICE,
             "CComponentCore::updateIsRemote()",
             "RECEIVER_SWITCHED_FROM_LOCAL_TO_REMOTE"
         );
     }
     else if (!checkStatusBit(LOCAL) && !answer) {
         _IRA_LOGFILTER_LOG(
-            LM_INFO,
+            LM_NOTICE,
             "CComponentCore::updateIsRemote()",
             "RECEIVER_SWITCHED_FROM_REMOTE_TO_LOCAL"
         );
