@@ -172,7 +172,23 @@ void CComponentCore::activate() throw (
     
 	lnaOn(); // Throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
     externalCalOff();
-    
+
+    bool answer;
+    try {
+        answer=m_control->isRemoteOn();
+    }
+    catch (IRA::ReceiverControlEx& ex) {
+        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::activate()");
+        impl.setDetails(ex.what().c_str());
+        setStatusBit(CONNECTIONERROR);
+        throw impl;
+    }
+    if (checkStatusBit(LOCAL)) {
+        _IRA_LOGFILTER_LOG(LM_NOTICE, "CComponentCore::activate()", "RECEIVER_COMMUNICATION_MODE_LOCAL");
+    }
+    else {
+        _IRA_LOGFILTER_LOG(LM_NOTICE, "CComponentCore::activate()", "RECEIVER_COMMUNICATION_MODE_REMOTE");
+    }
 }
 
 
@@ -988,14 +1004,14 @@ void CComponentCore::updateIsRemote() throw (ReceiversErrors::ReceiverControlBoa
 
     if (checkStatusBit(LOCAL) && answer) {
         _IRA_LOGFILTER_LOG(
-            LM_INFO,
+            LM_NOTICE,
             "CComponentCore::updateIsRemote()",
             "RECEIVER_SWITCHED_FROM_LOCAL_TO_REMOTE"
         );
     }
     else if (!checkStatusBit(LOCAL) && !answer) {
         _IRA_LOGFILTER_LOG(
-            LM_INFO,
+            LM_NOTICE,
             "CComponentCore::updateIsRemote()",
             "RECEIVER_SWITCHED_FROM_REMOTE_TO_LOCAL"
         );
