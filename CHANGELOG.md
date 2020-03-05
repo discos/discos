@@ -90,5 +90,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/
 
 ## Fixed
     issue #518 - In case of communication error we set a dummy value (100000) for the temperature properties, and the related timestamp keeps the value of the last communication timestamp.
-    issue #525 - When in LOCAL mode the receivers can turn on/off the noise mark. There is no more MNG_FAILURE logging in case of LOCAL mode: only the initial status (during component startup) and the change of status (local to remote and viceversa) are written to the logfile.
+    issue #525 - When in LOCAL mode the receivers can turn on/off the noise mark and LNAs. There is no more MNG_FAILURE logging in case of LOCAL mode: only the LOCAL/REMOTE status (during component activation) and the change of status (LOCAL to REMOTE and viceversa) are written to the logfile.
 ## Changed    
