@@ -233,11 +233,13 @@ void CComponentCore::activate(const char * setup_mode) throw (
         setStatusBit(CONNECTIONERROR);
         throw impl;
     }
-    if (checkStatusBit(LOCAL)) {
-        _IRA_LOGFILTER_LOG(LM_NOTICE, "CComponentCore::activate()", "RECEIVER_COMMUNICATION_MODE_LOCAL");
+    if (answer) {
+        _IRA_LOGFILTER_LOG(LM_NOTICE, "CComponentCore::activate()", "RECEIVER_COMMUNICATION_MODE_REMOTE");
+        clearStatusBit(LOCAL);
     }
     else {
-        _IRA_LOGFILTER_LOG(LM_NOTICE, "CComponentCore::activate()", "RECEIVER_COMMUNICATION_MODE_REMOTE");
+        _IRA_LOGFILTER_LOG(LM_NOTICE, "CComponentCore::activate()", "RECEIVER_COMMUNICATION_MODE_LOCAL");
+        setStatusBit(LOCAL);
     }
 }
 
