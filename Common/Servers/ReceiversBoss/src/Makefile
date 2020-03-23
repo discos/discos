@@ -21,11 +21,11 @@
 # user definable C-compilation flags
 # a quick comment on this: in order to control receivers a t med the boss is in charge of doing much more things that it has to. So
 # different code is required until new specific component to control the receivers for Medicina are written
-ifeq ($(STATION),Medicina)
-	USER_CFLAGS = -U 'COMPILE_TARGET_STANDARD' -U 'COMPILE_TARGET_NT' -D 'COMPILE_TARGET_MED'
-else
+#ifeq ($(STATION),Medicina)
+#	USER_CFLAGS = -U 'COMPILE_TARGET_STANDARD' -U 'COMPILE_TARGET_NT' -D 'COMPILE_TARGET_MED'
+#else
 	USER_CFLAGS = -U 'COMPILE_TARGET_MED' -U 'COMPILE_TARGET_NT' -D 'COMPILE_TARGET_STANDARD'
-endif
+#endif
 
 #
 # additional include and library search paths

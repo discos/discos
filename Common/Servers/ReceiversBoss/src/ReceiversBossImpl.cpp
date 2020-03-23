@@ -525,10 +525,10 @@ void ReceiversBossImpl::turnAntennaUnitOff() throw (CORBA::SystemException,Compo
 }
 
 void ReceiversBossImpl::startScan(ACS::Time& startUT,const Receivers::TReceiversParameters& param,
-		const Antenna::TRunTimeParameters& antennaInfo) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+		const Antenna::TRunTimeParameters& antennaInfo,const Management::TScanConfiguration& scanConf) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try{
-		m_core->startScan(startUT,param,antennaInfo);
+		m_core->startScan(startUT,param,antennaInfo,scanConf);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -566,8 +566,25 @@ void ReceiversBossImpl::closeScan(ACS::Time& timeToStop) throw (CORBA::SystemExc
 }
 
 CORBA::Boolean ReceiversBossImpl::checkScan(ACS::Time startUt,const Receivers::TReceiversParameters& param,const Antenna::TRunTimeParameters& antennaInfo,
-  Receivers::TRunTimeParameters_out runTime) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+  const Management::TScanConfiguration& scanConf,Receivers::TRunTimeParameters_out runTime) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
+	try{
+		m_core->checkScan(startUt,param,antennaInfo,scanConf,runTime);
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"ReceiversBossImpl::checkScan()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
+	
 	// At the moment no need to perform checks or something
 	// also no need to compute startUT
 	if (startUt!=0) {

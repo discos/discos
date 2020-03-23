@@ -72,16 +72,17 @@ ELEVATIONLIMITS	15.0	80.0
 #PostScan	A name of a procedure that must be executed at the end of the scan. It may be NULL in that case nothing is done. It has to be reported in the procedure list file.
 #			The async/sync execution mode is identical to the prescan procedure.
 
+
 SC:	1	dr21	STD:MANAGEMENT/MBFits	EQMAPLAYOUT
 1_1	10:12:04.000	60.0	1	STANDARDPRESCAN@	STANDARDPOSTSCAN
-1_2	10:12:25.000	100.0	12	NULL	NULL
 1_10	10:14:04.000	60.0	1	STANDARDPRESCAN@	STANDARDPOSTSCAN
 1_11	10:16:29.000	60.0	1	NULL	ENDSCAN=10.66@
+
 
 SC:	2	mySource	HIGH:MANAGEMENT/MBFits
 2_1	10:30:14.000	300.0	4	STANDARDPRESCAN	NULL
 
 #id duration scan PreScan PostScan backend Writer
-#SC:	1	dr21	STD::MANAGEMENT/FitsZilla
-#1_1	60.0	1	STANDARDPRESCAN	NULL
-#1_2	60.0	1	STANDARDPRESCAN	NULL
+#SC:	3	dr21	STD::MANAGEMENT/FitsZilla
+#3_1	60.0	8	STANDARDPRESCAN	NULL
+#3_2	60.0	8	STANDARDPRESCAN	NULL

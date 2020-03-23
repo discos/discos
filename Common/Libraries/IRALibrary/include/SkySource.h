@@ -262,9 +262,18 @@ public:
 	*/
 	static void apparentToJ2000(const double& appRA,const double& appDec,const CDateTime& time,
 			double& ra,double& dec);
+			
+	/**
+	 * This function converts from B1950.0 FK4 to J2000.0 FK5 assuming zero proper motion in the FK5 frame
+	 * @param ra50 B1950 right ascension (radians)
+	 * @param dec50 B1950 declination (radians)
+	 * @param ra returned J2000 right ascension (radians)
+	 * @param dec returned J2000 declination (radians)
+	*/
+	static void B1950ToJ2000(const double& ra50,const double& dec50,double& ra,double& dec); 
 	
 	/**
-	 * Converts horizontal coordinates for the given site and time to equatorial ones. No back-correction are perfomed like
+	 * Converts horizontal coordinates for the given site and time to equatorial ones. No back-correction are performed like
 	 * diurnal aberration.
 	 * @param now a CDateTime representing the current UT date and time
 	 * @param site coordinates of the observer

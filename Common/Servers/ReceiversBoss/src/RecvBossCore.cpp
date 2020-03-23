@@ -951,6 +951,7 @@ void CRecvBossCore::initialize(maci::ContainerServices* services,CConfiguration 
 	m_autoRewindSteps=-1;
 	m_dewarIsMoving=false;
 	m_notificationChannel=NULL;
+	m_lastScanTime=0;
 
 	ACS_LOG(LM_FULL_INFO,"CRecvBossCore::initialize()",(LM_INFO,"OPENING_RECEIVERS_BOSS_NOTIFICATION_CHANNEL"));
 	try {
@@ -1722,15 +1723,75 @@ void CRecvBossCore::closeScan(ACS::Time& timeToStop) throw (ReceiversErrors::Dew
 	}
 }
 
-void CRecvBossCore::startScan(ACS::Time& startUT,const Receivers::TReceiversParameters& param,const Antenna::TRunTimeParameters & antennaInfo)
-  throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,
-  ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::DewarPositionerCommandErrorExImpl)
+bool CRecvBossCore::checkScan(ACS::Time& startUT,const Receivers::TReceiversParameters& param,const Antenna::TRunTimeParameters& antennaInfo,
+     const Management::TScanConfiguration& scanConf,Receivers::TRunTimeParameters& runTime) throw(
+     ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,
+     ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,
+     ReceiversErrors::DewarPositionerCommandErrorExImpl)
 {
-	// at the moment no need to change startUT and return different value
-	// for the derotator we assume the device is fast enough to follow antenna movements, on the contrary it will rise a warning and
-	// affect the tracking flag
 	IRA::CString component;
-	bool derotator;
+	ACS::Time estimatedTime;
+	bool derotator,res,newTarget;
+	res=false;
+	baci::ThreadSyncGuard guard(&m_mutex);
+	if (!m_config->getReceiver(m_currentRecvCode,component,derotator)) {
+		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::checkScan()");
+		impl.setReason("Receiver code is not known");
+		changeBossStatus(Management::MNG_WARNING);
+		throw impl;
+	}
+	runTime.onTheFly=false;
+	if (m_lastScanTime!=scanConf.timeStamp) {
+		newTarget=true;
+	}
+	else {
+		newTarget=false;
+	}
+	if ((m_config->dewarPositionerInterface()!="") && (derotator) && (m_updateMode!=Receivers::RCV_UNDEF_DEROTCONF))  {
+		loadDewarPositioner(); // ComponentErrors::CouldntGetComponentExImpl
+		try {
+			res=m_dewarPositioner->checkUpdating(startUT,antennaInfo.axis,antennaInfo.section,
+			  antennaInfo.azimuth,antennaInfo.elevation,antennaInfo.rightAscension,antennaInfo.declination,newTarget,
+			  estimatedTime);
+			  runTime.onTheFly=true;
+		}
+		catch (ComponentErrors::ComponentErrorsEx& ex) {
+			_ADD_BACKTRACE(ReceiversErrors::DewarPositionerCommandErrorExImpl,impl,ex,"CRecvBossCore::checkScan()");
+			impl.setCommand("checkScan()");
+			changeBossStatus(Management::MNG_FAILURE);
+			throw impl;
+		}
+		catch (CORBA::SystemException& ex) {
+			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CRecvBossCore::checkScan()");
+			impl.setName(ex._name());
+			impl.setMinor(ex.minor());
+			changeBossStatus(Management::MNG_WARNING);
+			m_dewarPositionerError=true;
+			throw impl;
+		}
+		catch (...) {
+			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CRecvBossCore::checkScan()");
+			changeBossStatus(Management::MNG_WARNING);
+			m_dewarPositionerError=true;
+			throw impl;
+		}
+	}
+	runTime.timeToStop=0;
+	if (res) {
+		if (startUT<=0) runTime.startEpoch=estimatedTime;
+		else runTime.startEpoch=startUT;
+	}	
+	return res;
+}
+
+void CRecvBossCore::startScan(ACS::Time& startUT,const Receivers::TReceiversParameters& param,const Antenna::TRunTimeParameters & antennaInfo,
+  const Management::TScanConfiguration& scanConf) throw (ComponentErrors::ValidationErrorExImpl,
+  ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,
+  ReceiversErrors::DewarPositionerCommandErrorExImpl)
+{
+
+	IRA::CString component;
+	bool derotator,newTarget;
 	baci::ThreadSyncGuard guard(&m_mutex);
 	//*********************************************************
 	// At the moment no scans are included in for receivers boss. so:
@@ -1745,17 +1806,24 @@ void CRecvBossCore::startScan(ACS::Time& startUT,const Receivers::TReceiversPara
 	}
 	// the receiver code should be validated....
 	if (!m_config->getReceiver(m_currentRecvCode,component,derotator)) {
-		//_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::startScan()");
-		//impl.setReason("Receiver code is not known");
-		//changeBossStatus(Management::MNG_WARNING);
-		//throw impl;
+		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::startScan()");
+		impl.setReason("Receiver code is not known");
+		changeBossStatus(Management::MNG_WARNING);
+		throw impl;
 	}
 	// now check if the start scan have to deal also with the derotator
 	if ((m_config->dewarPositionerInterface()!="") && (derotator) && (m_updateMode!=Receivers::RCV_UNDEF_DEROTCONF))  {
 		loadDewarPositioner(); // ComponentErrors::CouldntGetComponentExImpl
+		if (m_lastScanTime!=scanConf.timeStamp) {
+			newTarget=true;
+			m_lastScanTime=scanConf.timeStamp;
+		}
+		else {
+			newTarget=false;
+		}
 		try {
 			m_dewarPositioner->startUpdating(antennaInfo.axis,antennaInfo.section,antennaInfo.azimuth,
-					antennaInfo.elevation,antennaInfo.rightAscension,antennaInfo.declination);
+					antennaInfo.elevation,antennaInfo.rightAscension,antennaInfo.declination,newTarget);
 			m_dewarIsMoving=true;
 		}
 		catch (ComponentErrors::ComponentErrorsEx& ex) {

@@ -253,9 +253,18 @@ public:
 	
 	void park()  throw (ManagementErrors::ParkingErrorExImpl);
 	
-	void startScan(ACS::Time& startUT,const Receivers::TReceiversParameters& param,const Antenna::TRunTimeParameters& antennaInfo) throw(
-			ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,
+	void startScan(ACS::Time& startUT,const Receivers::TReceiversParameters& param,const Antenna::TRunTimeParameters& antennaInfo,
+	      const Management::TScanConfiguration& scanConf) throw(
+			ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,
 			ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::DewarPositionerCommandErrorExImpl);
+
+	/**
+	 * Check if the receiver is ready to perform the next scan and set the structure Receivers:RuntimeParameters accordingly. 
+	*/ 	
+	bool checkScan(ACS::Time& startUT,const Receivers::TReceiversParameters& param,const Antenna::TRunTimeParameters& antennaInfo,
+	     const Management::TScanConfiguration& scanConf,Receivers::TRunTimeParameters& runTime) throw(
+			ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,
+			ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::DewarPositionerCommandErrorExImpl);			
 
 	void closeScan(ACS::Time& timeToStop) throw (ReceiversErrors::DewarPositionerCommandErrorExImpl,ComponentErrors::CORBAProblemExImpl,
 			ComponentErrors::UnexpectedExImpl);
@@ -318,7 +327,7 @@ private:
 	IRA::CString m_currentRecvCode;
 
 #ifdef COMPILE_TARGET_MED
-        #warning "Compiling RecvBossCore with Medicina target"
+   #warning "Compiling RecvBossCore with Medicina target"
 	/**
 	 * Socket to the KBand Recevier
 	 */
@@ -353,7 +362,7 @@ private:
 
 #elif COMPILE_TARGET_NT
 
-        #warning "Compiling RecvBossCore with Noto target"
+   #warning "Compiling RecvBossCore with Noto target"
 	void reinit() throw (ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::SocketErrorExImpl);
 	void reinitCal() throw (ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::SocketErrorExImpl);
 
@@ -372,7 +381,7 @@ private:
    Backends::TotalPower_proxy m_totalPower_proxy;
 	
 #else
-        #warning "Compiling RecvBossCore with default target"
+   #warning "Compiling RecvBossCore with default target"
 		
 	ACS::doubleSeq m_lo;
 	ACS::Time m_loEpoch;
@@ -391,6 +400,7 @@ private:
 	Management::TSystemStatus m_dewarStatus;
 	bool m_dewarTracking;
 	ACS::Time m_dewarStatusEpoch;
+	ACS::Time m_lastScanTime;
 
 	// This also controls if the derotator has been configured
 	Receivers::TDerotatorConfigurations m_updateMode;

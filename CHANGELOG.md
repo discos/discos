@@ -68,3 +68,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/
 ### Fixed
     issue #452 - The Total Power component erroneously assigned a timestamp to the samples in case more samples were needed to reach total integration time
     issue #473 - The SRT AS USDs now retry 5 times to communicate with the hardware before setting their state to unavailable
+
+## [Next Major] -
+### Added
+### Changed
+    issue #328 - Commands 'peaker', 'lonOTF', 'latOTF' and 'skydipOTF' disabled temporarily.
+                 The derotator is now handled as the other servo systems. The Dewar positioner now partecipate to the
+                 negotiations for the scan start time and handling.
+                 The schedule is now checked to guaratee the multiplicity if the relastionship between scans 
+                 and sources is one to one.
+                 Reviewed the scan handshake mechanism by subsystems and performed by the scheduler.         				
+### Fixed
+	 issue #328 - Fixed the handling of sign of the paralactic angle that led to misbeaviours in dewar positioning 	

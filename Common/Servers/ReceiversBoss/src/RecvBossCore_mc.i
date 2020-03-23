@@ -780,9 +780,21 @@ void CRecvBossCore::getIFOutput(const ACS::longSeq& feeds,const ACS::longSeq& if
 	}
 }
 
+bool CRecvBossCore::checkScan(ACS::Time& startUT,const Receivers::TReceiversParameters& param,
+		const Antenna::TRunTimeParameters& antennaInfo,const Management::TScanConfiguration& scanConf,Receivers::TRunTimeParameters& runTime) throw(
+		ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,
+		ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,
+		ReceiversErrors::DewarPositionerCommandErrorExImpl)
+{
+	runTime.onTheFly=true;
+	runTime.timeToStop=0;
+	runTime.startEpoch=startUT;
+	return true;
+}
+
 void CRecvBossCore::CRecvBossCore::startScan(ACS::Time& startUT,const Receivers::TReceiversParameters& param,
-  const Antenna::TRunTimeParameters& antennaInfo) throw(
-  ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,
+  const Antenna::TRunTimeParameters& antennaInfo,const Management::TScanConfiguration& scanConf) throw(
+  ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,
   ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::DewarPositionerCommandErrorExImpl)
 {
 

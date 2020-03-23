@@ -193,6 +193,15 @@ module Management  {
 		TSubScanSignal signal;			/* this indicates the signal of the current subscan */
 	};
 
+	/**
+	 * This structure contains some information derived from the scan parameters
+	*/
+	struct TScanConfiguration {
+		ACS::Time timeStamp;
+		long scanID; /* This indicates the scanID of the current Scan */
+		long subScansNumber; /* This tells how many subscans are included in this scan */
+	};
+
 };
 
 #endif

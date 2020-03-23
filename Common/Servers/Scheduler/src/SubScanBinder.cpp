@@ -1,4 +1,5 @@
 #include "Schedule.h"
+#include <SkySource.h>
 #include <slamac.h>
 
 using namespace Schedule;
@@ -79,8 +80,8 @@ void CSubScanBinder::peaker(const IRA::CString& axis,const double& span,const AC
 		direction=Antenna::SUBSCAN_INCREASE;
 		antennaSpan*=-1.0;
 	}
-	if (antennaSpan>0) {
-		OTFC(Antenna::ANT_EQUATORIAL,geom,Antenna::ANT_HORIZONTAL,direction,antennaSpan,duration,sec);
+	if (antennaSpan>0) { // this case is when a bdf is not null so the secondary movement is an otfC 
+		OnTheFlyC(Antenna::ANT_EQUATORIAL,geom,Antenna::ANT_HORIZONTAL,direction,antennaSpan,duration,sec);
 	}
 	else {
 		if (sec==NULL) { // in this case the current target is kept!
@@ -89,6 +90,7 @@ void CSubScanBinder::peaker(const IRA::CString& axis,const double& span,const AC
 		}
 		else {
 			copyPrimaryAntenaTrack(sec);
+			findTarget(sec); //target is defined by the secondary track
 		}
 	}
 
@@ -98,15 +100,15 @@ void CSubScanBinder::peaker(const IRA::CString& axis,const double& span,const AC
     prim.secondary=true;
     prim.applyOffsets=true;*/
 
-    m_servo->is_empty_scan=false;
-    m_servo->axis_code=CORBA::string_dup((const char *)axis);
-    m_servo->range=span;
-    m_servo->total_time=duration;
+   m_servo->is_empty_scan=false;
+   m_servo->axis_code=CORBA::string_dup((const char *)axis);
+   m_servo->range=span;
+   m_servo->total_time=duration;
 	m_receivers->dummy=0;
 	m_subScanConf->signal=Management::MNG_SIGNAL_NONE;
 }
 
-void CSubScanBinder::OTFC(const Antenna::TCoordinateFrame& coordFrame,const Antenna::TsubScanGeometry& geometry,
+void CSubScanBinder::OnTheFlyC(const Antenna::TCoordinateFrame& coordFrame,const Antenna::TsubScanGeometry& geometry,
 	const Antenna::TCoordinateFrame& subScanFrame,const Antenna::TsubScanDirection& direction,
 	const double& span,const ACS::TimeInterval& subScanDuration,const Antenna::TTrackingParameters * const sec)
 {
@@ -115,7 +117,6 @@ void CSubScanBinder::OTFC(const Antenna::TCoordinateFrame& coordFrame,const Ante
 	m_primary->type=Antenna::ANT_OTF;
 	m_primary->section=Antenna::ACU_NEUTRAL;
 	m_primary->paramNumber=0;
-
 	m_primary->otf.lon1=m_primary->otf.lat1=0.0; // this will be replaced by the antennaboss component
 	m_primary->otf.description=Antenna::SUBSCAN_CENTER;
 	m_primary->otf.subScanDuration=subScanDuration;
@@ -132,10 +133,12 @@ void CSubScanBinder::OTFC(const Antenna::TCoordinateFrame& coordFrame,const Ante
 		m_primary->otf.lon2=span;
 	}
 	addSecondaryAntennaTrack(sec);
-    m_servo->is_empty_scan=true;
-    m_servo->axis_code=CORBA::string_dup("");
-    m_servo->range=0;
-    m_servo->total_time=0;
+	findTarget(m_primary);
+	m_servo->is_empty_scan=true;
+	m_servo->axis_code=CORBA::string_dup("");
+	m_servo->range=0;
+	m_servo->total_time=0;
+	m_receivers->dummy=0;
 	m_subScanConf->signal=Management::MNG_SIGNAL_NONE;
 }
 
@@ -144,22 +147,30 @@ void CSubScanBinder::skydip(const double& lat1,const double& lat2,const ACS::Tim
 {
 	//the real target name, as well as the m_primary->secondary=true clause, will be set by the call to addSecondaryAntennaTrack();
 	if (lat1>lat2) {
-		OTF("skydip",0.0,lat1,0.0,lat2,Antenna::ANT_HORIZONTAL,Antenna::SUBSCAN_CONSTLON,
+		OnTheFly("skydip",0.0,lat1,0.0,lat2,Antenna::ANT_HORIZONTAL,Antenna::SUBSCAN_CONSTLON,
 				Antenna::ANT_HORIZONTAL,Antenna::SUBSCAN_STARTSTOP,Antenna::SUBSCAN_DECREASE,duration);
 	}
 	else {
-		OTF("skydip",0.0,lat2,0.0,lat1,Antenna::ANT_HORIZONTAL,Antenna::SUBSCAN_CONSTLON,
+		OnTheFly("skydip",0.0,lat2,0.0,lat1,Antenna::ANT_HORIZONTAL,Antenna::SUBSCAN_CONSTLON,
 				Antenna::ANT_HORIZONTAL,Antenna::SUBSCAN_STARTSTOP,Antenna::SUBSCAN_INCREASE,duration);
 	}
 	addSecondaryAntennaTrack(sec);
+	findTarget(sec); // note: sec is the correct argument, as we treat skydip as a sidereal when determining the target.
 	m_primary->enableCorrection=false;
+	m_servo->is_empty_scan=true;
+	m_servo->axis_code=CORBA::string_dup("");
+	m_servo->range=0;
+	m_servo->total_time=0;
+	m_receivers->dummy=0;
+	m_subScanConf->signal=Management::MNG_SIGNAL_NONE;	
 }
 
-void CSubScanBinder::OTF(const IRA::CString& target,
-						 const double& lon1,const double& lat1,const double& lon2,const double& lat2,
-						 const Antenna::TCoordinateFrame& coordFrame,const Antenna::TsubScanGeometry& geometry,
-						 const Antenna::TCoordinateFrame& subScanFrame,const Antenna::TsubScanDescription& description,
-						 const Antenna::TsubScanDirection& direction,const ACS::TimeInterval& subScanDuration)
+void CSubScanBinder::OnTheFly(
+		const IRA::CString& target,
+		const double& lon1,const double& lat1,const double& lon2,const double& lat2,
+		const Antenna::TCoordinateFrame& coordFrame,const Antenna::TsubScanGeometry& geometry,
+		const Antenna::TCoordinateFrame& subScanFrame,const Antenna::TsubScanDescription& description,
+		const Antenna::TsubScanDirection& direction,const ACS::TimeInterval& subScanDuration)
 {
 	m_primary->secondary=false;
 	m_primary->enableCorrection=true;
@@ -179,13 +190,15 @@ void CSubScanBinder::OTF(const IRA::CString& target,
 	m_primary->otf.direction=direction;
 	m_primary->latitudeOffset=m_primary->longitudeOffset=0.0;
 	m_primary->applyOffsets=false;
+	findTarget(m_primary);
 	m_secondary->secondary=false; m_secondary->paramNumber=0; m_secondary->applyOffsets=false;
 	m_secondary->type=Antenna::ANT_NONE; m_secondary->enableCorrection=true;
-    m_servo->is_empty_scan=true;
-    m_servo->axis_code=CORBA::string_dup("");
-    m_servo->range=0;
-    m_servo->total_time=0;
-    m_subScanConf->signal=Management::MNG_SIGNAL_NONE;
+	m_servo->is_empty_scan=true;
+	m_servo->axis_code=CORBA::string_dup("");
+	m_servo->range=0;
+	m_servo->total_time=0;
+	m_receivers->dummy=0;
+	m_subScanConf->signal=Management::MNG_SIGNAL_NONE;
 }
 
 void CSubScanBinder::lonOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration)
@@ -213,11 +226,12 @@ void CSubScanBinder::lonOTF(const Antenna::TCoordinateFrame& scanFrame,const dou
 	m_primary->targetName=CORBA::string_dup("otf"); // not strictly necessary as the system will take the last commanded name
 	m_primary->section=Antenna::ACU_NEUTRAL;
 	m_primary->enableCorrection=true;
-    m_servo->is_empty_scan=true;
-    m_servo->axis_code=CORBA::string_dup("");
-    m_servo->range=0;
-    m_servo->total_time=0;
-    m_subScanConf->signal=Management::MNG_SIGNAL_NONE;
+   m_servo->is_empty_scan=true;
+   m_servo->axis_code=CORBA::string_dup("");
+   m_servo->range=0;
+   m_servo->total_time=0;
+   m_receivers->dummy=0;
+   m_subScanConf->signal=Management::MNG_SIGNAL_NONE;
 	// The other subsystems can stay with defaults
 }
 
@@ -247,11 +261,12 @@ void CSubScanBinder::latOTF(const Antenna::TCoordinateFrame& scanFrame,const dou
 	m_primary->targetName=CORBA::string_dup("otf"); // not strictly necessary as the system will take the last commanded name
 	m_primary->section=Antenna::ACU_NEUTRAL;
 	m_primary->enableCorrection=true;
-    m_servo->is_empty_scan=true;
-    m_servo->axis_code=CORBA::string_dup("");
-    m_servo->range=0;
-    m_servo->total_time=0;
-    m_subScanConf->signal=Management::MNG_SIGNAL_NONE;
+   m_servo->is_empty_scan=true;
+   m_servo->axis_code=CORBA::string_dup("");
+   m_servo->range=0;
+   m_servo->total_time=0;
+   m_receivers->dummy=0; 
+   m_subScanConf->signal=Management::MNG_SIGNAL_NONE;
 	// The other subsystems can stay with defaults
 }
 
@@ -275,11 +290,13 @@ void CSubScanBinder::sidereal(const char * targetName,const Antenna::TCoordinate
 	m_primary->VradFrame=Antenna::ANT_UNDEF_FRAME;
 	m_primary->VradDefinition=Antenna::ANT_UNDEF_DEF;
 	m_primary->RadialVelocity=0.0;
-    m_servo->is_empty_scan=true;
-    m_servo->axis_code=CORBA::string_dup("");
-    m_servo->range=0;
-    m_servo->total_time=0;
-    m_subScanConf->signal=Management::MNG_SIGNAL_SIGNAL;
+	findTarget(m_primary); //target is defined by the primary track
+   m_servo->is_empty_scan=true;
+   m_servo->axis_code=CORBA::string_dup("");
+   m_servo->range=0;
+   m_servo->total_time=0;
+   m_receivers->dummy=0;
+   m_subScanConf->signal=Management::MNG_SIGNAL_SIGNAL;
 }
 
 void CSubScanBinder::sidereal(const char * targetName,const double& ra,const double& dec,const Antenna::TSystemEquinox& eq,const Antenna::TSections& section)
@@ -297,11 +314,13 @@ void CSubScanBinder::sidereal(const char * targetName,const double& ra,const dou
 	m_primary->secondary=false;
 	m_primary->applyOffsets=false;
 	m_primary->enableCorrection=true;
-    m_servo->is_empty_scan=true;
-    m_servo->axis_code=CORBA::string_dup("");
-    m_servo->range=0;
-    m_servo->total_time=0;
-    m_subScanConf->signal=Management::MNG_SIGNAL_SIGNAL;
+	findTarget(m_primary);
+   m_servo->is_empty_scan=true;
+   m_servo->axis_code=CORBA::string_dup("");
+   m_servo->range=0;
+   m_servo->total_time=0;
+   m_receivers->dummy=0; 
+   m_subScanConf->signal=Management::MNG_SIGNAL_SIGNAL;
 	// The other subsystems can stay with defaults
 }
 
@@ -318,11 +337,13 @@ void CSubScanBinder::moon()
 	m_primary->applyOffsets=false;
 	m_primary->section=Antenna::ACU_NEUTRAL;
 	m_primary->enableCorrection=true;
-    m_servo->is_empty_scan=true;
-    m_servo->axis_code=CORBA::string_dup("");
-    m_servo->range=0;
-    m_servo->total_time=0;
-    m_subScanConf->signal=Management::MNG_SIGNAL_SIGNAL;
+	findTarget(m_primary);
+   m_servo->is_empty_scan=true;
+   m_servo->axis_code=CORBA::string_dup("");
+   m_servo->range=0;
+   m_servo->total_time=0;
+	m_receivers->dummy=0;   
+   m_subScanConf->signal=Management::MNG_SIGNAL_SIGNAL;
 	// The other subsystems can stay with defaults
 }
 
@@ -340,11 +361,13 @@ void CSubScanBinder::track(const char *targetName)
 	m_primary->targetName=CORBA::string_dup(targetName);
 	m_primary->section=Antenna::ACU_NEUTRAL;
 	m_primary->enableCorrection=true;
-    m_servo->is_empty_scan=true;
-    m_servo->axis_code=CORBA::string_dup("");
-    m_servo->range=0;
-    m_servo->total_time=0;
-    m_subScanConf->signal=Management::MNG_SIGNAL_SIGNAL;
+	findTarget(m_primary);
+   m_servo->is_empty_scan=true;
+   m_servo->axis_code=CORBA::string_dup("");
+   m_servo->range=0;
+   m_servo->total_time=0;
+   m_receivers->dummy=0;
+   m_subScanConf->signal=Management::MNG_SIGNAL_SIGNAL;
 	// The other subsystems can stay with defaults
 }
 
@@ -363,16 +386,29 @@ void CSubScanBinder::goTo(const double& az,const double& el)
 	m_primary->secondary=false;
 	m_primary->applyOffsets=false;
 	m_primary->enableCorrection=false;
-    m_servo->is_empty_scan=true;
-    m_servo->axis_code=CORBA::string_dup("");
-    m_servo->range=0;
-    m_servo->total_time=0;
-    m_subScanConf->signal=Management::MNG_SIGNAL_SIGNAL;
+   m_servo->is_empty_scan=true;
+   m_servo->axis_code=CORBA::string_dup("");
+   m_servo->range=0;
+   m_servo->total_time=0;
+	m_receivers->dummy=0;  
+   m_subScanConf->signal=Management::MNG_SIGNAL_SIGNAL;
+}
+
+void CSubScanBinder::getTarget(IRA::CString& name,double &ra,double& dec,double& ra1,
+  double& dec1,double &ra2,double& dec2) const
+{
+	name=m_name;
+	ra=m_ra2000;
+	dec=m_dec2000;
+	ra1=m_ra1;
+	dec1=m_dec1;
+	ra2=m_ra2;
+	dec2=m_dec2;
 }
 
 void CSubScanBinder::init()
 {
-		m_primary->targetName=CORBA::string_dup("");;
+		m_primary->targetName=CORBA::string_dup("");
 		m_primary->type=Antenna::ANT_NONE;
 		m_primary->paramNumber=0;
 		m_primary->latitudeOffset=m_primary->longitudeOffset=0.0;
@@ -406,6 +442,9 @@ void CSubScanBinder::init()
 		m_servo->is_empty_scan=true;
 		m_receivers->dummy=0;
 		m_subScanConf->signal=Management::MNG_SIGNAL_NONE;
+		m_ra2000=m_dec2000=0.0;
+		m_ra1=m_dec1=m_ra2=m_dec2=0.0;
+		m_name="";
 }
 
 // **** PRVATE *********
@@ -477,6 +516,85 @@ void CSubScanBinder::addSecondaryAntennaTrack(const Antenna::TTrackingParameters
 	else {
 		m_secondary->secondary=false; m_secondary->paramNumber=0; m_secondary->applyOffsets=false;
 		m_secondary->type=Antenna::ANT_NONE; m_secondary->enableCorrection=true;
+	}
+}
+
+void CSubScanBinder::findTarget(const Antenna::TTrackingParameters * const track)
+{  
+	Antenna::TCoordinateFrame frame;
+	Antenna::TSystemEquinox equinox;
+	Antenna::TGeneratorType type;
+	double lon,lat;
+	if (track!=NULL) {
+		m_name=track->targetName;
+		type=track->type;
+		if (track->type==Antenna::ANT_SIDEREAL) {
+			if (track->paramNumber>=2) {
+				lon=track->parameters[0];
+				lat=track->parameters[1];
+				frame=track->frame;
+				equinox=track->equinox;
+				//printf ("sidereal %s,%lf,%lf\n",(const char *)m_name,lon,lat);
+			}
+			else { // this deals with "track=sourcename"
+				lon=0.0;
+				lat=0.0;
+				frame=Antenna::ANT_EQUATORIAL;
+				equinox=Antenna::ANT_J2000;				
+			}
+		}
+		else if (track->type==Antenna::ANT_OTF) {
+			frame=track->otf.coordFrame;
+			equinox=Antenna::ANT_J2000;
+			if (track->otf.description==Antenna::SUBSCAN_CENTER) {
+				lon=track->otf.lon1;
+				lat=track->otf.lat1;			
+			}
+			else {
+				if (track->otf.subScanFrame==frame) {
+					lon=(track->otf.lon1+track->otf.lon2)/2.0;
+					lat=(track->otf.lat1+track->otf.lat2)/2.0;				
+				}
+				else {
+					m_name=UNDEFINEDTARGET;
+					lon=lat=0.0;
+				}
+			}
+		}
+		else if (track->type==Antenna::ANT_MOON) {
+			frame=Antenna::ANT_EQUATORIAL;
+			equinox=Antenna::ANT_J2000;
+			lon=lat=0.0;
+		}
+		else {  // All other cases, to be specified when new generators come alive
+			lon=lat=0.0;
+			m_name=UNDEFINEDTARGET;
+			frame=Antenna::ANT_EQUATORIAL;
+			equinox=Antenna::ANT_J2000;
+		}
+		if (frame==Antenna::ANT_EQUATORIAL) {
+			if (equinox==Antenna::ANT_B1950) {
+				IRA::CSkySource::B1950ToJ2000(lon,lat,m_ra2000,m_dec2000);
+			} 
+			else if (equinox==Antenna::ANT_APPARENT) {
+				IRA::CDateTime tm; // convert to J200 epoch
+				IRA::CSkySource::apparentToJ2000(lon,lat,tm,m_ra2000,m_dec2000);
+			}
+			else if (equinox==Antenna::ANT_J2000) {
+				m_ra2000=lon;
+				m_dec2000=lat;				
+			}
+		}
+		else if (frame==Antenna::ANT_GALACTIC) {
+			IRA::CSkySource::galacticToEquatorial(lon,lat,m_ra2000,m_dec2000);
+		}
+		else { //HORIZONTAL
+			IRA::CDateTime tm; // convert to J200 epoch
+			IRA::CSite st;
+			st.cartesianCoordinates(0.4,0.4,100); // convert from a generic topocentric site
+			double pA;
+			IRA::CSkySource::horizontalToEquatorial(tm,st,lon,lat,m_ra2000,m_dec2000,pA);
+		}			
 	}
 }
 

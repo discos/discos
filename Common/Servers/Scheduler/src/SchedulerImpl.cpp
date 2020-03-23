@@ -376,7 +376,7 @@ void SchedulerImpl::setProjectCode(const char *code) throw (CORBA::SystemExcepti
 void SchedulerImpl::lonOTF(Antenna::TCoordinateFrame scanFrame,CORBA::Double span,ACS::TimeInterval duration) throw (
 			ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException)
 {
-	try {
+	/*try {
 		m_core->_lonOTF(scanFrame,span,duration);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
@@ -386,13 +386,14 @@ void SchedulerImpl::lonOTF(Antenna::TCoordinateFrame scanFrame,CORBA::Double spa
 	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
 		throw ex.getManagementErrorsEx();
-	}
+	}*/
+	ACS_LOG(LM_FULL_INFO,"SchedulerImpl::lonOTF()",(LM_WARNING,"Capability temporally disabled!"));
 }
 
 void SchedulerImpl::peaker(const char *axis,CORBA::Double span,ACS::TimeInterval duration) throw (
 		ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException)
 {
-	try {
+	/*try {
 		m_core->_peaker(axis,span,duration);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
@@ -402,13 +403,14 @@ void SchedulerImpl::peaker(const char *axis,CORBA::Double span,ACS::TimeInterval
 	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
 		throw ex.getManagementErrorsEx();
-	}
+	}*/
+	ACS_LOG(LM_FULL_INFO,"SchedulerImpl::peaker()",(LM_WARNING,"Capability temporally disabled!"));
 }
 
 void SchedulerImpl::latOTF(Antenna::TCoordinateFrame scanFrame,CORBA::Double span,ACS::TimeInterval duration) throw (
 			ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException)
 {
-	try {
+	/*try {
 		m_core->_latOTF(scanFrame,span,duration);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
@@ -418,13 +420,14 @@ void SchedulerImpl::latOTF(Antenna::TCoordinateFrame scanFrame,CORBA::Double spa
 	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
 		throw ex.getManagementErrorsEx();
-	}
+	}*/
+	ACS_LOG(LM_FULL_INFO,"SchedulerImpl::latOTF()",(LM_WARNING,"Capability temporally disabled!"));
 }
 
 void SchedulerImpl::skydipOTF(CORBA::Double el1,CORBA::Double el2,ACS::TimeInterval duration) throw (
 		ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException)
 {
-	try {
+	/*try {
 		m_core->_skydipOTF(el1,el2,duration);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
@@ -434,7 +437,8 @@ void SchedulerImpl::skydipOTF(CORBA::Double el1,CORBA::Double el2,ACS::TimeInter
 	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
 		throw ex.getManagementErrorsEx();
-	}
+	}*/
+	ACS_LOG(LM_FULL_INFO,"SchedulerImpl::skydipOTF()",(LM_WARNING,"Capability temporally disabled!"));
 }
 
 void SchedulerImpl::track(const char *targetName) throw (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException)

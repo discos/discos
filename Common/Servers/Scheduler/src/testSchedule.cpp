@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
 		printf("Total lines: %u\n",sched.getSubScansNumber());
 	}
 	else {
-		printf("Main schedule is uncomplete\n");
+		printf("Main schedule is incomplete\n");
 		return -1;
 	}
 
@@ -105,6 +105,7 @@ int main(int argc, char *argv[])
 			IRA::CIRATools::intervalToStr(rec.lst,outString);
 			printf("%u %u %u %s %lf %u %s %s %s %s %s %s\n",rec.counter,rec.scanid,rec.subscanid,(const char *)outString,rec.duration,rec.scan,(const char *)rec.preScan,(const char *)rec.postScan,(const char *)rec.backendProc,
 					(const char *)rec.writerInstance,(const char *)rec.suffix,(const char *)rec.layout);
+			printf("Scan Conf: %ld, %d, %d \n",rec.scanConf->timeStamp,rec.scanConf->subScansNumber,rec.scanConf->scanID);
 			if (!sched.getScanList()->getScan(rec.scan,type,scanPar,secPar,servoPar,recvPar,subScanConf)) {
 				printf("Scan number %u is not present\n",rec.scan);
 				return -1;

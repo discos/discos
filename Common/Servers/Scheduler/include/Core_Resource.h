@@ -27,7 +27,8 @@
 									m_antennaRTime=new Antenna::TRunTimeParameters; m_antennaRTime->targetName=""; \
 									m_antennaRTime->axis=Management::MNG_NO_AXIS; \
 									m_servoRunTime=new MinorServo::TRunTimeParameters; m_servoRunTime->scanAxis=""; \
-									m_subScanConf.signal=Management::MNG_SIGNAL_NONE;
+									m_subScanConf.signal=Management::MNG_SIGNAL_NONE; \
+									m_scanBinder.init(&m_scanConf);
 
 
 									
@@ -227,7 +228,7 @@ ACS::doubleSeq m_restFrequency;
 /**
  * structure used to pass back and forth runtime parameters from the receivers
  */
-Receivers::TRunTimeParameters m_receiversRunTime;
+Receivers::TRunTimeParameters_var m_receiversRunTime;
 /**
  * structure used to pass back and forth runtime parameters from the receivers
  */
@@ -244,6 +245,11 @@ bool m_abortCurrentOperation;
  * Stores the current subScan configuration
  */
 Management::TSubScanConfiguration m_subScanConf;
+/**
+ * Stores the current scan configuration
+ */
+Management::TScanConfiguration m_scanConf;
+Schedule::CScanBinder m_scanBinder;
 /**
  * if true a scan has been commanded to the telescope and the scan is still active (not closed)
  */

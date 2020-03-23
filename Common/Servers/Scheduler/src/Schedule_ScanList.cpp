@@ -18,7 +18,6 @@
 #define	SKYDIP	"SKYDIP"
 #define FOCUS "FOCUS"
 
-
 using namespace std;
 using namespace Schedule;
 
@@ -40,7 +39,7 @@ CScanList::~CScanList()
 			if (antenna) delete antenna;
 			MinorServo::MinorServoScan *servo=static_cast<MinorServo::MinorServoScan *>((*p)->servoParameters);
 			if (servo) delete servo;
-			Receivers::TReceiversParameters *receivers=static_cast<Receivers::TReceiversParameters *>((*p)->receieversParsmeters);
+			Receivers::TReceiversParameters *receivers=static_cast<Receivers::TReceiversParameters *>((*p)->receiversParameters);
 			if (receivers) delete receivers;
 			Management::TSubScanConfiguration *subScanConf=(*p)->subScanConfiguration;
 			if (subScanConf) delete subScanConf;
@@ -58,7 +57,37 @@ bool CScanList::checkScan(const DWORD& id)
 			return true;
 		}
 	}
+	m_lastError.Format("Scan number %u is not known",id);
 	return false;
+}
+
+bool CScanList::checkTarget(std::vector<DWORD>& vect)
+{
+	std::vector<DWORD>::iterator p;
+	IRA::CString name,tname;
+	double r,tr;
+	double d,td;
+	tname=UNDEFINEDTARGET;
+	tr=td=0.0;
+	for (p=vect.begin();p<vect.end();p++) {
+		getScanTarget((*p),name,r,d);
+		if (name==UNDEFINEDTARGET) {
+			//do nothing
+		} 
+		else {
+			if (tname==UNDEFINEDTARGET) {
+				tname=name; //
+				td=d; tr=r;
+			}
+			else if (isSame(tname,name,tr,r,td,d)) {
+				//do nothing
+			}
+			else {
+				return false;
+			}
+		}
+	}
+	return true;
 }
 
 bool CScanList::getScan(const DWORD&id,Management::TScanTypes& type,void *&prim,void *& sec,void *& servo,void *& recv,
@@ -72,7 +101,7 @@ bool CScanList::getScan(const DWORD&id,Management::TScanTypes& type,void *&prim,
 			prim=(*i)->primaryParameters;
 			sec=(*i)->secondaryParameters;
 			servo=(*i)->servoParameters;
-			recv=(*i)->receieversParsmeters;
+			recv=(*i)->receiversParameters;
 			subScanConf=(*i)->subScanConfiguration;
 			return true;
 		}
@@ -81,28 +110,90 @@ bool CScanList::getScan(const DWORD&id,Management::TScanTypes& type,void *&prim,
 	return false;
 }
 
+bool CScanList::getScanTarget(const DWORD& id,IRA::CString& name,double& ra2000,double& dec2000)
+{
+	TIterator i;
+	for (i=m_schedule.begin();i<m_schedule.end();i++) {
+		if ((*i)->id==id) {
+			name=(*i)->targetName;
+			ra2000=(*i)->centerRa2000;
+			dec2000=(*i)->centerDec2000;
+			return true;
+		}
+	}
+	m_lastError.Format("Scan number %u is not known",id);
+	return false;	
+}
+
 bool CScanList::getScan(const DWORD& id,TRecord& rec)
 {
-	return getScan(id,rec.type,rec.primaryParameters,rec.secondaryParameters,rec.servoParameters,rec.receieversParsmeters,
+	return getScan(id,rec.type,rec.primaryParameters,rec.secondaryParameters,rec.servoParameters,rec.receiversParameters,
 			rec.subScanConfiguration);
 }
 
- bool CScanList::checkConsistency(DWORD& line,IRA::CString& errMsg)
- {
-	 TIterator i,p;
-	 for (i=m_schedule.begin();i<m_schedule.end();i++) {
-		 for (p=i+1;p<m_schedule.end();p++) {
-			 if ((*i)->id==(*p)->id) {
-				 line=(*p)->line;
-				 errMsg.Format("scan %d is duplicated",(*i)->id);
-				 return false;
-			 }
-		 }
-	 }
-	 return true;
- }
+bool CScanList::checkConsistency(DWORD& line,IRA::CString& errMsg)
+{
+	TIterator i,p;
+	for (i=m_schedule.begin();i<m_schedule.end();i++) {
+		for (p=i+1;p<m_schedule.end();p++) {
+			if ((*i)->id==(*p)->id) {
+				line=(*p)->line;
+				errMsg.Format("scan %d is duplicated",(*i)->id);
+				return false;
+			}
+		}
+	}
+	return true;
+}
 
  /////////////////////////////////// PRIVATE ////////////////////////////////////////////////////////////
+
+bool CScanList::isSame(const IRA::CString& n1,const IRA::CString& n2,double& r1,const double& r2,double& d1,const double& d2) const
+{
+	IRA::CString m1,m2;
+	m1=n1;m2=n2;
+	m1.MakeUpper();
+	m2.MakeUpper();
+	if (m1==m2) {
+		if ((d2!=0.0) && (r2!=0.0)) {
+			if (isNear(r1,r2,d1,d2)) {
+				r1=r2;
+				d1=d2;
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		else {
+			return true;
+		}
+	}
+	else {
+		if ((d2!=0.0) && (d2!=0.0)) {
+			if (isNear(r1,r2,d1,d2)) {
+				r1=r2;
+				d1=d2;
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		else {
+			return false;
+		}
+	}
+}
+
+bool CScanList::isNear(const double& r1,const double& r2,const double& d1,const double& d2) const
+{
+	if ((d1==0.0) && (r1==0.0)) return true;
+	double derr=d1-d2;
+	double rerr=(r1-r2)*cos(derr);
+	double err=sqrt(derr*derr+rerr*rerr);
+	return err<=(1.0/60)*DD2R;	
+}
 
 bool CScanList::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CString& errMsg)
 {
@@ -138,10 +229,12 @@ bool CScanList::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CS
 			rec->type=type;
 			rec->primaryParameters=(void *)binder.getPrimary();
 			rec->secondaryParameters=(void *)binder.getSecondary();
-			rec->receieversParsmeters=(void *)binder.getReceivers();
+			rec->receiversParameters=(void *)binder.getReceivers();
 			rec->servoParameters=(void *)binder.getServo();
 			rec->subScanConfiguration=binder.getSubScanConfiguration();
 			rec->line=lnNumber;
+			binder.getTarget(rec->targetName,rec->centerRa2000,rec->centerDec2000,rec->LUcornerRa,
+			  rec->LUcornerDec,rec->RDcornerRa,rec->RDcornerDec);
 			m_schedule.push_back(rec);
 			break;
 		}
@@ -157,119 +250,80 @@ bool CScanList::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CS
 			rec->type=type;
 			rec->primaryParameters=(void *)binder.getPrimary();
 			rec->secondaryParameters=(void *)binder.getSecondary();
-			rec->receieversParsmeters=(void *)binder.getReceivers();
+			rec->receiversParameters=(void *)binder.getReceivers();
 			rec->servoParameters=(void *)binder.getServo();
 			rec->subScanConfiguration=binder.getSubScanConfiguration();
 			rec->line=lnNumber;
+			binder.getTarget(rec->targetName,rec->centerRa2000,rec->centerDec2000,rec->LUcornerRa,
+			  rec->LUcornerDec,rec->RDcornerRa,rec->RDcornerDec);
 			m_schedule.push_back(rec);
 			break;
-
-			/*DWORD id;
-			IRA::CString sourceName;
-			Antenna::TTrackingParameters *prim=new Antenna::TTrackingParameters;
-			if (!parseSidereal(line,prim,id,errMsg)) {
-				if (prim) delete prim;
-				return false; // errMsg already set by previous call
-			}
-			Antenna::TTrackingParameters *sec=new Antenna::TTrackingParameters;
-			resetTrackingParameters(sec);*/
-			/*TRecord *rec=new TRecord;
-			rec->id=id;
-			rec->type=type;
-			rec->primaryParameters=(void *)prim;
-			rec->secondaryParameters=(void *)sec;
-			// **************************************
-			// Da modificare come MNG_PEAKER
-			CSubScanBinder binder(getConfiguration(),false);
-			rec->receieversParsmeters=(void *)binder.getReceivers();
-			rec->servoParameters=(void *)binder.getServo();
-			// **************************************
-			//rec->target=sourceName;
-			rec->line=lnNumber;
-			m_schedule.push_back(rec);
-			break;*/
 		}
 		case Management::MNG_SUN: {
 			break;
 		}
 		case Management::MNG_MOON: {
-			DWORD id;
-			Antenna::TTrackingParameters *prim=new Antenna::TTrackingParameters;
-			if (!parseMoon(line,prim,id,errMsg)) {
-				if (prim) delete prim;
-				return false; // errMsg already set by previous call
-			}
-			Antenna::TTrackingParameters *sec=new Antenna::TTrackingParameters;
-			resetTrackingParameters(sec);
-			TRecord *rec=new TRecord;
-			rec->id=id;
-			rec->type=type;
-			rec->primaryParameters=(void *)prim;
-			rec->secondaryParameters=(void *)sec;
-			// **************************************
-			// Da modificare come MNG_PEAKER
 			CSubScanBinder binder(getConfiguration(),false);
-			rec->receieversParsmeters=(void *)binder.getReceivers();
+			DWORD identifier;
+			if (!parseMoon(line,identifier,errMsg,binder)) {
+				binder.dispose();
+				return false;
+			}
+			TRecord *rec=new TRecord;
+			rec->id=identifier;
+			rec->type=type;
+			rec->primaryParameters=(void *)binder.getPrimary();
+			rec->secondaryParameters=(void *)binder.getSecondary();
+			rec->receiversParameters=(void *)binder.getReceivers();
 			rec->servoParameters=(void *)binder.getServo();
 			rec->subScanConfiguration=binder.getSubScanConfiguration();
-			// **************************************
-
-			//rec->target="";
 			rec->line=lnNumber;
+			binder.getTarget(rec->targetName,rec->centerRa2000,rec->centerDec2000,rec->LUcornerRa,
+			  rec->LUcornerDec,rec->RDcornerRa,rec->RDcornerDec);
 			m_schedule.push_back(rec);
 			break;
 		}
 		case Management::MNG_OTFC: {
-			DWORD id;
-			Antenna::TTrackingParameters *prim=new Antenna::TTrackingParameters;
-			Antenna::TTrackingParameters *sec=new Antenna::TTrackingParameters;
-			if (!parseOTFC(line,prim,sec,id,errMsg)) {
-				if (prim) delete prim;
-				if (dec) delete sec;
-				return false; // errMsg already set by previous call
+			CSubScanBinder binder(getConfiguration(),false);
+			DWORD identifier;
+			if (!parseOTFC(line,identifier,errMsg,binder)) {
+				binder.dispose();
+				return false;
 			}
 			TRecord *rec=new TRecord;
-			rec->id=id;
+			rec->id=identifier;
 			rec->type=type;
-			rec->primaryParameters=(void *)prim;
-			rec->secondaryParameters=(void *)sec;
-			// **************************************
-			// Da modificare come MNG_PEAKER
-			CSubScanBinder binder(getConfiguration(),false);
-			rec->receieversParsmeters=(void *)binder.getReceivers();
+			rec->primaryParameters=(void *)binder.getPrimary();
+			rec->secondaryParameters=(void *)binder.getSecondary();
+			rec->receiversParameters=(void *)binder.getReceivers();
 			rec->servoParameters=(void *)binder.getServo();
 			rec->subScanConfiguration=binder.getSubScanConfiguration();
-			// **************************************
-
 			rec->line=lnNumber;
+			binder.getTarget(rec->targetName,rec->centerRa2000,rec->centerDec2000,rec->LUcornerRa,
+			  rec->LUcornerDec,rec->RDcornerRa,rec->RDcornerDec);
 			m_schedule.push_back(rec);
-			break;
+			break;			
 		}
 		case Management::MNG_SKYDIP: {
-			DWORD id;
-			Antenna::TTrackingParameters *prim=new Antenna::TTrackingParameters;
-			Antenna::TTrackingParameters *sec=new Antenna::TTrackingParameters;
-			if (!parseSKYDIP(line,prim,sec,id,errMsg)) {
-				if (prim) delete prim;
-				if (dec) delete sec;
-				return false; // errMsg already set by previous call
+			CSubScanBinder binder(getConfiguration(),false);
+			DWORD identifier;
+			if (!parseSKYDIP(line,identifier,errMsg,binder)) {
+				binder.dispose();
+				return false;
 			}
 			TRecord *rec=new TRecord;
-			rec->id=id;
+			rec->id=identifier;
 			rec->type=type;
-			rec->primaryParameters=(void *)prim;
-			rec->secondaryParameters=(void *)sec;
-			// **************************************
-			// Da modificare come MNG_PEAKER
-			CSubScanBinder binder(getConfiguration(),false);
-			rec->receieversParsmeters=(void *)binder.getReceivers();
+			rec->primaryParameters=(void *)binder.getPrimary();
+			rec->secondaryParameters=(void *)binder.getSecondary();
+			rec->receiversParameters=(void *)binder.getReceivers();
 			rec->servoParameters=(void *)binder.getServo();
 			rec->subScanConfiguration=binder.getSubScanConfiguration();
-			// **************************************
-
 			rec->line=lnNumber;
+			binder.getTarget(rec->targetName,rec->centerRa2000,rec->centerDec2000,rec->LUcornerRa,
+			  rec->LUcornerDec,rec->RDcornerRa,rec->RDcornerDec);
 			m_schedule.push_back(rec);
-			break;
+			break;			
 		}
 		case Management::MNG_SATELLITE: {
 			break;
@@ -278,31 +332,25 @@ bool CScanList::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CS
 			break;
 		}
 		case Management::MNG_OTF: {
-			DWORD id;
-			Antenna::TTrackingParameters *prim=new Antenna::TTrackingParameters;
-			if (!parseOTF(line,prim,id,errMsg)) {
-				if (prim) delete prim;
-				return false; // errMsg already set by previous call
-			}
-			Antenna::TTrackingParameters *sec=new Antenna::TTrackingParameters;
-			resetTrackingParameters(sec);
-			TRecord *rec=new TRecord;
-			rec->id=id;
-			rec->type=type;
-			rec->primaryParameters=(void *)prim;
-			rec->secondaryParameters=(void *)sec;
-			// **************************************
-			// Da modificare come MNG_PEAKER
 			CSubScanBinder binder(getConfiguration(),false);
-			rec->receieversParsmeters=(void *)binder.getReceivers();
+			DWORD identifier;
+			if (!parseOTF(line,identifier,errMsg,binder)) {
+				binder.dispose();
+				return false;
+			}
+			TRecord *rec=new TRecord;
+			rec->id=identifier;
+			rec->type=type;
+			rec->primaryParameters=(void *)binder.getPrimary();
+			rec->secondaryParameters=(void *)binder.getSecondary();
+			rec->receiversParameters=(void *)binder.getReceivers();
 			rec->servoParameters=(void *)binder.getServo();
 			rec->subScanConfiguration=binder.getSubScanConfiguration();
-			// **************************************
-
-			//rec->target="";
 			rec->line=lnNumber;
+			binder.getTarget(rec->targetName,rec->centerRa2000,rec->centerDec2000,rec->LUcornerRa,
+			  rec->LUcornerDec,rec->RDcornerRa,rec->RDcornerDec);
 			m_schedule.push_back(rec);
-			break;
+			break;			
 		}
 		default: {
 			errMsg="unknown scan type";
@@ -312,7 +360,64 @@ bool CScanList::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CS
 	return true;
 }
 
-bool CScanList::parseMoon(const IRA::CString& val,Antenna::TTrackingParameters *scan,DWORD& id,IRA::CString& errMsg)
+bool CScanList::parseMoon(const IRA::CString& line,DWORD& id,IRA::CString& errMsg,CSubScanBinder& binder)
+{
+	char type[32],offFrame[32],lonOff[32],latOff[32];
+	long out;
+	double longitudeOffset,latitudeOffset;
+	Antenna::TCoordinateFrame offsetFrame;
+	out=sscanf((const char *)line,"%u\t%s\t%s\t%s\t%s",&id,type,offFrame,lonOff,latOff);
+	if ((out!=2) && (out!=5)) {
+		errMsg="invalid moon scan definition";
+		return false;
+	}
+	if (out==5) {
+		if (strcmp(offFrame,OFFFRAMEEQ)==0) {
+			offsetFrame=Antenna::ANT_EQUATORIAL;
+			if (!IRA::CIRATools::offsetToRad(lonOff,longitudeOffset)) {
+				errMsg="invalid equatorial longitude offset";
+				return false; //ra
+			}
+			if (!IRA::CIRATools::offsetToRad(latOff,latitudeOffset)) {
+				errMsg="invalid equatorial latitude offset";
+				return false;  //dec
+			}
+		}
+		else if (strcmp(offFrame,OFFFRAMEHOR)==0) {
+			offsetFrame=Antenna::ANT_HORIZONTAL;
+			if (!IRA::CIRATools::offsetToRad(lonOff,longitudeOffset)) {
+				errMsg="invalid horizontal longitude offset";
+				return false;  //azimuth...since they are offsets negative values are valid
+			}
+			if (!IRA::CIRATools::offsetToRad(latOff,latitudeOffset)) {
+				errMsg="invalid horizontal latitude offset";
+				return false; //elevation
+			}
+		}
+		else if (strcmp(offFrame,OFFFRAMEGAL)==0) {
+			offsetFrame=Antenna::ANT_GALACTIC;
+			if (!IRA::CIRATools::offsetToRad(lonOff,longitudeOffset)) {
+				errMsg="invalid galactic longitude offset";
+				return false;  //longitude
+			}
+			if (!IRA::CIRATools::offsetToRad(latOff,latitudeOffset)) {
+				errMsg="invalid galactic latitude offset";
+				return false; //latitude
+			}
+		}
+		else {
+			return false;
+		}
+		binder.moon();
+		binder.addOffsets(longitudeOffset,latitudeOffset,offsetFrame);
+	}
+	else {
+		binder.moon();
+	}
+	return true;
+}
+
+/*bool CScanList::parseMoon(const IRA::CString& val,Antenna::TTrackingParameters *scan,DWORD& id,IRA::CString& errMsg)
 {
 	char type[32],offFrame[32],lonOff[32],latOff[32];
 	long out;
@@ -376,7 +481,7 @@ bool CScanList::parseMoon(const IRA::CString& val,Antenna::TTrackingParameters *
 		scan->applyOffsets=false;
 	}
 	return true;
-}
+}*/
 
 
 // void CSubScanBinder::sidereal(const char * targetName,const double& ra,const double& dec,const Antenna::TSystemEquinox& eq,const Antenna::TSections& section)
@@ -1018,24 +1123,25 @@ bool CScanList::parseVRADSwitch(const IRA::CString& val,int& start,double& vrad,
 	return true;
 }
 
-bool CScanList::parseSKYDIP(const IRA::CString& val,Antenna::TTrackingParameters *scan,Antenna::TTrackingParameters *secScan,DWORD& id,IRA::CString& errMsg)
+bool CScanList::parseSKYDIP(const IRA::CString& val,DWORD& id,IRA::CString& errMsg,CSubScanBinder& binder)
 {
 	TRecord rec;
 	char type[32],el1[32],el2[32],offFrame[32],lonOff[32],latOff[32];
 	double duration;
-	double dEl1,dEl2;
+	double dEl1,dEl2,lon1,lon2,lat1,lat2;
 	DWORD referenceScan;
 	long out;
-	scan->paramNumber=0;
-	scan->latitudeOffset=scan->longitudeOffset=0.0;
-	scan->applyOffsets=false;
-	scan->type=Antenna::ANT_OTF;
-	scan->VradFrame=Antenna::ANT_UNDEF_FRAME;
-	scan->VradDefinition=Antenna::ANT_UNDEF_DEF;
-	scan->RadialVelocity=0.0;
-	scan->section=Antenna::ACU_NEUTRAL; // no support for section selection in schedule right now
-	scan->secondary=true;
-	scan->enableCorrection=false; // disable the pointing corrections
+	
+	bool applyOffsets=false;
+	//Antenna::TsubScanDescription descriptionE;
+	//Antenna::TCoordinateFrame subScanFrameE;
+	//Antenna::TCoordinateFrame coordFrameE;
+	//Antenna::TsubScanGeometry geometryE;
+	//Antenna::TsubScanDirection directionE;
+	Antenna::TCoordinateFrame offsetFrameE;
+	ACS::TimeInterval subScanDurationE;
+	double longitudeOffset,latitudeOffset;
+	
 	out=sscanf((const char *)val,"%u\t%s\t%u\t%s\t%s\t%lf\t%s\t%s\t%s\t",&id,type,&referenceScan,el1,el2,&duration,offFrame,lonOff,latOff);
 	if ((out!=6) && (out!=9)) {   //parameters are 9 for the OTF plus 3 (not mandatory) for the offsets...
 		errMsg="invalid skydip scan definition";
@@ -1051,52 +1157,52 @@ bool CScanList::parseSKYDIP(const IRA::CString& val,Antenna::TTrackingParameters
 			return false;
 		}
 		//description
-		scan->otf.description=Antenna::SUBSCAN_STARTSTOP;
+		//descriptionE=Antenna::SUBSCAN_STARTSTOP;
 		//duration
 		TIMEDIFFERENCE time;
 		time.value((long double)duration);
-		scan->otf.subScanDuration=time.value().value;
+		subScanDurationE=time.value().value;
 		//coordFrame
-		scan->otf.coordFrame=Antenna::ANT_HORIZONTAL;
+		//coordFrameE=Antenna::ANT_HORIZONTAL;
 		//subScanFrame
-		scan->otf.subScanFrame=Antenna::ANT_HORIZONTAL;
+		//subScanFrameE=Antenna::ANT_HORIZONTAL;
 		//direction
-		scan->otf.direction=Antenna::SUBSCAN_DECREASE;
+		//directionE=Antenna::SUBSCAN_DECREASE;
 		//geometry
-		scan->otf.geometry=Antenna::SUBSCAN_CONSTLON;
-		scan->otf.lon1=scan->otf.lon2=0.0; // these values will be decided runtime by the antenna subsystem considering the referenceScan
-		scan->otf.lat1=GETMAX(dEl1,dEl2);
-		scan->otf.lat2=GETMIN(dEl1,dEl2);
+		//geometryE=Antenna::SUBSCAN_CONSTLON;
+		lon1=lon2=0.0; // these values will be decided runtime by the antenna subsystem considering the referenceScan
+		lat1=GETMAX(dEl1,dEl2);
+		lat2=GETMIN(dEl1,dEl2);
 		if (out==9) {
 			if (strcmp(offFrame,OFFFRAMEEQ)==0) {
-				scan->offsetFrame=Antenna::ANT_EQUATORIAL;
-				if (!IRA::CIRATools::offsetToRad(lonOff,scan->longitudeOffset)) {
+				offsetFrameE=Antenna::ANT_EQUATORIAL;
+				if (!IRA::CIRATools::offsetToRad(lonOff,longitudeOffset)) {
 					errMsg="invalid right ascension offset";
 					return false; //ra
 				}
-				if (!IRA::CIRATools::offsetToRad(latOff,scan->latitudeOffset)) {
+				if (!IRA::CIRATools::offsetToRad(latOff,latitudeOffset)) {
 					errMsg="invalid declination offset";
 					return false;  //dec
 				}
 			}
 			else if (strcmp(offFrame,OFFFRAMEHOR)==0) {
-				scan->offsetFrame=Antenna::ANT_HORIZONTAL;
-				if (!IRA::CIRATools::offsetToRad(lonOff,scan->longitudeOffset)) {
+				offsetFrameE=Antenna::ANT_HORIZONTAL;
+				if (!IRA::CIRATools::offsetToRad(lonOff,longitudeOffset)) {
 					errMsg="invalid azimuth offset";
 					return false;  //azimuth...since they are offsets negative values are valid
 				}
-				if (!IRA::CIRATools::offsetToRad(latOff,scan->latitudeOffset)) {
+				if (!IRA::CIRATools::offsetToRad(latOff,latitudeOffset)) {
 					errMsg="invalid elevation offset";
 					return false;   //elevation
 				}
 			}
 			else if (strcmp(offFrame,OFFFRAMEGAL)==0) {
-				scan->offsetFrame=Antenna::ANT_GALACTIC;
-				if (!IRA::CIRATools::offsetToRad(lonOff,scan->longitudeOffset)) {
+				offsetFrameE=Antenna::ANT_GALACTIC;
+				if (!IRA::CIRATools::offsetToRad(lonOff,longitudeOffset)) {
 					errMsg="invalid galactic longitude offset";
 					return false;  //longitude
 				}
-				if (!IRA::CIRATools::offsetToRad(latOff,scan->latitudeOffset)) {
+				if (!IRA::CIRATools::offsetToRad(latOff,latitudeOffset)) {
 					errMsg="invalid galactic latitude offset";
 					return false; //latitude
 				}
@@ -1105,37 +1211,163 @@ bool CScanList::parseSKYDIP(const IRA::CString& val,Antenna::TTrackingParameters
 				errMsg="scan offset frame is unknown";
 				return false;
 			}
-			scan->applyOffsets=true;
+			applyOffsets=true;
 		}
 		if (!getScan(referenceScan,rec)) {
 			errMsg=getLastError();
 			return false; // the secondary scan does not exist
 		}
 		Antenna::TTrackingParameters *tmp=static_cast<Antenna::TTrackingParameters *>(rec.primaryParameters);
-		secScan->targetName=CORBA::string_dup(tmp->targetName);
-		scan->targetName=CORBA::string_dup(tmp->targetName);
-		secScan->type=tmp->type;
-		for (long k=0;k<Antenna::ANTENNA_TRACKING_PARAMETER_NUMBER;k++) secScan->parameters[k]=tmp->parameters[k];
-		secScan->paramNumber=tmp->paramNumber;
-		secScan->frame=tmp->frame;
-		secScan->equinox=tmp->equinox;
-		secScan->longitudeOffset=0.0;
-		secScan->latitudeOffset=0.0;
-		secScan->applyOffsets=false;
-		secScan->section=tmp->section;
-		secScan->secondary=false;
-		secScan->otf.lon1=tmp->otf.lon1;
-		secScan->otf.lat1=tmp->otf.lat1;
-		secScan->otf.lon2=tmp->otf.lon2;
-		secScan->otf.lat2=tmp->otf.lat2;
-		secScan->otf.coordFrame=tmp->otf.coordFrame;
-		secScan->otf.geometry=tmp->otf.geometry;
-		secScan->otf.subScanFrame=tmp->otf.subScanFrame;
-		secScan->otf.description=tmp->otf.description;
-		secScan->otf.direction=tmp->otf.direction;
-		secScan->otf.subScanDuration=tmp->otf.subScanDuration;
+		binder.skydip(lat1,lat2,subScanDurationE,tmp);		
+		if (applyOffsets) {
+			binder.addOffsets(longitudeOffset,latitudeOffset,offsetFrameE);	
+		}		
 		return true;
 	}
+}
+
+bool CScanList::parseOTFC(const IRA::CString& val,DWORD& id,IRA::CString& errMsg,CSubScanBinder& binder)
+{
+	TRecord rec;
+	char coordFrame[32],geometry[32],subScanFrame[32],direction[32],type[32],offFrame[32],span[32],lonOff[32],latOff[32];
+	DWORD scanCenter;
+	double duration;
+	Antenna::TCoordinateFrame frame;
+	long out;
+	bool applyOffsets=false;
+	
+	
+	Antenna::TsubScanDescription descriptionE;
+	Antenna::TCoordinateFrame subScanFrameE;
+	Antenna::TsubScanGeometry geometryE;
+	Antenna::TsubScanDirection directionE;
+	Antenna::TCoordinateFrame offsetFrameE;
+	ACS::TimeInterval subScanDurationE;
+	IRA::CString tName;
+	
+	double spanE,longitudeOffset,latitudeOffset;	
+
+	out=sscanf((const char *)val,"%u\t%s\t%u\t%s\t%s\t%s\t%s\t%s\t%lf\t%s\t%s\t%s\t",&id,type,&scanCenter,span,coordFrame,subScanFrame,geometry,direction,&duration,offFrame,lonOff,latOff);
+	if ((out!=9) && (out!=12)) {   //parameters are 9 for the OTF plus 3 (not mandatory) for the offsets...
+		errMsg="invalid on the fly scan definition";
+		return false;
+	}
+	else {
+		//Description
+		descriptionE=Antenna::SUBSCAN_CENTER;
+		spanE=0.0;
+		//duration
+		TIMEDIFFERENCE time;
+		time.value((long double)duration);
+		subScanDurationE=time.value().value;
+		//coordFrame
+		if (!IRA::CIRATools::strToCoordinateFrame(coordFrame,frame)) {
+			errMsg="the frame is not known";
+			return false;
+		}
+		if (frame==Antenna::ANT_HORIZONTAL) {
+			errMsg="horizontal frame is not supported as coordinate frame";
+			return false;
+		}
+		//scan->otf.coordFrame=frame;
+		//direction
+		if (strcmp(direction,"INC")==0) directionE=Antenna::SUBSCAN_INCREASE;
+		else if (strcmp(direction,"DEC")==0) directionE=Antenna::SUBSCAN_DECREASE;
+		else {
+			errMsg="invalid on the fly scan direction";
+			return false;
+		}
+		//geometry
+		if (strcmp(geometry,"LON")==0) geometryE=Antenna::SUBSCAN_CONSTLON;
+		else if (strcmp(geometry,"LAT")==0) geometryE=Antenna::SUBSCAN_CONSTLAT; //GC not allowed
+		else {
+			errMsg="invalid on the fly scan geometry";
+			return false;
+		}
+		//subScan Frame
+		if (!IRA::CIRATools::strToCoordinateFrame(subScanFrame,subScanFrameE)) {
+			errMsg="invalid on the fly scan frame";
+			return false;
+		}
+		//scan->otf.subScanFrame=frame;
+		//span
+		if (!IRA::CIRATools::offsetToRad(span,spanE)) {
+			errMsg="invalid on the fly scan latitude span";
+			return false; //az span....no need of a check
+		}
+		if (out==12) {
+			if (strcmp(offFrame,OFFFRAMEEQ)==0) {
+				offsetFrameE=Antenna::ANT_EQUATORIAL;
+				if (!IRA::CIRATools::offsetToRad(lonOff,longitudeOffset)) {
+					errMsg="invalid right ascension offset";
+					return false; //ra
+				}
+				if (!IRA::CIRATools::offsetToRad(latOff,latitudeOffset)) {
+					errMsg="invalid declination offset";
+					return false;  //dec
+				}
+			}
+			else if (strcmp(offFrame,OFFFRAMEHOR)==0) {
+				offsetFrameE=Antenna::ANT_HORIZONTAL;
+				if (!IRA::CIRATools::offsetToRad(lonOff,longitudeOffset)) {
+					errMsg="invalid azimuth offset";
+					return false;  //azimuth...since they are offsets negative values are valid
+				}
+				if (!IRA::CIRATools::offsetToRad(latOff,latitudeOffset)) {
+					errMsg="invalid elevation offset";
+					return false;   //elevation
+				}
+			}
+			else if (strcmp(offFrame,OFFFRAMEGAL)==0) {
+				offsetFrameE=Antenna::ANT_GALACTIC;
+				if (!IRA::CIRATools::offsetToRad(lonOff,longitudeOffset)) {
+					errMsg="invalid galactic longitude offset";
+					return false;  //longitude
+				}
+				if (!IRA::CIRATools::offsetToRad(latOff,latitudeOffset)) {
+					errMsg="invalid galactic latitude offset";
+					return false; //latitude
+				}
+			}
+			else {
+				errMsg="scan offset frame is unknown";
+				return false;
+			}
+			applyOffsets=true;
+		}
+	}
+	if (!getScan(scanCenter,rec)) {
+		errMsg=getLastError();
+		return false; // the secondary scan does not exist
+	}
+	Antenna::TTrackingParameters *tmp=static_cast<Antenna::TTrackingParameters *>(rec.primaryParameters);
+	binder.OnTheFlyC(frame,geometryE,subScanFrameE,directionE,spanE,subScanDurationE,tmp);
+	if (applyOffsets) {
+		binder.addOffsets(longitudeOffset,latitudeOffset,offsetFrameE);	
+	}
+	/*secScan->targetName=CORBA::string_dup(tmp->targetName);
+	scan->targetName=CORBA::string_dup(tmp->targetName);
+	secScan->type=tmp->type;
+	for (long k=0;k<Antenna::ANTENNA_TRACKING_PARAMETER_NUMBER;k++) secScan->parameters[k]=tmp->parameters[k];
+	secScan->paramNumber=tmp->paramNumber;
+	secScan->frame=tmp->frame;
+	secScan->equinox=tmp->equinox;
+	secScan->longitudeOffset=0.0;
+	secScan->latitudeOffset=0.0;
+	secScan->applyOffsets=false;
+	secScan->section=tmp->section;
+	secScan->secondary=false;
+	secScan->otf.lon1=tmp->otf.lon1;
+	secScan->otf.lat1=tmp->otf.lat1;
+	secScan->otf.lon2=tmp->otf.lon2;
+	secScan->otf.lat2=tmp->otf.lat2;
+	secScan->otf.coordFrame=tmp->otf.coordFrame;
+	secScan->otf.geometry=tmp->otf.geometry;
+	secScan->otf.subScanFrame=tmp->otf.subScanFrame;
+	secScan->otf.description=tmp->otf.description;
+	secScan->otf.direction=tmp->otf.direction;
+	secScan->otf.subScanDuration=tmp->otf.subScanDuration;*/
+	return true;
 }
 
 bool CScanList::parsePeaker(const IRA::CString& line,DWORD& id,IRA::CString& errMsg,CSubScanBinder& binder)
@@ -1169,369 +1401,222 @@ bool CScanList::parsePeaker(const IRA::CString& line,DWORD& id,IRA::CString& err
 	return true;
 }
 
-bool CScanList::parseOTFC(const IRA::CString& val,Antenna::TTrackingParameters *scan,Antenna::TTrackingParameters *secScan,DWORD& id,IRA::CString& errMsg)
+bool CScanList::parseOTF(const IRA::CString& val,DWORD& id,IRA::CString& errMsg,CSubScanBinder& binder)
 {
-	TRecord rec;
-	char coordFrame[32],geometry[32],subScanFrame[32],direction[32],type[32],offFrame[32],span[32],lonOff[32],latOff[32];
-	DWORD scanCenter;
-	double duration;
-	Antenna::TCoordinateFrame frame;
-	long out;
-	//scan->targetName=CORBA::string_dup("");
-	scan->paramNumber=0;
-	scan->latitudeOffset=scan->longitudeOffset=0.0;
-	scan->applyOffsets=false;
-	scan->type=Antenna::ANT_OTF;
-	scan->section=Antenna::ACU_NEUTRAL; // no support for section selection in schedule right now
-	scan->secondary=true;
-	scan->enableCorrection=true;
-	scan->VradFrame=Antenna::ANT_UNDEF_FRAME;
-	scan->VradDefinition=Antenna::ANT_UNDEF_DEF;
-	scan->RadialVelocity=0.0;
-	out=sscanf((const char *)val,"%u\t%s\t%u\t%s\t%s\t%s\t%s\t%s\t%lf\t%s\t%s\t%s\t",&id,type,&scanCenter,span,coordFrame,subScanFrame,geometry,direction,&duration,offFrame,lonOff,latOff);
-	if ((out!=9) && (out!=12)) {   //parameters are 9 for the OTF plus 3 (not mandatory) for the offsets...
-		errMsg="invalid on the fly scan definition";
-		return false;
-	}
-	else {
-		//Description
-		scan->otf.description=Antenna::SUBSCAN_CENTER;
-		scan->otf.lon1=scan->otf.lat1=0.0;
-		//duration
-		TIMEDIFFERENCE time;
-		time.value((long double)duration);
-		scan->otf.subScanDuration=time.value().value;
-		//coordFrame
-		if (!IRA::CIRATools::strToCoordinateFrame(coordFrame,frame)) {
-			errMsg="the frame is not known";
-			return false;
-		}
-		if (frame==Antenna::ANT_HORIZONTAL) {
-			errMsg="horizontal frame is not supported as coordinate frame";
-			return false;
-		}
-		scan->otf.coordFrame=frame;
-		//direction
-		if (strcmp(direction,"INC")==0) scan->otf.direction=Antenna::SUBSCAN_INCREASE;
-		else if (strcmp(direction,"DEC")==0) scan->otf.direction=Antenna::SUBSCAN_DECREASE;
-		else {
-			errMsg="invalid on the fly scan direction";
-			return false;
-		}
-		//geometry
-		if (strcmp(geometry,"LON")==0) scan->otf.geometry=Antenna::SUBSCAN_CONSTLON;
-		else if (strcmp(geometry,"LAT")==0) scan->otf.geometry=Antenna::SUBSCAN_CONSTLAT; //GC not allowed
-		else {
-			errMsg="invalid on the fly scan geometry";
-			return false;
-		}
-		//subScan Frame
-		if (!IRA::CIRATools::strToCoordinateFrame(subScanFrame,frame)) {
-			errMsg="invalid on the fly scan frame";
-			return false;
-		}
-		scan->otf.subScanFrame=frame;
-		//span
-		if (scan->otf.geometry==Antenna::SUBSCAN_CONSTLON) {
-			if (!IRA::CIRATools::offsetToRad(span,scan->otf.lat2)) {
-				errMsg="invalid on the fly scan latitude span";
-				return false; //az span....no need of a check
-			}
-			scan->otf.lon2=0.0;
-		}
-		else {
-			if (!IRA::CIRATools::offsetToRad(span,scan->otf.lon2)) {
-				errMsg="invalid on the fly scan longitude span";
-				return false; //el span....no need of a check
-			}
-			scan->otf.lat2=0.0;
-		}
-		if (out==12) {
-			if (strcmp(offFrame,OFFFRAMEEQ)==0) {
-				scan->offsetFrame=Antenna::ANT_EQUATORIAL;
-				if (!IRA::CIRATools::offsetToRad(lonOff,scan->longitudeOffset)) {
-					errMsg="invalid right ascension offset";
-					return false; //ra
-				}
-				if (!IRA::CIRATools::offsetToRad(latOff,scan->latitudeOffset)) {
-					errMsg="invalid declination offset";
-					return false;  //dec
-				}
-			}
-			else if (strcmp(offFrame,OFFFRAMEHOR)==0) {
-				scan->offsetFrame=Antenna::ANT_HORIZONTAL;
-				if (!IRA::CIRATools::offsetToRad(lonOff,scan->longitudeOffset)) {
-					errMsg="invalid azimuth offset";
-					return false;  //azimuth...since they are offsets negative values are valid
-				}
-				if (!IRA::CIRATools::offsetToRad(latOff,scan->latitudeOffset)) {
-					errMsg="invalid elevation offset";
-					return false;   //elevation
-				}
-			}
-			else if (strcmp(offFrame,OFFFRAMEGAL)==0) {
-				scan->offsetFrame=Antenna::ANT_GALACTIC;
-				if (!IRA::CIRATools::offsetToRad(lonOff,scan->longitudeOffset)) {
-					errMsg="invalid galactic longitude offset";
-					return false;  //longitude
-				}
-				if (!IRA::CIRATools::offsetToRad(latOff,scan->latitudeOffset)) {
-					errMsg="invalid galactic latitude offset";
-					return false; //latitude
-				}
-			}
-			else {
-				errMsg="scan offset frame is unknown";
-				return false;
-			}
-			scan->applyOffsets=true;
-		}
-	}
-	if (!getScan(scanCenter,rec)) {
-		errMsg=getLastError();
-		return false; // the secondary scan does not exist
-	}
-	Antenna::TTrackingParameters *tmp=static_cast<Antenna::TTrackingParameters *>(rec.primaryParameters);
-	secScan->targetName=CORBA::string_dup(tmp->targetName);
-	scan->targetName=CORBA::string_dup(tmp->targetName);
-	secScan->type=tmp->type;
-	for (long k=0;k<Antenna::ANTENNA_TRACKING_PARAMETER_NUMBER;k++) secScan->parameters[k]=tmp->parameters[k];
-	secScan->paramNumber=tmp->paramNumber;
-	secScan->frame=tmp->frame;
-	secScan->equinox=tmp->equinox;
-	secScan->longitudeOffset=0.0;
-	secScan->latitudeOffset=0.0;
-	secScan->applyOffsets=false;
-	secScan->section=tmp->section;
-	secScan->secondary=false;
-	secScan->otf.lon1=tmp->otf.lon1;
-	secScan->otf.lat1=tmp->otf.lat1;
-	secScan->otf.lon2=tmp->otf.lon2;
-	secScan->otf.lat2=tmp->otf.lat2;
-	secScan->otf.coordFrame=tmp->otf.coordFrame;
-	secScan->otf.geometry=tmp->otf.geometry;
-	secScan->otf.subScanFrame=tmp->otf.subScanFrame;
-	secScan->otf.description=tmp->otf.description;
-	secScan->otf.direction=tmp->otf.direction;
-	secScan->otf.subScanDuration=tmp->otf.subScanDuration;
-	return true;
-}
-
-bool CScanList::parseOTF(const IRA::CString& val,Antenna::TTrackingParameters *scan,DWORD& id,IRA::CString& errMsg)
-{
-	char coordFrame[32],geometry[32],subScanFrame[32],description[32],direction[32],type[32],offFrame[32],lon1[32],lon2[32],lat1[32],lat2[32],lonOff[32],latOff[32];
+	char coordFrame[32],geometry[32],subScanFrame[32],description[32],direction[32],type[32],offFrame[32],
+	lon1[32],lon2[32],lat1[32],lat2[32],lonOff[32],latOff[32];
 	char targetName[32];
 	double duration;
 	Antenna::TCoordinateFrame frame;
 	long out;
-	//scan->targetName="";
-	scan->secondary=false;
-	scan->enableCorrection=true;
-	scan->latitudeOffset=scan->longitudeOffset=0.0;
-	scan->applyOffsets=false;
-	scan->type=Antenna::ANT_OTF;
-	scan->VradFrame=Antenna::ANT_UNDEF_FRAME;
-	scan->VradDefinition=Antenna::ANT_UNDEF_DEF;
-	scan->RadialVelocity=0.0;
-	scan->section=Antenna::ACU_NEUTRAL; // no support for section selection in schedule right now
+	
+	Antenna::TsubScanDescription descriptionE;
+	Antenna::TCoordinateFrame subScanFrameE;
+	Antenna::TsubScanGeometry geometryE;
+	Antenna::TsubScanDirection directionE;
+	Antenna::TCoordinateFrame offsetFrameE;
+	ACS::TimeInterval subScanDurationE;
+	IRA::CString tName;
+	
+	double lon1rad,lon2rad,lat1rad,lat2rad,longitudeOffset,latitudeOffset;
+	
 	out=sscanf((const char *)val,"%u\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%lf\t%s\t%s\t%s",&id,type,targetName,lon1,lat1,lon2,
 			lat2,coordFrame,subScanFrame,geometry,description,direction,&duration,offFrame,lonOff,latOff);
 	if ((out!=13) && (out!=16)) {   //parameters are 12 for the OTF plus 3 (not mandatory) for the offsets...
 		errMsg="invalid on the fly scan definition";
 		return false;
 	}
+	TIMEDIFFERENCE time;
+	time.value((long double)duration);
+	subScanDurationE=time.value().value;
+	tName=targetName;
+	if (strcmp(description,"SS")==0) descriptionE=Antenna::SUBSCAN_STARTSTOP;
+	else if (strcmp(description,"CEN")==0) descriptionE=Antenna::SUBSCAN_CENTER;
 	else {
-		TIMEDIFFERENCE time;
-		time.value((long double)duration);
-		scan->otf.subScanDuration=time.value().value;
-		scan->targetName=CORBA::string_dup(targetName);
-		if (strcmp(description,"SS")==0) scan->otf.description=Antenna::SUBSCAN_STARTSTOP;
-		else if (strcmp(description,"CEN")==0) scan->otf.description=Antenna::SUBSCAN_CENTER;
-		else {
-			errMsg="invalid on the fly scan description";
-			return false;
-		}
-		if (!IRA::CIRATools::strToCoordinateFrame(coordFrame,frame)) {
-			errMsg="the coordinate frame is not known";
-			return false;
-		}
-		if (frame==Antenna::ANT_EQUATORIAL) {
-			scan->otf.coordFrame=Antenna::ANT_EQUATORIAL;
-			if (scan->otf.description==Antenna::SUBSCAN_CENTER) {
-				if (!IRA::CIRATools::rightAscensionToRad(lon1,scan->otf.lon1,true)) { //ra center ...need a complete check
-					errMsg="central point right ascension format error";
-					return false;
-				}
-				if (!IRA::CIRATools::declinationToRad(lat1,scan->otf.lat1,true)) { //dec center ...need a complete check
-					errMsg="central point declination format error";
-					return false;
-				}
-				if (!IRA::CIRATools::offsetToRad(lon2,scan->otf.lon2)) { //ra span....no need of a check
-					errMsg="right ascension span format error";
-					return false;
-				}
-				if (!IRA::CIRATools::offsetToRad(lat2,scan->otf.lat2)) { //dec span....no need of a check
-					errMsg="declination span format error";
-					return false;
-				}
-			}
-			else {
-				if (!IRA::CIRATools::rightAscensionToRad(lon1,scan->otf.lon1,true)) { //ra first point ...need a complete check
-					errMsg="start point right ascension format error";
-					return false;
-				}
-				if (!IRA::CIRATools::declinationToRad(lat1,scan->otf.lat1,true)) { //dec first point ...need a complete check
-					errMsg="start point declination format error";
-					return false;
-				}
-				if (!IRA::CIRATools::rightAscensionToRad(lon2,scan->otf.lon2,true)) {  //ra second point ...need a complete check
-					errMsg="end point right ascension format error";
-					return false;
-				}
-				if (!IRA::CIRATools::declinationToRad(lat2,scan->otf.lat2,true)) { //dec second point ...need a complete check
-					errMsg="end point declination format error";
-					return false;
-				}
-			}
-		}
-		else if (frame==Antenna::ANT_HORIZONTAL) {
-			scan->otf.coordFrame=Antenna::ANT_HORIZONTAL;
-			if (scan->otf.description==Antenna::SUBSCAN_CENTER) {
-				if (!IRA::CIRATools::azimuthToRad(lon1,scan->otf.lon1,true)) { //az center ...need a complete check
-					errMsg="central point azimuth format error";
-					return false;
-				}
-				if (!IRA::CIRATools::elevationToRad(lat1,scan->otf.lat1,true)) {  //el center ...need a complete check
-					errMsg="central point elevation format error";
-					return false;
-				}
-				if (!IRA::CIRATools::offsetToRad(lon2,scan->otf.lon2)) { //az span....no need of a check
-					errMsg="azimuth span format error";
-					return false;
-				}
-				if (!IRA::CIRATools::offsetToRad(lat2,scan->otf.lat2)) { //el span....no need of a check
-					errMsg="elevation span format error";
-					return false;
-				}
-			}
-			else {
-				if (!IRA::CIRATools::azimuthToRad(lon1,scan->otf.lon1,true)) { //az first point ...need a complete check
-					errMsg="start point azimuth format error";
-					return false;
-				}
-				if (!IRA::CIRATools::elevationToRad(lat1,scan->otf.lat1,true)) { //el first point ...need a complete check
-					errMsg="start point elevation format error";
-					return false;
-				}
-				if (!IRA::CIRATools::azimuthToRad(lon2,scan->otf.lon2,true)) { //az second point ...need a complete check
-					errMsg="end point azimuth format error";
-					return false;
-				}
-				if (!IRA::CIRATools::elevationToRad(lat2,scan->otf.lat2,true)) { //el second point ...need a complete check
-					errMsg="end point elevation format error";
-					return false;
-				}
-			}
-		}
-		else if (frame==Antenna::ANT_GALACTIC) {
-			scan->otf.coordFrame=Antenna::ANT_GALACTIC;
-			if (scan->otf.description==Antenna::SUBSCAN_CENTER) {
-				if (!IRA::CIRATools::galLongitudeToRad(lon1,scan->otf.lon1,true)) { //lon center ...need a complete check
-					errMsg="central point galactic longitude format error";
-					return false;
-				}
-				if (!IRA::CIRATools::galLatitudeToRad(lat1,scan->otf.lat1,true)) {  //lat center ...need a complete check
-					errMsg="central point galactic latitude format error";
-					return false;
-				}
-				if (!IRA::CIRATools::offsetToRad(lon2,scan->otf.lon2)) { //lon span....no need of a check
-					errMsg="galactic longitude span format error";
-					return false;
-				}
-				if (!IRA::CIRATools::offsetToRad(lat2,scan->otf.lat2)) {  //lat span....no need of a check
-					errMsg="galactic latitude span format error";
-					return false;
-				}
-			}
-			else {
-				if (!IRA::CIRATools::galLongitudeToRad(lon1,scan->otf.lon1,true)) { //lon first point ...need a complete check
-					errMsg="start point galactic longitude format error";
-					return false;
-				}
-				if (!IRA::CIRATools::galLatitudeToRad(lat1,scan->otf.lat1,true)) { //lat first point ...need a complete check
-					errMsg="start point galactic latitude format error";
-					return false;
-				}
-				if (!IRA::CIRATools::galLongitudeToRad(lon2,scan->otf.lon2,true)) {  //lon second point ...need a complete check
-					errMsg="end point galactic longitude format error";
-					return false;
-				}
-				if (!IRA::CIRATools::galLatitudeToRad(lat2,scan->otf.lat2,true)) {  //lat second point ...need a complete check
-					errMsg="end point galactic latitude format error";
-					return false;
-				}
-			}
-		}
-		if (!IRA::CIRATools::strToCoordinateFrame(subScanFrame,frame)) {
-			errMsg="the scan frame is not known";
-			return false;
-		}
-		scan->otf.subScanFrame=frame;
-		if (strcmp(geometry,"LON")==0) scan->otf.geometry=Antenna::SUBSCAN_CONSTLON;
-		else if (strcmp(geometry,"LAT")==0) scan->otf.geometry=Antenna::SUBSCAN_CONSTLAT;
-		else if (strcmp(geometry,"GC")==0) scan->otf.geometry=Antenna::SUBSCAN_GREATCIRCLE;
-		else {
-			errMsg="invalid on the fly scan geometry";
-			return false;
-		}
-		if (strcmp(direction,"INC")==0) scan->otf.direction=Antenna::SUBSCAN_INCREASE;
-		else if (strcmp(direction,"DEC")==0) scan->otf.direction=Antenna::SUBSCAN_DECREASE;
-		else {
-			errMsg="invalid on the fly scan direction";
-			return false;
-		}
-		if (out==16) {
-			if (strcmp(offFrame,OFFFRAMEEQ)==0) {
-				scan->offsetFrame=Antenna::ANT_EQUATORIAL;
-				if (!IRA::CIRATools::offsetToRad(lonOff,scan->longitudeOffset)) {
-					errMsg="invalid right ascension offset";
-					return false; //ra
-				}
-				if (!IRA::CIRATools::offsetToRad(latOff,scan->latitudeOffset)) {
-					errMsg="invalid declination offset";
-					return false;  //dec
-				}
-			}
-			else if (strcmp(offFrame,OFFFRAMEHOR)==0) {
-				scan->offsetFrame=Antenna::ANT_HORIZONTAL;
-				if (!IRA::CIRATools::offsetToRad(lonOff,scan->longitudeOffset)) {
-					errMsg="invalid azimuth offset";
-					return false;  //azimuth...since they are offsets negative values are valid
-				}
-				if (!IRA::CIRATools::offsetToRad(latOff,scan->latitudeOffset)) {
-					errMsg="invalid elevation offset";
-					return false; //elevation
-				}
-			}
-			else if (strcmp(offFrame,OFFFRAMEGAL)==0) {
-				scan->offsetFrame=Antenna::ANT_GALACTIC;
-				if (!IRA::CIRATools::offsetToRad(lonOff,scan->longitudeOffset)) {
-					errMsg="invalid galactic longitude offset";
-					return false;  //longitude
-				}
-				if (!IRA::CIRATools::offsetToRad(latOff,scan->latitudeOffset)) {
-					errMsg="invalid galactic latitude offset";
-					return false; //latitude
-				}
-			}
-			else {
-				errMsg="scan offset frame is unknown";
+		errMsg="invalid on the fly scan description";
+		return false;
+	}
+	if (!IRA::CIRATools::strToCoordinateFrame(coordFrame,frame)) {
+		errMsg="the coordinate frame is not known";
+		return false;
+	}
+	if (frame==Antenna::ANT_EQUATORIAL) {
+		//scan->otf.coordFrame=Antenna::ANT_EQUATORIAL;
+		if (descriptionE==Antenna::SUBSCAN_CENTER) {
+			if (!IRA::CIRATools::rightAscensionToRad(lon1,lon1rad,true)) { //ra center ...need a complete check
+				errMsg="central point right ascension format error";
 				return false;
 			}
-			scan->applyOffsets=true;
+			if (!IRA::CIRATools::declinationToRad(lat1,lat1rad,true)) { //dec center ...need a complete check
+				errMsg="central point declination format error";
+				return false;
+			}
+			if (!IRA::CIRATools::offsetToRad(lon2,lon2rad)) { //ra span....no need of a check
+				errMsg="right ascension span format error";
+				return false;
+			}
+			if (!IRA::CIRATools::offsetToRad(lat2,lat2rad)) { //dec span....no need of a check
+				errMsg="declination span format error";
+				return false;
+			}
 		}
-		return true;
+		else {
+			if (!IRA::CIRATools::rightAscensionToRad(lon1,lon1rad,true)) { //ra first point ...need a complete check
+				errMsg="start point right ascension format error";
+				return false;
+			}
+			if (!IRA::CIRATools::declinationToRad(lat1,lat1rad,true)) { //dec first point ...need a complete check
+				errMsg="start point declination format error";
+				return false;
+			}
+			if (!IRA::CIRATools::rightAscensionToRad(lon2,lon2rad,true)) {  //ra second point ...need a complete check
+				errMsg="end point right ascension format error";
+				return false;
+			}
+			if (!IRA::CIRATools::declinationToRad(lat2,lat2rad,true)) { //dec second point ...need a complete check
+				errMsg="end point declination format error";
+				return false;
+			}
+		}
 	}
+	else if (frame==Antenna::ANT_HORIZONTAL) {
+		//scan->otf.coordFrame=Antenna::ANT_HORIZONTAL;
+		if (descriptionE==Antenna::SUBSCAN_CENTER) {
+			if (!IRA::CIRATools::azimuthToRad(lon1,lon1rad,true)) { //az center ...need a complete check
+				errMsg="central point azimuth format error";
+				return false;
+			}
+			if (!IRA::CIRATools::elevationToRad(lat1,lat1rad,true)) {  //el center ...need a complete check
+				errMsg="central point elevation format error";
+				return false;
+			}
+			if (!IRA::CIRATools::offsetToRad(lon2,lon2rad)) { //az span....no need of a check
+				errMsg="azimuth span format error";
+				return false;
+			}
+			if (!IRA::CIRATools::offsetToRad(lat2,lat2rad)) { //el span....no need of a check
+				errMsg="elevation span format error";
+				return false;
+			}
+		}
+		else {
+			if (!IRA::CIRATools::azimuthToRad(lon1,lon1rad,true)) { //az first point ...need a complete check
+				errMsg="start point azimuth format error";
+				return false;
+			}
+			if (!IRA::CIRATools::elevationToRad(lat1,lat1rad,true)) { //el first point ...need a complete check
+				errMsg="start point elevation format error";
+				return false;
+			}
+			if (!IRA::CIRATools::azimuthToRad(lon2,lon2rad,true)) { //az second point ...need a complete check
+				errMsg="end point azimuth format error";
+				return false;
+			}
+			if (!IRA::CIRATools::elevationToRad(lat2,lat2rad,true)) { //el second point ...need a complete check
+				errMsg="end point elevation format error";
+				return false;
+			}
+		}
+	}
+	else if (frame==Antenna::ANT_GALACTIC) {
+		//scan->otf.coordFrame=Antenna::ANT_GALACTIC;
+		if (descriptionE==Antenna::SUBSCAN_CENTER) {
+			if (!IRA::CIRATools::galLongitudeToRad(lon1,lon1rad,true)) { //lon center ...need a complete check
+				errMsg="central point galactic longitude format error";
+				return false;
+			}
+			if (!IRA::CIRATools::galLatitudeToRad(lat1,lat1rad,true)) {  //lat center ...need a complete check
+				errMsg="central point galactic latitude format error";
+				return false;
+			}
+			if (!IRA::CIRATools::offsetToRad(lon2,lon2rad)) { //lon span....no need of a check
+				errMsg="galactic longitude span format error";
+				return false;
+			}
+			if (!IRA::CIRATools::offsetToRad(lat2,lat2rad)) {  //lat span....no need of a check
+				errMsg="galactic latitude span format error";
+				return false;
+			}
+		}
+		else {
+			if (!IRA::CIRATools::galLongitudeToRad(lon1,lon1rad,true)) { //lon first point ...need a complete check
+				errMsg="start point galactic longitude format error";
+				return false;
+			}
+			if (!IRA::CIRATools::galLatitudeToRad(lat1,lat1rad,true)) { //lat first point ...need a complete check
+				errMsg="start point galactic latitude format error";
+				return false;
+			}
+			if (!IRA::CIRATools::galLongitudeToRad(lon2,lon2rad,true)) {  //lon second point ...need a complete check
+				errMsg="end point galactic longitude format error";
+				return false;
+			}
+			if (!IRA::CIRATools::galLatitudeToRad(lat2,lat2rad,true)) {  //lat second point ...need a complete check
+				errMsg="end point galactic latitude format error";
+				return false;
+			}
+		}
+	}
+	if (!IRA::CIRATools::strToCoordinateFrame(subScanFrame,subScanFrameE)) {
+		errMsg="the scan frame is not known";
+		return false;
+	}
+	//scan->otf.subScanFrame=frame;
+	if (strcmp(geometry,"LON")==0) geometryE=Antenna::SUBSCAN_CONSTLON;
+	else if (strcmp(geometry,"LAT")==0) geometryE=Antenna::SUBSCAN_CONSTLAT;
+	else if (strcmp(geometry,"GC")==0) geometryE=Antenna::SUBSCAN_GREATCIRCLE;
+	else {
+		errMsg="invalid on the fly scan geometry";
+		return false;
+	}
+	if (strcmp(direction,"INC")==0) directionE=Antenna::SUBSCAN_INCREASE;
+	else if (strcmp(direction,"DEC")==0) directionE=Antenna::SUBSCAN_DECREASE;
+	else {
+		errMsg="invalid on the fly scan direction";
+		return false;
+	}
+	binder.OnTheFly(tName,lon1rad,lat1rad,lon2rad,lat2rad,frame,geometryE,subScanFrameE,descriptionE,directionE,subScanDurationE);
+	if (out==16) {
+		if (strcmp(offFrame,OFFFRAMEEQ)==0) {
+			offsetFrameE=Antenna::ANT_EQUATORIAL;
+			if (!IRA::CIRATools::offsetToRad(lonOff,longitudeOffset)) {
+				errMsg="invalid right ascension offset";
+				return false; //ra
+			}
+			if (!IRA::CIRATools::offsetToRad(latOff,latitudeOffset)) {
+				errMsg="invalid declination offset";
+				return false;  //dec
+			}
+		}
+		else if (strcmp(offFrame,OFFFRAMEHOR)==0) {
+			offsetFrameE=Antenna::ANT_HORIZONTAL;
+			if (!IRA::CIRATools::offsetToRad(lonOff,longitudeOffset)) {
+				errMsg="invalid azimuth offset";
+				return false;  //azimuth...since they are offsets negative values are valid
+			}
+			if (!IRA::CIRATools::offsetToRad(latOff,latitudeOffset)) {
+				errMsg="invalid elevation offset";
+				return false; //elevation
+			}
+		}
+		else if (strcmp(offFrame,OFFFRAMEGAL)==0) {
+			offsetFrameE=Antenna::ANT_GALACTIC;
+			if (!IRA::CIRATools::offsetToRad(lonOff,longitudeOffset)) {
+				errMsg="invalid galactic longitude offset";
+				return false;  //longitude
+			}
+			if (!IRA::CIRATools::offsetToRad(latOff,latitudeOffset)) {
+				errMsg="invalid galactic latitude offset";
+				return false; //latitude
+			}
+		}
+		else {
+			errMsg="scan offset frame is unknown";
+			return false;
+		}
+		binder.addOffsets(longitudeOffset,latitudeOffset,offsetFrameE);
+	}
+	return true;
 }
 
 void CScanList::resetTrackingParameters(Antenna::TTrackingParameters *scan)

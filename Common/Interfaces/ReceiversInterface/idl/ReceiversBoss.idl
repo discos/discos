@@ -206,10 +206,11 @@ module Receivers {
          *         As output (in case the input value is zero) it returns the expected start time.
          * @param param structure containing all the information required in order to prepare the receiver for the scan.
          * @param antennaInfo auxiliary information from the antenna
+         * @param scanConf structure that contains the configruation of the current scan to be checked
          * @throw ReceiversErrors::ReceiversErrorsEx
          * @throw ComponentErrors::ComponentErrorsEx
          */
-        void startScan(inout ACS::Time startUT,in TReceiversParameters param,in Antenna::TRunTimeParameters antennaInfo) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+        void startScan(inout ACS::Time startUT,in TReceiversParameters param,in Antenna::TRunTimeParameters antennaInfo,in Management::TScanConfiguration scanConf) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
         
 		/**
 		 * This method virtually stops the current scan. The boss indeed is not required to do anything.
@@ -229,11 +230,12 @@ module Receivers {
 		 * @param startUt this is the time before which the receivers are supposed to be ready for the scan. 
 		 * @param param structure that describes the scan to be performed.
 		 * @param antennaInfo structure that contains desired information from the antenna subsystem
+		 * @param scanConf structure that contains the configruation of the current scan to be checked
 		 * @param runTime stores the runtime parameters regarding the current scan from the receivers
 		 * @return true if the subsystem could accomplish the required scan.
 		 */
 		boolean checkScan(in ACS::Time startUt,in TReceiversParameters param,in Antenna::TRunTimeParameters antennaInfo,
-		 out TRunTimeParameters runTime) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+		 in Management::TScanConfiguration scanConf,out TRunTimeParameters runTime) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
         
     };
     

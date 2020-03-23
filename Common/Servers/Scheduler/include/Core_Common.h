@@ -18,6 +18,7 @@
  * @param sec primary scan configuration for the subscan (antenna)
  * @param servoPar structure containing the scan configuration for the minor servo system
  * @param recvPar structure containing the scan configuration for the receivers subsystem.
+ * @param scanConf current scan description and configuration
  * @param minEl elevation lower limit
  * @param maxEl elevation upper limit
  * @throw ComponentErrors::UnexpectedExImpl
@@ -29,10 +30,11 @@
  * @return true if the scan has been checked successfully
  */
 bool checkScan(ACS::Time& ut,const Antenna::TTrackingParameters *const prim,const Antenna::TTrackingParameters *const sec,
-	const MinorServo::MinorServoScan*const servoPar, const Receivers::TReceiversParameters*const recvPar,const double& minEl=-1.0,
-	const double& maxEl=-1.0) throw (ComponentErrors::UnexpectedExImpl,
-	ComponentErrors::OperationErrorExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,
-	ComponentErrors::CouldntGetComponentExImpl,ManagementErrors::UnsupportedOperationExImpl);
+	const MinorServo::MinorServoScan*const servoPar, const Receivers::TReceiversParameters*const recvPar,
+	const Management::TScanConfiguration& scanConf,const double& minEl=-1.0,const double& maxEl=-1.0) throw (
+	ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::ComponentNotActiveExImpl,
+	ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntGetComponentExImpl,
+	ManagementErrors::UnsupportedOperationExImpl);
 
 /**
  * Send to the telescope the commands required to start scan.
@@ -47,10 +49,11 @@ bool checkScan(ACS::Time& ut,const Antenna::TTrackingParameters *const prim,cons
  * @param servoPar scan configuration of the servo subsystem.
  * @param recvPar structure containing the scan configuration for the receivers subsystem.
  * @param subScanConf structure containing the sub scan configuration
+ * @param scanConf structure containing the scan configuration
 */
 void doScan(ACS::Time& ut,const Antenna::TTrackingParameters* const prim,const Antenna::TTrackingParameters* const sec,
 	const MinorServo::MinorServoScan*const servoPar,const Receivers::TReceiversParameters*const recvPa,
-	const Management::TSubScanConfiguration& subScanConf) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+	const Management::TSubScanConfiguration& subScanConf,const Management::TScanConfiguration& scanConf) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,
 	ComponentErrors::UnexpectedExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CouldntGetComponentExImpl);
 
 /*
@@ -76,10 +79,11 @@ ACS::Time startRecording(const ACS::Time& recUt,const long& scanId, const long& 
  * @param servoPar scan configuration of the servo subsystem.
  * @param recvPar structure containing the scan configuration for the receivers subsystem.
  * @param subScanConf structure containing the sub scan configuration
+ * @param scanConf structure containing the scan configuration
 */
 void startScan(ACS::Time& time,const Antenna::TTrackingParameters *const prim,const Antenna::TTrackingParameters *const sec,
 	const MinorServo::MinorServoScan*const servoPar, const Receivers::TReceiversParameters*const recvPar,
-	const Management::TSubScanConfiguration& subScanConf) throw (
+	const Management::TSubScanConfiguration& subScanConf,const Management::TScanConfiguration& scanConf) throw (
 	ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
 	ManagementErrors::CloseTelescopeScanErrorExImpl);
 

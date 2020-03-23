@@ -129,8 +129,9 @@ void CScheduleExecutor::runLoop()
 					primary=static_cast<Antenna::TTrackingParameters *>(m_currentScanRec.primaryParameters);
 					secondary=static_cast<Antenna::TTrackingParameters *>(m_currentScanRec.secondaryParameters);
 					servoPar=static_cast<MinorServo::MinorServoScan *>(m_currentScanRec.servoParameters);
-					recvPar=static_cast<Receivers::TReceiversParameters *>(m_currentScanRec.receieversParsmeters);
-					ok=m_core->checkScan(m_currentScan.ut,primary,secondary,servoPar,recvPar,minEl,maxEl);
+					recvPar=static_cast<Receivers::TReceiversParameters *>(m_currentScanRec.receiversParameters);
+					Management::TScanConfiguration scanConf=*(m_currentScan.scanConf);
+					ok=m_core->checkScan(m_currentScan.ut,primary,secondary,servoPar,recvPar,scanConf,minEl,maxEl);
 				}
 				catch (ACSErr::ACSbaseExImpl& ex) {
 					_ADD_BACKTRACE(ManagementErrors::SubscanErrorExImpl,impl,ex,"CScheduleExecutor::runLoop()");
@@ -190,9 +191,10 @@ void CScheduleExecutor::runLoop()
 					primary=static_cast<Antenna::TTrackingParameters *>(m_currentScanRec.primaryParameters);
 					secondary=static_cast<Antenna::TTrackingParameters *>(m_currentScanRec.secondaryParameters);
 					servoPar=static_cast<MinorServo::MinorServoScan *>(m_currentScanRec.servoParameters);
-					recvPar=static_cast<Receivers::TReceiversParameters *>(m_currentScanRec.receieversParsmeters);
+					recvPar=static_cast<Receivers::TReceiversParameters *>(m_currentScanRec.receiversParameters);
 					Management::TSubScanConfiguration subConf=*(m_currentScanRec.subScanConfiguration);
-					m_core->doScan(m_currentScan.ut,primary,secondary,servoPar,recvPar,subConf);
+					Management::TScanConfiguration scanConf=*(m_currentScan.scanConf);
+					m_core->doScan(m_currentScan.ut,primary,secondary,servoPar,recvPar,subConf,scanConf);
 					m_closeScanTimer=0;
 				}
 				catch (ACSErr::ACSbaseExImpl& Ex) {

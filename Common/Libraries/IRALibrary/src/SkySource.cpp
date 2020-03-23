@@ -329,6 +329,12 @@ void CSkySource::apparentToJ2000(const double& appRA,const double& appDec,const 
 	dec=IRA::CIRATools::latRangeRad(dec);
 }
 
+void CSkySource::B1950ToJ2000(const double& ra50,const double& dec50,double& ra,double& dec)
+{
+	double epoch=CDateTime::julianDay2BesselianEpoch(DT_B1950);
+	slaFk45z(ra50,dec50,epoch,&ra,&dec);
+}
+
 void CSkySource::J2000ToApparent(const CDateTime& now,const CSite& site)
 {
 	double TDB;

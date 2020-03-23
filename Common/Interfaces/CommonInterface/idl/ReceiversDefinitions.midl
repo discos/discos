@@ -46,7 +46,7 @@ module Receivers {
 
     typedef struct RunTime {
     	ACS::Time startEpoch;
-    	boolean onTheFly;
+    	boolean onTheFly;   /*!< indicates if a movement is required, i.e. if a derotator is involved in the observation */
     	ACS::Time timeToStop; /*!< indicates the exact time (when) the scan will be closed, it could be zero if no time is required */
     } TRunTimeParameters;
 

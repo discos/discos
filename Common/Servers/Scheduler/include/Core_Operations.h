@@ -41,9 +41,9 @@ void _nop() const;
  * @param span length of the scan
  * @param span duration of the scan
  */
-void _lonOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration) throw (
-		ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
-		ManagementErrors::CloseTelescopeScanErrorExImpl);
+//void _lonOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration) throw (
+//		ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
+//		ManagementErrors::CloseTelescopeScanErrorExImpl);
 
 /*
  * Starts a latitude OnTheFly scan
@@ -51,9 +51,9 @@ void _lonOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const
  * @param span length of the scan
  * @param span duration of the scan
  */
-void _latOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration) throw (
-		ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
-		ManagementErrors::CloseTelescopeScanErrorExImpl);
+//void _latOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration) throw (
+//		ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
+//		ManagementErrors::CloseTelescopeScanErrorExImpl);
 
 /**
  * Starts a peaker operation, which is indeed maximizing the focusing or in general the position of the subreflector.
@@ -61,9 +61,9 @@ void _latOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const
  * @param span range to be traveled by the axis
  * @param duration total allotted time
  */
-void _peaker(const char *axis,const double& span,const ACS::TimeInterval& duration) throw (
-		ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
-		ManagementErrors::CloseTelescopeScanErrorExImpl,ComponentErrors::ValidationErrorExImpl);
+//void _peaker(const char *axis,const double& span,const ACS::TimeInterval& duration) throw (
+//		ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
+//		ManagementErrors::CloseTelescopeScanErrorExImpl,ComponentErrors::ValidationErrorExImpl);
 
 /**
  * Starts a skydip OnTheFly scan
@@ -71,9 +71,9 @@ void _peaker(const char *axis,const double& span,const ACS::TimeInterval& durati
  * @param el2 second elevation border of the scan
  * @param duration duration of the scan
  */
-void _skydipOTF(const double& el1,const double& el2,const ACS::TimeInterval& duration) throw (
-		ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
-		ManagementErrors::CloseTelescopeScanErrorExImpl);
+//void _skydipOTF(const double& el1,const double& el2,const ACS::TimeInterval& duration) throw (
+//		ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
+//		ManagementErrors::CloseTelescopeScanErrorExImpl);
 
 /**
  * start the tracking of a source form its catalog identifier

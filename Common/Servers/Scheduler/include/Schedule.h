@@ -26,12 +26,34 @@
 #define _SCHED_NULLTARGET "NULL"
 #define SEPARATOR '\t'
 
+#define UNDEFINEDTARGET "UNDEF"
+
 /**
  * This namespace contains all the classes and symbol that are needed to parse and execute the schedules
  */
 namespace Schedule {
 
 class CParser;
+
+/**
+ * This class quickly maps a scan (defined by its salient parameters) into the correct scan configurations structure
+*/
+class CScanBinder {
+public:
+	CScanBinder(CConfiguration* config=NULL,bool dispose=false);
+	~CScanBinder();
+	void dispose();
+	void init(Management::TScanConfiguration * const scanConf);
+	void startScan(DWORD id);
+	void nextScan();
+	Management::TScanConfiguration *getScanConf() const { return m_scanConf; }
+	void addSubScan(Antenna::TTrackingParameters *prim, Antenna::TTrackingParameters *sec,
+		MinorServo::MinorServoScan *servo,Receivers::TReceiversParameters *reciv);
+private:
+	Management::TScanConfiguration *m_scanConf;
+	bool m_own;
+	CConfiguration* m_config;
+};
 
 /**
  * This class quickly maps a subscan (defined by its salient parameters) to the correct subscan configurations structures used to
@@ -46,13 +68,14 @@ public:
 	~CSubScanBinder();
 	void lonOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration);
 	void latOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration);
-	void OTF(const IRA::CString& target,
+	void OnTheFly(
+			const IRA::CString& target,
 			const double& lon1,const double& lat1,const double& lon2,const double& lat2,
 			const Antenna::TCoordinateFrame& coordFrame,const Antenna::TsubScanGeometry& geometry,
 			const Antenna::TCoordinateFrame& subScanFrame,const Antenna::TsubScanDescription& description,
 			const Antenna::TsubScanDirection& direction,const ACS::TimeInterval& subScanDuration);
 
-	void OTFC(const Antenna::TCoordinateFrame& coordFrame,const Antenna::TsubScanGeometry& geometry,
+	void OnTheFlyC(const Antenna::TCoordinateFrame& coordFrame,const Antenna::TsubScanGeometry& geometry,
 		const Antenna::TCoordinateFrame& subScanFrame,const Antenna::TsubScanDirection& direction,
 		const double& span,const ACS::TimeInterval& subScanDuration,const Antenna::TTrackingParameters * const sec);
 
@@ -77,6 +100,7 @@ public:
 	Receivers::TReceiversParameters *getReceivers() const { return m_receivers;}
 	void dispose();
 	Management::TSubScanConfiguration *getSubScanConfiguration() const { return m_subScanConf; }
+	void getTarget(IRA::CString& name,double &ra,double& dec,double& ra1,double& dec1,double &ra2,double& dec2) const;
 
 private:
 	Antenna::TTrackingParameters *m_primary;
@@ -84,12 +108,15 @@ private:
 	MinorServo::MinorServoScan *m_servo;
 	Receivers::TReceiversParameters *m_receivers;
 	Management::TSubScanConfiguration *m_subScanConf;
+	double m_ra2000,m_dec2000;
+	IRA::CString m_name;
+	double m_ra1,m_dec1,m_ra2,m_dec2;
 	bool m_own;
 	CConfiguration* m_config;
 	void init();
 	void addSecondaryAntennaTrack(const Antenna::TTrackingParameters * const sec);
 	void copyPrimaryAntenaTrack(const Antenna::TTrackingParameters * const prim);
-
+	void findTarget(const Antenna::TTrackingParameters * const track);
 };
 
 /**
@@ -429,9 +456,15 @@ public:
 		void *primaryParameters;
 		void *secondaryParameters;
 		void *servoParameters;
-		void *receieversParsmeters;
+		void *receiversParameters;
 		Management::TSubScanConfiguration *subScanConfiguration;
-		//IRA::CString target;
+		double centerRa2000;
+		double centerDec2000;
+		IRA::CString targetName;
+		double LUcornerRa;
+		double LUcornerDec;
+		double RDcornerRa;
+		double RDcornerDec;		
 	};
 	/**
 	 * Constructor
@@ -475,6 +508,24 @@ public:
 	 */
 	virtual bool checkScan(const DWORD& id);
 	
+	/**
+	 * This performs a draft check that all the the subscans composing a scan are on the same target.
+	 * @param vect vector containing all the scans to be checked;
+	 * @return if the scan is to be considered ok or not
+	 */
+	virtual bool checkTarget(std::vector<DWORD>& vect);
+
+	/**
+	 * returns the name and coordinate of the target of the referred scan
+	 * @param id identifier of the scan 
+	 * @param name name of the target
+	 * @param ra2000 right ascension (at J2000) of the target
+ 	 * @param dec2000 declination (at J2000) of the target 	
+	 * @return true if the scan exists, false if it doesn't.
+	 */	
+	virtual bool getScanTarget(const DWORD& id,IRA::CString& name,double& ra2000,double& dec2000);
+		
+	
 private:
 	typedef std::vector<TRecord *> TSchedule;
 	typedef TSchedule::iterator TIterator;
@@ -495,24 +546,23 @@ private:
 	
 	/**
 	 * parse the list of parameters of an OTF.
-	 * @param val line to parse
-	 * @param scan structure containing the OTF parameters
+	 * @param val val to parse
 	 * @param id numeral identifier of the scan
 	 * @param errMsg error specification string in case of unsuccessful operation
+	 * @param binder reference to binder object.
 	 * @return the result of the parse
 	 */
-	bool parseOTF(const IRA::CString& val,Antenna::TTrackingParameters *scan,DWORD& id,IRA::CString& errMsg);
+	 bool parseOTF(const IRA::CString& val,DWORD& id,IRA::CString& errMsg,CSubScanBinder& binder);
 
 	/**
 	 * parse the list of parameters of an OTFC scan.
 	 * @param val line to parse
-	 * @param scan structure containing the OTF parameters
-	 * @param scanSec structure containing the parameters of the secondary scan which is the scan used to compute the center of the scan
 	 * @param id numeral identifier of the scan
 	 * @param errMsg error specification string in case of unsuccessful operation
+ 	 * @param binder reference to binder object.
 	 * @return the result of the parse
 	 */	
-	bool parseOTFC(const IRA::CString& val,Antenna::TTrackingParameters *scan,Antenna::TTrackingParameters *secScan,DWORD& id,IRA::CString& errMsg);
+	bool parseOTFC(const IRA::CString& val,DWORD& id,IRA::CString& errMsg,CSubScanBinder& binder);
 
 	/**
 	 * parse the list of parameters of a SKYDIP scan.
@@ -523,7 +573,8 @@ private:
 	 * @param errMsg error specification string in case of unsuccessful operation
 	 * @return the result of the parse
 	 */
-	bool parseSKYDIP(const IRA::CString& val,Antenna::TTrackingParameters *scan,Antenna::TTrackingParameters *secScan,DWORD& id,IRA::CString& errMsg);
+	//bool parseSKYDIP(const IRA::CString& val,Antenna::TTrackingParameters *scan,Antenna::TTrackingParameters *secScan,DWORD& id,IRA::CString& errMsg);
+	bool parseSKYDIP(const IRA::CString& val,DWORD& id,IRA::CString& errMsg,CSubScanBinder& binder);
 
 	/**
 	 * Parse the list of parameters of sidereal tracking.
@@ -539,13 +590,14 @@ private:
 
 	/**
 	 * Parse the list of parameters for moon tracking
-	 * @param val line to parse
-	 * @param otf structure containing the ORF parameters
+	 * @param line line to parse
 	 * @param id numeral identifier of the scan
 	 * @param errMsg error specification string in case of unsuccessful operation
+	 * @param binder binder object
 	 * @return the result of the parse
 	 */
-	bool parseMoon(const IRA::CString& val,Antenna::TTrackingParameters *scan,DWORD& id,IRA::CString& errMsg);
+	//bool parseMoon(const IRA::CString& val,Antenna::TTrackingParameters *scan,DWORD& id,IRA::CString& errMsg);
+	bool parseMoon(const IRA::CString& line,DWORD& id,IRA::CString& errMsg,CSubScanBinder& binder);
 
 	/**
 	 * Parse the vRAD switch in order to configure a radial velocity
@@ -576,6 +628,10 @@ private:
 	 * @return true if the check is ok
 	 */
 	virtual bool checkConsistency(DWORD& line,IRA::CString& errMsg);
+	
+	bool isNear(const double& r1,const double& r2,const double& d1,const double& d2) const;
+	bool isSame(const IRA::CString& n1,const IRA::CString& n2,double& r1,const double& r2,double& d1,const double& d2) const;
+	
 };
 
 /**
@@ -612,7 +668,7 @@ public:
 	 * @param if the function returns without errors it represent the number of lines in the schedule; otherwise it is the line at which
 	 *               the parsing stopped due to an error
 	 * @param message if an error is found
-	 * @return true if the parsing is completed succesfully, otherwise it returns false.
+	 * @return true if the parsing is completed successfully, otherwise it returns false.
 	 */
 	bool parse(CBaseSchedule* unit,DWORD& line,IRA::CString& errorMsg);
 	
@@ -656,6 +712,7 @@ public:
 		IRA::CString writerInstance; /*!< name of the component in charge of receiving the data from the backend */
 		IRA::CString suffix                    /*!< token appended to the name of the file */;
 		bool rewind;							/*!< this is a runtime attribute, it will be set to true when the current subscan is the first one located by the <i>getScan_LST</i> or <i>getScan_SEQ</i>  methods after the schedule was rewound*/
+		Management::TScanConfiguration* scanConf;	/* !< this contains information about the current scan */
 	};
 	/**
 	 * Constructor
@@ -769,10 +826,12 @@ public:
 	 * @param suffix string that will be appended at the end of the file name(output)
 	 * @param layout name of the scan layout definition (output)
 	 * @param rewind is the scan the first one after a schedule rewind? (output)
+	 * @param scanConf record that stores the scan configuration of the current subscan
 	 * @return true if the line can be returned 
 	 */
 	bool getSubScan_SEQ(DWORD& counter,DWORD& scanid,DWORD& subscanid,double& duration,DWORD& scan,IRA::CString& pre,bool& preBlocking,WORD& preArgs,IRA::CString& post,bool& postBlocking,
-			WORD& postArgs,IRA::CString& bckProc,IRA::CString& wrtInstance,IRA::CString& suffix,IRA::CString& layout,bool &rewind);
+			WORD& postArgs,IRA::CString& bckProc,IRA::CString& wrtInstance,IRA::CString& suffix,IRA::CString& layout,
+			bool &rewind,Management::TScanConfiguration*& scanConf);
 	
 	/**
 	 * Used to retrive the desired scan number. This method is a wrapper of the previuos method used to retrieve the informations using a structure.
@@ -803,10 +862,13 @@ public:
 	 * @param suffix string that will be appended at the end of the file name (output)
 	 * @param layout  name of the scan layout definition (output)
 	 * @param rewind is the scan the first one after a schedule rewind? (output)
+	 * @param scanConf record that stores the scan configuration of the current subscan (output)
 	 * @return true if the line can be returned 
 	 */
 	bool getSubScan_LST(ACS::TimeInterval& lst,DWORD& counter,DWORD&scanid,DWORD& subscanid,double& duration,DWORD& scan,
-			IRA::CString& pre,bool& preBlocking,WORD& preArgs,IRA::CString& post,bool& postBlocking,WORD& postArgs,IRA::CString& bckProc,IRA::CString& wrtInstance,IRA::CString& suffix,IRA::CString& layout,bool& rewind);
+			IRA::CString& pre,bool& preBlocking,WORD& preArgs,IRA::CString& post,bool& postBlocking,WORD& postArgs,
+			IRA::CString& bckProc,IRA::CString& wrtInstance,IRA::CString& suffix,
+			IRA::CString& layout,bool& rewind,Management::TScanConfiguration*& scanConf);
 
 	/**
 	 * Used to retrive the desired  line based on start LST. This method is a wrapper of the previuos method used to retrieve the informations using a structure.
@@ -856,9 +918,14 @@ public:
 	 * @param upper return back the upper value of the range, a negative means use system default
 	 */
 	void getElevationLimits(double&lower, double&upper) const { lower=m_lowerElevationLimit; upper=m_upperElevationLimit; }
+	
+	bool prepareScan(DWORD& line,IRA::CString& errMsg);
+
 private:
 	typedef std::vector<TRecord *> TSchedule;
 	typedef TSchedule::iterator TIterator;
+	typedef std::vector<Management::TScanConfiguration *> TScans;
+	typedef TScans::iterator TScansIterator;
 	IRA::CString m_projectName;
 	IRA::CString m_observer;
 	IRA::CString m_scanList;
@@ -879,6 +946,7 @@ private:
 	IRA::CString m_initProc;
 	WORD m_initProcArgs;
 	TSchedule m_schedule;
+	TScans m_scans;
 	struct {
 		bool valid;
 		DWORD id;

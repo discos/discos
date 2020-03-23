@@ -18,10 +18,11 @@ void CCore::changeSchedulerStatus(const Management::TSystemStatus& status)
 }
 
 bool CCore::checkScan(ACS::Time& ut,const Antenna::TTrackingParameters *const prim,const Antenna::TTrackingParameters *const sec,
-	const MinorServo::MinorServoScan*const servoPar,const Receivers::TReceiversParameters*const recvPar,const double& minEl,
-	const double& maxEl) throw (ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,
-	ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntGetComponentExImpl,
-	ManagementErrors::UnsupportedOperationExImpl)
+	const MinorServo::MinorServoScan*const servoPar,const Receivers::TReceiversParameters*const recvPar,
+	const Management::TScanConfiguration& scanConf,const double& minEl,const double& maxEl) throw (
+	ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,
+	ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CORBAProblemExImpl,
+	ComponentErrors::CouldntGetComponentExImpl,ManagementErrors::UnsupportedOperationExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	//ACS::Time antennaUT,receiversUT;
@@ -103,7 +104,9 @@ bool CCore::checkScan(ACS::Time& ut,const Antenna::TTrackingParameters *const pr
 		throw impl;
 	}
 	try {
-		receiversAnswer=m_receiversBoss->checkScan(ut,*recvPar,m_antennaRTime.in(),m_receiversRunTime);
+		Management::TScanConfiguration_var scConf;
+		scConf=scanConf;
+		receiversAnswer=m_receiversBoss->checkScan(ut,*recvPar,m_antennaRTime.in(),scConf.in(),m_receiversRunTime.out());
 		if (!receiversAnswer) return receiversAnswer;
 	}
 	catch (ComponentErrors::ComponentErrorsEx& ex) {
@@ -130,32 +133,45 @@ bool CCore::checkScan(ACS::Time& ut,const Antenna::TTrackingParameters *const pr
 	}
 	if (ut==0) {  //if the request was to start as soon as possible, we need to do some computation and change the effective start time
 		/*******************************************************/
-		/* At the moment I do not consider the case m_receiversRunTime.onTheFly==true to be a realistic case, so it is not
-		 * considered in the "if then else" sequence below. it the things change I have to deal with them according the following table.
+		/* At the moment I do  consider the case m_receiversRunTime.onTheFly==true to be related to a derotator case.
+		 *	If the things change I have to deal with it.
 		 * When scans of secondary subsystem are only involved (i.e. focus scan) the transfer time of the antenna have to be taken into
 		 * consideration as well.
-		 * Ant.otf	servo.otf	recv.otf	real?	=>	UT		 			  (comment)
-		 *    N			N			N		 y			0    	 			  (beam park, wait tracking flag...)
-		 *    N			N			Y		 n          max(recv.ut,ant.ut)
-		 *    N			Y			N		 y		    max(servo.ut,ant.ut)  (focus scan)
-		 *    N			Y			Y        n          max(recv.ut,servo.ut)
-		 *    Y			N			N		 y			ant.ut				  (OnTheFly scan)
-		 *    Y			N			Y		 n			max(ant.ut,recv,ut)
-		 *    Y			Y			N		 y			max(ant.ut,servo.ut)  (scan along subr.y)
-		 *    Y			Y			Y        n			max(all)*/
+		 * Ant.otf	servo.otf	recv.otf	real?	=>	UT		 			  (COMMENT)
+		 *    N			N			N		 y			0    	 			     (beam park, wait tracking flag...) *
+		 *    N			N			Y		 y       0						  (Beam park, w/ derotator, wait tracking flag...) * 	
+		 *    N			Y			N		 y		   max(servo.ut,ant.ut)(focus scan)   *
+		 *    N			Y			Y      n       max(recv.ut,servo.ut)
+		 *    Y			N			N		 y			ant.ut				  (OnTheFly scan) *
+		 *    Y			N			Y		 y			max(ant.ut,recv,ut) (OnTheFly scanm W/ detorator) *
+		 *    Y			Y			N		 y			max(ant.ut,servo.ut)(scan along subr.y) *
+		 *    Y			Y			Y      n			max(all)
+		 */
 		/* ****************************************************************** */
-		if ((!m_antennaRTime->onTheFly) && (!m_servoRunTime->onTheFly)) { //simple beampark scan, for example
+		if ((!m_antennaRTime->onTheFly) && (!m_servoRunTime->onTheFly)) { //simple beampark scan, for example NNN and NNY
 			// do nothing as ut should be zero as well, i.e the system must wait for the tracking flag to be true
 		}
-		else if ((!m_antennaRTime->onTheFly) && (m_servoRunTime->onTheFly)) { //typical case is focus scan...
+		//typical case is focus scan...for example NYN
+		else if ((!m_antennaRTime->onTheFly) && (m_servoRunTime->onTheFly)) {
 			ut=MAX(m_antennaRTime->startEpoch,m_servoRunTime->startEpoch)+2000000; // add 0.2 sec. as overhead
 		}
-		else if ((m_antennaRTime->onTheFly) && (!m_servoRunTime->onTheFly)) { //typical case of OTF scan...the resulting time is the one comingo from the antenna
+		// typical case of OTF scan...the resulting time is the one coming from the antenna...for example YNN
+		else if ((m_antennaRTime->onTheFly) && (!m_servoRunTime->onTheFly) && (!m_receiversRunTime->onTheFly)) {
 			ut=m_antennaRTime->startEpoch;
 		}
-		else { // both are OTF...typically a scan along a subreflector axis (Y for example)
+		// typical case of OTF scan using a derotator...for example YNY
+		else if ((m_antennaRTime->onTheFly) && (!m_servoRunTime->onTheFly) && (m_receiversRunTime->onTheFly)) {
+			ut=MAX(m_antennaRTime->startEpoch,m_receiversRunTime->startEpoch)+2000000; // add 0.2 sec. as overhead
+		}
+		// both are OTF...typically a scan along a subreflector axis (Y for example). For example YYN
+		else if ((m_antennaRTime->onTheFly) && (m_servoRunTime->onTheFly) && (!m_receiversRunTime->onTheFly)) { 
 			// the correct start time is the maximum of the two times
 			ut=MAX(m_antennaRTime->startEpoch,m_servoRunTime->startEpoch)+2000000; // add 0.2 sec. as overhead
+		}
+		// unreal cases NYY, YYY
+		else {
+			ut=MAX(m_servoRunTime->startEpoch,m_receiversRunTime->startEpoch);
+			if (m_antennaRTime->onTheFly) ut=MAX(ut,m_antennaRTime->startEpoch);
 		}
 	}  // otherwise keep the original starting time, which is the one requested by the user
 	return true;
@@ -163,7 +179,7 @@ bool CCore::checkScan(ACS::Time& ut,const Antenna::TTrackingParameters *const pr
 
 void CCore::doScan(ACS::Time& ut,const Antenna::TTrackingParameters * const prim,const Antenna::TTrackingParameters *const sec,
 		const MinorServo::MinorServoScan*const servoPar,const Receivers::TReceiversParameters*const recvPa,
-		const Management::TSubScanConfiguration& subScanConf) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,
+		const Management::TSubScanConfiguration& subScanConf,const Management::TScanConfiguration& scanConf) throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,
 				ComponentErrors::UnexpectedExImpl,ComponentErrors::ComponentNotActiveExImpl,ComponentErrors::CouldntGetComponentExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
@@ -240,7 +256,9 @@ void CCore::doScan(ACS::Time& ut,const Antenna::TTrackingParameters * const prim
 	}
 	try {
 		receiversUT=ut;
-		m_receiversBoss->startScan(receiversUT,*recvPa,m_antennaRTime.in());
+		Management::TScanConfiguration_var scConf;
+		scConf=scanConf;
+		m_receiversBoss->startScan(receiversUT,*recvPa,m_antennaRTime.in(),scConf.in());
 		ACS_LOG(LM_FULL_INFO,"CCore::doScan()",(LM_DEBUG,"RECEIEVERS_SCAN_EPOCH %llu",(unsigned long long)receiversUT));
 	}
 	catch (ComponentErrors::ComponentErrorsEx& ex) {
@@ -278,7 +296,7 @@ void CCore::doScan(ACS::Time& ut,const Antenna::TTrackingParameters * const prim
 
 void CCore::startScan(ACS::Time& time,const Antenna::TTrackingParameters *const prim,const Antenna::TTrackingParameters *const sec,
   const MinorServo::MinorServoScan*const servoPar,const Receivers::TReceiversParameters*const recvPar,
-  const Management::TSubScanConfiguration& subScanConf) throw (ManagementErrors::TelescopeSubScanErrorExImpl,
+  const Management::TSubScanConfiguration& subScanConf,const Management::TScanConfiguration& scanConf) throw (ManagementErrors::TelescopeSubScanErrorExImpl,
   ManagementErrors::TargetOrSubscanNotFeasibleExImpl,ManagementErrors::CloseTelescopeScanErrorExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
@@ -290,7 +308,7 @@ void CCore::startScan(ACS::Time& time,const Antenna::TTrackingParameters *const 
 		throw impl;
 	}
 	try {
-		if (!checkScan(time,prim,sec,servoPar,recvPar)) {
+		if (!checkScan(time,prim,sec,servoPar,recvPar,scanConf)) {
 			_EXCPT(ManagementErrors::TargetOrSubscanNotFeasibleExImpl,impl,"CCore::startScan()");
 			throw impl;
 		}
@@ -302,7 +320,7 @@ void CCore::startScan(ACS::Time& time,const Antenna::TTrackingParameters *const 
 	}
 	clearTracking();
 	try {
-		doScan(time,prim,sec,servoPar,recvPar,subScanConf);
+		doScan(time,prim,sec,servoPar,recvPar,subScanConf,scanConf);
 	}
 	catch (ACSErr::ACSbaseExImpl& ex) {
 		_ADD_BACKTRACE(ManagementErrors::TelescopeSubScanErrorExImpl,impl,ex,"CCore::startScan()");

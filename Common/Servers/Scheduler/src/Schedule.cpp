@@ -540,9 +540,15 @@ CSchedule::CSchedule(const IRA::CString& path,const IRA::CString& fileName) : CB
 CSchedule::~CSchedule()
 {
 	TIterator p;
+	TScansIterator k;
 	for(p=m_schedule.begin();p<m_schedule.end();p++) {
 		if ((*p)!=NULL) delete (*p);
 	}
+	for(k=m_scans.begin();k<m_scans.end();k++) {
+		if ((*k)!=NULL) delete (*k);
+	}
+	m_schedule.clear();
+	m_scans.clear();
 	if (m_scanListUnit) delete m_scanListUnit;
 	if (m_postScanUnit) delete m_postScanUnit;
 	if (m_preScanUnit) delete m_preScanUnit;
@@ -552,6 +558,8 @@ CSchedule::~CSchedule()
 
 bool CSchedule::readAll(bool check)
 {
+	DWORD line;
+	IRA::CString err;
 	if (!CBaseSchedule::readAll(false)) { //the check is posticipated at the time of the other file are opened
 		return false;
 	}
@@ -589,10 +597,14 @@ bool CSchedule::readAll(bool check)
 		return false;
 	}
 	if (check) {
-		DWORD line;
-		IRA::CString err;
 		if (!checkConsistency(line,err)) {
 			m_lastError.Format("File %s has inconsistencies at line %u, error message: %s",(const char*)m_fileName,line,(const char *)err);
+			return false;
+		}
+	}
+	if (!prepareScan(line,err)) {
+		if (check) {
+			m_lastError.Format("Scan definition error in file %s at line %u, error message: %s",(const char*)m_fileName,line,(const char *)err);
 			return false;
 		}
 	}
@@ -684,7 +696,8 @@ IRA::CString CSchedule::getIdentifiers(const DWORD& counter)
 }
 
 bool CSchedule::getSubScan_SEQ(DWORD& counter,DWORD& scanid,DWORD& subscanid,double& duration,DWORD& scan,IRA::CString& pre,bool& preBlocking,WORD& preArgs,IRA::CString& post,
-		bool& postBlocking,WORD& postArgs,IRA::CString& bckProc,IRA::CString& wrtInstance,IRA::CString& suffix,IRA::CString& layout,bool& rewind)
+		bool& postBlocking,WORD& postArgs,IRA::CString& bckProc,IRA::CString& wrtInstance,IRA::CString& suffix,
+		IRA::CString& layout,bool& rewind,Management::TScanConfiguration*& scanConf)
 {
 	if ((m_mode!=SEQ) && (m_mode!=TIMETAGGED)) {
 		m_lastError.Format("The current is not a sequence schedule");
@@ -713,6 +726,7 @@ bool CSchedule::getSubScan_SEQ(DWORD& counter,DWORD& scanid,DWORD& subscanid,dou
 			layout=(*p)->layout;
 			counter=(*p)->counter;
 			rewind=false;
+			scanConf=(*p)->scanConf;
 			return true;
 		}
 	}	
@@ -733,17 +747,20 @@ bool CSchedule::getSubScan_SEQ(DWORD& counter,DWORD& scanid,DWORD& subscanid,dou
 	layout=(*p)->layout;
 	counter=(*p)->counter;
 	rewind=true;
+	scanConf=(*p)->scanConf;
 	return true;
 }
 
 bool CSchedule::getSubScan_SEQ(TRecord& rec)
 {
 	return getSubScan_SEQ(rec.counter,rec.scanid,rec.subscanid,rec.duration,rec.scan,rec.preScan,rec.preScanBlocking,rec.preScanArgs,rec.postScan,rec.postScanBlocking,rec.postScanArgs,rec.backendProc,rec.writerInstance,rec.suffix,
-			rec.layout,rec.rewind);
+			rec.layout,rec.rewind,rec.scanConf);
 }
 
 bool CSchedule::getSubScan_LST(ACS::TimeInterval& lst,DWORD& counter,DWORD&scanid,DWORD& subscanid,double& duration,DWORD& scan,
-		IRA::CString& pre,bool& preBlocking,WORD& preArgs,IRA::CString& post,bool& postBlocking,WORD& postArgs,IRA::CString& bckProc,IRA::CString& wrtInstance,IRA::CString& suffix,IRA::CString& layout,bool& rewind)
+		IRA::CString& pre,bool& preBlocking,WORD& preArgs,IRA::CString& post,bool& postBlocking,WORD& postArgs,
+		IRA::CString& bckProc,IRA::CString& wrtInstance,IRA::CString& suffix,
+		IRA::CString& layout,bool& rewind,Management::TScanConfiguration*& scanConf)
 {
 	if (m_mode!=LST) {
 		m_lastError.Format("The current schedule is not LST based");
@@ -774,6 +791,7 @@ bool CSchedule::getSubScan_LST(ACS::TimeInterval& lst,DWORD& counter,DWORD&scani
 				suffix=(*p)->suffix;
 				layout=(*p)->layout;
 				rewind=false;
+				scanConf=(*p)->scanConf;
 				return true;
 			}
 		}
@@ -803,26 +821,69 @@ bool CSchedule::getSubScan_LST(ACS::TimeInterval& lst,DWORD& counter,DWORD&scani
 	suffix=(*p)->suffix;
 	layout=(*p)->layout;
 	rewind=true;
+	scanConf=(*p)->scanConf;
 	return true;
 }
 
 bool CSchedule::getSubScan_LST(TRecord& rec)
 {
 	return getSubScan_LST(rec.lst,rec.counter,rec.scanid,rec.subscanid,rec.duration,rec.scan,rec.preScan,rec.preScanBlocking,rec.preScanArgs,rec.postScan,rec.postScanBlocking,rec.preScanArgs,
-			rec.backendProc,rec.writerInstance,rec.suffix,rec.layout,rec.rewind);
+			rec.backendProc,rec.writerInstance,rec.suffix,rec.layout,rec.rewind,rec.scanConf);
+}
+
+bool CSchedule::prepareScan(DWORD& line,IRA::CString& errMsg)
+{
+	TIterator p;
+	Schedule::CScanList::TRecord rec;
+	DWORD scanID=0;
+	Management::TScanConfiguration *scanConf;
+	Schedule::CScanBinder binder(NULL,false);
+	for (p=m_schedule.begin();p<m_schedule.end();p++) {
+		if (scanID!=(*p)->scanid) {
+			scanConf=new Management::TScanConfiguration;
+			m_scans.push_back(scanConf);
+			scanID=(*p)->scanid;
+			binder.init(scanConf);
+			binder.startScan(scanID);
+		}	
+		m_scanListUnit->getScan((*p)->scan,rec);
+		binder.addSubScan((Antenna::TTrackingParameters*)rec.primaryParameters,
+		  						(Antenna::TTrackingParameters*)rec.secondaryParameters,
+								(MinorServo::MinorServoScan*)rec.servoParameters,
+								(Receivers::TReceiversParameters*)rec.receiversParameters);
+		(*p)->scanConf=binder.getScanConf();				
+	}
+	return true;
 }
 
 bool CSchedule::checkConsistency(DWORD& line,IRA::CString& errMsg)
 {
 	ACS::TimeInterval lst=0;
 	TIterator p,i;
+	DWORD currentScanID;
+	TIterator start;
+	std::vector<DWORD> scanIDS;
 	// check that the initialization procedure has been defined
 	if (!m_postScanUnit->checkProcedure(m_initProc,m_initProcArgs)) {
 		line=0;
 		errMsg.Format("schedule initialization procedure %s is not defined",(const char *)m_initProc);
 		return false;
 	}
+	scanIDS.clear();
+	currentScanID=0;
+	start=m_schedule.begin();
 	for (p=m_schedule.begin();p<m_schedule.end();p++) {
+		if (currentScanID!=(*p)->scanid) {
+			if (!m_scanListUnit->checkTarget(scanIDS)) {
+				line=(*start)->line;
+				errMsg="this scan seems to have more than one target or source";
+				return false;
+			}
+			scanIDS.clear();
+			currentScanID=(*p)->scanid;
+			start=p;		
+		}		
+		scanIDS.push_back((*p)->scan);		
 		//check that  the combination scanid/subscanid is unique
 		for (i=p+1;i<m_schedule.end();i++) {
 				 if  (((*p)->scanid==(*i)->scanid) && ((*p)->subscanid==(*i)->subscanid)) {
@@ -875,6 +936,11 @@ bool CSchedule::checkConsistency(DWORD& line,IRA::CString& errMsg)
 			}
 		}
 		//count++;
+	}
+	if (!m_scanListUnit->checkTarget(scanIDS)) {
+		line=(*start)->line;
+		errMsg="this scan seems to have more than one target or source";
+		return false;
 	}
 	return true;
 }
@@ -1123,7 +1189,7 @@ bool CSchedule::parseScans(const IRA::CString& line,const DWORD& lnNumber,IRA::C
 				errorMsg="cannot decode local sidereal timestamp";
 				return false;
 			}
-			if (scanid!=m_currentScanDef.id) {
+			if (scanid!=m_currentScanDef.id) {			
 				errorMsg="scan identifier differs from the identifier provided in the current scan definition";
 				return false;
 			}
@@ -1131,8 +1197,9 @@ bool CSchedule::parseScans(const IRA::CString& line,const DWORD& lnNumber,IRA::C
 				errorMsg="subscan identifier cannot be zero";
 				return false;
 			}
-			counter=m_schedule.size()+1; // subscan enumerations must start from 1
+			counter=m_schedule.size()+1; // subscan enumerations must start from 1			
 			p=new TRecord;
+			p->scanConf=0; //this wil be set in preparescan method of this class
 			p->line=lnNumber;
 			p->scanLine=m_currentScanDef.line;
 			p->subscanid=subscanid;
@@ -1171,12 +1238,13 @@ bool CSchedule::parseScans(const IRA::CString& line,const DWORD& lnNumber,IRA::C
 			}
 			counter=m_schedule.size()+1; // subscan enumerations must start from 1
 			p=new TRecord;
+			p->scanConf=0; //this wil be set in prepareScan method of this class 
 			p->line=lnNumber;
 			p->scanLine=m_currentScanDef.line;
 			p->subscanid=subscanid;
 			p->scanid=m_currentScanDef.id;
 			p->counter=counter;
-			p->ut=0;  // this represents the indication that the scan must start as soon as possible
+			p->ut=0;  // this is the indication that the scan must start as soon as possible
 			p->scan=scan;
 			p->duration=duration;
 			p->preScanBlocking=isSync(pre);

@@ -267,7 +267,7 @@ public:
 	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 */
 	virtual void startScan(ACS::Time& startUT,const Receivers::TReceiversParameters & param,
-	  const Antenna::TRunTimeParameters & antennaInfo) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
+	  const Antenna::TRunTimeParameters & antennaInfo,const Management::TScanConfiguration& scanConf) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
 	  ReceiversErrors::ReceiversErrorsEx);
 
 	/**
@@ -281,7 +281,7 @@ public:
 	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 */
 	virtual CORBA::Boolean checkScan(ACS::Time startUt,const Receivers::TReceiversParameters& param,
-	 const Antenna::TRunTimeParameters& antennaInfo,Receivers::TRunTimeParameters_out runTime) throw (
+	 const Antenna::TRunTimeParameters& antennaInfo,const Management::TScanConfiguration& scanConf,Receivers::TRunTimeParameters_out runTime) throw (
 	 CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 	/**
