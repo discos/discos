@@ -24,7 +24,7 @@
 <mode/>
 <derotatorPosition/>
 
-<AvailableReceiver Code="CCG" Derotator="false" Component="RECEIVERS/SRT7GHzReceiver"/>
+<AvailableReceiver Code="CCB" Derotator="false" Component="RECEIVERS/SRT7GHzReceiver"/>
 
 <AvailableReceiver Code="KKG" Derotator="false" Component="RECEIVERS/SRTKBandMFReceiver"/>
 
