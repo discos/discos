@@ -305,10 +305,11 @@ public:
 	 * This method  allows to set the current running project code. The code will be used to locate schedules files and to store data files on system disks. If the project is not present/registered in the
 	 * system an error is thrown.
 	 * @param code new project code. If an empty string is given the default code is adopted, the default code is part of the component configuration.
+	 *	@param message a wellcome message from control software 
 	 * @throw CORBA::SystemException
 	 * @throw ManagementErrors::ManagementErrorsEx
 	 */
-	virtual void setProjectCode(const char *code) throw (CORBA::SystemException,ManagementErrors::ManagementErrorsEx);
+	virtual void setProjectCode(const char *code,CORBA::String_out message) throw (CORBA::SystemException,ManagementErrors::ManagementErrorsEx);
 
 	/**
 	 * This method allow to set the current value for the rest frequency

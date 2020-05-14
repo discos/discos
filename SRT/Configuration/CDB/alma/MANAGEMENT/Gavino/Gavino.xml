@@ -30,7 +30,7 @@
              DefaultBackendInstance="BACKENDS/TotalPower"             
              DefaultDataReceiverInstance="MANAGEMENT/FitsZilla"
              DefaultProjectCode="Maintenance"
-             CheckProjectCode="false"
+             CheckProjectCode="true"
 >
 
 <!--ActiveSurfaceBossInterface="IDL:/alma/SRTActiveSurface/SRTActiveSurfaceBoss:1.0" -->             

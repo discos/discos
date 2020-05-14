@@ -107,6 +107,19 @@ public:
 	}
 };
 
+class longString_converter
+{
+public:
+	IRA::CString strToVal(const char * str) throw (ParserErrors::BadTypeFormatExImpl) {
+		return IRA::CString(str);
+	}
+	char *valToStr(const IRA::CString& val) {
+		char *c=new char[val.GetLength()+1];
+		strcpy(c,(const char*)val);
+		return c;
+	}
+};
+
 template <_sp_symbols OUT> class angle_converter
 {
 public:

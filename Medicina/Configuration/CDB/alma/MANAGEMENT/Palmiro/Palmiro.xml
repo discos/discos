@@ -30,7 +30,7 @@
 	     	 DefaultBackendInstance="BACKENDS/TotalPower"
 	     	 DefaultDataReceiverInstance="MANAGEMENT/FitsZilla"
 	     	 DefaultProjectCode="maintenance"
-	     	 CheckProjectCode="false"
+	     	 CheckProjectCode="true"
 >
              
 <scheduleName/>

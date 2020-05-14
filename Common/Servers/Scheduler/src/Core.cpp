@@ -123,7 +123,7 @@ void CCore::execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::
 	m_parser->add("log",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::_changeLogFile),1);
 	m_parser->add("logMessage",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::_logMessage),1);
 	m_parser->add("wx",new function4<CCore,non_constant,void_type,O<double_type>,O<double_type>,O<double_type>,O<double_type> >(this,&CCore::_getWeatherStationParameters),0);
-	m_parser->add("project",new function1<CCore,non_constant,void_type,I<string_type> >(this,&CCore::_setProjectCode),1);
+	m_parser->add("project",new function2<CCore,non_constant,void_type,I<string_type>,O<longString_type> >(this,&CCore::_setProjectCode),1);
 	// no range checks because * is allowed
 	m_parser->add("skydip",new function3<CCore,non_constant,void_type,I<elevation_type<rad,false> >,I<elevation_type<rad,false> >,I<interval_type> >(this,&CCore::skydip),3);
 	m_parser->add("agc","_tp_agc",2,"NONE");

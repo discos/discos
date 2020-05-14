@@ -362,10 +362,12 @@ void SchedulerImpl::fTrack(const char* dev) throw (ComponentErrors::ComponentErr
 	m_core->_fTrack(dev);
 }
 
-void SchedulerImpl::setProjectCode(const char *code) throw (CORBA::SystemException,ManagementErrors::ManagementErrorsEx)
+void SchedulerImpl::setProjectCode(const char *code, CORBA::String_out message) throw (CORBA::SystemException,ManagementErrors::ManagementErrorsEx)
 {
+	IRA::CString msg;
 	try {
-		m_core->_setProjectCode(code);
+		m_core->_setProjectCode(code, msg);
+		message=(const char *)msg;
 	}
 	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
