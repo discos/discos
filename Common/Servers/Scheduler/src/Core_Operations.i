@@ -733,7 +733,7 @@ void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponent
 	}
 }
 
-void CCore::_setProjectCode(const char* code) throw (ManagementErrors::UnkownProjectCodeErrorExImpl)
+void CCore::_setProjectCode(const char* code,IRA::CString& message) throw (ManagementErrors::UnkownProjectCodeErrorExImpl)
 {
 	IRA::CString newCode(code);
 	if (newCode=="''") { // if '' given...maps to default user
@@ -750,6 +750,11 @@ void CCore::_setProjectCode(const char* code) throw (ManagementErrors::UnkownPro
 	if (m_schedExecuter) {
 		m_schedExecuter->setProjectCode(newCode);
 	}
+	message.Format("wellcome %s",code);
+	/**************************************/
+	/* The other part of the message should be read from CDB. I suggest
+		Some table inside DataBlock/ It should be Station or coudl create one */
+	/***************************************/
 }
 
 /*void CCore::_winkingMark(const char *arg) throw (ComponentErrors::ValidationErrorExImpl);

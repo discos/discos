@@ -47,6 +47,16 @@ void positivo(const long& var,TBools& res) {
 void stampa(const char *str) {
 	printf("%s\n",str);
 }
+
+void answer(const char *str,IRA::CString& answer) const
+{
+	if (str!=NULL) {
+		answer.Format("Wellcome %s",str);		
+	}
+	else {
+		answer="Wellcome";
+	}
+}
 int somma(const int&i,const int&j) {
 	return i+j;
 }
@@ -175,6 +185,9 @@ int main(int argc, char *argv[])
 	parser.add("sumSeq",new function1<CTest,non_constant,double_type,I<doubleSeq_type> >(&test,&CTest::sumSeq),1);
 	parser.add("sequence",new function2<CTest,constant,void_type,O<longSeq_type>,I<long_type> >(&test,&CTest::sequence),1);
 	parser.add("wait",new function1<CTest,constant,void_type,I<long_type> >(&test,&CTest::wait),1);
+	
+	parser.add("answer",new function2<CTest,constant,void_type,I<string_type>, O<longString_type> >(&test,&CTest::answer),1);
+
 
 	parser.add("naviga","firefox",1);
 
