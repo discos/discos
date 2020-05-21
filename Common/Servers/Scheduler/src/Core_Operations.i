@@ -750,11 +750,11 @@ void CCore::_setProjectCode(const char* code,IRA::CString& message) throw (Manag
 	if (m_schedExecuter) {
 		m_schedExecuter->setProjectCode(newCode);
 	}
-	message.Format("wellcome %s",code);
-	/**************************************/
-	/* The other part of the message should be read from CDB. I suggest
-		Some table inside DataBlock/ It should be Station or coudl create one */
-	/***************************************/
+    std::string msg = "Welcome to this facility, " + std::string(code) + "!";
+    std::string welcome = std::string(m_config->getWelcomeMessage());
+    if(welcome != "")
+        msg += "\n" + welcome;
+    message.Format("STR %s", msg.c_str());
 }
 
 /*void CCore::_winkingMark(const char *arg) throw (ComponentErrors::ValidationErrorExImpl);

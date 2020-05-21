@@ -219,6 +219,11 @@ public:
 	 */
 	const IRA::CString& getRecordingLockFile() const { return m_recordingLockFile;}
 
+	/**
+	 * @return the welcome message string
+	 */
+	const IRA::CString& getWelcomeMessage() const { return m_welcomeMessage;}
+
 private:
 	IRA::CString m_schedDir;
 	IRA::CString m_dataDir;
@@ -241,6 +246,7 @@ private:
 	IRA::CString m_proceduresLocation;
 	IRA::CString m_defaultProceduresFile;
 	IRA::CString m_defaultProjectCode;
+	IRA::CString m_welcomeMessage;
 	bool m_checkProjectCode;
 	long m_minorServoMappings;
 	long m_fTrackDigits;
