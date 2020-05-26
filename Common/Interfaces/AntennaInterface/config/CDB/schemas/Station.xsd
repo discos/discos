@@ -33,6 +33,8 @@
 	<xs:attribute name="xPolarMotion" type="xs:double" use="required"/>
 	<!--  allow to configure the startup geodetic model  -->
 	<xs:attribute name="geodeticModel" type="xs:long" use="required"/>
+	<!-- The message to be displayed whenever a new 'project' command is issued -->
+	<xs:attribute name="welcomeMessage" type="xs:string" use="required" />
 	
 </xs:complexType>
 
