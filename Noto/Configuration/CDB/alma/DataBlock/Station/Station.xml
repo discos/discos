@@ -16,4 +16,5 @@
 	height="32.0"
 	yPolarMotion="0.0"
 	xPolarMotion="0.0"
-	geodeticModel="0" />
+	geodeticModel="0"
+	welcomeMessage="" />

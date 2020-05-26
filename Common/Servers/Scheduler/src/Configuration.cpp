@@ -289,7 +289,6 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	_GET_STRING_ATTRIBUTE("DefaultProceduresFile","The default procedures file is ",m_defaultProceduresFile);
 	_GET_STRING_ATTRIBUTE("DefaultProjectCode","The default project code is ",m_defaultProjectCode);
 	_GET_STRING_ATTRIBUTE("CheckProjectCode","Check new project codes: ",check);
-	_GET_STRING_ATTRIBUTE("WelcomeMessage","Welcome message: ", m_welcomeMessage);
 	check.MakeUpper();
 	if (check=="TRUE") {
 		m_checkProjectCode=true;
@@ -302,16 +301,18 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 		m_currentBackendIndex=-1;
 	}
 
-    std::string welcomeMessage = std::string(m_welcomeMessage);
-    //Replace every occurrence of the string "\n" (2 characters) with a new line character
-    while(true)
-    {
-        std::size_t found = welcomeMessage.find("\\n");
-        if(found == std::string::npos)
-            break;
-        welcomeMessage.replace(found, 2, "\n");
-    }
-    m_welcomeMessage.Format("%s", welcomeMessage.c_str());
+	if (!CIRATools::getDBValue(Services,"welcomeMessage",m_welcomeMessage,"alma/","DataBlock/Station")) {
+		m_welcomeMessage = (const char*)"";
+	}
+	std::string welcomeMessage = std::string(m_welcomeMessage);
+	//Replace every occurrence of the string "\n" (2 characters) with a new line character
+	while(true) {
+		std::size_t found = welcomeMessage.find("\\n");
+		if(found == std::string::npos)
+			break;
+		welcomeMessage.replace(found, 2, "\n");
+	}
+	m_welcomeMessage = welcomeMessage.c_str();
 }
 
 Management::TScanAxis CConfiguration::str2Axis(const IRA::CString& axis) const

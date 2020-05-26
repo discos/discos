@@ -85,8 +85,6 @@
 		<xs:attribute name="DefaultProjectCode" type="xs:string" use="required" />
 		<!-- This flag is "true" or "false" to control if the system should check the project code for its existance or not -->
         <xs:attribute name="CheckProjectCode" type="xs:boolean" use="required" />
-		<!-- The message to be displayed whenever a new 'project' command is issued -->
-		<xs:attribute name="WelcomeMessage" type="xs:string" default="" />
       </xs:extension>
      </xs:complexContent>
 	</xs:complexType>

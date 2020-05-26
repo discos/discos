@@ -31,7 +31,6 @@
              DefaultDataReceiverInstance="MANAGEMENT/FitsZilla"
              DefaultProjectCode="Maintenance"
              CheckProjectCode="true"
-             WelcomeMessage="Before starting to observe, it is important that you check the status of the telescope visiting the following website:\nhttps://bit.ly/2Xf3aUl\nYou can find it as a bookmark in the browser as well."
 >
 
 <!--ActiveSurfaceBossInterface="IDL:/alma/SRTActiveSurface/SRTActiveSurfaceBoss:1.0" at the moment disabled-->
