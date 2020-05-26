@@ -204,11 +204,12 @@ module Management {
 
 		/**
 		 * This method sets the current project code. If the project does not exists an error is thrown.
-		 * @param code code of the project, if blank the selected code will be default one 
+		 * @param code code of the project, if blank the selected code will be default one
+		 * @param message this will returns a wellcome message from the control software
 		 * @throw ManagementErrors::ManagementErrorsEx 
 		 * @throw CORBA::SystemExcpetion 
 		 */
-		void setProjectCode(in string code) raises (ManagementErrors::ManagementErrorsEx);
+		void setProjectCode(in string code, out string message) raises (ManagementErrors::ManagementErrorsEx);
 
 		/**
 		 * It allows to immediately start a scan that involves a primary focus axis or a subreflector axis. The scan is performed of the currently

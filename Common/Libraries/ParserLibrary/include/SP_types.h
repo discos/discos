@@ -163,6 +163,7 @@ typedef basic_type<ACS::Time,time_converter> time_type;
 typedef basic_type<ACS::TimeInterval,interval_converter> interval_type;
 typedef basic_type<ACS::longSeq,longSeq_converter> longSeq_type;
 typedef basic_type<ACS::doubleSeq,doubleSeq_converter> doubleSeq_type;
+typedef basic_type<IRA::CString,longString_converter> longString_type;
 
 
 class string_type: public virtual basic_type<char *,string_converter,_no_wildcard>
