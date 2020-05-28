@@ -10,11 +10,12 @@ import ACSLog
 
 import ACS, ACS__POA                                  # Import the Python CORBA stubs for BACI
 from PyQt4 import Qt
-from PyQt4.QtCore import   pyqtSlot,QThread,QMutex,QTimer
+from PyQt4.QtCore import pyqtSlot,QThread,QMutex,QTimer
 import PyQt4.Qwt5 as Qwt
-import sys,getopt
+import sys,getopt,os
 from time import sleep
 import math 
+from IRAPy import logger,userLogger
 
 
 
@@ -28,6 +29,7 @@ __version__ = '$Id'
 @version $Id$
 '''
 
+DEFAULT_COMPONENT="MANAGEMENT/CalibrationTool"
 
 class MyWorker(QThread):
 	def __init__(self,component,parent=None):
@@ -165,172 +167,199 @@ class MyWorker(QThread):
                 QThread.msleep(200)
                 pass
  
- 
-
-
 
 class Application(Qt.QDialog,calibrationtool_ui.Ui_CalibrationToolDialog):
  
 	def __init__(self,compname,parent=None):
-		Qt.QDialog.__init__(self)
-                
-		self.simpleClient = PySimpleClient()
+		
+		self.scheduler=None
+		self.antennaBoss=None
+		self.component=None
+		self.componentName=DEFAULT_COMPONENT
+		self.managerConnected=False
+		self.thread=None
+		
 		try:
-                        scheduler= self.simpleClient.getDefaultComponent("IDL:alma/Management/Scheduler:1.0")
-                        antennaBoss =self.simpleClient.getDefaultComponent("IDL:alma/Antenna/AntennaBoss:1.0")
-                        
-                        #choose default recorder
-                        if compname=='default':
-                              
-                              recorder=scheduler._get_currentRecorder()
-                              (recordername,compl)=recorder.get_sync()
-                              self.componentname=recordername
-                              print recordername
-                        else:
-                              self.componentname=compname
-                        print self.componentname
-                        component= self.simpleClient.getComponent(self.componentname)
-     			self.thread=MyWorker([component,scheduler,antennaBoss,self.simpleClient])
-			self.setupUi(self)
-#                        self.qwtPlot_datax.setAxisScale(Qwt.QwtPlot.xBottom, 0,1000)
-                        self.qwtPlot_datax.setAxisAutoScale(Qwt.QwtPlot. yLeft) 
-			self.setWindowTitle(self.componentname)
-                        self.qwtPlot_datax.setAxisTitle(Qwt.QwtPlot.yLeft, "Ta(K)")
-                        self.qwtPlot_datay.setAxisTitle(Qwt.QwtPlot.yLeft, "Ta(K)")
- 
-
-
-
-
-			self.connect(self.thread,Qt.SIGNAL("arrayDataX"),self.qwtPlot_datay.setX)
-    	 		self.connect(self.thread,Qt.SIGNAL("arrayDataY"),self.qwtPlot_datay.setVal)
-                        
-                        self.connect(self.thread,Qt.SIGNAL("DataX"),self.qwtPlot_datax.setX)
-                        self.connect(self.thread,Qt.SIGNAL("DataY"),self.qwtPlot_datax.setVal)
-                        
-                        self.connect(self.thread,Qt.SIGNAL("projectname"),self.plainTextEdit_project.setPlainText)
-                        self.connect(self.thread,Qt.SIGNAL("observer"),self.plainTextEdit_observer.setPlainText)
-                        self.connect(self.thread,Qt.SIGNAL("filename"),self.plainTextEdit_filename.setPlainText)
-                        self.connect(self.thread,Qt.SIGNAL("subscan"),self.subscanIdLineEdit.setText)
-                        self.connect(self.thread,Qt.SIGNAL("scan"),self.scanIdLineEdit.setText)
-                        self.connect(self.thread,Qt.SIGNAL("hpbw"),self.hpbwLineEdit.setText)
-                        self.connect(self.thread,Qt.SIGNAL("amplitude"),self.amplitudeLineEdit.setText)
-                        self.connect(self.thread,Qt.SIGNAL("peakOffset"),self.peakoffsetLineEdit.setText)
-                        self.connect(self.thread,Qt.SIGNAL("slope"),self.slopeLineEdit.setText)
-                        self.connect(self.thread,Qt.SIGNAL("offset"),self.offsetLineEdit.setText)
-                        self.connect(self.thread,Qt.SIGNAL("target"),self.nameLineEdit.setText)
-                        self.connect(self.thread,Qt.SIGNAL("device"),self.deviceIdLineEdit.setText)
-                        self.connect(self.thread,Qt.SIGNAL("isRecording"),self.isRecording)
-                        self.connect(self.thread,Qt.SIGNAL("scanAxis"),self.scanAxis)
-                       
-
-
-		except  Exception,ex:
+			self.simpleClient = PySimpleClient()
+			self.managerConnected=True
+		except Exception,ex:
+			newEx = ClientErrorsImpl.CouldntLogManagerExImpl(exception=ex, create=1)
+			logger.logException(newEx)
+			print "Please check the system is up and running......"
+			sys.exit(-1)
+							
+		try:
+			self.scheduler= self.simpleClient.getDefaultComponent("IDL:alma/Management/Scheduler:1.0")
+		except Exception,ex:
 			newEx = ClientErrorsImpl.CouldntAccessComponentExImpl(exception=ex, create=1)
-#        		newEx.setComponentName(self.componentname)
-         #ACS_LOG_ERROR
-        		newEx.log(self.simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR)
-        		self.simpleClient.disconnect()
-        		sys.exit(-1)	
+			newEx.setComponentName("IDL:alma/Management/Scheduler:1.0")
+			logger.logException(newEx)
+			print "Please check the system is up and running and scheduler component is alive!"
+			sys.exit(-1)
+
+		try:
+			self.antennaBoss =self.simpleClient.getDefaultComponent("IDL:alma/Antenna/AntennaBoss:1.0")
+		except Exception,ex:
+			newEx = ClientErrorsImpl.CouldntAccessComponentExImpl(exception=ex, create=1)
+			newEx.setComponentName("IDL:alma/Antenna/AntennaBoss:1.0")
+			logger.logException(newEx)
+			print "Please check the system is up and running and antenna boss is alive!"
+			sys.exit(-1)
+
+		#choose default recorder
+		if compname=='default':
+			try:
+				recorder=self.scheduler._get_currentRecorder()
+				(recordername,compl)=recorder.get_sync()
+			except  Exception,ex:
+				newEx = ClientErrorsImpl.CouldntAccessPropertyExImpl(exception=ex, create=1)
+				logger.logException(newEx)
+				print "Please check scheduler component is alive and responsive|" 
+				sys.exit(-1)
+					
+			print "Starting with default component: " + DEFAULT_COMPONENT	
+			if recordername!=DEFAULT_COMPONENT:
+				print "Be aware that the in-use recorder is currently " + recordername
+
+			self.componentName=DEFAULT_COMPONENT
+				
+		else:
+			self.componentName=compname
+			print "Starting with component: " + self.componentName
+       	               
+		try:
+			self.component= self.simpleClient.getComponent(self.componentName)
+		except Exception,ex:
+			newEx = ClientErrorsImpl.CouldntAccessComponentExImpl(exception=ex, create=1)
+			newEx.setComponentName(self.componentName)
+			logger.logException(newEx)
+			print "Please check the system is up and running and " + self.componentName + " is alive!"
+			sys.exit(-1)
+		
+		self.thread=MyWorker([self.component,self.scheduler,self.antennaBoss,self.simpleClient])
+		Qt.QDialog.__init__(self)
+		self.setupUi(self)
+#		self.qwtPlot_datax.setAxisScale(Qwt.QwtPlot.xBottom, 0,1000)
+		self.qwtPlot_datax.setAxisAutoScale(Qwt.QwtPlot. yLeft) 
+		self.setWindowTitle(self.componentName)
+		self.qwtPlot_datax.setAxisTitle(Qwt.QwtPlot.yLeft, "Ta(K)")
+		self.qwtPlot_datay.setAxisTitle(Qwt.QwtPlot.yLeft, "Ta(K)")
+		
+		self.connect(self.thread,Qt.SIGNAL("arrayDataX"),self.qwtPlot_datay.setX)
+		self.connect(self.thread,Qt.SIGNAL("arrayDataY"),self.qwtPlot_datay.setVal)
                         
- 	@pyqtSlot(Qt.QObject,name="isRecording")
-        def isRecording(self,rec):
-            if rec==False:
-                self.recording.setText("OFF")
-                palette = self.recording.palette()
-                role = self.recording.backgroundRole()
-                palette.setColor(role, Qt.QColor('gray'))
-                self.recording.setPalette(palette)
-                self.BScanaxis.setEnabled(False)
-                
-                
-                
-            if rec==True:
-                self.recording.setText("ON")
-                palette = self.recording.palette()
-                role = self.recording.backgroundRole()
-                palette.setColor(role, Qt.QColor('green'))
-                self.recording.setPalette(palette)
-                self.BScanaxis.setEnabled(True)
+		self.connect(self.thread,Qt.SIGNAL("DataX"),self.qwtPlot_datax.setX)
+		self.connect(self.thread,Qt.SIGNAL("DataY"),self.qwtPlot_datax.setVal)
+                        
+		self.connect(self.thread,Qt.SIGNAL("projectname"),self.plainTextEdit_project.setPlainText)
+		self.connect(self.thread,Qt.SIGNAL("observer"),self.plainTextEdit_observer.setPlainText)
+		self.connect(self.thread,Qt.SIGNAL("filename"),self.plainTextEdit_filename.setPlainText)
+		self.connect(self.thread,Qt.SIGNAL("subscan"),self.subscanIdLineEdit.setText)
+		self.connect(self.thread,Qt.SIGNAL("scan"),self.scanIdLineEdit.setText)
+		self.connect(self.thread,Qt.SIGNAL("hpbw"),self.hpbwLineEdit.setText)
+		self.connect(self.thread,Qt.SIGNAL("amplitude"),self.amplitudeLineEdit.setText)
+		self.connect(self.thread,Qt.SIGNAL("peakOffset"),self.peakoffsetLineEdit.setText)
+		self.connect(self.thread,Qt.SIGNAL("slope"),self.slopeLineEdit.setText)
+		self.connect(self.thread,Qt.SIGNAL("offset"),self.offsetLineEdit.setText)
+		self.connect(self.thread,Qt.SIGNAL("target"),self.nameLineEdit.setText)
+		self.connect(self.thread,Qt.SIGNAL("device"),self.deviceIdLineEdit.setText)
+		self.connect(self.thread,Qt.SIGNAL("isRecording"),self.isRecording)
+		self.connect(self.thread,Qt.SIGNAL("scanAxis"),self.scanAxis)
+                       
+	@pyqtSlot(Qt.QObject,name="isRecording")
+	def isRecording(self,rec):
+		if rec==False:
+			self.recording.setText("OFF")
+			palette = self.recording.palette()
+			role = self.recording.backgroundRole()
+			palette.setColor(role, Qt.QColor('gray'))
+			self.recording.setPalette(palette)
+			self.BScanaxis.setEnabled(False)
+		if rec==True:
+			self.recording.setText("ON")
+			palette = self.recording.palette()
+			role = self.recording.backgroundRole()
+			palette.setColor(role, Qt.QColor('green'))
+			self.recording.setPalette(palette)
+			self.BScanaxis.setEnabled(True)
         
-        @pyqtSlot(Qt.QObject,name="scanAxis")  # decorator for the slot
-        def scanAxis(self,scanaxis):
-                self.BScanaxis.setText(str(scanaxis))
-                
-                if 'SUBR' not in str(scanaxis):
-                        self.scanAxisLabel.setText('ScanAxis - Pointing')
-                        xaxis_text="Direction (Deg)"
-                        hpbw_label_text='HPBW(arcmim)'
-                        peakOffsetLabel_text='PeakOffset(deg)'
-                else:
-                        self.scanAxisLabel.setText('ScanAxis - Focus')
-                        xaxis_text="Distance (mm)"
-                        hpbw_label_text='HPBW(mm)'
+	@pyqtSlot(Qt.QObject,name="scanAxis")  # decorator for the slot
+	def scanAxis(self,scanaxis):
+		self.BScanaxis.setText(str(scanaxis))           
+		if 'SUBR' not in str(scanaxis):
+			self.scanAxisLabel.setText('ScanAxis - Pointing')
+			xaxis_text="Direction (Deg)"
+			hpbw_label_text='HPBW(arcmim)'
+			peakOffsetLabel_text='PeakOffset(deg)'
+		else:
+			self.scanAxisLabel.setText('ScanAxis - Focus')
+			xaxis_text="Distance (mm)"
+			hpbw_label_text='HPBW(mm)'
+			peakOffsetLabel_text='PeakOffset(mm)'  
+			self.qwtPlot_datax.setAxisTitle(Qwt.QwtPlot.xBottom, xaxis_text)
+			self.qwtPlot_datay.setAxisTitle(Qwt.QwtPlot.xBottom, xaxis_text)
+			self.hpbw_label.setText(hpbw_label_text)
+			self.peakOffsetLabel.setText(peakOffsetLabel_text)
 
-                        peakOffsetLabel_text='PeakOffset(mm)'
-                
-                self.qwtPlot_datax.setAxisTitle(Qwt.QwtPlot.xBottom, xaxis_text)
-                self.qwtPlot_datay.setAxisTitle(Qwt.QwtPlot.xBottom, xaxis_text)
-                self.hpbw_label.setText(hpbw_label_text)
-                self.peakOffsetLabel.setText(peakOffsetLabel_text)
-                
-        
-
-        @pyqtSlot(Qt.QObject,name="scalePlots")  # decorator for the slot
-        def scalePlots(self,val):
-	        self.qwtPlot_datay.setAxisScale(QwtPlot.xBottom, min(val), max(val))		
+	@pyqtSlot(Qt.QObject,name="scalePlots")  # decorator for the slot
+	def scalePlots(self,val):
+		self.qwtPlot_datay.setAxisScale(QwtPlot.xBottom, min(val), max(val))
+   	
 	def run(self):
 		self.thread.start()
 					
 	def __del__(self):
-		self.thread.run=False  
-                try:
- 		     self.simpleClient.releaseComponent(self.componentname)
- 		     self.simpleClient.releaseComponent(self.scheduler._get_name())
- 		     self.simpleClient.releaseComponent(self.boss._get_name())
-     
+		#__del__ apparently is called twice, I have no clue and it should be investigated 
+		if self.thread:
+			if self.thread.isRunning:
+				self.thread.quit()
 
-
-		     self.simpleClient.disconnect()
-                except Exception,ex:
-                      print "exception"
-                      
-		print "end app"
+		if self.managerConnected:
+			try:
+				if self.component:
+					self.simpleClient.releaseComponent(self.component._get_name())
+				if self.scheduler:
+					self.simpleClient.releaseComponent(self.scheduler._get_name())
+				if self.antennaBoss:
+					self.simpleClient.releaseComponent(self.antennaBoss._get_name())
+			except Exception,ex:
+				print "Error in application cleanup"                      
 		
-
-def usage(nameapp):
-        print nameapp+" [component name]"
-        
-        
-  
-
- 
+		
+def usage():
+	print "calibrationtoolclient [component name]"
+	print
+	print "If no component name is provided, the default "+DEFAULT_COMPONENT+" will be used" 
 
 def main(args):
+	sys.tracebacklimit=0
+
 	try:
-           opts, args = getopt.getopt(sys.argv[1:],"h",["help"])
-        except getopt.GetoptError, err:
-            print str(err)
-            usage()
-            sys.exit(1)
-         
-        for o,a in opts:
-            if o in ("-h", "--help"):
-              usage()
-              sys.exit()
-        
-        if len(args)==0:
-            componentname='default'
-        else:
-            componentname=args[0]
-         
-        print componentname   
-        app = Qt.QApplication(args)
+		opts, args = getopt.getopt(sys.argv[1:],"h",["help"])
+	except getopt.GetoptError, err:
+		print str(err)
+		usage()
+		sys.exit(1)
+
+	for o,a in opts:
+		if o in ("-h", "--help"):
+			usage()
+			sys.exit()
+
+	if len(args)==0:
+		componentname='default'
+	else:
+		componentname=args[0]
+  
+	app = Qt.QApplication(args)
 	a=Application(componentname) #passa il nome del component al costruttore
+	sleep(1)
 	a.run()
-	p=a.show()
-		
-     	sys.exit(app.exec_())
+	p=a.show()	
+	sys.exit(app.exec_())
 	sleep(2)
+	print "Application closed!"
+	
+
 if __name__=='__main__':
 	main(sys.argv)
