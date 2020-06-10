@@ -18,8 +18,8 @@
 using namespace AntennaErrors;
 using namespace ComponentErrors;
 
-static char *rcsId="@(#) $Id: MedicinaMountImpl.cpp,v 1.17 2011-04-22 17:15:07 a.orlati Exp $";
-static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
+//static char *rcsId="@(#) $Id: MedicinaMountImpl.cpp,v 1.17 2011-04-22 17:15:07 a.orlati Exp $";
+//static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
 
 
 MedicinaMountImpl::MedicinaMountImpl(const ACE_CString &CompName,maci::ContainerServices *containerServices) : 
