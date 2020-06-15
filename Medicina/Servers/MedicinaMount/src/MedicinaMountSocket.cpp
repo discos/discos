@@ -842,6 +842,8 @@ double CMedicinaMountSocket::getHWAzimuth(double destination,const CACUInterface
 void CMedicinaMountSocket::detectOscillation() throw (ConnectionExImpl,SocketErrorExImpl,TimeoutExImpl,AntennaErrors::NakExImpl,AntennaBusyExImpl)
 {
 	TIMEVALUE now;
+	// if oscillation is not to be checked then exit immediately 
+	if (!m_configuration->checkForOscillation()) return;
 	double azError=getAzimuthError(); // throw (ConnectionExImpl,SocketErrorExImpl,TimeoutExImpl)
 	IRA::CIRATools::getTime(now);
 	CACUInterface::TAxeModes mode=m_Data.getLastCommandedMode();

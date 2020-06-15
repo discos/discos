@@ -24,7 +24,7 @@
 	} \
 	else { \
 		FIELD=tmpw; \
-		ACS_DEBUG_PARAM("CConfiguration::Init()",DESCR" %lu",tmpw); \
+		ACS_DEBUG_PARAM("CConfiguration::Init()",DESCR" %u",tmpw); \
 	} \
 }
 
@@ -43,6 +43,7 @@
 
 void CConfiguration::Init(maci::ContainerServices *Services) throw (ComponentErrors::CDBAccessExImpl)
 {
+	IRA::CString check;
 	ACS_TRACE("::CConfiguration::Init()");
 	// get ACU IP and port number from the database.	
 	_GET_STRING_ATTRIBUTE("IPAddress","IP Address:",m_sACUAddress,"");
@@ -62,7 +63,9 @@ void CConfiguration::Init(maci::ContainerServices *Services) throw (ComponentErr
 	m_elevationRateInfo.lowerLimit=-m_elevationRateInfo.upperLimit;
 	_GET_DOUBLE_ATTRIBUTE("maxAzimuthRate","Azimuth rate(degrees/sec):",m_azimuthRateInfo.upperLimit,"DataBlock/Mount");
 	m_azimuthRateInfo.lowerLimit=-m_azimuthRateInfo.upperLimit;
-	_GET_DOUBLE_ATTRIBUTE("cw_ccw_limit","CW/CCW limit (degrees):",m_cwLimit,"DataBlock/Mount");	
+	_GET_DOUBLE_ATTRIBUTE("cw_ccw_limit","CW/CCW limit (degrees):",m_cwLimit,"DataBlock/Mount");
+	
+	_GET_STRING_ATTRIBUTE("CheckOscillation","Check oscillation during tracking: ",check,"");
 	_GET_DOUBLE_ATTRIBUTE("OscillationThreshold","Oscillation theshold (deg):",m_doscThreashold,"");
 	_GET_DWORD_ATTRIBUTE("OscillationAlarmDuration","Oscillation alarm duration (uSec):",m_dwoscAlarmDuration,"");
 	_GET_DWORD_ATTRIBUTE("OscillationNumberThreshold","Oscillation number threashold:",m_dwoscNumberThreshold,"");
@@ -70,4 +73,6 @@ void CConfiguration::Init(maci::ContainerServices *Services) throw (ComponentErr
 	m_dwoscAlarmDuration*=10;
 	m_dwoscRecoverTime*=10;
 	m_dwcontrolThreadPeriod*=10;
+	check.MakeUpper();
+	m_checkOsc=(check=="TRUE");
 }

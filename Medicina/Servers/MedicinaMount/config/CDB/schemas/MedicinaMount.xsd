@@ -100,7 +100,9 @@
 		<!-- the cache time (microseconds) for logging repetition filter -->
 		<xs:attribute name="RepetitionCacheTime" type="xs:unsignedLong" use="required" />
 		<!-- the expire time (microseconds) for logging repetition filter -->
-		<xs:attribute name="RepetitionExpireTime" type="xs:unsignedLong" use="required" />	
+		<xs:attribute name="RepetitionExpireTime" type="xs:unsignedLong" use="required" />
+		<!-- This flag is "true" or "false" to control the oscillattion check is active or not -->
+      <xs:attribute name="CheckOscillation" type="xs:boolean" use="required" />	
 		<!-- the oscillation threshold as azimuth tracking error (degrees) -->
 		<xs:attribute name="OscillationThreshold" type="xs:double" use="required" />	
 		<!-- duration of the oscillation alarm window (microseconds) -->

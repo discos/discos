@@ -99,6 +99,9 @@ public:
 	/** Gets the number of times the oscillation has to be hit before an oscillation is declared*/
 	inline DWORD oscillationNumberThreashold() const { return m_dwoscNumberThreshold; }
 	
+	/** Flag that indicates whether the oscillation chek must performed or not. */
+	inline bool checkForOscillation() const { return m_checkOsc; }
+	
 	/**
     * This member function is used to configure component by reading the configuration parameter from the CDB.
 	 * This must be the first call before using any other function of this class.
@@ -147,6 +150,7 @@ private:
 	DDWORD m_dwoscAlarmDuration;
 	WORD m_dwoscNumberThreshold;
 	DDWORD m_dwoscRecoverTime;
+	bool m_checkOsc;
 };
 
 
