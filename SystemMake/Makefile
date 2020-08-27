@@ -60,7 +60,8 @@ MED_DOC:=MEDDox
 MED_ERRORS:=
 MED_INTERFACES:=MedicinaAntennaInterface MedicinaReceiversInterface
 MED_LIBRARIES:=
-MED_SERVERS:=MedicinaMount MedicinaMinorServo WeatherStation MedicinaPyDMed MedicinaKBandDualFReceiver
+## MED_SERVERS:=MedicinaMount MedicinaMinorServo WeatherStation MedicinaPyDMed MedicinaKBandDualFReceiver
+MED_SERVERS:=MedicinaMount MedicinaMinorServo WeatherStation MedicinaPyDMed
 MED_CLIENTS:=MedicinaMountTextClient
 MED_MISC:=MedScripts
 

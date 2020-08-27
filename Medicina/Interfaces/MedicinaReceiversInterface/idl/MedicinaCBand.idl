@@ -1,0 +1,25 @@
+#ifndef ___MED_C_IDL__
+#define ___MED_C_IDL__
+
+
+#include <baci.idl>
+#include <ComponentErrors.idl>
+#include "GenericReceiver.idl"
+
+#pragma prefix "alma"
+
+module Receivers {
+
+	/**
+	* @todo Fill Med C Band recevier server specializatin interface?
+	* @todo Pragma prefix alma?
+	*/
+    interface MedicinaCBand : ACS::CharacteristicComponent, Receiver {
+
+
+	};
+
+
+};
+
+#endif

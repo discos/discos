@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+	- Author: Matteo De Biaggi
+	-
+	- History:
+	-   25-08-2020 Created
+-->
+<xs:schema
+	targetNamespace="urn:syhemas-cosylab-com:MedicinaCBandReceiver:1.0"
+	xmlns="urn:schemas-cosylab-com:MedicinaCBandReceiver:1.0"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	xmlns:mng="urn:schemas-cosylab-com:Managment:1.0"
+	xmlns:rcv="urn:schemas-cosylab-com:Receivers:1.0"
+	
+	elementFormDefault="qualified"
+	attributeFormDefault="unqualified">
+	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
+  	<xs:import namespace="urn:schemas-cosylab-com:Receivers:1.0" schemaLocation="Receivers.xsd"/>
+  	  	
+  	<xs:complexType name="MedicinaCBandStatusType">
+		<xs:complexContent>
+			<xs:restriction base="baci:ROpattern">
+				<xs:attribute name="resolution" type="xs:unsignedLong" use="optional" default="2048"/>
+            	<xs:attribute name="bitDescription" type="xs:string" use="optional" default=
+                    ""/>
+				<xs:attribute name="whenSet" type="xs:string" use="optional" default=
+                	""/>
+            	<xs:attribute name="whenCleared" type="xs:string" use="optional" default=
+            		""/>
+			</xs:restriction>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<xs:complexType name="MedicinaCBandReceiverType">
+     <xs:complexContent>
+      <xs:extension base="baci:CharacteristicComponent">
+        <xs:sequence>
+			<!-- Local Oscillator (ROdoubleSeq) -->
+			<xs:element name="LO" type="baci:ROdoubleSeq"/>
+			<!-- Number of receiver feeds -->
+			<xs:element name="feeds" type="baci:ROlong"/>
+			<!-- Intermediate Frequencies (ROlong) -->
+			<xs:element name="IFs" type="baci:ROlong"/>
+			<!-- Polarization (ROlongSeq) -->
+			<xs:element name="polarization" type="baci:ROlongSeq"/>	
+			<!-- initialFrequency (ROdoubleSeq) -->
+			<xs:element name="initialFrequency" type="baci:ROdoubleSeq"/>	
+			<!-- bandWidth (ROdoubleSeq) -->
+			<xs:element name="bandWidth" type="baci:ROdoubleSeq"/>
+			<!-- currently configured mode (ROstring) -->
+			<xs:element name="mode" type="baci:ROstring"/>
+			<!-- vacuum (ROdouble) -->
+			<xs:element name="vacuum" type="baci:ROdouble"/>
+			<!-- Subsystem status -->
+			<xs:element name="status" type="MedicinaCBandStatusType" />	
+			<xs:element name="receiverStatus" type="mng:SystemStatusType" />
+		</xs:sequence>
+		<xs:attribute name="DewarIPAddress" type="xs:string" use="required"/>
+		<xs:attribute name="DewarPort" type="xs:unsignedShort" use="required" />
+		<xs:attribute name="LNAIPAddress" type="xs:string" use="required"/>
+		<xs:attribute name="LNAPort" type="xs:unsignedShort" use="required" />
+		<!-- The WatchDog working time(microseconds) -->
+		<xs:attribute name="WatchDogResponseTime" type="xs:unsignedLong" use="required" />
+		<!-- The WatchDog sleep time(microseconds) -->
+		<xs:attribute name="WatchDogSleepTime" type="xs:unsignedLong" use="required" />
+		<!-- LNA sampling time (microseconds) -->
+		<xs:attribute name="LNASamplingTime" type="xs:unsignedLong" use="required" />
+		<!-- the cache time (microseconds) for logging repetition filter -->
+		<xs:attribute name="RepetitionCacheTime" type="xs:unsignedLong" use="required" />
+		<!-- the expire time (microseconds) for logging repetition filter -->
+		<xs:attribute name="RepetitionExpireTime" type="xs:unsignedLong" use="required" />
+		<!-- Instance of the associated device that will set the local oscillator -->
+        <xs:attribute name="LocalOscillatorInstance" type="xs:string" use="required" />
+      </xs:extension>
+     </xs:complexContent>
+	</xs:complexType>
+  
+	<xs:element name="MedicinaCBandReceiver" type="MedicinaCBandReceiverType"/>
+</xs:schema>

@@ -56,7 +56,7 @@ module Receivers {
 
         /**
          * Gate voltage of LNA, IF 1
-         */
+          */
         readonly attribute ACS::ROdouble Vg_1;
 
         /**

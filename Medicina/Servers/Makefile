@@ -29,10 +29,12 @@
 
 SUBSYSTEM = Servers 
 
-MODULES =  MedicinaMount \
-		   Metrology \
-		   MedWeatherStation \
-		   HolographyBackend
+# MedicinaMount \
+# Metrology \
+# MedWeatherStation \
+# HolographyBackend \
+
+MODULES = MedicinaCBand  
 
 MAKE_FLAGS = "-k"
 PLATFORM := $(shell uname)
