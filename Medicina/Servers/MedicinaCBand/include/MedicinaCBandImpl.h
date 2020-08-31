@@ -273,22 +273,7 @@ public:
 	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 */
     virtual void turnLNAsOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
-
-    /**
-     * it turns the vacuum sensor on
-	 * @throw CORBA::SystemException
-	 * @throw ComponentErrors::ComponentErrorsEx
-	 * @throw ReceiversErrors::ReceiversErrorsEx
-     */
-    virtual void turnVacuumSensorOn() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
-
-    /**
-     * it turns the vacuum sensor on
-	 * @throw CORBA::SystemException
-	 * @throw ComponentErrors::ComponentErrorsEx
-	 * @throw ReceiversErrors::ReceiversErrorsEx
-     */
-    virtual void turnVacuumSensorOff() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+    
 
 	/**
 	 * It allows to turn the antenna unit on
@@ -358,73 +343,7 @@ public:
 	 * Returns a reference to the vacuum property implementation of the IDL interface.
 	 * @return pointer to read-only double property
 	*/
-    virtual ACS::ROdouble_ptr vacuum() throw (CORBA::SystemException);
-
-	/**
-	 * Returns a reference to the Vd_1 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
-	*/
-    virtual ACS::ROdouble_ptr Vd_1() throw (CORBA::SystemException);
-
-	/**
-	 * Returns a reference to the Vd_2 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
-	*/
-    virtual ACS::ROdouble_ptr Vd_2() throw (CORBA::SystemException);
-
-	/**
-	 * Returns a reference to the Id_1 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
-	*/
-    virtual ACS::ROdouble_ptr Id_1() throw (CORBA::SystemException);
-
-	/**
-	 * Returns a reference to the Id_2 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
-	*/
-    virtual ACS::ROdouble_ptr Id_2() throw (CORBA::SystemException);
-
-	/**
-	 * Returns a reference to the Vg_1 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
-	*/
-    virtual ACS::ROdouble_ptr Vg_1() throw (CORBA::SystemException);
-
-	/**
-	 * Returns a reference to the Vg_2 property implementation of the IDL interface.
-	 * @return pointer to read-only double property
-	*/
-    virtual ACS::ROdouble_ptr Vg_2() throw (CORBA::SystemException);
-
-	/**
-	 * Returns a reference to the cryoTemperatureCoolHead property implementation of the IDL interface.
-	 * @return pointer to read-only double property
-	*/
-    virtual ACS::ROdouble_ptr cryoTemperatureCoolHead() throw (CORBA::SystemException);
-
-	/**
-	 * Returns a reference to the cryoTemperatureCoolHeadWindow property implementation of the IDL interface.
-	 * @return pointer to read-only double property
-	*/
-    virtual ACS::ROdouble_ptr cryoTemperatureCoolHeadWindow() throw (CORBA::SystemException);
-
-	/**
-	 * Returns a reference to the cryoTemperatureLNA property implementation of the IDL interface.
-	 * @return pointer to read-only double property
-	*/
-    virtual ACS::ROdouble_ptr cryoTemperatureLNA() throw (CORBA::SystemException);
-
-	/**
-	 * Returns a reference to the cryoTemperatureLNAWindow property implementation of the IDL interface.
-	 * @return pointer to read-only double property
-	*/
-    virtual ACS::ROdouble_ptr cryoTemperatureLNAWindow() throw (CORBA::SystemException);
-
-	/**
-	 * Returns a reference to the environmentTemperature property implementation of the IDL interface.
-	 * @return pointer to read-only double property
-	*/
-    virtual ACS::ROdouble_ptr environmentTemperature() throw (CORBA::SystemException);
+    virtual ACS::ROdouble_ptr vacuum() throw (CORBA::SystemException);	
 
 	/**
      * Returns a reference to the status property Implementation of IDL interface.
@@ -440,18 +359,7 @@ private:
 	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pbandWidth;
 	baci::SmartPropertyPointer<baci::ROlongSeq> m_ppolarization;
 	baci::SmartPropertyPointer<baci::ROpattern> m_pstatus;
-	baci::SmartPropertyPointer<baci::ROdouble> m_pvacuum;
-	baci::SmartPropertyPointer<baci::ROdouble> m_pVd_1;
-	baci::SmartPropertyPointer<baci::ROdouble> m_pVd_2;
-	baci::SmartPropertyPointer<baci::ROdouble> m_pId_1;
-	baci::SmartPropertyPointer<baci::ROdouble> m_pId_2;
-	baci::SmartPropertyPointer<baci::ROdouble> m_pVg_1;
-	baci::SmartPropertyPointer<baci::ROdouble> m_pVg_2;
-	baci::SmartPropertyPointer<baci::ROdouble> m_pcryoTemperatureCoolHead;
-	baci::SmartPropertyPointer<baci::ROdouble> m_pcryoTemperatureCoolHeadWindow;
-	baci::SmartPropertyPointer<baci::ROdouble> m_pcryoTemperatureLNA;
-	baci::SmartPropertyPointer<baci::ROdouble> m_pcryoTemperatureLNAWindow;
-	baci::SmartPropertyPointer<baci::ROdouble> m_penvironmentTemperature;
+	baci::SmartPropertyPointer<baci::ROdouble> m_pvacuum;		
 	baci::SmartPropertyPointer<baci::ROstring> m_pmode;
 	baci::SmartPropertyPointer < ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus), POA_Management::ROTSystemStatus> > m_preceiverStatus;
 

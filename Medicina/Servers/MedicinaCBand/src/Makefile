@@ -61,7 +61,8 @@ LIBRARIES_L     =
 
 #
 # <brief description of lllll library>
-MedicinaCBandImpl_OBJECTS   =  Configuration MedicinaCBandImpl ComponentCore MonitorThread
+ 
+MedicinaCBandImpl_OBJECTS   =  Configuration  ComponentCore MonitorThread MedicinaCBandImpl 
 MedicinaCBandImpl_LIBS = IRALibrary ComponentErrors ManagementErrors ReceiversErrors CommonReceiverInterfaceStubs GenericReceiverStubs MedicinaCBandStubs \
                    LocalOscillatorInterfaceStubs ReceiversDefinitionsStubs ManagmentDefinitionsStubs
 

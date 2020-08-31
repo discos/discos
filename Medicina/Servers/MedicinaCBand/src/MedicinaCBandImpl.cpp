@@ -5,11 +5,6 @@
 #include "DevIOPolarization.h"
 #include "DevIOMode.h"
 #include "DevIOVacuum.h"
-#include "DevIOCryoTemperatureCoolHead.h"
-#include "DevIOCryoTemperatureCoolHeadWindow.h"
-#include "DevIOCryoTemperatureLNA.h"
-#include "DevIOCryoTemperatureLNAWindow.h"
-#include "DevIOEnvTemperature.h"
 #include "DevIOLNAControls.h"
 #include "DevIOStatus.h"
 #include "DevIOComponentStatus.h"
@@ -27,8 +22,7 @@ MedicinaCBandImpl::MedicinaCBandImpl(const ACE_CString &CompName,maci::Container
 	m_pbandWidth(this),
 	m_ppolarization(this),
 	m_pstatus(this),
-	m_pvacuum(this),
-	m_penvironmentTemperature(this),
+	m_pvacuum(this),	
 	m_pmode(this),
 	m_preceiverStatus(this)
 {	
@@ -66,8 +60,7 @@ void MedicinaCBandImpl::execute() throw (ACSErr::ACSbaseExImpl)
 		m_pbandWidth=new baci::ROdoubleSeq(getContainerServices()->getName()+":bandWidth",getComponent(),new DevIOBandWidth(&m_core),true);
 		m_pIFs=new baci::ROlong(getContainerServices()->getName()+":IFs",getComponent());
 		m_pfeeds=new baci::ROlong(getContainerServices()->getName()+":feeds",getComponent());
-		m_pvacuum=new baci::ROdouble(getContainerServices()->getName()+":vacuum",getComponent(),new DevIOVacuum(&m_core),true);		
-		m_penvironmentTemperature=new baci::ROdouble(getContainerServices()->getName()+":environmentTemperature",getComponent());
+		m_pvacuum=new baci::ROdouble(getContainerServices()->getName()+":vacuum",getComponent(),new DevIOVacuum(&m_core),true);				
 				// new DevIOEnvTemperature(&m_core),true); // Is there a sensor?
 		m_pstatus=new baci::ROpattern(getContainerServices()->getName()+":status",getComponent(),
 				new DevIOStatus(&m_core),true);
@@ -216,7 +209,6 @@ void MedicinaCBandImpl::calOff() throw (CORBA::SystemException,ComponentErrors::
 		throw impl.getComponentErrorsEx();
 	}
 }
-
 
 void MedicinaCBandImpl::externalCalOn() throw (
         CORBA::SystemException,
@@ -465,8 +457,6 @@ void MedicinaCBandImpl::turnLNAsOff() throw (CORBA::SystemException,ComponentErr
 	}
 }
 
-
-
 void MedicinaCBandImpl::turnAntennaUnitOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	//has it to be implemented?
@@ -487,7 +477,6 @@ _PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,ACS::ROlong,m_pIFs,IFs);
 _PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,ACS::ROdoubleSeq,m_pbandWidth,bandWidth);
 _PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,ACS::ROdoubleSeq,m_pinitialFrequency,initialFrequency);
 _PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,ACS::ROdouble,m_pvacuum,vacuum);
-_PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,ACS::ROdouble,m_penvironmentTemperature,environmentTemperature);
 _PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,ACS::ROstring,m_pmode,mode);
 _PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,Management::ROTSystemStatus,m_preceiverStatus,receiverStatus);
 
