@@ -141,14 +141,17 @@ void MedicinaKBandDualFCore::updateVertexTemperature() throw (ReceiversErrors::R
 {
 	 // Not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
     try {
-        m_envTemperature=m_control->vertexTemperature(voltage2Celsius,
-				MCB_CMD_DATA_TYPE_F32,     
+        m_envTemperature.temperature=m_control->vertexTemperature(
+            voltage2Celsius,
+            MCB_CMD_DATA_TYPE_F32,     
             MCB_PORT_TYPE_AD24,       
             MCB_PORT_NUMBER_00_07,
             5        
         );
+        m_envTemperature.timestamp = getTimeStamp();
     }
     catch (IRA::ReceiverControlEx& ex) {
+        m_envTemperature.temperature = CEDUMMY;
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"MedicinaKBandDualFCore::updateVertexTemperature()");
         impl.setDetails(ex.what().c_str());
         setStatusBit(CONNECTIONERROR);
@@ -157,15 +160,18 @@ void MedicinaKBandDualFCore::updateVertexTemperature() throw (ReceiversErrors::R
     clearStatusBit(CONNECTIONERROR); // The communication was ok so clear the CONNECTIONERROR bit
 }
 
+
 void MedicinaKBandDualFCore::updateCryoCoolHead() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
 {
-	m_cryoCoolHead=0.0;
+    m_cryoCoolHead.temperature=0.0;
+    m_cryoCoolHead.timestamp = getTimeStamp();
 }
 
 
 void MedicinaKBandDualFCore::updateCryoCoolHeadWin() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
 {
-	m_cryoCoolHeadWin=0.0;
+    m_cryoCoolHeadWin.temperature=0.0;
+    m_cryoCoolHeadWin.timestamp = getTimeStamp();
 }
 
 
@@ -173,9 +179,11 @@ void MedicinaKBandDualFCore::updateCryoLNA() throw (ReceiversErrors::ReceiverCon
 {
     // Not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
     try {
-        m_cryoLNA=m_control->cryoTemperature(1,voltage2Kelvin);
+        m_cryoLNA.temperature=m_control->cryoTemperature(1,voltage2Kelvin);
+        m_cryoLNA.timestamp = getTimeStamp();
     }
     catch (IRA::ReceiverControlEx& ex) {
+        m_cryoLNA.temperature = CEDUMMY;
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"MedicinaKBandDualFCore::updateCryoLNA()");
         impl.setDetails(ex.what().c_str());
         setStatusBit(CONNECTIONERROR);
@@ -189,9 +197,11 @@ void MedicinaKBandDualFCore::updateCryoLNAWin() throw (ReceiversErrors::Receiver
 {
     // Not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
     try {
-        m_cryoLNAWin=m_control->cryoTemperature(0,voltage2Kelvin);
+        m_cryoLNAWin.temperature=m_control->cryoTemperature(0,voltage2Kelvin);
+        m_cryoLNAWin.timestamp = getTimeStamp();
     }
     catch (IRA::ReceiverControlEx& ex) {
+        m_cryoLNAWin.temperature = CEDUMMY;
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"MedicinaKBandDualFCore::updateCryoLNAWin()");
         impl.setDetails(ex.what().c_str());
         setStatusBit(CONNECTIONERROR);
