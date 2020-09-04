@@ -163,14 +163,14 @@ void MedicinaKBandDualFCore::updateVertexTemperature() throw (ReceiversErrors::R
 
 void MedicinaKBandDualFCore::updateCryoCoolHead() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
 {
-	m_cryoCoolHead.temperature=0.0;
+    m_cryoCoolHead.temperature=0.0;
     m_cryoCoolHead.timestamp = getTimeStamp();
 }
 
 
 void MedicinaKBandDualFCore::updateCryoCoolHeadWin() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
 {
-	m_cryoCoolHeadWin.temperature=0.0;
+    m_cryoCoolHeadWin.temperature=0.0;
     m_cryoCoolHeadWin.timestamp = getTimeStamp();
 }
 
