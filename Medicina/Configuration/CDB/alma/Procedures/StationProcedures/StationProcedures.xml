@@ -9,6 +9,7 @@
 	receiversSetup=CCC
 	chooseBackend=TotalPower
 	initialize=CCC
+	dmed=default
 	setSection=0,*,730.0,*,*,*,*
 	setSection=1,*,730.0,*,*,*,*
 	device=0
@@ -23,6 +24,7 @@
 	receiversSetup=CHC
 	chooseBackend=TotalPower
 	initialize=CHC
+	dmed=default
 	setSection=0,*,300.0,*,*,*,*
 	setSection=1,*,300.0,*,*,*,*
 	setAttenuation=0,8
@@ -39,6 +41,7 @@
 	receiversSetup=KKC
 	chooseBackend=TotalPower
 	initialize=KKC
+	dmed=default
 	device=0
 	setAttenuation=0,9
 	setAttenuation=1,9
@@ -55,6 +58,7 @@
 	receiversSetup=XXP
 	chooseBackend=TotalPower
 	initialize=XXP
+	dmed=default
 	setSection=0,*,730.0,*,*,*,*
 	setSection=1,*,730.0,*,*,*,*
 	device=0
@@ -70,6 +74,7 @@
 	receiversMode=NARROWBANDWIDTH
 	chooseBackend=TotalPower
 	initialize=CCCL
+	dmed=default
 	setSection=0,*,300.0,*,*,*,*
 	setSection=1,*,300.0,*,*,*,*
 	setAttenuation=0,8
@@ -87,6 +92,7 @@
 	receiversMode=NARROWBANDWIDTH
 	chooseBackend=TotalPower
 	initialize=CHCL
+	dmed=default
 	setSection=0,*,300.0,*,*,*,*
 	setSection=1,*,300.0,*,*,*,*
 	setAttenuation=0,8
