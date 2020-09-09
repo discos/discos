@@ -26,7 +26,7 @@
             <useDedicatedSettings>true</useDedicatedSettings>
             <scriptBase>0</scriptBase>
             <remoteHost>MASTERHOST</remoteHost>
-            <remoteAccount></remoteAccount>
+            <remoteAccount>discos</remoteAccount>
         </container>
         <container>
             <name>WeatherStationContainer</name>
@@ -35,7 +35,7 @@
             <useDedicatedSettings>true</useDedicatedSettings>
             <scriptBase>0</scriptBase>
             <remoteHost>MASTERHOST</remoteHost>
-            <remoteAccount></remoteAccount>
+            <remoteAccount>discos</remoteAccount>
         </container>
         <container>
             <name>MountContainer</name>
@@ -44,7 +44,7 @@
             <useDedicatedSettings>true</useDedicatedSettings>
             <scriptBase>0</scriptBase>
             <remoteHost>MASTERHOST</remoteHost>
-            <remoteAccount></remoteAccount>
+            <remoteAccount>discos</remoteAccount>
         </container>
         <container>
             <name>AntennaContainer</name>
@@ -53,7 +53,7 @@
             <useDedicatedSettings>true</useDedicatedSettings>
             <scriptBase>0</scriptBase>
             <remoteHost>MASTERHOST</remoteHost>
-            <remoteAccount></remoteAccount>
+            <remoteAccount>discos</remoteAccount>
         </container>
         <container>
             <name>ReceiversContainer</name>
@@ -62,7 +62,7 @@
             <useDedicatedSettings>true</useDedicatedSettings>
             <scriptBase>0</scriptBase>
             <remoteHost>MASTERHOST</remoteHost>
-            <remoteAccount></remoteAccount>
+            <remoteAccount>discos</remoteAccount>
         </container>
         <container>
             <name>KBandContainer</name>
@@ -71,7 +71,7 @@
             <useDedicatedSettings>true</useDedicatedSettings>
             <scriptBase>0</scriptBase>
             <remoteHost>MASTERHOST</remoteHost>
-            <remoteAccount></remoteAccount>
+            <remoteAccount>discos</remoteAccount>
         </container>
         <container>
             <name>TotalPowerContainer</name>
@@ -80,7 +80,7 @@
             <useDedicatedSettings>true</useDedicatedSettings>
             <scriptBase>0</scriptBase>
             <remoteHost>MASTERHOST</remoteHost>
-            <remoteAccount></remoteAccount>
+            <remoteAccount>discos</remoteAccount>
         </container>
         <container>
             <name>ManagementContainer</name>
@@ -89,7 +89,7 @@
             <useDedicatedSettings>true</useDedicatedSettings>
             <scriptBase>0</scriptBase>
             <remoteHost>MASTERHOST</remoteHost>
-            <remoteAccount></remoteAccount>
+            <remoteAccount>discos</remoteAccount>
         </container>
         <container>
             <name>FitsZillaContainer</name>
@@ -98,7 +98,7 @@
             <useDedicatedSettings>true</useDedicatedSettings>
             <scriptBase>0</scriptBase>
             <remoteHost>MASTERHOST</remoteHost>
-            <remoteAccount></remoteAccount>
+            <remoteAccount>discos</remoteAccount>
         </container>
         <container>
             <name>CalibrationToolContainer</name>
@@ -107,7 +107,7 @@
             <useDedicatedSettings>true</useDedicatedSettings>
             <scriptBase>0</scriptBase>
             <remoteHost>MASTERHOST</remoteHost>
-            <remoteAccount></remoteAccount>
+            <remoteAccount>discos</remoteAccount>
         </container>
         <container>
             <name>PointContainer</name>
@@ -116,7 +116,7 @@
             <useDedicatedSettings>true</useDedicatedSettings>
             <scriptBase>0</scriptBase>
             <remoteHost>MASTERHOST</remoteHost>
-            <remoteAccount></remoteAccount>
+            <remoteAccount>discos</remoteAccount>
         </container>
         <container>
             <name>ExternalClientsContainer</name>
@@ -125,7 +125,7 @@
             <useDedicatedSettings>true</useDedicatedSettings>
             <scriptBase>0</scriptBase>
             <remoteHost>MASTERHOST</remoteHost>
-            <remoteAccount></remoteAccount>
+            <remoteAccount>discos</remoteAccount>
         </container>
         <container>
             <name>XContainer</name>
@@ -134,7 +134,7 @@
             <useDedicatedSettings>true</useDedicatedSettings>
             <scriptBase>0</scriptBase>
             <remoteHost>MASTERHOST</remoteHost>
-            <remoteAccount></remoteAccount>
+            <remoteAccount>discos</remoteAccount>
         </container>
     </containers>
 </AcsCommandCenterProject>
