@@ -3,7 +3,7 @@
 #include "Tone.h"
 
 #define IS_LO_AVAIL m_configuration.getLocalOscillatorInstance()!=""
-#define IS_LO_TUNABLE m_configuration.getLocalOscillatorEnabledReceivers().Find(m_setup)>0 
+#define IS_LO_TUNABLE m_configuration.getLocalOscillatorEnabledReceivers().Find(m_setup)>=0 
 
 //_IRA_LOGFILTER_IMPORT;
 
