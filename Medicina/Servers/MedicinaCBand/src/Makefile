@@ -110,7 +110,7 @@ tttlll_OBJECTS  =
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS = MedicinaCBandReceiver
+CDB_SCHEMAS = MedicinaCBand
 
 # 
 # IDL Files and flags

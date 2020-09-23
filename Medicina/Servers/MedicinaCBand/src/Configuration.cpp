@@ -43,7 +43,7 @@ using namespace IRA;
 	} \
 }
 
-#define CONFIG_PATH "DataBlock/MedicinaCBandReceiver"
+#define CONFIG_PATH "DataBlock/MedicinaCBand"
 #define LOTABLE_PATH CONFIG_PATH"/Synthesizer"
 #define MARKTABLE_PATH CONFIG_PATH"/NoiseMark"
 #define NORMALMODE_PATH CONFIG_PATH"/NormalModeSetup"

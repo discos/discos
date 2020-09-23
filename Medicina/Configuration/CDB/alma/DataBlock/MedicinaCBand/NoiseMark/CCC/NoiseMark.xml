@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<NoiseMarkLookUpTable xmlns="urn:schemas-cosylab-com:NoiseMarkLookUpTable:1.0"
+             	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+				xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>5700.0</SkyFrequency><NoiseMark>18.483</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>6200.0</SkyFrequency><NoiseMark>17.333</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>6700.0</SkyFrequency><NoiseMark>16.183</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>7200.0</SkyFrequency><NoiseMark>15.033</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>7700.0</SkyFrequency><NoiseMark>13.883</NoiseMark></MarkEntry>
+
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>5700.0</SkyFrequency><NoiseMark>19.654</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>6200.0</SkyFrequency><NoiseMark>18.504</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>6700.0</SkyFrequency><NoiseMark>17.354</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>7200.0</SkyFrequency><NoiseMark>16.204</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>7700.0</SkyFrequency><NoiseMark>15.054</NoiseMark></MarkEntry>
+
+</NoiseMarkLookUpTable>

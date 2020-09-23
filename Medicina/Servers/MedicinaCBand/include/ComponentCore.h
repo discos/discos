@@ -51,9 +51,8 @@ public:
     virtual void cleanup();
 
     /**
-     * It sets the local oscillator. Only the first value is considered in this case, since the receiver has just one synthesizer. Before commanding the new value some check are done. The the correspnding signal
-     * amplitude is computed.
-     * @param lo lists of values for the local oscillator (MHz), one for each IF. In that case just the first one is significant. In a -1 is passed the present value is kept
+     * It sets the local oscillator. System has 2 synth. Before commanding the new value some check are done. The the correspnding signal amplitude is computed.
+     * @param lo lists of values for the local oscillator (MHz), one for each IF. 2 Values are processed. If a -1 is passed the present value is kept
      * @throw  ComponentErrors::ValidationErrorExImpl
      * @throw ComponentErrors::ValueOutofRangeExImpl
      * @throw ComponentErrors::CouldntGetComponentExImpl
@@ -71,9 +70,11 @@ public:
             ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl);
 
     /**
-     * It activate the receiver, in other words it allows to setup the default configuration and to make sure the LNA are turned on.
+     * It activate the receiver, in other words it allows to setup the default configuration and to make sure the LNA are turned on and selects the appropriate
+     * C receiver ( LOW - HIGH ).
+     * @details Throw an exception if mode is not valid or it got some init errors.
      */
-    void activate() throw (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
+    void activate(const char *mode) throw (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
             ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl,ReceiversErrors::NoRemoteControlErrorExImpl,
             ReceiversErrors::ReceiverControlBoardErrorExImpl);
 
@@ -318,44 +319,9 @@ protected:
      * used to free the reference to the local oscillator device
      */
     void unloadLocalOscillator();
+
 private:
 
-    enum TStatusBit {
-        LOCAL=0,
-        VACUUMSENSOR=1,
-        VACUUMPUMPSTATUS=2,
-        VACUUMPUMPFAULT=3,
-        VACUUMVALVEOPEN=4,
-        COOLHEADON=5,
-        COMPRESSORFAULT=6,
-        NOISEMARK=7,
-        NOISEMARKERROR=8,
-        EXTNOISEMARK=9,
-        CONNECTIONERROR=10,
-        UNLOCKED=11
-    };
-
-    CConfiguration m_configuration;
-    maci::ContainerServices* m_services;
-    BACIMutex m_mutex;
-    IRA::ReceiverControl *m_control; // this object is thread safe
-    Receivers::LocalOscillator_var m_localOscillatorDevice;
-    bool m_localOscillatorFault;
-    double m_localOscillatorValue;
-    ACS::doubleSeq m_startFreq;
-    ACS::doubleSeq m_bandwidth;
-    ACS::longSeq m_polarization;
-    IRA::CString m_setupMode;
-    double m_vacuum;
-    CConfiguration::BoardValue m_environmentTemperature;
-    double m_vacuumDefault;
-    bool m_calDiode;
-    IRA::ReceiverControl::FetValues m_fetValues;
-    DWORD m_statusWord;
-    // m_ioMarkError is a flag used to know if we already got an IO
-    // error. See mantis issue n.0000236
-    bool m_ioMarkError;
-    Management::TSystemStatus m_componentStatus;
 
     void setComponentStatus(const Management::TSystemStatus& status) { if (status>m_componentStatus) m_componentStatus=status;  }
 
@@ -374,24 +340,92 @@ private:
      */
     inline bool checkStatusBit(TStatusBit bit) { return m_statusWord & (1 << bit); }
 
+    /**
+     * @todo ?
+     */    
     double linearFit(double *X,double *Y,const WORD& size,double x);
+
     /************************ CONVERSION FUNCTIONS **************************/
-    // Convert the voltage value of the vacuum to mbar
+
+    /**
+     *  Convert the voltage value of the vacuum to mbar
+     */
     static double voltage2mbar(double voltage) { return(pow(10, 1.5 * voltage - 12)); }
-    // Convert the voltage value of the temperatures to Kelvin
+
+    /**
+     *  Convert the voltage value of the temperatures to Kelvin
+     */
     static double voltage2Kelvin(double voltage) {
         return voltage < 1.12 ?  (660.549422889947 * pow(voltage, 6)) - (2552.334255456860 * pow(voltage, 5)) + (3742.529989384570 * pow(voltage, 4))
             - (2672.656926956470 * pow(voltage, 3)) + (947.905578508975 * pow(voltage, 2)) - 558.351002849576 * voltage + 519.607622398508  :
             (865.747519105672 * pow(voltage, 6)) - (7271.931957100480 * pow(voltage, 5)) + (24930.666241800500 * pow(voltage, 4))
             - (44623.988512320400 * pow(voltage, 3)) + (43962.922216886600 * pow(voltage, 2)) - 22642.245121997700 * voltage + 4808.631312836750;
     }
-    // Convert the voltage value of the temperatures to Celsius (Sensor B57703-10K)
+
+    /**
+     *  Convert the voltage value of the temperatures to Celsius (Sensor B57703-10K)
+     */
     static double voltage2Celsius(double voltage) 
     { return -5.9931 * pow(voltage, 5) + 40.392 * pow(voltage, 4) - 115.41 * pow(voltage, 3) + 174.67 * pow(voltage, 2) - 174.23 * voltage + 112.79; }
-    // Convert the ID voltage value to the mA value
+
+    /**
+     *  Convert the ID voltage value to the mA value
+     */
     static double currentConverter(double voltage) { return(10 * voltage); }
-    // Convert the VD and VG voltage values using a right scale factor
+
+    /**
+     *  Convert the VD and VG voltage values using a right scale factor
+     */
     static double voltageConverter(double voltage) { return(voltage); }
+
+private:
+
+    enum TStatusBit {
+        LOCAL=0,
+        VACUUMSENSOR=1,
+        VACUUMPUMPSTATUS=2,
+        VACUUMPUMPFAULT=3,
+        VACUUMVALVEOPEN=4,
+        COOLHEADON=5,
+        COMPRESSORFAULT=6,
+        NOISEMARK=7,
+        NOISEMARKERROR=8,
+        EXTNOISEMARK=9,
+        CONNECTIONERROR=10,
+        UNLOCKED=11
+    };
+
+
+    /**@brief LO device anda data collector */    
+    struct LO{
+        Receivers::LocalOscillator_var m_localOscillatorDevice; /**< LO HPIB connected device */
+        bool m_localOscillatorFault;    /**< Falut flag */
+        double m_localOscillatorValue;  /**< Frequency Value */
+    }
+
+    CConfiguration m_configuration;
+    maci::ContainerServices* m_services;
+    BACIMutex m_mutex;
+
+    IRA::ReceiverControl *m_control; // this object is thread safe        
+    ACS::doubleSeq m_startFreq;
+    ACS::doubleSeq m_bandwidth;
+    ACS::longSeq m_polarization;
+    IRA::CString m_setupMode;
+
+    LO m_lo_1st;        /**< 1st stage mixer */
+    LO m_lo_2st;        /**< 2st stage mixer */
+
+    double m_vacuum;
+    CConfiguration::BoardValue m_environmentTemperature;
+    double m_vacuumDefault;
+    bool m_calDiode;
+    
+    IRA::ReceiverControl::FetValues m_fetValues;
+    DWORD m_statusWord;    
+    bool m_ioMarkError; /**< m_ioMarkError is a flag used to know if we already got an IO error. See mantis issue n.0000236 */
+    Management::TSystemStatus m_componentStatus;
+
 };
 
 

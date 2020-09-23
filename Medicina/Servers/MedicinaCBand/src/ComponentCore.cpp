@@ -8,7 +8,6 @@ _IRA_LOGFILTER_IMPORT;
 
 CComponentCore::CComponentCore()
 {
-
 }
 
 CComponentCore::~CComponentCore()
@@ -19,12 +18,21 @@ void CComponentCore::initialize(maci::ContainerServices* services)
 {
     m_services=services;
     m_control=NULL;
-    m_localOscillatorDevice=Receivers::LocalOscillator::_nil();
-    m_localOscillatorFault=false;
+    
+    m_lo_1st.m_localOscillatorDevice=Receivers::LocalOscillator::_nil();
+    m_lo_1st.m_localOscillatorFault=false;
+    m_lo_1st.m_localOscillatorValue = 0.0;
+    
+    m_lo_2st.m_localOscillatorDevice=Receivers::LocalOscillator::_nil();
+    m_lo_2st.m_localOscillatorFault=false;
+    m_lo_2st.m_localOscillatorValue = 0.0;
+
     m_environmentTemperature.temperature = 20.0;
+    
     m_vacuum=0.0;
     m_calDiode=false;
     m_fetValues.VDL=m_fetValues.IDL=m_fetValues.VGL=m_fetValues.VDR=m_fetValues.IDR=m_fetValues.VGR=0.0;
+    
     m_statusWord=0;
     m_ioMarkError = false;
 }

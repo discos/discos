@@ -151,6 +151,11 @@ public:
 	DWORD getTaperTable(double * &freq,double *&taper) const;
 
 	/**
+	 * @return the number of feeds
+	 */
+	inline const  DWORD& getFeeds() const { return m_feeds; }
+
+	/**
 	 * @param code feed identification codes. It must be freed by caller.
 	 * @param xOffset displacement of the feed with respect to the central one along x axis. It must be freed by caller.
 	  *@param yOffset displacement of the feed with respect to the central one along y axis. It must be freed by caller.

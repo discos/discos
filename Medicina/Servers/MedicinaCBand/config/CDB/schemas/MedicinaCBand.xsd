@@ -6,8 +6,8 @@
 	-   25-08-2020 Created
 -->
 <xs:schema
-	targetNamespace="urn:syhemas-cosylab-com:MedicinaCBandReceiver:1.0"
-	xmlns="urn:schemas-cosylab-com:MedicinaCBandReceiver:1.0"
+	targetNamespace="urn:schemas-cosylab-com:MedicinaCBand:1.0"
+	xmlns="urn:schemas-cosylab-com:MedicinaCBand:1.0"
 	xmlns:xs="http://www.w3.org/2001/XMLSchema"
 	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
 	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
@@ -35,7 +35,7 @@
 		</xs:complexContent>
 	</xs:complexType>
 	
-	<xs:complexType name="MedicinaCBandReceiverType">
+	<xs:complexType name="MedicinaCBandType">
      <xs:complexContent>
       <xs:extension base="baci:CharacteristicComponent">
         <xs:sequence>
@@ -79,5 +79,5 @@
      </xs:complexContent>
 	</xs:complexType>
   
-	<xs:element name="MedicinaCBandReceiver" type="MedicinaCBandReceiverType"/>
+	<xs:element name="MedicinaCBand" type="MedicinaCBandType"/>
 </xs:schema>
