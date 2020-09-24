@@ -43,10 +43,10 @@ using namespace IRA;
 	} \
 }
 
+/**@todo Bring this path inside ReceiverConf? */
 #define CONFIG_PATH "DataBlock/MedicinaCBand"
 #define LOTABLE_PATH CONFIG_PATH"/Synthesizer"
 #define MARKTABLE_PATH CONFIG_PATH"/NoiseMark"
-#define NORMALMODE_PATH CONFIG_PATH"/NormalModeSetup"
 #define FEEDTABLE_PATH CONFIG_PATH"/Feeds"
 #define TAPERTABLE_PATH CONFIG_PATH"/Taper"
 
@@ -64,8 +64,16 @@ CConfiguration::CConfiguration()
 	m_feedVector=NULL;
 	m_taperTable=NULL;
 	m_taperVector=NULL;
-	m_taperVectorLen=0;
-	m_RFMin=m_RFMax=m_IFMin=m_IFBandwidth=m_defaultLO=m_fixedLO2=m_LOMin=m_LOMax=NULL;
+	m_taperVectorLen=0;	
+	/* conf */
+	m_conf_file['CCCNormal']= "";
+	m_conf_file['CCCNarrow']= "";
+	m_conf_file['CHCNormal']= "";
+	m_conf_file['CHCNarrow']= "";
+	m_conf_param['CCCNormal']= SetupParams();
+	m_conf_param['CCCNarrow']= SetupParams();
+	m_conf_param['CHCNormal']= SetupParams();
+	m_conf_param['CHCNarrow']= SetupParams();
 }
 
 CConfiguration::~CConfiguration()
@@ -125,26 +133,56 @@ CConfiguration::~CConfiguration()
 
 void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl)
 {
+	/**
+	 *  Basically we look for:
+	 *  * Component configuration data  at Medicina\Configuration\alma\RECEIVERS\MedicinaCBand\MedicinaCBand.xml
+	 *  * Working mode configuration data:
+	 * 		* CHC, C High freq receiver, NormalMode at Medicina\Configuration\alma\DataBlock\MedicinaCBand\NormalModeSetup\CHC\NormalModeSetup.xml
+	 * 		* CCC, C Low freq receiver, NormalMode at Medicina\Configuration\alma\DataBlock\MedicinaCBand\NormalModeSetup\CCC\NormalModeSetup.xml
+	 * 		* CHC, C High freq receiver, NarrowBw. at Medicina\Configuration\alma\DataBlock\MedicinaCBand\NarrowBandwidthSetup\CHC\NarrowBandwidthSetup.xml
+	 * 		* CCC, C Low freq receiver, NarrowBw. at Medicina\Configuration\alma\DataBlock\MedicinaCBand\NarrowBandwidthSetup\CCC\NarrowBandwidthSetup.xml
+	 *  Basic config attributes are set following given receiver operation mode:
+	 *   * CHC Normal
+	 *   * CCC Normal
+	 *   * CHC NarrowBw.
+	 *   * CCC NarrowBw.
+	 * 
+	 */
 	IRA::CError error;
 	IRA::CString field,value,token;
 	WORD len;
 	int start=0;
-	// read component configuration
+	/* read component configuration */
+	/**@todo review LO 2nd stage component readings and setup */	
 	_GET_STRING_ATTRIBUTE("DewarIPAddress","Dewar IP address:",m_dewarIPAddress,"");
 	_GET_STRING_ATTRIBUTE("LNAIPAddress","LNA IP address:",m_LNAIPAddress,"");
-	_GET_STRING_ATTRIBUTE("LocalOscillatorInstance","Local oscillator instance:",m_localOscillatorInstance,"");
+	_GET_STRING_ATTRIBUTE("LocalOscillatorInstance1st","Local oscillator instance:",m_localOscillatorInstance1st,"");
+	_GET_STRING_ATTRIBUTE("LocalOscillatorInstance2nd","Local oscillator instance:",m_localOscillatorInstance2nd,"");
 	_GET_DWORD_ATTRIBUTE("DewarPort","Dewar port:",m_dewarPort,"");
 	_GET_DWORD_ATTRIBUTE("LNAPort","LNA port:",m_LNAPort,"");
 	_GET_DWORD_ATTRIBUTE("WatchDogResponseTime","Response time of watch dog thread (uSec):",m_watchDogResponseTime,"");
 	_GET_DWORD_ATTRIBUTE("WatchDogSleepTime","Sleep time of the watch dog thread (uSec):",m_watchDogSleepTime,"");
 	_GET_DWORD_ATTRIBUTE("LNASamplingTime","Time needed to collect LNA information from control boards (uSec):",m_LNASamplingTime,"");
 	_GET_DWORD_ATTRIBUTE("RepetitionCacheTime","Log repetition filter, caching time (uSec):",m_repetitionCacheTime,"");
-	_GET_DWORD_ATTRIBUTE("RepetitionExpireTime","Log repetition filter, expire time (uSec):",m_repetitionExpireTime,"");
-	_GET_STRING_ATTRIBUTE("LocalOscillatorInstance","Local oscillator instance:",m_localOscillatorInstance,"");
-	// now read the receiver configuration
-	_GET_STRING_ATTRIBUTE("Mode","mode name:",m_mode,NORMALMODE_PATH);
+	_GET_DWORD_ATTRIBUTE("RepetitionExpireTime","Log repetition filter, expire time (uSec):",m_repetitionExpireTime,"");	
+	_GET_STRING_ATTRIBUTE("CCCNormalSetup","CCC normal setup:", m_conf_file['CCCNormalSetup'], "");
+	_GET_STRING_ATTRIBUTE("CCCNarrowSetup","CCC narrow setup:", m_conf_file['CCCNarrowSetup'], "");
+	_GET_STRING_ATTRIBUTE("CHCNormalSetup","CHC Normal setup:", m_conf_file['CHCNormalSetup'], "");
+	_GET_STRING_ATTRIBUTE("CHCNarrowSetup","CHC narrow setup:", m_conf_file['CHCNarrowSetup'], "");		
+	/* now read the setup related configurations */	
+	std::map<IRA::CString, IRA::CString> l_it;
+	for (l_it= m_conf_file.begin(); it != m_conf_file.end(); it++ ){
+		/* read(setupname, setupfile, paramstruct container &) */
+		/** @todo unificare la routine di lettura parametri*/
+		readSetupConfig(l_it->first, l_it->second; m_conf_param[l_it->first]);
+	}
+
+	/**@todo Review work mode readings, it depends on CHC - CCC and setup */
+	/* Gather params for every available conf */
+	//_GET_STRING_ATTRIBUTE("Mode","mode name:",m_mode,NORMALMODE_PATH);
 	_GET_DWORD_ATTRIBUTE("Feeds","Number of feeds:",m_feeds,NORMALMODE_PATH);
 	_GET_DWORD_ATTRIBUTE("IFs","Number of IFs per feed:",m_IFs,NORMALMODE_PATH);
+	/* Basic working params array ( 1 x N, where N is feed numbers ) */
 	try {
 		m_polarizations=new Receivers::TPolarization[m_IFs];
 		m_RFMin=new double[m_IFs];
@@ -160,6 +198,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CConfiguration::init()");
 		throw dummy;
 	}
+	/* Set polarization for every feed */
 	_GET_STRING_ATTRIBUTE("Polarization","IF polarization:",value,NORMALMODE_PATH);
 	start=0;
 	for (WORD k=0;k<m_IFs;k++) {
@@ -181,6 +220,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 			throw dummy;
 		}
 	}
+	/* Set RF lower limit for every feed */
 	_GET_STRING_ATTRIBUTE("RFMin","RF lower limit (MHz):",value,NORMALMODE_PATH);
 	start=0;
 	for (WORD k=0;k<m_IFs;k++) {
@@ -191,6 +231,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 		}
 		m_RFMin[k]=token.ToDouble();
 	}
+	/* Set RF upper limit for every feed */
 	_GET_STRING_ATTRIBUTE("RFMax","RF upper limit (MHz):",value,NORMALMODE_PATH);
 	start=0;
 	for (WORD k=0;k<m_IFs;k++) {
@@ -201,6 +242,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 		}
 		m_RFMax[k]=token.ToDouble();
 	}
+	/* Set IF start freq. for every feed */
 	_GET_STRING_ATTRIBUTE("IFMin","IF start frequency (MHz):",value,NORMALMODE_PATH);
 	start=0;
 	for (WORD k=0;k<m_IFs;k++) {
@@ -211,6 +253,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 		}
 		m_IFMin[k]=token.ToDouble();
 	}
+	/* Set IF bw for every feed */
 	_GET_STRING_ATTRIBUTE("IFBandwidth","IF bandwidth (MHz):",value,NORMALMODE_PATH);
 	start=0;
 	for (WORD k=0;k<m_IFs;k++) {
@@ -221,6 +264,8 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 		}
 		m_IFBandwidth[k]=token.ToDouble();
 	}
+	/** @todo Check LO stage control */
+	/* Set default LO value for every feed */
 	_GET_STRING_ATTRIBUTE("DefaultLO","Default local oscillator (MHz):",value,NORMALMODE_PATH);
 	start=0;
 	for (WORD k=0;k<m_IFs;k++) {
@@ -231,6 +276,8 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 		}
 		m_defaultLO[k]=token.ToDouble();
 	}
+	/** @todo Check LO stage control */
+	/* Set Fixed LO 2nd stage? value for every feed */
 	_GET_STRING_ATTRIBUTE("FixedLO2","Second fixed local oscillator value (MHz):",value,NORMALMODE_PATH);
 	start=0;
 	for (WORD k=0;k<m_IFs;k++) {
@@ -241,6 +288,8 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 		}
 		m_fixedLO2[k]=token.ToDouble();
 	}
+	/** @todo Check LO stage control */
+	/* Set  LO min (stage?) value for every feed */
 	_GET_STRING_ATTRIBUTE("LOMin","Local oscillator minimum allowed value (MHz):",value,NORMALMODE_PATH);
 	start=0;
 	for (WORD k=0;k<m_IFs;k++) {
@@ -251,6 +300,8 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 		}
 		m_LOMin[k]=token.ToDouble();
 	}
+	/** @todo Check LO stage control */
+	/* Set  LO max (stage?) value for every feed */
 	_GET_STRING_ATTRIBUTE("LOMax","Local oscillator maximum allowed value (MHz):",value,NORMALMODE_PATH);
 	start=0;
 	for (WORD k=0;k<m_IFs;k++) {
@@ -261,7 +312,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 		}
 		m_LOMax[k]=token.ToDouble();
 	}
-	// The noise mark
+	/* Noise mark local data table build */
 	try {
 		m_markTable=new IRA::CDBTable(Services,"MarkEntry",MARKTABLE_PATH);
 	}
@@ -310,7 +361,9 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	m_markTable->closeTable();
 	delete m_markTable;
 	m_markTable=NULL;
-	// The synthesizer
+	/** @todo how does it cope with LO ?  */
+	/** @todo add 2nd stage controller .. */
+	/* Synth. configuration */
 	try {
 		m_loTable=new IRA::CDBTable(Services,"SynthesizerEntry",LOTABLE_PATH);
 	}
@@ -354,7 +407,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	m_loTable->closeTable();
 	delete m_loTable;
 	m_loTable=NULL;
-	// The feeds
+	/* Local feed table */
 	try {
 		m_feedsTable=new IRA::CDBTable(Services,"Feed",FEEDTABLE_PATH);
 	}

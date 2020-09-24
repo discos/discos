@@ -82,6 +82,85 @@ void CComponentCore::cleanup()
     }
 }
 
+
+void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
+        ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl,ReceiversErrors::NoRemoteControlErrorExImpl,
+        ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+    /**@todo check mode string from configuration and setup mode*/
+
+
+    /* activate mode */
+    baci::ThreadSyncGuard guard(&m_mutex);
+    setMode((const char *)m_configuration.getSetupMode()); // Throw ......
+    guard.release();
+    lnaOn(); // throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
+    externalCalOff();
+
+    bool answer;
+    try {
+        answer=m_control->isRemoteOn();
+    }
+    catch (IRA::ReceiverControlEx& ex) {
+        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::activate()");
+        impl.setDetails(ex.what().c_str());
+        setStatusBit(CONNECTIONERROR);
+        throw impl;
+    }
+    if (answer) {
+        _IRA_LOGFILTER_LOG(LM_NOTICE, "CComponentCore::activate()", "RECEIVER_COMMUNICATION_MODE_REMOTE");
+        clearStatusBit(LOCAL);
+    }
+    else {
+        _IRA_LOGFILTER_LOG(LM_NOTICE, "CComponentCore::activate()", "RECEIVER_COMMUNICATION_MODE_LOCAL");
+        setStatusBit(LOCAL);
+    }
+}
+
+
+void CComponentCore::deactivate() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+    // no guard needed.
+    lnaOff(); // throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
+}
+
+
+void CComponentCore::setMode(const char * mode) throw (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
+        ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl)
+{
+    baci::ThreadSyncGuard guard(&m_mutex);
+    IRA::CString cmdMode(mode);
+    cmdMode.MakeUpper();
+    /**@todo CHC - CCC modes allowed? */
+    /**@todo NarrowBandiwth vs NormalSetupMode ? */
+    if (cmdMode!=m_configuration.getSetupMode()) { 
+        _EXCPT(ReceiversErrors::ModeErrorExImpl,impl,"CComponentErrors::setMode()");
+        throw impl;
+    }
+    // 
+    for (WORD i=0;i<m_configuration.getIFs();i++) {
+        m_startFreq[i]=m_configuration.getIFMin()[i];
+        m_bandwidth[i]=m_configuration.getIFBandwidth()[i];
+        m_polarization[i]=(long)m_configuration.getPolarizations()[i];
+    }
+    // the set the default LO for the default LO for the selected mode.....
+    ACS::doubleSeq lo;
+    lo.length(m_configuration.getIFs());
+    for (WORD i=0;i<m_configuration.getIFs();i++) {
+        lo[i]=m_configuration.getDefaultLO()[i];
+    }
+    setLO(lo); // throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl)
+    m_setupMode=mode;
+    m_calDiode=false;
+    ACS_LOG(LM_FULL_INFO,"CComponentCore::setMode()",(LM_NOTICE,"RECEIVER_MODE %s",mode));
+}
+
+const IRA::CString& CComponentCore::getSetupMode()
+{
+    baci::ThreadSyncGuard guard(&m_mutex);
+    return m_setupMode;
+}
+
 void CComponentCore::getLO(ACS::doubleSeq& lo)
 {
     baci::ThreadSyncGuard guard(&m_mutex);
@@ -118,12 +197,6 @@ void CComponentCore::getPolarization(ACS::longSeq& pol)
     }
 }
 
-const IRA::CString& CComponentCore::getSetupMode()
-{
-    baci::ThreadSyncGuard guard(&m_mutex);
-    return m_setupMode;
-}
-
 const DWORD& CComponentCore::getIFs()
 {
     baci::ThreadSyncGuard guard(&m_mutex);
@@ -142,35 +215,6 @@ const DWORD& CComponentCore::getFeeds()
     return m_configuration.getFeeds();
 }
 
-void CComponentCore::activate() throw (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
-        ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl,ReceiversErrors::NoRemoteControlErrorExImpl,
-        ReceiversErrors::ReceiverControlBoardErrorExImpl)
-{
-    baci::ThreadSyncGuard guard(&m_mutex);
-    setMode((const char *)m_configuration.getSetupMode()); // Throw ......
-    guard.release();
-    lnaOn(); // throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
-    externalCalOff();
-
-    bool answer;
-    try {
-        answer=m_control->isRemoteOn();
-    }
-    catch (IRA::ReceiverControlEx& ex) {
-        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::activate()");
-        impl.setDetails(ex.what().c_str());
-        setStatusBit(CONNECTIONERROR);
-        throw impl;
-    }
-    if (answer) {
-        _IRA_LOGFILTER_LOG(LM_NOTICE, "CComponentCore::activate()", "RECEIVER_COMMUNICATION_MODE_REMOTE");
-        clearStatusBit(LOCAL);
-    }
-    else {
-        _IRA_LOGFILTER_LOG(LM_NOTICE, "CComponentCore::activate()", "RECEIVER_COMMUNICATION_MODE_LOCAL");
-        setStatusBit(LOCAL);
-    }
-}
 
 
 void CComponentCore::externalCalOn() throw (

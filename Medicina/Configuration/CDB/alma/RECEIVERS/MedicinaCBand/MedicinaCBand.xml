@@ -17,7 +17,13 @@
 				LNASamplingTime="250000"
 				RepetitionCacheTime="7000000"
 				RepetitionExpireTime="10000000"
-				LocalOscillatorInstance="DUMMY"
+				LocalOscillatorInstance1st="RECEIVERS/LO"
+				LocalOscillatorInstance2nd="RECEIVERS/LO2"
+				CCCNormalSetup= "DataBlock/MedicinaCBand/NormalModeSetup/CCC"
+				CCCNArrowSetup= "DataBlock/MedicinaCBand/NarrowBandwidthSetup/CCC"
+				CHCNormalSetup= "DataBlock/MedicinaCBand/NormalModeSetup/CHC"
+				CHCNarrowSetup= "DataBlock/MedicinaCBand/NarrowBandwidthSetup/CHC"
+				
 >
 			<LO description="Sequence of local oscillator values for each IF chain"/>
 			<feeds description="Number of feeds of the receiver"/>

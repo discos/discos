@@ -14,6 +14,8 @@
 #include <maciContainerServices.h>
 #include <ComponentErrors.h>
 #include <ReceiversDefinitionsC.h>
+#include <map>
+#include <vector>
 
 // Dummy value for a board connection error
 #define CEDUMMY 100000
@@ -22,7 +24,8 @@
 /**
  * This class implements the component configuration. The data inside this class are initialized at the startup from the
  * configuration database and then are used (read) inside the component.
- * @author <a href=mailto:a.orlati@ira.cnr.it>Andrea Orlati</a>,
+ * @author <a href=mailto:a.orlati@ira.cnr.it>Andrea Orlati</a>,v
+ * @author <a href=mailto:matteo.debiaggi@inaf.it>Matteo De Biaggi</a>,
  * Istituto di Radioastronomia, Italia
  * <br> 
   */
@@ -57,6 +60,22 @@ public:
         ACS::Time timestamp;
 	} BoardValue;
 
+	/**
+	 * @brief Setup parmaters collector
+	 */
+	struct SetupParams{
+		DWORD m_IFs;
+		DWORD m_feeds;
+		std::vector<double> m_RFMin;
+		std::vector<double> m_RFMax;
+		std::vector<double> m_IFMin;
+		std::vector<double> m_IFBandwidth;		
+		std::vector<Receivers::TPolarization> m_polarizations;		
+		std::vector<double> m_defaultLO;
+		std::vector<double> m_fixedLO2;
+		std::vector<double> m_LOMin;
+		std::vector<double> m_LOMax;
+	};
 
 	/**
 	 * Default constructor
@@ -114,9 +133,14 @@ public:
 	inline const DDWORD& getRepetitionExpireTime() const { return m_repetitionExpireTime; }
 
 	/**
-	 * @return the instance of the local oscillator component  that the receiver will use to drive the set its LO
+	 * @return the instance of the local oscillator component name to drive 1st stage LO
 	 */
-	inline const IRA::CString& getLocalOscillatorInstance() const { return m_localOscillatorInstance; }
+	inline const IRA::CString& getLocalOscillatorInstance1st() const { return m_localOscillatorInstance1st; }
+
+	/**
+	 * @return the instance of the local oscillator component name to drive 2nd stage LO
+	 */
+	inline const IRA::CString& getLocalOscillatorInstance2nd() const { return m_localOscillatorInstance2nd; }
 
 	/**
 	 * Allows to get the table of mark values relative to left polarization
@@ -242,20 +266,11 @@ private:
 	DDWORD m_LNASamplingTime;
 	DDWORD m_repetitionCacheTime;
 	DDWORD m_repetitionExpireTime;
-	IRA::CString m_localOscillatorInstance;
+	IRA::CString m_localOscillatorInstance1st; /**< 1st stage mixer component instance name */
+	IRA::CString m_localOscillatorInstance2nd; /**< 2nd stage mixer component instance name */
 
-	IRA::CString m_mode;
-	double *m_RFMin;
-	double *m_RFMax;
-	double *m_IFMin;
-	double *m_IFBandwidth;
-	DWORD m_IFs;
-	Receivers::TPolarization *m_polarizations;
-	DWORD m_feeds;
-	double *m_defaultLO;
-	double *m_fixedLO2;
-	double *m_LOMin;
-	double *m_LOMax;
+	std::map<IRA::CString, IRA::CString> m_conf_files;	/**< Map known allowed configurations - configuration files */ 
+	std::map<IRA::CString, SetupParams> m_conf_param; /**< Map configuration name - parameters */ 
 
 	IRA::CDBTable *m_markTable;
 	IRA::CDBTable *m_loTable;
