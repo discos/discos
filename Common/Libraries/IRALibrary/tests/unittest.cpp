@@ -86,6 +86,10 @@ TEST_F(IRALibrary_String,string_checkSplit) {
 	EXPECT_TRUE(string_checkSplit());
 }
 
+TEST_F(IRALibrary_String,string_Find) {
+	EXPECT_TRUE(string_Find());
+}
+
 TEST_F(IRALibrary_BaseConverter,decToBin_checkConversion) {
 	EXPECT_TRUE(decToBin_checkConversion());
 }

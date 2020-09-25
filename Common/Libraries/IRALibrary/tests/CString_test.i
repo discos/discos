@@ -23,7 +23,7 @@ public:
 	}
 	
 	::testing::AssertionResult string_checkSplit() {
-		RecordProperty("description","check the how CString handle string splitting");
+		RecordProperty("description","check how CString handle string splitting");
 		IRA::CString base("That is a test string that must be split");		
 		IRA::CString token("is");
 		IRA::CString split1,split2;		
@@ -42,7 +42,28 @@ public:
 			  << (const char *)split2 << "' instead of ' a test string that must be split'";
 		}		
 		return ::testing::AssertionSuccess();
-	}	
+	}
+	
+	::testing::AssertionResult string_Find() {
+		RecordProperty("description","check the bug emerged");
+		IRA::CString search("KKC QQC CCC MMC");		
+		IRA::CString failToken("XXP");
+		IRA::CString successToken("QQC");
+		IRA::CString bugToken("KKC");
+		int pos=search.Find(failToken);
+		if (pos>0) {
+			return ::testing::AssertionFailure() << "result should be negative as the string is not present";
+		}
+		pos=search.Find(successToken);
+		if (pos<=0) {
+			return ::testing::AssertionFailure() << "result should be positive as the string is present";
+		}
+		pos=search.Find(bugToken);
+		if (pos!=0) {
+			return ::testing::AssertionFailure() << "result should be zero as the string start with first char";
+		}
+		return ::testing::AssertionSuccess();
+	}
 
 protected:
 	virtual void SetUp() {
