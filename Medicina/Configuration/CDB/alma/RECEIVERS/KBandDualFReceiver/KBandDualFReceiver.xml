@@ -1,10 +1,6 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
 <!-- 
- *  Authors Info
- *  ===========
- *  Name:         Marco Buttu
- *  E-mail:       mbuttu@oa-cagliari.inaf.it
- *  Personal Web: http://www.pypeople.com/
+
 -->
 <!-- *DewarPort="10000" -->
 <!-- LNAPort="10001" -->
@@ -17,9 +13,9 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     actionThreadStackSize="2048"
     monitoringThreadStackSize="4096"
-    DewarIPAddress="192.167.189.2"
+    DewarIPAddress="192.168.51.2"
     DewarPort="10000"
-    LNAIPAddress="192.167.189.2"
+    LNAIPAddress="192.168.51.2"
     LNAPort="10001"      
     WatchDogResponseTime="10000000"
     WatchDogSleepTime="10000000"
