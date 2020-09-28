@@ -60,22 +60,6 @@ public:
         ACS::Time timestamp;
 	} BoardValue;
 
-	/**
-	 * @brief Setup parmaters collector
-	 */
-	struct SetupParams{
-		DWORD m_IFs;
-		DWORD m_feeds;
-		std::vector<double> m_RFMin;
-		std::vector<double> m_RFMax;
-		std::vector<double> m_IFMin;
-		std::vector<double> m_IFBandwidth;		
-		std::vector<Receivers::TPolarization> m_polarizations;		
-		std::vector<double> m_defaultLO;
-		std::vector<double> m_fixedLO2;
-		std::vector<double> m_LOMin;
-		std::vector<double> m_LOMax;
-	};
 
 	/**
 	 * Default constructor
@@ -257,6 +241,48 @@ public:
 	void init(maci::ContainerServices *Services)  throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl);
 	
 private:
+
+	/**
+	 * @brief Read setup configuration from file
+	 * @details Setup conf. example params
+				Mode="NORMAL"
+				RFMin="4300.0 4300.0"
+				RFMax="5800.0 5800.0"
+				IFMin="100.0 100.0"
+				IFBandwidth="400.0 400.0"
+				Feeds="1"
+				IFs="2"
+				Polarization="L R"
+				DefaultLO="4600.0 4600.0"
+				FixedLO2="2300.0 2300.0"
+				LOMin="4200.0 4200.0"
+				LOMax="5500.0 5500.0"	 
+	 * @param[in] p_conf_path configuration file path
+	 * @param[out] p_params_out Read conf params	 
+	 */
+	void readConfigurationSetup(const IRA::CString & p_conf_path, SetupParams & p_params_out )  throw (ComponentErrors::CDBAccessExImpl);
+
+	/**
+	 * @brief Read noise mark polynomial coefficient from file
+	 * @details NoiseMark DataBlock carries polynomial calcultaion coefficients
+	 * 	E.g.:  NMtemp= C0 + C1*Fin	 
+	 * @param[in] p_conf_path file path
+	 * @param[out] p_params_out Read conf params	 
+	 */
+	void readNoiseMarkPoly(const IRA::CString & p_conf_path, SetupParams & p_params_out) throw (ComponentErrors::CDBAccessExImpl);
+
+	/**
+	 * @brief Feed coordinates readings
+	 */
+	void readFeeds() throw (ComponentErrors::CDBAccessExImpl, ComponentErrors::MemoryAllocationExImpl);
+
+	/**
+	 * @brief Taper values readings
+	 */
+	void readTaper() throw (ComponentErrors::CDBAccessExImpl, ComponentErrors::MemoryAllocationExImpl);
+
+private:
+
 	IRA::CString m_dewarIPAddress;
 	WORD m_dewarPort;
 	IRA::CString m_LNAIPAddress;
@@ -266,13 +292,40 @@ private:
 	DDWORD m_LNASamplingTime;
 	DDWORD m_repetitionCacheTime;
 	DDWORD m_repetitionExpireTime;
+
 	IRA::CString m_localOscillatorInstance1st; /**< 1st stage mixer component instance name */
 	IRA::CString m_localOscillatorInstance2nd; /**< 2nd stage mixer component instance name */
 
-	std::map<IRA::CString, IRA::CString> m_conf_files;	/**< Map known allowed configurations - configuration files */ 
-	std::map<IRA::CString, SetupParams> m_conf_param; /**< Map configuration name - parameters */ 
+	/**
+	 * @brief Configuration file path container struct
+	 */
+	struct ConfigurationFiles{
+		IRA::CString m_setup;		/**< General setup xml conf file path */ 
+		IRA::CString m_noise_mark;  /**< Noise mark xml conf file path */
+	};
 
-	IRA::CDBTable *m_markTable;
+	/**
+	 * @brief Setup configuration parameters
+	 */
+	struct SetupParams{
+		DWORD m_IFs;
+		DWORD m_feeds;
+		std::vector<Receivers::TPolarization> m_polarizations;		
+		std::vector<double> m_RFMin;
+		std::vector<double> m_RFMax;
+		std::vector<double> m_IFMin;
+		std::vector<double> m_IFBandwidth;			
+		std::vector<double> m_defaultLO;
+		std::vector<double> m_fixedLO2;
+		std::vector<double> m_LOMin;
+		std::vector<double> m_LOMax;
+		std::vector<double> m_noise_mark_lcp_coeffs; /**< Noise mark polynomial coeff. left pol. */		
+		std::vector<double> m_noise_mark_rcp_coeffs; /**< Noise mark polynomial coeff. right pol. */		
+	};
+
+	std::map<IRA::CString, ConfigurationFiles > m_conf_files;			/**< Map known allowed configurations - setup configuration files */ 
+	std::map<IRA::CString, SetupParams> m_conf_param; 			/**< Map configuration name - parameters */ 
+	
 	IRA::CDBTable *m_loTable;
 	IRA::CDBTable *m_taperTable;
 	IRA::CDBTable *m_feedsTable;
@@ -285,6 +338,5 @@ private:
 	DWORD m_taperVectorLen;
 	TFeedValue * m_feedVector; // length given by m_feeds
 };
-
 
 #endif

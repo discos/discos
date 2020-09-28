@@ -23,7 +23,10 @@
 				CCCNArrowSetup= "DataBlock/MedicinaCBand/NarrowBandwidthSetup/CCC"
 				CHCNormalSetup= "DataBlock/MedicinaCBand/NormalModeSetup/CHC"
 				CHCNarrowSetup= "DataBlock/MedicinaCBand/NarrowBandwidthSetup/CHC"
-				
+				CCCNormalNoiseMark= "DataBlock/MedicinaCBand/NoiseMark/CCC"
+				CCCNarrowNoiseMark= "DataBlock/MedicinaCBand/NoiseMark/CCC"
+				CHCNormalNoiseMark= "DataBlock/MedicinaCBand/NoiseMark/CHC"
+				CHCNarrowNoiseMark= "DataBlock/MedicinaCBand/NoiseMark/CHC"
 >
 			<LO description="Sequence of local oscillator values for each IF chain"/>
 			<feeds description="Number of feeds of the receiver"/>
