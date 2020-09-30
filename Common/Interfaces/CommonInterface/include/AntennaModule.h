@@ -19,6 +19,34 @@ namespace Antenna {
  */
 class Definitions {
 public:
+	static bool map(const char *str,TCoordinateFrame& frame) {
+		if (strcasecmp(str,"EQ")==0) {
+			frame=Antenna::ANT_EQUATORIAL;
+			return true;
+		}
+		else if (strcasecmp(str,"HOR")==0) {
+			frame=Antenna::ANT_HORIZONTAL;
+			return true;
+		}
+		else if (strcasecmp(str,"GAL")==0) {
+			frame=Antenna::ANT_GALACTIC;
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	static const char *map(const TCoordinateFrame& frame) {
+		if (frame==Antenna::ANT_EQUATORIAL) {
+			return "EQ";
+		}
+		if (frame==Antenna::ANT_HORIZONTAL) {
+			return "HOR";
+		}
+		else { // Antenna::ANT_GALACTIC
+			return "GAL";
+		}
+	}
 	static bool map(const char *str,TsubScanGeometry& geometry) {
 		if (strcasecmp(str,"LAT")==0) {
 			geometry=Antenna::SUBSCAN_CONSTLAT;

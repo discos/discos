@@ -85,8 +85,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/
 ## [discos1.0.5] - 
 ## Added
 	issue #504 - added credits clause (regarding INAF data ownership) to fits files headers
-    issue #518 - KBand receivers cryo temperature read wrongly with connection problems. More information:
+   issue #518 - KBand receivers cryo temperature read wrongly with connection problems. More information:
     https://github.com/discos/discos/issues/518#issuecomment-590838480
+   issue #530 - New Fitszilla versione 1.21 online. The subscan offsets related keywords added to the primary header.
 
 ## Fixed
     issue #518 - In case of communication error we set a dummy value (100000) for the temperature properties, and the related timestamp keeps the value of the last communication timestamp.

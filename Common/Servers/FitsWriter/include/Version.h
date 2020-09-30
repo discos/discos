@@ -21,8 +21,11 @@
 #define FITS_VERSION9 "V.1.11"
 #define FITS_VERSION10 "V.1.12"
 #define FITS_VERSION11 "V.1.2"
+#define FITS_VERSION12 "V.1.21"
 
-#define CURRENT_VERSION FITS_VERSION11
+
+
+#define CURRENT_VERSION FITS_VERSION12
 
 #define DEFAULT_COMMENT CURRENT_VERSION" Created by  S. Righini, M. Bartolini  & A. Orlati"
 
@@ -37,6 +40,7 @@
 #define HISTORY9 FITS_VERSION9" Added the keyword SIGNAL in main header of each sub scan fits"
 #define HISTORY10 FITS_VERSION10" Summary.fits has now a number of meaningful keywords"
 #define HISTORY11 FITS_VERSION11" Frequency and bandwidth columns added to Section table reporting backend sampled band"
+#define HISTORY12 FITS_VERSION12" SubScan offsets added to the primary header"
 
 #define CREDITS1  " "
 #define CREDITS2  "These data are property of:"

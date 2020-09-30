@@ -612,6 +612,21 @@ void AntennaBossImpl::getAllOffsets(CORBA::Double_out azOff,CORBA::Double_out el
 	azOff=(CORBA::Double)az; elOff=(CORBA::Double)el; raOff=(CORBA::Double)ra; decOff=(CORBA::Double)dec; lonOff=(CORBA::Double)lon; latOff=(CORBA::Double)lat;
 }
 
+void AntennaBossImpl::getScanOffsets(CORBA::Double_out lonOff,CORBA::Double_out latOff,
+ Antenna::TCoordinateFrame_out frameOff) throw (CORBA::SystemException)
+{
+	double lon,lat;
+	Antenna::TCoordinateFrame frame;
+	if (!m_core) {
+		lonOff=latOff=0.0;
+		frameOff=Antenna::ANT_HORIZONTAL;
+		return;
+	}
+	CSecAreaResourceWrapper<CBossCore> resource=m_core->Get("IMPL:getScanOffsets");
+	resource->getScanOffsets(lon,lat,frame);
+	lonOff=(CORBA::Double)lon; latOff=(CORBA::Double)lat; frameOff=frame;
+}
+
 void AntennaBossImpl::getScanAxis (Management::TScanAxis_out axis) throw (CORBA::SystemException)
 {
 	if (!m_core) {
