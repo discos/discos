@@ -16,10 +16,8 @@
 #include <ReceiversDefinitionsC.h>
 #include <map>
 #include <vector>
-
-// Dummy value for a board connection error
-#define CEDUMMY 100000
-
+#include "Commons.h"
+#include "ReceiverConfHandler.h"
 
 /**
  * This class implements the component configuration. The data inside this class are initialized at the startup from the
@@ -32,35 +30,6 @@
 class CConfiguration {
 public:
 
-	typedef struct {
-		double skyFrequency;
-		double markValue;
-		Receivers::TPolarization polarization;
-	} TMarkValue;
-
-	typedef struct {
-		double frequency;
-		double outputPower;
-	} TLOValue;
-
-	typedef struct {
-		double frequency;
-		double taper;
-	} TTaperValue;
-
-	typedef struct {
-		WORD code;
-		double xOffset;
-		double yOffset;
-		double relativePower;
-	} TFeedValue;
-
-	typedef struct {
-		double temperature;
-        ACS::Time timestamp;
-	} BoardValue;
-
-
 	/**
 	 * Default constructor
 	 */
@@ -70,6 +39,17 @@ public:
 	 * Destructor
 	 */
 	~CConfiguration();
+
+	/* *** COMPONENT *** */
+	/**
+    * This member function is used to configure component by reading the configuration parameter from the CDB.
+	 * This must be the first call before using any other function of this class.
+	 * @throw ComponentErrors::CDBAccess
+	 * @param Services pointer to the container services object
+	*/
+	void init(maci::ContainerServices *Services)  throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl);
+
+	/* *** NOT CONFIGURATION RELATED PARAMS *** */
 
 	/**
 	 * @return the IP address of the board that controls the dewar
@@ -116,6 +96,8 @@ public:
 	 */
 	inline const DDWORD& getRepetitionExpireTime() const { return m_repetitionExpireTime; }
 
+	/* *** LO INSTANCES *** */
+
 	/**
 	 * @return the instance of the local oscillator component name to drive 1st stage LO
 	 */
@@ -126,23 +108,23 @@ public:
 	 */
 	inline const IRA::CString& getLocalOscillatorInstance2nd() const { return m_localOscillatorInstance2nd; }
 
-	/**
-	 * Allows to get the table of mark values relative to left polarization
-	 * @param freq vector containing the frequency value of the mark table. It must be freed by caller.
-	 * @param markValue vector of the value of the calibration diode. It must be freed by caller.
-	 * @param len used to return the length of the mark values array
-	 * @return the size of the output vectors
-	 */
-	DWORD getLeftMarkTable(double *& freq,double *& markValuel) const;
+	/* **** TABLES **** */
 
 	/**
-	 * Allows to get the table of mark values relative to left polarization
-	 * @param freq vector containing the frequency value of the mark table. It must be freed by caller.
-	 * @param markValue vector of the value of the calibration diode. It must be freed by caller.
-	 * @param len used to return the length of the mark values array
-	 * @return the size of the output vectors
+	 * @brief Get the Left pol. Noise Mark Coeffs c array
+	 * 
+	 * @param[out] p_out_coeffs Coeff c array
+	 * @return Coeff Array len.
 	 */
-	DWORD getRightMarkTable(double *& freq,double *& markValue) const;
+	DWORD getLeftMarkCoeffs(double *& p_out_coeffs) const;
+
+	/**
+	 * @brief Get the Right pol. noise Mark Coeffs c array
+	 * 
+	 * @param[out] p_out_coeffs Coeff c array
+	 * @return Coeff Array len.
+	 */
+	DWORD getRightMarkCoeffs(double *& p_out_coeffs) const;
 
 	/**
 	 * @param freq vector with the synthesizer frequencies. It must be freed by caller.
@@ -158,11 +140,7 @@ public:
 	 */
 	DWORD getTaperTable(double * &freq,double *&taper) const;
 
-	/**
-	 * @return the number of feeds
-	 */
-	inline const  DWORD& getFeeds() const { return m_feeds; }
-
+	
 	/**
 	 * @param code feed identification codes. It must be freed by caller.
 	 * @param xOffset displacement of the feed with respect to the central one along x axis. It must be freed by caller.
@@ -171,6 +149,13 @@ public:
 	 * @return the size of the output vectors
 	 */
 	DWORD getFeedInfo(WORD *& code,double *& xOffset,double *& yOffset,double *& relativePower) const;
+
+	/* *** SINGLE SETUP ENTRIES  *** */
+
+	/**
+	 * @return the number of feeds
+	 */
+	inline const  DWORD& getFeeds() const { return m_feeds; }
 
 	/**
 	 * @return mnemonic of the working mode of the receiver
@@ -231,36 +216,15 @@ public:
 	 * @return upper limit for  the  synthesizer tuning (MHz)
 	 */
 	inline double const * const  getLOMax() const { return  m_LOMax; }
-
-	/**
-    * This member function is used to configure component by reading the configuration parameter from the CDB.
-	 * This must be the first call before using any other function of this class.
-	 * @throw ComponentErrors::CDBAccess
-	 * @param Services pointer to the container services object
-	*/
-	void init(maci::ContainerServices *Services)  throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl);
 	
 private:
 
 	/**
 	 * @brief Read setup configuration from file
-	 * @details Setup conf. example params
-				Mode="NORMAL"
-				RFMin="4300.0 4300.0"
-				RFMax="5800.0 5800.0"
-				IFMin="100.0 100.0"
-				IFBandwidth="400.0 400.0"
-				Feeds="1"
-				IFs="2"
-				Polarization="L R"
-				DefaultLO="4600.0 4600.0"
-				FixedLO2="2300.0 2300.0"
-				LOMin="4200.0 4200.0"
-				LOMax="5500.0 5500.0"	 
 	 * @param[in] p_conf_path configuration file path
 	 * @param[out] p_params_out Read conf params	 
 	 */
-	void readConfigurationSetup(const IRA::CString & p_conf_path, SetupParams & p_params_out )  throw (ComponentErrors::CDBAccessExImpl);
+	void readConfigurationSetup(const IRA::CString & p_conf_path, ReceiverConfHandler::ConfigurationSetup & p_params_out )  throw (ComponentErrors::CDBAccessExImpl);
 
 	/**
 	 * @brief Read noise mark polynomial coefficient from file
@@ -269,17 +233,30 @@ private:
 	 * @param[in] p_conf_path file path
 	 * @param[out] p_params_out Read conf params	 
 	 */
-	void readNoiseMarkPoly(const IRA::CString & p_conf_path, SetupParams & p_params_out) throw (ComponentErrors::CDBAccessExImpl);
+	void readNoiseMarkPoly(const IRA::CString & p_conf_path, ReceiverConfHandler::ConfigurationSetup & p_params_out) throw (ComponentErrors::CDBAccessExImpl);
 
 	/**
 	 * @brief Feed coordinates readings
 	 */
-	void readFeeds() throw (ComponentErrors::CDBAccessExImpl, ComponentErrors::MemoryAllocationExImpl);
+	void readFeeds() throw (ComponentErrors::CDBAccessExImpl, ComponentErrors::MemoryAllocationExImpl);	
 
 	/**
 	 * @brief Taper values readings
 	 */
 	void readTaper() throw (ComponentErrors::CDBAccessExImpl, ComponentErrors::MemoryAllocationExImpl);
+
+	/**
+	 * @brief Read freq-power table for each synth
+	 * @details Getting 2 differents data table for 1st and 2nd stage mixer
+	 */
+	void readSynths()throw (ComponentErrors::CDBAccessExImpl, ComponentErrors::MemoryAllocationExImpl);
+
+	/**
+	 * @brief Single synth table reading
+	 * @param[out] p_synt_table Data output container
+	 * @param[in] p_table_file Input configuration file
+	 */
+	void readSyntTable(std::vector<TLOValue> & p_synt_table, IRA::CString p_table_file) throw (ComponentErrors::CDBAccessExImpl, ComponentErrors::MemoryAllocationExImpl);
 
 private:
 
@@ -296,47 +273,17 @@ private:
 	IRA::CString m_localOscillatorInstance1st; /**< 1st stage mixer component instance name */
 	IRA::CString m_localOscillatorInstance2nd; /**< 2nd stage mixer component instance name */
 
-	/**
-	 * @brief Configuration file path container struct
-	 */
-	struct ConfigurationFiles{
-		IRA::CString m_setup;		/**< General setup xml conf file path */ 
-		IRA::CString m_noise_mark;  /**< Noise mark xml conf file path */
-	};
-
-	/**
-	 * @brief Setup configuration parameters
-	 */
-	struct SetupParams{
-		DWORD m_IFs;
-		DWORD m_feeds;
-		std::vector<Receivers::TPolarization> m_polarizations;		
-		std::vector<double> m_RFMin;
-		std::vector<double> m_RFMax;
-		std::vector<double> m_IFMin;
-		std::vector<double> m_IFBandwidth;			
-		std::vector<double> m_defaultLO;
-		std::vector<double> m_fixedLO2;
-		std::vector<double> m_LOMin;
-		std::vector<double> m_LOMax;
-		std::vector<double> m_noise_mark_lcp_coeffs; /**< Noise mark polynomial coeff. left pol. */		
-		std::vector<double> m_noise_mark_rcp_coeffs; /**< Noise mark polynomial coeff. right pol. */		
-	};
-
-	std::map<IRA::CString, ConfigurationFiles > m_conf_files;			/**< Map known allowed configurations - setup configuration files */ 
-	std::map<IRA::CString, SetupParams> m_conf_param; 			/**< Map configuration name - parameters */ 
+	ReceiverConfHandler m_conf_hnd;	/**< Receiver Configuration  helper */
 	
-	IRA::CDBTable *m_loTable;
-	IRA::CDBTable *m_taperTable;
-	IRA::CDBTable *m_feedsTable;
-
-	TMarkValue *m_markVector;
-	DWORD m_markVectorLen;
-	TLOValue * m_loVector;
-	DWORD m_loVectorLen;
-	TTaperValue * m_taperVector;
-	DWORD m_taperVectorLen;
-	TFeedValue * m_feedVector; // length given by m_feeds
+	IRA::CDBTable *m_taperTable;	/**< Helper reading xml taper table */
+	IRA::CDBTable *m_feedsTable;	/**< Helper reading xml feeds table */
+	IRA::CDBTable *m_loTable;		/**< Helper reading xml local synth data table */
+	
+	std::vector<TLOValue> m_synt_table_1st;	/**< Freq - power synt table 1st stage LO*/
+	std::vector<TLOValue> m_synt_table_2nd;	/**< Freq - power synt table 2nd stage LO*/
+	std::vector<TMarkValue> m_mark_values; /**< @todo Mark value cosa do fuori?? */
+	std::vector<TTaperValue>  m_taper_table; /**< Freq - value taper */	
+	std::vector<TFeedValue>  m_feeds_table; /**< feeds data table */
 };
 
 #endif

@@ -59,6 +59,7 @@ CConfiguration const * const  CComponentCore::execute() throw (ComponentErrors::
         throw dummy;
     }
     //members initialization
+    /**@todo spostare in activate */
     m_startFreq.length(m_configuration.getIFs());
     m_bandwidth.length(m_configuration.getIFs());
     m_polarization.length(m_configuration.getIFs());
@@ -499,18 +500,20 @@ void CComponentCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& r
     DWORD sizeL=0;
     DWORD sizeR=0;
     baci::ThreadSyncGuard guard(&m_mutex);
+    /* Checking receiver setup */
     if (m_setupMode=="") {
         _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getCalibrationMark()");
         impl.setReason("receiver not configured yet");
         throw impl;
     }
-    //let's do some checks about input data
+    /* Checking start frequnency input seq length*/
     unsigned stdLen=freqs.length();
     if ((stdLen!=bandwidths.length()) || (stdLen!=feeds.length()) || (stdLen!=ifs.length())) {
         _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getCalibrationMark()");
         impl.setReason("sub-bands definition is not consistent");
         throw impl;
     }
+    /* For every start frequency checks IF input seq */
     for (unsigned i=0;i<stdLen;i++) {
         if ((ifs[i]>=(long)m_configuration.getIFs()) || (ifs[i]<0)) {
             _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::getCalibrationMark()");
@@ -518,6 +521,7 @@ void CComponentCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& r
             throw impl;
         }
     }
+    /* For every start frequency checks Feeds input seq */
     for (unsigned i=0;i<stdLen;i++) {
         if ((feeds[i]>=(long)m_configuration.getFeeds()) || (feeds[i]<0)) {
             _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::getCalibrationMark()");
@@ -525,10 +529,15 @@ void CComponentCore::getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& r
             throw impl;
         }
     }
+    /* Setting output data containers lenght */
     result.length(stdLen);
     resFreq.length(stdLen);
     resBw.length(stdLen);
-    // first get the calibration mark tables
+    /* Ask for polynomial coeffs from configuration layer */
+    SetupParams l_receiver_setup;
+
+
+
     sizeL=m_configuration.getLeftMarkTable(tableLeftFreq,tableLeftMark);
     sizeR=m_configuration.getRightMarkTable(tableRightFreq,tableRightMark);
     for (unsigned i=0;i<stdLen;i++) {
