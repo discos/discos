@@ -12,6 +12,8 @@
 
 #include <baciDevIO.h>
 #include <IRA>
+#include "MFKBandBaseConf.h"
+
 
 /**
  * This class is derived from template DevIO and it is used by the cryoTemparatureCoolHead  property of the  component.
@@ -54,8 +56,9 @@ public:
 	*/
 	CORBA::Double read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
 	{
-		m_val=m_pCore->getCryoCoolHead();
-		timestamp=getTimeStamp();  //Completion time
+        CConfiguration::BoardValue result = m_pCore->getCryoCoolHead();
+        m_val = result.temperature;
+        timestamp = result.timestamp;
 		return m_val;
 	}
 	/**
@@ -70,6 +73,7 @@ public:
 private:
 	CComponentCore* m_pCore;
 	double  m_val;
+    ACS::Time m_timestamp_lc;  // Timestamp of last connection
 };
 
 #endif

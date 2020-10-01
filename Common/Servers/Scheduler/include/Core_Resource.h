@@ -28,7 +28,8 @@
 									m_antennaRTime->axis=Management::MNG_NO_AXIS; \
 									m_servoRunTime=new MinorServo::TRunTimeParameters; m_servoRunTime->scanAxis=""; \
 									m_subScanConf.signal=Management::MNG_SIGNAL_NONE; \
-									m_scanBinder.init(&m_scanConf);
+									m_scanBinder.init(&m_scanConf); \
+									m_parser=NULL;
 
 
 									
@@ -46,18 +47,11 @@
 					  ACS_LOG(LM_FULL_INFO, "Core::execute()", (LM_INFO,"RECEIVERS_NC_READY")); \
 					  m_defaultBackendInstance=m_config->getDefaultBackendInstance(); \
 					  m_defaultDataReceiverInstance=m_config->getDefaultDataReceiverInstance(); \
-					  try { \
-					  	m_parser=new CParser<CCore>(this,10,true);\
-					  } \
-					  catch (...) { \
-						_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CCore::execute()"); \
-						throw dummy; \
-	                  } \
-	                  if (!m_timer.init()) { \
+	              if (!m_timer.init()) { \
 		                _EXCPT(ComponentErrors::TimerErrorExImpl,dummy,"CCore::initialize()"); \
 		                 dummy.setReason("Timer could not be initialized"); \
 		                throw dummy; \
-	                  }
+	              }
 
 #define RESOURCE_CLEANUP if (m_antennaNC!=NULL) m_antennaNC->disconnect(); \
 						 m_antennaNC=NULL; \

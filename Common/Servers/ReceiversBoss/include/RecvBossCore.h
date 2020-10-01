@@ -426,8 +426,8 @@ private:
 
 #ifdef COMPILE_TARGET_MED
 	void setup(const char * code) throw(ComponentErrors::SocketErrorExImpl,ComponentErrors::ValidationErrorExImpl);
-	bool sendToRecvControl(const void *buffer,unsigned size);
-	bool sendToFS(const void *buffer,unsigned size);
+	bool sendToRecvControl(const void *buffer,int size);
+	bool sendToFS(const void *buffer,int size);
 
 #elif COMPILE_TARGET_NT
 	void setup(const char * code) throw(ComponentErrors::SocketErrorExImpl,ComponentErrors::ValidationErrorExImpl);

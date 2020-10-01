@@ -455,8 +455,8 @@ CustomLoggerImpl::filter(LogRecord& log_record)
     {
         if(log_record.process_name == CUSTOM_PYTHON_LOGGING_PROCESS){ //if the log record has been produced by IRAPy logger
             filtered = true; 
-        }else if(!log_record.kwargs.empty())
-        {
+        }
+        else if(!log_record.kwargs.empty()) {
             result = log_record.get_data(std::string(CUSTOM_LOGGING_DATA_NAME));
             if(result == CUSTOM_LOGGING_DATA_VALUE) //if the log record has been produced by C++ IRA Log MACROS
                 filtered = true;
@@ -501,8 +501,8 @@ CustomLoggerImpl::handle(LogRecord_sp log_record)
         //Write the log record to syslog file
         _full_log << log_record->xml_text << '\n';
         _full_log.flush();
-        if(filter(*log_record))
-        {
+
+        if(filter(*log_record)) {
             //publish the log record to the notification channel
             Management::TCustomLoggingData loggingData={log_record->timestamp, 
                                                         log_record->log_level, 
@@ -664,23 +664,28 @@ void CustomStructuredPushConsumer::push_structured_event (const CosNotification:
     Logging::XmlLogRecordSeq *reclist;
     notification.remainder_of_body >>= reclist;
     LogRecord_sp lr;
-    try{
-        if(xmlLog)
-        {
+    try {
+        if(xmlLog) {
             //parse the xml to a LogRecord
             lr = get_log_record(logger_->log_parser, xmlLog);
             //handle the log record and the xml
             logger_->handle(lr);
         }
-        else if (reclist)
+        else if (reclist) {
             for(unsigned int i = 0; i < reclist->length(); i++)
             {
                 xmlLog = (*reclist)[i].xml;
                 lr = get_log_record(logger_->log_parser, xmlLog);
                 logger_->handle(lr);
             }
-    }catch(const MalformedXMLError& mxe){
+        }
+    }
+    catch(const MalformedXMLError& mxe){
         logger_->handle_xml_error();
+    }
+    catch (...) {
+    	ACS_LOG(LM_FULL_INFO,"CustomStructuredPushConsumer::push_structured_event",(LM_ERROR,
+    	  "Error in event logging and handling routine"));
     }
 };
 

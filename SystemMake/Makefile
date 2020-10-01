@@ -34,7 +34,7 @@ COMMON_LIBRARIES:=SlaLibrary IRALibrary DiscosVersion TextWindowLibrary ParserLi
 COMMON_SERVERS:=AntennaBoss Observatory OTF PointingModel Refraction SkySource \
                 Moon FitsWriter Scheduler ReceiversBoss ExternalClients \
                 CalibrationTool TotalPower NoiseGenerator CustomLogger \
-                XBackend PyDewarPositioner Sardara PyLocalOscillator MFKBandBaseReceiver
+                XBackend PyDewarPositioner Sardara PyLocalOscillator MFKBandBaseReceiver PyCalmux
 COMMON_CLIENTS:=AntennaBossTextClient ObservatoryTextClient \
                 GenericBackendTextClient ReceiversBossTextClient \
                 SystemTerminal CaltoolClient CustomLoggingClient \
@@ -120,7 +120,7 @@ ifeq ($(STATION),Medicina)
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary ComponentProxy ModbusChannel XarcosLibrary \
 	    PyTestingLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
-		Metrology TotalPower NoiseGenerator MedicinaMount MedWeatherStation CustomLogger XBackend MedicinaMinorServo\
+		TotalPower NoiseGenerator MedicinaMount MedicinaPyLocalOscillator MedicinaPyDMed CustomLogger XBackend MedicinaMinorServo\
 		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient SchedulerTextClient MinorServoBossTextClient\
 		MedicinaMountTextClient CustomLoggingClient\
 		Plotter KStars Scripts MedScripts

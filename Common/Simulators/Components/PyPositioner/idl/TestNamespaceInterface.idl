@@ -6,7 +6,6 @@
 #define __TESTNAMESPACE_INTERFACE__IDL__ 
 
 #include <baci.idl>
-#include <ComponentErrors.idl>
 
 #pragma prefix "alma"
 
@@ -24,8 +23,7 @@ module TestNamespaceInterface {
     {
    
         /** Set the position */
-        void setPosition(in double position) 
-            raises (ComponentErrors::ComponentErrorsEx);
+        void setPosition(in double position);
 
 
         /** Return the actual position */

@@ -659,6 +659,13 @@ void CBossCore::setOffsets(const double& lonOff,const double& latOff,const Anten
 	addOffsets(m_longitudeOffset,m_latitudeOffset,m_offsetFrame,m_userOffset,m_scanOffset);
 }
 
+void CBossCore::getScanOffsets(double& lonOff,double& latOff,Antenna::TCoordinateFrame& frame)
+{
+	lonOff=m_scanOffset.lon;
+	latOff=m_scanOffset.lat;
+	frame=m_scanOffset.frame;
+}
+
 void CBossCore::getAllOffsets(double& azOff,double& elOff,double& raOff,double& decOff,double& lonOff,double& latOff) const
 {
 	if (m_offsetFrame==Antenna::ANT_HORIZONTAL) {
@@ -1023,7 +1030,7 @@ bool CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,Co
 		loadPointingModel(m_pointingModel); // throw ComponentErrors::CouldntGetComponentExImpl
 		// get Offset from refraction;
 		try {
-			m_refraction->getCorrection(DPI/2.0-el,m_waveLength,m_refractionOffset);
+			m_refraction->getCorrection(DPIBY2-el,m_waveLength,m_refractionOffset);
 		}
 		catch (AntennaErrors::AntennaErrorsEx& ex) {  
 			_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CBossCore::updateAttributes()");
@@ -1249,7 +1256,7 @@ void CBossCore::loadTrackingPoint(const TIMEVALUE& time,bool restart) throw (Com
 		refOff=0.0;
 		try {
 			if (el>0.0) {
-				m_refraction->getCorrection(DPI/2.0-el,m_waveLength,refOff);
+				m_refraction->getCorrection(DPIBY2-el,m_waveLength,refOff);
 			}
 		}
 		catch (AntennaErrors::AntennaErrorsEx& ex) {

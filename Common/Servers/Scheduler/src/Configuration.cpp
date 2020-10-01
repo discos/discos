@@ -300,6 +300,19 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 		ACS_LOG(LM_FULL_INFO,"CConfiguration::init()",(LM_WARNING,"Default backend does not exist"));
 		m_currentBackendIndex=-1;
 	}
+
+	if (!CIRATools::getDBValue(Services,"welcomeMessage",m_welcomeMessage,"alma/","DataBlock/Station")) {
+		m_welcomeMessage = (const char*)"";
+	}
+	std::string welcomeMessage = std::string(m_welcomeMessage);
+	//Replace every occurrence of the string "\n" (2 characters) with a new line character
+	while(true) {
+		std::size_t found = welcomeMessage.find("\\n");
+		if(found == std::string::npos)
+			break;
+		welcomeMessage.replace(found, 2, "\n");
+	}
+	m_welcomeMessage = welcomeMessage.c_str();
 }
 
 Management::TScanAxis CConfiguration::str2Axis(const IRA::CString& axis) const

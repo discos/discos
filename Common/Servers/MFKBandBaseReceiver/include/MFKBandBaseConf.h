@@ -22,6 +22,10 @@
 #include <ReceiversDefinitionsC.h>
 #include "MFKBandBaseUtils.h"
 
+// Temperature dummy value to use in case of Connection Error
+#define CEDUMMY 100000
+
+
 /**
  * This class implements the component configuration. The data inside this class are initialized at the startup from the
  * configuration database and then are used (read) inside the component.
@@ -54,6 +58,12 @@ public:
 		double yOffset;
 		double relativePower;
 	} TFeedValue;
+
+	typedef struct {
+		double temperature;
+        ACS::Time timestamp;
+	} BoardValue;
+
 
 	/**
 	 * Default constructor

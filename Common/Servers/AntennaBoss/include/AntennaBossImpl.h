@@ -633,6 +633,19 @@ public:
 	void getAllOffsets(CORBA::Double_out azOff,CORBA::Double_out elOff,CORBA::Double_out raOff,CORBA::Double_out decOff,CORBA::Double_out lonOff,CORBA::Double_out latOff) throw (CORBA::SystemException);
 	
 	/**
+	 * This method should only be used internally to know the scan offsets currently commanded
+	 * @throw CORBA::SystemException
+	 * @param azOff user offset for the azimuth (radians)
+	 * @param elOff user offset for the elevation (radians)
+	 * @param raOff user offset for the right ascension (radians)
+	 * @param decOff user offset for the declination (radians)
+	 * @param lonOff user offset for the longitude (radians)
+	 * @param latOff user offset for the latitude (radians)
+	*/
+	void getScanOffsets(CORBA::Double_out lonOff,CORBA::Double_out latOff,
+	 Antenna::TCoordinateFrame_out frameOff) throw (CORBA::SystemException);
+	
+	/**
 	 * It can be called to know which is the axis the antenna is currently performing the scan
 	 * @param axis returned identfier of the axis
 	 */
@@ -673,6 +686,7 @@ private:
 	SmartPropertyPointer<ROdouble> m_pdeclinationOffset;
 	SmartPropertyPointer<ROdouble> m_plongitudeOffset;
 	SmartPropertyPointer<ROdouble> m_platitudeOffset;
+	CBossCore *m_boss;
 	IRA::CSecureArea<CBossCore> *m_core;
 	CWorkingThread *m_workingThread;
 	CWatchingThread *m_watchingThread;

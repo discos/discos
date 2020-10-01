@@ -533,11 +533,11 @@ void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponent
 		impl.setComponentName(backend->name());
 		throw impl;
 	}
-	for (unsigned t=0;t<bckinputFreq->length();t++) {
+	/*for (unsigned t=0;t<bckinputFreq->length();t++) {
 		printf("bck freq :%lf\n",bckinputFreq[t]);
 		printf("bck bw:%lf\n",bckinputBW[t]);
 
-	}
+	}*/
 	if (inputSection->length()!=(unsigned)inputs) {
 		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCore::_fTrack()");
 		impl.setReason("inconsistent data from the backend inputs number");
@@ -545,7 +545,7 @@ void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponent
 	}
 	//---------------------------------------------------------------------------------------------------
 	//4) info from antenna--------------------------------------------------------------------------------
-	printf("RestFrequency : %lf\n",m_restFrequency[0]);
+	//printf("RestFrequency : %lf\n",m_restFrequency[0]);
 	try {
 		m_antennaBoss->getTopocentricFrequency(m_restFrequency,topocentricFreq.out());
 	}
@@ -573,7 +573,7 @@ void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponent
 		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::_fTrack()");
 		throw impl;
 	}
-	for (unsigned t=0;t<topocentricFreq->length();t++) printf("topocentric Freq :%lf\n",topocentricFreq[t]);
+	//for (unsigned t=0;t<topocentricFreq->length();t++) printf("topocentric Freq :%lf\n",topocentricFreq[t]);
 	// just to make sure the topocentric sequence has the right dimension!
 	if (topocentricFreq->length()!=m_restFrequency.length()) {
 		topocentricFreq->length(m_restFrequency.length());
@@ -590,7 +590,7 @@ void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponent
 		throw impl;
 	}
 	IFNumber=IFNumberRO->get_sync(comp.out()); // number of output IFs of the receeever
-	printf("if number :%ld\n",IFNumber);
+	//printf("if number :%ld\n",IFNumber);
 	try {
 		m_receiversBoss->getIFOutput(bckinputFeed,bckinputIF,fndoutputFreq.out(),fndoutputBw.out(),fndoutputPol.out(),fndoutputLO.out());
 	}
@@ -617,10 +617,10 @@ void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponent
 		impl.setReason("inconsistent data from the receivers if outputs");
 		throw impl;
 	}
-	for (unsigned t=0;t<fndoutputFreq->length();t++) {
+	/*for (unsigned t=0;t<fndoutputFreq->length();t++) {
 		printf("Frequency :%lf\n",fndoutputFreq[t]);
 		printf("BandWidth :%lf\n",fndoutputBw[t]);
-	}
+	}*/
 	//---------------------------------------------------------------------------------------------------
 	//5) let's start with some computations  -----------------------------------------------------------------------------
 	sectionFreq.length(sections);
@@ -631,16 +631,16 @@ void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponent
 		inputLO[j]=fndoutputLO[j]; //if (device=="BCK")
 		if ((device=="ALL") || (device=="LO")) {
 			currentSection=inputSection[j];
-			printf("currentSection :%ld\n",currentSection);
+			//printf("currentSection :%ld\n",currentSection);
 			if (topocentricFreq->length()==1) {
 				inputLO[j]=IRA::CIRATools::roundNearest(topocentricFreq[0]-bckinputFreq[j]-
 						(bckinputBW[j]/2.0),digits);
-				printf("inputLO[j] :%lf\n",inputLO[j]);
+				//printf("inputLO[j] :%lf\n",inputLO[j]);
 			}
 			else {
 				inputLO[j]=IRA::CIRATools::roundNearest(topocentricFreq[currentSection]-bckinputFreq[j]-
 						(bckinputBW[j]/2.0),digits);
-				printf("inputLO[j] :%lf\n",inputLO[j]);
+				//printf("inputLO[j] :%lf\n",inputLO[j]);
 			}
 			//lo[bckinputIF[j]]=inputLO[j]; // local oscillator per IFs
 		}
@@ -654,7 +654,7 @@ void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponent
 			if (bckinputIF[i]==j) {
 				if((lo[j] < 0.0 ) || (inputLO[i] < lo[j])) { // change the local oscillator value if ......
 					lo[j] = inputLO[i];
-					printf("lo changed: #if: %ld, value: %lf  \n",j,lo[j]);
+					//printf("lo changed: #if: %ld, value: %lf  \n",j,lo[j]);
 				}
 			}
 		}
@@ -743,7 +743,7 @@ void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponent
 	}
 }
 
-void CCore::_setProjectCode(const char* code) throw (ManagementErrors::UnkownProjectCodeErrorExImpl)
+void CCore::_setProjectCode(const char* code,IRA::CString& message) throw (ManagementErrors::UnkownProjectCodeErrorExImpl)
 {
 	IRA::CString newCode(code);
 	if (newCode=="''") { // if '' given...maps to default user
@@ -760,6 +760,11 @@ void CCore::_setProjectCode(const char* code) throw (ManagementErrors::UnkownPro
 	if (m_schedExecuter) {
 		m_schedExecuter->setProjectCode(newCode);
 	}
+    std::string msg = "Welcome to this facility, " + std::string(code) + "!";
+    std::string welcome = std::string(m_config->getWelcomeMessage());
+    if(welcome != "")
+        msg += "\n" + welcome;
+    message.Format("STR %s", msg.c_str());
 }
 
 /*void CCore::_winkingMark(const char *arg) throw (ComponentErrors::ValidationErrorExImpl);

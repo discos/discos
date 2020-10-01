@@ -17,4 +17,5 @@
 	height="650.0"
 	yPolarMotion="0.0"
 	xPolarMotion="0.0"
-	geodeticModel="0" />
+	geodeticModel="0"
+	welcomeMessage="Before starting to observe, it is important that you check the status of the telescope visiting the following website:\nhttps://bit.ly/2Xf3aUl\nYou can find it as a bookmark in the browser as well." />

@@ -1,10 +1,10 @@
 //#define RB_DEBUG
 
-#define RECV_ADDRESS "192.167.189.2"
+#define RECV_ADDRESS "192.168.51.2"
 #define RECV_PORT 2096
-#define FS_ADDRESS "192.167.189.62"
+#define FS_ADDRESS "192.168.51.14"
 #define FS_PORT 5002
-#define SXKL_ADDRESS "192.167.189.2"
+#define SXKL_ADDRESS "192.168.51.2"
 #define SXKL_PORT 9876
 
 
@@ -109,7 +109,7 @@ void CRecvBossCore::calOn() throw (ComponentErrors::ValidationErrorExImpl,Compon
 	}
 	else if (m_currentRecvCode=="XXP") {
 		// turn the marca on through the FS
-		IRA::CString fsBuffer("sxkl=*,on\n");
+		IRA::CString fsBuffer("calon\n");
 		if (!sendToFS((const void *)fsBuffer,fsBuffer.GetLength())) {
 			_EXCPT(ComponentErrors::SocketErrorExImpl,impl,"CRecvBossCore::calOn()");
 			m_status=Management::MNG_FAILURE;
@@ -173,7 +173,7 @@ void CRecvBossCore::calOff() throw (ComponentErrors::ValidationErrorExImpl,Compo
 	}
 	else if (m_currentRecvCode=="XXP") {
 		// turn the marca on through thr FS
-		IRA::CString fsBuffer("sxkl=*,off\n");
+		IRA::CString fsBuffer("caloff\n");
 		if (!sendToFS((const void *)fsBuffer,fsBuffer.GetLength())) {
 			_EXCPT(ComponentErrors::SocketErrorExImpl,impl,"CRecvBossCore::calOff()");
 			m_status=Management::MNG_FAILURE;
@@ -332,6 +332,13 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CRecvBossCore::setup()");
 			changeBossStatus(Management::MNG_FAILURE);
 			m_currentRecvError=true;
+			throw impl;
+		}
+		// now set the subreflector configuration through the FS
+		IRA::CString fsBuffer("scu=kkc\n");
+		if (!sendToFS((const void *)fsBuffer,fsBuffer.GetLength())) {
+			_EXCPT(ComponentErrors::SocketErrorExImpl,impl,"CRecvBossCore::setup()");
+			m_status=Management::MNG_FAILURE;
 			throw impl;
 		}
 		changeBossStatus(Management::MNG_OK);
@@ -1334,32 +1341,35 @@ void CRecvBossCore::publishData() throw (ComponentErrors::NotificationChannelErr
 	}
 }
 
-bool CRecvBossCore::sendToRecvControl(const void *buffer,unsigned size)
+bool CRecvBossCore::sendToRecvControl(const void *buffer,int size)
 {
 	IRA::CSocket sock;
 	IRA::CError err;
 	char readout[128];
 	IRA::CString recvIpAddr(RECV_ADDRESS);
 	DWORD recvPort=RECV_PORT;
+	int count;
 	try {
 		if (sock.Create(err,IRA::CSocket::STREAM)!=IRA::CSocket::SUCCESS) {
 			return false;
 		}
-		if (sock.setSockMode(err,IRA::CSocket::NONBLOCKING)==IRA::CSocket::FAIL) {
+		/*if (sock.setSockMode(err,IRA::CSocket::NONBLOCKING)==IRA::CSocket::FAIL) {
 			return false;
-		}
+		}*/
 		if (sock.Connect(err,recvIpAddr,recvPort)==IRA::CSocket::FAIL) {
 			return false;
 		}
 		if (sock.Send(err,buffer,size)!=(int)size) {
 			return false;
 		}
-		if (sock.Receive(err,(void *)readout,128)==IRA::CSocket::FAIL) {
+		count=sock.Receive(err,(void *)readout,128);
+		if (count==IRA::CSocket::FAIL) {
 			return false;
 		}
+		readout[count]=0;
 		if (strcmp(readout,"ACK\n")!=0) {
 			return false;
-		} 		
+		} 	
 		sock.Close(err);
 	}
 	catch (...) {
@@ -1368,7 +1378,7 @@ bool CRecvBossCore::sendToRecvControl(const void *buffer,unsigned size)
 	return true;
 }
 
-bool CRecvBossCore::sendToFS(const void *buffer,unsigned size)
+bool CRecvBossCore::sendToFS(const void *buffer,int size)
 {
 	IRA::CSocket sock;
 	IRA::CError err;
