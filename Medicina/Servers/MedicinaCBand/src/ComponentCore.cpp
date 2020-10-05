@@ -39,6 +39,10 @@ void CComponentCore::initialize(maci::ContainerServices* services)
 
 CConfiguration const * const  CComponentCore::execute() throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::SocketErrorExImpl)
 {
+    /*
+     * This Call sets default Recevier Configuration at CCC_Normal 
+     * User has to call for Activate() and setupMode() to be more specific about receiver conf
+     */
     m_configuration.init(m_services);  //throw (ComponentErrors::CDBAccessExImpl);
     try {
         m_control=new IRA::ReceiverControl(
@@ -58,18 +62,7 @@ CConfiguration const * const  CComponentCore::execute() throw (ComponentErrors::
         _EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CComponentCore::execute()");
         throw dummy;
     }
-    //members initialization
-    /**@todo spostare in activate */
-    m_startFreq.length(m_configuration.getIFs());
-    m_bandwidth.length(m_configuration.getIFs());
-    m_polarization.length(m_configuration.getIFs());
-    for (WORD i=0;i<m_configuration.getIFs();i++) {
-        m_startFreq[i]=m_configuration.getIFMin()[i];
-        m_bandwidth[i]=m_configuration.getIFBandwidth()[i];
-        m_polarization[i]=(long)m_configuration.getPolarizations()[i];
-        m_localOscillatorValue=m_configuration.getDefaultLO()[i];
-    }
-    m_setupMode="";
+    m_setupMode= m_configuration.m_con_hnd.getActualConfStr();
     return &m_configuration;
 }
 
@@ -83,21 +76,33 @@ void CComponentCore::cleanup()
     }
 }
 
-
 void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
         ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl,ReceiversErrors::NoRemoteControlErrorExImpl,
         ReceiversErrors::ReceiverControlBoardErrorExImpl)
 {
-    /**@todo check mode string from configuration and setup mode*/
-
-
     /* activate mode */
     baci::ThreadSyncGuard guard(&m_mutex);
-    setMode((const char *)m_configuration.getSetupMode()); // Throw ......
+    bool l_res= m_configuration.m_conf_hnd.setMode(mode);
+    if (! l_res){
+        _EXCPT(ReceiversErrors::ModeErrorExImpl,impl,"CComponentErrors::setMode()");
+        throw impl;
+    }    
     guard.release();
+    //members initialization        
+    m_startFreq.length(m_configuration.getIFs());
+    m_bandwidth.length(m_configuration.getIFs());
+    m_polarization.length(m_configuration.getIFs());
+    for (WORD i=0;i<m_configuration.getIFs();i++) {
+        m_startFreq[i]=m_configuration.getIFMin()[i];
+        m_bandwidth[i]=m_configuration.getIFBandwidth()[i];
+        m_polarization[i]=(long)m_configuration.getPolarizations()[i];
+        /** @todo comporre un oggetto LO con un unica interfaccia come clsse a parte ? */
+        m_localOscillatorValue=m_configuration.getDefaultLO()[i];
+    }
+    // Basic operations
     lnaOn(); // throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
     externalCalOff();
-
+    // Remote control check
     bool answer;
     try {
         answer=m_control->isRemoteOn();
@@ -133,6 +138,7 @@ void CComponentCore::setMode(const char * mode) throw (ReceiversErrors::ModeErro
     IRA::CString cmdMode(mode);
     cmdMode.MakeUpper();
     /**@todo CHC - CCC modes allowed? */
+    
     /**@todo NarrowBandiwth vs NormalSetupMode ? */
     if (cmdMode!=m_configuration.getSetupMode()) { 
         _EXCPT(ReceiversErrors::ModeErrorExImpl,impl,"CComponentErrors::setMode()");

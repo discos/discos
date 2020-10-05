@@ -395,13 +395,7 @@ private:
         UNLOCKED=11
     };
 
-
-    /**@brief LO device anda data collector */    
-    struct LO{
-        Receivers::LocalOscillator_var m_localOscillatorDevice; /**< LO HPIB connected device */
-        bool m_localOscillatorFault;    /**< Falut flag */
-        double m_localOscillatorValue;  /**< Frequency Value */
-    }
+    /**@brief LO device anda data collector */        
 
     CConfiguration m_configuration;
     maci::ContainerServices* m_services;
@@ -413,8 +407,14 @@ private:
     ACS::longSeq m_polarization;
     IRA::CString m_setupMode;
 
+    struct LO{
+        Receivers::LocalOscillator_var m_localOscillatorDevice; /**< LO  connected device */
+        bool m_localOscillatorFault;    /**< Falut flag */
+        double m_localOscillatorValue;  /**< Frequency Value */
+    };
+
     LO m_lo_1st;        /**< 1st stage mixer */
-    LO m_lo_2st;        /**< 2st stage mixer */
+    LO m_lo_2nd;        /**< 2st stage mixer */
 
     double m_vacuum;
     CConfiguration::BoardValue m_environmentTemperature;

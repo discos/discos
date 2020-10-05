@@ -42,8 +42,9 @@ public:
 
 	/* *** COMPONENT *** */
 	/**
-    * This member function is used to configure component by reading the configuration parameter from the CDB.
-	 * This must be the first call before using any other function of this class.
+    *  @brief This member function is used to configure component by reading the configuration parameter from the CDB.
+	 * @details This must be the first call before using any other function of this class.
+	 * 			This call applies CCC_Normal configuration as default
 	 * @throw ComponentErrors::CDBAccess
 	 * @param Services pointer to the container services object
 	*/
@@ -216,7 +217,11 @@ public:
 	 * @return upper limit for  the  synthesizer tuning (MHz)
 	 */
 	inline double const * const  getLOMax() const { return  m_LOMax; }
-	
+
+public: 
+
+	ReceiverConfHandler m_conf_hnd;	/**< Receiver Configuration  helper */	
+
 private:
 
 	/**
@@ -272,8 +277,6 @@ private:
 
 	IRA::CString m_localOscillatorInstance1st; /**< 1st stage mixer component instance name */
 	IRA::CString m_localOscillatorInstance2nd; /**< 2nd stage mixer component instance name */
-
-	ReceiverConfHandler m_conf_hnd;	/**< Receiver Configuration  helper */
 	
 	IRA::CDBTable *m_taperTable;	/**< Helper reading xml taper table */
 	IRA::CDBTable *m_feedsTable;	/**< Helper reading xml feeds table */

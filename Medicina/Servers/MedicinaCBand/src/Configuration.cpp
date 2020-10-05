@@ -81,7 +81,6 @@ void CConfiguration::init(maci::ContainerServices *Services)
 	 *   * CCC Normal
 	 *   * CHC NarrowBw.
 	 *   * CCC NarrowBw.
-	 * 
 	 */	
 	/* read component configuration */	
 	_GET_STRING_ATTRIBUTE("DewarIPAddress","Dewar IP address:",m_dewarIPAddress,"");
@@ -95,23 +94,22 @@ void CConfiguration::init(maci::ContainerServices *Services)
 	_GET_DWORD_ATTRIBUTE("LNASamplingTime","Time needed to collect LNA information from control boards (uSec):",m_LNASamplingTime,"");
 	_GET_DWORD_ATTRIBUTE("RepetitionCacheTime","Log repetition filter, caching time (uSec):",m_repetitionCacheTime,"");
 	_GET_DWORD_ATTRIBUTE("RepetitionExpireTime","Log repetition filter, expire time (uSec):",m_repetitionExpireTime,"");		
-	/* now read the setup related configurations <name - con file path> , filling associated parameters struct */	
+	/* now read the setup for every available conf <name - con file path> , filling associated parameters struct */	
 	const std::vector<ConfigurationName> l_available_confs= m_conf_hnd.getAvailableConfs();
 	std::vector<ConfigurationName>::const_iterator l_conf_it;
-	for (l_conf_it= m_conf_file.begin(); l_conf_ != m_conf_file.end(); l_conf_++ ){		
-		/* Getting configuration file ptah
-		 * Reading configuration setup
-		 * Filling related setup struct		
-		 */
+	for (l_conf_it= m_conf_file.begin(); l_conf_it != m_conf_file.end(); l_conf_it++ ){		
+		/* Getting configuration file path */
 		ReceiverConfHandler::ConfigurationSetup l_setup;
 		ReceiverConfHandler::ConfigurationAccess l_access;		
-		IRA::CError l_error;
+		IRA::CError l_error;		
 		bool l_found= m_conf_hnd.getConfigurationAccess(*l_conf_it, l_access);
 		if(!l_found){
 			_EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, l_error);
 			dummy.setFieldName("Configuration");
 			throw dummy;
 		}
+		/* Reading Setup main infos */
+		l_setup.m_name= m_conf_hnd.m_conf_name[*l_conf_it];
 		readConfigurationSetup(l_access.m_conf_file_path, l_setup );		
 		/* noise mark read */		
 		readNoiseMarkPoly(l_access.m_noisemark_file_path, l_setup);
@@ -122,7 +120,10 @@ void CConfiguration::init(maci::ContainerServices *Services)
 			dummy.setFieldName("Configuration");
 			throw dummy;
 		}
+		 ACS_LOG(LM_FULL_INFO,"CConfiguration::init()",(LM_NOTICE, "CONFIGURATION PROCESSED %s", l_setup.m_name));
 	}		
+	/* Applying default conf */
+	m_conf_hnd.setConfiguration(ReceiverConfHandler::CCC_Normal);
 	/* Feeds */
 	readFeeds();
 	/* Taper */
@@ -166,7 +167,6 @@ DWORD CConfiguration::getTaperTable(double * &freq,double *&taper) const
 	}
 	return m_taperVectorLen;
 }
-
 
 DWORD CConfiguration::getFeedInfo(WORD *& code,double *& xOffset,double *& yOffset,double *& relativePower) const
 {

@@ -133,7 +133,7 @@ void MedicinaCBandImpl::aboutToAbort()
 void MedicinaCBandImpl::activate(const char * setup_mode) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {
-		m_core.activate();
+		m_core.activate(setup_mode);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
