@@ -53,13 +53,13 @@ CConfiguration::CConfiguration()
 {	
 	m_loTable=NULL;	
 	m_feedsTable=NULL;
-	m_taperTable=NULL;	
+	l_taper_table=NULL;	
 }
 
 CConfiguration::~CConfiguration()
 {	
 	if (m_loTable) {delete m_loTable;}		
-	if (m_taperTable) {delete m_taperTable;}		
+	if (l_taper_table) {delete l_taper_table;}		
 	if (m_feedsTable) {delete m_feedsTable;}		
 }
 
@@ -113,14 +113,14 @@ void CConfiguration::init(maci::ContainerServices *Services)
 		readConfigurationSetup(l_access.m_conf_file_path, l_setup );		
 		/* noise mark read */		
 		readNoiseMarkPoly(l_access.m_noisemark_file_path, l_setup);
-		/* set setup conf back to configuration handler */
+		/* Set setup conf back to configuration handler */
 		l_found= m_conf_hnd.setSetup(*l_conf_it, l_setup);
 		if(!l_found){
 			_EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, l_error);
 			dummy.setFieldName("Configuration");
 			throw dummy;
 		}
-		 ACS_LOG(LM_FULL_INFO,"CConfiguration::init()",(LM_NOTICE, "CONFIGURATION PROCESSED %s", l_setup.m_name));
+		ACS_LOG(LM_FULL_INFO,"CConfiguration::init()",(LM_NOTICE, "CONFIGURATION PROCESSED %s", l_setup.m_name));
 	}		
 	/* Applying default conf */
 	m_conf_hnd.setConfiguration(ReceiverConfHandler::CCC_Normal);
@@ -130,17 +130,17 @@ void CConfiguration::init(maci::ContainerServices *Services)
 	readTaper();
 }
 
-
 /* *** TABLES *** */
 
 DWORD CConfiguration::getLeftMarkCoeffs(double *& p_out_coeffs) const
 {		
 	if (p_out_coeffs)
 		delete p_out_coeffs;
-	WORD l_coeff_vect_len= p_params_out.m_noise_mark_lcp_coeffs.size();	
+	ReceiverConfHandler::ConfigurationSetup l_conf_setup= m_conf_hnd.getCurrentSetup();
+	WORD l_coeff_vect_len= l_conf_setup.m_noise_mark_lcp_coeffs.size();	
 	p_out_coeffs= new double[l_coeff_vect_len];
 	for(int i=0; i< l_coeff_vect_len; i++){
-		p_out_coeffs[i]= p_params_out.m_noise_mark_lcp_coeffs[i];
+		p_out_coeffs[i]= l_conf_setup.m_noise_mark_lcp_coeffs[i];
 	}
 	return l_coeff_vect_len
 }
@@ -149,7 +149,8 @@ DWORD CConfiguration::getRightMarkCoeffs(double *& p_out_coeffs) const
 {
 	if (p_out_coeffs)
 		delete p_out_coeffs;
-	WORD l_coeff_vect_len= p_params_out.m_noise_mark_rcp_coeffs.size();	
+	ReceiverConfHandler::ConfigurationSetup l_conf_setup= m_conf_hnd.getCurrentSetup();
+	WORD l_coeff_vect_len= l_conf_setup.m_noise_mark_rcp_coeffs.size();	
 	p_out_coeffs= new double[l_coeff_vect_len];
 	for(int i=0; i< l_coeff_vect_len; i++){
 		p_out_coeffs[i]= p_params_out.m_noise_mark_rcp_coeffs[i];
@@ -159,38 +160,40 @@ DWORD CConfiguration::getRightMarkCoeffs(double *& p_out_coeffs) const
 
 DWORD CConfiguration::getTaperTable(double * &freq,double *&taper) const
 {
-	freq= new double [m_taperVectorLen];
-	taper=new double [m_taperVectorLen];
-	for (DWORD j=0;j<m_taperVectorLen;j++) {
+	WORD l_taper_len= m_taperTalbe->recordCount();
+	freq= new double [l_taper_len];
+	taper=new double [l_taper_len];
+	for (WORD j=0;j<m_taperTalbe->recordCount();j++) {
 		freq[j]=m_taperVector[j].frequency;
 		taper[j]=m_taperVector[j].taper;
 	}
-	return m_taperVectorLen;
+	return l_taper_len;
 }
 
 DWORD CConfiguration::getFeedInfo(WORD *& code,double *& xOffset,double *& yOffset,double *& relativePower) const
 {
-	code=new WORD[m_feeds];
-	xOffset=new double [m_feeds];
-	yOffset=new double [m_feeds];
-	relativePower=new double [m_feeds];
-	for (DWORD j=0;j<m_feeds;j++) {
+	WORD l_feeds_len= m_feedsTable->recordCount();
+	code=new WORD[l_feeds_len];
+	xOffset=new double [l_feeds_len];
+	yOffset=new double [l_feeds_len];
+	relativePower=new double [l_feeds_len];
+	for (DWORD j=0;j<l_feeds_len;j++) {
 		code[j]=m_feedVector[j].code;
 		xOffset[j]=m_feedVector[j].xOffset;
 		yOffset[j]=m_feedVector[j].yOffset;
 		relativePower[j]=m_feedVector[j].relativePower;
 	}
-	return m_feeds;
+	return l_feeds_len;
 }
 
 /* *** PRIVATE *** */
 
 void CConfiguration::readConfigurationSetup(const IRA::CString & p_conf_path,
-									ReceiverConfHandler::ConfigurationSetup & p_params_out)
+									ReceiverConfHandler::ConfigurationSetup & p_conf_setup)
 									throw (ComponentErrors::CDBAccessExImpl)
 {	
-	_GET_DWORD_ATTRIBUTE("Feeds","Number of feeds:", p_params_out.m_feeds, p_conf_path) ;
-	_GET_DWORD_ATTRIBUTE("IFs","Number of IFs per feed:",p_params_out.m_IFs, p_conf_path);
+	_GET_DWORD_ATTRIBUTE("Feeds","Number of feeds:", p_conf_setup.m_feeds, p_conf_path) ;
+	_GET_DWORD_ATTRIBUTE("IFs","Number of IFs per feed:",p_conf_setup.m_IFs, p_conf_path);
 	/* Read polarization token, string splitted by ' ' 
 	 * Reading L R .., converting string to Receivers tokens RCV_LCP ...
 	 */
@@ -200,7 +203,7 @@ void CConfiguration::readConfigurationSetup(const IRA::CString & p_conf_path,
 	int l_start=0;
 	_GET_STRING_ATTRIBUTE("Polarization","IF polarization:", l_value, p_conf_path);
 	l_start=0;
-	for (WORD k=0; k< p_params_out.m_IFs; k++) {
+	for (WORD k=0; k< p_conf_setup.m_IFs; k++) {
 		if (!IRA::CIRATools::getNextToken(l_value, l_start, ' ', l_token)) {
 			_EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, l_error);
 			dummy.setFieldName("Polarization");
@@ -222,98 +225,98 @@ void CConfiguration::readConfigurationSetup(const IRA::CString & p_conf_path,
 	/* Set RF lower limit for every feed */
 	_GET_STRING_ATTRIBUTE("RFMin","RF lower limit (MHz):", l_value, p_conf_path);
 	l_start=0;
-	for (WORD k=0; k < p_params_out.m_IFs; k++) {
+	for (WORD k=0; k < p_conf_setup.m_IFs; k++) {
 		if (!IRA::CIRATools::getNextToken(l_value, l_start, ' ', l_token)) {
 			_EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, l_error);
 			dummy.setFieldName("RFMin");
 			throw dummy;
 		}
-		p_params_out.m_RFMin.push_back(token.ToDouble());
+		p_conf_setup.m_RFMin.push_back(token.ToDouble());
 	}
 	/* Set RF upper limit for every feed */
 	_GET_STRING_ATTRIBUTE("RFMax","RF upper limit (MHz):", l_value, p_conf_path);
 	l_start=0;
-	for (WORD k=0; k < p_params_out.m_IFs; k++) {
+	for (WORD k=0; k < p_conf_setup.m_IFs; k++) {
 		if (!IRA::CIRATools::getNextToken(l_value, l_start, ' ', l_token)) {
 			_EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, l_error);
 			dummy.setFieldName("RFMax");
 			throw dummy;
 		}
-		p_params_out.m_RFMax.push_back(token.ToDouble());
+		p_conf_setup.m_RFMax.push_back(token.ToDouble());
 	}
 	/* Set IF start freq. for every feed */
 	_GET_STRING_ATTRIBUTE("IFMin","IF start frequency (MHz):", l_value, p_conf_path);
 	l_start=0;
-	for (WORD k=0; k < p_params_out.m_IFs; k++) {
+	for (WORD k=0; k < p_conf_setup.m_IFs; k++) {
 		if (!IRA::CIRATools::getNextToken(l_value, l_start, ' ', l_token)) {
 			_EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, l_error);
 			dummy.setFieldName("IFMin");
 			throw dummy;
 		}
-		p_params_out.m_IFMin.push_back(token.ToDouble());
+		p_conf_setup.m_IFMin.push_back(token.ToDouble());
 	}
 	/* Set IF bw for every feed */
 	_GET_STRING_ATTRIBUTE("IFBandwidth","IF bandwidth (MHz):", l_value, p_conf_path);
 	l_start=0;
-	for (WORD k=0; k < p_params_out.m_IFs; k++) {
+	for (WORD k=0; k < p_conf_setup.m_IFs; k++) {
 		if (!IRA::CIRATools::getNextToken(l_value, l_start, ' ', l_token)) {
 			_EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, l_error);
 			dummy.setFieldName("IFBandwidth");
 			throw dummy;
 		}
-		p_params_out.m_IFBandwidth.push_back(token.ToDouble());
+		p_conf_setup.m_IFBandwidth.push_back(token.ToDouble());
 	}
 	/* Set default LO value for every feed */
 	_GET_STRING_ATTRIBUTE("DefaultLO","Default local oscillator (MHz):", l_value, p_conf_path);
 	l_start=0;
-	for (WORD k=0; k < p_params_out.m_IFs; k++) {
+	for (WORD k=0; k < p_conf_setup.m_IFs; k++) {
 		if (!IRA::CIRATools::getNextToken(l_value, l_start, ' ', l_token)) {
 			_EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, l_error);
 			dummy.setFieldName("DefaultLO");
 			throw dummy;
 		}
-		p_params_out.m_defaultLO.push_back(token.ToDouble());
+		p_conf_setup.m_defaultLO.push_back(token.ToDouble());
 	}
 	/** @todo Check LO stage control */
 	/* Set Fixed LO 2nd stage? value for every feed */
 	_GET_STRING_ATTRIBUTE("FixedLO2","Second fixed local oscillator value (MHz):", l_value, p_conf_path);
 	l_start=0;
-	for (WORD k=0; k < p_params_out.m_IFs; k++) {
+	for (WORD k=0; k < p_conf_setup.m_IFs; k++) {
 		if (!IRA::CIRATools::getNextToken( l_value, l_start, ' ', l_token)) {
 			_EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, l_error);
 			dummy.setFieldName("FixedLO2");
 			throw dummy;
 		}
-		p_params_out.m_fixedLO2.push_back(token.ToDouble());
+		p_conf_setup.m_fixedLO2.push_back(token.ToDouble());
 	}
 	/** @todo Check LO stage control */
 	/* Set  LO min (stage?) value for every feed */
 	_GET_STRING_ATTRIBUTE("LOMin","Local oscillator minimum allowed value (MHz):", l_value, p_conf_path);
 	l_start=0;
-	for (WORD k=0; k < p_params_out.m_IFs; k++) {
+	for (WORD k=0; k < p_conf_setup.m_IFs; k++) {
 		if (!IRA::CIRATools::getNextToken(l_value, l_start, ' ', l_token)) {
 			_EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, l_error);
 			dummy.setFieldName("LOMin");
 			throw dummy;
 		}
-		p_params_out.m_LOMin.push_back(token.ToDouble());
+		p_conf_setup.m_LOMin.push_back(token.ToDouble());
 	}
 	/** @todo Check LO stage control */
 	/* Set  LO max (stage?) value for every feed */
 	_GET_STRING_ATTRIBUTE("LOMax","Local oscillator maximum allowed value (MHz):", l_value, p_conf_path);
 	l_start=0;
-	for (WORD k=0; k < p_params_out.m_IFs; k++) {
+	for (WORD k=0; k < p_conf_setup.m_IFs; k++) {
 		if (!IRA::CIRATools::getNextToken(l_value, l_start, ' ', l_token)) {
 			_EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, l_error);
 			dummy.setFieldName("LOMax");
 			throw dummy;
 		}
-		p_params_out.m_LOMax.push_back(token.ToDouble());
+		p_conf_setup.m_LOMax.push_back(token.ToDouble());
 	}
 }
 
 void CConfiguration::readNoiseMarkPoly(const IRA::CString & p_conf_path,
-									ReceiverConfHandler::ConfigurationSetup & p_params_out)
+									ReceiverConfHandler::ConfigurationSetup & p_conf_setup)
 									throw (ComponentErrors::CDBAccessExImpl)
 {
 	/* Nois mark is bound to receiver configuration */
@@ -323,13 +326,13 @@ void CConfiguration::readNoiseMarkPoly(const IRA::CString & p_conf_path,
 	 int l_start=0;
 	_GET_STRING_ATTRIBUTE("LCoeffs","LCP noise mark poly coefficients :", l_value, p_conf_path);	
 	while(!IRA::CIRATools::getNextToken(l_value, l_start, ' ', l_token)){		
-		p_params_out.m_noise_mark_lcp_coeffs.push_back(token.ToDouble());
+		p_conf_setup.m_noise_mark_lcp_coeffs.push_back(token.ToDouble());
 	}	
 	/* Collecting RCP "C0 C1 .."" coefficients from appropriate configuration file */ 
 	int l_start=0;
 	_GET_STRING_ATTRIBUTE("RCoeffs","RCP noise mark poly coefficients :", l_value, p_conf_path);	
 	while(!IRA::CIRATools::getNextToken(l_value, l_start, ' ', l_token)){		
-		p_params_out.m_noise_mark_rcp_coeffs.push_back(token.ToDouble());
+		p_conf_setup.m_noise_mark_rcp_coeffs.push_back(token.ToDouble());
 	}
 }
 
@@ -337,6 +340,7 @@ void CConfiguration::readFeeds()
 			 	throw (ComponentErrors::CDBAccessExImpl, ComponentErrors::MemoryAllocationExImpl)
 {
 	/* Local feed table */
+	IRA::CDBTable *m_feedsTable;	/**< Helper reading xml feeds table */
 	IRA::CError l_error;
 	IRA::CString l_field;	
 	try {
@@ -368,13 +372,17 @@ void CConfiguration::readFeeds()
 		_EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, l_error);
 		throw dummy;
 	}
-	m_feedsTable->First();
-	if (m_feeds!=m_feedsTable->recordCount()) {
+	/** @todo prende i dati delal conf di default ? */
+	ReceiverConfHandler::ConfigurationSetup l_default_setup;
+	bool l_valid= m_conf_hnd.get.getConfigurationSetup(ReceiverConfHandler::CCC_Normal, l_default_setup);
+	WORD l_default_conf_feed_len= l_default_setup.m_feeds.size();
+	m_feedsTable->First();	
+	if (l_default_conf_feed_len!= m_feedsTable->recordCount()) {
 		_EXCPT(ComponentErrors::CDBAccessExImpl, dummy, "CConfiguration::init()");
 		dummy.setFieldName("feed table size");
 		throw dummy;
 	}			
-	for (WORD i=0; i < m_feeds; i++) {
+	for (WORD i=0; i < l_default_conf_feed_len; i++) {
 		TFeedValue l_feed_value;
 		l_feed_value.xOffset=(*m_feedsTable)["xOffset"]->asDouble();
 		l_feed_value.yOffset=(*m_feedsTable)["yOffset"]->asDouble();
@@ -385,7 +393,7 @@ void CConfiguration::readFeeds()
 														l_feed_value.xOffset,
 														l_feed_value.yOffset,
 														l_feed_value.relativePower));
-		m_feeds_table.push_back(l_feed_value);														
+		m_feeds_vector.push_back(l_feed_value);														
 		m_feedsTable->Next();
 	}
 	m_feedsTable->closeTable();
@@ -396,20 +404,21 @@ void CConfiguration::readFeeds()
 void CConfiguration::readTaper() 
 	throw (ComponentErrors::CDBAccessExImpl, ComponentErrors::MemoryAllocationExImpl)
 {
+	IRA::CDBTable * l_taper_table;
 	IRA::CError l_error;
 	IRA::CString l_field;		
 	try {
-		m_taperTable=new IRA::CDBTable(Services,"TaperEntry",TAPERTABLE_PATH);
+		l_taper_table=new IRA::CDBTable(Services,"TaperEntry",TAPERTABLE_PATH);
 	}
 	catch (std::bad_alloc& ex) {
 		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CConfiguration::init()");
 		throw dummy;
 	}
 	error.Reset();
-	if (!m_taperTable->addField(l_error,"Frequency",IRA::CDataField::DOUBLE)) {
+	if (!l_taper_table->addField(l_error,"Frequency",IRA::CDataField::DOUBLE)) {
 		l_field="Frequency";
  	}
-	else if (!m_taperTable->addField(l_error,"Taper",IRA::CDataField::DOUBLE)) {
+	else if (!l_taper_table->addField(l_error,"Taper",IRA::CDataField::DOUBLE)) {
 		l_field="OutputPower";
  	}
 	if (!error.isNoError()) {
@@ -417,25 +426,25 @@ void CConfiguration::readTaper()
 		dummy.setFieldName((const char *)l_field);
 		throw dummy;
 	}
-	if (!m_taperTable->openTable(error))	{
+	if (!l_taper_table->openTable(error))	{
 		_EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, l_error);
 		throw dummy;
 	}
-	m_taperTable->First();
-	ACS_LOG(LM_FULL_INFO,"CConfiguration::init()",(LM_DEBUG,"TAPER_ENTRY_NUMBER: %d", m_taperTable->recordCount()));
-	for (WORD i=0; i < m_taperTable->recordCount(); i++) {
+	l_taper_table->First();
+	ACS_LOG(LM_FULL_INFO,"CConfiguration::init()",(LM_DEBUG,"TAPER_ENTRY_NUMBER: %d", l_taper_table->recordCount()));
+	for (WORD i=0; i < l_taper_table->recordCount(); i++) {
 		TTaperValue l_taper_value;
-		l_taper_value.frequency= (*m_taperTable)["Frequency"]->asDouble();		
-		l_taper_value.taper=(*m_taperTable)["Taper"]->asDouble();
+		l_taper_value.frequency= (*l_taper_table)["Frequency"]->asDouble();		
+		l_taper_value.taper=(*l_taper_table)["Taper"]->asDouble();
 		ACS_LOG(LM_FULL_INFO,"CConfiguration::init()",(LM_DEBUG,"SYNTH_VALUE_ENTRY: %lf %lf", 
 														l_taper_value.frequency,
 														l_taper_value.taper));
-		m_taper_table.push_back(l_taper_value);													
-		m_taperTable->Next();
+		l_taper_vector.push_back(l_taper_value);													
+		l_taper_table->Next();
 	}
-	m_taperTable->closeTable();
-	delete m_taperTable;
-	m_taperTable=NULL;
+	l_taper_table->closeTable();
+	delete l_taper_table;
+	l_taper_table=NULL;
 }
 
 void CConfiguration::readSynths(){
@@ -448,6 +457,9 @@ void CConfiguration::readSyntTable(std::vector<TLOValue> & p_synt_table, IRA::CS
 							throw (ComponentErrors::CDBAccessExImpl, ComponentErrors::MemoryAllocationExImpl)
 {
 	/* file table reading */
+	IRA::CDBTable * m_loTable;
+	IRA::CError l_error;
+	IRA::CString l_field;	
 	try {
 		m_loTable=new IRA::CDBTable(Services,"SynthesizerEntry",p_table_file);
 	}
@@ -456,19 +468,19 @@ void CConfiguration::readSyntTable(std::vector<TLOValue> & p_synt_table, IRA::CS
 		throw dummy;
 	}
 	error.Reset();
-	if (!m_loTable->addField(error,"Frequency",IRA::CDataField::DOUBLE)) {
-		field="Frequency";
+	if (!m_loTable->addField(l_error,"Frequency",IRA::CDataField::DOUBLE)) {
+		l_field="Frequency";
  	}
-	else if (!m_loTable->addField(error,"OutputPower",IRA::CDataField::DOUBLE)) {
-		field="OutputPower";
+	else if (!m_loTable->addField(l_error,"OutputPower",IRA::CDataField::DOUBLE)) {
+		l_field="OutputPower";
  	}
 	if (!error.isNoError()) {
-		_EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl,dummy,error);
-		dummy.setFieldName((const char *)field);
+		_EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl,dummy,l_error);
+		dummy.setFieldName((const char *)l_field);
 		throw dummy;
 	}
 	if (!m_loTable->openTable(error))	{
-		_EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
+		_EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, l_error);
 		throw dummy;
 	}
 	/* Cove table data to class member container */
@@ -478,7 +490,7 @@ void CConfiguration::readSyntTable(std::vector<TLOValue> & p_synt_table, IRA::CS
 		TLOValue l_tlo_value;
 		l_tlo_value.frequency= (*m_loTable)["Frequency"]->asDouble();
 		l_tlo_value.outputPower= (*m_loTable)["OutputPower"]->asDouble();		
-		m_synt_table_1st.push_back(l_tlo_value);
+		p_synt_table.push_back(l_tlo_value);
 		ACS_LOG(LM_FULL_INFO,"CConfiguration::init()",(LM_DEBUG,"SYNTH_VALUE_ENTRY: %lf %lf", l_tlo_value.frequency, l_tlo_value.outputPower));
 		m_loTable->Next();
 	}	

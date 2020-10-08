@@ -155,68 +155,69 @@ public:
 
 	/**
 	 * @return the number of feeds
+	 * @details Valid till you reallocate source data vector
 	 */
-	inline const  DWORD& getFeeds() const { return m_feeds; }
+	inline const  DWORD& getFeeds() const { return m_conf_hnd.getCurrentSetup().m_feeds; }
 
 	/**
 	 * @return mnemonic of the working mode of the receiver
 	 */
-	inline const IRA::CString& getSetupMode() const { return m_mode; }
+	inline const IRA::CString& getSetupMode() const { return m_conf_hnd.getCurrentSetup().m_name; }
 
 	/**
 	 * @return the lower limit of the RF coming from the receiver (MHz)
 	 */
-	inline double const * const  getRFMin() const { return m_RFMin; }
+	inline double const * const  getRFMin() const { return &m_conf_hnd.getCurrentSetup().m_RFMin[0]; }
 
 	/**
 	 * @return the upper  limit of the RF coming from the receiver (MHz)
 	 */
-	inline double const * const  getRFMax() const { return m_RFMax; }
+	inline double const * const  getRFMax() const { return &m_conf_hnd.getCurrentSetup().m_RFMax[0]; }
 
 	/**
 	 * @return the start frequency of the IF coming from the receiver (MHz)
 	 */
-	inline double const * const  getIFMin() const { return m_IFMin; }
+	inline double const * const  getIFMin() const { return &m_conf_hnd.getCurrentSetup().m_IFMin[0]; }
 
 	/**
 	 * @return the bandwidth of the IF coming from the receiver (MHz)
 	 */
-	inline double const * const  getIFBandwidth() const{ return  m_IFBandwidth; }
+	inline double const * const  getIFBandwidth() const{ return  &m_conf_hnd.getCurrentSetup().m_IFBandwidth[0]; }
 
 	/**
 	 * @return the number of IF chains for each feed
 	 */
-	inline const  DWORD& getIFs() const { return m_IFs; }
+	inline const  DWORD getIFs() const { return m_conf_hnd.getCurrentSetup().m_IFs; }
 
 	/**
 	 * @return the pointer to the polarizations array, the first element correspond to the first IF and so on.....
 	 */
-	inline Receivers::TPolarization const * const getPolarizations() const { return m_polarizations; }
+	inline Receivers::TPolarization const * const getPolarizations() const { return &m_conf_hnd.getCurrentSetup().m_polarizations[0]; }
 
 	/**
 	 * @return the number of feeds
 	 */
-	inline const  DWORD& getFeeds() const { return m_feeds; }
+	inline const  DWORD getFeeds() const { return m_conf_hnd.getCurrentSetup().m_feeds; }
 
 	/**
 	 * @return the default frequency for the synthesizer  (MHz)
 	 */
-	inline double const * const  getDefaultLO()  const { return m_defaultLO; }
+	inline double const * const  getDefaultLO()  const { return &m_conf_hnd.getCurrentSetup().m_defaultLO[0]; }
 
 	/**
 	 * @return the value of the fixed synthesizer used for the second conversion (MHz)
 	 */
-	inline double const * const  getFixedLO2() const { return m_fixedLO2; }
+	inline double const * const  getFixedLO2() const { return &m_conf_hnd.getCurrentSetup().m_fixedLO2[0]; }
 
 	/**
 	 * @return lower limit for the synthesizer tuning (MHz)
 	 */
-	inline double const * const  getLOMin() const { return  m_LOMin; }
+	inline double const * const  getLOMin() const { return  &m_conf_hnd.getCurrentSetup().m_LOMin[0]; }
 
 	/**
 	 * @return upper limit for  the  synthesizer tuning (MHz)
 	 */
-	inline double const * const  getLOMax() const { return  m_LOMax; }
+	inline double const * const  getLOMax() const { return  &m_conf_hnd.getCurrentSetup().m_LOMax[0]; }
 
 public: 
 
@@ -277,16 +278,15 @@ private:
 
 	IRA::CString m_localOscillatorInstance1st; /**< 1st stage mixer component instance name */
 	IRA::CString m_localOscillatorInstance2nd; /**< 2nd stage mixer component instance name */
-	
-	IRA::CDBTable *m_taperTable;	/**< Helper reading xml taper table */
-	IRA::CDBTable *m_feedsTable;	/**< Helper reading xml feeds table */
-	IRA::CDBTable *m_loTable;		/**< Helper reading xml local synth data table */
-	
+
+	std::vector<TFeedValue> m_feeds_vector;	/**< Feed data array */
+	std::vector<TTaperValue> m_taper_vector;	/**< Feed data array */
+
 	std::vector<TLOValue> m_synt_table_1st;	/**< Freq - power synt table 1st stage LO*/
 	std::vector<TLOValue> m_synt_table_2nd;	/**< Freq - power synt table 2nd stage LO*/
 	std::vector<TMarkValue> m_mark_values; /**< @todo Mark value cosa do fuori?? */
 	std::vector<TTaperValue>  m_taper_table; /**< Freq - value taper */	
-	std::vector<TFeedValue>  m_feeds_table; /**< feeds data table */
+	std::vector<TFeedValue>  m_feeds_table; /**< feeds data table */	
 };
 
 #endif

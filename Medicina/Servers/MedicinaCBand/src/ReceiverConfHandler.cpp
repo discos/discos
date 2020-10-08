@@ -203,7 +203,7 @@ bool ReceiverConfHandler::setMode(ModeName p_mode_name)
     return false;
 }
 
-/* **GETTERS ** */
+/* *** GETTERS *** */
 
 const std::vector<ConfigurationName> ReceiverConfHandler::getAvailableConfs() const
 {
@@ -219,6 +219,15 @@ const IRA::CString ReceiverConfHandler::getActualConfStr()
         return m_conf_name[CCC_Normal];
     }
     return m_conf_name[l_name_enum];    
+}
+
+ConfigurationSetup ReceiverConfHandler::getCurrentSetup() {
+    ConfigurationName l_name_enum = m_current_conf.m_name;
+    if (!findConfiguration(l_name_enum)){    
+        setConfiguartion(CCC_Normal);
+        return m_conf_data[CCC_Normal];
+    }
+    return m_conf_data[l_name_enum];
 }
 
 const std::map<ConfigurationName, IRA::CString> ReceiverConfHandler::getAvailableConfsMap() const

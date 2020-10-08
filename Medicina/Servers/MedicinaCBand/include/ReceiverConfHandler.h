@@ -147,6 +147,8 @@ struct ReceiverConfHandler{
     bool setConfigurationSetup(ConfigurationName p_conf_name,
                                 const ConfigurationSetup & p_setup);
 
+    /* *** GETTERs *** */
+
     /**
      * @brief Get the Available configuration by enum name
      * @return Available conf names
@@ -154,11 +156,18 @@ struct ReceiverConfHandler{
     const std::vector<ConfigurationName> getAvailableConfs() const;
 
     /**
-     * @brief Get the Actual configuration by its string tag
+     * @brief Get the actual configuration by its string tag
      * @details Side-effect, set default in case of conf mismatch 
      * @return Conf string tag
      */
     const IRA::CString getActualConfStr();
+
+    /**
+     * @brief Get the Current configuration setup
+     * 
+     * @return ConfigurationSetup for selected working mode
+     */
+    ConfigurationSetup getCurrentSetup() const;    
 
     /**
      * @brief Get the Available configuration by enum name
@@ -234,6 +243,7 @@ struct ReceiverConfHandler{
      */
     bool findModeFromString(IRA::CString p_mode_name,
                              ReceiverName & p_mode_enum) const;
+                             
 
     private:
 
