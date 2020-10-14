@@ -14,6 +14,7 @@
 #include <LocalOscillatorInterfaceC.h>
 #include <ReceiversErrors.h>
 #include <ManagmentDefinitionsC.h>
+#include "MixerOperator.h"
 
 /**
  * This class contains the code of almost all the features  of the component
@@ -424,7 +425,7 @@ private:
         UNLOCKED=11
     };
 
-    /**@brief LO device anda data collector */        
+    /**@brief LO device and data collector */        
 
     CConfiguration m_configuration;
     maci::ContainerServices* m_services;
@@ -435,16 +436,9 @@ private:
     ACS::doubleSeq m_bandwidth;
     ACS::longSeq m_polarization;
     ACS::doubleSeq m_localOscillatorValue;  /**< Frequency Value */
-    IRA::CString m_setupMode;
+    IRA::CString m_setupMode;   /**< Setup mode string */
 
-    struct LO{
-        Receivers::LocalOscillator_var m_localOscillatorDevice; /**< LO  connected device */
-        bool m_localOscillatorFault;    /**< Falut flag */
-        double m_value;                 /**< Freq Value */
-    };
-
-    LO m_lo_1st;        /**< 1st stage mixer */
-    LO m_lo_2nd;        /**< 2st stage mixer */
+    MixerOperator m_mixer;  /**< LOs manager */
 
     double m_vacuum;
     CConfiguration::BoardValue m_environmentTemperature;

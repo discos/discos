@@ -7,6 +7,16 @@
 #include <ReceiversDefinitionsC.h>
 
 
+	/**
+	 * @brief Calibration mark data repr
+	 * 
+	 */
+	typedef struct {
+		double skyFrequency;
+		double markValue;
+		Receivers::TPolarization polarization;
+	} TMarkValue;
+
     /**
      * @brief Synth data repr. 
      */

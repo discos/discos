@@ -19,6 +19,7 @@
 #include "Commons.h"
 #include "ReceiverConfHandler.h"
 
+
 /**
  * This class implements the component configuration. The data inside this class are initialized at the startup from the
  * configuration database and then are used (read) inside the component.
@@ -219,10 +220,6 @@ public:
 	 */
 	inline double const * const  getLOMax() const { return  &m_conf_hnd.getCurrentSetup().m_LOMax[0]; }
 
-public: 
-
-	ReceiverConfHandler m_conf_hnd;	/**< Receiver Configuration  helper */	
-
 private:
 
 	/**
@@ -263,6 +260,10 @@ private:
 	 * @param[in] p_table_file Input configuration file
 	 */
 	void readSyntTable(std::vector<TLOValue> & p_synt_table, IRA::CString p_table_file) throw (ComponentErrors::CDBAccessExImpl, ComponentErrors::MemoryAllocationExImpl);
+
+public: 
+
+	ReceiverConfHandler m_conf_hnd;	/**< Receiver Configuration  helper */	
 
 private:
 
