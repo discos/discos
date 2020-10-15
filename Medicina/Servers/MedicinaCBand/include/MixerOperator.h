@@ -3,6 +3,7 @@
 
 #include <IRA>
 #include "Configuration.h"
+#include <ReceiversErrors.h>
 
 /**
  * @brief This class enclose both mixer stages into a unique interface

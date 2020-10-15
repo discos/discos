@@ -1,6 +1,10 @@
 #include "MixerOperator.h"
+#include <LogFilter.h>
+#include <ReceiverControl.h>
+#include <LocalOscillatorInterfaceC.h>
+#include <ManagmentDefinitionsC.h>
 
-/** @todo Aggioranre i loge gli include del modulo, macro comprese
+/** @todo Aggioranre i log gli include del modulo, macro comprese
  * Inserire nel modulo ComponetCore e verificare che sia tutto ok
  */
 
@@ -17,7 +21,6 @@ MixerOperator::MixerOperator(CConfiguration & p_config):
     m_loDev_1st= Receivers::LocalOscillator::_nil();
     m_loDev_2nd= Receivers::LocalOscillator::_nil();
 }
-
 
 void MixerOperator::loadComponents() 
         throw (ComponentErrors::CouldntGetComponentExImpl)
@@ -85,9 +88,6 @@ bool MixerOperator::SetValue(const ACS::doubleSeq& p_values)
     if (power) delete [] power;
     if (freq) delete [] freq;
     ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_DEBUG,"SYNTHESIZER_VALUES %lf %lf",trueValue,amp));
-    // make sure the synthesizer component is available
-    /** @todo  questo perchè, se il device non è attivo..lo controllo prima*/
-    //loadLocalOscillator(); // throw (ComponentErrors::CouldntGetComponentExImpl)
     try {
         m_loDev_1st->set(amp, trueValue);
     }
@@ -106,12 +106,41 @@ bool MixerOperator::SetValue(const ACS::doubleSeq& p_values)
 
 double MixerOperator::getValue()
 {
-
+    double l_power;
+    double l_freq;
+    try{
+        m_loDev_1st->get(l_power, l_freq);
+    } catch (ReceiversErrors::ReceiversErrorsEx& ex) { 
+        _ADD_BACKTRACE(ReceiversErrors::LocalOscillatorErrorExImpl,impl,ex,"CComponentCore::setLO()");
+        throw impl;        
+    }
+    return l_freq;
 }
 
 bool MixerOperator::isLocked()
 {
-    
+    ACSErr::Completion_var comp;
+    ACS::ROlong_var isLockedRef;
+    CORBA::Long isLocked;
+    try {
+        isLockedRef=m_localOscillatorDevice->isLocked();
+    }
+    catch (CORBA::SystemException& ex) {
+        m_localOscillatorFault=true;
+        _EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CComponentCore::checkLocalOscillator()");
+        impl.setName(ex._name());
+        impl.setMinor(ex.minor());
+        throw impl;
+    }
+    isLocked=isLockedRef->get_sync(comp.out());
+    ACSErr::CompletionImpl complImpl(comp);
+    if (!complImpl.isErrorFree()) {
+        _ADD_BACKTRACE(ComponentErrors::CouldntGetAttributeExImpl,impl,complImpl,"CComponentCore::checkLocalOscillator()");
+        impl.setAttributeName("isLocked");
+        impl.setComponentName((const char *)m_configuration.getLocalOscillatorInstance());
+        throw impl;
+    }
+    return isLocked;
 }
 
 /* *** PRIVATE *** */
