@@ -2,8 +2,11 @@
 #define MED_C_BAND_MIXER_OP_H
 
 #include <IRA>
-#include "Configuration.h"
+#include <ReceiverControl.h>
+#include <LocalOscillatorInterfaceC.h>
 #include <ReceiversErrors.h>
+#include <ManagmentDefinitionsC.h>
+#include "Configuration.h"
 
 /**
  * @brief This class enclose both mixer stages into a unique interface
@@ -22,6 +25,11 @@ class MixerOperator{
          * @brief Destroy the Mixer Operator object
          */
         ~MixerOperator();
+
+			/**
+			* @brief
+			*/
+		 	bool isLoaded()const;
 
         /**
          * @brief Mixer Setup
@@ -54,7 +62,7 @@ class MixerOperator{
          * @param p_values Values for what? why an array?
          * @return true Value is valid         
          */
-        bool SetValue(const ACS::doubleSeq& p_values)
+        bool setValue(const ACS::doubleSeq& p_values)
                           throw (ComponentErrors::ValidationErrorExImpl,
                                 ComponentErrors::ValueOutofRangeExImpl,
                                 ComponentErrors::CouldntGetComponentExImpl,
@@ -82,7 +90,7 @@ class MixerOperator{
          * @param[inout] p_loDev LOs device object
          * @param[in] p_lo_instance LO name to be loaded 
          */
-        void loadDevice(Receivers::LocalOsclillator_var p_loDev,
+        void loadDevice(Receivers::LocalOscillator_var p_loDev,
                         char * p_lo_name);
 
         /**
@@ -91,7 +99,7 @@ class MixerOperator{
          * @param p_loDev instance container
          * @param p_lo_name instance name
          */
-        void releaseDevice(Receivers::LocalOsclillator_var p_loDev,
+        void releaseDevice(Receivers::LocalOscillator_var p_loDev,
                         char * p_lo_name);
 
     private:

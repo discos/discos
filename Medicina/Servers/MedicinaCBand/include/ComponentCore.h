@@ -14,6 +14,7 @@
 #include <LocalOscillatorInterfaceC.h>
 #include <ReceiversErrors.h>
 #include <ManagmentDefinitionsC.h>
+#include "Commons.h"
 #include "MixerOperator.h"
 
 /**
@@ -23,6 +24,24 @@
  * <br>
   */
 class CComponentCore {
+
+	private:
+
+    enum TStatusBit {
+        LOCAL=0,
+        VACUUMSENSOR=1,
+        VACUUMPUMPSTATUS=2,
+        VACUUMPUMPFAULT=3,
+        VACUUMVALVEOPEN=4,
+        COOLHEADON=5,
+        COMPRESSORFAULT=6,
+        NOISEMARK=7,
+        NOISEMARKERROR=8,
+        EXTNOISEMARK=9,
+        CONNECTIONERROR=10,
+        UNLOCKED=11
+    };
+
 public:
     /**
      * Constructor
@@ -97,7 +116,7 @@ public:
      * It returns the current operating mode of the receiver.
      * @return output string
      */
-    const IRA::CString& getSetupMode();
+    const IRA::CString getSetupMode();
 
 
         /* *** LOs *** */
@@ -179,13 +198,13 @@ public:
      * It returns the number of IF chains
      * @return output value
      */
-    const DWORD& getIFs();
+    const DWORD getIFs();
 
     /**
      * It returns the number of feeds
      * @return output value
      */
-    const DWORD& getFeeds();
+    const DWORD getFeeds();
 
         /* *** TAPER *** */
 
@@ -307,7 +326,7 @@ public:
      * This is getter method. No need to make it thread safe......
      * @return the current value of the vertex temperature
      */
-    CConfiguration::BoardValue getEnvironmentTemperature() const { return m_environmentTemperature; }
+    BoardValue getEnvironmentTemperature() const { return m_environmentTemperature; }
 
 
     /**
@@ -410,21 +429,6 @@ private:
 
 private:
 
-    enum TStatusBit {
-        LOCAL=0,
-        VACUUMSENSOR=1,
-        VACUUMPUMPSTATUS=2,
-        VACUUMPUMPFAULT=3,
-        VACUUMVALVEOPEN=4,
-        COOLHEADON=5,
-        COMPRESSORFAULT=6,
-        NOISEMARK=7,
-        NOISEMARKERROR=8,
-        EXTNOISEMARK=9,
-        CONNECTIONERROR=10,
-        UNLOCKED=11
-    };
-
     /**@brief LO device and data collector */        
 
     CConfiguration m_configuration;
@@ -441,7 +445,7 @@ private:
     MixerOperator m_mixer;  /**< LOs manager */
 
     double m_vacuum;
-    CConfiguration::BoardValue m_environmentTemperature;
+    BoardValue m_environmentTemperature;
     double m_vacuumDefault;
     bool m_calDiode;
     

@@ -6,7 +6,8 @@ _IRA_LOGFILTER_IMPORT;
 // speed of light in meters per second
 #define LIGHTSPEED 299792458.0
 
-CComponentCore::CComponentCore()
+CComponentCore::CComponentCore():
+	m_mixer(MixerOperator(m_configuration))
 {
 }
 
@@ -187,7 +188,7 @@ void CComponentCore::setMode(const char * mode) throw (ReceiversErrors::ModeErro
     ACS_LOG(LM_FULL_INFO,"CComponentCore::setMode()",(LM_NOTICE,"RECEIVER_MODE %s",mode));
 }
 
-const IRA::CString& CComponentCore::getSetupMode()
+const IRA::CString CComponentCore::getSetupMode()
 {
     baci::ThreadSyncGuard guard(&m_mutex);
     return m_configuration.m_conf_hnd.getActualConfStr();
@@ -270,13 +271,13 @@ void CComponentCore::getPolarization(ACS::longSeq& pol)
     }
 }
 
-const DWORD& CComponentCore::getIFs()
+const DWORD CComponentCore::getIFs()
 {
     baci::ThreadSyncGuard guard(&m_mutex);
     return m_configuration.getIFs();
 }
 
-const DWORD& CComponentCore::getFeeds()
+const DWORD CComponentCore::getFeeds()
 {
     baci::ThreadSyncGuard guard(&m_mutex);
     return m_configuration.getFeeds();
@@ -495,9 +496,10 @@ void CComponentCore::getCalibrationMark(ACS::doubleSeq& result,
     resFreq.length(stdLen);
     resBw.length(stdLen);
     /* Ask for polynomial coeffs from configuration layer */    
-    sizeL=m_configuration.getLeftMarkTable(tableLeftFreq,tableLeftMark);
-    sizeR=m_configuration.getRightMarkTable(tableRightFreq,tableRightMark);
-    for (unsigned i=0;i<stdLen;i++) {
+    sizeL= m_configuration.getLeftMarkCoeffs(tableLeftMark);
+    sizeR= m_configuration.getRightMarkCoeffs(tableRightMark);
+    /**@todo rivedere questa parte */
+    for (unsigned i=0; i < stdLen; i++) {
         // now computes the mark for each input band....considering the present mode and configuration of the receiver.
         if (!IRA::CIRATools::skyFrequency(freqs[i],bandwidths[i],m_startFreq[ifs[i]],m_bandwidth[ifs[i]],realFreq,realBw)) {
                 realFreq=m_startFreq[ifs[i]];
@@ -509,8 +511,8 @@ void CComponentCore::getCalibrationMark(ACS::doubleSeq& result,
         resBw[i]=realBw;
         realFreq+=realBw/2.0;
         ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"REFERENCE_FREQUENCY %lf",realFreq));
-        if (m_polarization[ifs[i]]==(long)Receivers::RCV_LCP) {
-            result[i]=linearFit(tableLeftFreq,tableLeftMark,sizeL,realFreq);
+        if (m_polarization[ifs[i]]== (long)Receivers::RCV_LCP) {
+            result[i]= linearFit(tableLeftFreq,tableLeftMark,sizeL,realFreq);
             ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"LEFT_MARK_VALUE %lf",result[i]));
         }
         else { //RCV_RCP

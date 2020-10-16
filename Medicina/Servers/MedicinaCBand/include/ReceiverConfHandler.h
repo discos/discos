@@ -50,16 +50,20 @@ struct ReceiverConfHandler{
         IRA::CString m_name_str;      /**< Conf string name */
         IRA::CString m_conf_file_path;/**< Conf data block file path */
         IRA::CString m_noisemark_file_path;/**< Noise mark data block file path */
+		  IRA::CString m_synth_1_file_path;/**< Synth 1st stage data block file path */
+		  IRA::CString m_synth_2_file_path;/**< Synth 2nd stage data block file path */
+		  IRA::CString m_feeds_file_path;/**< Feeds data block file path */
+		  IRA::CString m_taper_file_path;/**< Taper data block file path */
     };
 
-     /**
+    /**
 	 * @brief Configuration setup values
-     * This is a receiver representation from configuraion point of view
+    * This is a receiver representation from configuraion point of view
 	 */
 	struct ConfigurationSetup{
 		DWORD m_IFs;
 		DWORD m_feeds;
-        IRA::CString m_name;
+      IRA::CString m_name;
 		std::vector<Receivers::TPolarization> m_polarizations;		
 		std::vector<double> m_RFMin;
 		std::vector<double> m_RFMax;
@@ -103,7 +107,7 @@ struct ReceiverConfHandler{
      * @return true 
      * @return True if requested configuration is valid.
      */
-    bool setConfiguration(IRA::Cstring p_conf_name);
+    bool setConfiguration(IRA::CString p_conf_name);
 
     /**
      * @brief Set configuration starting from given receiver keeping default Normal as mode
@@ -167,7 +171,14 @@ struct ReceiverConfHandler{
      * 
      * @return ConfigurationSetup for selected working mode
      */
-    ConfigurationSetup getCurrentSetup() const;    
+    ConfigurationSetup getCurrentSetup() const;
+    
+    /**
+    * @brief Getter actual conf file access infos
+	 *     
+    * @return Current conf file acces
+    */
+    ConfigurationAccess getCurrentAccess() const;    
 
     /**
      * @brief Get the Available configuration by enum name

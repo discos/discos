@@ -22,6 +22,11 @@ MixerOperator::MixerOperator(CConfiguration & p_config):
     m_loDev_2nd= Receivers::LocalOscillator::_nil();
 }
 
+bool isLoaded() const
+{
+  return m_init_ok; 	
+}
+
 void MixerOperator::loadComponents() 
         throw (ComponentErrors::CouldntGetComponentExImpl)
 {
@@ -39,7 +44,7 @@ void MixerOperator::releaseComponents()
     m_init_ok= false;
 }
 
-bool MixerOperator::SetValue(const ACS::doubleSeq& p_values)
+bool MixerOperator::setValue(const ACS::doubleSeq& p_values)
                     throw (ComponentErrors::ValidationErrorExImpl,
                         ComponentErrors::ValueOutofRangeExImpl,
                         ComponentErrors::CouldntGetComponentExImpl,

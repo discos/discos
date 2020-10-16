@@ -19,7 +19,6 @@
 #include "Commons.h"
 #include "ReceiverConfHandler.h"
 
-
 /**
  * This class implements the component configuration. The data inside this class are initialized at the startup from the
  * configuration database and then are used (read) inside the component.
@@ -118,12 +117,12 @@ public:
 	 * @param[out] p_out_coeffs Coeff c array
 	 * @return Coeff Array len.
 	 */
-	DWORD getLeftMarkCoeffs(double *& p_out_coeffs) const;
+	DWORD getLeftMarkCoeffs( double *& p_out_coeffs) const;
 
 	/**
 	 * @brief Get the Right pol. noise Mark Coeffs c array
 	 * 
-	 * @param[out] p_out_coeffs Coeff c array
+	 * @param[out] p_out_coeffs Coeff c array	 
 	 * @return Coeff Array len.
 	 */
 	DWORD getRightMarkCoeffs(double *& p_out_coeffs) const;
@@ -153,12 +152,6 @@ public:
 	DWORD getFeedInfo(WORD *& code,double *& xOffset,double *& yOffset,double *& relativePower) const;
 
 	/* *** SINGLE SETUP ENTRIES  *** */
-
-	/**
-	 * @return the number of feeds
-	 * @details Valid till you reallocate source data vector
-	 */
-	inline const  DWORD& getFeeds() const { return m_conf_hnd.getCurrentSetup().m_feeds; }
 
 	/**
 	 * @return mnemonic of the working mode of the receiver
@@ -267,6 +260,8 @@ public:
 
 private:
 
+	maci::ContainerServices * m_service;
+	
 	IRA::CString m_dewarIPAddress;
 	WORD m_dewarPort;
 	IRA::CString m_LNAIPAddress;
@@ -279,9 +274,6 @@ private:
 
 	IRA::CString m_localOscillatorInstance1st; /**< 1st stage mixer component instance name */
 	IRA::CString m_localOscillatorInstance2nd; /**< 2nd stage mixer component instance name */
-
-	std::vector<TFeedValue> m_feeds_vector;	/**< Feed data array */
-	std::vector<TTaperValue> m_taper_vector;	/**< Feed data array */
 
 	std::vector<TLOValue> m_synt_table_1st;	/**< Freq - power synt table 1st stage LO*/
 	std::vector<TLOValue> m_synt_table_2nd;	/**< Freq - power synt table 2nd stage LO*/

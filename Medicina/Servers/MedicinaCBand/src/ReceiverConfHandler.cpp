@@ -28,6 +28,10 @@ ReceiverConfHandler::ReceiverConfHandler()
     l_ccc_normal_acc.m_name = CCC_Normal;
     l_ccc_normal_acc.m_conf_file_path= "DataBlock/MedicinaCBand/NormalModeSetup/CCC";
     l_ccc_normal_acc.m_noisemark_file_path= "DataBlock/MedicinaCBand/NoiseMark/CCC";
+ 	 l_ccc_normal_acc.m_synth_1_file_path= "DataBlock/MedicinaCBand/Synthesizer1"; 
+	 l_ccc_normal_acc.m_synth_2_file_path= "DataBlock/MedicinaCBand/Synthesizer2";
+	 l_ccc_normal_acc.m_feeds_file_path= "DataBlock/MedicinaCBand/Feeds";
+	 l_ccc_normal_acc.m_taper_file_path= "DataBlock/MedicinaCBand/Taper";
     m_conf_access[CCC_Normal].push_back(l_ccc_normal_acc);
     /* CCC narrow */    
     ConfigurationAccess l_ccc_narrow_acc;
@@ -35,6 +39,10 @@ ReceiverConfHandler::ReceiverConfHandler()
     l_ccc_narrow_acc.m_name = CCC_Narrow;
     l_ccc_narrow_acc.m_conf_file_path= "DataBlock/MedicinaCBand/NarrowModeSetup/CCC";
     l_ccc_narrow_acc.m_noisemark_file_path= "DataBlock/MedicinaCBand/NoiseMark/CCC";
+	 l_ccc_narrow_acc.m_synth_1_file_path= "DataBlock/MedicinaCBand/Synthesizer1"; 
+	 l_ccc_narrow_acc.m_synth_2_file_path= "DataBlock/MedicinaCBand/Synthesizer2";
+	 l_ccc_narrow_acc.m_feeds_file_path= "DataBlock/MedicinaCBand/Feeds";
+	 l_ccc_narrow_acc.m_taper_file_path= "DataBlock/MedicinaCBand/Taper";
     m_conf_access[CCC_Narrow].push_back(l_ccc_narrow_acc);
     /* CHC Normal */
     ConfigurationAccess l_chc_normal_acc;
@@ -42,6 +50,10 @@ ReceiverConfHandler::ReceiverConfHandler()
     l_chc_normal_acc.m_name = CHC_Normal;
     l_chc_normal_acc.m_conf_file_path= "DataBlock/MedicinaCBand/NormalModeSetup/CHC";
     l_chc_normal_acc.m_noisemark_file_path= "DataBlock/MedicinaCBand/NoiseMark/CHC";
+    l_chc_normal_acc.m_synth_1_file_path= "DataBlock/MedicinaCBand/Synthesizer1"; 
+	 l_chc_normal_acc.m_synth_2_file_path= "DataBlock/MedicinaCBand/Synthesizer2";
+	 l_chc_normal_acc.m_feeds_file_path= "DataBlock/MedicinaCBand/Feeds";
+	 l_chc_normal_acc.m_taper_file_path= "DataBlock/MedicinaCBand/Taper";
     m_conf_access[CHC_Normal].push_back(l_chc_normal_acc);
     /* CHC narrow */
     ConfigurationAccess l_chc_narrow_acc;
@@ -49,6 +61,10 @@ ReceiverConfHandler::ReceiverConfHandler()
     l_chc_narrow_acc.m_name = CHC_Narrow;
     l_chc_narrow_acc.m_conf_file_path= "DataBlock/MedicinaCBand/NarrowModeSetup/CHC";
     l_chc_narrow_acc.m_noisemark_file_path= "DataBlock/MedicinaCBand/NoiseMark/CHC";
+    l_chc_narrow_acc.m_synth_1_file_path= "DataBlock/MedicinaCBand/Synthesizer1"; 
+	 l_chc_narrow_acc.m_synth_2_file_path= "DataBlock/MedicinaCBand/Synthesizer2";
+	 l_chc_narrow_acc.m_feeds_file_path= "DataBlock/MedicinaCBand/Feeds";
+	 l_chc_narrow_acc.m_taper_file_path= "DataBlock/MedicinaCBand/Taper";
     m_conf_access[CHC_Narrow].push_back(l_chc_narrow_acc);
     /* Filling conf setup holders */
     std::vector<ConfigurationName>::const_iter l_it;
@@ -221,13 +237,22 @@ const IRA::CString ReceiverConfHandler::getActualConfStr()
     return m_conf_name[l_name_enum];    
 }
 
-ConfigurationSetup ReceiverConfHandler::getCurrentSetup() {
+ConfigurationSetup ReceiverConfHandler::getCurrentSetup() const {
     ConfigurationName l_name_enum = m_current_conf.m_name;
     if (!findConfiguration(l_name_enum)){    
         setConfiguartion(CCC_Normal);
         return m_conf_data[CCC_Normal];
     }
     return m_conf_data[l_name_enum];
+}
+
+ConfigurationAccess ReceiverConfHandler::getCurrentAccess() const{
+	ConfigurationName l_name_enum = m_current_conf.m_name;
+    if (!findConfiguration(l_name_enum)){   
+        setConfiguartion(CCC_Normal);
+        return m_conf_access[CCC_Normal];
+    }
+    return m_conf_access[l_name_enum];	
 }
 
 const std::map<ConfigurationName, IRA::CString> ReceiverConfHandler::getAvailableConfsMap() const
