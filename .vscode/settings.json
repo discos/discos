@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.idl": "cpp",
+        "ira": "cpp",
+        "map": "cpp"
+    }
+}
