@@ -30,6 +30,7 @@
 
 #define _CURRENT_VERSION_MAJOR 1
 #define _CURRENT_VERSION_MINOR 0
+#define _CURRENT_VERSION_REVISION 6
 
 #define _CURRENT_PRODUCT "DISCOS"
 
@@ -39,6 +40,7 @@ class CurrentVersion {
 public:
 	static WORD major;
 	static WORD minor;
+	static WORD revision;
 	static IRA::CString station;
 	static IRA::CString product;
 	static IRA::CString getVersion();
