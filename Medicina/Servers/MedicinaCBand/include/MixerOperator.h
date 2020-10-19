@@ -18,13 +18,19 @@ class MixerOperator{
         /**
          * @brief Default Ctor
          * @param p_config Component's config ref
+         * @param p_services 
          */
-        MixerOperator(CConfiguration & p_config);
+        MixerOperator(CConfiguration & p_config );
 
         /**
          * @brief Destroy the Mixer Operator object
          */
         ~MixerOperator();
+
+			/**
+			* @brief Set services
+			*/
+			void setServices(maci::ContainerServices * p_services);
 
 			/**
 			* @brief
@@ -91,7 +97,7 @@ class MixerOperator{
          * @param[in] p_lo_instance LO name to be loaded 
          */
         void loadDevice(Receivers::LocalOscillator_var p_loDev,
-                        char * p_lo_name);
+                        const char * p_lo_name);
 
         /**
          * @brief Realse LO device by isntance name
@@ -100,17 +106,26 @@ class MixerOperator{
          * @param p_lo_name instance name
          */
         void releaseDevice(Receivers::LocalOscillator_var p_loDev,
-                        char * p_lo_name);
+                        const char * p_lo_name);
 
+			/**
+			* @brief Single component lock check			 
+			* @param p_loDev Component instance
+			* @param p_lo_name Component instance name
+			* @return true id Device is locked
+			*/
+			bool isDeviceLocked(Receivers::LocalOscillator_var p_loDev,
+										const char* p_lo_name);
+			
     private:
 
         CConfiguration & m_configuration;   /**< Reference to component's config */
+		  maci::ContainerServices * m_services; /**< maci service */
         bool m_init_ok; /**< Init part completed flag */
         bool m_mixer_fault; /**< Flag indicating some faults on LO devices */
+        double m_current_value; /**< memo current value seen from user */
         Receivers::LocalOscillator_var m_loDev_1st; /**< First LO component */
-        Receivers::LocalOscillator_var m_loDev_2nd; /**< Second LO component */
-        char * m_1st_name;  /**< First Lo comp. name */
-        char * m_2nd_name;  /**< First Lo comp. name */
+        Receivers::LocalOscillator_var m_loDev_2nd; /**< Second LO component */          
 };
 
 #endif

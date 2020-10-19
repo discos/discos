@@ -106,12 +106,12 @@ public:
 	/**
 	 * @return the instance of the local oscillator component name to drive 1st stage LO
 	 */
-	inline const IRA::CString& getLocalOscillatorInstance1st() const { return m_localOscillatorInstance1st; }
+	 IRA::CString getLocalOscillatorInstance1st() const { return m_localOscillatorInstance1st; }
 
 	/**
 	 * @return the instance of the local oscillator component name to drive 2nd stage LO
 	 */
-	inline const IRA::CString& getLocalOscillatorInstance2nd() const { return m_localOscillatorInstance2nd; }
+	IRA::CString getLocalOscillatorInstance2nd() const { return m_localOscillatorInstance2nd; }
 
 	/* **** TABLES **** */
 
@@ -121,7 +121,7 @@ public:
 	 * @param[out] p_out_coeffs Coeff c array
 	 * @return Coeff Array len.
 	 */
-	DWORD getLeftMarkCoeffs( double *& p_out_coeffs) const;
+	DWORD getLeftMarkCoeffs( double *& p_out_coeffs) ;
 
 	/**
 	 * @brief Get the Right pol. noise Mark Coeffs c array
@@ -129,7 +129,7 @@ public:
 	 * @param[out] p_out_coeffs Coeff c array	 
 	 * @return Coeff Array len.
 	 */
-	DWORD getRightMarkCoeffs(double *& p_out_coeffs) const;
+	DWORD getRightMarkCoeffs(double *& p_out_coeffs) ;
 
 	/**
 	 * @brief Get mark temp at given freq ( left )
@@ -163,7 +163,6 @@ public:
 	 */
 	DWORD getTaperTable(double * &freq,double *&taper) const;
 
-	
 	/**
 	 * @param code feed identification codes. It must be freed by caller.
 	 * @param xOffset displacement of the feed with respect to the central one along x axis. It must be freed by caller.
@@ -178,62 +177,62 @@ public:
 	/**
 	 * @return mnemonic of the working mode of the receiver
 	 */
-	inline const IRA::CString& getSetupMode() const { return m_conf_hnd.getCurrentSetup().m_name; }
+	inline const IRA::CString& getSetupMode()  { return m_conf_hnd.getCurrentSetup().m_name; }
 
 	/**
 	 * @return the lower limit of the RF coming from the receiver (MHz)
 	 */
-	inline double const * const  getRFMin() const { return &m_conf_hnd.getCurrentSetup().m_RFMin[0]; }
+	inline double const * const  getRFMin()  { return &m_conf_hnd.getCurrentSetup().m_RFMin[0]; }
 
 	/**
 	 * @return the upper  limit of the RF coming from the receiver (MHz)
 	 */
-	inline double const * const  getRFMax() const { return &m_conf_hnd.getCurrentSetup().m_RFMax[0]; }
+	inline double const * const  getRFMax()  { return &m_conf_hnd.getCurrentSetup().m_RFMax[0]; }
 
 	/**
 	 * @return the start frequency of the IF coming from the receiver (MHz)
 	 */
-	inline double const * const  getIFMin() const { return &m_conf_hnd.getCurrentSetup().m_IFMin[0]; }
+	inline double const * const  getIFMin()  { return &m_conf_hnd.getCurrentSetup().m_IFMin[0]; }
 
 	/**
 	 * @return the bandwidth of the IF coming from the receiver (MHz)
 	 */
-	inline double const * const  getIFBandwidth() const{ return  &m_conf_hnd.getCurrentSetup().m_IFBandwidth[0]; }
+	inline double const * const  getIFBandwidth() { return  &m_conf_hnd.getCurrentSetup().m_IFBandwidth[0]; }
 
 	/**
 	 * @return the number of IF chains for each feed
 	 */
-	inline const  DWORD getIFs() const { return m_conf_hnd.getCurrentSetup().m_IFs; }
+	inline const  DWORD getIFs()  { return m_conf_hnd.getCurrentSetup().m_IFs; }
 
 	/**
 	 * @return the pointer to the polarizations array, the first element correspond to the first IF and so on.....
 	 */
-	inline Receivers::TPolarization const * const getPolarizations() const { return &m_conf_hnd.getCurrentSetup().m_polarizations[0]; }
+	inline Receivers::TPolarization const * const getPolarizations()  { return &m_conf_hnd.getCurrentSetup().m_polarizations[0]; }
 
 	/**
 	 * @return the number of feeds
 	 */
-	inline const  DWORD getFeeds() const { return m_conf_hnd.getCurrentSetup().m_feeds; }
+	inline const  DWORD getFeeds()  { return m_conf_hnd.getCurrentSetup().m_feeds; }
 
 	/**
 	 * @return the default frequency for the synthesizer  (MHz)
 	 */
-	inline double const * const  getDefaultLO()  const { return &m_conf_hnd.getCurrentSetup().m_defaultLO[0]; }
+	inline double const * const  getDefaultLO()   { return &m_conf_hnd.getCurrentSetup().m_defaultLO[0]; }
 
 	/**
 	 * @return the value of the fixed synthesizer used for the second conversion (MHz)
 	 */
-	inline double const * const  getFixedLO2() const { return &m_conf_hnd.getCurrentSetup().m_fixedLO2[0]; }
+	inline double const * const  getFixedLO2()  { return &m_conf_hnd.getCurrentSetup().m_fixedLO2[0]; }
 
 	/**
 	 * @return lower limit for the synthesizer tuning (MHz)
 	 */
-	inline double const * const  getLOMin() const { return  &m_conf_hnd.getCurrentSetup().m_LOMin[0]; }
+	inline double const * const  getLOMin()  { return  &m_conf_hnd.getCurrentSetup().m_LOMin[0]; }
 
 	/**
 	 * @return upper limit for  the  synthesizer tuning (MHz)
 	 */
-	inline double const * const  getLOMax() const { return  &m_conf_hnd.getCurrentSetup().m_LOMax[0]; }
+	inline double const * const  getLOMax()  { return  &m_conf_hnd.getCurrentSetup().m_LOMax[0]; }
 
 private:
 

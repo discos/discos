@@ -128,7 +128,7 @@ void CConfiguration::init(maci::ContainerServices *Services)
 
 /* *** TABLES *** */
 
-DWORD CConfiguration::getLeftMarkCoeffs(double *& p_out_coeffs) const
+DWORD CConfiguration::getLeftMarkCoeffs(double *& p_out_coeffs) 
 {		
 	if (p_out_coeffs)
 		delete p_out_coeffs;
@@ -141,7 +141,7 @@ DWORD CConfiguration::getLeftMarkCoeffs(double *& p_out_coeffs) const
 	return l_coeff_vect_len;
 }
 
-DWORD CConfiguration::getRightMarkCoeffs(double *& p_out_coeffs) const
+DWORD CConfiguration::getRightMarkCoeffs(double *& p_out_coeffs) 
 {
 	if (p_out_coeffs)
 		delete p_out_coeffs;
@@ -154,24 +154,41 @@ DWORD CConfiguration::getRightMarkCoeffs(double *& p_out_coeffs) const
 	return l_coeff_vect_len;
 }
 
-double CConfiguration::getLeftMarkTemp(double freq){
+double CConfiguration::getLeftMarkTemp(double freq)
+{
 	double * l_coeffs= NULL;
 	DWORD l_coeffs_len;
 	double l_ret= 0.0;
 	l_coeffs_len= getLeftMarkCoeffs(l_coeffs);				
-	for(int i=0; i< l_coeffs_len; i++){
+	for(DWORD i=0; i< l_coeffs_len; i++){
 		l_ret+= l_coeffs[i] *  pow(freq, i);
 	}
+	return l_ret;
 }
 
-double CConfiguration::getRightMarkTemp(double freq){
+double CConfiguration::getRightMarkTemp(double freq)
+{
 	double * l_coeffs= NULL;
 	DWORD l_coeffs_len;
 	double l_ret= 0.0;
 	l_coeffs_len= getRightMarkCoeffs(l_coeffs);				
-	for(int i=0; i< l_coeffs_len; i++){
+	for(DWORD i=0; i< l_coeffs_len; i++){
 		l_ret+= l_coeffs[i] *  pow(freq, i);
 	}
+	return l_ret;
+}
+
+DWORD CConfiguration::getSynthesizerTable(double *& freq,double *& power) const
+{
+	/* returning only one table values, we assume similar steps between two stages */
+	WORD l_synt_len= m_synt_table_1st.size();
+	freq= new double [l_synt_len];
+	power=new double [l_synt_len];
+	for (DWORD j=0;j < l_synt_len; j++){
+		freq[j]= m_synt_table_1st[j].frequency;
+		power[j]= m_synt_table_1st[j].outputPower;
+	}
+	return l_synt_len;
 }
 
 DWORD CConfiguration::getTaperTable(double * &freq,double *&taper) const

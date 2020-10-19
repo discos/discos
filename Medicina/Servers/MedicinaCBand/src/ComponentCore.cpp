@@ -1,4 +1,5 @@
 #include "ComponentCore.h"
+#include "Commons.h"
 #include <LogFilter.h>
 
 _IRA_LOGFILTER_IMPORT;
@@ -20,6 +21,7 @@ CComponentCore::~CComponentCore()
 void CComponentCore::initialize(maci::ContainerServices* services)
 {
     m_services=services;
+    m_mixer.setServices(services);
     m_control=NULL;
 
     m_environmentTemperature.temperature = 20.0;
@@ -452,11 +454,7 @@ void CComponentCore::getCalibrationMark(ACS::doubleSeq& result,
                                 const ACS::longSeq& ifs,
                                 bool& onoff,double &scaleFactor) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl)
 {
-    double realFreq,realBw;    
-    double *tableLeftMark=NULL;    
-    double *tableRightMark=NULL;
-    DWORD sizeL=0;
-    DWORD sizeR=0;
+    double realFreq,realBw;            
     baci::ThreadSyncGuard guard(&m_mutex);
     /* Checking start frequnency input seq length*/
     unsigned stdLen=freqs.length();
@@ -518,11 +516,7 @@ void CComponentCore::getCalibrationMark(ACS::doubleSeq& result,
         }
     }
     scaleFactor=1.0;
-    onoff=m_calDiode;
-    if (tableLeftFreq) delete [] tableLeftFreq;
-    if (tableLeftMark) delete [] tableLeftMark;
-    if (tableRightFreq) delete [] tableRightFreq;
-    if (tableRightMark) delete [] tableRightMark;
+    onoff=m_calDiode;    
 }
 
 
@@ -654,7 +648,7 @@ void CComponentCore::updateLNAControls() throw (ReceiversErrors::ReceiverControl
 {
     // not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
     try {
-        m_fetValues=m_control->fetValues(0,1,CComponentCore::currentConverter, CComponentCore::voltageConverter);
+        m_fetValues= m_control->fetValues(0,1, Helpers::currentConverter, Helpers::voltageConverter);
     }
     catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateCryoLNAWin()");
@@ -704,7 +698,7 @@ double CComponentCore::getTaper(const double& freq,const double& bw,const long& 
     waveLen=LIGHTSPEED/(centralFreq*1000000);
     ACS_LOG(LM_FULL_INFO,"CComponentCore::getTaper()",(LM_DEBUG,"WAVELENGTH %lf",waveLen));
     size=m_configuration.getTaperTable(freqVec,taperVec);
-    taper=linearFit(freqVec,taperVec,size,centralFreq);
+    taper=Helpers::linearFit(freqVec,taperVec,size,centralFreq);
     ACS_LOG(LM_FULL_INFO,"CComponentCore::getTaper()",(LM_DEBUG,"TAPER %lf",taper));
     if (freqVec) delete [] freqVec;
     if (taperVec) delete [] taperVec;
@@ -748,7 +742,7 @@ void CComponentCore::updateVacuum() throw (ReceiversErrors::ReceiverControlBoard
     }
     if (vacuumSensor) {
         try {
-            m_vacuum=m_control->vacuum(CComponentCore::voltage2mbar);
+            m_vacuum=m_control->vacuum(Helpers::voltage2mbar);
         }
         catch (IRA::ReceiverControlEx& ex) {
             _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateVacuum()");
@@ -844,7 +838,7 @@ void CComponentCore::updateEnvironmentTemperature() throw (ReceiversErrors::Rece
 {
     // not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
     try {
-        m_environmentTemperature.temperature = m_control->vertexTemperature(CComponentCore::voltage2Celsius);
+        m_environmentTemperature.temperature = m_control->vertexTemperature(Helpers::voltage2Celsius);
         m_environmentTemperature.timestamp = getTimeStamp();
     }
     catch (IRA::ReceiverControlEx& ex) {
@@ -893,33 +887,3 @@ void CComponentCore::updateIsRemote() throw (ReceiversErrors::ReceiverControlBoa
     clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
 }
 
-/* ***PRIVATE*** */
-
-double CComponentCore::linearFit(double *X,double *Y,const WORD& size,double x)
-{
-    int low=-1,high=-1;
-    for (WORD j=0;j<size;j++) {
-        if (x==X[j]) {
-            return Y[j];
-        }
-        else if (x<X[j]) {
-            if (high==-1) high=j;
-            else if (X[j]<X[high]) high=j;
-        }
-        else if (x>X[j]) { // X value is lower
-            if (low==-1) low=j;
-            else if (X[j]>X[low]) low=j;
-        }
-    }
-    if ((high!=-1) && (low!=-1)) {
-        double slope=X[low]-X[high];
-        return ((x-X[high])/slope)*Y[low]-((x-X[low])/slope)*Y[high];
-    }
-    else if (high==-1) {
-        return Y[low];
-    }
-    else if (low==-1) {
-        return Y[high];
-    }
-    else return 0.0; //this will never happen if size!=0
-}

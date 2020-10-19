@@ -157,7 +157,7 @@ struct ReceiverConfHandler{
      * @brief Get the Available configuration by enum name
      * @return Available conf names
      */
-    const std::vector<ConfigurationName> getAvailableConfs() const;
+    std::vector<ConfigurationName> getAvailableConfs() const;
 
     /**
      * @brief Get the actual configuration by its string tag
@@ -178,14 +178,14 @@ struct ReceiverConfHandler{
      * 
      * @return ConfigurationSetup for selected working mode
      */
-    ConfigurationSetup getCurrentSetup() const;
+    ConfigurationSetup getCurrentSetup()  ;
     
     /**
     * @brief Getter actual conf file access infos
 	 *     
     * @return Current conf file acces
     */
-    ConfigurationAccess getCurrentAccess() const;    
+    ConfigurationAccess getCurrentAccess()  ;    
 
     /**
      * @brief Get the Available configuration by enum name
@@ -201,7 +201,7 @@ struct ReceiverConfHandler{
      * @return True if p_conf_name is present on access container
      */
     bool getConfigurationAccess(ConfigurationName p_conf_name,
-                                ConfigurationAccess & p_out_conf) const;
+                                ConfigurationAccess & p_out_conf) ;
 
     /**
      * @brief Get the requested configuration setup       
@@ -211,7 +211,7 @@ struct ReceiverConfHandler{
      * @return True when p_output_setup is valid
      */
     bool getConfigurationSetup(ConfigurationName p_conf_name,
-                                ConfigurationSetup & p_out_setup) const;
+                                ConfigurationSetup & p_out_setup)  ;
 
 
     private:
@@ -239,8 +239,18 @@ struct ReceiverConfHandler{
      * @param[out] p_conf_enum Conf enum tag relative to p_conf_name
      * @return true Requested configuration is valid
      */
-    bool findEnumFromString(IRA::CString p_conf_name,
+    bool findEnumFromString(IRA::CString &p_conf_name,
                              ConfigurationName & p_con_enum) const;
+                             
+	 /**
+     * @brief Find mode enum from string tag
+     * 
+     * @param p_mode_name String tag mode name
+     * @param[out] p_mode_enum Found mode enum
+     * @return true  Mode enum found
+     */
+    bool findModeFromString(IRA::CString & p_mode_name,
+                             ModeName & p_mode_enum) const;
 
     /**
      * @brief Find Receiver enum from string tag
@@ -249,19 +259,8 @@ struct ReceiverConfHandler{
      * @param[out] p_receiver_enum Found receiver enum
      * @return true Receiver enum found
      */
-    bool findReceiverFromString(IRA::CString p_receiver_name,
-                             ReceiverName & p_receiver_enum) const;
-
-    /**
-     * @brief Find mode enum from string tag
-     * 
-     * @param p_mode_name String tag mode name
-     * @param[out] p_mode_enum Found mode enum
-     * @return true  Mode enum found
-     */
-    bool findModeFromString(IRA::CString p_mode_name,
-                             ReceiverName & p_mode_enum) const;
-                             
+    bool findReceiverFromString(IRA::CString & p_receiver_name,
+                             ReceiverName & p_receiver_enum) const;                         
 
     private:
 
