@@ -452,22 +452,12 @@ void CComponentCore::getCalibrationMark(ACS::doubleSeq& result,
                                 const ACS::longSeq& ifs,
                                 bool& onoff,double &scaleFactor) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl)
 {
-    double realFreq,realBw;
-    double *tableLeftFreq=NULL;
-    double *tableLeftMark=NULL;
-    double *tableRightFreq=NULL;
+    double realFreq,realBw;    
+    double *tableLeftMark=NULL;    
     double *tableRightMark=NULL;
     DWORD sizeL=0;
     DWORD sizeR=0;
     baci::ThreadSyncGuard guard(&m_mutex);
-    /* Checking receiver setup */
-    /*
-    if (m_setupMode=="") {
-        _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getCalibrationMark()");
-        impl.setReason("receiver not configured yet");
-        throw impl;
-    }
-    */
     /* Checking start frequnency input seq length*/
     unsigned stdLen=freqs.length();
     if ((stdLen!=bandwidths.length()) || (stdLen!=feeds.length()) || (stdLen!=ifs.length())) {
@@ -496,11 +486,18 @@ void CComponentCore::getCalibrationMark(ACS::doubleSeq& result,
     resFreq.length(stdLen);
     resBw.length(stdLen);
     /* Ask for polynomial coeffs from configuration layer */    
-    sizeL= m_configuration.getLeftMarkCoeffs(tableLeftMark);
-    sizeR= m_configuration.getRightMarkCoeffs(tableRightMark);
-    /**@todo rivedere questa parte */
+    //sizeL= m_configuration.getLeftMarkCoeffs(tableLeftMark);
+    //sizeR= m_configuration.getRightMarkCoeffs(tableRightMark);
+    /**@todo rivedere questa parte 
+     * in pratica per ogni entry del set di input 
+     * freq, bw, feeds, ifs 
+     * devo calcolare la relativa cal mark temp tramite
+     * la formula polinomiale
+     * e ritornare il dato attraverso
+     * result, resFreq, resBw ?
+    */
     for (unsigned i=0; i < stdLen; i++) {
-        // now computes the mark for each input band....considering the present mode and configuration of the receiver.
+        /* Get sky frequency for each input freq */
         if (!IRA::CIRATools::skyFrequency(freqs[i],bandwidths[i],m_startFreq[ifs[i]],m_bandwidth[ifs[i]],realFreq,realBw)) {
                 realFreq=m_startFreq[ifs[i]];
                 realBw=0.0;
@@ -512,11 +509,11 @@ void CComponentCore::getCalibrationMark(ACS::doubleSeq& result,
         realFreq+=realBw/2.0;
         ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"REFERENCE_FREQUENCY %lf",realFreq));
         if (m_polarization[ifs[i]]== (long)Receivers::RCV_LCP) {
-            result[i]= linearFit(tableLeftFreq,tableLeftMark,sizeL,realFreq);
+            result[i]= m_configuration.getLeftMarkTemp(realFreq);            
             ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"LEFT_MARK_VALUE %lf",result[i]));
         }
-        else { //RCV_RCP
-            result[i]=linearFit(tableRightFreq,tableRightMark,sizeR,realFreq);
+        else { //RCV_RCP            
+            result[i]= m_configuration.getRightMarkTemp(realFreq);
             ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"RIGHT_MARK_VALUE %lf",result[i]));
         }
     }

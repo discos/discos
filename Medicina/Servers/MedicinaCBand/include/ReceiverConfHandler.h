@@ -167,6 +167,13 @@ struct ReceiverConfHandler{
     const IRA::CString getActualConfStr();
 
     /**
+     * @brief Get the Actual Configuration
+     * 
+     * @return ConfigurationName 
+     */
+    ConfigurationName getActualConf();
+
+    /**
      * @brief Get the Current configuration setup
      * 
      * @return ConfigurationSetup for selected working mode

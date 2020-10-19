@@ -1,6 +1,7 @@
 // $Id: Configuration.cpp,v 1.5 2011-06-01 18:24:44 a.orlati Exp $
 
 #include "Configuration.h"
+#include <math.h>
 #include "Defs.h"
 
 using namespace IRA;
@@ -104,7 +105,7 @@ void CConfiguration::init(maci::ContainerServices *Services)
 			dummy.setFieldName("Configuration");
 			throw dummy;
 		}
-		/* Reading Setup main infos */		
+		/* Reading Setup main infos */
 		readConfigurationSetup(l_access.m_conf_file_path, l_setup );		
 		/* noise mark read */		
 		readNoiseMarkPoly(l_access.m_noisemark_file_path, l_setup);
@@ -151,6 +152,26 @@ DWORD CConfiguration::getRightMarkCoeffs(double *& p_out_coeffs) const
 		p_out_coeffs[i]= l_conf_setup.m_noise_mark_rcp_coeffs[i];		
 	}
 	return l_coeff_vect_len;
+}
+
+double CConfiguration::getLeftMarkTemp(double freq){
+	double * l_coeffs= NULL;
+	DWORD l_coeffs_len;
+	double l_ret= 0.0;
+	l_coeffs_len= getLeftMarkCoeffs(l_coeffs);				
+	for(int i=0; i< l_coeffs_len; i++){
+		l_ret+= l_coeffs[i] *  pow(freq, i);
+	}
+}
+
+double CConfiguration::getRightMarkTemp(double freq){
+	double * l_coeffs= NULL;
+	DWORD l_coeffs_len;
+	double l_ret= 0.0;
+	l_coeffs_len= getRightMarkCoeffs(l_coeffs);				
+	for(int i=0; i< l_coeffs_len; i++){
+		l_ret+= l_coeffs[i] *  pow(freq, i);
+	}
 }
 
 DWORD CConfiguration::getTaperTable(double * &freq,double *&taper) const

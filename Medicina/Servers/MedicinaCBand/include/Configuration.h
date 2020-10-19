@@ -19,6 +19,10 @@
 #include "Commons.h"
 #include "ReceiverConfHandler.h"
 
+// Temperature dummy value to use in case of Connection Error
+#define CEDUMMY 100000
+
+
 /**
  * This class implements the component configuration. The data inside this class are initialized at the startup from the
  * configuration database and then are used (read) inside the component.
@@ -126,6 +130,24 @@ public:
 	 * @return Coeff Array len.
 	 */
 	DWORD getRightMarkCoeffs(double *& p_out_coeffs) const;
+
+	/**
+	 * @brief Get mark temp at given freq ( left )
+	 * @details Calculation depends on receiver configuration
+	 * 
+	 * @param freq Input frequency
+	 * @return double Cal mark value
+	 */
+	double getLeftMarkTemp(double freq);
+
+	/**
+	 * @brief Get mark temp at given freq ( right )
+	 * @details Calculation depends on receiver configuration
+	 * 
+	 * @param freq Input frequency
+	 * @return double Cal mark value
+	 */
+	double getRightMarkTemp(double freq);
 
 	/**
 	 * @param freq vector with the synthesizer frequencies. It must be freed by caller.

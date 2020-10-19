@@ -237,6 +237,10 @@ const IRA::CString ReceiverConfHandler::getActualConfStr()
     return m_conf_name[l_name_enum];    
 }
 
+ConfigurationName ReceiverConfHandler::getActualConf(){
+    return m_current_conf.m_name;
+}
+
 ConfigurationSetup ReceiverConfHandler::getCurrentSetup() const {
     ConfigurationName l_name_enum = m_current_conf.m_name;
     if (!findConfiguration(l_name_enum)){    
