@@ -19,7 +19,7 @@
 
 #
 # user definable C-compilation flags
-#USER_CFLAGS = 
+USER_CFLAGS = -DMED_DEBUG_LVL 
 
 #
 # additional include and library search paths

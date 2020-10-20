@@ -52,6 +52,7 @@ using namespace IRA;
 
 CConfiguration::CConfiguration()
 {	
+	MED_TRACE();
 }
 
 CConfiguration::~CConfiguration()
@@ -78,6 +79,7 @@ void CConfiguration::init(maci::ContainerServices *Services)
 	 *   * CHC NarrowBw.
 	 *   * CCC NarrowBw.
 	 */	
+	 MED_TRACE();
 	 m_service= Services;
 	/* read component configuration */	
 	_GET_STRING_ATTRIBUTE("DewarIPAddress","Dewar IP address:",m_dewarIPAddress,"");
@@ -123,7 +125,8 @@ void CConfiguration::init(maci::ContainerServices *Services)
 	/* Feeds */
 	readFeeds();
 	/* Taper */
-	readTaper();
+	readTaper();	
+	MED_TRACE();
 }
 
 /* *** TABLES *** */

@@ -17,4 +17,22 @@
 #define FEEDTABLE_PATH CONFIG_PATH"/Feeds"
 #define TAPERTABLE_PATH CONFIG_PATH"/Taper"
 
+
+
+
+#ifdef MED_DEBUG_LVL
+#include <cstdio>
+#define MED_TRACE() do { fprintf(stderr, "%s:%d:%s() \n", __FILE__, __LINE__, __func__); } while(0); 
+#else
+#define MED_TRACE() 
+#endif
+
+/*
+#define MED_LOG(fmt,...) \
+	
+
+*/
+/* PRIVATE COMPONENT LOG */
+
+
 #endif

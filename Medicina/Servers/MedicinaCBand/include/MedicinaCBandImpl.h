@@ -30,7 +30,7 @@
 #include <ReceiversErrors.h>
 #include "ComponentCore.h"
 #include "MonitorThread.h"
-
+#include "Defs.h"
 
 /** 
  * @mainpage 7GHz receiver component Implementation

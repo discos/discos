@@ -14,6 +14,7 @@
 MixerOperator::MixerOperator(CConfiguration & p_config):
     m_configuration(p_config)
 {
+	 
 	 m_services= NULL;
     m_loDev_1st= Receivers::LocalOscillator::_nil();
     m_loDev_2nd= Receivers::LocalOscillator::_nil();
@@ -29,6 +30,7 @@ MixerOperator::~MixerOperator()
 
 void MixerOperator::setServices(maci::ContainerServices * p_services)
 {
+	
 	m_services= p_services;
 }	
 
@@ -40,11 +42,13 @@ bool MixerOperator::isLoaded() const
 void MixerOperator::loadComponents() 
         throw (ComponentErrors::CouldntGetComponentExImpl)
 {
+	 
     const char * m_1st_name= m_configuration.getLocalOscillatorInstance1st();
     const char * m_2nd_name= m_configuration.getLocalOscillatorInstance2nd();    
     loadDevice(m_loDev_1st, m_1st_name);
     loadDevice(m_loDev_2nd, m_2nd_name);
     m_init_ok= true;
+    
 }
 
 void MixerOperator::releaseComponents()
@@ -63,6 +67,7 @@ bool MixerOperator::setValue(const ACS::doubleSeq& p_values)
                         ComponentErrors::CORBAProblemExImpl,
                         ReceiversErrors::LocalOscillatorErrorExImpl)
 {
+	 
     /** @todo controllare */
     if(!m_init_ok || CORBA::is_nil(m_loDev_1st) || CORBA::is_nil(m_loDev_1st) ){
         ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",
@@ -120,6 +125,7 @@ bool MixerOperator::setValue(const ACS::doubleSeq& p_values)
         throw impl;
     }
     m_current_value= p_values[0];
+    
     return true;
 }
 

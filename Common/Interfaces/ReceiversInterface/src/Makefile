@@ -11,7 +11,7 @@ MAKE_PDF = ON
 # Libraries (public and local)
 # ----------------------------
  
-CDB_SCHEMAS = Feeds ReceiversModeSetup LocalOscillatorLookUpTable \
+CDB_SCHEMAS = NoiseMarkPoly Feeds ReceiversModeSetup LocalOscillatorLookUpTable \
 			  NoiseMarkLookUpTable TaperLookUpTable \
 			  DewarPositionerUpdatingTable DewarPositionerMapping \
 			  DewarPositionerActions \

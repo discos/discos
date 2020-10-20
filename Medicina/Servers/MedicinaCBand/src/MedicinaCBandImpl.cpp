@@ -8,8 +8,8 @@
 #include "DevIOLNAControls.h"
 #include "DevIOStatus.h"
 #include "DevIOComponentStatus.h"
+#include <cstdio>
 #include <LogFilter.h>
-
 
 _IRA_LOGFILTER_DECLARE;
 
@@ -27,6 +27,7 @@ MedicinaCBandImpl::MedicinaCBandImpl(const ACE_CString &CompName,maci::Container
 	m_preceiverStatus(this)
 {	
 	AUTO_TRACE("MedicinaCBandImpl::MedicinaCBandImpl()");
+	MED_TRACE();	 
 }
 
 MedicinaCBandImpl::~MedicinaCBandImpl()
@@ -36,15 +37,18 @@ MedicinaCBandImpl::~MedicinaCBandImpl()
 
 void MedicinaCBandImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 {
+	MED_TRACE();
 	AUTO_TRACE("MedicinaCBandImpl::initialize()");
 	ACS_LOG(LM_FULL_INFO,"MedicinaCBandImpl::initialize()",(LM_INFO,"MedicinaCBandImpl::COMPSTATE_INITIALIZING"));
 	m_core.initialize(getContainerServices());
 	m_monitor=NULL;
 	ACS_LOG(LM_FULL_INFO,"MedicinaCBandImpl::initialize()",(LM_INFO,"COMPSTATE_INITIALIZED"));
+	 
 }
 
 void MedicinaCBandImpl::execute() throw (ACSErr::ACSbaseExImpl)
 {
+	 
 	AUTO_TRACE("MedicinaCBandImpl::execute()");
 	ACS::Time timestamp;
 	const CConfiguration *config=m_core.execute(); //throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::SocketErrorExImpl)
@@ -104,6 +108,7 @@ void MedicinaCBandImpl::execute() throw (ACSErr::ACSbaseExImpl)
 		throw __dummy;		
 	}
 	ACS_LOG(LM_FULL_INFO,"MedicinaCBandImpl::execute()",(LM_INFO,"COMPSTATE_OPERATIONAL"));
+	 
 }
 
 void MedicinaCBandImpl::cleanUp()

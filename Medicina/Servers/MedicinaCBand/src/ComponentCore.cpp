@@ -20,6 +20,7 @@ CComponentCore::~CComponentCore()
 
 void CComponentCore::initialize(maci::ContainerServices* services)
 {
+	MED_TRACE();
     m_services=services;
     m_mixer.setServices(services);
     m_control=NULL;
@@ -36,6 +37,7 @@ void CComponentCore::initialize(maci::ContainerServices* services)
 
 CConfiguration const * const  CComponentCore::execute() throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::SocketErrorExImpl)
 {
+	MED_TRACE();
     /*
      * This Call sets default Recevier Configuration at CCC_Normal 
      * User has to call for Activate() and setupMode() to be more specific about receiver conf
@@ -58,7 +60,8 @@ CConfiguration const * const  CComponentCore::execute() throw (ComponentErrors::
     catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CComponentCore::execute()");
         throw dummy;
-    }    
+    }
+    MED_TRACE();    
     return &m_configuration;
 }
 
@@ -76,6 +79,7 @@ void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ModeErro
         ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl,ReceiversErrors::NoRemoteControlErrorExImpl,
         ReceiversErrors::ReceiverControlBoardErrorExImpl)
 {
+	MED_TRACE();
     /* activate mode */
     baci::ThreadSyncGuard guard(&m_mutex);
     bool l_res= m_configuration.m_conf_hnd.setMode(mode);
@@ -117,6 +121,7 @@ void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ModeErro
         _IRA_LOGFILTER_LOG(LM_NOTICE, "CComponentCore::activate()", "RECEIVER_COMMUNICATION_MODE_LOCAL");
         setStatusBit(LOCAL);
     }
+    MED_TRACE();
 }
 
 

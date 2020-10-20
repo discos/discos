@@ -7,6 +7,7 @@ ReceiverConfHandler::ReceiverConfHandler()
     /* Before C++11 member initialization does not allow to do it in header 
         member declaration */
     /* Allowed confs */
+	MED_TRACE();
     m_allowed_conf.push_back(CCC_Normal);
     m_allowed_conf.push_back(CCC_Narrow);
     m_allowed_conf.push_back(CHC_Normal);
@@ -88,6 +89,7 @@ ReceiverConfHandler::ReceiverConfHandler()
     l_chc_narrow.m_receiver= CHC;
     l_chc_narrow.m_mode= Narrow;
     m_available_current[CHC_Narrow]= l_chc_narrow;
+    MED_TRACE();
 }
 
 ReceiverConfHandler::~ReceiverConfHandler()
