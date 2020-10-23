@@ -37,18 +37,18 @@ MedicinaCBandImpl::~MedicinaCBandImpl()
 
 void MedicinaCBandImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 {
-	MED_TRACE();
+	MED_TRACE_MSG(" IN ");
 	AUTO_TRACE("MedicinaCBandImpl::initialize()");
 	ACS_LOG(LM_FULL_INFO,"MedicinaCBandImpl::initialize()",(LM_INFO,"MedicinaCBandImpl::COMPSTATE_INITIALIZING"));
 	m_core.initialize(getContainerServices());
 	m_monitor=NULL;
 	ACS_LOG(LM_FULL_INFO,"MedicinaCBandImpl::initialize()",(LM_INFO,"COMPSTATE_INITIALIZED"));
-	 
+	MED_TRACE_MSG(" OUT ");
 }
 
 void MedicinaCBandImpl::execute() throw (ACSErr::ACSbaseExImpl)
 {
-	 
+	MED_TRACE_MSG(" IN ");
 	AUTO_TRACE("MedicinaCBandImpl::execute()");
 	ACS::Time timestamp;
 	const CConfiguration *config=m_core.execute(); //throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::SocketErrorExImpl)
@@ -84,7 +84,7 @@ void MedicinaCBandImpl::execute() throw (ACSErr::ACSbaseExImpl)
 	CComponentCore *temp=&m_core;
 	try {
 		m_monitor=getContainerServices()->getThreadManager()->create<CMonitorThread,CComponentCore*> (
-				"WHATCHDOG7GHZ",temp,config->getWarchDogResponseTime()*10,config->getWatchDogSleepTime()*10);
+				"WHATCHDOG_MEDCBAND",temp,config->getWarchDogResponseTime()*10,config->getWatchDogSleepTime()*10);
 	}
 	catch (acsthreadErrType::acsthreadErrTypeExImpl& ex) {
 		_ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,_dummy,ex,"MedicinaCBandImpl::execute()");
@@ -108,7 +108,7 @@ void MedicinaCBandImpl::execute() throw (ACSErr::ACSbaseExImpl)
 		throw __dummy;		
 	}
 	ACS_LOG(LM_FULL_INFO,"MedicinaCBandImpl::execute()",(LM_INFO,"COMPSTATE_OPERATIONAL"));
-	 
+	MED_TRACE_MSG(" OUT "); 
 }
 
 void MedicinaCBandImpl::cleanUp()
@@ -137,6 +137,7 @@ void MedicinaCBandImpl::aboutToAbort()
 
 void MedicinaCBandImpl::activate(const char * setup_mode) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
+	MED_TRACE();
 	try {
 		m_core.activate(setup_mode);
 	}
@@ -153,10 +154,12 @@ void MedicinaCBandImpl::activate(const char * setup_mode) throw (CORBA::SystemEx
 		impl.log(LM_DEBUG);
 		throw impl.getComponentErrorsEx();
 	}
+	MED_TRACE();
 }
 
 void MedicinaCBandImpl::deactivate() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
+	MED_TRACE();
 	try {
 		m_core.deactivate();
 	}
@@ -173,6 +176,7 @@ void MedicinaCBandImpl::deactivate() throw (CORBA::SystemException,ComponentErro
 		impl.log(LM_DEBUG);
 		throw impl.getComponentErrorsEx();
 	}
+	MED_TRACE();
 }
 
 void MedicinaCBandImpl::calOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
@@ -287,7 +291,8 @@ void MedicinaCBandImpl::setLO(const ACS::doubleSeq& lo) throw (CORBA::SystemExce
 
 void MedicinaCBandImpl::setMode(const char * mode) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
-	try {
+	MED_TRACE_MSG(" IN ");
+	try {		
 		m_core.setMode(mode);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
@@ -303,6 +308,7 @@ void MedicinaCBandImpl::setMode(const char * mode) throw (CORBA::SystemException
 		impl.log(LM_DEBUG);
 		throw impl.getComponentErrorsEx();
 	}
+	MED_TRACE_MSG(" OUT ");
 }
 
 ACS::doubleSeq *MedicinaCBandImpl::getCalibrationMark(const ACS::doubleSeq& freqs, const ACS::doubleSeq& bandwidths, const ACS::longSeq& feeds,const ACS::longSeq& ifs,

@@ -36,7 +36,7 @@ ReceiverConfHandler::ReceiverConfHandler()
     /* CCC narrow */    
     ConfigurationAccess l_ccc_narrow_acc;    
     l_ccc_narrow_acc.m_name = CCC_Narrow;
-    l_ccc_narrow_acc.m_conf_file_path= "DataBlock/MedicinaCBand/NarrowModeSetup/CCC";
+    l_ccc_narrow_acc.m_conf_file_path= "DataBlock/MedicinaCBand/NarrowBandwidthSetup/CCC";
     l_ccc_narrow_acc.m_noisemark_file_path= "DataBlock/MedicinaCBand/NoiseMark/CCC";
 	 l_ccc_narrow_acc.m_synth_1_file_path= "DataBlock/MedicinaCBand/Synthesizer1"; 
 	 l_ccc_narrow_acc.m_synth_2_file_path= "DataBlock/MedicinaCBand/Synthesizer2";
@@ -56,7 +56,7 @@ ReceiverConfHandler::ReceiverConfHandler()
     /* CHC narrow */
     ConfigurationAccess l_chc_narrow_acc;    
     l_chc_narrow_acc.m_name = CHC_Narrow;
-    l_chc_narrow_acc.m_conf_file_path= "DataBlock/MedicinaCBand/NarrowModeSetup/CHC";
+    l_chc_narrow_acc.m_conf_file_path= "DataBlock/MedicinaCBand/NarrowBandwidthSetup/CHC";
     l_chc_narrow_acc.m_noisemark_file_path= "DataBlock/MedicinaCBand/NoiseMark/CHC";
     l_chc_narrow_acc.m_synth_1_file_path= "DataBlock/MedicinaCBand/Synthesizer1"; 
 	 l_chc_narrow_acc.m_synth_2_file_path= "DataBlock/MedicinaCBand/Synthesizer2";
@@ -100,6 +100,7 @@ ReceiverConfHandler::~ReceiverConfHandler()
 /* *** SETTERS *** */
 
 bool ReceiverConfHandler::setConfiguration(ConfigurationName p_conf_name){
+	MED_TRACE();
     if (findConfiguration(p_conf_name)){
         m_current_conf= m_available_current[p_conf_name];
         return true;
@@ -192,11 +193,13 @@ bool ReceiverConfHandler::setMode(ModeName p_mode_name)
 }
 
 bool ReceiverConfHandler::setMode(IRA::CString p_mode_name)
-{        
+{    
+	 MED_TRACE_MSG(" IN ");    
     ModeName l_mode_enum;
     bool l_ret= findModeFromString(p_mode_name, l_mode_enum);
     if (!l_ret)
         return false;    
+	MED_TRACE_MSG(" SWITCH ");
     switch (l_mode_enum){
         case Normal:
             if (m_current_conf.m_receiver == CCC){
@@ -218,7 +221,7 @@ bool ReceiverConfHandler::setMode(IRA::CString p_mode_name)
                 return true;
             }
         break;           
-    }    
+    }        
     return false;
 }
 

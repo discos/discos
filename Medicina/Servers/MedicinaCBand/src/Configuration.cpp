@@ -79,7 +79,7 @@ void CConfiguration::init(maci::ContainerServices *Services)
 	 *   * CHC NarrowBw.
 	 *   * CCC NarrowBw.
 	 */	
-	 MED_TRACE();
+	 MED_TRACE_MSG(" IN ");
 	 m_service= Services;
 	/* read component configuration */	
 	_GET_STRING_ATTRIBUTE("DewarIPAddress","Dewar IP address:",m_dewarIPAddress,"");
@@ -126,7 +126,7 @@ void CConfiguration::init(maci::ContainerServices *Services)
 	readFeeds();
 	/* Taper */
 	readTaper();	
-	MED_TRACE();
+	MED_TRACE_MSG(" OUT ");
 }
 
 /* *** TABLES *** */
@@ -228,6 +228,9 @@ void CConfiguration::readConfigurationSetup(const IRA::CString & p_conf_path,
 									ReceiverConfHandler::ConfigurationSetup & p_conf_setup)
 									throw (ComponentErrors::CDBAccessExImpl)
 {	
+	MED_TRACE_MSG("IN");	
+	const char * l_app= p_conf_path;
+	MED_TRACE_MSG(l_app);
 	_GET_DWORD_ATTRIBUTE("Feeds","Number of feeds:", p_conf_setup.m_feeds, p_conf_path) ;
 	_GET_DWORD_ATTRIBUTE("IFs","Number of IFs per feed:",p_conf_setup.m_IFs, p_conf_path);
 	/* Read polarization token, string splitted by ' ' 
@@ -348,32 +351,42 @@ void CConfiguration::readConfigurationSetup(const IRA::CString & p_conf_path,
 		}
 		p_conf_setup.m_LOMax.push_back(l_token.ToDouble());
 	}
+	MED_TRACE_MSG("OUT");
 }
 
 void CConfiguration::readNoiseMarkPoly(const IRA::CString & p_conf_path,
 									ReceiverConfHandler::ConfigurationSetup & p_conf_setup)
 									throw (ComponentErrors::CDBAccessExImpl)
 {
+	MED_TRACE_MSG("IN");
 	/* Nois mark is bound to receiver configuration */
 	IRA::CError l_error;
 	IRA::CString l_field, l_value, l_token;	
  	/* Collecting LCP "C0 C1 .."" coefficients from appropriate configuration file */ 
 	int l_start=0;
 	_GET_STRING_ATTRIBUTE("LCoeffs","LCP noise mark poly coefficients :", l_value, p_conf_path);	
-	while(!IRA::CIRATools::getNextToken(l_value, l_start, ' ', l_token)){		
+	while(IRA::CIRATools::getNextToken(l_value, l_start, ' ', l_token)){		
 		p_conf_setup.m_noise_mark_lcp_coeffs.push_back(l_token.ToDouble());
 	}	
+	/* wo token convert string to value */
+	if (!l_start)
+		p_conf_setup.m_noise_mark_lcp_coeffs.push_back(l_value.ToDouble());
 	/* Collecting RCP "C0 C1 .."" coefficients from appropriate configuration file */ 
+	/* wo token convert string to value */
+	if (!l_start)
+		p_conf_setup.m_noise_mark_lcp_coeffs.push_back(l_value.ToDouble());
 	l_start=0;
 	_GET_STRING_ATTRIBUTE("RCoeffs","RCP noise mark poly coefficients :", l_value, p_conf_path);	
-	while(!IRA::CIRATools::getNextToken(l_value, l_start, ' ', l_token)){		
+	while(IRA::CIRATools::getNextToken(l_value, l_start, ' ', l_token)){		
 		p_conf_setup.m_noise_mark_rcp_coeffs.push_back(l_token.ToDouble());
 	}
+	MED_TRACE_MSG("OUT");
 }
 
 void CConfiguration::readFeeds()
 			 	throw (ComponentErrors::CDBAccessExImpl, ComponentErrors::MemoryAllocationExImpl)
 {
+	MED_TRACE_MSG("IN");
 	/* Local feed table */
 	IRA::CDBTable *m_feedsTable;	/**< Helper reading xml feeds table */
 	IRA::CError l_error;
@@ -437,11 +450,13 @@ void CConfiguration::readFeeds()
 	m_feedsTable->closeTable();
 	delete m_feedsTable;
 	m_feedsTable=NULL;
+	MED_TRACE_MSG("OUT");
 }
 
 void CConfiguration::readTaper() 
 	throw (ComponentErrors::CDBAccessExImpl, ComponentErrors::MemoryAllocationExImpl)
 {
+	MED_TRACE_MSG("IN");
 	IRA::CDBTable * l_taper_table;
 	IRA::CError l_error;
 	IRA::CString l_field;
@@ -486,21 +501,25 @@ void CConfiguration::readTaper()
 	l_taper_table->closeTable();
 	delete l_taper_table;
 	l_taper_table=NULL;
+	MED_TRACE_MSG("OUT");
 }
 
 void CConfiguration::readSynths()
 			throw (ComponentErrors::CDBAccessExImpl,
 					 ComponentErrors::MemoryAllocationExImpl)
 {
+	MED_TRACE_MSG("IN");
 	/* SYNTHs */
 	ReceiverConfHandler::ConfigurationAccess l_access= m_conf_hnd.getCurrentAccess();
 	readSyntTable(m_synt_table_1st, l_access.m_synth_1_file_path);	
 	readSyntTable(m_synt_table_2nd, l_access.m_synth_2_file_path);
+	MED_TRACE_MSG("OUT");
 }
 
 void CConfiguration::readSyntTable(std::vector<TLOValue> & p_synt_table, IRA::CString p_table_file) 
 							throw (ComponentErrors::CDBAccessExImpl, ComponentErrors::MemoryAllocationExImpl)
 {
+	MED_TRACE_MSG("IN");
 	/* file table reading */
 	IRA::CDBTable * m_loTable;
 	IRA::CError l_error;
@@ -542,4 +561,5 @@ void CConfiguration::readSyntTable(std::vector<TLOValue> & p_synt_table, IRA::CS
 	m_loTable->closeTable();
 	delete m_loTable;
 	m_loTable=NULL;
+	MED_TRACE_MSG("OUT");
 }

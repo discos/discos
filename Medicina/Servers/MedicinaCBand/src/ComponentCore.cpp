@@ -37,13 +37,14 @@ void CComponentCore::initialize(maci::ContainerServices* services)
 
 CConfiguration const * const  CComponentCore::execute() throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::SocketErrorExImpl)
 {
-	MED_TRACE();
+	MED_TRACE_MSG(" IN ");
     /*
      * This Call sets default Recevier Configuration at CCC_Normal 
      * User has to call for Activate() and setupMode() to be more specific about receiver conf
      */
-    m_configuration.init(m_services);  //throw (ComponentErrors::CDBAccessExImpl);
+    m_configuration.init(m_services);  //throw (ComponentErrors::CDBAccessExImpl);    
     try {
+    	  MED_TRACE_MSG(" Receiver new ");    	  
         m_control=new IRA::ReceiverControl(
                 (const char *)m_configuration.getDewarIPAddress(),
                 m_configuration.getDewarPort(),
@@ -52,6 +53,7 @@ CConfiguration const * const  CComponentCore::execute() throw (ComponentErrors::
                 m_configuration.getLNASamplingTime(),
                 m_configuration.getFeeds()
         );
+		 MED_TRACE_MSG(" Receiver new done");
     }
     catch (std::bad_alloc& ex) {
         _EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CComponentCore::execute()");
@@ -61,7 +63,7 @@ CConfiguration const * const  CComponentCore::execute() throw (ComponentErrors::
         _EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CComponentCore::execute()");
         throw dummy;
     }
-    MED_TRACE();    
+    MED_TRACE_MSG(" OUT ");
     return &m_configuration;
 }
 
@@ -170,6 +172,7 @@ const Management::TSystemStatus& CComponentCore::getComponentStatus()
 void CComponentCore::setMode(const char * mode) throw (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
         ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl)
 {
+	 MED_TRACE_MSG(" IN ");
     baci::ThreadSyncGuard guard(&m_mutex);
     IRA::CString cmdMode(mode);
     cmdMode.MakeUpper();        
@@ -193,6 +196,7 @@ void CComponentCore::setMode(const char * mode) throw (ReceiversErrors::ModeErro
     setLO(lo); // throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl)    
     m_calDiode=false;
     ACS_LOG(LM_FULL_INFO,"CComponentCore::setMode()",(LM_NOTICE,"RECEIVER_MODE %s",mode));
+	MED_TRACE_MSG(" OUT ");
 }
 
 const IRA::CString CComponentCore::getSetupMode()

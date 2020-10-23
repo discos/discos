@@ -5,6 +5,7 @@
 #include <LocalOscillatorInterfaceC.h>
 #include <ManagmentDefinitionsC.h>
 #include "Commons.h"
+#include "Defs.h"
 
 /** 
  * @todo Aggioranre i log gli include del modulo, macro comprese
@@ -14,7 +15,7 @@
 MixerOperator::MixerOperator(CConfiguration & p_config):
     m_configuration(p_config)
 {
-	 
+	 MED_TRACE();
 	 m_services= NULL;
     m_loDev_1st= Receivers::LocalOscillator::_nil();
     m_loDev_2nd= Receivers::LocalOscillator::_nil();
@@ -30,7 +31,7 @@ MixerOperator::~MixerOperator()
 
 void MixerOperator::setServices(maci::ContainerServices * p_services)
 {
-	
+	MED_TRACE();
 	m_services= p_services;
 }	
 
@@ -42,13 +43,18 @@ bool MixerOperator::isLoaded() const
 void MixerOperator::loadComponents() 
         throw (ComponentErrors::CouldntGetComponentExImpl)
 {
-	 
+	 MED_TRACE_MSG(" IN ");
+	 #ifndef EXCLUDE_MIXER	 
     const char * m_1st_name= m_configuration.getLocalOscillatorInstance1st();
     const char * m_2nd_name= m_configuration.getLocalOscillatorInstance2nd();    
     loadDevice(m_loDev_1st, m_1st_name);
     loadDevice(m_loDev_2nd, m_2nd_name);
+    #else
+    	#warning "Excluding mixer.."
+	 	MED_TRACE_MSG(" TESTING ");    
+    #endif
     m_init_ok= true;
-    
+    MED_TRACE_MSG(" OUT ");
 }
 
 void MixerOperator::releaseComponents()
@@ -67,7 +73,7 @@ bool MixerOperator::setValue(const ACS::doubleSeq& p_values)
                         ComponentErrors::CORBAProblemExImpl,
                         ReceiversErrors::LocalOscillatorErrorExImpl)
 {
-	 
+	 MED_TRACE();
     /** @todo controllare */
     if(!m_init_ok || CORBA::is_nil(m_loDev_1st) || CORBA::is_nil(m_loDev_1st) ){
         ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",
@@ -125,7 +131,7 @@ bool MixerOperator::setValue(const ACS::doubleSeq& p_values)
         throw impl;
     }
     m_current_value= p_values[0];
-    
+	 MED_TRACE();
     return true;
 }
 
@@ -144,26 +150,35 @@ double MixerOperator::getValue()
 
 bool MixerOperator::isLocked()
 {
+	#ifndef EXCLUDE_MIXER
    bool l_1st_lock= isDeviceLocked(m_loDev_1st, (const char *)m_configuration.getLocalOscillatorInstance1st());
 	bool l_2nd_lock= isDeviceLocked(m_loDev_2nd, (const char *)m_configuration.getLocalOscillatorInstance2nd());
 	return l_1st_lock || l_2nd_lock;
+	#else
+	return false;
+	#endif
 }
 
 /* *** PRIVATE *** */
 
 void MixerOperator::loadDevice(Receivers::LocalOscillator_var p_loDev, const char * p_lo_name){
 
+	
     if ((!CORBA::is_nil(p_loDev)) && (m_mixer_fault)) { // if reference was already taken, but an error was found....dispose the reference
+    #ifndef EXCLUDE_MIXER
         try {
             releaseComponents();
         }catch (...) { //dispose silently...if an error...no matter
         }
+    #endif
         p_loDev= Receivers::LocalOscillator::_nil();
     }
     if (CORBA::is_nil(p_loDev)) {  //only if it has not been retrieved yet
         try {
+        #ifndef EXCLUDE_MIXER
             p_loDev= m_services->getComponent<Receivers::LocalOscillator>((const char*)p_lo_name);
             ACS_LOG(LM_FULL_INFO,"CCore::loadLocalOscillator()",(LM_INFO,"LOCAL_OSCILLATOR_OBTAINED"));
+        #endif
             m_mixer_fault= false;
         }
         catch (maciErrType::CannotGetComponentExImpl& ex) {
@@ -190,8 +205,9 @@ void MixerOperator::loadDevice(Receivers::LocalOscillator_var p_loDev, const cha
 void MixerOperator::releaseDevice(Receivers::LocalOscillator_var p_loDev,
                     					const char * p_lo_name)
 {
+	#ifndef EXCLUDE_MIXER
     if (!CORBA::is_nil(p_loDev)) {
-        try {
+        try {        		
             m_services->releaseComponent((const char*)p_lo_name);
         }
         catch (maciErrType::CannotReleaseComponentExImpl& ex) {
@@ -206,6 +222,10 @@ void MixerOperator::releaseDevice(Receivers::LocalOscillator_var p_loDev,
         p_loDev= Receivers::LocalOscillator::_nil();
         m_init_ok= false;
     }
+    #else
+    p_loDev= Receivers::LocalOscillator::_nil();
+    m_init_ok= false;
+    #endif
 }
 
 

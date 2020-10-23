@@ -47,6 +47,9 @@ void CMonitorThread::onStart()
 
  void CMonitorThread::runLoop()
 {
+	#ifdef EXCLUDE_MONITOR
+	#warning "Excluding monitor thread"
+	#else	
 	 m_core->updateComponent();
 	 switch( m_currentStage) {
 	 	 case VACUUM: {
@@ -173,4 +176,5 @@ void CMonitorThread::onStart()
 	 		break;
 	 	}
 	 }
+	 #endif
 }

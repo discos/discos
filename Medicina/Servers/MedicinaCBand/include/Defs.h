@@ -22,9 +22,11 @@
 
 #ifdef MED_DEBUG_LVL
 #include <cstdio>
-#define MED_TRACE() do { fprintf(stderr, "%s:%d:%s() \n", __FILE__, __LINE__, __func__); } while(0); 
+#define MED_TRACE() do { fprintf(stderr, "MED_LOG %s:%d:%s() \n", __FILE__, __LINE__, __func__); } while(0);
+#define MED_TRACE_MSG(msg) do { fprintf(stderr, "MED_LOG %s:%d:%s() - %s \n", __FILE__, __LINE__, __func__, msg); } while(0); 
 #else
-#define MED_TRACE() 
+#define MED_TRACE()
+#define MED_TRACE_MSG(msg) do { } while(0); 
 #endif
 
 /*
