@@ -177,7 +177,12 @@ public:
 	/**
 	 * @return mnemonic of the working mode of the receiver
 	 */
-	inline const IRA::CString& getSetupMode()  { return m_conf_hnd.getCurrentSetup().m_name; }
+	inline const IRA::CString& getSetupMode()  { return m_conf_hnd.getCurrentSetup().m_name; }	
+
+	/**
+	* @brief Getter whole current setup
+	*/
+	ReceiverConfHandler::ConfigurationSetup getCurrentSetup(){ return m_conf_hnd.getCurrentSetup(); }
 
 	/**
 	 * @return the lower limit of the RF coming from the receiver (MHz)
@@ -187,17 +192,23 @@ public:
 	/**
 	 * @return the upper  limit of the RF coming from the receiver (MHz)
 	 */
-	inline double const * const  getRFMax()  { return &m_conf_hnd.getCurrentSetup().m_RFMax[0]; }
+	inline double const * const  getRFMax()  { 
+			return &m_conf_hnd.getCurrentSetup().m_RFMax[0];
+			 }
 
 	/**
 	 * @return the start frequency of the IF coming from the receiver (MHz)
 	 */
-	inline double const * const  getIFMin()  { return &m_conf_hnd.getCurrentSetup().m_IFMin[0]; }
+	inline double const * const  getIFMin()  { 
+			return &m_conf_hnd.getCurrentSetup().m_IFMin[0];
+			 }
 
 	/**
 	 * @return the bandwidth of the IF coming from the receiver (MHz)
 	 */
-	inline double const * const  getIFBandwidth() { return  &m_conf_hnd.getCurrentSetup().m_IFBandwidth[0]; }
+	inline double const * const  getIFBandwidth() { 
+		return  &m_conf_hnd.getCurrentSetup().m_IFBandwidth[0];
+		 }
 
 	/**
 	 * @return the number of IF chains for each feed

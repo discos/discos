@@ -1,5 +1,6 @@
 #include "ComponentCore.h"
 #include "Commons.h"
+#include "ReceiverConfHandler.h"
 #include <LogFilter.h>
 
 _IRA_LOGFILTER_IMPORT;
@@ -81,25 +82,39 @@ void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ModeErro
         ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl,ReceiversErrors::NoRemoteControlErrorExImpl,
         ReceiversErrors::ReceiverControlBoardErrorExImpl)
 {
-	MED_TRACE();
+	MED_TRACE_MSG(" IN ");
     /* activate mode */
     baci::ThreadSyncGuard guard(&m_mutex);
-    bool l_res= m_configuration.m_conf_hnd.setMode(mode);
+    bool l_res= m_configuration.m_conf_hnd.setConfiguration(mode);
     if (! l_res){
+    		MED_TRACE_MSG(" EXC set mode");
         _EXCPT(ReceiversErrors::ModeErrorExImpl,impl,"CComponentErrors::setMode()");
         throw impl;
     }    
     guard.release();
+	 MED_TRACE_MSG(" ASK IFs ");
     /* For every feed ( L R for med C) populate core member  
      * arrays eg bandwidth polarization.. */
-    m_startFreq.length(m_configuration.getIFs());
-    m_bandwidth.length(m_configuration.getIFs());
-    m_polarization.length(m_configuration.getIFs());
-    for (WORD i=0;i<m_configuration.getIFs();i++) {
-        m_startFreq[i]=m_configuration.getIFMin()[i];
-        m_bandwidth[i]=m_configuration.getIFBandwidth()[i];
-        m_polarization[i]=(long)m_configuration.getPolarizations()[i];
-        m_localOscillatorValue[i]=m_configuration.getDefaultLO()[i];
+    ReceiverConfHandler::ConfigurationSetup l_setup= m_configuration.getCurrentSetup();	   
+    m_startFreq.length(l_setup.m_IFs);
+    m_bandwidth.length(l_setup.m_IFs);
+    m_polarization.length(l_setup.m_IFs);
+    
+    MED_TRACE_FMT("IFMin len %d\n",l_setup.m_IFMin.size());
+	 MED_TRACE_FMT("IFBandwidth len %d\n",l_setup.m_IFBandwidth.size());
+	 MED_TRACE_FMT("Polar. len %d\n",l_setup.m_polarizations.size());
+    MED_TRACE_FMT("Default LO len %d\n",l_setup.m_defaultLO.size());
+
+    try{
+    for (WORD i=0; i < l_setup.m_IFs; i++) {
+    	  MED_TRACE_MSG(" SET PARAMS IF ");
+        m_startFreq[i]=l_setup.m_IFMin[i];
+        m_bandwidth[i]=l_setup.m_IFBandwidth[i];
+        m_polarization[i]=(long)l_setup.m_polarizations[i];
+        m_localOscillatorValue[i]=l_setup.m_defaultLO[i];
+    }
+    }catch(...){
+    	MED_TRACE_MSG(" EXC SET IFS ");
     }
     // Basic operations
     lnaOn(); // throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
@@ -107,15 +122,17 @@ void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ModeErro
     // Remote control check
     bool answer;
     try {
+    		MED_TRACE_MSG(" CHECK LOCAL REMOTE ");
         answer=m_control->isRemoteOn();
     }
     catch (IRA::ReceiverControlEx& ex) {
+			MED_TRACE_MSG(" LOCAL REMOTE EXC");
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::activate()");
         impl.setDetails(ex.what().c_str());
         setStatusBit(CONNECTIONERROR);
         throw impl;
     }
-    if (answer) {
+    if (answer) {			
         _IRA_LOGFILTER_LOG(LM_NOTICE, "CComponentCore::activate()", "RECEIVER_COMMUNICATION_MODE_REMOTE");
         clearStatusBit(LOCAL);
     }
@@ -123,7 +140,7 @@ void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ModeErro
         _IRA_LOGFILTER_LOG(LM_NOTICE, "CComponentCore::activate()", "RECEIVER_COMMUNICATION_MODE_LOCAL");
         setStatusBit(LOCAL);
     }
-    MED_TRACE();
+    MED_TRACE_MSG(" OUT ");
 }
 
 
@@ -178,20 +195,38 @@ void CComponentCore::setMode(const char * mode) throw (ReceiversErrors::ModeErro
     cmdMode.MakeUpper();        
     bool l_res= m_configuration.m_conf_hnd.setMode(mode);
     if (!l_res) {
+			MED_TRACE_MSG(" EXCP ");
         _EXCPT(ReceiversErrors::ModeErrorExImpl,impl,"CComponentErrors::setMode()");
         throw impl;
-    }
-    // 
-    for (WORD i=0;i<m_configuration.getIFs();i++) {
-        m_startFreq[i]=m_configuration.getIFMin()[i];
-        m_bandwidth[i]=m_configuration.getIFBandwidth()[i];
-        m_polarization[i]=(long)m_configuration.getPolarizations()[i];
+    }    	 
+	 ReceiverConfHandler::ConfigurationSetup l_setup= m_configuration.getCurrentSetup();	  	 	 
+	 /**/
+	 try{
+	 	MED_TRACE_FMT("Len IFMin %d", l_setup.m_IFBandwidth.size());	 	 	
+	    for (int i=0; i < l_setup.m_IFs ;i++) {
+	    	 #ifdef MED_DEBUG_LVL
+	    	  fprintf(stderr,"IFMin %f\n",l_setup.m_IFMin[i]);
+	    	  fprintf(stderr,"IFBandwidth %f\n",l_setup.m_IFBandwidth[i]);			  
+			  fprintf(stderr,"IFBandwidth %d\n",l_setup.m_polarizations[i]);
+			 #endif   	     
+   	     m_startFreq[i]= l_setup.m_IFMin[i];			  
+      	  m_bandwidth[i]= l_setup.m_IFBandwidth[i];			  
+      	  m_polarization[i]= (long)l_setup.m_polarizations[i];        
+    	}
+    }catch(...){
+    	MED_TRACE_MSG(" EXC 1 ");	
     }
     // the set the default LO for the default LO for the selected mode.....
     ACS::doubleSeq lo;
-    lo.length(m_configuration.getIFs());
-    for (WORD i=0;i<m_configuration.getIFs();i++) {
-        lo[i]=m_configuration.getDefaultLO()[i];
+    MED_TRACE_MSG(" LO ");
+    lo.length(l_setup.m_IFs);
+    try{
+    	for (WORD i=0; i < l_setup.m_IFs; i++) {
+    		MED_TRACE_MSG(" LO DEFAULT ");
+        	lo[i]= l_setup.m_defaultLO[i];
+    	}
+  	 }catch(...){
+    	MED_TRACE_MSG(" EXC 2 ");	
     }
     setLO(lo); // throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl)    
     m_calDiode=false;
@@ -199,8 +234,7 @@ void CComponentCore::setMode(const char * mode) throw (ReceiversErrors::ModeErro
 	MED_TRACE_MSG(" OUT ");
 }
 
-const IRA::CString CComponentCore::getSetupMode()
-{
+const IRA::CString CComponentCore::getSetupMode(){
     baci::ThreadSyncGuard guard(&m_mutex);
     return m_configuration.m_conf_hnd.getActualConfStr();
 }
@@ -211,17 +245,19 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo)
          throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
         ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl)
 {    
+	MED_TRACE_MSG(" IN ");	
     baci::ThreadSyncGuard guard(&m_mutex);
     m_mixer.setValue(lo);
-    /** @todo  Bandwidth update, check it */
+    ReceiverConfHandler::ConfigurationSetup l_setup= m_configuration.getCurrentSetup();	      
     double l_lo_value= m_mixer.getValue();    
-    for (WORD i=0; i < m_configuration.getIFs(); i++) {
-        m_bandwidth[i]= m_configuration.getRFMax()[i]-( m_startFreq[i] + l_lo_value );
+    for (WORD i=0; i < l_setup.m_IFs; i++) {
+        m_bandwidth[i]= l_setup.m_RFMax[i]-( m_startFreq[i] + l_lo_value );
         // the if bandwidth could never be larger than the max IF bandwidth:
-        if (m_bandwidth[i] > m_configuration.getIFBandwidth()[i])
-            m_bandwidth[i]= m_configuration.getIFBandwidth()[i];
+        if (m_bandwidth[i] > l_setup.m_IFBandwidth[i])
+            m_bandwidth[i]= l_setup.m_IFBandwidth[i];
     }
     ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"LOCAL_OSCILLATOR %lf",l_lo_value));
+	MED_TRACE_MSG(" OUT ");
 }
 
 void CComponentCore::getLO(ACS::doubleSeq& lo)

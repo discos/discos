@@ -15,8 +15,8 @@ ReceiverConfHandler::ReceiverConfHandler()
     /* Conf - names */
     m_conf_name[CCC_Normal]= "CCCNormal";
     m_conf_name[CCC_Narrow]= "CCCNarrow";
-    m_conf_name[CHC_Normal]= "chcNormal";
-    m_conf_name[CHC_Narrow]= "chcNarrow";
+    m_conf_name[CHC_Normal]= "CHCNormal";
+    m_conf_name[CHC_Narrow]= "CHCNarrow";
     /* Filling partial conf definitions */
     m_receiver_name[CCC]= "CCC";
     m_receiver_name[CHC]= "CHC";
@@ -100,11 +100,13 @@ ReceiverConfHandler::~ReceiverConfHandler()
 /* *** SETTERS *** */
 
 bool ReceiverConfHandler::setConfiguration(ConfigurationName p_conf_name){
-	MED_TRACE();
+	MED_TRACE_MSG(" IN ");
     if (findConfiguration(p_conf_name)){
         m_current_conf= m_available_current[p_conf_name];
+        MED_TRACE_MSG(" OUT TRUE ");
         return true;
     }
+    MED_TRACE_MSG(" OUT ");
     return false;
 }
 
@@ -122,6 +124,23 @@ bool ReceiverConfHandler::setConfigurationSetup(ConfigurationName p_conf_name,
 {
     if (findConfiguration(p_conf_name)){
         m_conf_data[p_conf_name]= p_setup;
+        #ifdef MED_DEBUG_LVL
+        fprintf(stderr, " -- SETUP START -- \n");
+        fprintf(stderr, " ifmin[0] %d \n", p_setup.m_IFs);
+        for (int i=0; i < p_setup.m_IFs; i++){
+        		fprintf(stderr, "Pol[%d] %d \n",i, (long)p_setup.m_polarizations[i]);
+        		fprintf(stderr, "IFMin[%d] %f \n",i, p_setup.m_IFMin[i]);				
+				//fprintf(stderr, "RFMin[%d] %d \n",i, p_setup.m_RFMin[i]);
+				//fprintf(stderr, "IFMax[%d] %d \n",i, p_setup.m_RFMax[i]);
+				fprintf(stderr, "Bw[%d] %f \n",i, p_setup.m_IFBandwidth[i]);
+				//fprintf(stderr, "defaultLO[%d] %d \n",i, p_setup.m_defaultLO[i]);
+				//fprintf(stderr, "LOMin[%d] %d \n",i, p_setup.m_LOMin[i]);
+				//fprintf(stderr, "LOMax[%d] %d \n",i, p_setup.m_LOMax[i]);
+				
+        }
+        fprintf(stderr, " -- SETUP END -- \n");
+        #endif
+        /**/
         return true;
     }    
     return false;
@@ -197,31 +216,38 @@ bool ReceiverConfHandler::setMode(IRA::CString p_mode_name)
 	 MED_TRACE_MSG(" IN ");    
     ModeName l_mode_enum;
     bool l_ret= findModeFromString(p_mode_name, l_mode_enum);
-    if (!l_ret)
-        return false;    
+    if (!l_ret){
+    		MED_TRACE_MSG(" OUT FALSE ");
+        return false;
+        }    
 	MED_TRACE_MSG(" SWITCH ");
     switch (l_mode_enum){
         case Normal:
             if (m_current_conf.m_receiver == CCC){
                 setConfiguration(CCC_Normal);
+					 MED_TRACE_MSG(" OUT CCC NORMAL TRUE ");
                 return true;
             }
             if (m_current_conf.m_receiver == CHC){
                 setConfiguration(CHC_Normal);
+					 MED_TRACE_MSG(" OUT CHC NORMAL TRUE ");
                 return true;
             }
         break;           
         case Narrow:
             if (m_current_conf.m_receiver == CCC){
                 setConfiguration(CCC_Narrow);
+                MED_TRACE_MSG(" OUT CCC NARROW TRUE ");
                 return true;
             }
             if (m_current_conf.m_receiver == CHC){
                 setConfiguration(CHC_Narrow);
+					 MED_TRACE_MSG(" OUT CHC NARROW TRUE ");
                 return true;
             }
         break;           
     }        
+    MED_TRACE_MSG(" OUT FALSE ");
     return false;
 }
 
@@ -248,11 +274,14 @@ ReceiverConfHandler::ConfigurationName ReceiverConfHandler::getActualConf(){
 }
 
 ReceiverConfHandler::ConfigurationSetup ReceiverConfHandler::getCurrentSetup()  {
+	MED_TRACE_MSG(" IN ");    
     ReceiverConfHandler::ConfigurationName l_name_enum = m_current_conf.m_name;
     if (!findConfiguration(l_name_enum)){    
         setConfiguration(CCC_Normal);
+        MED_TRACE_MSG(" OUT DEFAULT ");
         return m_conf_data[CCC_Normal];
     }
+	 MED_TRACE_MSG(" OUT ");
     return m_conf_data[l_name_enum];
 }
 
@@ -329,13 +358,16 @@ bool ReceiverConfHandler::findEnumFromString(IRA::CString & p_conf_name,
 bool ReceiverConfHandler::findModeFromString(IRA::CString & p_mode_name,
                              				ModeName & p_mode_enum) const
 {
+	MED_TRACE_FMT(" Asking for mode string %s\n", p_mode_name);
     std::map<ReceiverConfHandler::ModeName, IRA::CString>::const_iterator l_it;
     for (l_it= m_mode_name.begin(); l_it != m_mode_name.end(); ++l_it ){
         if (l_it->second == p_mode_name){
+        		MED_TRACE_MSG(" CONF FOUND ");
             p_mode_enum= l_it->first;
             return true;
         }
     }
+	MED_TRACE_MSG(" CONF NOT FOUND ");
     return false;
 }                             
 
