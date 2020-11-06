@@ -23,6 +23,12 @@ MedicinaCBandImpl::MedicinaCBandImpl(const ACE_CString &CompName,maci::Container
 	m_ppolarization(this),
 	m_pstatus(this),
 	m_pvacuum(this),	
+	m_pVd_1(this),
+	m_pVd_2(this),
+	m_pId_1(this),
+	m_pId_2(this),
+	m_pVg_1(this),
+	m_pVg_2(this),
 	m_pmode(this),
 	m_preceiverStatus(this)
 {	
@@ -64,7 +70,19 @@ void MedicinaCBandImpl::execute() throw (ACSErr::ACSbaseExImpl)
 		m_pbandWidth=new baci::ROdoubleSeq(getContainerServices()->getName()+":bandWidth",getComponent(),new DevIOBandWidth(&m_core),true);
 		m_pIFs=new baci::ROlong(getContainerServices()->getName()+":IFs",getComponent());
 		m_pfeeds=new baci::ROlong(getContainerServices()->getName()+":feeds",getComponent());
-		m_pvacuum=new baci::ROdouble(getContainerServices()->getName()+":vacuum",getComponent(),new DevIOVacuum(&m_core),true);				
+		m_pvacuum=new baci::ROdouble(getContainerServices()->getName()+":vacuum",getComponent(),new DevIOVacuum(&m_core),true);	
+		m_pVd_1=new baci::ROdouble(getContainerServices()->getName()+":Vd_1",getComponent(),
+				new DevIOLNAControls(&m_core,IRA::ReceiverControl::DRAIN_VOLTAGE,0),true);
+		m_pVd_2=new baci::ROdouble(getContainerServices()->getName()+":Vd_2",getComponent(),
+				new DevIOLNAControls(&m_core,IRA::ReceiverControl::DRAIN_VOLTAGE,1),true);
+		m_pId_1=new baci::ROdouble(getContainerServices()->getName()+":Id_1",getComponent(),
+				new DevIOLNAControls(&m_core,IRA::ReceiverControl::DRAIN_CURRENT,0),true);
+		m_pId_2=new baci::ROdouble(getContainerServices()->getName()+":Id_2",getComponent(),
+				new DevIOLNAControls(&m_core,IRA::ReceiverControl::DRAIN_CURRENT,1),true);
+		m_pVg_1=new baci::ROdouble(getContainerServices()->getName()+":Vg_1",getComponent(),
+				new DevIOLNAControls(&m_core,IRA::ReceiverControl::GATE_VOLTAGE,0),true);
+		m_pVg_2=new baci::ROdouble(getContainerServices()->getName()+":Vg_2",getComponent(),
+				new DevIOLNAControls(&m_core,IRA::ReceiverControl::GATE_VOLTAGE,1),true);			
 				// new DevIOEnvTemperature(&m_core),true); // Is there a sensor?
 		m_pstatus=new baci::ROpattern(getContainerServices()->getName()+":status",getComponent(),
 				new DevIOStatus(&m_core),true);
@@ -480,6 +498,50 @@ void MedicinaCBandImpl::turnAntennaUnitOff() throw (CORBA::SystemException,Compo
 	ACS_LOG(LM_FULL_INFO,"MedicinaCBandImpl::turnAntennaUnitOff()",(LM_NOTICE,"CBAND_ANTENNA_UNIT_OFF"));
 }
 
+
+void MedicinaCBandImpl::turnVacuumSensorOn() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+{
+	try {
+		/** @todo to be done */
+		//m_core.vacuumSensorOn();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"MedicinaCBandImpl::turnVacuumSensorOn()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
+}
+
+void MedicinaCBandImpl::turnVacuumSensorOff() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+{
+	try {
+		/** @todo to be done */
+		//m_core.vacuumSensorOff();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"MedicinaCBandImpl::turnVacuumSensorOff()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
+}
+
+
 _PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,ACS::ROdoubleSeq,m_plocalOscillator,LO);
 _PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,ACS::ROpattern,m_pstatus,status);
 _PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,ACS::ROlongSeq,m_ppolarization,polarization);
@@ -489,6 +551,12 @@ _PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,ACS::ROdoubleSeq,m_pbandWidth,bandWidt
 _PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,ACS::ROdoubleSeq,m_pinitialFrequency,initialFrequency);
 _PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,ACS::ROdouble,m_pvacuum,vacuum);
 _PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,ACS::ROstring,m_pmode,mode);
+_PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,ACS::ROdouble,m_pVd_1,Vd_1);
+_PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,ACS::ROdouble,m_pVd_2,Vd_2);
+_PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,ACS::ROdouble,m_pId_1,Id_1);
+_PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,ACS::ROdouble,m_pId_2,Id_2);
+_PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,ACS::ROdouble,m_pVg_1,Vg_1);
+_PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,ACS::ROdouble,m_pVg_2,Vg_2);
 _PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,Management::ROTSystemStatus,m_preceiverStatus,receiverStatus);
 
 

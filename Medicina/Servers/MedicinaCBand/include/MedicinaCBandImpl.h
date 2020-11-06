@@ -351,6 +351,123 @@ public:
 	*/
 	virtual Management::ROTSystemStatus_ptr receiverStatus() throw (CORBA::SystemException);
 
+	/* LNA */
+
+	/**
+	 * Returns a reference to the Vd_1 property implementation of the IDL interface.
+	 * @return pointer to read-only double property
+	*/
+    virtual ACS::ROdouble_ptr Vd_1() throw (CORBA::SystemException);
+
+	/**
+	 * Returns a reference to the Vd_2 property implementation of the IDL interface.
+	 * @return pointer to read-only double property
+	*/
+    virtual ACS::ROdouble_ptr Vd_2() throw (CORBA::SystemException);
+
+	/**
+	 * Returns a reference to the Id_1 property implementation of the IDL interface.
+	 * @return pointer to read-only double property
+	*/
+    virtual ACS::ROdouble_ptr Id_1() throw (CORBA::SystemException);
+
+	/**
+	 * Returns a reference to the Id_2 property implementation of the IDL interface.
+	 * @return pointer to read-only double property
+	*/
+    virtual ACS::ROdouble_ptr Id_2() throw (CORBA::SystemException);
+
+	/**
+	 * Returns a reference to the Vg_1 property implementation of the IDL interface.
+	 * @return pointer to read-only double property
+	*/
+    virtual ACS::ROdouble_ptr Vg_1() throw (CORBA::SystemException);
+
+	/**
+	 * Returns a reference to the Vg_2 property implementation of the IDL interface.
+	 * @return pointer to read-only double property
+	*/
+    virtual ACS::ROdouble_ptr Vg_2() throw (CORBA::SystemException);
+
+	/* VACUUM */
+    
+    /**
+     * it turns the vacuum sensor on
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ReceiversErrors::ReceiversErrorsEx
+     */
+    virtual void turnVacuumSensorOn() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+    /**
+     * it turns the vacuum sensor on
+	 * @throw CORBA::SystemException
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ReceiversErrors::ReceiversErrorsEx
+     */
+    virtual void turnVacuumSensorOff() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+    
+    /**
+    * @brief to be done
+    */
+    virtual void turnVacuumPumpOn(const char *) throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx){}
+
+	/**
+    * @brief to be done
+    */
+    virtual void turnVacuumPumpOff() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx){}
+    
+    /**
+    * @brief to be done
+    */
+    virtual void openVacuumValve(const char *, CORBA::Double) throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx){}
+
+	/**
+    * @brief to be done
+    */
+    virtual void turnDewarHeatResistorsOn() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx){}
+    
+	/**
+    * @brief to be done
+    */
+    virtual void turnDewarHeatResistorsOff() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx){}    
+
+
+	/**
+    * @brief to be done
+    */
+	 virtual void TurnColdHeadOn() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx){}
+
+	/**
+    * @brief to be done
+    */
+	 virtual void TurnColdHeadOff() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx){}
+	 
+	/**
+    * @brief to be done
+    */
+	 virtual ACS::ROpattern* vacuumStatus()throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx) {return NULL;}
+	 
+	/**
+    * @brief to be done
+    */
+	virtual ACS::ROdouble* environmentTemperature() {return NULL;}
+
+	/**
+    * @brief to be done
+    */
+	virtual ACS::ROdouble* cryoTemperatureShield() {return NULL;}
+
+	/**
+    * @brief to be done
+    */
+	virtual ACS::ROdouble* cryoTemperatureLNA() {return NULL;}
+	
+	/**
+    * @brief to be done
+    */
+	virtual ACS::ROpattern* cryoStatus() {return NULL;}	
+	
 private:
 	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_plocalOscillator;
 	baci::SmartPropertyPointer<baci::ROlong> m_pfeeds;
@@ -361,6 +478,12 @@ private:
 	baci::SmartPropertyPointer<baci::ROpattern> m_pstatus;
 	baci::SmartPropertyPointer<baci::ROdouble> m_pvacuum;		
 	baci::SmartPropertyPointer<baci::ROstring> m_pmode;
+	baci::SmartPropertyPointer<baci::ROdouble> m_pVd_1;
+	baci::SmartPropertyPointer<baci::ROdouble> m_pVd_2;
+	baci::SmartPropertyPointer<baci::ROdouble> m_pId_1;
+	baci::SmartPropertyPointer<baci::ROdouble> m_pId_2;
+	baci::SmartPropertyPointer<baci::ROdouble> m_pVg_1;
+	baci::SmartPropertyPointer<baci::ROdouble> m_pVg_2;
 	baci::SmartPropertyPointer < ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus), POA_Management::ROTSystemStatus> > m_preceiverStatus;
 
 	CComponentCore m_core;
