@@ -55,7 +55,12 @@ public:
 	*/
 	CORBA::Double read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
 	{
-		m_val=m_pCore->getFetValue(m_control,m_ifs);
+		try{
+			m_val=m_pCore->getFetValue(m_control,m_ifs);
+		} catch (...) {
+      timestamp=getTimeStamp();  //Completion time
+      return -1.0;  
+    }
 		timestamp=getTimeStamp();  //Completion time
 		return m_val;
 	}

@@ -93,11 +93,13 @@ void MedicinaCBandImpl::execute() throw (ACSErr::ACSbaseExImpl)
 		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"MedicinaCBandImpl::initialize()");
 		throw dummy;
 	}
-
+	MED_TRACE();
 	// write some fixed values
 	m_pfeeds->getDevIO()->write(m_core.getFeeds(),timestamp);
 	m_pIFs->getDevIO()->write(m_core.getIFs(),timestamp);
 	m_core.setVacuumDefault(m_pvacuum->default_value());
+	
+	MED_TRACE();
 
 	CComponentCore *temp=&m_core;
 	try {
@@ -110,9 +112,15 @@ void MedicinaCBandImpl::execute() throw (ACSErr::ACSbaseExImpl)
 	}
 	catch (...) {
 		_THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"MedicinaCBandImpl::execute()");
+
 	}
+	MED_TRACE();
+	
 	m_monitor->setLNASamplingTime(config->getLNASamplingTime());
 	m_monitor->resume();
+
+	MED_TRACE();
+
 	ACS_LOG(LM_FULL_INFO,"MedicinaCBandImpl::execute()",(LM_INFO,"WATCH_DOG_SPAWNED"));
 	try {
 		startPropertiesMonitoring();

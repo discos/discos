@@ -55,6 +55,18 @@
 			<xs:element name="vacuum" type="baci:ROdouble"/>
 			<!-- Subsystem status -->
 			<xs:element name="status" type="MedicinaCBandStatusType" />	
+			<!-- Drain voltage for IF1 (ROdouble) -->
+			<xs:element name="Vd_1" type="baci:ROdouble"/>
+			<!-- Drain voltage for IF2 (ROdouble) -->
+			<xs:element name="Vd_2" type="baci:ROdouble"/>
+			<!-- Drain current for IF1 (ROdouble) -->
+			<xs:element name="Id_1" type="baci:ROdouble"/>
+			<!-- Drain current for IF2 (ROdouble) -->
+			<xs:element name="Id_2" type="baci:ROdouble"/>
+			<!-- Gate voltage for IF1 (ROdouble) -->
+			<xs:element name="Vg_1" type="baci:ROdouble"/>
+			<!-- Gate voltage for IF2 (ROdouble) -->
+			<xs:element name="Vg_2" type="baci:ROdouble"/>
 			<xs:element name="receiverStatus" type="mng:SystemStatusType" />
 		</xs:sequence>
 		<xs:attribute name="DewarIPAddress" type="xs:string" use="required"/>
