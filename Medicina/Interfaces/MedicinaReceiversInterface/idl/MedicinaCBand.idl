@@ -118,7 +118,7 @@ module Receivers {
     		/**
 			* Vacuum pump stop request.
 		   */
-			void turnVacuumPumpOn() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx); 
+			void turnVacuumPumpOff() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx); 
 				
 			/**
 			* Vacuum valve opening, it can act in two different ways:
