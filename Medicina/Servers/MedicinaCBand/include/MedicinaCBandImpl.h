@@ -408,65 +408,66 @@ public:
     virtual void turnVacuumSensorOff() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
     
     /**
-    * @brief to be done
+    * @brief Vacuum pump on
     */
-    virtual void turnVacuumPumpOn(const char *) throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx){}
+    virtual void turnVacuumPumpOn(const char *) throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 	/**
-    * @brief to be done
+    * @brief Vacuum pump off
     */
-    virtual void turnVacuumPumpOff() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx){}
+    virtual void turnVacuumPumpOff() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
     
     /**
-    * @brief to be done
+    * @brief Vacuum valve opening
     */
-    virtual void openVacuumValve(const char *, CORBA::Double) throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx){}
+    virtual void openVacuumValve(const char *, CORBA::Double) throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 	/**
-    * @brief to be done
+    * @brief Heat resistors on
     */
-    virtual void turnDewarHeatResistorsOn() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx){}
+    virtual void turnDewarHeatResistorsOn() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
     
 	/**
-    * @brief to be done
+    * @brief Heat resistor off
     */
-    virtual void turnDewarHeatResistorsOff() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx){}    
+    virtual void turnDewarHeatResistorsOff() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);    
 
 
 	/**
-    * @brief to be done
+    * @brief Cold head on
     */
-	 virtual void TurnColdHeadOn() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx){}
+	 virtual void turnColdHeadOn() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 	/**
-    * @brief to be done
+    * @brief Cold head off
     */
-	 virtual void TurnColdHeadOff() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx){}
-	 
-	/**
-    * @brief to be done
-    */
-	 virtual ACS::ROpattern* vacuumStatus()throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx) {return NULL;}
-	 
-	/**
-    * @brief to be done
-    */
-	virtual ACS::ROdouble* environmentTemperature() {return NULL;}
-
-	/**
-    * @brief to be done
-    */
-	virtual ACS::ROdouble* cryoTemperatureShield() {return NULL;}
-
-	/**
-    * @brief to be done
-    */
-	virtual ACS::ROdouble* cryoTemperatureLNA() {return NULL;}
+	 virtual void turnColdHeadOff() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 	
 	/**
-    * @brief to be done
+    * @brief Property getter
     */
-	virtual ACS::ROpattern* cryoStatus() {return NULL;}	
+	virtual ACS::ROpattern* cryoStatus() throw  (CORBA::SystemException);	
+	 
+	/**
+    * @brief Property getter
+    */
+	 virtual ACS::ROpattern* vacuumStatus()throw  (CORBA::SystemException);
+	 
+	/**
+    * @brief Property getter
+    */
+	virtual ACS::ROdouble* environmentTemperature() throw  (CORBA::SystemException);
+
+	/**
+    * @brief Protperty getter
+    */
+	virtual ACS::ROdouble* cryoTemperatureShield() throw  (CORBA::SystemException);
+
+	/**
+    * @brief Property getter
+    */
+	virtual ACS::ROdouble* cryoTemperatureLNA()throw  (CORBA::SystemException);
+		
 	
 private:
 	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_plocalOscillator;
@@ -484,8 +485,13 @@ private:
 	baci::SmartPropertyPointer<baci::ROdouble> m_pId_2;
 	baci::SmartPropertyPointer<baci::ROdouble> m_pVg_1;
 	baci::SmartPropertyPointer<baci::ROdouble> m_pVg_2;
+	baci::SmartPropertyPointer<baci::ROpattern> m_vacuum_status;
+	baci::SmartPropertyPointer<baci::ROpattern> m_cryo_status;	
+	baci::SmartPropertyPointer<baci::ROdouble> m_env_temp;
+	baci::SmartPropertyPointer<baci::ROdouble> m_shield_temp;	
+	baci::SmartPropertyPointer<baci::ROdouble> m_lna_temp;		
 	baci::SmartPropertyPointer < ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus), POA_Management::ROTSystemStatus> > m_preceiverStatus;
-
+	
 	CComponentCore m_core;
 	CMonitorThread *m_monitor;
 };

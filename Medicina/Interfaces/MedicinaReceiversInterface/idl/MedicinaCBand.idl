@@ -80,12 +80,12 @@ module Receivers {
 			/**
 			* Turns cold head on bringing down C Low receiver stage temperature.						 
 			*/
-			void TurnColdHeadOn() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+			void turnColdHeadOn() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 			/**
 			* Turns cold head off on C Low receiver stage.						 
 			*/
-			void TurnColdHeadOff() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+			void turnColdHeadOff() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 									
 			
 			/* **** VACUUM **** */

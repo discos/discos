@@ -688,7 +688,6 @@ void CComponentCore::getIFOutput(
     }
 }
 
-
 void CComponentCore::updateLNAControls() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
 {
     // not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
@@ -804,6 +803,42 @@ void CComponentCore::updateVacuum() throw (ReceiversErrors::ReceiverControlBoard
     clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
 }
 
+void CComponentCore::vacuumPumpOn() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+	if (checkStatusBit(LOCAL)) {
+        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::vacuumPumpOn()");
+        throw impl;
+    }
+    try {
+        m_control->setVacuumPumpOn();
+    }
+    catch (IRA::ReceiverControlEx& ex) {
+        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::vacuumPumpOn()");
+        impl.setDetails(ex.what().c_str());
+        setStatusBit(CONNECTIONERROR);
+        throw impl;
+    }
+    clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
+}
+
+void CComponentCore::vacuumPumpOff() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+	if (checkStatusBit(LOCAL)) {
+        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::vacuumPumpOff()");
+        throw impl;
+    }
+    try {
+        m_control->setVacuumPumpOff();
+    }
+    catch (IRA::ReceiverControlEx& ex) {
+        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::vacuumPumpOff()");
+        impl.setDetails(ex.what().c_str());
+        setStatusBit(CONNECTIONERROR);
+        throw impl;
+    }
+    clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
+}
+
 void CComponentCore::updateVacuumPump() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
 {
     bool answer;
@@ -826,6 +861,44 @@ void CComponentCore::updateVacuumPump() throw (ReceiversErrors::ReceiverControlB
     clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
 }
 
+void CComponentCore::openVacuumValve(const  char * p_mode, double p_delay) throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+	/**@todo il delay..*/
+	if (checkStatusBit(LOCAL)) {
+        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::openVacuumValve()");
+        throw impl;
+    }
+    try {
+        m_control->setVacuumValveOn();
+    }
+    catch (IRA::ReceiverControlEx& ex) {
+        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::openVacuumValve()");
+        impl.setDetails(ex.what().c_str());
+        setStatusBit(CONNECTIONERROR);
+        throw impl;
+    }
+    clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
+}
+
+void CComponentCore::closeVacuumValve() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+	/**@todo il delay..*/
+	if (checkStatusBit(LOCAL)) {
+        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::closeVacuumValve()");
+        throw impl;
+    }
+    try {
+        m_control->setVacuumValveOn();
+    }
+    catch (IRA::ReceiverControlEx& ex) {
+        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::closeVacuumValve()");
+        impl.setDetails(ex.what().c_str());
+        setStatusBit(CONNECTIONERROR);
+        throw impl;
+    }
+    clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
+}
+
 void CComponentCore::updateVacuumValve() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
 {
     bool answer;
@@ -841,6 +914,42 @@ void CComponentCore::updateVacuumValve() throw (ReceiversErrors::ReceiverControl
     }
     if (!answer) setStatusBit(VACUUMVALVEOPEN);
     else clearStatusBit(VACUUMVALVEOPEN);
+    clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
+}
+
+void CComponentCore::vacuumSensorOn() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+    if (checkStatusBit(LOCAL)) {
+        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::vacuumSensorOn()");
+        throw impl;
+    }
+    try {
+        m_control->setVacuumSensorOn();
+    }
+    catch (IRA::ReceiverControlEx& ex) {
+        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::vacuumSensorOn()");
+        impl.setDetails(ex.what().c_str());
+        setStatusBit(CONNECTIONERROR);
+        throw impl;
+    }
+    clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
+}
+
+void CComponentCore::vacuumSensorOff() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+    if (checkStatusBit(LOCAL)) {
+        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::vacuumSensorOff()");
+        throw impl;
+    }
+    try {
+        m_control->setVacuumSensorOff();
+    }
+    catch (IRA::ReceiverControlEx& ex) {
+        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::vacuumSensorOff()");
+        impl.setDetails(ex.what().c_str());
+        setStatusBit(CONNECTIONERROR);
+        throw impl;
+    }
     clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
 }
 
@@ -896,7 +1005,41 @@ void CComponentCore::updateEnvironmentTemperature() throw (ReceiversErrors::Rece
     clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
 }
 
-/* *** LOCAL REMOTE  CONTROL*** */
+void CComponentCore::updateShieldTemperature() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+    // not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
+    try {
+        m_environmentTemperature.temperature = m_control->cryoTemperature(0,Helpers::voltage2Kelvin);
+        m_environmentTemperature.timestamp = getTimeStamp();
+    }
+    catch (IRA::ReceiverControlEx& ex) {
+        m_environmentTemperature.temperature = CEDUMMY;
+        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateShieldTemperature()");
+        impl.setDetails(ex.what().c_str());
+        setStatusBit(CONNECTIONERROR);
+        throw impl;
+    }
+    clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
+}
+
+void CComponentCore::updateLnaTemperature() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+    // not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
+    try {
+        m_environmentTemperature.temperature = m_control->cryoTemperature(1,Helpers::voltage2Kelvin);
+        m_environmentTemperature.timestamp = getTimeStamp();
+    }
+    catch (IRA::ReceiverControlEx& ex) {
+        m_environmentTemperature.temperature = CEDUMMY;
+        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateLnaTemperature()");
+        impl.setDetails(ex.what().c_str());
+        setStatusBit(CONNECTIONERROR);
+        throw impl;
+    }
+    clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
+}
+
+/* *** LOCAL REMOTE CONTROL*** */
 
 void CComponentCore::updateIsRemote() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
 {

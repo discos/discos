@@ -6,6 +6,9 @@
 #include "DevIOMode.h"
 #include "DevIOVacuum.h"
 #include "DevIOLNAControls.h"
+#include "DevIOEnvTemperature.h"
+#include "DevIOCryoTemperatureCoolHeadWindow.h"
+#include "DevIOCryoTemperatureLNA.h"
 #include "DevIOStatus.h"
 #include "DevIOComponentStatus.h"
 #include <cstdio>
@@ -29,6 +32,11 @@ MedicinaCBandImpl::MedicinaCBandImpl(const ACE_CString &CompName,maci::Container
 	m_pId_2(this),
 	m_pVg_1(this),
 	m_pVg_2(this),
+	m_vacuum_status(this),
+	m_cryo_status(this),
+	m_env_temp(this),
+	m_shield_temp(this),	
+	m_lna_temp(this),
 	m_pmode(this),
 	m_preceiverStatus(this)
 {	
@@ -82,8 +90,14 @@ void MedicinaCBandImpl::execute() throw (ACSErr::ACSbaseExImpl)
 		m_pVg_1=new baci::ROdouble(getContainerServices()->getName()+":Vg_1",getComponent(),
 				new DevIOLNAControls(&m_core,IRA::ReceiverControl::GATE_VOLTAGE,0),true);
 		m_pVg_2=new baci::ROdouble(getContainerServices()->getName()+":Vg_2",getComponent(),
-				new DevIOLNAControls(&m_core,IRA::ReceiverControl::GATE_VOLTAGE,1),true);			
-				// new DevIOEnvTemperature(&m_core),true); // Is there a sensor?
+				new DevIOLNAControls(&m_core,IRA::ReceiverControl::GATE_VOLTAGE,1),true);
+		/** @todo verificare match con i relativi dev/sensori */
+		m_env_temp=new baci::ROdouble(getContainerServices()->getName()+":environmentTemperature",getComponent());
+				// new DevIOEnvTemperature(&m_core),true); // Is there a sensor?									
+		m_lna_temp=new baci::ROdouble(getContainerServices()->getName()+":cryoTemperatureLNA",getComponent(),
+				new DevIOCryoTemperatureLNA(&m_core),true);
+		m_shield_temp =new baci::ROdouble(getContainerServices()->getName()+":cryoTemperatureCoolHeadWindow",getComponent(),
+				new DevIOCryoTemperatureCoolHeadWin(&m_core),true);
 		m_pstatus=new baci::ROpattern(getContainerServices()->getName()+":status",getComponent(),
 				new DevIOStatus(&m_core),true);
 		m_preceiverStatus=new ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus),POA_Management::ROTSystemStatus>
@@ -509,9 +523,8 @@ void MedicinaCBandImpl::turnAntennaUnitOff() throw (CORBA::SystemException,Compo
 
 void MedicinaCBandImpl::turnVacuumSensorOn() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
-	try {
-		/** @todo to be done */
-		//m_core.vacuumSensorOn();
+	try {		
+		m_core.vacuumSensorOn();
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -530,9 +543,8 @@ void MedicinaCBandImpl::turnVacuumSensorOn() throw  (CORBA::SystemException,Comp
 
 void MedicinaCBandImpl::turnVacuumSensorOff() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
-	try {
-		/** @todo to be done */
-		//m_core.vacuumSensorOff();
+	try {		
+		m_core.vacuumSensorOff();
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -549,6 +561,149 @@ void MedicinaCBandImpl::turnVacuumSensorOff() throw  (CORBA::SystemException,Com
 	}
 }
 
+void MedicinaCBandImpl::turnVacuumPumpOn(const char * p_mode) throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+{
+	try {		
+		m_core.vacuumPumpOn();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"MedicinaCBandImpl::turnVacuumSensorOn()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
+}
+
+void MedicinaCBandImpl::turnVacuumPumpOff() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+{
+	try {		
+		m_core.vacuumPumpOff();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"MedicinaCBandImpl::turnVacuumSensorOn()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
+}
+
+void MedicinaCBandImpl::openVacuumValve(const char * p_mode , CORBA::Double p_delay) throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+{
+	try {		
+		m_core.openVacuumValve(p_mode, p_delay);
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"MedicinaCBandImpl::turnVacuumSensorOn()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
+}
+
+void MedicinaCBandImpl::turnDewarHeatResistorsOn() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+{
+	try {
+		/** @todo */		
+		//m_core.turnDewarHeatResistorsOn();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"MedicinaCBandImpl::turnVacuumSensorOn()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
+}
+
+void MedicinaCBandImpl::turnDewarHeatResistorsOff() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+{
+	try {	
+		/** @todo */		
+		//_core.turnDewarHeatResistorsOff();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"MedicinaCBandImpl::turnVacuumSensorOn()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
+}
+
+void MedicinaCBandImpl::turnColdHeadOn() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+{
+	try {	
+			/** @todo */		
+		//m_core.turnColdHeadOn();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"MedicinaCBandImpl::turnVacuumSensorOn()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
+}
+
+void MedicinaCBandImpl::turnColdHeadOff() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+{
+	try {
+		/** @todo */		
+		//	m_core.turnColdHeadOff();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"MedicinaCBandImpl::turnVacuumSensorOn()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
+}
 
 _PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,ACS::ROdoubleSeq,m_plocalOscillator,LO);
 _PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,ACS::ROpattern,m_pstatus,status);
@@ -565,6 +720,12 @@ _PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,ACS::ROdouble,m_pId_1,Id_1);
 _PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,ACS::ROdouble,m_pId_2,Id_2);
 _PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,ACS::ROdouble,m_pVg_1,Vg_1);
 _PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,ACS::ROdouble,m_pVg_2,Vg_2);
+_PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,ACS::ROpattern,m_vacuum_status, vacuumStatus);
+_PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,ACS::ROpattern,m_cryo_status, cryoStatus);
+_PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,ACS::ROdouble,m_env_temp, environmentTemperature);
+_PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,ACS::ROdouble,m_shield_temp, cryoTemperatureShield);
+_PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,ACS::ROdouble,m_lna_temp, cryoTemperatureLNA);
+
 _PROPERTY_REFERENCE_CPP(MedicinaCBandImpl,Management::ROTSystemStatus,m_preceiverStatus,receiverStatus);
 
 

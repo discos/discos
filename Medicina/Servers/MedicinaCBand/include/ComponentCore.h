@@ -143,10 +143,9 @@ public:
      */
     void checkLocalOscillator() throw (ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntGetAttributeExImpl);
 
-
         /* *** IFs *** */
 
-        /**
+    /**
      * It is called to get the all the receiver output information in one call.
      * An output is identified by providing the feed and the IF identifier. It can process any number of requests at a time.
      * @param feeds is a list that stores the corresponding feed of the output we are asking for
@@ -289,17 +288,34 @@ public:
 
         /* *** VACUUM *** */
 
+     /**
+     * This is getter method. No need to make it thread safe......
+     * @return the current value of the vacuum in mbar
+     */
+    double  getVacuum() const { return m_vacuum; }
+
     /**
      * It reads and updates from the control board the current value of the vacuum
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
     void updateVacuum() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
 
+ 	 /**
+ 	 * @brief Turn on vacuum pump
+ 	 */	
+	 void vacuumPumpOn() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+
+	 /**
+ 	 * @brief Turn off vacuum pump
+ 	 */	
+	 void vacuumPumpOff() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+	 
     /**
      * It check if the vacuum pump is on and check is the status is fault or not (<i>VACUUMPUMPFAULT</i>)
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
     void updateVacuumPump() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+
 
     /**
      * It checks if the vacuum valve is opened or not
@@ -307,18 +323,32 @@ public:
      */
     void updateVacuumValve() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
 
-     /**
-     * This is getter method. No need to make it thread safe......
-     * @return the current value of the vacuum in mbar
-     */
-    double  getVacuum() const { return m_vacuum; }
-    
+	/**
+ 	 * @brief Turn on vacuum valve with delay
+ 	 * @todo check how it works
+ 	 */	
+	 void openVacuumValve(const char * p_mode, double p_delay) throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+	 
+	 /**
+	 * @brief Close vaccum valve
+	 */
+	 void closeVacuumValve() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+
     /**
      * Allows to set the "default_value" for the vacuum characteristic. In principle it is possible to read it directly from CDB, but I found it more
      * comfortable to get it directly from the characteristic itself.
      */
     inline void setVacuumDefault(const double& val) { m_vacuumDefault=val; }
-
+       
+     /**
+     * It turns on the sensor for vacuum measurement.
+     */
+    void vacuumSensorOn() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    
+    /**
+     * It turns off the sensor for vacuum measurement.
+     */
+    void vacuumSensorOff() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl);
 
         /* *** TEMPERATURE *** */        
    
@@ -328,12 +358,36 @@ public:
      */
     BoardValue getEnvironmentTemperature() const { return m_environmentTemperature; }
 
-
     /**
      * It reads and updates from the control board the current vertex temperature
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
     void updateEnvironmentTemperature() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+
+    /**
+     * This is getter method. No need to make it thread safe......
+     * @return the current value of the vertex temperature
+     */
+	BoardValue getShieldTemperature() const { return m_shieldTemperature; }
+
+	 /**
+     * It reads and updates from the control board the current shield temperature
+     * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
+     */
+    void updateShieldTemperature() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+
+/**
+     * This is getter method. No need to make it thread safe......
+     * @return the current value of the vertex temperature
+     */
+	BoardValue getLnaTemperature() const { return m_lnaTemperature; }
+
+	 /**
+     * It reads and updates from the control board the current shield temperature
+     * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
+     */
+    void updateLnaTemperature() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+
 
      /**
      * It checks if the cool head is turned on or not
@@ -405,13 +459,18 @@ private:
     IRA::CString m_setupMode;   /**< Setup mode string */
 
     MixerOperator m_mixer;  /**< LOs manager */
+    
+    bool m_calDiode;
 
     double m_vacuum;
-    BoardValue m_environmentTemperature;
     double m_vacuumDefault;
-    bool m_calDiode;
     
+    BoardValue m_environmentTemperature;
+    BoardValue m_shieldTemperature;
+    BoardValue m_lnaTemperature;
+        
     IRA::ReceiverControl::FetValues m_fetValues;
+    
     DWORD m_statusWord;    
     bool m_ioMarkError; /**< m_ioMarkError is a flag used to know if we already got an IO error. See mantis issue n.0000236 */
     Management::TSystemStatus m_componentStatus;

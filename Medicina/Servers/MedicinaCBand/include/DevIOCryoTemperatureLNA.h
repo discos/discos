@@ -12,6 +12,7 @@
 
 #include <baciDevIO.h>
 #include <IRA>
+#include "Commons.h"
 
 /**
  * This class is derived from template DevIO and it is used by the cryoTemparatureLNA  property of the  component.
@@ -54,7 +55,7 @@ public:
 	*/
 	CORBA::Double read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
 	{
-        CConfiguration::BoardValue result = m_pCore->getCryoLNA();
+        BoardValue result = m_pCore->getLnaTemperature();
         m_val = result.temperature;
         timestamp = result.timestamp;
 		return m_val;
