@@ -85,7 +85,7 @@ if [ "$CL_STOP" ] ; then
    killall -s SIGUSR1 -u $USER -q _tui_ReceiversBossTextClient
    killall -s SIGUSR1 -u $USER -q _tui_SchedulerTextClient
    #close the operator input
-   pkill -SIGINT -f -n -u $USER _tui_SysTerm
+   pkill -SIGUSR1 -f -n -u $USER _tui_SysTerm
    #close the logging display client 
    pkill -SIGUSR1 -f -n -u $USER _gui_customLoggingClient
    exit
