@@ -751,7 +751,7 @@ void CCore::_setProjectCode(const char* code,IRA::CString& message) throw (Manag
 		m_schedExecuter->setProjectCode(newCode);
 	}
     std::string msg = "Welcome to this facility, " + std::string(code) + "!";
-    std::string welcome = std::string(m_config->getWelcomeMessage());
+    std::string welcome = std::string(m_stationConf->getWelcomeMessage());
     if(welcome != "")
         msg += "\n" + welcome;
     message.Format("STR %s", msg.c_str());

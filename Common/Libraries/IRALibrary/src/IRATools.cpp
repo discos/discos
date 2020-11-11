@@ -8,6 +8,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <libgen.h>
+#include <boost/regex.hpp>
 
 using namespace IRA;
 
@@ -1194,6 +1195,18 @@ bool CIRATools::extractFileName(const IRA::CString& fullPath,IRA::CString& baseD
 	return true;
 }
 
+bool CIRATools::sendMail(const IRA::CString& subject,const IRA::CString& body,
+  const IRA::CString& recipients, bool dryRun)
+{
+	IRA::CString command;
+	command.Format("echo \"%s\" | mail -s \"%s\" ",(const char *)body,(const char *)subject);
+	command=command+recipients;
+	//cout << (const char *)command << endl;
+	if (dryRun) return true;
+	else if (system((const char *)command)<0) return false;
+	else return true;
+}
+
 double CIRATools::roundNearest(const double& val,const long& decimals)
 {
 	long precision=(long)pow(10,decimals);
@@ -1248,6 +1261,36 @@ double CIRATools::getMaximumValue(const ACS::doubleSeq& array,long& pos)
 		pos=-1;
 		return 0.0;
 	}
+}
+
+bool CIRATools::matchRegExp(const IRA::CString& input,const IRA::CString& expr,std::vector<IRA::CString>& res)
+{
+	std::string::const_iterator start, end;
+	std::string stream;
+	boost::match_results<std::string::const_iterator> what;
+	boost::match_flag_type flags = boost::match_default;
+	stream=(const char *)input;
+	start=stream.begin();
+	end=stream.end();
+	//boost::smatch what;
+	boost::regex regExpr((const char *)expr);
+	try {
+		res.empty();
+		while (boost::regex_search(start,end,what,regExpr,flags)) {
+			//res.empty();
+			for(unsigned i=0;i<what.size();i++) {
+				std::string out(what[i].first,what[i].second);
+				res.push_back(out.c_str());
+			}
+			start=what[0].second;      
+      	//flags|=boost::match_prev_avail;
+      	//flags|=boost::match_not_bob;
+		}
+		return true;
+	}
+	catch (...) {
+	}
+	return false;
 }
 
 // *******************************//
