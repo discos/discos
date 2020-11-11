@@ -29,7 +29,7 @@
 #include "Core.h"
 #include <IRA>
 #include <baciROdoubleSeq.h>
-
+#include <StationConfig.h>
 /** 
  * @mainpage Scheduler component Implementation 
  * @date 08/04/2013
@@ -463,6 +463,7 @@ private:
 	baci::SmartPropertyPointer<baci::ROstring> m_pcurrentRecorder;
 	baci::SmartPropertyPointer<baci::ROdoubleSeq> m_prestFrequency;
 	CConfiguration m_config;
+	DiscosLocals::StationConfig m_stationConfig;
 	CCore *m_core;
 };
 

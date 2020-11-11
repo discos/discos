@@ -131,7 +131,7 @@ void MedicinaMountImpl::execute() throw (ACSErr::ACSbaseExImpl)
 	CSecAreaResourceWrapper<CMedicinaMountSocket> Socket=m_ACULink->Get();
 	CUSTOM_LOG(LM_FULL_INFO,"MedicinaMountImpl::execute()",(LM_INFO,"MedicinaMount::ACU_SOCKET_CONNECTING"));
 	// this could throw an exception.....
-	Socket->Init(&m_CompConfiguration);
+	Socket->Init(&m_CompConfiguration,getContainerServices());
 	CUSTOM_LOG(LM_FULL_INFO,"MedicinaMountImpl::execute()",(LM_INFO,"MedicinaMount::ACU_SOCKET_CONNECTED"));
 	timeSlice=m_CompConfiguration.controlThreadPeriod();
 	CUSTOM_LOG(LM_FULL_INFO,"MedicinaMountImpl::execute()",(LM_INFO,"MedicinaMount::CONTROL_THREAD_STARTING"));
