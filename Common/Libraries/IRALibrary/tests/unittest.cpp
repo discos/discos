@@ -30,6 +30,10 @@ TEST_F(IRALibrary_IRATools, fileExists_checkNoExistance){
 	EXPECT_TRUE(fileExists_checkNoExistance());
 }
 
+TEST_F(IRALibrary_IRATools, matchRegExp_checkCorrectMatch){
+	EXPECT_TRUE(matchRegExp_checkCorrectMatch());
+}
+
 TEST_F(IRALibrary_IRATools, createEmptyFile_checkSuccess){
 	EXPECT_TRUE(createEmptyFile_checkSuccess());
 }
@@ -40,6 +44,10 @@ TEST_F(IRALibrary_IRATools, createEmptyFile_checkFail){
 
 TEST_F(IRALibrary_IRATools, deleteFile_checkSuccess){
 	EXPECT_TRUE(deleteFile_checkSuccess());
+}
+
+TEST_F(IRALibrary_IRATools, sendMail_checkSuccess) {
+	EXPECT_TRUE(sendMail_checkSuccess());
 }
 
 TEST_F(IRALibrary_IRATools,extractFileName_checkSimpleDirectoryPath){

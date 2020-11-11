@@ -26,6 +26,7 @@
 #include <TimeTaggedCircularArray.h>
 #include "Configuration.h"
 #include <LogDike.h>
+#include <StationConfig.h>
 
 
 #define UNSTOW_ACTION 1
@@ -54,10 +55,11 @@ public:
      * This member function is used to enstablish and configure the communication channel to the ACU. 
 	 * This must be the first call before using any other function of this class.
 	 * @param config pointer to the component configuration data structure
+	 * @param Services pointer to the container services object
 	 * @throw ComponentErrors::SocketError
 	 * 		  @arg \c IRALibraryResource>
 	*/
-	void Init(CConfiguration *config) throw (ComponentErrors::SocketErrorExImpl);
+	void Init(CConfiguration *config,maci::ContainerServices *Services) throw (ComponentErrors::SocketErrorExImpl);
 	
 	/**
 	 * called to clean up all the allocated resources before closing
@@ -609,6 +611,11 @@ private:
 	 * Stores the epoch of the last scan. Used in oscillation prevention
 	 */
 	ACS::Time m_lastScanEpoch;
+	
+	/**
+	* Some local configuration
+	*/
+	DiscosLocals::StationConfig m_stationConf;
 	
 	/**
     * This member function is called to send a buffer to the ACU.

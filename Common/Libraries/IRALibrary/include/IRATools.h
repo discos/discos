@@ -747,6 +747,26 @@ public:
 	  * @return the maximum
 	  */
 	 static double getMaximumValue(const ACS::doubleSeq& array,long& pos);
+	
+	 /**
+	  * parse an input string trying to match a regular expression
+	  * @param input input sequence of chars
+	  * @param expr regular expression to be matched
+	  * @param res arrays of token matching the expression
+	  * @return true if no errors are encountered 
+	  * @return the maximum
+	  */	
+	 static bool matchRegExp(const IRA::CString& input,const IRA::CString& expr,std::vector<IRA::CString>& res);	
+	
+	 /**
+	  * Sends an email using the mail command
+	  * @param subject subject of the email 
+	  * @param body body the email
+	  * @param dryRun if true the email is not sent
+	  * @return recipients list of recipients of the email, the addresses are spaced with a blank 
+	  */
+	static bool sendMail(const IRA::CString& subject,const IRA::CString& body,
+	  const IRA::CString& recipients,bool dryRun=false);
 
 private:
 

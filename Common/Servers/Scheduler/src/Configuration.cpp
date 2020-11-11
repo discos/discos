@@ -301,7 +301,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 		m_currentBackendIndex=-1;
 	}
 
-	if (!CIRATools::getDBValue(Services,"welcomeMessage",m_welcomeMessage,"alma/","DataBlock/Station")) {
+	/*if (!CIRATools::getDBValue(Services,"welcomeMessage",m_welcomeMessage,"alma/","DataBlock/Station")) {
 		m_welcomeMessage = (const char*)"";
 	}
 	std::string welcomeMessage = std::string(m_welcomeMessage);
@@ -312,7 +312,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 			break;
 		welcomeMessage.replace(found, 2, "\n");
 	}
-	m_welcomeMessage = welcomeMessage.c_str();
+	m_welcomeMessage = welcomeMessage.c_str();*/
 }
 
 Management::TScanAxis CConfiguration::str2Axis(const IRA::CString& axis) const

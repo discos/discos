@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+	- Author: Andrea Orlati
+	-
+	- History:
+	-   06-11-2020  Created
+-->
+
+<xs:schema
+	targetNamespace="urn:schemas-cosylab-com:LocalSettings:1.0"
+	xmlns="urn:schemas-cosylab-com:LocalSettings:1.0"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"	
+	elementFormDefault="qualified"
+	attributeFormDefault="unqualified">
+
+<xs:complexType name="LocalSettingsType">
+
+	<!-- The message to be displayed whenever a new 'project' command is issued -->
+	<xs:attribute name="welcomeMessage" type="xs:string" use="required" />
+	<!-- list of name of the system administrators, in the form of name dot surname -->
+	<xs:attribute name="admins" type="xs:string" use="required" />
+	<!-- domain name -->
+	<xs:attribute name="domain" type="xs:string" use="required" />
+</xs:complexType>
+
+<xs:element name="LocalSettings" type="LocalSettingsType"/>
+
+</xs:schema>

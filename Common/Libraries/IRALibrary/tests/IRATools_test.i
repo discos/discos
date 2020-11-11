@@ -63,6 +63,25 @@ public:
 			return ::testing::AssertionSuccess();
 		}
 	}
+	
+	::testing::AssertionResult matchRegExp_checkCorrectMatch() {
+		IRA::CString input("giant1spaghetti.monster doesnotmatch gino.pino white1black 1112121 giant1spaghetti.0122");
+		IRA::CString reg("[A-Za-z0-1]+\\.[A-Za-z]+");
+		std::vector<IRA::CString> res;
+		::testing::Test::RecordProperty("description","check if parser correctly match the tokens");
+		if (IRA::CIRATools::matchRegExp(input,reg,res)) {
+			if (res.size()!=2) return ::testing::AssertionFailure() << " number of matched tokens should be 2";
+			if (res[1]=="gino.pino") {
+				return ::testing::AssertionSuccess();
+			}
+			else {
+				return ::testing::AssertionFailure() << " number of matched tokens should be 2";
+			}
+		}
+		else {
+			return ::testing::AssertionFailure();
+		}
+	}
 
 	::testing::AssertionResult skyFrequency_noIntersection() {
 		double f,bw;
@@ -363,6 +382,18 @@ public:
 		}
 		return ::testing::AssertionSuccess();
 	}
+	
+	::testing::AssertionResult sendMail_checkSuccess() {
+		IRA::CString sbj("test email");
+		IRA::CString bdy("this is a test email. Trash it.");
+		IRA::CString rcp("foo@mailserver.domain moo@m1.anotherdomain");
+		::testing::Test::RecordProperty("description","check if an email can be sent");
+		if (!IRA::CIRATools::sendMail(sbj,bdy,rcp,true)) {
+			return ::testing::AssertionFailure(); 
+		}
+		return ::testing::AssertionSuccess();
+	}
+
 
 protected:
 	static IRA::CString simpleDirPath;
