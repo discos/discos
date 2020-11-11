@@ -46,7 +46,7 @@ LIBRARIES_L     =
 IRALibrary_OBJECTS = String IRATools Error SerialPort Lecom Socket DataField DBTable LogFilter \
  Site DateTime Timer SkySource TimeTaggedCircularArray ScheduleTimer TimeoutSync MicroControllerBoard \
  ReceiverControl SourceFlux CustomLoggerUtils LogDike FrequencyTracking BaseConverter
-IRALibrary_LIBS = acstime SlaLibrary maciClient
+IRALibrary_LIBS = acstime SlaLibrary maciClient boost_system boost_regex
 
 PY_PACKAGES  = IRAPy
 PY_SCRIPTS =
