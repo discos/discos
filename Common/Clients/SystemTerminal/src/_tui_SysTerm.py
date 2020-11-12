@@ -40,8 +40,7 @@ def usage():
     print "[-h|--help]           displays this help"
 
 def handler(num, stack):
-    global stopAll
-    stopAll=True
+    raise EOFError
 
 def get_history_items():
     return [readline.get_history_item(i) for i in xrange(1,readline.get_current_history_length()+1)]
