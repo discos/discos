@@ -7,7 +7,7 @@
 #include "DevIOVacuum.h"
 #include "DevIOLNAControls.h"
 #include "DevIOEnvTemperature.h"
-#include "DevIOCryoTemperatureCoolHeadWindow.h"
+#include "DevIOCryoTemperatureShield.h"
 #include "DevIOCryoTemperatureLNA.h"
 #include "DevIOStatus.h"
 #include "DevIOComponentStatus.h"
@@ -92,12 +92,12 @@ void MedicinaCBandImpl::execute() throw (ACSErr::ACSbaseExImpl)
 		m_pVg_2=new baci::ROdouble(getContainerServices()->getName()+":Vg_2",getComponent(),
 				new DevIOLNAControls(&m_core,IRA::ReceiverControl::GATE_VOLTAGE,1),true);
 		/** @todo verificare match con i relativi dev/sensori */
-		m_env_temp=new baci::ROdouble(getContainerServices()->getName()+":environmentTemperature",getComponent());
-				// new DevIOEnvTemperature(&m_core),true); // Is there a sensor?									
+		m_env_temp=new baci::ROdouble(getContainerServices()->getName()+":environmentTemperature",getComponent(),
+				 new DevIOEnvTemperature(&m_core),true); // Is there a sensor?									
 		m_lna_temp=new baci::ROdouble(getContainerServices()->getName()+":cryoTemperatureLNA",getComponent(),
 				new DevIOCryoTemperatureLNA(&m_core),true);
-		m_shield_temp =new baci::ROdouble(getContainerServices()->getName()+":cryoTemperatureCoolHeadWindow",getComponent(),
-				new DevIOCryoTemperatureCoolHeadWin(&m_core),true);
+		m_shield_temp =new baci::ROdouble(getContainerServices()->getName()+":cryoTemperatureShield",getComponent(),
+				new DevIOCryoTemperatureShield(&m_core),true);
 		m_pstatus=new baci::ROpattern(getContainerServices()->getName()+":status",getComponent(),
 				new DevIOStatus(&m_core),true);
 		m_preceiverStatus=new ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus),POA_Management::ROTSystemStatus>
@@ -665,9 +665,8 @@ void MedicinaCBandImpl::turnDewarHeatResistorsOff() throw  (CORBA::SystemExcepti
 
 void MedicinaCBandImpl::turnColdHeadOn() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
-	try {	
-			/** @todo */		
-		//m_core.turnColdHeadOn();
+	try {					
+		m_core.coldHeadOn();
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -686,9 +685,8 @@ void MedicinaCBandImpl::turnColdHeadOn() throw  (CORBA::SystemException,Componen
 
 void MedicinaCBandImpl::turnColdHeadOff() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
-	try {
-		/** @todo */		
-		//	m_core.turnColdHeadOff();
+	try {				
+		m_core.coldHeadOff();
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);

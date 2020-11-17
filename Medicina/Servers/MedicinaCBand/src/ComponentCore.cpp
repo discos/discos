@@ -953,7 +953,47 @@ void CComponentCore::vacuumSensorOff() throw (ReceiversErrors::NoRemoteControlEr
     clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
 }
 
-void CComponentCore::updateCoolHead()  throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
+/* ** COLD SENSOR ** */
+
+void CComponentCore::coldHeadOn() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+	if (checkStatusBit(LOCAL)) {
+        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::vacuumSensorOff()");
+        throw impl;
+    }
+    try {
+    	/* @todo */
+        //m_control->set cold head on();
+    }
+    catch (IRA::ReceiverControlEx& ex) {
+        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::vacuumSensorOff()");
+        impl.setDetails(ex.what().c_str());
+        setStatusBit(CONNECTIONERROR);
+        throw impl;
+    }
+    clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
+}
+
+void CComponentCore::coldHeadOff() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
+{
+	if (checkStatusBit(LOCAL)) {
+        _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::vacuumSensorOff()");
+        throw impl;
+    }
+    try {
+    	/* @todo */
+        //m_control->set cold head off();
+    }
+    catch (IRA::ReceiverControlEx& ex) {
+        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::vacuumSensorOff()");
+        impl.setDetails(ex.what().c_str());
+        setStatusBit(CONNECTIONERROR);
+        throw impl;
+    }
+    clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
+}
+
+void CComponentCore::updateColdHead()  throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
 {
     bool answer;
     // not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
@@ -1009,8 +1049,8 @@ void CComponentCore::updateShieldTemperature() throw (ReceiversErrors::ReceiverC
 {
     // not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
     try {
-        m_environmentTemperature.temperature = m_control->cryoTemperature(0,Helpers::voltage2Kelvin);
-        m_environmentTemperature.timestamp = getTimeStamp();
+        m_shieldTemperature.temperature = m_control->cryoTemperature(0,Helpers::voltage2Kelvin);
+        m_shieldTemperature.timestamp = getTimeStamp();
     }
     catch (IRA::ReceiverControlEx& ex) {
         m_environmentTemperature.temperature = CEDUMMY;
@@ -1026,8 +1066,8 @@ void CComponentCore::updateLnaTemperature() throw (ReceiversErrors::ReceiverCont
 {
     // not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
     try {
-        m_environmentTemperature.temperature = m_control->cryoTemperature(1,Helpers::voltage2Kelvin);
-        m_environmentTemperature.timestamp = getTimeStamp();
+        m_lnaTemperature.temperature = m_control->cryoTemperature(1,Helpers::voltage2Kelvin);
+        m_lnaTemperature.timestamp = getTimeStamp();
     }
     catch (IRA::ReceiverControlEx& ex) {
         m_environmentTemperature.temperature = CEDUMMY;

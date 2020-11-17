@@ -66,7 +66,13 @@
 			<!-- Gate voltage for IF1 (ROdouble) -->
 			<xs:element name="Vg_1" type="baci:ROdouble"/>
 			<!-- Gate voltage for IF2 (ROdouble) -->
-			<xs:element name="Vg_2" type="baci:ROdouble"/>
+			<xs:element name="Vg_2" type="baci:ROdouble"/>						
+			<!-- cryogenic temp (K) (ROdouble) -->
+			<xs:element name="cryoTemperatureLNA" type="baci:ROdouble"/>
+			<!-- cryogenic temp (K) (ROdouble) -->
+			<xs:element name="cryoTemperatureShield" type="baci:ROdouble"/>
+			<!-- cryogenic temp (K) (ROdouble) -->
+			<xs:element name="environmentTemperature" type="baci:ROdouble"/>			
 			<xs:element name="receiverStatus" type="mng:SystemStatusType" />
 		</xs:sequence>
 		<xs:attribute name="DewarIPAddress" type="xs:string" use="required"/>

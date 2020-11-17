@@ -129,5 +129,38 @@
 			      units="Volts"
 			      format="%6.3f"						
 			/>			
+			<cryoTemperatureLNA description="Cryogenic temperature measured at the LNA"
+			      alarm_high_on="40.0"
+			      alarm_high_off="28.0"
+			      default_value="20.0"
+			      alarm_timer_trig="10"
+			      default_timer_trig="10"
+			      min_timer_trig="1"
+			      min_delta_trig="0.5"
+			      units="Kelvin"
+			      format="%5.1f"									
+			/>
+			<cryoTemperatureShield description="Cryogenic temperature measured at the shield"
+			      alarm_high_on="63.0"
+			      alarm_high_off="44.0"
+			      default_value="35.0"
+			      alarm_timer_trig="10"
+			      default_timer_trig="10"
+			      min_timer_trig="1"
+			      min_delta_trig="0.5"
+			      units="Kelvin"
+			      format="%5.1f"												
+			/>
+			<environmentTemperature description="temperature of the room in which the receiver is installed"
+			      alarm_high_on="35.0"
+			      alarm_high_off="30.0"
+			      default_value="25.0"
+			      alarm_timer_trig="10"
+			      default_timer_trig="10"
+			      min_timer_trig="1"
+			      min_delta_trig="0.5"
+			      units="Celsius degree"
+			      format="%4.1f"									
+			/>
 			<receiverStatus description="Overall status of the receiver"/>
 </MedicinaCBand>

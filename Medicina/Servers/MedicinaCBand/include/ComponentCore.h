@@ -388,12 +388,21 @@ public:
      */
     void updateLnaTemperature() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
 
+	/*
+	* @brief Cold head on
+	*/
+	void coldHeadOn() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+	 
+	 /**
+	 *@brief Cold head off
+	 */
+	 void coldHeadOff() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
 
      /**
      * It checks if the cool head is turned on or not
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
-    void updateCoolHead() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    void updateColdHead() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
 
         /* *** LOCAL REMOTE *** */
 
