@@ -123,6 +123,19 @@ public:
 	 */
 	 virtual void deactivate() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 		
+
+	/**
+	 * @brief Set Receiver C High
+	 * 
+	 */
+	virtual void setReceiverHigh() throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+	/**
+	 * @brief Set Receiver C Low
+	 * 
+	 */
+	virtual void setReceiverLow() throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
 	/**
 	 * This method is used to turn the calibration diode on.
 	 * @throw CORBA::SystemExcpetion

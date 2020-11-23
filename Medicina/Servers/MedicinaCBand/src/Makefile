@@ -62,7 +62,7 @@ LIBRARIES_L     =
 #
 # <brief description of lllll library>
  
-MedicinaCBandImpl_OBJECTS   = Commons ReceiverConfHandler MixerOperator Configuration  ComponentCore MonitorThread MedicinaCBandImpl 
+MedicinaCBandImpl_OBJECTS   = Commons ReceiverConfHandler MixerOperator Configuration ReceiverControlCBand ComponentCore MonitorThread MedicinaCBandImpl 
 MedicinaCBandImpl_LIBS = IRALibrary ComponentErrors ManagementErrors ReceiversErrors CommonReceiverInterfaceStubs GenericReceiverStubs MedicinaCBandStubs \
                    LocalOscillatorInterfaceStubs ReceiversDefinitionsStubs ManagmentDefinitionsStubs
 

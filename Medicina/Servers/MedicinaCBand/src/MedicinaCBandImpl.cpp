@@ -219,6 +219,47 @@ void MedicinaCBandImpl::deactivate() throw (CORBA::SystemException,ComponentErro
 	MED_TRACE();
 }
 
+
+void MedicinaCBandImpl::setReceiverHigh() throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+{
+	try {
+		m_core.setReceiverHigh();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();		
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"MedicinaCBandImpl::setReceiverLow()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
+}
+
+void MedicinaCBandImpl::setReceiverLow() throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+{
+	try {
+		m_core.setReceiverLow();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();		
+	}
+	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getReceiversErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"MedicinaCBandImpl::setReceiverLow()");
+		impl.log(LM_DEBUG);
+		throw impl.getComponentErrorsEx();
+	}
+}
+
 void MedicinaCBandImpl::calOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {	
 	try {
