@@ -8,7 +8,9 @@
  * @details We need to extend some functionalities as C Hi/LOW receiver selection
  * 
  */
-class ReceiverControlCBand : public IRA::Receviercontrol {
+
+ 
+class ReceiverControlCBand : public IRA::RecevierControl {
 
 public:
 
@@ -50,7 +52,7 @@ public:
             const BYTE switch_madd=0x7C,   // Switch board master address
             const BYTE switch_sadd=0x7F,   // Switch board slave address - We use broadcast address
             bool reliable_comm=false
-    ) throw (ReceiverControlEx);
+    ) throw (IRA::ReceiverControlEx);
 
     /**
      * @brief Destroy the Receiver Control object
@@ -71,7 +73,7 @@ public:
             const BYTE port_type=MCB_PORT_TYPE_DIO, 
             const BYTE port_number=MCB_PORT_NUMBER_01, 
             const BYTE value=0x01
-    ) throw (ReceiverControlEx);
+    ) throw (IRA::ReceiverControlEx);
 
     /** Set LOW C Receiver
      *  @param data_type the type of the data; the default type is 1 bit
@@ -85,7 +87,7 @@ public:
             const BYTE port_type=MCB_PORT_TYPE_DIO, 
             const BYTE port_number=MCB_PORT_NUMBER_01, 
             const BYTE value=0x00
-    ) throw (ReceiverControlEx);
+    ) throw (IRA::ReceiverControlEx);
 
 private:
 

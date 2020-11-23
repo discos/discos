@@ -16,8 +16,8 @@ ReceiverControlCBand::ReceiverControlCBand(
     const BYTE switch_madd,
     const BYTE switch_sadd,
     bool reliable_comm) 
-    throw (ReceiverControlEx) : 
-    IRA::ReceiverControl(dewar_ip, dewar_port
+    throw (IRA::ReceiverControlEx) : 
+    IRA::ReceiverControl(dewar_ip, dewar_port,
                         lna_ip, lna_port,
                         guard_time,
                         number_of_feeds,
@@ -36,7 +36,7 @@ void ReceiverControlCBand::setReceiverHigh(
         const BYTE port_type, 
         const BYTE port_number, 
         const BYTE value
-        ) throw (ReceiverControlEx)
+        ) throw (IRA::ReceiverControlEx)
 {
     try {
         makeRequest(
@@ -49,9 +49,9 @@ void ReceiverControlCBand::setReceiverHigh(
                 value 
         );
     }
-    catch(MicroControllerBoardEx& ex) {
+    catch(IRA::MicroControllerBoardEx& ex) {
         std::string error_msg = "ReceiverControl: error performing setReceiverHigh.\n";
-        throw ReceiverControlEx(error_msg + ex.what());
+        throw IRA::ReceiverControlEx(error_msg + ex.what());
     }    
 }
 
@@ -60,7 +60,7 @@ void ReceiverControlCBand::setReceiverLow(
         const BYTE port_type, 
         const BYTE port_number, 
         const BYTE value
-        ) throw (ReceiverControlEx)
+        ) throw (IRA::ReceiverControlEx)
 {
     try {
         makeRequest(
@@ -73,8 +73,8 @@ void ReceiverControlCBand::setReceiverLow(
                 value 
         );
     }
-    catch(MicroControllerBoardEx& ex) {
+    catch(IRA::MicroControllerBoardEx& ex) {
         std::string error_msg = "ReceiverControl: error performing setReceiverHigh.\n";
-        throw ReceiverControlEx(error_msg + ex.what());
+        throw IRA::ReceiverControlEx(error_msg + ex.what());
     }    
 }
