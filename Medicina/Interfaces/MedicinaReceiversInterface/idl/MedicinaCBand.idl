@@ -77,6 +77,22 @@ module Receivers {
          */
         readonly attribute ACS::ROdouble environmentTemperature;
 
+         /* *** SELECT RECEIVER *** */
+
+         /**
+          * @brief select receiver C HIGH
+          * 
+          */
+         void setReceiverHigh() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+         /**
+          * @brief select receiver C LOW
+          * 
+          */
+         void setReceiverLow() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+         /* *** COLD HEAD *** */
+
 			/**
 			* Turns cold head on bringing down C Low receiver stage temperature.						 
 			*/

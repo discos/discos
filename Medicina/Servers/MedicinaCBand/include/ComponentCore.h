@@ -10,10 +10,12 @@
 /* Andrea Orlati(aorlati@ira.inaf.it) 03/08/2011     Creation                                         */
 
 #include "Configuration.h"
-#include <ReceiverControl.h>
+
+
 #include <LocalOscillatorInterfaceC.h>
 #include <ReceiversErrors.h>
 #include <ManagmentDefinitionsC.h>
+#include "ReceiverControlCBand.h"
 #include "Commons.h"
 #include "MixerOperator.h"
 
@@ -39,7 +41,8 @@ class CComponentCore {
         NOISEMARKERROR=8,
         EXTNOISEMARK=9,
         CONNECTIONERROR=10,
-        UNLOCKED=11
+        UNLOCKED=11,
+        C_HIGH=12
     };
 
 public:
@@ -103,7 +106,7 @@ public:
     const Management::TSystemStatus& getComponentStatus();
 
 
-        /* *** MODE *** */
+    /* *** MODE *** */
 
      /**
      * It allows to change the operating mode of the receiver. If the mode does not correspond to a valid mode an error is thrown.
@@ -118,6 +121,21 @@ public:
      */
     const IRA::CString getSetupMode();
 
+    /* RECEIVER  SELECTION */
+
+    /**
+     * @brief Select current reciver, C HIGH
+     * 
+     */
+    void setReceiverHigh()throw  (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
+            ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl);
+
+    /**
+     * @brief Select current reciver, C LOW
+     * 
+     */
+    void setReceiverLow()throw  (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
+            ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl);
 
         /* *** LOs *** */
 
@@ -460,7 +478,7 @@ private:
     maci::ContainerServices* m_services;
     BACIMutex m_mutex;
 
-    IRA::ReceiverControl *m_control; // this object is thread safe        
+    ReceiverControlCBand *m_control; // this object is thread safe        
     ACS::doubleSeq m_startFreq;
     ACS::doubleSeq m_bandwidth;
     ACS::longSeq m_polarization;

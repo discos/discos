@@ -45,8 +45,8 @@ CConfiguration const * const  CComponentCore::execute() throw (ComponentErrors::
      */
     m_configuration.init(m_services);  //throw (ComponentErrors::CDBAccessExImpl);    
     try {
-    	  MED_TRACE_MSG(" Receiver new ");    	  
-        m_control=new IRA::ReceiverControl(
+    	MED_TRACE_MSG(" Receiver new ");    	  
+        m_control=new ReceiverControlCBand(
                 (const char *)m_configuration.getDewarIPAddress(),
                 m_configuration.getDewarPort(),
                 (const char *)m_configuration.getLNAIPAddress(),
@@ -54,7 +54,7 @@ CConfiguration const * const  CComponentCore::execute() throw (ComponentErrors::
                 m_configuration.getLNASamplingTime(),
                 m_configuration.getFeeds()
         );
-		 MED_TRACE_MSG(" Receiver new done");
+		MED_TRACE_MSG(" Receiver new done");
     }
     catch (std::bad_alloc& ex) {
         _EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CComponentCore::execute()");
@@ -185,6 +185,40 @@ const Management::TSystemStatus& CComponentCore::getComponentStatus()
 }
 
 /* *** SETUP *** */
+
+void CComponentCore::setReceiverHigh()throw  (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
+            ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl)
+{
+     baci::ThreadSyncGuard guard(&m_mutex);
+    try {
+        m_control->setReceiverHigh();
+    }
+    catch (IRA::ReceiverControlEx& ex) {
+        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::setReceiverHigh()");
+        impl.setDetails(ex.what().c_str());
+        setStatusBit(CONNECTIONERROR);
+        throw impl;
+    }
+    setStatusBit(C_HIGH);    
+    clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
+}
+
+void CComponentCore::setReceiverLow()throw  (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
+            ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl)
+{
+     baci::ThreadSyncGuard guard(&m_mutex);
+    try {
+        m_control->setReceiverLow();
+    }
+    catch (IRA::ReceiverControlEx& ex) {
+        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::setReceiverHigh()");
+        impl.setDetails(ex.what().c_str());
+        setStatusBit(CONNECTIONERROR);
+        throw impl;
+    }
+    setStatusBit(C_LOW);    
+    clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
+}
 
 void CComponentCore::setMode(const char * mode) throw (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
         ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl)
