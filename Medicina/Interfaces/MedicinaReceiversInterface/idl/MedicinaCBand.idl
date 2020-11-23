@@ -140,10 +140,9 @@ module Receivers {
 			* Vacuum valve opening, it can act in two different ways:
 			*   * Applying delay starting from pump activation
 			*   * Applying delay starting from when pump is up to speed
-			* @param[in] p_mode Delay mode
-			* @param[in] p_dealy_sec Delay in seconds
+			* @param[in] p_mode DELAY string requests delayed start	
 			*/
-          void openVacuumValve(in string p_mode, in double p_delay_sec) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+          void openVacuumValve(in string p_mode) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
           
           /**
           * Heating resistor turn on request, helping dewar to raise temperature quickly 

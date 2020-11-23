@@ -433,7 +433,7 @@ public:
     /**
     * @brief Vacuum valve opening
     */
-    virtual void openVacuumValve(const char *, CORBA::Double) throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+    virtual void openVacuumValve(const char *) throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 	/**
     * @brief Heat resistors on

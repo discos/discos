@@ -89,6 +89,63 @@ public:
             const BYTE value=0x00
     ) throw (IRA::ReceiverControlEx);
 
+    /** Soft start vacuum pump on
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 11
+     *  @param value the value to set; the default value is 0x01
+     *  @throw ReceiverControlEx
+     */
+    void setVacuumPumpSoftStart(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01, 
+            const BYTE port_type=MCB_PORT_TYPE_DIO, 
+            const BYTE port_number=MCB_PORT_NUMBER_06, 
+            const BYTE value=0x01
+    ) throw (IRA::ReceiverControlEx);
+
+    /** Soft start vacuum pump off
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 11
+     *  @param value the value to set; the default value is 0x01
+     *  @throw ReceiverControlEx
+     */
+    void resetVacuumPumpSoftStart(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01, 
+            const BYTE port_type=MCB_PORT_TYPE_DIO, 
+            const BYTE port_number=MCB_PORT_NUMBER_06, 
+            const BYTE value=0x00
+    ) throw (IRA::ReceiverControlEx);
+
+
+    /** Vacuum valve open delay on
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 11
+     *  @param value the value to set; the default value is 0x01
+     *  @throw ReceiverControlEx
+     */
+    void setVacuumValveOpenDelay(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01, 
+            const BYTE port_type=MCB_PORT_TYPE_DIO, 
+            const BYTE port_number=MCB_PORT_NUMBER_06, 
+            const BYTE value=0x01
+    ) throw (IRA::ReceiverControlEx);
+
+    /** Vacuum valve open delay off
+     *  @param data_type the type of the data; the default type is 1 bit
+     *  @param port_type the port type; the default port is the Digital IO
+     *  @param port_number the port number; the default port number is 11
+     *  @param value the value to set; the default value is 0x01
+     *  @throw ReceiverControlEx
+     */
+    void resetVacuumValveOpenDelay(
+            const BYTE data_type=MCB_CMD_DATA_TYPE_B01, 
+            const BYTE port_type=MCB_PORT_TYPE_DIO, 
+            const BYTE port_number=MCB_PORT_NUMBER_06, 
+            const BYTE value=0x00
+    ) throw (IRA::ReceiverControlEx);
+
 private:
 
 

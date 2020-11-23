@@ -50,7 +50,7 @@ void ReceiverControlCBand::setReceiverHigh(
         );
     }
     catch(IRA::MicroControllerBoardEx& ex) {
-        std::string error_msg = "ReceiverControl: error performing setReceiverHigh.\n";
+        std::string error_msg = "ReceiverControl: error performing setReceiverHigh().\n";
         throw IRA::ReceiverControlEx(error_msg + ex.what());
     }    
 }
@@ -74,7 +74,103 @@ void ReceiverControlCBand::setReceiverLow(
         );
     }
     catch(IRA::MicroControllerBoardEx& ex) {
-        std::string error_msg = "ReceiverControl: error performing setReceiverHigh.\n";
+        std::string error_msg = "ReceiverControl: error performing setReceiverLow().\n";
+        throw IRA::ReceiverControlEx(error_msg + ex.what());
+    }    
+}
+
+void ReceiverControlCBand::setVacuumPumpSoftStart(
+        const BYTE data_type, 
+        const BYTE port_type, 
+        const BYTE port_number, 
+        const BYTE value
+        ) throw (IRA::ReceiverControlEx)
+{
+    try {
+        makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_SET_DATA,      // Command to send
+                4,                     // Number of parameters
+                data_type, 
+                port_type,  
+                port_number, 
+                value 
+        );
+    }
+    catch(IRA::MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing setVacuumPumpSoftStart().\n";
+        throw IRA::ReceiverControlEx(error_msg + ex.what());
+    }    
+}
+
+void ReceiverControlCBand::resetVacuumPumpSoftStart(
+        const BYTE data_type, 
+        const BYTE port_type, 
+        const BYTE port_number, 
+        const BYTE value
+        ) throw (IRA::ReceiverControlEx)
+{
+    try {
+        makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_SET_DATA,      // Command to send
+                4,                     // Number of parameters
+                data_type, 
+                port_type,  
+                port_number, 
+                value 
+        );
+    }
+    catch(IRA::MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing resetVacuumPumpSoftStart().\n";
+        throw IRA::ReceiverControlEx(error_msg + ex.what());
+    }    
+}
+
+void ReceiverControlCBand::setVacuumValveOpenDelay(
+        const BYTE data_type, 
+        const BYTE port_type, 
+        const BYTE port_number, 
+        const BYTE value
+        ) throw (IRA::ReceiverControlEx)
+{
+    try {
+        makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_SET_DATA,      // Command to send
+                4,                     // Number of parameters
+                data_type, 
+                port_type,  
+                port_number, 
+                value 
+        );
+    }
+    catch(IRA::MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing setVacuumValveOpenDelay().\n";
+        throw IRA::ReceiverControlEx(error_msg + ex.what());
+    }    
+}
+
+void ReceiverControlCBand::resetVacuumValveOpenDelay(
+        const BYTE data_type, 
+        const BYTE port_type, 
+        const BYTE port_number, 
+        const BYTE value
+        ) throw (IRA::ReceiverControlEx)
+{
+    try {
+        makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_SET_DATA,      // Command to send
+                4,                     // Number of parameters
+                data_type, 
+                port_type,  
+                port_number, 
+                value 
+        );
+    }
+    catch(IRA::MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error performing resetVacuumValveOpenDelay().\n";
         throw IRA::ReceiverControlEx(error_msg + ex.what());
     }    
 }

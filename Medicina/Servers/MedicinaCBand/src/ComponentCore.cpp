@@ -177,7 +177,6 @@ void CComponentCore::updateComponent()
     }
 }
 
-
 const Management::TSystemStatus& CComponentCore::getComponentStatus()
 {
     baci::ThreadSyncGuard guard(&m_mutex);
@@ -837,14 +836,18 @@ void CComponentCore::updateVacuum() throw (ReceiversErrors::ReceiverControlBoard
     clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
 }
 
-void CComponentCore::vacuumPumpOn() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
+void CComponentCore::vacuumPumpOn(const char * p_mode) throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
 {
 	if (checkStatusBit(LOCAL)) {
         _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::vacuumPumpOn()");
         throw impl;
     }
     try {
-        m_control->setVacuumPumpOn();
+        /**@todo se chiedo vacuum pump off con soft start cosa succede? */
+        if(p_mode == "SOFT")
+            m_control->setVacuumPumpSoftStart();        
+        else
+            m_control->setVacuumPumpOn();
     }
     catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::vacuumPumpOn()");
@@ -895,7 +898,7 @@ void CComponentCore::updateVacuumPump() throw (ReceiversErrors::ReceiverControlB
     clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
 }
 
-void CComponentCore::openVacuumValve(const  char * p_mode, double p_delay) throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
+void CComponentCore::openVacuumValve(const  char * p_mode) throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
 {
 	/**@todo il delay..*/
 	if (checkStatusBit(LOCAL)) {
@@ -903,7 +906,10 @@ void CComponentCore::openVacuumValve(const  char * p_mode, double p_delay) throw
         throw impl;
     }
     try {
-        m_control->setVacuumValveOn();
+        if (p_mode == "DELAY" )
+            m_control->setVacuumValveOpenDelay();
+        else
+            m_control->setVacuumValve();
     }
     catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::openVacuumValve()");

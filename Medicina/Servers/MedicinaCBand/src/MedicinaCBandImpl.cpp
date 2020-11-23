@@ -604,8 +604,8 @@ void MedicinaCBandImpl::turnVacuumSensorOff() throw  (CORBA::SystemException,Com
 
 void MedicinaCBandImpl::turnVacuumPumpOn(const char * p_mode) throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
-	try {		
-		m_core.vacuumPumpOn();
+	try {							
+		m_core.vacuumPumpOn(p_mode);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -642,10 +642,10 @@ void MedicinaCBandImpl::turnVacuumPumpOff() throw  (CORBA::SystemException,Compo
 	}
 }
 
-void MedicinaCBandImpl::openVacuumValve(const char * p_mode , CORBA::Double p_delay) throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void MedicinaCBandImpl::openVacuumValve(const char * p_mode ) throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {		
-		m_core.openVacuumValve(p_mode, p_delay);
+		m_core.openVacuumValve(p_mode);
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);

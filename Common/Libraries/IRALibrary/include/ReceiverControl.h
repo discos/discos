@@ -909,7 +909,7 @@ public:
     ) throw (ReceiverControlEx);
 
 
-private:
+protected:
     
 	/** Send the request to the board and receive the answer
      * @param board_ptr pointer to the board (dewar of LNA board)
@@ -924,8 +924,9 @@ private:
             const BYTE command, size_t len, ...
     ) throw(MicroControllerBoardEx);
 
-    
-	/** Return the requested value computed from a vector<BYTE> of parameters
+private:
+
+        /** Return the requested value computed from a vector<BYTE> of parameters
 	 * @param parameters a vector of BYTEs to join to compute the final value
      * @param RAW_INDEX the index of the PORT (f.i. AD24) from which read the data
      * @return a dobule value computed from a vector<BYTE> of parameters
@@ -995,7 +996,8 @@ private:
      */
     bool m_reliable_comm;
 
-
+ protected:
+ 
     /** Dewar MicroControllerBoard pointer */
     MicroControllerBoard *m_dewar_board_ptr;
 

@@ -319,9 +319,10 @@ public:
     void updateVacuum() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
 
  	 /**
- 	 * @brief Turn on vacuum pump
+ 	  * @brief Turn on vacuum pump
+      * @param p_mode SOFT or NORMAL
  	 */	
-	 void vacuumPumpOn() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+	 void vacuumPumpOn(const char * p_mode) throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
 
 	 /**
  	 * @brief Turn off vacuum pump
@@ -343,9 +344,10 @@ public:
 
 	/**
  	 * @brief Turn on vacuum valve with delay
+      * @param p_mode DELAY for delayed opening
  	 * @todo check how it works
  	 */	
-	 void openVacuumValve(const char * p_mode, double p_delay) throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+	 void openVacuumValve(const char * p_mode) throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
 	 
 	 /**
 	 * @brief Close vaccum valve

@@ -514,7 +514,6 @@ bool ReceiverControl::isVacuumSensorOn(
     }
 }
 
-
 void ReceiverControl::setVacuumPumpOn(
             const BYTE data_type,
             const BYTE port_type,
@@ -539,7 +538,6 @@ void ReceiverControl::setVacuumPumpOn(
     }
 }
 
-
 void ReceiverControl::setVacuumPumpOff(
             const BYTE data_type,
             const BYTE port_type,
@@ -563,7 +561,6 @@ void ReceiverControl::setVacuumPumpOff(
         throw ReceiverControlEx(error_msg + ex.what());
     }
 }
-
 
 bool ReceiverControl::isVacuumPumpOn(
             const BYTE data_type,
@@ -592,7 +589,6 @@ bool ReceiverControl::isVacuumPumpOn(
         throw ReceiverControlEx(error_msg + ex.what());
     }
 }
-
 
 bool ReceiverControl::hasVacuumPumpFault(
         const BYTE data_type,
@@ -1802,7 +1798,6 @@ void ReceiverControl::setSkyPath(
         throw ReceiverControlEx(error_msg + ex.what());
     }
 }
-
 
 
 std::vector<BYTE> ReceiverControl::makeRequest(MicroControllerBoard *board_ptr, BYTE command, size_t len, ...) 
