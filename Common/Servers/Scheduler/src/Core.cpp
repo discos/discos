@@ -12,8 +12,8 @@ _IRA_LOGFILTER_IMPORT;
 
 #define SCHED_EXECUTOR_NAME "SCHED_THREAD"
 
-CCore::CCore(ContainerServices *service,CConfiguration *conf) : 
-	m_config(conf), m_services(service)
+CCore::CCore(ContainerServices *service,CConfiguration *conf,DiscosLocals::StationConfig* stConfig) : 
+	m_config(conf), m_stationConf(stConfig), m_services(service)
 {
 }
 

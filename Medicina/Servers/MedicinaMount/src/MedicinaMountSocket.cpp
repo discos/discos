@@ -76,9 +76,14 @@ void CMedicinaMountSocket::cleanUp()
 	_IRA_LOGDIKE_DESTROY(m_logDike);
 }
 
-void CMedicinaMountSocket::Init(CConfiguration *config) throw (SocketErrorExImpl)
+void CMedicinaMountSocket::Init(CConfiguration *config,maci::ContainerServices *Services) throw (SocketErrorExImpl)
 {
 	AUTO_TRACE("CMedicinaMountSocket::Init()");
+	if (!m_stationConf.initialize(Services)) {
+		_EXCPT(ComponentErrors::CDBAccessExImpl,dummy,"CMedicinaMountSocket::Init");
+		dummy.setFieldName("Station locals config");
+		throw dummy;
+	}
 	m_configuration=config;
 	_IRA_LOGDIKE_CONFIGURE(m_logDike,m_configuration->repetitionCacheTime(),m_configuration->expireCacheTime());
 	// this will create the socket in blocking mode.....
@@ -847,7 +852,7 @@ void CMedicinaMountSocket::detectOscillation() throw (ConnectionExImpl,SocketErr
 	double azError=getAzimuthError(); // throw (ConnectionExImpl,SocketErrorExImpl,TimeoutExImpl)
 	IRA::CIRATools::getTime(now);
 	CACUInterface::TAxeModes mode=m_Data.getLastCommandedMode();
-	if (m_oscStop) { // if the oscillation has been detected.....during previuos iteration
+	if (m_oscStop) { // if the oscillation has been detected.....during previous iteration
 		if (now.value().value>=m_oscStopTime+m_configuration->oscillationRecoveryTime()) { // the time to wait for trying to recover has elapsed.....
 			CUSTOM_LOG(LM_FULL_INFO,"CMedicinaMountSocket::detectOscillation()",(LM_NOTICE,"OSCILLATION_RECOVERY"));
 			Mode(m_oscMode,m_oscMode); // throw (TimeoutExImpl,AntennaErrors::NakExImpl,ConnectionExImpl,SocketErrorExImpl,AntennaBusyExImpl)
@@ -867,7 +872,7 @@ void CMedicinaMountSocket::detectOscillation() throw (ConnectionExImpl,SocketErr
 		return;
 	}
 	if (!m_oscStop) {  // this cycle is done only if the oscillation has not been detected yet.
-		if (azError>m_configuration->oscillationThreshold()) {  //if the error si beyond a threshold...possible alarm
+		if (azError>m_configuration->oscillationThreshold()) {  //if the error is beyond a threshold...possible alarm
 			if (!m_oscAlarm) { // if the alarm was not triggered yet.....do it
 				m_oscAlarm=true;
 				m_oscTime=now.value().value;
@@ -876,7 +881,7 @@ void CMedicinaMountSocket::detectOscillation() throw (ConnectionExImpl,SocketErr
 			}
 			else { //alarm already triggered 
 				if (m_oscTime<now.value().value+m_configuration->oscillationAlarmDuration()) { // if the alarm time windows is still opened
-					if (m_oscDirection<0) { // the previuos direction was negative
+					if (m_oscDirection<0) { // the previous direction was negative
 						m_oscNumber++;
 						m_oscDirection=-1;
 						if (m_oscNumber>m_configuration->oscillationNumberThreashold()) { // if the number of directions changes is beyound the threshold, during the alarm validity time....oscillation detected!
@@ -912,11 +917,18 @@ void CMedicinaMountSocket::detectOscillation() throw (ConnectionExImpl,SocketErr
 			}
 		}	
 	}
-	if (m_oscStop) { // if the oscillation has been detected durint current iteration.....stop the antenna
+	if (m_oscStop) { // if the oscillation has been detected during the current iteration.....stop the antenna
 		CUSTOM_LOG(LM_FULL_INFO,"CMedicinaMountSocket::detectOscillation()",(LM_CRITICAL,"OSCILLATION_DETECTED"));
 		m_oscMode=mode; ///store the current mode, in order to recommand it for ascillation recovery;
-		m_oscStopTime=now.value().value;
+		m_oscStopTime=now.value().value;		
 		Stop(); //throw (TimeoutExImpl,AntennaErrors::NakExImpl,ConnectionExImpl,SocketErrorExImpl,AntennaBusyExImpl)
+		IRA::CString emessage,tmsg;
+		IRA::CIRATools::timeToStr(now.value().value,emessage);		
+		tmsg.Format("Azimuth: %lf, Elevation: %lf, Az. Error: %lf, El. Error: %lf, Az. Rate: %lf, El. Rate: %lf",
+		  m_Data.azimuth(),m_Data.elevation(),m_Data.azimuthError(),m_Data.elevationError(),
+		  m_Data.azimuthRate(),m_Data.elevationRate());
+		emessage+=tmsg;  
+		m_stationConf.sendMail("Mount Oscillation Detected",(const char *)emessage);
 	}
 }
 
