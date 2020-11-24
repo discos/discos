@@ -5,7 +5,7 @@
    -   Thu Nov 22 11:09:34 UTC 2012 modified by jDAL
 -->
 <LocalOscillatorEthernet xmlns="urn:schemas-cosylab-com:LocalOscillatorEthernet:1.0" xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
- xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" IP="192.168.200.127" PORT="5025"  >
+ xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" IP="127.0.0.1" PORT="12700"  >
     <frequency units="MHz"/>
     <amplitude units="dBm"/>
     <isLocked/>
