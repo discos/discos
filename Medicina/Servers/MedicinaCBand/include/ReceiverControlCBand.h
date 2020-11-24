@@ -10,7 +10,7 @@
  */
 
  
-class ReceiverControlCBand : public IRA::RecevierControl {
+class ReceiverControlCBand : public IRA::ReceiverControl {
 
 public:
 

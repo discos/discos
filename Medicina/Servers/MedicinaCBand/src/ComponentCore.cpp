@@ -215,7 +215,7 @@ void CComponentCore::setReceiverLow()throw  (ReceiversErrors::ModeErrorExImpl,Co
         setStatusBit(CONNECTIONERROR);
         throw impl;
     }
-    setStatusBit(C_LOW);    
+    clearStatusBit(C_HIGH);    
     clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
 }
 
@@ -909,7 +909,7 @@ void CComponentCore::openVacuumValve(const  char * p_mode) throw (ReceiversError
         if (p_mode == "DELAY" )
             m_control->setVacuumValveOpenDelay();
         else
-            m_control->setVacuumValve();
+            m_control->setVacuumValveOn();
     }
     catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::openVacuumValve()");
@@ -928,7 +928,7 @@ void CComponentCore::closeVacuumValve() throw (ReceiversErrors::ReceiverControlB
         throw impl;
     }
     try {
-        m_control->setVacuumValveOn();
+        m_control->setVacuumValveOff();
     }
     catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::closeVacuumValve()");
