@@ -1106,7 +1106,8 @@ void CComponentCore::updateLnaTemperature() throw (ReceiversErrors::ReceiverCont
 {
     // not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
     try {
-        m_lnaTemperature.temperature = m_control->cryoTemperature(1,Helpers::voltage2Kelvin);
+        //m_lnaTemperature.temperature = m_control->cryoTemperature(1,Helpers::voltage2Kelvin);
+        m_lnaTemperature.temperature = m_control->cryoTemperature(1,nullptr);
         m_lnaTemperature.timestamp = getTimeStamp();
     }
     catch (IRA::ReceiverControlEx& ex) {
