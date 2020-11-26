@@ -80,18 +80,31 @@ void CMonitorThread::onStart()
 	 	 }
 	 	case CTEMPCOOLHEAD: {
 	 		m_currentStage=CTEMPCOOLHEADW;
-	 		 
-	 		 break;
+			try {
+	 			m_core->updateShieldTemperature();
+	 		 }
+	 		 catch (ACSErr::ACSbaseExImpl& ex) {
+	 			_ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl,impl,ex,"CMonitorThread::runLoop");
+	 			_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
+	 		 }
+	 		 break;	 		 	 		 
 	 	 }
 	 	case CTEMPCOOLHEADW: {
+			 updateShieldTemperature
 	 		m_currentStage=CTEMPLNA;
 	 		 
 	 		 break;
 	 	 }
 	 	case CTEMPLNA: {
 	 		m_currentStage=CTEMPLNAW;
-	 		 
-	 		 break;
+	 		 try {
+	 			m_core->updateLnaTemperature();
+	 		 }
+	 		 catch (ACSErr::ACSbaseExImpl& ex) {
+	 			_ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl,impl,ex,"CMonitorThread::runLoop");
+	 			_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
+	 		 }
+	 		break;
 	 	 }
 	 	case CTEMPLNAW: {
 	 		m_currentStage=ENVTEMP;
