@@ -1072,7 +1072,7 @@ void CComponentCore::updateEnvironmentTemperature() throw (ReceiversErrors::Rece
 {
     // not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
     try {
-        m_environmentTemperature.temperature = m_control->vertexTemperature(Helpers::voltage2Celsius);
+        m_environmentTemperature.temperature = m_control->vertexTemperature(Helpers::voltageConverter);
         m_environmentTemperature.timestamp = getTimeStamp();
     }
     catch (IRA::ReceiverControlEx& ex) {
@@ -1089,8 +1089,7 @@ void CComponentCore::updateShieldTemperature() throw (ReceiversErrors::ReceiverC
 {
     // not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
     try {
-        //m_shieldTemperature.temperature = m_control->cryoTemperature(0,Helpers::voltage2Kelvin);
-        m_shieldTemperature.temperature = m_control->cryoTemperature(0,nullptr);
+        m_shieldTemperature.temperature = m_control->cryoTemperature(0,Helpers::voltage2Kelvin);        
         m_shieldTemperature.timestamp = getTimeStamp();
     }
     catch (IRA::ReceiverControlEx& ex) {
