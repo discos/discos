@@ -123,7 +123,7 @@ void CMonitorThread::onStart()
 	 	case COOLHEAD: {
 	 		m_currentStage=VACUUMPUMP;
 	 		try {
-	 			m_core->updateCoolHead();
+	 			m_core->updateColdHead();
 	 		}
 	 		 catch (ACSErr::ACSbaseExImpl& ex) {
 	 			 _ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl,impl,ex,"CMonitorThread::runLoop");
