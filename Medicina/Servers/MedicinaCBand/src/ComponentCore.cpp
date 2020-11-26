@@ -1093,7 +1093,7 @@ void CComponentCore::updateShieldTemperature() throw (ReceiversErrors::ReceiverC
         m_shieldTemperature.timestamp = getTimeStamp();
     }
     catch (IRA::ReceiverControlEx& ex) {
-        m_environmentTemperature.temperature = CEDUMMY;
+        m_shieldTemperature.temperature = CEDUMMY;
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateShieldTemperature()");
         impl.setDetails(ex.what().c_str());
         setStatusBit(CONNECTIONERROR);
@@ -1110,7 +1110,7 @@ void CComponentCore::updateLnaTemperature() throw (ReceiversErrors::ReceiverCont
         m_lnaTemperature.timestamp = getTimeStamp();
     }
     catch (IRA::ReceiverControlEx& ex) {
-        m_environmentTemperature.temperature = CEDUMMY;
+        m_lnaTemperature.temperature = CEDUMMY;
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::updateLnaTemperature()");
         impl.setDetails(ex.what().c_str());
         setStatusBit(CONNECTIONERROR);
