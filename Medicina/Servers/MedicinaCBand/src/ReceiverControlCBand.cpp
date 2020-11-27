@@ -174,3 +174,32 @@ void ReceiverControlCBand::resetVacuumValveOpenDelay(
         throw IRA::ReceiverControlEx(error_msg + ex.what());
     }    
 }
+
+double ReceiverControlCBand::environmentTemperature(
+        double (*converter)(double voltage),
+        const BYTE data_type,     
+        const BYTE port_type,       
+        const BYTE port_number,  
+        const size_t raw_index                      
+        ) throw (ReceiverControlEx)
+{
+    try {
+
+        std::vector<BYTE> parameters = makeRequest(
+                m_dewar_board_ptr,      // Pointer to the dewar board
+                MCB_CMD_GET_DATA,       // Command to send
+                3,                      // Number of parameters
+                data_type,
+                port_type,
+                port_number
+        );
+
+        // Return the vertex temperature in Kelvin for a given voltage VALUE
+        return converter != NULL ? converter(get_value(parameters, raw_index)) : \
+                            get_value(parameters, raw_index);
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "ReceiverControl: error getting the vertex temperature.\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+}

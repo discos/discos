@@ -146,6 +146,30 @@ public:
             const BYTE value=0x00
     ) throw (IRA::ReceiverControlEx);
 
+
+     /** Return the env temperature 
+     *
+     *  @param converter pointer to the function that performs the conversion from
+     *  voltage to Kelvin; default value is NULL, and in this case the value
+     *  returned by vertexTemperature is the voltage value (the value before conversion).
+     *  @param data_type the type of the data; the default type is a 32 bit floating point
+     *  @param port_type the port type; the default port is the AD24
+     *  @param port_number the port number; the default value is a range of port numbers from
+     *  8 to 15.
+     *  @param raw_index the index that allows to get the vertex temperature value from the 
+     *  port_number range. The default value is 6.
+     *  @return the vertex temperature in Kelvin if converter != NULL, the value in voltage
+     *  (before conversion) otherwise.
+     *  @throw ReceiverControlEx
+     */
+    double environmentTemperature(
+            double (*converter)(double voltage)=NULL,
+            const BYTE data_type=MCB_CMD_DATA_TYPE_F32,     
+            const BYTE port_type=MCB_PORT_TYPE_AD24,       
+            const BYTE port_number=MCB_PORT_NUMBER_00_07,  
+            const size_t raw_index=5                      
+    ) throw (ReceiverControlEx);
+
 private:
 
 
