@@ -198,8 +198,8 @@ double ReceiverControlCBand::environmentTemperature(
         return converter != NULL ? converter(get_value(parameters, raw_index)) : \
                             get_value(parameters, raw_index);
     }
-    catch(MicroControllerBoardEx& ex) {
+    catch(IRA::MicroControllerBoardEx& ex) {
         std::string error_msg = "ReceiverControl: error getting the vertex temperature.\n";
-        throw ReceiverControlEx(error_msg + ex.what());
+        throw IRA::ReceiverControlEx(error_msg + ex.what());
     }
 }
