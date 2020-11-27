@@ -924,7 +924,7 @@ protected:
             const BYTE command, size_t len, ...
     ) throw(MicroControllerBoardEx);
 
-private:
+
 
         /** Return the requested value computed from a vector<BYTE> of parameters
 	 * @param parameters a vector of BYTEs to join to compute the final value
@@ -932,7 +932,8 @@ private:
      * @return a dobule value computed from a vector<BYTE> of parameters
 	*/
     double get_value(const std::vector<BYTE> parameters, const size_t RAW_INDEX);
-
+    
+private:
 
     /** The IP address of the dewar board */
     const std::string m_dewar_ip;
