@@ -161,7 +161,7 @@ double MixerOperator::getValue()
 bool MixerOperator::isLocked()
 {
 	#ifndef EXCLUDE_MIXER
-   bool l_1st_lock= isDeviceLocked(m_loDev_1st, (const char *)m_configuration.getLocalOscillatorInstance1st());
+    bool l_1st_lock= isDeviceLocked(m_loDev_1st, (const char *)m_configuration.getLocalOscillatorInstance1st());
 	bool l_2nd_lock= isDeviceLocked(m_loDev_2nd, (const char *)m_configuration.getLocalOscillatorInstance2nd());
 	return l_1st_lock || l_2nd_lock;
 	#else

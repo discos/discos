@@ -82,17 +82,25 @@ void CConfiguration::init(maci::ContainerServices *Services)
 	 MED_TRACE_MSG(" IN ");
 	 m_service= Services;
 	/* read component configuration */	
-	_GET_STRING_ATTRIBUTE("DewarIPAddress","Dewar IP address:",m_dewarIPAddress,"");
+	_GET_STRING_ATTRIBUTE("DewarIPAddress","Dewar IP address:",m_dewarIPAddress,"");	
+	_GET_DWORD_ATTRIBUTE("DewarPort","Dewar port:",m_dewarPort,"");
 	_GET_STRING_ATTRIBUTE("LNAIPAddress","LNA IP address:",m_LNAIPAddress,"");
+	_GET_DWORD_ATTRIBUTE("LNAPort","LNA port:",m_LNAPort,"");
 	_GET_STRING_ATTRIBUTE("LocalOscillatorInstance1st","Local oscillator instance:",m_localOscillatorInstance1st,"");
 	_GET_STRING_ATTRIBUTE("LocalOscillatorInstance2nd","Local oscillator instance:",m_localOscillatorInstance2nd,"");
-	_GET_DWORD_ATTRIBUTE("DewarPort","Dewar port:",m_dewarPort,"");
-	_GET_DWORD_ATTRIBUTE("LNAPort","LNA port:",m_LNAPort,"");
 	_GET_DWORD_ATTRIBUTE("WatchDogResponseTime","Response time of watch dog thread (uSec):",m_watchDogResponseTime,"");
 	_GET_DWORD_ATTRIBUTE("WatchDogSleepTime","Sleep time of the watch dog thread (uSec):",m_watchDogSleepTime,"");
 	_GET_DWORD_ATTRIBUTE("LNASamplingTime","Time needed to collect LNA information from control boards (uSec):",m_LNASamplingTime,"");
 	_GET_DWORD_ATTRIBUTE("RepetitionCacheTime","Log repetition filter, caching time (uSec):",m_repetitionCacheTime,"");
-	_GET_DWORD_ATTRIBUTE("RepetitionExpireTime","Log repetition filter, expire time (uSec):",m_repetitionExpireTime,"");		
+	_GET_DWORD_ATTRIBUTE("RepetitionExpireTime","Log repetition filter, expire time (uSec):",m_repetitionExpireTime,"");	
+	/** TEST */
+	fprintf(stderr, "LO 1st %s \n", m_localOscillatorInstance1st);
+	fprintf(stderr, "LO 1st %s \n", m_localOscillatorInstance2nd);
+	fprintf(stderr, "LNA address %S \n", m_LNAIPAddress);
+	fprintf(stderr, "LNA port %u \n", m_LNAPort);
+	fprintf(stderr, "Dewar address %S \n", m_dewarIPAddress);
+	fprintf(stderr, "Dewar port %u \n", m_dewarPort);
+	/* END TEST */	
 	/* Get available configurations, access every conf file, filling associated parameters struct */	
 	const std::vector<ReceiverConfHandler::ConfigurationName> l_available_confs= m_conf_hnd.getAvailableConfs();
 	std::vector<ReceiverConfHandler::ConfigurationName>::const_iterator l_conf_it;
