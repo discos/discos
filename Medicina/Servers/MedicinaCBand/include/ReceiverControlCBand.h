@@ -168,7 +168,7 @@ public:
             const BYTE port_type=MCB_PORT_TYPE_AD24,       
             const BYTE port_number=MCB_PORT_NUMBER_00_07,  
             const size_t raw_index=5                      
-    ) throw (ReceiverControlEx);
+    ) throw (IRA::ReceiverControlEx);
 
 private:
 

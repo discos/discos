@@ -181,7 +181,7 @@ double ReceiverControlCBand::environmentTemperature(
         const BYTE port_type,       
         const BYTE port_number,  
         const size_t raw_index                      
-        ) throw (ReceiverControlEx)
+        ) throw (IRA::ReceiverControlEx)
 {
     try {
 
