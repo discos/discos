@@ -1001,9 +1001,8 @@ void CComponentCore::coldHeadOn() throw (ReceiversErrors::ReceiverControlBoardEr
         _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::vacuumSensorOff()");
         throw impl;
     }
-    try {
-    	/* @todo */
-        //m_control->set cold head on();
+    try {    	
+        m_control->setCoolHeadOn();
     }
     catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::vacuumSensorOff()");
@@ -1020,9 +1019,8 @@ void CComponentCore::coldHeadOff() throw (ReceiversErrors::ReceiverControlBoardE
         _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::vacuumSensorOff()");
         throw impl;
     }
-    try {
-    	/* @todo */
-        //m_control->set cold head off();
+    try {    	
+        m_control->setCoolHeadOff();
     }
     catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::vacuumSensorOff()");
