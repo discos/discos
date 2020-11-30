@@ -171,16 +171,16 @@ bool MixerOperator::isLocked()
 
 /* *** PRIVATE *** */
 
-void MixerOperator::loadDevice(Receivers::LocalOscillator_var p_loDev, const char * p_lo_name){
-
-	
+void MixerOperator::loadDevice(Receivers::LocalOscillator_var p_loDev, const char * p_lo_name)
+{	
     if ((!CORBA::is_nil(p_loDev)) && (m_mixer_fault)) { // if reference was already taken, but an error was found....dispose the reference
-    #ifndef EXCLUDE_MIXER
-        try {
-            releaseComponents();
-        }catch (...) { //dispose silently...if an error...no matter
-        }
-    #endif
+        #ifndef EXCLUDE_MIXER
+            try {
+                releaseComponents();
+            }catch (...) { 
+                //dispose silently...if an error...no matter
+            }
+        #endif
         p_loDev= Receivers::LocalOscillator::_nil();
     }
     if (CORBA::is_nil(p_loDev)) {  //only if it has not been retrieved yet

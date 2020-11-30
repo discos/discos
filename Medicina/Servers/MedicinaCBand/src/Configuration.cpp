@@ -94,12 +94,14 @@ void CConfiguration::init(maci::ContainerServices *Services)
 	_GET_DWORD_ATTRIBUTE("RepetitionCacheTime","Log repetition filter, caching time (uSec):",m_repetitionCacheTime,"");
 	_GET_DWORD_ATTRIBUTE("RepetitionExpireTime","Log repetition filter, expire time (uSec):",m_repetitionExpireTime,"");	
 	/** TEST */
+	fprintf(stderr, "---- CONF ----" );
 	fprintf(stderr, "LO 1st %s \n", (const char*)m_localOscillatorInstance1st);
 	fprintf(stderr, "LO 1st %s \n", (const char*)m_localOscillatorInstance2nd);
 	fprintf(stderr, "LNA address %S \n", (const char*)m_LNAIPAddress);
 	fprintf(stderr, "LNA port %u \n", m_LNAPort);
 	fprintf(stderr, "Dewar address %S \n", (const char*)m_dewarIPAddress);
 	fprintf(stderr, "Dewar port %u \n", m_dewarPort);
+	fprintf(stderr, "---- * ----" );
 	/* END TEST */	
 	/* Get available configurations, access every conf file, filling associated parameters struct */	
 	const std::vector<ReceiverConfHandler::ConfigurationName> l_available_confs= m_conf_hnd.getAvailableConfs();
