@@ -34,7 +34,8 @@ SUBSYSTEM = Servers
 # MedWeatherStation \
 # HolographyBackend \
 
-MODULES = MedicinaCBand  
+MODULES = MedicinaCBand \
+			MedicinaLocalOscillatorImpl
 
 MAKE_FLAGS = "-k"
 PLATFORM := $(shell uname)
