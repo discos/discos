@@ -18,19 +18,19 @@
         </xs:sequence>
         <xs:attribute name="IP" type="xs:string" use="required"/>
         <xs:attribute name="PORT" type="xs:unsignedInt" use="required"/>
-        <xs:element name="FREQ_CMD" type="xs:string" use="required"/>
-        <xs:element name="FREQ_CMD" type="xs:string" use="required"/>
-        <xs:element name="FREQ_ANS_OK" type="xs:string" use="required"/>
-        <xs:element name="AMP_CMD" type="xs:string" use="required"/>
-        <xs:element name="AMP_ANS_OK" type="xs:string" use="required"/>
-        <xs:element name="RF_ON_CMD" type="xs:string" use="required"/>
-        <xs:element name="RF_ON_ANS_OK" type="xs:string" use="required"/>
-        <xs:element name="RF_OFF_CMD" type="xs:string" use="required"/>
-        <xs:element name="RF_OFF_ANS_OK" type="xs:string" use="required"/>
-        <xs:element name="FREQ_QUERY" type="xs:string" use="required"/>
-        <xs:element name="FREQ_QUERY_NOK" type="xs:string" use="required"/>
-        <xs:element name="AMP_QUERY" type="xs:string" use="required"/>
-        <xs:element name="AMP_QUERY_NOK" type="xs:string" use="required"/>
+        <xs:attribute name="FREQ_CMD" type="xs:string" use="required"/>
+        <xs:attribute name="FREQ_CMD" type="xs:string" use="required"/>
+        <xs:attribute name="FREQ_ANS_OK" type="xs:string" use="required"/>
+        <xs:attribute name="AMP_CMD" type="xs:string" use="required"/>
+        <xs:attribute name="AMP_ANS_OK" type="xs:string" use="required"/>
+        <xs:attribute name="RF_ON_CMD" type="xs:string" use="required"/>
+        <xs:attribute name="RF_ON_ANS_OK" type="xs:string" use="required"/>
+        <xs:attribute name="RF_OFF_CMD" type="xs:string" use="required"/>
+        <xs:attribute name="RF_OFF_ANS_OK" type="xs:string" use="required"/>
+        <xs:attribute name="FREQ_QUERY" type="xs:string" use="required"/>
+        <xs:attribute name="FREQ_QUERY_NOK" type="xs:string" use="required"/>
+        <xs:attribute name="AMP_QUERY" type="xs:string" use="required"/>
+        <xs:attribute name="AMP_QUERY_NOK" type="xs:string" use="required"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
