@@ -34,5 +34,5 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <xs:element name="LocalOscillatorEthernet" type="LocalOscillatorEthType"/>
+  <xs:element name="LocalOscillatorEthernetCommand" type="LocalOscillatorEthCommandType"/>
 </xs:schema>
