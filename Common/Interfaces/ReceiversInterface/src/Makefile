@@ -15,7 +15,7 @@ CDB_SCHEMAS = NoiseMarkPoly Feeds ReceiversModeSetup LocalOscillatorLookUpTable 
 			  NoiseMarkLookUpTable TaperLookUpTable \
 			  DewarPositionerUpdatingTable DewarPositionerMapping \
 			  DewarPositionerActions \
-			  LocalOscillator LocalOscillatorEthernet
+			  LocalOscillator LocalOscillatorEthernet LocalOscillatorEthernetCommand
 
 # IDL Files and flags
 IDL_FILES = CommonReceiverInterface ReceiversBoss \
