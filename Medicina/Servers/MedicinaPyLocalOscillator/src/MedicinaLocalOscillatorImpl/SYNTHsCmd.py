@@ -22,7 +22,7 @@ class SYNTHsCmd:
                         'AMP_CMD', 'AMP_ANS_OK', \
                         'RF_ON_CMD', 'RF_ON_ANS_OK', \
                         'RF_OFF_CMD', 'RF_OFF_ANS_OK',\
-                        'FREQ_QUERY', 'FREQ_QUERY_NOK'\
+                        'FREQ_QUERY', 'FREQ_QUERY_NOK',\
                         'AMP_QUERY', 'AMP_QUERY_NOK']
         self.m_cmd_dict= dict.fromkeys(self.m_keys)
 
