@@ -18,8 +18,7 @@
         </xs:sequence>
         <xs:attribute name="IP" type="xs:string" use="required"/>
         <xs:attribute name="PORT" type="xs:unsignedInt" use="required"/>
-        <xs:attribute name="FREQ_CMD" type="xs:string" use="required"/>
-        <xs:attribute name="FREQ_CMD" type="xs:string" use="required"/>
+        <xs:attribute name="FREQ_CMD" type="xs:string" use="required"/>        
         <xs:attribute name="FREQ_ANS_OK" type="xs:string" use="required"/>
         <xs:attribute name="AMP_CMD" type="xs:string" use="required"/>
         <xs:attribute name="AMP_ANS_OK" type="xs:string" use="required"/>
