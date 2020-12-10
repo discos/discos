@@ -61,7 +61,7 @@ class MedicinaLocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComp
 			l_synt_cmd_list= l_synt_cmd.getCmdList()
 			for l_cmd_key in l_synt_cmd_list:
 				l_cmd_string= dao.get_string(l_cmd_key)
-				l_synt_cmd.setCmd(l_cmd_key, l_cmd_string)							
+				l_synt_cmd.setCmd(l_cmd_key, l_cmd_string.decode('string_escape'))							
 		except Exception:			
 			exc=ComponentErrorsImpl.CDBAccessExImpl()
 			msg= "Init error reading configuration from alma/"+ name
