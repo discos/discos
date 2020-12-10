@@ -41,7 +41,7 @@ class CommandLine:
 		cmd=self.m_cmd_dict['AMP_CMD']%power
 		#can rise an error....
 		answer=self.sendCmd(cmd)
-		self.last_answer= sanswer
+		self.last_answer= self.answer
 		if answer!=self.m_cmd_dict['AMP_ANS_OK']:
 			nak,err=answer.split()
 			message="cannot set the power, the error code is %s" % err
@@ -58,7 +58,7 @@ class CommandLine:
 			return self.power		
 		#can rise an error....
 		answer=self.sendCmd(cmd)
-		self.last_answer= sanswer
+		self.last_answer= self.answer
 		if self.m_cmd_dict['AMP_QUERY_NOK'] in answer:
 			nak,err=answer.split()
 			message="cannot read power, the error code is %s" % err
@@ -74,7 +74,7 @@ class CommandLine:
 		cmd=self.m_cmd_dict['FREQ_CMD']%freq
 		#can rise an error....
 		answer=self.sendCmd(cmd)
-		self.last_answer= sanswer
+		self.last_answer= self.answer
 		if answer!=self.m_cmd_dict['FREQ_ANS_OK']:
 			nak,err=answer.split()
 			message="cannot set frequency, the error code is %s" % err
@@ -91,7 +91,7 @@ class CommandLine:
 			return self.freq
 		#can rise an error....
 		answer=self.sendCmd(cmd)
-		self.last_answer= sanswer
+		self.last_answer= self.answer
 		if self.m_cmd_dict['FREQ_QUERY_NOK'] in answer:
 			nak,err=answer.split()
 			message="cannot read frequency, the error code is %s" % err
@@ -107,7 +107,7 @@ class CommandLine:
 		cmd=self.m_cmd_dict['RF_ON_CMD']
 		#can rise an error....
 		answer=self.sendCmd(cmd)
-		print answer
+		self.last_answer= self.answer
 		if answer!= self.m_cmd_dict['RF_ON_ANS_OK']:
 			nak,err=answer.split()
 			message="an error occurred, the code is %s" % err
@@ -118,6 +118,7 @@ class CommandLine:
 		cmd= self.m_cmd_dict['RF_OFF_CMD']
 		#can rise an error....
 		answer=self.sendCmd(cmd)
+		self.last_answer= self.answer
 		if answer!= self.m_cmd_dict['RF_OFF_ANS_OK']:
 			nak,err=answer.split()
 			message="an error occurred, the code is %s " % err
