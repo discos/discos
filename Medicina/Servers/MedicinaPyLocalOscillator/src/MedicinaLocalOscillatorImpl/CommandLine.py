@@ -42,7 +42,7 @@ class CommandLine:
 		answer=self.sendCmd(cmd)
 		if answer!=self.m_cmd_dict['AMP_ANS_OK']:
 			nak,err=answer.split()
-			message="cannot set the power, the error code is %d"%err
+			message="cannot set the power, the error code is %s" % err
 			exc=CommandLineError(message);
 			raise exc
 		else:
@@ -58,7 +58,7 @@ class CommandLine:
 		answer=self.sendCmd(cmd)
 		if self.m_cmd_dict['AMP_QUERY_NOK'] in answer:
 			nak,err=answer.split()
-			message="cannot read power, the error code is %d"%err
+			message="cannot read power, the error code is %s" % err
 			exc=CommandLineError(message);
 			raise exc
 		else:
@@ -73,7 +73,7 @@ class CommandLine:
 		answer=self.sendCmd(cmd)
 		if answer!=self.m_cmd_dict['FREQ_ANS_OK']:
 			nak,err=answer.split()
-			message="cannot set frequency, the error code is %d"%err
+			message="cannot set frequency, the error code is %s" % err
 			exc=CommandLineError(message);
 			raise exc
 		else:
@@ -89,7 +89,7 @@ class CommandLine:
 		answer=self.sendCmd(cmd)
 		if self.m_cmd_dict['FREQ_QUERY_NOK'] in answer:
 			nak,err=answer.split()
-			message="cannot read frequency, the error code is %d"%err
+			message="cannot read frequency, the error code is %s" % err
 			exc=CommandLineError(message);
 			raise exc
 		else:
@@ -105,7 +105,7 @@ class CommandLine:
 		print answer
 		if answer!= self.m_cmd_dict['RF_ON_ANS_OK']:
 			nak,err=answer.split()
-			message="an error occurred, the code is %d"%err
+			message="an error occurred, the code is %s" % err
 			exc=CommandLineError(message);
 			raise exc
   
@@ -115,7 +115,7 @@ class CommandLine:
 		answer=self.sendCmd(cmd)
 		if answer!= self.m_cmd_dict['RF_OFF_ANS_OK']:
 			nak,err=answer.split()
-			message="an error occurred, the code is %d"%err
+			message="an error occurred, the code is %s " % err
 			exc=CommandLineError(message);
 			raise exc
    
