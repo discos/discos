@@ -22,6 +22,7 @@ class CommandLine:
 		self.freq=0.0
 		self.powerTime=0
 		self.freqTime=0
+		self.last_answer=""
 		
 	def initialize(self):
 		#raises an error.....
@@ -40,6 +41,7 @@ class CommandLine:
 		cmd=self.m_cmd_dict['AMP_CMD']%power
 		#can rise an error....
 		answer=self.sendCmd(cmd)
+		self.last_answer= sanswer
 		if answer!=self.m_cmd_dict['AMP_ANS_OK']:
 			nak,err=answer.split()
 			message="cannot set the power, the error code is %s" % err
@@ -51,11 +53,12 @@ class CommandLine:
 
 	def getPower(self):
 		cmd=self.m_cmd_dict['AMP_QUERY']
-		now=time.time()
+		now=time.time()		
 		if now<self.powerTime:
 			return self.power		
 		#can rise an error....
 		answer=self.sendCmd(cmd)
+		self.last_answer= sanswer
 		if self.m_cmd_dict['AMP_QUERY_NOK'] in answer:
 			nak,err=answer.split()
 			message="cannot read power, the error code is %s" % err
@@ -71,6 +74,7 @@ class CommandLine:
 		cmd=self.m_cmd_dict['FREQ_CMD']%freq
 		#can rise an error....
 		answer=self.sendCmd(cmd)
+		self.last_answer= sanswer
 		if answer!=self.m_cmd_dict['FREQ_ANS_OK']:
 			nak,err=answer.split()
 			message="cannot set frequency, the error code is %s" % err
@@ -87,6 +91,7 @@ class CommandLine:
 			return self.freq
 		#can rise an error....
 		answer=self.sendCmd(cmd)
+		self.last_answer= sanswer
 		if self.m_cmd_dict['FREQ_QUERY_NOK'] in answer:
 			nak,err=answer.split()
 			message="cannot read frequency, the error code is %s" % err
