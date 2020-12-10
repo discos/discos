@@ -89,18 +89,16 @@ class MedicinaLocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComp
 	def set(self,rf_power,rf_freq):
 		try:
 			self.cl.setFrequency(rf_freq)
-		except CommandLineError as ex:
-			#msg="cannot set frequency with message %s" % (ex.__str__)
+		except Exception as ex:			
 			print str(ex)
 			msg="cannot set frequency"
 			exc=ReceiversErrorsImpl.SynthetiserErrorExImpl()
 			exc.setData('Details',msg);
-			raise exc.getReceiversErrorsEx()
+			raise exc.getReceiversErrorsEx()		
 		try:
 			self.cl.setPower(rf_power)
-		except CommandLineError as ex:
-			print str(ex)
-			#msg="cannot set power with message %s" % (ex.__str__)
+		except Exception as ex:
+			print str(ex)			
 			msg="cannot set power"
 			exc=ReceiversErrorsImpl.SynthetiserErrorExImpl()
 			exc.setData('Details',msg);
