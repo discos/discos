@@ -303,12 +303,17 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo)
         ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"Catch 3 !"));    
         return;
     }
-    try{        
-        m_bandwidth[0]= l_setup.m_RFMax[0]-( m_startFreq[0] + l_lo_value );
+    try{    
+        /* TEST */
+        fprintf(stderr, "m_IFBandwidth[0] : %f", l_setup.m_IFBandwidth[0]);
+        fprintf(stderr, "m_rfmax[0] : %f", l_setup.m_RFMax[0]);    
+        fprintf(stderr, "m_startfreq[0] : %f", m_startFreq[0]);
+        fprintf(stderr, "lo_value : %f", l_lo_value);
+        m_bandwidth[0]= l_setup.m_RFMax[0]-( m_startFreq[0] + l_lo_value );        
         // the if bandwidth could never be larger than the max IF bandwidth:
         if (m_bandwidth[0] > l_setup.m_IFBandwidth[0])
-            m_bandwidth[0]= l_setup.m_IFBandwidth[0];
-        }
+            m_bandwidth[0]= l_setup.m_IFBandwidth[0];        
+        fprintf(stderr, "m_bandwidth[0] : %f", m_bandwidth[0]);
     }catch(...){
         ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"Catch 4 !"));    
         return;
