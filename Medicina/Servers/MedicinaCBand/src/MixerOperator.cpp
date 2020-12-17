@@ -259,7 +259,9 @@ bool MixerOperator::isDeviceLocked(Receivers::LocalOscillator_var p_loDev,
 	 ACSErr::Completion_var comp;
     ACS::ROlong_var isLockedRef;
     CORBA::Long isLocked;
-    try {
+    if (CORBA::is_nil(p_loDev))
+        return false;
+    try {        
         isLockedRef=p_loDev->isLocked();
     }
     catch (CORBA::SystemException& ex) {

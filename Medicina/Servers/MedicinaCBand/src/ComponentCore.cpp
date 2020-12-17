@@ -306,8 +306,10 @@ void CComponentCore::checkLocalOscillator() throw (ComponentErrors::CORBAProblem
 {
     baci::ThreadSyncGuard guard(&m_mutex);    
     /* Load mixer if it's not ready */
-    if (!m_mixer.isLoaded())
-        m_mixer.loadComponents();
+    if (!m_mixer.isLoaded()){        
+        clearStatusBit(UNLOCKED);   
+        return;
+    }        
     if (!m_mixer.isLocked()) setStatusBit(UNLOCKED);
     else clearStatusBit(UNLOCKED);   
 }
