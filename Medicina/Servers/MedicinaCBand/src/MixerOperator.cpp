@@ -159,7 +159,7 @@ double MixerOperator::getValue()
     double l_freq;
     if( CORBA::is_nil(m_loDev_1st)){
         ACS_LOG(LM_FULL_INFO,"MixerOperator::getValue()",(LM_INFO,"LO is null!"));
-        return 0.0
+        return 0.0;
     }
     try{
     	#ifndef EXCLUDE_MIXER        
