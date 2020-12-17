@@ -112,7 +112,7 @@ void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ModeErro
         m_bandwidth[i]=l_setup.m_IFBandwidth[i];
         m_polarization[i]=(long)l_setup.m_polarizations[i];
         m_localOscillatorValue[i]=l_setup.m_defaultLO[i];
-        MED_TRACE_FMT("\n --- cyle %d --- \n");
+        MED_TRACE_FMT("\n --- cyle %d --- \n", i);
         MED_TRACE_FMT("m_startFreq %f\n",m_startFreq[i]);
         MED_TRACE_FMT("m_bandwidth %f\n",m_bandwidth[i]);
         MED_TRACE_FMT("m_polarization %f\n",m_polarization[i]);
