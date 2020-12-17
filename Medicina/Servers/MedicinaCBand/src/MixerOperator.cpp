@@ -149,7 +149,7 @@ bool MixerOperator::setValue(const ACS::doubleSeq& p_values)
         throw impl;
     }
     m_current_value= p_values[0];
-	 MED_TRACE_MSG(" OUT ");
+	MED_TRACE_MSG(" OUT ");
     return true;
 }
 
