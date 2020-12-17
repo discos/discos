@@ -92,7 +92,7 @@ void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ModeErro
         throw impl;
     }    
     guard.release();
-	 MED_TRACE_MSG(" ASK IFs ");
+	MED_TRACE_MSG(" ASK IFs ");
     /* For every feed ( L R for med C) populate core member  
      * arrays eg bandwidth polarization.. */
     ReceiverConfHandler::ConfigurationSetup l_setup= m_configuration.getCurrentSetup();	   
@@ -101,21 +101,29 @@ void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ModeErro
     m_polarization.length(l_setup.m_IFs);
     
     MED_TRACE_FMT("IFMin len %d\n",l_setup.m_IFMin.size());
-	 MED_TRACE_FMT("IFBandwidth len %d\n",l_setup.m_IFBandwidth.size());
-	 MED_TRACE_FMT("Polar. len %d\n",l_setup.m_polarizations.size());
+	MED_TRACE_FMT("IFBandwidth len %d\n",l_setup.m_IFBandwidth.size());
+	MED_TRACE_FMT("Polar. len %d\n",l_setup.m_polarizations.size());
     MED_TRACE_FMT("Default LO len %d\n",l_setup.m_defaultLO.size());
 
     try{
     for (WORD i=0; i < l_setup.m_IFs; i++) {
-    	  MED_TRACE_MSG(" SET PARAMS IF ");
+    	MED_TRACE_MSG(" SET PARAMS IF ");
         m_startFreq[i]=l_setup.m_IFMin[i];
         m_bandwidth[i]=l_setup.m_IFBandwidth[i];
         m_polarization[i]=(long)l_setup.m_polarizations[i];
         m_localOscillatorValue[i]=l_setup.m_defaultLO[i];
+        MED_TRACE_FMT("\n --- cyle %d --- \n");
+        MED_TRACE_FMT("m_startFreq %f\n",m_startFreq[i]);
+        MED_TRACE_FMT("m_bandwidth %f\n",m_bandwidth[i]);
+        MED_TRACE_FMT("m_polarization %f\n",m_polarization[i]);
+        MED_TRACE_FMT("m_localOscillatorValue %f\n",m_localOscillatorValue[i]);
     }
     }catch(...){
     	MED_TRACE_MSG(" EXC SET IFS ");
     }
+
+
+
     // Basic operations
     lnaOn(); // throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
     externalCalOff();
@@ -305,10 +313,10 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo)
     }
     try{    
         /* TEST */
-        fprintf(stderr, "m_IFBandwidth[0] : %f", l_setup.m_IFBandwidth[0]);
-        fprintf(stderr, "m_rfmax[0] : %f", l_setup.m_RFMax[0]);    
-        fprintf(stderr, "m_startfreq[0] : %f", m_startFreq[0]);
-        fprintf(stderr, "lo_value : %f", l_lo_value);
+        fprintf(stderr, "m_IFBandwidth[0] : %f\n", l_setup.m_IFBandwidth[0]);
+        fprintf(stderr, "m_rfmax[0] : %f\n", l_setup.m_RFMax[0]);    
+        fprintf(stderr, "lo_value : %f\n", l_lo_value);
+        fprintf(stderr, "m_startfreq[0] : %f\n", m_startFreq[0]);        
         m_bandwidth[0]= l_setup.m_RFMax[0]-( m_startFreq[0] + l_lo_value );        
         // the if bandwidth could never be larger than the max IF bandwidth:
         if (m_bandwidth[0] > l_setup.m_IFBandwidth[0])
