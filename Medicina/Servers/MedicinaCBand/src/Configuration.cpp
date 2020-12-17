@@ -96,7 +96,7 @@ void CConfiguration::init(maci::ContainerServices *Services)
 	/** TEST */
 	fprintf(stderr, "---- CONF ----" );
 	fprintf(stderr, "LO 1st %s \n", (const char*)m_localOscillatorInstance1st);
-	fprintf(stderr, "LO 1st %s \n", (const char*)m_localOscillatorInstance2nd);
+	fprintf(stderr, "LO 2st %s \n", (const char*)m_localOscillatorInstance2nd);
 	fprintf(stderr, "LNA address %S \n", (const char*)m_LNAIPAddress);
 	fprintf(stderr, "LNA port %u \n", m_LNAPort);
 	fprintf(stderr, "Dewar address %S \n", (const char*)m_dewarIPAddress);
