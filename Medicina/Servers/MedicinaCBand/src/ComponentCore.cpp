@@ -280,6 +280,8 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo)
 {    
 	MED_TRACE_MSG(" IN ");	
     baci::ThreadSyncGuard guard(&m_mutex);
+    double l_lo_value;
+    ReceiverConfHandler::ConfigurationSetup l_setup;
     /** TODO REMOVE TRY CATCH IF NOT USEFULL */
     try{
         m_mixer.setValue(lo);
@@ -289,12 +291,12 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo)
     }
 
     try{
-        ReceiverConfHandler::ConfigurationSetup l_setup= m_configuration.getCurrentSetup();	      
+        l_setup= m_configuration.getCurrentSetup();	      
     }catch(...){
         ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"Catch 2 !"));    
         return;
     }
-    double l_lo_value;
+    
     try{
         l_lo_value= m_mixer.getValue();    
     }catch(...){
