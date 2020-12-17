@@ -287,14 +287,16 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo)
         ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"Catch 1 !"));    
         return;
     }
+
     try{
         ReceiverConfHandler::ConfigurationSetup l_setup= m_configuration.getCurrentSetup();	      
     }catch(...){
         ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"Catch 2 !"));    
         return;
     }
+    double l_lo_value;
     try{
-        double l_lo_value= m_mixer.getValue();    
+        l_lo_value= m_mixer.getValue();    
     }catch(...){
         ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"Catch 3 !"));    
         return;
