@@ -47,6 +47,9 @@ void MixerOperator::loadComponents()
 	#ifndef EXCLUDE_MIXER	 
     const char * m_1st_name= m_configuration.getLocalOscillatorInstance1st();
     const char * m_2nd_name= m_configuration.getLocalOscillatorInstance2nd();             
+    /* TEST */
+    fprintf(stderr,"LO 1 : %s", m_1st_name);
+    fprintf(stderr,"LO 2 : %s", m_2nd_name);
     try{           
         loadDevice(m_loDev_1st, m_1st_name);
         loadDevice(m_loDev_2nd, m_2nd_name);
@@ -64,10 +67,14 @@ void MixerOperator::loadComponents()
 
 void MixerOperator::releaseComponents()
 {
-	 const char * m_1st_name= m_configuration.getLocalOscillatorInstance1st();
+    try{
+	const char * m_1st_name= m_configuration.getLocalOscillatorInstance1st();
     const char * m_2nd_name= m_configuration.getLocalOscillatorInstance2nd();
     releaseDevice(m_loDev_1st, m_1st_name);
     releaseDevice(m_loDev_2nd, m_2nd_name);
+    }catch(...){
+       MED_TRACE_MSG(" Failed to release LOs ");  
+    }
     m_init_ok= false;
 }
 
@@ -213,6 +220,9 @@ void MixerOperator::loadDevice(Receivers::LocalOscillator_var p_loDev, const cha
             Impl.setComponentName((const char*)p_lo_name);
             p_loDev= Receivers::LocalOscillator::_nil();
             throw Impl;
+        }
+        catch(...){
+            MED_TRACE_MSG(" Failed to load LO ");
         }
     }
 }
