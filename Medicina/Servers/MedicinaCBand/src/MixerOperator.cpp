@@ -86,7 +86,7 @@ bool MixerOperator::setValue(const ACS::doubleSeq& p_values)
                         ReceiversErrors::LocalOscillatorErrorExImpl)
 {
 	 MED_TRACE_MSG(" IN ");        
-    if(!m_init_ok || CORBA::is_nil(m_loDev_1st) || CORBA::is_nil(m_loDev_1st) ){
+    if(!m_init_ok || CORBA::is_nil(m_loDev_1st) || CORBA::is_nil(m_loDev_2nd) ){
         ACS_LOG(LM_FULL_INFO,"MixerOperator::setLO()",
                     (LM_NOTICE,"LOs not ready to be set"));
 		  MED_TRACE_MSG(" EXCP devices not found ");                    

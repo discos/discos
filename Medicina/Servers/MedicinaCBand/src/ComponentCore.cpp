@@ -280,14 +280,35 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo)
 {    
 	MED_TRACE_MSG(" IN ");	
     baci::ThreadSyncGuard guard(&m_mutex);
-    m_mixer.setValue(lo);
-    ReceiverConfHandler::ConfigurationSetup l_setup= m_configuration.getCurrentSetup();	      
-    double l_lo_value= m_mixer.getValue();    
-    for (WORD i=0; i < l_setup.m_IFs; i++) {
-        m_bandwidth[i]= l_setup.m_RFMax[i]-( m_startFreq[i] + l_lo_value );
-        // the if bandwidth could never be larger than the max IF bandwidth:
-        if (m_bandwidth[i] > l_setup.m_IFBandwidth[i])
-            m_bandwidth[i]= l_setup.m_IFBandwidth[i];
+    /** TODO REMOVE TRY CATCH IF NOT USEFULL */
+    try{
+        m_mixer.setValue(lo);
+    }catch(...){
+        ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"Catch 1 !"));    
+        return;
+    }
+    try{
+        ReceiverConfHandler::ConfigurationSetup l_setup= m_configuration.getCurrentSetup();	      
+    }catch(...){
+        ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"Catch 2 !"));    
+        return;
+    }
+    try{
+        double l_lo_value= m_mixer.getValue();    
+    }catch(...){
+        ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"Catch 3 !"));    
+        return;
+    }
+    try{
+        for (WORD i=0; i < l_setup.m_IFs; i++) {
+            m_bandwidth[i]= l_setup.m_RFMax[i]-( m_startFreq[i] + l_lo_value );
+            // the if bandwidth could never be larger than the max IF bandwidth:
+            if (m_bandwidth[i] > l_setup.m_IFBandwidth[i])
+                m_bandwidth[i]= l_setup.m_IFBandwidth[i];
+        }
+    }catch(...){
+        ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"Catch 4 !"));    
+        return;
     }
     ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"LOCAL_OSCILLATOR %lf",l_lo_value));
 	MED_TRACE_MSG(" OUT ");
