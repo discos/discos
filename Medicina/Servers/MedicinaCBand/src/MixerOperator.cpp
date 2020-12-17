@@ -94,7 +94,7 @@ bool MixerOperator::setValue(const ACS::doubleSeq& p_values)
     ReceiverConfHandler::ConfigurationSetup l_setup= m_configuration.getCurrentSetup();	  
     
     if (p_values.length()==0) {
-        _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::setLO");
+        _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"MixerOperator::setLO");
         impl.setReason("at least one value must be provided");
         throw impl;
     }
