@@ -58,7 +58,7 @@ public:
      * @brief Destroy the Receiver Control object
      * 
      */
-    ~ReceiverControlCBand();
+    ~ReceiverControlCBand(){}
 
     
     /** Set HI C Receiver
