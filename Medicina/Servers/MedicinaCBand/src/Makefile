@@ -19,7 +19,7 @@
 
 #
 # user definable C-compilation flags
-USER_CFLAGS = -DMED_DEBUG_LVL -DEXCLUDE_MIXER -DEXCLUDE_MONITOR
+USER_CFLAGS = -DMED_DEBUG_LVL -DEXCLUDE_MIXER -DEXCLUDE_MONITOR -DSTOP_MONITOR_PROPERTY
 
 #
 # additional include and library search paths
