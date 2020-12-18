@@ -99,7 +99,8 @@ void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ModeErro
     m_startFreq.length(l_setup.m_IFs);
     m_bandwidth.length(l_setup.m_IFs);
     m_polarization.length(l_setup.m_IFs);
-    
+    m_localOscillatorValue.length(l_setup.m_IFs);
+
     MED_TRACE_FMT("IFMin len %d\n",l_setup.m_IFMin.size());
 	MED_TRACE_FMT("IFBandwidth len %d\n",l_setup.m_IFBandwidth.size());
 	MED_TRACE_FMT("Polar. len %d\n",l_setup.m_polarizations.size());
@@ -121,8 +122,6 @@ void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ModeErro
     }catch(...){
     	MED_TRACE_MSG(" EXC SET IFS ");
     }
-
-
 
     // Basic operations
     lnaOn(); // throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)

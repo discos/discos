@@ -138,6 +138,7 @@ void MedicinaCBandImpl::execute() throw (ACSErr::ACSbaseExImpl)
 	ACS_LOG(LM_FULL_INFO,"MedicinaCBandImpl::execute()",(LM_INFO,"WATCH_DOG_SPAWNED"));
 	try {
 		#ifndef STOP_MONITOR_PROPERTY
+		#warning "not starting property monitoring!"
 			startPropertiesMonitoring();
 		#endif
 	}
