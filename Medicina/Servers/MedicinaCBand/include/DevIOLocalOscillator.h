@@ -54,8 +54,12 @@ public:
 	*/
 	ACS::doubleSeq read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
 	{
-		m_pCore->getLO(m_val);
-		timestamp=getTimeStamp();  //Completion time
+		try{
+			m_pCore->getLO(m_val);					
+		}catch(...){
+			AUTO_TRACE("DevIOLocalOscillator::read() - Error getting Value");			
+		}
+		timestamp=getTimeStamp();  //Completion time	
 		return m_val;
 	}
 	/**

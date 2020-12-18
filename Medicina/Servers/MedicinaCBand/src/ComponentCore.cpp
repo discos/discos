@@ -313,15 +313,15 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo)
     }
     try{    
         /* TEST */
-        fprintf(stderr, "m_IFBandwidth[0] : %f\n", l_setup.m_IFBandwidth[0]);
-        fprintf(stderr, "m_rfmax[0] : %f\n", l_setup.m_RFMax[0]);    
-        fprintf(stderr, "lo_value : %f\n", l_lo_value);
-        fprintf(stderr, "m_startfreq[0] : %f\n", m_startFreq[0]);        
+        MED_TRACE_FMT("m_IFBandwidth[0] : %f\n", l_setup.m_IFBandwidth[0]);
+        MED_TRACE_FMT("m_rfmax[0] : %f\n", l_setup.m_RFMax[0]);    
+        MED_TRACE_FMT("lo_value : %f\n", l_lo_value);
+        MED_TRACE_FMT("m_startfreq[0] : %f\n", m_startFreq[0]);        
         m_bandwidth[0]= l_setup.m_RFMax[0]-( m_startFreq[0] + l_lo_value );        
         // the if bandwidth could never be larger than the max IF bandwidth:
         if (m_bandwidth[0] > l_setup.m_IFBandwidth[0])
             m_bandwidth[0]= l_setup.m_IFBandwidth[0];        
-        fprintf(stderr, "m_bandwidth[0] : %f", m_bandwidth[0]);
+        MED_TRACE_FMT( "m_bandwidth[0] : %f", m_bandwidth[0]);
     }catch(...){
         ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"Catch 4 !"));    
         return;
@@ -332,11 +332,8 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo)
 
 void CComponentCore::getLO(ACS::doubleSeq& lo)
 {
-    baci::ThreadSyncGuard guard(&m_mutex);
-    lo.length(m_configuration.getIFs());
-    for (WORD i=0; i<m_configuration.getIFs(); i++) {
-        lo[i]= m_mixer.getValue();
-    }
+    baci::ThreadSyncGuard guard(&m_mutex);    
+    lo[0]= m_mixer.getValue();    
 }
 
 void CComponentCore::checkLocalOscillator() throw (ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntGetAttributeExImpl)
