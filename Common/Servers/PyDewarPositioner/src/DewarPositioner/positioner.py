@@ -155,7 +155,9 @@ class Positioner(object):
         elif str(axis) == 'MNG_BEAMPARK':
             return (True, stime)
         elif self.conf.getAttribute('DynamicUpdatingAllowed') != 'true':
-            raise NotAllowedError('dynamic updating not allowed')
+            # FIXED configuration, should return ready even if the derotator
+            # will not actually move
+            return (True, stime)
         elif not self.siteInfo:
             raise NotAllowedError('no site information available')
         elif str(sector) not in sectors:
@@ -232,7 +234,9 @@ class Positioner(object):
             elif str(axis) == 'MNG_BEAMPARK':
                 pass # Do nothing
             elif self.conf.getAttribute('DynamicUpdatingAllowed') != 'true':
-                logger.logNotice('dynamic updating not allowed')
+                # This log is pretty much useless
+                # logger.logNotice('dynamic updating not allowed')
+                pass
             elif not self.siteInfo:
                 raise NotAllowedError('no site information available')
             elif not self.source:
