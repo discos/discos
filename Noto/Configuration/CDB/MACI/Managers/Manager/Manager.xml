@@ -17,6 +17,7 @@
   	<cdb:_ string="MANAGEMENT/Ducezio"/>
   	<cdb:_ string="MANAGEMENT/CustomLogger"/>
   	<cdb:_ string="MANAGEMENT/ExternalClients"/>
+  	<cdb:_ string="AS/Boss"/>
   </Startup>
 
   <ServiceComponents>
