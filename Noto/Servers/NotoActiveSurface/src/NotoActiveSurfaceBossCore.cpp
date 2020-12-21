@@ -1313,16 +1313,18 @@ void CNotoActiveSurfaceBossCore::workingActiveSurface() throw (ComponentErrors::
 	    		}
         		azimuth = 0.0;
 				diff = fabs(m_elevation - elevation*DR2D);
-				m_elevation=elevation*DR2D;
+                //printf ("diff =%f\n", diff);
+				//m_elevation=elevation*DR2D;
         		try {
             			//onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, elevation*DR2D, 0, 0, m_profile);
 							if ((elevation*DR2D > 5.0) && (elevation*DR2D < 90.0) && (diff > 0.5)) {
 								sprintf(buff,"@-%02.0lf\n", elevation*DR2D);
 								res = sendBuffer(buff,strlen(buff));
-								printf("diff = %f, elevation = %s", diff, buff);
+								//printf("diff = %f, elevation = %s", diff, buff);
+				                m_elevation=elevation*DR2D;
 							}
-							else
-								printf("bad elevation = %lf\n", elevation*DR2D);
+							//else
+							//	printf("bad elevation = %lf\n", elevation*DR2D);
         		}
         		catch (ComponentErrors::ComponentErrorsExImpl& ex) {
             			ex.log(LM_DEBUG);

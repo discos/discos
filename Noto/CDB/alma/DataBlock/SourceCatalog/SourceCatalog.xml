@@ -181,6 +181,31 @@
 </Source>
 
 <Source>
+	<sourceName>3c273</sourceName>
+	<rightAscension>12:29:06.6996828061</rightAscension>
+	<declination>+02:03:08.598846466</declination>
+	<epoch>J2000</epoch>
+	<pmRA/>
+	<pmDec/>
+	<parallax/>
+	<radialVelocity/>
+    <type>c</type>
+    <nFreqRange>1</nFreqRange>
+    <freqRange>500.0-23780.0</freqRange>
+    <fluxCoeff1>1</fluxCoeff1>
+    <fluxCoeff2>0</fluxCoeff2>
+    <fluxCoeff3>0</fluxCoeff3>
+    <size>1</size>
+    <model>GAUSS</model>
+    <modelCoeff1>1.0</modelCoeff1>
+    <modelCoeff2>0</modelCoeff2>
+    <modelCoeff3>0</modelCoeff3>
+    <modelCoeff4>0.0</modelCoeff4>
+    <modelCoeff5>0.0</modelCoeff5>
+    <modelCoeff6>0.0</modelCoeff6>
+</Source>
+
+<Source>
 	<sourceName>3c286</sourceName>
 	<rightAscension>13:31:08.286</rightAscension>
 	<declination>+30:30:32.92</declination>

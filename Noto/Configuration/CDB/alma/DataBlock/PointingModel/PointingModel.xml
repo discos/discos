@@ -4,7 +4,7 @@
 <Receiver>
 	<receiverCode>SEC</receiverCode>
         <phi>90.0</phi>
-        <coefficientNum00> 1 </coefficientNum00> <coefficientVal00> 0.0219204295 </coefficientVal00>
+        <coefficientNum00> 1 </coefficientNum00> <coefficientVal00> -0.48307975 </coefficientVal00>
         <coefficientNum01> 0 </coefficientNum01> <coefficientVal01> 0 </coefficientVal01>
         <coefficientNum02> 1 </coefficientNum02> <coefficientVal02> -0.0001390366 </coefficientVal02>
         <coefficientNum03> 1 </coefficientNum03> <coefficientVal03> 0.0267782640 </coefficientVal03>
@@ -39,14 +39,14 @@
 <Receiver>
 	<receiverCode>PRIM</receiverCode>	
         <phi>90.0000</phi>
-        <coefficientNum00>1</coefficientNum00> <coefficientVal00>-0.0116563020</coefficientVal00>
+        <coefficientNum00>1</coefficientNum00> <coefficientVal00>-0.4902156889</coefficientVal00>
         <coefficientNum01>0</coefficientNum01> <coefficientVal01>0.0000000000</coefficientVal01>
-        <coefficientNum02>1</coefficientNum02> <coefficientVal02>-0.0205956493</coefficientVal02>
-        <coefficientNum03>1</coefficientNum03> <coefficientVal03>0.0057161199</coefficientVal03>
-        <coefficientNum04>1</coefficientNum04> <coefficientVal04>-0.0027005430</coefficientVal04>     
-        <coefficientNum05>1</coefficientNum05> <coefficientVal05>0.0016794193</coefficientVal05>
-        <coefficientNum06>1</coefficientNum06> <coefficientVal06>0.0475987159</coefficientVal06>
-        <coefficientNum07>1</coefficientNum07> <coefficientVal07>-0.1092262417</coefficientVal07>
+        <coefficientNum02>1</coefficientNum02> <coefficientVal02>-0.0035906327</coefficientVal02>
+        <coefficientNum03>1</coefficientNum03> <coefficientVal03>0.0238860864</coefficientVal03>
+        <coefficientNum04>1</coefficientNum04> <coefficientVal04>-0.0034573940</coefficientVal04>     
+        <coefficientNum05>1</coefficientNum05> <coefficientVal05>0.0024787406</coefficientVal05>
+        <coefficientNum06>1</coefficientNum06> <coefficientVal06>0.0408597477</coefficientVal06>
+        <coefficientNum07>1</coefficientNum07> <coefficientVal07>-0.1057725847</coefficientVal07>
         <coefficientNum08>0</coefficientNum08> <coefficientVal08>0.0000000000</coefficientVal08>
         <coefficientNum09>0</coefficientNum09> <coefficientVal09>0.0000000000</coefficientVal09>
         <coefficientNum10>0</coefficientNum10> <coefficientVal10>0.0000000000</coefficientVal10>
@@ -74,7 +74,7 @@
 <Receiver>
     <receiverCode>LL</receiverCode>	
         <phi>90.0000</phi>
-        <coefficientNum00>1</coefficientNum00> <coefficientVal00>-0.0231925715</coefficientVal00>
+        <coefficientNum00>1</coefficientNum00> <coefficientVal00>-0.5131925715</coefficientVal00>
         <coefficientNum01>0</coefficientNum01> <coefficientVal01>0.0000000000</coefficientVal01>
         <coefficientNum02>1</coefficientNum02> <coefficientVal02>-0.0336112157</coefficientVal02>
         <coefficientNum03>1</coefficientNum03> <coefficientVal03>-0.0069472454</coefficientVal03>
