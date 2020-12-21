@@ -146,7 +146,7 @@
             <remoteAccount>discos</remoteAccount>
         </container-->
         <container>
-            <name>ExternalClientContainer</name>
+            <name>ExternalClientsContainer</name>
             <type>cpp</type>
             <heapSizeMB></heapSizeMB>
             <useDedicatedSettings>true</useDedicatedSettings>
