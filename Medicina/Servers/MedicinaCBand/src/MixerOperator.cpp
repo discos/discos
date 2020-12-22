@@ -57,7 +57,7 @@ void MixerOperator::loadComponents()
     if (! m_configuration ){
         ACS_LOG(LM_FULL_INFO,"MixerOperator::loadComponents()",
                     (LM_NOTICE,"LOs configuration not provided!"));
-        _ADD_BACKTRACE(ReceiversErrors::LocalOscillatorErrorExImpl,impl,dummy,"MixerOperator::setLO()");
+        _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"MixerOperator::setLO()");
         throw impl;
     }    
     const char * m_1st_name= m_configuration->getLocalOscillatorInstance1st();
@@ -71,7 +71,7 @@ void MixerOperator::loadComponents()
     }catch(...){
         ACS_LOG(LM_FULL_INFO,"MixerOperator::loadComponents()",
                     (LM_NOTICE,"LOs loading failed!"));
-        _ADD_BACKTRACE(ReceiversErrors::LocalOscillatorErrorExImpl,impl,dummy,"MixerOperator::setLO()");
+        _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"MixerOperator::setLO()");
         throw impl;
     }
 #else
@@ -88,7 +88,7 @@ void MixerOperator::releaseComponents()
     if (! m_configuration ){
         ACS_LOG(LM_FULL_INFO,"MixerOperator::loadComponents()",
                     (LM_NOTICE,"LOs configuration not provided!"));
-        _ADD_BACKTRACE(ReceiversErrors::LocalOscillatorErrorExImpl,impl,dummy,"MixerOperator::setLO()");
+        _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"MixerOperator::setLO()");
         throw impl;
     }
     const char * m_1st_name= m_configuration->getLocalOscillatorInstance1st();
@@ -99,7 +99,7 @@ void MixerOperator::releaseComponents()
     }catch(...){
        ACS_LOG(LM_FULL_INFO,"MixerOperator::loadComponents()",
                     (LM_NOTICE,"LOs release failed!"));
-        _ADD_BACKTRACE(ReceiversErrors::LocalOscillatorErrorExImpl,impl,dummy,"MixerOperator::setLO()");
+        _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"MixerOperator::setLO()");
         throw impl;
     }
 #else
@@ -124,7 +124,7 @@ bool MixerOperator::setValue(const ACS::doubleSeq& p_values)
     if (! m_configuration ){
         ACS_LOG(LM_FULL_INFO,"MixerOperator::loadComponents()",
                     (LM_NOTICE,"LOs configuration not provided!"));
-        _ADD_BACKTRACE(ReceiversErrors::LocalOscillatorErrorExImpl,impl,dummy,"MixerOperator::setLO()");
+        _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"MixerOperator::setLO()");
         throw impl;
     }
     /**/
@@ -180,7 +180,7 @@ bool MixerOperator::setValue(const ACS::doubleSeq& p_values)
         throw impl;
     }
     catch (ReceiversErrors::ReceiversErrorsEx& ex) { 
-        _ADD_BACKTRACE(ReceiversErrors::LocalOscillatorErrorExImpl,impl,dummy,"MixerOperator::setLO()");
+        _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"MixerOperator::setLO()");
         throw impl;
     }
     m_current_value= p_values[0];
@@ -203,7 +203,7 @@ double MixerOperator::getValue()
             return 0.0;
        #endif
     } catch (ReceiversErrors::ReceiversErrorsEx& ex) { 
-        _ADD_BACKTRACE(ReceiversErrors::LocalOscillatorErrorExImpl,impl,dummy,"MixerOperator::setLO()");
+        _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"MixerOperator::setLO()");
         throw impl;        
     }
     return l_freq;
@@ -215,7 +215,7 @@ bool MixerOperator::isLocked()
     if (! m_configuration ){
         ACS_LOG(LM_FULL_INFO,"MixerOperator::loadComponents()",
                     (LM_NOTICE,"LOs configuration not provided!"));
-        _ADD_BACKTRACE(ReceiversErrors::LocalOscillatorErrorExImpl,impl,dummy,"MixerOperator::setLO()");
+        _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"MixerOperator::setLO()");
         throw impl;
     }
 	const char * m_1st_name= m_configuration->getLocalOscillatorInstance1st();
@@ -227,7 +227,7 @@ bool MixerOperator::isLocked()
     }catch(...){
         ACS_LOG(LM_FULL_INFO,"MixerOperator::loadComponents()",
                     (LM_NOTICE,"LOs loading failed!"));
-        _ADD_BACKTRACE(ReceiversErrors::LocalOscillatorErrorExImpl,impl,dummy,"MixerOperator::setLO()");
+        _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"MixerOperator::setLO()");
         throw impl;        
     }
 #else
@@ -258,19 +258,19 @@ void MixerOperator::loadDevice(Receivers::LocalOscillator_var p_loDev, const cha
             m_mixer_fault= false;
         }
         catch (maciErrType::CannotGetComponentExImpl& ex) {
-            _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,dummy,"MixerOperator::loadLocalOscillator()");
+            _EXCPT(ComponentErrors::CouldntGetComponentExImpl,Impl,"MixerOperator::loadLocalOscillator()");
             Impl.setComponentName((const char*)p_lo_name);
             p_loDev= Receivers::LocalOscillator::_nil();
             throw Impl;
         }
         catch (maciErrType::NoPermissionExImpl& ex) {
-            _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,dummy,"MixerOperator::loadLocalOscillator()");
+            _EXCPT(ComponentErrors::CouldntGetComponentExImpl,Impl,"MixerOperator::loadLocalOscillator()");
             Impl.setComponentName((const char*)p_lo_name);
             p_loDev= Receivers::LocalOscillator::_nil();
             throw Impl;
         }
         catch (maciErrType::NoDefaultComponentExImpl& ex) {
-            _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,dummy,"MixerOperator::loadLocalOscillator()");
+            _EXCPT(ComponentErrors::CouldntGetComponentExImpl,Impl,"MixerOperator::loadLocalOscillator()");
             Impl.setComponentName((const char*)p_lo_name);
             p_loDev= Receivers::LocalOscillator::_nil();
             throw Impl;
@@ -290,7 +290,7 @@ void MixerOperator::releaseDevice(Receivers::LocalOscillator_var p_loDev,
             m_services->releaseComponent((const char*)p_lo_name);
         }
         catch (maciErrType::CannotReleaseComponentExImpl& ex) {
-            _ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,dummy,"MixerOperator::unloadLocalOscillator()");
+            _EXCPT(ComponentErrors::CouldntReleaseComponentExImpl,Impl,"MixerOperator::unloadLocalOscillator()");
             Impl.setComponentName(p_lo_name);
             Impl.log(LM_WARNING);
         }
@@ -328,7 +328,7 @@ bool MixerOperator::isDeviceLocked(Receivers::LocalOscillator_var p_loDev,
     isLocked=isLockedRef->get_sync(comp.out());
     ACSErr::CompletionImpl complImpl(comp);
     if (!complImpl.isErrorFree()) {
-        _ADD_BACKTRACE(ComponentErrors::CouldntGetAttributeExImpl,impl,complImpl,"MixerOperator::isDeviceLocked()");
+        _EXCPT(ComponentErrors::CouldntGetAttributeExImpl,impl,complImpl,"MixerOperator::isDeviceLocked()");
         impl.setAttributeName("isLocked");
         impl.setComponentName(p_lo_name);
         throw impl;
