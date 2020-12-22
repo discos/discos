@@ -20,22 +20,27 @@ class MixerOperator{
          * @param p_config Component's config ref
          * @param p_services 
          */
-        MixerOperator(CConfiguration & p_config );
+        MixerOperator();
 
         /**
          * @brief Destroy the Mixer Operator object
          */
         ~MixerOperator();
 
-			/**
-			* @brief Set services
-			*/
-			void setServices(maci::ContainerServices * p_services);
+        /**
+        * @brief Set services
+        */
+        void setServices(maci::ContainerServices * p_services);
 
-			/**
-			* @brief
-			*/
-		 	bool isLoaded()const;
+        /**
+         * @brief Set laoded configuration 
+         */
+        void setConfigurations(CConfiguration * p_confs);
+
+        /**
+        * @brief
+        */
+        bool isLoaded()const;
 
         /**
          * @brief Mixer Setup
@@ -118,9 +123,9 @@ class MixerOperator{
 										const char* p_lo_name);
 			
     private:
-
-        CConfiguration & m_configuration;   /**< Reference to component's config */
-		  maci::ContainerServices * m_services; /**< maci service */
+        
+		maci::ContainerServices * m_services; /**< maci service */
+        CConfiguration * m_configuration;   /**< Reference to component's config */
         bool m_init_ok; /**< Init part completed flag */
         bool m_mixer_fault; /**< Flag indicating some faults on LO devices */
         double m_current_value; /**< memo current value seen from user */

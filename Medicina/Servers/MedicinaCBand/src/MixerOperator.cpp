@@ -12,11 +12,11 @@
  * Inserire nel modulo ComponetCore e verificare che sia tutto ok
  */
 
-MixerOperator::MixerOperator(CConfiguration & p_config):
-    m_configuration(p_config)
+MixerOperator::MixerOperator()
 {
-	 MED_TRACE();
-	 m_services= NULL;
+	MED_TRACE();
+	m_services= NULL;
+    m_configuration= NULL;
     m_loDev_1st= Receivers::LocalOscillator::_nil();
     m_loDev_2nd= Receivers::LocalOscillator::_nil();
     m_current_value= 0.0;
@@ -35,6 +35,10 @@ void MixerOperator::setServices(maci::ContainerServices * p_services)
 	m_services= p_services;
 }	
 
+void MixerOperator::setConfigurations(CConfiguration * p_confs){
+    m_configuration= p_confs;
+}
+
 bool MixerOperator::isLoaded() const
 {
   return m_init_ok; 	
@@ -44,42 +48,62 @@ void MixerOperator::loadComponents()
         throw (ComponentErrors::CouldntGetComponentExImpl)
 {
 	MED_TRACE_MSG(" IN ");
-	#ifndef EXCLUDE_MIXER	 
+#ifndef EXCLUDE_MIXER	 
     if( m_init_ok && CORBA::is_nil(m_loDev_1st) && CORBA::is_nil(m_loDev_2nd) ){
         ACS_LOG(LM_FULL_INFO,"MixerOperator::loadComponents()",
                     (LM_NOTICE,"LOs already actives"));
         return;
     }        
-    const char * m_1st_name= m_configuration.getLocalOscillatorInstance1st();
-    const char * m_2nd_name= m_configuration.getLocalOscillatorInstance2nd();             
+    if (! m_configuration ){
+        ACS_LOG(LM_FULL_INFO,"MixerOperator::loadComponents()",
+                    (LM_NOTICE,"LOs configuration not provided!"));
+        _ADD_BACKTRACE(ReceiversErrors::LocalOscillatorErrorExImpl,impl,ex,"MixerOperator::setLO()");
+        throw impl;
+    }    
+    const char * m_1st_name= m_configuration->getLocalOscillatorInstance1st();
+    const char * m_2nd_name= m_configuration->getLocalOscillatorInstance2nd();             
     /* TEST */
-    fprintf(stderr,"LO 1 : %s", m_1st_name);
-    fprintf(stderr,"LO 2 : %s", m_2nd_name);
+    MED_TRACE_FMT("LO 1 : %s", m_1st_name);
+    MED_TRACE_FMT("LO 2 : %s", m_2nd_name);
     try{           
         loadDevice(m_loDev_1st, m_1st_name);
         loadDevice(m_loDev_2nd, m_2nd_name);
     }catch(...){
         ACS_LOG(LM_FULL_INFO,"MixerOperator::loadComponents()",
-                    (LM_NOTICE,"LOs not ready to be set"));
+                    (LM_NOTICE,"LOs loading failed!"));
+        _ADD_BACKTRACE(ReceiversErrors::LocalOscillatorErrorExImpl,impl,ex,"MixerOperator::setLO()");
+        throw impl;
     }
-    #else
+#else
     	#warning "Excluding mixer.."
 	 	MED_TRACE_MSG(" TESTING ");    
-    #endif
+#endif
     m_init_ok= true;
     MED_TRACE_MSG(" OUT ");
 }
 
 void MixerOperator::releaseComponents()
 {
-    try{
-	const char * m_1st_name= m_configuration.getLocalOscillatorInstance1st();
-    const char * m_2nd_name= m_configuration.getLocalOscillatorInstance2nd();
-    releaseDevice(m_loDev_1st, m_1st_name);
-    releaseDevice(m_loDev_2nd, m_2nd_name);
-    }catch(...){
-       MED_TRACE_MSG(" Failed to release LOs ");  
+#ifndef EXCLUDE_MIXER
+    if (! m_configuration ){
+        ACS_LOG(LM_FULL_INFO,"MixerOperator::loadComponents()",
+                    (LM_NOTICE,"LOs configuration not provided!"));
+        _ADD_BACKTRACE(ReceiversErrors::LocalOscillatorErrorExImpl,impl,ex,"MixerOperator::setLO()");
+        throw impl;
     }
+    const char * m_1st_name= m_configuration->getLocalOscillatorInstance1st();
+    const char * m_2nd_name= m_configuration->getLocalOscillatorInstance2nd();
+    try{        
+        releaseDevice(m_loDev_1st, m_1st_name);
+        releaseDevice(m_loDev_2nd, m_2nd_name);
+    }catch(...){
+       ACS_LOG(LM_FULL_INFO,"MixerOperator::loadComponents()",
+                    (LM_NOTICE,"LOs release failed!"));
+        _ADD_BACKTRACE(ReceiversErrors::LocalOscillatorErrorExImpl,impl,ex,"MixerOperator::setLO()");
+        throw impl;
+    }
+#else
+#endif
     m_init_ok= false;
 }
 
@@ -94,9 +118,15 @@ bool MixerOperator::setValue(const ACS::doubleSeq& p_values)
     if(!m_init_ok || CORBA::is_nil(m_loDev_1st) || CORBA::is_nil(m_loDev_2nd) ){
         ACS_LOG(LM_FULL_INFO,"MixerOperator::setLO()",
                     (LM_NOTICE,"LOs not ready to be set"));
-		  MED_TRACE_MSG(" EXCP devices not found ");                    
+		MED_TRACE_MSG(" EXCP devices not found ");                    
         return false;
     }             
+    if (! m_configuration ){
+        ACS_LOG(LM_FULL_INFO,"MixerOperator::loadComponents()",
+                    (LM_NOTICE,"LOs configuration not provided!"));
+        _ADD_BACKTRACE(ReceiversErrors::LocalOscillatorErrorExImpl,impl,ex,"MixerOperator::setLO()");
+        throw impl;
+    }
     /**/
     double trueValue,amp;
     double *freq=NULL;
@@ -132,7 +162,7 @@ bool MixerOperator::setValue(const ACS::doubleSeq& p_values)
 	MED_TRACE_MSG(" calculate value ");
     //computes the synthesizer settings
     trueValue= p_values[0]+l_setup.m_fixedLO2[0];
-    size= m_configuration.getSynthesizerTable(freq,power);
+    size= m_configuration->getSynthesizerTable(freq,power);
     amp= round(Helpers::linearFit(freq,power,size,trueValue));
     if (power) delete [] power;
     if (freq) delete [] freq;
@@ -168,9 +198,9 @@ double MixerOperator::getValue()
     }
     try{
     	#ifndef EXCLUDE_MIXER        
-        m_loDev_1st->get(l_power, l_freq);
+            m_loDev_1st->get(l_power, l_freq);
         #else
-        return 0.0;
+            return 0.0;
        #endif
     } catch (ReceiversErrors::ReceiversErrorsEx& ex) { 
         _ADD_BACKTRACE(ReceiversErrors::LocalOscillatorErrorExImpl,impl,ex,"MixerOperator::setLO()");
@@ -181,13 +211,28 @@ double MixerOperator::getValue()
 
 bool MixerOperator::isLocked()
 {
-	#ifndef EXCLUDE_MIXER
-    bool l_1st_lock= isDeviceLocked(m_loDev_1st, (const char *)m_configuration.getLocalOscillatorInstance1st());
-	bool l_2nd_lock= isDeviceLocked(m_loDev_2nd, (const char *)m_configuration.getLocalOscillatorInstance2nd());
-	return l_1st_lock || l_2nd_lock;
-	#else
+#ifndef EXCLUDE_MIXER
+    if (! m_configuration ){
+        ACS_LOG(LM_FULL_INFO,"MixerOperator::loadComponents()",
+                    (LM_NOTICE,"LOs configuration not provided!"));
+        _ADD_BACKTRACE(ReceiversErrors::LocalOscillatorErrorExImpl,impl,ex,"MixerOperator::setLO()");
+        throw impl;
+    }
+	const char * m_1st_name= m_configuration->getLocalOscillatorInstance1st();
+    const char * m_2nd_name= m_configuration->getLocalOscillatorInstance2nd();       
+    try{
+        bool l_1st_lock= isDeviceLocked(m_loDev_1st, m_1st_name);
+        bool l_2nd_lock= isDeviceLocked(m_loDev_2nd, m_2nd_name);
+        return l_1st_lock || l_2nd_lock;
+    }catch(...){
+        ACS_LOG(LM_FULL_INFO,"MixerOperator::loadComponents()",
+                    (LM_NOTICE,"LOs loading failed!"));
+        _ADD_BACKTRACE(ReceiversErrors::LocalOscillatorErrorExImpl,impl,ex,"MixerOperator::setLO()");
+        throw impl;        
+    }
+#else
 	return false;
-	#endif
+#endif
 }
 
 /* *** PRIVATE *** */

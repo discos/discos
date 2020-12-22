@@ -64,6 +64,8 @@ CConfiguration const * const  CComponentCore::execute() throw (ComponentErrors::
         _EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CComponentCore::execute()");
         throw dummy;
     }
+    /* Pass conf to mixer */
+    m_mixer.setConfigurations(m_configuration);
     MED_TRACE_MSG(" OUT ");
     return &m_configuration;
 }
