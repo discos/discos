@@ -88,9 +88,11 @@ void MixerOperator::releaseComponents()
         _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"MixerOperator::setLO()");
         throw impl;
     }    
-    try{        
-        releaseDevice(m_loDev_1st, (const char*)m_configuration->getLocalOscillatorInstance1st());
-        releaseDevice(m_loDev_2nd, (const char*)m_configuration->getLocalOscillatorInstance2nd());
+    try{
+        if ( !CORBA::is_nil(m_loDev_1st) )        
+            releaseDevice(m_loDev_1st, (const char*)m_configuration->getLocalOscillatorInstance1st());
+        if ( !CORBA::is_nil(m_loDev_2nd) )        
+            releaseDevice(m_loDev_2nd, (const char*)m_configuration->getLocalOscillatorInstance2nd());
     }catch(...){
        ACS_LOG(LM_FULL_INFO,"MixerOperator::loadComponents()",
                     (LM_NOTICE,"LOs release failed!"));
@@ -235,7 +237,7 @@ void MixerOperator::loadDevice(Receivers::LocalOscillator_var p_loDev, const cha
     if ((!CORBA::is_nil(p_loDev)) && (m_mixer_fault)) { // if reference was already taken, but an error was found....dispose the reference
         #ifndef EXCLUDE_MIXER
             try {
-                releaseComponents();
+                releaseDevice(p_loDev);
             }catch (...) { 
                 //dispose silently...if an error...no matter
             }
