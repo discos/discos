@@ -9,7 +9,7 @@ _IRA_LOGFILTER_IMPORT;
 #define LIGHTSPEED 299792458.0
 
 CComponentCore::CComponentCore():
-	m_mixer(MixerOperator(m_configuration))
+    m_mixer()
 {
 }
 
