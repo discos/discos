@@ -90,9 +90,9 @@ void MixerOperator::releaseComponents() throw (ReceiversErrors::LocalOscillatorE
     }    
     try{
         if ( !CORBA::is_nil(m_loDev_1st) )        
-            releaseDevice(m_loDev_1st, (const char*)m_configuration->getLocalOscillatorInstance1st());
+            releaseDevice(m_loDev_1st.out(), (const char*)m_configuration->getLocalOscillatorInstance1st());
         if ( !CORBA::is_nil(m_loDev_2nd) )        
-            releaseDevice(m_loDev_2nd, (const char*)m_configuration->getLocalOscillatorInstance2nd());
+            releaseDevice(m_loDev_2nd.out(), (const char*)m_configuration->getLocalOscillatorInstance2nd());
     }catch(...){
        ACS_LOG(LM_FULL_INFO,"MixerOperator::loadComponents()",
                     (LM_NOTICE,"LOs release failed!"));
@@ -216,8 +216,8 @@ bool MixerOperator::isLocked() throw (ReceiversErrors::LocalOscillatorErrorExImp
         throw impl;
     }	
     try{
-        bool l_1st_lock= isDeviceLocked(m_loDev_1st, (const char*)m_configuration->getLocalOscillatorInstance1st());
-        bool l_2nd_lock= isDeviceLocked(m_loDev_2nd, (const char*)m_configuration->getLocalOscillatorInstance2nd());
+        bool l_1st_lock= isDeviceLocked(m_loDev_1st.out(), (const char*)m_configuration->getLocalOscillatorInstance1st());
+        bool l_2nd_lock= isDeviceLocked(m_loDev_2nd.out(), (const char*)m_configuration->getLocalOscillatorInstance2nd());
         return l_1st_lock || l_2nd_lock;
     }catch(...){
         ACS_LOG(LM_FULL_INFO,"MixerOperator::loadComponents()",
