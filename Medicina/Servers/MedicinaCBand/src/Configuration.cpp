@@ -101,7 +101,7 @@ void CConfiguration::init(maci::ContainerServices *Services)
 	MED_TRACE_FMT( "LNA port %u \n", m_LNAPort);
 	MED_TRACE_FMT( "Dewar address %S \n", (const char*)m_dewarIPAddress);
 	MED_TRACE_FMT( "Dewar port %u \n", m_dewarPort);
-	MED_TRACE_FMT( "---- * ----" );
+	MED_TRACE_MSG( "---- * ----" );
 	/* END TEST */	
 	/* Get available configurations, access every conf file, filling associated parameters struct */	
 	const std::vector<ReceiverConfHandler::ConfigurationName> l_available_confs= m_conf_hnd.getAvailableConfs();
