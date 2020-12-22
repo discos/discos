@@ -237,7 +237,7 @@ void MixerOperator::loadDevice(Receivers::LocalOscillator_var p_loDev, const cha
     if ((!CORBA::is_nil(p_loDev)) && (m_mixer_fault)) { // if reference was already taken, but an error was found....dispose the reference
         #ifndef EXCLUDE_MIXER
             try {
-                releaseDevice(p_loDev);
+                releaseDevice(p_loDev, p_lo_name);
             }catch (...) { 
                 //dispose silently...if an error...no matter
             }
