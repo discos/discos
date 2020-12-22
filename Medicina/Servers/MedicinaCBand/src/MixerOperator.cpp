@@ -328,7 +328,7 @@ bool MixerOperator::isDeviceLocked(Receivers::LocalOscillator_var p_loDev,
     isLocked=isLockedRef->get_sync(comp.out());
     ACSErr::CompletionImpl complImpl(comp);
     if (!complImpl.isErrorFree()) {
-        _EXCPT(ComponentErrors::CouldntGetAttributeExImpl,impl,complImpl,"MixerOperator::isDeviceLocked()");
+        _EXCPT(ComponentErrors::CouldntGetAttributeExImpl,impl,"MixerOperator::isDeviceLocked()");
         impl.setAttributeName("isLocked");
         impl.setComponentName(p_lo_name);
         throw impl;
