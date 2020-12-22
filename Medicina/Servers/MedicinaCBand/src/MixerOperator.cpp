@@ -59,15 +59,12 @@ void MixerOperator::loadComponents()
                     (LM_NOTICE,"LOs configuration not provided!"));
         _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"MixerOperator::setLO()");
         throw impl;
-    }    
-    const char * m_1st_name= m_configuration->getLocalOscillatorInstance1st();
-    const char * m_2nd_name= m_configuration->getLocalOscillatorInstance2nd();             
-    /* TEST */
-    MED_TRACE_FMT("LO 1 : %s", m_1st_name);
-    MED_TRACE_FMT("LO 2 : %s", m_2nd_name);
+    }                      
+    MED_TRACE_FMT("LO 1 : %s\n", (const char*)m_configuration->getLocalOscillatorInstance1st());
+    MED_TRACE_FMT("LO 2 : %s\n", (const char*)m_configuration->getLocalOscillatorInstance2nd());
     try{           
-        loadDevice(m_loDev_1st, m_1st_name);
-        loadDevice(m_loDev_2nd, m_2nd_name);
+        loadDevice(m_loDev_1st, (const char*)m_configuration->getLocalOscillatorInstance1st());
+        loadDevice(m_loDev_2nd, (const char*)m_configuration->getLocalOscillatorInstance2nd());
     }catch(...){
         ACS_LOG(LM_FULL_INFO,"MixerOperator::loadComponents()",
                     (LM_NOTICE,"LOs loading failed!"));
@@ -90,12 +87,10 @@ void MixerOperator::releaseComponents()
                     (LM_NOTICE,"LOs configuration not provided!"));
         _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"MixerOperator::setLO()");
         throw impl;
-    }
-    const char * m_1st_name= m_configuration->getLocalOscillatorInstance1st();
-    const char * m_2nd_name= m_configuration->getLocalOscillatorInstance2nd();
+    }    
     try{        
-        releaseDevice(m_loDev_1st, m_1st_name);
-        releaseDevice(m_loDev_2nd, m_2nd_name);
+        releaseDevice(m_loDev_1st, (const char*)m_configuration->getLocalOscillatorInstance1st());
+        releaseDevice(m_loDev_2nd, (const char*)m_configuration->getLocalOscillatorInstance2nd());
     }catch(...){
        ACS_LOG(LM_FULL_INFO,"MixerOperator::loadComponents()",
                     (LM_NOTICE,"LOs release failed!"));
@@ -217,12 +212,10 @@ bool MixerOperator::isLocked()
                     (LM_NOTICE,"LOs configuration not provided!"));
         _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"MixerOperator::setLO()");
         throw impl;
-    }
-	const char * m_1st_name= m_configuration->getLocalOscillatorInstance1st();
-    const char * m_2nd_name= m_configuration->getLocalOscillatorInstance2nd();       
+    }	
     try{
-        bool l_1st_lock= isDeviceLocked(m_loDev_1st, m_1st_name);
-        bool l_2nd_lock= isDeviceLocked(m_loDev_2nd, m_2nd_name);
+        bool l_1st_lock= isDeviceLocked(m_loDev_1st, (const char*)m_configuration->getLocalOscillatorInstance1st());
+        bool l_2nd_lock= isDeviceLocked(m_loDev_2nd, (const char*)m_configuration->getLocalOscillatorInstance2nd());
         return l_1st_lock || l_2nd_lock;
     }catch(...){
         ACS_LOG(LM_FULL_INFO,"MixerOperator::loadComponents()",
