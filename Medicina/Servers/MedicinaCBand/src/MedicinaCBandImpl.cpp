@@ -191,11 +191,7 @@ void MedicinaCBandImpl::activate(const char * setup_mode) throw (CORBA::SystemEx
 	catch (ReceiversErrors::ReceiversErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
 		throw ex.getReceiversErrorsEx();
-	}
-	catch (ReceiversErrors::LocalOscillatorErrorExImpl& ex) {
-		ex.log(LM_DEBUG);
-		throw ex.getLocalOscillatorEx();
-	}
+	}	
 	catch (...) {
 		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"MedicinaCBandImpl::activate()");
 		impl.log(LM_DEBUG);
