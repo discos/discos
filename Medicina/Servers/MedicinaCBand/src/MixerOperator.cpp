@@ -45,6 +45,11 @@ void MixerOperator::loadComponents()
 {
 	MED_TRACE_MSG(" IN ");
 	#ifndef EXCLUDE_MIXER	 
+    if( m_init_ok && CORBA::is_nil(m_loDev_1st) && CORBA::is_nil(m_loDev_2nd) ){
+        ACS_LOG(LM_FULL_INFO,"MixerOperator::loadComponents()",
+                    (LM_NOTICE,"LOs already actives"));
+        return;
+    }        
     const char * m_1st_name= m_configuration.getLocalOscillatorInstance1st();
     const char * m_2nd_name= m_configuration.getLocalOscillatorInstance2nd();             
     /* TEST */

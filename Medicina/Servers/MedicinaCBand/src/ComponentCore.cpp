@@ -122,6 +122,17 @@ void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ModeErro
     }catch(...){
     	MED_TRACE_MSG(" EXC SET IFS ");
     }
+    /* Loading LOs */
+    try{
+        m_mixer.loadComponents();
+        setLO(lo); 
+    }catch(...){
+        MED_TRACE_MSG(" EXC loading LOs or setting their values !");	                
+        _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"CComponentCore::activate()");
+        impl.setDetails(ex.what().c_str());
+        setStatusBit(CONNECTIONERROR);
+        throw impl;
+    }        
 
     // Basic operations
     lnaOn(); // throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
@@ -129,11 +140,11 @@ void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ModeErro
     // Remote control check
     bool answer;
     try {
-    		MED_TRACE_MSG(" CHECK LOCAL REMOTE ");
+    	MED_TRACE_MSG(" CHECK LOCAL REMOTE ");
         answer=m_control->isRemoteOn();
     }
-    catch (IRA::ReceiverControlEx& ex) {
-			MED_TRACE_MSG(" LOCAL REMOTE EXC");
+    catch (IRA::ReceiverControlEx& ex) {		
+        MED_TRACE_MSG(" LOCAL REMOTE EXC");
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::activate()");
         impl.setDetails(ex.what().c_str());
         setStatusBit(CONNECTIONERROR);
@@ -231,6 +242,7 @@ void CComponentCore::setMode(const char * mode) throw (ReceiversErrors::ModeErro
 {
 	 MED_TRACE_MSG(" IN ");
     baci::ThreadSyncGuard guard(&m_mutex);
+    m_calDiode=false;
     IRA::CString cmdMode(mode);
     cmdMode.MakeUpper();        
     bool l_res= m_configuration.m_conf_hnd.setMode(mode);
@@ -259,17 +271,20 @@ void CComponentCore::setMode(const char * mode) throw (ReceiversErrors::ModeErro
     // the set the default LO for the default LO for the selected mode.....
     ACS::doubleSeq lo;
     MED_TRACE_MSG(" LO ");
+    /** @todo rivedere assegnazioni */
     lo.length(l_setup.m_IFs);
+    lo[0]= l_setup.m_defaultLO[0];    
+    /* LOs loading */
     try{
-    	for (WORD i=0; i < l_setup.m_IFs; i++) {
-    		MED_TRACE_MSG(" LO DEFAULT ");
-        	lo[i]= l_setup.m_defaultLO[i];
-    	}
-  	 }catch(...){
-    	MED_TRACE_MSG(" EXC 2 ");	
-    }
-    setLO(lo); // throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl)    
-    m_calDiode=false;
+        m_mixer.loadComponents();
+        setLO(lo); 
+    }catch(...){
+        MED_TRACE_MSG(" EXC loading LOs or setting their values !");	                
+        _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"CComponentCore::activate()");
+        impl.setDetails(ex.what().c_str());
+        setStatusBit(CONNECTIONERROR);
+        throw impl;
+    }        
     ACS_LOG(LM_FULL_INFO,"CComponentCore::setMode()",(LM_NOTICE,"RECEIVER_MODE %s",mode));
 	MED_TRACE_MSG(" OUT ");
 }
