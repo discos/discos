@@ -91,7 +91,7 @@ class MixerOperator{
          * 
          * @return true Resurce is locked         
          */
-        bool isLocked() throw (ReceiversErrors::LocalOscillatorErrorExImpl);
+        bool isLocked() throw (ReceiversErrors::LocalOscillatorErrorExImpl, ReceiversErrors::LocalOscillatorErrorExImpl);
 
     private:
 

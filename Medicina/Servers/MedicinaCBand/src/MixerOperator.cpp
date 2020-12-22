@@ -64,7 +64,7 @@ void MixerOperator::loadComponents()
     MED_TRACE_FMT("LO 2 : %s\n", (const char*)m_configuration->getLocalOscillatorInstance2nd());
     try{           
         loadDevice(m_loDev_1st, (const char*)m_configuration->getLocalOscillatorInstance1st());
-        loadDevice(m_loDev_2nd, (const char*)m_configuration->getLocalOscillatorInstance2nd());
+        loadDevice(m_loDev_2nd, (const char*)m_configuration->getLocalOscillatorInstance2nd());        
     }catch(...){
         ACS_LOG(LM_FULL_INFO,"MixerOperator::loadComponents()",
                     (LM_NOTICE,"LOs loading failed!"));
@@ -115,7 +115,7 @@ bool MixerOperator::setValue(const ACS::doubleSeq& p_values)
     if(!m_init_ok || CORBA::is_nil(m_loDev_1st) || CORBA::is_nil(m_loDev_2nd) ){
         ACS_LOG(LM_FULL_INFO,"MixerOperator::setLO()",
                     (LM_NOTICE,"LOs not ready to be set"));
-		MED_TRACE_MSG(" EXCP devices not found ");                    
+		MED_TRACE_MSG(" LOs not ready to be set! ");                    
         return false;
     }             
     if (! m_configuration ){
@@ -206,7 +206,7 @@ double MixerOperator::getValue() throw (ReceiversErrors::LocalOscillatorErrorExI
     return l_freq;
 }
 
-bool MixerOperator::isLocked() throw (ReceiversErrors::LocalOscillatorErrorExImpl)
+bool MixerOperator::isLocked() throw (ReceiversErrors::LocalOscillatorErrorExImpl, ReceiversErrors::LocalOscillatorErrorExImpl)
 {
 #ifndef EXCLUDE_MIXER
     if (! m_configuration ){
@@ -279,6 +279,7 @@ void MixerOperator::loadDevice(Receivers::LocalOscillator_ptr p_loDev, const cha
             throw Impl;
         }
     }
+    MED_TRACE_FMT("Device %s loaded \n", p_lo_name);
 }
 
 void MixerOperator::releaseDevice(Receivers::LocalOscillator_ptr p_loDev,
