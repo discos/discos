@@ -124,10 +124,9 @@ void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ModeErro
     }
     /* Loading LOs */
     try{
-        m_mixer.loadComponents();
-        setLO(lo); 
+        m_mixer.loadComponents();        
     }catch(...){
-        MED_TRACE_MSG(" EXC loading LOs or setting their values !");	                
+        MED_TRACE_MSG(" EXC loading LOs !");	                
         _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"CComponentCore::activate()");        
         setStatusBit(CONNECTIONERROR);
         throw impl;
