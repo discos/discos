@@ -66,7 +66,7 @@ class MixerOperator{
          * @brief Freeing associate LOs components
          * 
          */
-        void releaseComponents();
+        void releaseComponents()  throw (ReceiversErrors::LocalOscillatorErrorExImpl);
 
         /**
          * @brief Set LO equivalent value to the 2 stages LOs
@@ -84,14 +84,14 @@ class MixerOperator{
          * @brief Get the equivalent LO value 
          * @return double LO value
          */
-        double getValue();
+        double getValue() throw (ReceiversErrors::LocalOscillatorErrorExImpl);
 
         /**
          * @brief Resurce lock check
          * 
          * @return true Resurce is locked         
          */
-        bool isLocked();
+        bool isLocked() throw (ReceiversErrors::LocalOscillatorErrorExImpl);
 
     private:
 
@@ -101,8 +101,8 @@ class MixerOperator{
          * @param[inout] p_loDev LOs device object
          * @param[in] p_lo_instance LO name to be loaded 
          */
-        void loadDevice(Receivers::LocalOscillator_var p_loDev,
-                        const char * p_lo_name);
+        void loadDevice(Receivers::LocalOscillator_ptr p_loDev,
+                        const char * p_lo_name)  throw (ComponentErrors::CouldntGetComponentExImpl);
 
         /**
          * @brief Realse LO device by isntance name
@@ -110,8 +110,8 @@ class MixerOperator{
          * @param p_loDev instance container
          * @param p_lo_name instance name
          */
-        void releaseDevice(Receivers::LocalOscillator_var p_loDev,
-                        const char * p_lo_name);
+        void releaseDevice(Receivers::LocalOscillator_ptr p_loDev,
+                        const char * p_lo_name) throw (ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl);
 
 			/**
 			* @brief Single component lock check			 
@@ -119,8 +119,8 @@ class MixerOperator{
 			* @param p_lo_name Component instance name
 			* @return true id Device is locked
 			*/
-			bool isDeviceLocked(Receivers::LocalOscillator_var p_loDev,
-										const char* p_lo_name);
+			bool isDeviceLocked(Receivers::LocalOscillator_ptr p_loDev,
+										const char* p_lo_name) throw (ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntGetAttributeExImpl);
 			
     private:
         

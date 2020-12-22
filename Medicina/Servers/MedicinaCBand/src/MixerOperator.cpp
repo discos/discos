@@ -57,7 +57,7 @@ void MixerOperator::loadComponents()
     if (! m_configuration ){
         ACS_LOG(LM_FULL_INFO,"MixerOperator::loadComponents()",
                     (LM_NOTICE,"LOs configuration not provided!"));
-        _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"MixerOperator::setLO()");
+        _EXCPT(ReceiversErrors::CouldntGetComponentExImpl,impl,"MixerOperator::setLO()");
         throw impl;
     }                      
     MED_TRACE_FMT("LO 1 : %s\n", (const char*)m_configuration->getLocalOscillatorInstance1st());
@@ -68,7 +68,7 @@ void MixerOperator::loadComponents()
     }catch(...){
         ACS_LOG(LM_FULL_INFO,"MixerOperator::loadComponents()",
                     (LM_NOTICE,"LOs loading failed!"));
-        _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"MixerOperator::setLO()");
+        _EXCPT(ReceiversErrors::CouldntGetComponentExImpl,impl,"MixerOperator::setLO()");
         throw impl;
     }
 #else
@@ -79,7 +79,7 @@ void MixerOperator::loadComponents()
     MED_TRACE_MSG(" OUT ");
 }
 
-void MixerOperator::releaseComponents()
+void MixerOperator::releaseComponents() throw (ReceiversErrors::LocalOscillatorErrorExImpl)
 {
 #ifndef EXCLUDE_MIXER
     if (! m_configuration ){
@@ -185,7 +185,7 @@ bool MixerOperator::setValue(const ACS::doubleSeq& p_values)
     return true;
 }
 
-double MixerOperator::getValue()
+double MixerOperator::getValue() throw (ReceiversErrors::LocalOscillatorErrorExImpl)
 {
     double l_power;
     double l_freq;
@@ -206,7 +206,7 @@ double MixerOperator::getValue()
     return l_freq;
 }
 
-bool MixerOperator::isLocked()
+bool MixerOperator::isLocked() throw (ReceiversErrors::LocalOscillatorErrorExImpl)
 {
 #ifndef EXCLUDE_MIXER
     if (! m_configuration ){
@@ -232,7 +232,8 @@ bool MixerOperator::isLocked()
 
 /* *** PRIVATE *** */
 
-void MixerOperator::loadDevice(Receivers::LocalOscillator_var p_loDev, const char * p_lo_name)
+void MixerOperator::loadDevice(Receivers::LocalOscillator_ptr p_loDev, const char * p_lo_name)
+                 throw (ComponentErrors::CouldntGetComponentExImpl)
 {	
     if ((!CORBA::is_nil(p_loDev)) && (m_mixer_fault)) { // if reference was already taken, but an error was found....dispose the reference
         #ifndef EXCLUDE_MIXER
@@ -272,12 +273,18 @@ void MixerOperator::loadDevice(Receivers::LocalOscillator_var p_loDev, const cha
         }
         catch(...){
             MED_TRACE_MSG(" Failed to load LO ");
+            _EXCPT(ComponentErrors::CouldntGetComponentExImpl,Impl,"MixerOperator::loadLocalOscillator()");
+            Impl.setComponentName((const char*)p_lo_name);
+            p_loDev= Receivers::LocalOscillator::_nil();
+            throw Impl;
         }
     }
 }
 
-void MixerOperator::releaseDevice(Receivers::LocalOscillator_var p_loDev,
+void MixerOperator::releaseDevice(Receivers::LocalOscillator_ptr p_loDev,
                     					const char * p_lo_name)
+                        throw (ComponentErrors::CouldntReleaseComponentExImpl,
+                            ComponentErrors::UnexpectedExImpl)
 {
 	#ifndef EXCLUDE_MIXER
     if (!CORBA::is_nil(p_loDev)) {
@@ -303,8 +310,11 @@ void MixerOperator::releaseDevice(Receivers::LocalOscillator_var p_loDev,
 }
 
 
-bool MixerOperator::isDeviceLocked(Receivers::LocalOscillator_var p_loDev,
-											 const char* p_lo_name){
+bool MixerOperator::isDeviceLocked(Receivers::LocalOscillator_ptr p_loDev,
+											 const char* p_lo_name)
+                            throw (ComponentErrors::CORBAProblemExImpl,
+                                    ComponentErrors::CouldntGetAttributeExImpl)
+{
 	 ACSErr::Completion_var comp;
     ACS::ROlong_var isLockedRef;
     CORBA::Long isLocked;
