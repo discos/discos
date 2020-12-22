@@ -57,7 +57,7 @@ void MixerOperator::loadComponents()
     if (! m_configuration ){
         ACS_LOG(LM_FULL_INFO,"MixerOperator::loadComponents()",
                     (LM_NOTICE,"LOs configuration not provided!"));
-        _EXCPT(ReceiversErrors::CouldntGetComponentExImpl,impl,"MixerOperator::setLO()");
+        _EXCPT(ComponentErrors::CouldntGetComponentExImpl,impl,"MixerOperator::setLO()");
         throw impl;
     }                      
     MED_TRACE_FMT("LO 1 : %s\n", (const char*)m_configuration->getLocalOscillatorInstance1st());
@@ -68,7 +68,7 @@ void MixerOperator::loadComponents()
     }catch(...){
         ACS_LOG(LM_FULL_INFO,"MixerOperator::loadComponents()",
                     (LM_NOTICE,"LOs loading failed!"));
-        _EXCPT(ReceiversErrors::CouldntGetComponentExImpl,impl,"MixerOperator::setLO()");
+        _EXCPT(ComponentErrors::CouldntGetComponentExImpl,impl,"MixerOperator::setLO()");
         throw impl;
     }
 #else
