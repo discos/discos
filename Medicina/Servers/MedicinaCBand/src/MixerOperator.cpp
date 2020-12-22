@@ -133,7 +133,7 @@ bool MixerOperator::setValue(const ACS::doubleSeq& p_values)
     double *power=NULL;
     DWORD size;
 
-    ReceiverConfHandler::ConfigurationSetup l_setup= m_configuration.getCurrentSetup();	  
+    ReceiverConfHandler::ConfigurationSetup l_setup= m_configuration->getCurrentSetup();	  
     
     if (p_values.length()==0) {
         _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"MixerOperator::setLO");
