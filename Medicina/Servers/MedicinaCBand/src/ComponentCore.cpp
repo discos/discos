@@ -128,8 +128,7 @@ void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ModeErro
         setLO(lo); 
     }catch(...){
         MED_TRACE_MSG(" EXC loading LOs or setting their values !");	                
-        _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"CComponentCore::activate()");
-        impl.setDetails(ex.what().c_str());
+        _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"CComponentCore::activate()");        
         setStatusBit(CONNECTIONERROR);
         throw impl;
     }        
@@ -280,8 +279,7 @@ void CComponentCore::setMode(const char * mode) throw (ReceiversErrors::ModeErro
         setLO(lo); 
     }catch(...){
         MED_TRACE_MSG(" EXC loading LOs or setting their values !");	                
-        _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"CComponentCore::activate()");
-        impl.setDetails(ex.what().c_str());
+        _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"CComponentCore::activate()");        
         setStatusBit(CONNECTIONERROR);
         throw impl;
     }        
