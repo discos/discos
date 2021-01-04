@@ -101,8 +101,7 @@ class MixerOperator{
          * @param[inout] p_loDev LOs device object
          * @param[in] p_lo_instance LO name to be loaded 
          */
-        void loadDevice(Receivers::LocalOscillator_ptr p_loDev,
-                        const char * p_lo_name)  throw (ComponentErrors::CouldntGetComponentExImpl);
+        void loadDevices()  throw (ComponentErrors::CouldntGetComponentExImpl);
 
         /**
          * @brief Realse LO device by isntance name
@@ -110,17 +109,15 @@ class MixerOperator{
          * @param p_loDev instance container
          * @param p_lo_name instance name
          */
-        void releaseDevice(Receivers::LocalOscillator_ptr p_loDev,
-                        const char * p_lo_name) throw (ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl);
+        void releaseDevices() throw (ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl);
 
-			/**
-			* @brief Single component lock check			 
-			* @param p_loDev Component instance
-			* @param p_lo_name Component instance name
-			* @return true id Device is locked
-			*/
-			bool isDeviceLocked(Receivers::LocalOscillator_ptr p_loDev,
-										const char* p_lo_name) throw (ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntGetAttributeExImpl);
+        /**
+        * @brief Single component lock check			 
+        * @param p_loDev Component instance
+        * @param p_lo_name Component instance name
+        * @return true id Device is locked
+        */
+        bool isDeviceLocked() throw (ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntGetAttributeExImpl);
 			
     private:
         
