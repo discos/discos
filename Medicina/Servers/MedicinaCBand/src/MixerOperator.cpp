@@ -191,6 +191,7 @@ double MixerOperator::getValue() throw (ReceiversErrors::LocalOscillatorErrorExI
     }
     try{
     	#ifndef EXCLUDE_MIXER        
+            ReceiverConfHandler::ConfigurationSetup l_setup= m_configuration->getCurrentSetup();
             m_loDev_1st->get(l_power, l_freq);
             l_freq -= l_setup.m_fixedLO2[0];
         #else
