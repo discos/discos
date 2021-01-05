@@ -68,7 +68,8 @@ class MyWorker(QThread):
                 self.newsubscan=0L
                 self.oldrecordingstatus=False
                 self.newrecordingstatus=False
-                
+                self.azimuthOffset=self.boss._get_azimuthOffset()
+                self.elevationOffset=self.boss._get_elevationOffset()
                 
                 
         def run (self):
@@ -125,6 +126,12 @@ class MyWorker(QThread):
                         (device,compl13)=self.device.get_sync()
                         self.emit(Qt.SIGNAL("device"),str(device))
                         self.emit(Qt.SIGNAL("scanAxis"),scanaxis)
+                        (azOffset,_)=self.azimuthOffset.get_sync()
+                        (elOffset,_)=self.elevationOffset.get_sync()
+
+                        self.emit(Qt.SIGNAL("azoffset"),str(azOffset/math.pi*180))
+                        self.emit(Qt.SIGNAL("eloffset"),str(elOffset/math.pi*180))
+
 
                         rec= self.caltool.isRecording()
                         if rec==True:  
@@ -265,6 +272,13 @@ class Application(Qt.QDialog,calibrationtool_ui.Ui_CalibrationToolDialog):
 		self.connect(self.thread,Qt.SIGNAL("device"),self.deviceIdLineEdit.setText)
 		self.connect(self.thread,Qt.SIGNAL("isRecording"),self.isRecording)
 		self.connect(self.thread,Qt.SIGNAL("scanAxis"),self.scanAxis)
+                self.connect(self.thread,Qt.SIGNAL("eloffset"),self.elOffsetlineEdit.setText)
+                self.connect(self.thread,Qt.SIGNAL("azoffset"),self.azOffsetlineEdit.setText)
+
+
+
+
+
                        
 	@pyqtSlot(Qt.QObject,name="isRecording")
 	def isRecording(self,rec):
@@ -329,7 +343,7 @@ class Application(Qt.QDialog,calibrationtool_ui.Ui_CalibrationToolDialog):
 def usage():
 	print "calibrationtoolclient [component name]"
 	print
-	print "If no component name is provided, the default "+DEFAULT_COMPONENT+" will be used" 
+	print "If no component name is provided, the default MANAGEMENT/CalibrationTool will be used" 
 
 def main(args):
 	sys.tracebacklimit=0
@@ -347,7 +361,7 @@ def main(args):
 			sys.exit()
 
 	if len(args)==0:
-		componentname='default'
+		componentname='MANAGEMENT/CalibrationTool'
 	else:
 		componentname=args[0]
   
