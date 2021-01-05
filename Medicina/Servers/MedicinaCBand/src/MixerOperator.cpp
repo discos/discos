@@ -242,8 +242,8 @@ void MixerOperator::loadDevices()
     }    
     try {
     #ifndef EXCLUDE_MIXER
-        m_loDev_1st= m_services->getComponent<Receivers::LocalOscillator>((const char*)m_configuration->getLocalOscillatorInstance1st()););
-        m_loDev_2nd= m_services->getComponent<Receivers::LocalOscillator>((const char*)m_configuration->getLocalOscillatorInstance2nd()););
+        m_loDev_1st= m_services->getComponent<Receivers::LocalOscillator>((const char*)m_configuration->getLocalOscillatorInstance1st());
+        m_loDev_2nd= m_services->getComponent<Receivers::LocalOscillator>((const char*)m_configuration->getLocalOscillatorInstance2nd());
         ACS_LOG(LM_FULL_INFO,"MixerOperator::loadLocalOscillator()",(LM_INFO,"LOCAL_OSCILLATOR_OBTAINED"));
     #endif
         m_mixer_fault= false;
@@ -287,9 +287,9 @@ void MixerOperator::releaseDevices()
 	#ifndef EXCLUDE_MIXER
     try {
         if(!CORBA::is_nil(m_loDev_1st))         		
-            m_services->releaseComponent((const char*)m_configuration->getLocalOscillatorInstance1st()));
+            m_services->releaseComponent((const char*)m_configuration->getLocalOscillatorInstance1st());
         if(!CORBA::is_nil(m_loDev_2nd))         		
-            m_services->releaseComponent((const char*)m_configuration->getLocalOscillatorInstance2nd()));
+            m_services->releaseComponent((const char*)m_configuration->getLocalOscillatorInstance2nd());
     }
     catch (maciErrType::CannotReleaseComponentExImpl& ex) {
         _EXCPT(ComponentErrors::CouldntReleaseComponentExImpl,Impl,"MixerOperator::unloadLocalOscillator()");
