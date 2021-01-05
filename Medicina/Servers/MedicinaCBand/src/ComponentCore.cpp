@@ -135,8 +135,7 @@ void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ModeErro
     }        
 
     // Basic operations
-    lnaOn(); // throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
-    externalCalOff();
+    lnaOn(); // throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)    
     // Remote control check
     bool answer;
     try {

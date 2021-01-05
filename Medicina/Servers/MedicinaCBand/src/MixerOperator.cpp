@@ -192,6 +192,7 @@ double MixerOperator::getValue() throw (ReceiversErrors::LocalOscillatorErrorExI
     try{
     	#ifndef EXCLUDE_MIXER        
             m_loDev_1st->get(l_power, l_freq);
+            l_freq -= l_setup.m_fixedLO2[0];
         #else
             return 0.0;
        #endif
