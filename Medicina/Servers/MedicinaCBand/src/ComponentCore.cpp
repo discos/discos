@@ -765,7 +765,7 @@ void CComponentCore::getIFOutput(
         freqs[i] = m_startFreq[ifs[i]];
         bw[i] = m_bandwidth[ifs[i]];
         pols[i] = m_polarization[ifs[i]];
-        LO[i] = m_mixer.getValue();
+        LO[i] = m_mixer.getEffectiveValue();
     }
 }
 

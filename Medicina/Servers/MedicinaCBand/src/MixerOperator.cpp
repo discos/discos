@@ -190,9 +190,30 @@ double MixerOperator::getValue() throw (ReceiversErrors::LocalOscillatorErrorExI
         return 0.0;
     }
     try{
-    	#ifndef EXCLUDE_MIXER        
-            ReceiverConfHandler::ConfigurationSetup l_setup= m_configuration->getCurrentSetup();
-            m_loDev_1st->get(l_power, l_freq);
+    	#ifndef EXCLUDE_MIXER                    
+            m_loDev_1st->get(l_power, l_freq);            
+        #else
+            return 0.0;
+       #endif
+    } catch (ReceiversErrors::ReceiversErrorsEx& ex) { 
+        _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"MixerOperator::setLO()");
+        throw impl;        
+    }
+    return l_freq;
+}
+
+double MixerOperator::getEffectiveValue() throw (ReceiversErrors::LocalOscillatorErrorExImpl)
+{
+    double l_power;
+    double l_freq;
+    if( CORBA::is_nil(m_loDev_1st)){
+        ACS_LOG(LM_FULL_INFO,"MixerOperator::getValue()",(LM_INFO,"LO is null!"));
+        return 0.0;
+    }
+    try{
+    	#ifndef EXCLUDE_MIXER  
+            ReceiverConfHandler::ConfigurationSetup l_setup= m_configuration->getCurrentSetup();                  
+            m_loDev_1st->get(l_power, l_freq);            
             l_freq -= l_setup.m_fixedLO2[0];
         #else
             return 0.0;

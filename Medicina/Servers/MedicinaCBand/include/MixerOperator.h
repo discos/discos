@@ -81,10 +81,16 @@ class MixerOperator{
                                 ReceiversErrors::LocalOscillatorErrorExImpl);
 
         /**
-         * @brief Get the equivalent LO value 
-         * @return double LO value
+         * @brief Get the LO1 value 
+         * @return double LO1 value
          */
         double getValue() throw (ReceiversErrors::LocalOscillatorErrorExImpl);
+
+        /**
+         * @brief Get Effective LO chain value
+         * @return effective LO value
+         */
+        double getEffectiveValue() throw (ReceiversErrors::LocalOscillatorErrorExImpl);
 
         /**
          * @brief Resurce lock check
