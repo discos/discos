@@ -325,7 +325,7 @@ bool MixerOperator::isDeviceLocked()
         if(!CORBA::is_nil(m_loDev_1st))
             isLockedRef1=m_loDev_1st->isLocked();
         else isLocked1= false;
-        if(!CORBA::is_nil(m_loDev_2nd)
+        if(!CORBA::is_nil(m_loDev_2nd))
             isLockedRef2=m_loDev_2nd->isLocked();
         else isLocked2= false;
     }
