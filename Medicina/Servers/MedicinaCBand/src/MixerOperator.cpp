@@ -250,30 +250,34 @@ void MixerOperator::loadDevices()
     }
     catch (maciErrType::CannotGetComponentExImpl& ex) {
         _EXCPT(ComponentErrors::CouldntGetComponentExImpl,Impl,"MixerOperator::loadLocalOscillator()");
-        Impl.setComponentName((const char*)p_lo_name);
-        p_loDev= Receivers::LocalOscillator::_nil();
+        Impl.setComponentName("LO1 or LO2");
+        m_loDev_1st= Receivers::LocalOscillator::_nil();
+        m_loDev_2nd= Receivers::LocalOscillator::_nil();
         throw Impl;
     }
     catch (maciErrType::NoPermissionExImpl& ex) {
         _EXCPT(ComponentErrors::CouldntGetComponentExImpl,Impl,"MixerOperator::loadLocalOscillator()");
-        Impl.setComponentName((const char*)p_lo_name);
-        p_loDev= Receivers::LocalOscillator::_nil();
+        Impl.setComponentName("LO1 or LO2");
+        m_loDev_1st= Receivers::LocalOscillator::_nil();
+        m_loDev_2nd= Receivers::LocalOscillator::_nil();
         throw Impl;
     }
     catch (maciErrType::NoDefaultComponentExImpl& ex) {
         _EXCPT(ComponentErrors::CouldntGetComponentExImpl,Impl,"MixerOperator::loadLocalOscillator()");
-        Impl.setComponentName((const char*)p_lo_name);
-        p_loDev= Receivers::LocalOscillator::_nil();
+        Impl.setComponentName("LO1 or LO2");
+        m_loDev_1st= Receivers::LocalOscillator::_nil();
+        m_loDev_2nd= Receivers::LocalOscillator::_nil();
         throw Impl;
     }
     catch(...){
-        MED_TRACE_MSG(" Failed to load LO ");
+        MED_TRACE_MSG(" Failed to load LOs ");
         _EXCPT(ComponentErrors::CouldntGetComponentExImpl,Impl,"MixerOperator::loadLocalOscillator()");
-        Impl.setComponentName((const char*)p_lo_name);
-        p_loDev= Receivers::LocalOscillator::_nil();
+        Impl.setComponentName("LO1 or LO2");
+        m_loDev_1st= Receivers::LocalOscillator::_nil();
+        m_loDev_2nd= Receivers::LocalOscillator::_nil();
         throw Impl;
     }
-    MED_TRACE_FMT("Device %s loaded \n", p_lo_name);
+    MED_TRACE_FMT("Device %s loaded \n", "LOs");
 }
 
 void MixerOperator::releaseDevices()
@@ -289,17 +293,19 @@ void MixerOperator::releaseDevices()
     }
     catch (maciErrType::CannotReleaseComponentExImpl& ex) {
         _EXCPT(ComponentErrors::CouldntReleaseComponentExImpl,Impl,"MixerOperator::unloadLocalOscillator()");
-        Impl.setComponentName(p_lo_name);
+        Impl.setComponentName("LO1 or LO2");
         Impl.log(LM_WARNING);
     }
     catch (...) {
         _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"MixerOperator::unloadLocalOscillator()");
         impl.log(LM_WARNING);
     }
-    p_loDev= Receivers::LocalOscillator::_nil();
+    m_loDev_1st= Receivers::LocalOscillator::_nil();
+    m_loDev_2nd= Receivers::LocalOscillator::_nil();
     m_init_ok= false;    
     #else
-    p_loDev= Receivers::LocalOscillator::_nil();
+    m_loDev_1st= Receivers::LocalOscillator::_nil();
+    m_loDev_2nd= Receivers::LocalOscillator::_nil();
     m_init_ok= false;
     #endif
 }
