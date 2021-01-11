@@ -7,6 +7,7 @@ _IRA_LOGFILTER_IMPORT;
 
 // speed of light in meters per second
 #define LIGHTSPEED 299792458.0
+using namespace IRA;
 
 CComponentCore::CComponentCore():
     m_mixer()
@@ -43,6 +44,7 @@ CConfiguration const * const  CComponentCore::execute() throw (ComponentErrors::
      * This Call sets default Recevier Configuration at CCC_Normal 
      * User has to call for Activate() and setupMode() to be more specific about receiver conf
      */
+    m_componentStatus=Management::MNG_OK;
     m_configuration.init(m_services);  //throw (ComponentErrors::CDBAccessExImpl);    
     try {
     	MED_TRACE_MSG(" Receiver new ");    	  
@@ -57,10 +59,14 @@ CConfiguration const * const  CComponentCore::execute() throw (ComponentErrors::
 		MED_TRACE_MSG(" Receiver new done");
     }
     catch (std::bad_alloc& ex) {
+        setComponentStatus(Management::MNG_FAILURE);
+        _IRA_LOGFILTER_LOG(LM_CRITICAL,"CComponentCore::execute()","ReceiverControl allocation error");
         _EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CComponentCore::execute()");
         throw dummy;
     }
     catch (IRA::ReceiverControlEx& ex) {
+        setComponentStatus(Management::MNG_FAILURE);
+        _IRA_LOGFILTER_LOG(LM_CRITICAL,"CComponentCore::execute()","ReceiverControl init error");
         _EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CComponentCore::execute()");
         throw dummy;
     }
@@ -87,10 +93,16 @@ void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ModeErro
 	MED_TRACE_MSG(" IN ");
     /* activate mode */
     baci::ThreadSyncGuard guard(&m_mutex);
-    bool l_res= m_configuration.m_conf_hnd.setConfiguration(mode);
+    /* Check component status */
+    if(m_componentStatus!= Management::MNG_OK){
+        MED_TRACE_MSG(" Cannot Activate with component status marked as FAILURE! ");
+        _EXCPT(ReceiversErrors::ModeErrorExImpl,impl,"CComponentErrors::acitvate()");
+        throw impl;
+    }        
+    bool l_res= m_configuration.m_conf_hnd.setConfiguration(IRA::CString(mode));
     if (! l_res){
-    		MED_TRACE_MSG(" EXC set mode");
-        _EXCPT(ReceiversErrors::ModeErrorExImpl,impl,"CComponentErrors::setMode()");
+    	MED_TRACE_MSG(" Activate, setMode failed");
+        _EXCPT(ReceiversErrors::ModeErrorExImpl,impl,"CComponentErrors::activate()");
         throw impl;
     }    
     guard.release();
@@ -113,7 +125,7 @@ void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ModeErro
     	MED_TRACE_MSG(" SET PARAMS IF ");
         m_startFreq[i]=l_setup.m_IFMin[i];
         m_bandwidth[i]=l_setup.m_IFBandwidth[i];
-        m_polarization[i]=(long)l_setup.m_polarizations[i];
+        m_polarization[i]=(long)l_setup.m_polarizations[i];                        
         m_localOscillatorValue[i]=l_setup.m_defaultLO[i];
         MED_TRACE_FMT("\n --- cyle %d --- \n", i);
         MED_TRACE_FMT("m_startFreq %f\n",m_startFreq[i]);
