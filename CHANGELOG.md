@@ -94,3 +94,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/
     issue #525 - When in LOCAL mode the receivers can turn on/off the noise mark and LNAs. There is no more MNG_FAILURE logging in case of LOCAL mode: only the LOCAL/REMOTE status (during component activation) and the change of status (LOCAL to REMOTE and viceversa) are written to the logfile.
 ## Changed  
     issue #545 - Oscillation checks enabled for Mc and Nt telescopes, this setting is now under control of a CDB argument   
+
+## [next release]
+## Added
+## Fixed
+    issue #448 - Added Sky Offsets to calibration tool client
+## Changed
