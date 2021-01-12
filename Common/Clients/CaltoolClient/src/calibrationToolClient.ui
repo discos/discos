@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>954</width>
-    <height>572</height>
+    <width>998</width>
+    <height>726</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -76,7 +76,7 @@
     <rect>
      <x>527</x>
      <y>40</y>
-     <width>401</width>
+     <width>415</width>
      <height>51</height>
     </rect>
    </property>
@@ -99,8 +99,8 @@
     <rect>
      <x>560</x>
      <y>100</y>
-     <width>371</width>
-     <height>371</height>
+     <width>381</width>
+     <height>381</height>
     </rect>
    </property>
    <property name="frameShape">
@@ -110,9 +110,9 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>0</y>
+      <y>10</y>
       <width>408</width>
-      <height>351</height>
+      <height>361</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout_3">
@@ -131,7 +131,7 @@
         </size>
        </property>
        <property name="text">
-        <string>Name</string>
+        <string>Source</string>
        </property>
       </widget>
      </item>
@@ -297,7 +297,7 @@
         </size>
        </property>
        <property name="text">
-        <string>HPBW(arcmim)</string>
+        <string>HPBW (arcmin)</string>
        </property>
       </widget>
      </item>
@@ -425,7 +425,7 @@
         </size>
        </property>
        <property name="text">
-        <string>Offset (K)</string>
+        <string>Tsys (K)</string>
        </property>
       </widget>
      </item>
@@ -542,7 +542,7 @@
      <x>20</x>
      <y>100</y>
      <width>541</width>
-     <height>431</height>
+     <height>581</height>
     </rect>
    </property>
    <property name="frameShape">
@@ -554,8 +554,14 @@
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="QLabel" name="label_10">
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
       <property name="text">
-       <string>Current Subscan</string>
+       <string>Ongoing Subscan</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
@@ -605,8 +611,14 @@
     </item>
     <item>
      <widget class="QLabel" name="label_9">
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
       <property name="text">
-       <string>Last Subscan</string>
+       <string>Completed Subscan</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
@@ -619,9 +631,9 @@
    <property name="geometry">
     <rect>
      <x>560</x>
-     <y>470</y>
-     <width>371</width>
-     <height>61</height>
+     <y>610</y>
+     <width>381</width>
+     <height>71</height>
     </rect>
    </property>
    <property name="frameShape">
@@ -634,7 +646,7 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>10</y>
+      <y>20</y>
       <width>401</width>
       <height>34</height>
      </rect>
@@ -665,12 +677,133 @@
     </property>
    </widget>
   </widget>
+  <widget class="QFrame" name="frame_3">
+   <property name="geometry">
+    <rect>
+     <x>560</x>
+     <y>480</y>
+     <width>381</width>
+     <height>131</height>
+    </rect>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::Box</enum>
+   </property>
+   <widget class="QLabel" name="label_6">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>121</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Sky Offsets</string>
+    </property>
+   </widget>
+   <widget class="QWidget" name="gridLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>40</y>
+      <width>408</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_4">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Azimuth (Deg)</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="azOffsetlineEdit">
+       <property name="minimumSize">
+        <size>
+         <width>94</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>150</width>
+         <height>26</height>
+        </size>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_5">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Elevation (Deg)</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="elOffsetlineEdit">
+       <property name="minimumSize">
+        <size>
+         <width>94</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>150</width>
+         <height>26</height>
+        </size>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
  </widget>
  <customwidgets>
   <customwidget>
    <class>QwtPlot</class>
    <extends>QFrame</extends>
    <header>qwt_plot.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>
