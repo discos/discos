@@ -76,7 +76,7 @@
     <rect>
      <x>527</x>
      <y>40</y>
-     <width>401</width>
+     <width>415</width>
      <height>51</height>
     </rect>
    </property>
@@ -100,7 +100,7 @@
      <x>560</x>
      <y>100</y>
      <width>381</width>
-     <height>361</height>
+     <height>381</height>
     </rect>
    </property>
    <property name="frameShape">
@@ -110,9 +110,9 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>0</y>
+      <y>10</y>
       <width>408</width>
-      <height>351</height>
+      <height>361</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout_3">
@@ -681,24 +681,24 @@
    <property name="geometry">
     <rect>
      <x>560</x>
-     <y>460</y>
+     <y>480</y>
      <width>381</width>
-     <height>151</height>
+     <height>131</height>
     </rect>
    </property>
    <property name="frameShape">
-    <enum>QFrame::StyledPanel</enum>
+    <enum>QFrame::Box</enum>
    </property>
    <property name="frameShadow">
-    <enum>QFrame::Raised</enum>
+    <enum>QFrame::Plain</enum>
    </property>
    <widget class="QWidget" name="gridLayoutWidget">
     <property name="geometry">
      <rect>
       <x>30</x>
       <y>40</y>
-      <width>351</width>
-      <height>111</height>
+      <width>381</width>
+      <height>71</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout">
@@ -706,7 +706,14 @@
       <number>5</number>
      </property>
      <item row="1" column="1">
-      <widget class="QLineEdit" name="azOffsetlineEdit"/>
+      <widget class="QLineEdit" name="azOffsetlineEdit">
+       <property name="maximumSize">
+        <size>
+         <width>150</width>
+         <height>26</height>
+        </size>
+       </property>
+      </widget>
      </item>
      <item row="1" column="0">
       <widget class="QLabel" name="label_4">
@@ -717,7 +724,7 @@
         </size>
        </property>
        <property name="text">
-        <string>Azimuth (Deg)    </string>
+        <string>Azimuth (Deg)</string>
        </property>
       </widget>
      </item>
@@ -729,7 +736,14 @@
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QLineEdit" name="elOffsetlineEdit"/>
+      <widget class="QLineEdit" name="elOffsetlineEdit">
+       <property name="maximumSize">
+        <size>
+         <width>150</width>
+         <height>26</height>
+        </size>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
