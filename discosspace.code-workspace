@@ -9,7 +9,10 @@
 			"*.idl": "cpp",
 			"ira": "cpp",
 			"map": "cpp",
-			"bitset": "cpp"
+			"bitset": "cpp",
+			"cmath": "cpp",
+			"complex": "cpp",
+			"valarray": "cpp"
 		}
 	}
 }

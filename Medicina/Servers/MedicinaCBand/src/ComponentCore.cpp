@@ -84,6 +84,7 @@ void CComponentCore::cleanup()
         m_control->closeConnection();
         delete m_control;
     }
+    m_mixer.releaseComponents();
 }
 
 void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
@@ -179,6 +180,7 @@ void CComponentCore::deactivate() throw (ReceiversErrors::NoRemoteControlErrorEx
 {
     // no guard needed.
     lnaOff(); // throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
+    m_mixer.releaseComponents();
 }
 
 
