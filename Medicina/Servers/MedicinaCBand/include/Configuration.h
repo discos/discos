@@ -150,11 +150,12 @@ public:
 	double getRightMarkTemp(double freq);
 
 	/**
+	 * @param p_lo_name oscillatore we are referring to (LO / LO2)
 	 * @param freq vector with the synthesizer frequencies. It must be freed by caller.
 	 * @param power corresponding powers for the frequencies vector. It must be freed by caller.
 	 * @return the size of the output vectors
 	 */
-	DWORD getSynthesizerTable(double *& freq,double *& power) const;
+	DWORD getSynthesizerTable(const char * p_lo_name, double *& freq,double *& power) const;
 
 	/**
 	 * @param freq vector with the frequencies. It must be freed by caller.

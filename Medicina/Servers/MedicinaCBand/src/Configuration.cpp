@@ -191,17 +191,30 @@ double CConfiguration::getRightMarkTemp(double freq)
 	return l_ret;
 }
 
-DWORD CConfiguration::getSynthesizerTable(double *& freq,double *& power) const
+DWORD CConfiguration::getSynthesizerTable(const char * p_lo_name, double *& freq,double *& power) const
 {
 	/* returning only one table values, we assume similar steps between two stages */
-	WORD l_synt_len= m_synt_table_1st.size();
-	freq= new double [l_synt_len];
-	power=new double [l_synt_len];
-	for (DWORD j=0;j < l_synt_len; j++){
-		freq[j]= m_synt_table_1st[j].frequency;
-		power[j]= m_synt_table_1st[j].outputPower;
+	if (p_lo_name == "LO"){	
+		WORD l_synt_len= m_synt_table_1st.size();	
+		freq= new double [l_synt_len];
+		power=new double [l_synt_len];
+		for (DWORD j=0;j < l_synt_len; j++){
+			freq[j]= m_synt_table_1st[j].frequency;
+			power[j]= m_synt_table_1st[j].outputPower;
+		}
+		return l_synt_len;
 	}
-	return l_synt_len;
+	if (p_lo_name == "LO2"){	
+		WORD l_synt_len= m_synt_table_2nd.size();	
+		freq= new double [l_synt_len];
+		power=new double [l_synt_len];
+		for (DWORD j=0;j < l_synt_len; j++){
+			freq[j]= m_synt_table_2nd[j].frequency;
+			power[j]= m_synt_table_2nd[j].outputPower;
+		}
+		return l_synt_len;
+	}
+	return 0;
 }
 
 DWORD CConfiguration::getTaperTable(double * &freq,double *&taper) const

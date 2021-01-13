@@ -121,10 +121,13 @@ bool MixerOperator::setValue(const ACS::doubleSeq& p_values)
         throw impl;
     }
     /**/
-    double trueValue,amp;
-    double *freq=NULL;
-    double *power=NULL;
-    DWORD size;
+    double trueValue;
+    double amp_lo, amp_lo2; 
+    DWORD size_lo, size_lo2;
+    double *freq_lo=NULL;
+    double *power_lo=NULL;
+    double *freq_lo2=NULL;
+    double *power_lo2=NULL;
 
     ReceiverConfHandler::ConfigurationSetup l_setup= m_configuration->getCurrentSetup();	  
     
@@ -153,16 +156,33 @@ bool MixerOperator::setValue(const ACS::doubleSeq& p_values)
         throw impl;
     }
 	MED_TRACE_MSG(" calculate value ");
+    // LO2 specs fiex freq, get the freq, get the power
+    size_lo2= m_configuration->getSynthesizerTable("LO2", freq_lo2, power_lo2);
+    if (size_lo2 != 1){
+        _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"MixerOperator::setLO");
+        impl.setValueName("local oscillator 2 expecting only one configuration for freq/power value");        
+        throw impl;
+    } 
+    if (l_setup.m_fixedLO2[0] != power_lo2[0]){
+        _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"MixerOperator::setLO");
+        impl.setValueName("local oscillator 2 conf table freq not matching expencting fixed frequency (2300MHz)");        
+        throw impl;
+    }
+    amp_lo2= power_lo2[0];    
     //computes the synthesizer settings
-    trueValue= p_values[0]+l_setup.m_fixedLO2[0];
-    size= m_configuration->getSynthesizerTable(freq,power);
-    amp= round(Helpers::linearFit(freq,power,size,trueValue));
-    if (power) delete [] power;
-    if (freq) delete [] freq;
-    ACS_LOG(LM_FULL_INFO,"MixerOperator::setLO()",(LM_DEBUG,"SYNTHESIZER_VALUES %lf %lf",trueValue,amp));
+    trueValue= p_values[0]+ l_setup.m_fixedLO2[0];
+    // LO specs 
+    size_lo= m_configuration->getSynthesizerTable("LO", freq_lo, power_lo);
+    amp_lo= round(Helpers::linearFit(freq_lo, power_lo, size_lo, trueValue));
+    if (power_lo) delete [] power_lo;
+    if (freq_lo) delete [] freq_lo;    
+    if (power_lo2) delete [] power_lo2;
+    if (freq_lo2) delete [] freq_lo2; 
+    ACS_LOG(LM_FULL_INFO,"MixerOperator::setLO()",(LM_DEBUG, "SYNTHESIZER_VALUES %lf %lf", trueValue, amp_lo));
     try {
-		  #ifndef EXCLUDE_MIXER
-        	m_loDev_1st->set(amp, trueValue);
+		#ifndef EXCLUDE_MIXER
+            m_loDev_2nd->set(amp_lo2, l_setup.m_fixedLO2[0]);
+        	m_loDev_1st->set(amp_lo, trueValue);
         #endif
     }
     catch (CORBA::SystemException& ex) {
