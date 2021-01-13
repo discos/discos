@@ -90,7 +90,7 @@ void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ModeErro
         ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl,ReceiversErrors::NoRemoteControlErrorExImpl,
         ReceiversErrors::ReceiverControlBoardErrorExImpl)
 {
-	MED_TRACE_MSG(" IN ");
+	MED_TRACE_MSG(" IN ");    
     /* activate mode */
     baci::ThreadSyncGuard guard(&m_mutex);
     /* Check component status */
@@ -143,6 +143,7 @@ void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ModeErro
         MED_TRACE_MSG(" EXC loading LOs !");	                
         _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"CComponentCore::activate()");        
         setStatusBit(CONNECTIONERROR);
+        setComponentStatus(Management::MNG_FAILURE);
         throw impl;
     }        
 
@@ -159,6 +160,7 @@ void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ModeErro
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::activate()");
         impl.setDetails(ex.what().c_str());
         setStatusBit(CONNECTIONERROR);
+        setComponentStatus(Management::MNG_FAILURE);
         throw impl;
     }
     if (answer) {			
