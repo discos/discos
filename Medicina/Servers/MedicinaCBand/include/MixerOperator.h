@@ -70,7 +70,19 @@ class MixerOperator{
 
         /**
          * @brief Set LO equivalent value to the 2 stages LOs
-         * @param p_values Values for what? why an array?
+         * @param p_value Unique value from user point of view
+         * @return true Value is valid         
+         */
+        bool MixerOperator::setValue(double p_value)
+                                throw (ComponentErrors::ValidationErrorExImpl,
+                                ComponentErrors::ValueOutofRangeExImpl,
+                                ComponentErrors::CouldntGetComponentExImpl,
+                                ComponentErrors::CORBAProblemExImpl,
+                                ReceiversErrors::LocalOscillatorErrorExImpl);
+
+        /**
+         * @brief Set LO equivalent value to the 2 stages LOs
+         * @param p_values Values for LO chain, we use just first value seen from user point of view
          * @return true Value is valid         
          */
         bool setValue(const ACS::doubleSeq& p_values)

@@ -100,6 +100,103 @@ void MixerOperator::releaseComponents() throw (ReceiversErrors::LocalOscillatorE
     m_init_ok= false;
 }
 
+
+bool MixerOperator::setValue(double p_value)
+                    throw (ComponentErrors::ValidationErrorExImpl,
+                        ComponentErrors::ValueOutofRangeExImpl,
+                        ComponentErrors::CouldntGetComponentExImpl,
+                        ComponentErrors::CORBAProblemExImpl,
+                        ReceiversErrors::LocalOscillatorErrorExImpl)
+{
+    MED_TRACE_MSG(" IN ");        
+    if(!m_init_ok || CORBA::is_nil(m_loDev_1st) || CORBA::is_nil(m_loDev_2nd) ){
+        ACS_LOG(LM_FULL_INFO,"MixerOperator::setLO()",
+                    (LM_NOTICE,"LOs not ready to be set"));
+		MED_TRACE_MSG(" LOs not ready to be set! ");                    
+        return false;
+    }             
+    if (! m_configuration ){
+        ACS_LOG(LM_FULL_INFO,"MixerOperator::loadComponents()",
+                    (LM_NOTICE,"LOs configuration not provided!"));
+        _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"MixerOperator::setLO()");
+        throw impl;
+    }
+    /**/
+    double trueValue;
+    double amp_lo, amp_lo2; 
+    DWORD size_lo, size_lo2;
+    double *freq_lo=NULL;
+    double *power_lo=NULL;
+    double *freq_lo2=NULL;
+    double *power_lo2=NULL;
+
+    ReceiverConfHandler::ConfigurationSetup l_setup= m_configuration->getCurrentSetup();	  
+    
+    // in case -1 is given we keep the current value...so nothing to do
+    if (p_value == -1) {
+        ACS_LOG(LM_FULL_INFO,"MixerOperator::setLO()",
+                    (LM_NOTICE,"KEEP_CURRENT_LOCAL_OSCILLATOR %lf",m_current_value));
+        return false;
+    }    
+    // now check if the requested value match the limits
+    if (p_value < l_setup.m_LOMin[0]) {
+        _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"MixerOperator::setLO");
+        impl.setValueName("local oscillator lower limit");
+        impl.setValueLimit(l_setup.m_LOMin[0]);
+        throw impl;
+    }
+    else if (p_value > l_setup.m_LOMax[0]) {
+        _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"MixerOperator::setLO");
+        impl.setValueName("local oscillator upper limit");
+        impl.setValueLimit(l_setup.m_LOMax[0]);
+        throw impl;
+    }
+	MED_TRACE_MSG(" calculate value ");
+    // LO2 specs fiex freq, get the freq, get the power
+    size_lo2= m_configuration->getSynthesizerTable("LO2", freq_lo2, power_lo2);
+    if (size_lo2 != 1){
+        _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"MixerOperator::setLO");
+        impl.setValueName("local oscillator 2 expecting only one configuration for freq/power value");        
+        throw impl;
+    } 
+    if (l_setup.m_fixedLO2[0] != power_lo2[0]){
+        _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"MixerOperator::setLO");
+        impl.setValueName("local oscillator 2 conf table freq not matching expencting fixed frequency (2300MHz)");        
+        throw impl;
+    }
+    amp_lo2= power_lo2[0];    
+    //computes the synthesizer settings
+    trueValue= p_value + l_setup.m_fixedLO2[0];
+    // LO specs 
+    size_lo= m_configuration->getSynthesizerTable("LO", freq_lo, power_lo);
+    amp_lo= round(Helpers::linearFit(freq_lo, power_lo, size_lo, trueValue));
+    if (power_lo) delete [] power_lo;
+    if (freq_lo) delete [] freq_lo;    
+    if (power_lo2) delete [] power_lo2;
+    if (freq_lo2) delete [] freq_lo2; 
+    ACS_LOG(LM_FULL_INFO,"MixerOperator::setLO()",(LM_DEBUG, "SYNTHESIZER_VALUES %lf %lf", trueValue, amp_lo));
+    try {
+		#ifndef EXCLUDE_MIXER
+            m_loDev_2nd->set(amp_lo2, l_setup.m_fixedLO2[0]);
+        	m_loDev_1st->set(amp_lo, trueValue);
+        #endif
+    }
+    catch (CORBA::SystemException& ex) {
+        m_mixer_fault= true;
+        _EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"MixerOperator::setLO()");
+        impl.setName(ex._name());
+        impl.setMinor(ex.minor());
+        throw impl;
+    }
+    catch (ReceiversErrors::ReceiversErrorsEx& ex) { 
+        _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"MixerOperator::setLO()");
+        throw impl;
+    }
+    m_current_value= p_values[0];
+	MED_TRACE_MSG(" OUT ");
+    return true;  
+}
+
 bool MixerOperator::setValue(const ACS::doubleSeq& p_values)
                     throw (ComponentErrors::ValidationErrorExImpl,
                         ComponentErrors::ValueOutofRangeExImpl,
@@ -107,7 +204,7 @@ bool MixerOperator::setValue(const ACS::doubleSeq& p_values)
                         ComponentErrors::CORBAProblemExImpl,
                         ReceiversErrors::LocalOscillatorErrorExImpl)
 {
-	 MED_TRACE_MSG(" IN ");        
+	MED_TRACE_MSG(" IN ");        
     if(!m_init_ok || CORBA::is_nil(m_loDev_1st) || CORBA::is_nil(m_loDev_2nd) ){
         ACS_LOG(LM_FULL_INFO,"MixerOperator::setLO()",
                     (LM_NOTICE,"LOs not ready to be set"));
