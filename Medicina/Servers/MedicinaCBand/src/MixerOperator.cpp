@@ -154,17 +154,12 @@ bool MixerOperator::setValue(double p_value)
 	MED_TRACE_MSG(" calculate value ");
     // LO2 specs fiex freq, get the freq, get the power
     size_lo2= m_configuration->getSynthesizerTable("LO2", freq_lo2, power_lo2);
-    if (size_lo2 != 1){
+    if (size_lo2 < 1 ){
         _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"MixerOperator::setLO");
-        impl.setValueName("local oscillator 2 expecting only one configuration for freq/power value");        
+        impl.setValueName("local oscillator 2 expecting at least one configuration for freq/power value");        
         throw impl;
     } 
-    if (l_setup.m_fixedLO2[0] != power_lo2[0]){
-        _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"MixerOperator::setLO");
-        impl.setValueName("local oscillator 2 conf table freq not matching expencting fixed frequency (2300MHz)");        
-        throw impl;
-    }
-    amp_lo2= power_lo2[0];    
+    amp_lo2= power_lo2[0];
     //computes the synthesizer settings
     trueValue= p_value + l_setup.m_fixedLO2[0];
     // LO specs 

@@ -120,6 +120,14 @@ void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ModeErro
 	MED_TRACE_FMT("IFBandwidth len %d\n",l_setup.m_IFBandwidth.size());
 	MED_TRACE_FMT("Polar. len %d\n",l_setup.m_polarizations.size());
     MED_TRACE_FMT("Default LO len %d\n",l_setup.m_defaultLO.size());
+    
+    if( l_setup.m_defaultLO.size() != 0){
+        MED_TRACE_FMT("Default LO[0] %f\n",l_setup.m_defaultLO[0]);
+    }
+    if( l_setup.m_fixedLO2.size() != 0){
+        MED_TRACE_FMT("Fixed LO2[0] %f\n",l_setup.m_fixedLO2[0]);
+    }
+
 
     try{
     for (WORD i=0; i < l_setup.m_IFs; i++) {

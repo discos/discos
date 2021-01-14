@@ -330,7 +330,7 @@ void CConfiguration::readConfigurationSetup(const IRA::CString & p_conf_path,
 		p_conf_setup.m_IFBandwidth.push_back(l_token.ToDouble());
 	}
 	/* Set default LO value for every feed */
-	_GET_STRING_ATTRIBUTE("DefaultLO","Default local oscillator (MHz):", l_value, p_conf_path);
+	_GET_STRING_ATTRIBUTE("DefaultLO","Default local oscillator (MHz):", l_value, p_conf_path);	
 	l_start=0;
 	for (WORD k=0; k < p_conf_setup.m_IFs; k++) {
 		if (!IRA::CIRATools::getNextToken(l_value, l_start, ' ', l_token)) {
