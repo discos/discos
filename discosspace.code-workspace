@@ -12,7 +12,8 @@
 			"bitset": "cpp",
 			"cmath": "cpp",
 			"complex": "cpp",
-			"valarray": "cpp"
+			"valarray": "cpp",
+			"set": "cpp"
 		}
 	}
 }
