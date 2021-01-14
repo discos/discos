@@ -154,7 +154,7 @@ void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ModeErro
         throw impl;
     }
     MED_TRACE_FMT("Setting default value to LO %f", l_setup.m_defaultLO[0]);
-    m_mixer.setValue(l_setup.m_defaultLO);
+    m_mixer.setValue(l_setup.m_defaultLO[0]);
     // Basic operations
     lnaOn(); // throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)    
     // Remote control check
