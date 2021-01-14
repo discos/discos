@@ -153,7 +153,8 @@ void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ModeErro
         setComponentStatus(Management::MNG_FAILURE);
         throw impl;
     }
-    m_mixer.setValue(l_setup.m_defaultLO[0]);
+    MED_TRACE_FMT("Setting default value to LO %f", l_setup.m_defaultLO[0]);
+    m_mixer.setValue(l_setup.m_defaultLO);
     // Basic operations
     lnaOn(); // throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)    
     // Remote control check
