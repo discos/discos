@@ -192,7 +192,7 @@ bool MixerOperator::setValue(double p_value)
         _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"MixerOperator::setLO()");
         throw impl;
     }
-    m_current_value= p_values[0];
+    m_current_value= p_value;
 	MED_TRACE_MSG(" OUT ");
     return true;  
 }
