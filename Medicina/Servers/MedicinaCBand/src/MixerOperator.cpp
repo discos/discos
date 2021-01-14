@@ -165,7 +165,7 @@ bool MixerOperator::setValue(double p_value)
     // LO specs 
     size_lo= m_configuration->getSynthesizerTable("LO", freq_lo, power_lo);
     amp_lo= round(Helpers::linearFit(freq_lo, power_lo, size_lo, trueValue));
-    MED_TRACE_FMT("Setting LOs [%f/%f] [%f/%f]", trueValue, amp_lo, freq_lo2, amp_lo2 );
+    MED_TRACE_FMT("Setting LOs [%f/%f] [%f/%f]", trueValue, amp_lo, l_setup.m_fixedLO2[0], amp_lo2 );
     if (power_lo) delete [] power_lo;
     if (freq_lo) delete [] freq_lo;    
     if (power_lo2) delete [] power_lo2;
