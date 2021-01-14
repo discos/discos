@@ -63,8 +63,7 @@ void MixerOperator::loadComponents()
     MED_TRACE_FMT("LO 1 : %s\n", (const char*)m_configuration->getLocalOscillatorInstance1st());
     MED_TRACE_FMT("LO 2 : %s\n", (const char*)m_configuration->getLocalOscillatorInstance2nd());
     try{           
-        loadDevices();
-        m_configuration->readSynths();
+        loadDevices();        
     }catch(...){
         ACS_LOG(LM_FULL_INFO,"MixerOperator::loadComponents()",
                     (LM_NOTICE,"LOs loading failed!"));

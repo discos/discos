@@ -134,6 +134,8 @@ void CConfiguration::init(maci::ContainerServices *Services)
 	m_conf_hnd.setConfiguration(ReceiverConfHandler::CCC_Normal);
 	/* Feeds */
 	readFeeds();
+	/* Synth tables */
+	readSynths();
 	/* Taper */
 	readTaper();	
 	MED_TRACE_MSG(" OUT ");
