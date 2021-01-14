@@ -142,12 +142,18 @@ void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ModeErro
         m_mixer.loadComponents();        
     }catch(...){
         MED_TRACE_MSG(" EXC loading LOs !");	                
-        _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"CComponentCore::activate()");        
-        setStatusBit(CONNECTIONERROR);
+        _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"CComponentCore::activate()");                
         setComponentStatus(Management::MNG_FAILURE);
         throw impl;
     }        
-
+    /* Setting default LOs value */
+    if (l_setup.m_defaultLO.size() < 1){
+        MED_TRACE_MSG(" EXC setting LO default values, no default value on configuration!");	                
+        _EXCPT(ReceiversErrors::LocalOscillatorErrorExImpl,impl,"CComponentCore::activate()");                
+        setComponentStatus(Management::MNG_FAILURE);
+        throw impl;
+    }
+    m_mixer.setValue(l_setup.m_defaultLO[0]);
     // Basic operations
     lnaOn(); // throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)    
     // Remote control check
@@ -318,27 +324,11 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo)
     baci::ThreadSyncGuard guard(&m_mutex);
     double l_lo_value;
     ReceiverConfHandler::ConfigurationSetup l_setup;
-    /** TODO REMOVE TRY CATCH IF NOT USEFULL */
-    try{
-        m_mixer.setValue(lo);
-    }catch(...){
-        ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"Catch 1 !"));    
-        return;
-    }
 
-    try{
-        l_setup= m_configuration.getCurrentSetup();	      
-    }catch(...){
-        ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"Catch 2 !"));    
-        return;
-    }
-    
-    try{
-        l_lo_value= m_mixer.getValue();    
-    }catch(...){
-        ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"Catch 3 !"));    
-        return;
-    }
+    m_mixer.setValue(lo);           
+    l_lo_value= m_mixer.getValue();    
+    l_setup= m_configuration.getCurrentSetup();	   
+
     try{    
         /* TEST */
         MED_TRACE_FMT("m_IFBandwidth[0] : %f\n", l_setup.m_IFBandwidth[0]);
@@ -351,7 +341,7 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo)
             m_bandwidth[0]= l_setup.m_IFBandwidth[0];        
         MED_TRACE_FMT( "m_bandwidth[0] : %f", m_bandwidth[0]);
     }catch(...){
-        ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"Catch 4 !"));    
+        ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"Exception calculating bw"));    
         return;
     }
     ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"LOCAL_OSCILLATOR %lf",l_lo_value));
