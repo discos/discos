@@ -73,7 +73,7 @@ class MixerOperator{
          * @param p_value Unique value from user point of view
          * @return true Value is valid         
          */
-        bool MixerOperator::setValue(double p_value)
+        bool setValue(double p_value)
                                 throw (ComponentErrors::ValidationErrorExImpl,
                                 ComponentErrors::ValueOutofRangeExImpl,
                                 ComponentErrors::CouldntGetComponentExImpl,
