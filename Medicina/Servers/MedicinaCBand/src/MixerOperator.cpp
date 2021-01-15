@@ -251,22 +251,18 @@ bool MixerOperator::setValue(const ACS::doubleSeq& p_values)
 	MED_TRACE_MSG(" calculate value ");
     // LO2 specs fiex freq, get the freq, get the power
     size_lo2= m_configuration->getSynthesizerTable("LO2", freq_lo2, power_lo2);
-    if (size_lo2 != 1){
+    if (size_lo2 < 1 ){
         _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"MixerOperator::setLO");
-        impl.setValueName("local oscillator 2 expecting only one configuration for freq/power value");        
+        impl.setValueName("local oscillator 2 expecting at least one configuration for freq/power value");        
         throw impl;
     } 
-    if (l_setup.m_fixedLO2[0] != power_lo2[0]){
-        _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"MixerOperator::setLO");
-        impl.setValueName("local oscillator 2 conf table freq not matching expencting fixed frequency (2300MHz)");        
-        throw impl;
-    }
-    amp_lo2= power_lo2[0];    
+    amp_lo2= power_lo2[0];
     //computes the synthesizer settings
     trueValue= p_values[0]+ l_setup.m_fixedLO2[0];
     // LO specs 
     size_lo= m_configuration->getSynthesizerTable("LO", freq_lo, power_lo);
     amp_lo= round(Helpers::linearFit(freq_lo, power_lo, size_lo, trueValue));
+    MED_TRACE_FMT("Setting LOs [%f/%f] [%f/%f]", trueValue, amp_lo, l_setup.m_fixedLO2[0], amp_lo2 );
     if (power_lo) delete [] power_lo;
     if (freq_lo) delete [] freq_lo;    
     if (power_lo2) delete [] power_lo2;
