@@ -80,9 +80,7 @@ public:
      * C receiver ( LOW - HIGH ).
      * @details Throw an exception if mode is not valid or it got some init errors.
      */
-    void activate(const char *mode) throw (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
-            ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl,ReceiversErrors::NoRemoteControlErrorExImpl,
-            ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    void activate(const char *mode) throw (ReceiversErrors::ReceiversErrorsExImpl,ComponentErrors::ComponentErrorsExImpl);
 
     /**
      * It deactivates the receiver.
@@ -112,8 +110,7 @@ public:
      * It allows to change the operating mode of the receiver. If the mode does not correspond to a valid mode an error is thrown.
      * @param  mode mode code as a string
      */
-    void setMode(const char * mode) throw  (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
-            ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl);
+    void setMode(const char * mode) throw  (ReceiversErrors::ReceiversErrorsExImpl,ComponentErrors::ComponentErrorsExImpl);
 
     /**
      * It returns the current operating mode of the receiver.
@@ -127,15 +124,13 @@ public:
      * @brief Select current reciver, C HIGH
      * 
      */
-    void setReceiverHigh()throw  (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
-            ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl);
+    void setReceiverHigh()throw  (ReceiversErrors::ReceiversErrorsExImpl,ComponentErrors::ComponentErrorsExImpl);
 
     /**
      * @brief Select current reciver, C LOW
      * 
      */
-    void setReceiverLow()throw  (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
-            ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl);
+    void setReceiverLow()throw  (ReceiversErrors::ReceiversErrorsExImpl,ComponentErrors::ComponentErrorsExImpl);
 
         /* *** LOs *** */
 
@@ -148,13 +143,12 @@ public:
      * @throw ComponentErrors::CORBAProblemExImpl
      * @thorw ReceiversErrors::LocalOscillatorErrorExImpl
      */
-    void setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CouldntGetComponentExImpl,
-            ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl);
+    void setLO(const ACS::doubleSeq& lo) throw (ReceiversErrors::ReceiversErrorsExImpl,ComponentErrors::ComponentErrorsExImpl);
     /**
      * It returns back the current local oscillator frequency settings.
      * @param lo output sequence
      */
-    void getLO(ACS::doubleSeq& lo);
+    void getLO(ACS::doubleSeq& lo) throw (ReceiversErrors::LocalOscillatorErrorExImpl);
 
     /**
      * I checks if the local oscillator is locked properly
@@ -450,7 +444,7 @@ protected:
     /**
      * used to free the reference to the local oscillator device
      */
-    void unloadLocalOscillator();
+    void unloadLocalOscillator() throw (ReceiversErrors::LocalOscillatorErrorExImpl);
 
 private:
 

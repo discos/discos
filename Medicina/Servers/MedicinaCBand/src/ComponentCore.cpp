@@ -65,7 +65,7 @@ CConfiguration const * const  CComponentCore::execute() throw (ComponentErrors::
         throw dummy;
     }
     catch (IRA::ReceiverControlEx& ex) {
-        setComponentStatus(Management::MNG_FAILURE);
+         setComponentStatus(Management::MNG_FAILURE);
         _IRA_LOGFILTER_LOG(LM_CRITICAL,"CComponentCore::execute()","ReceiverControl init error");
         _EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CComponentCore::execute()");
         throw dummy;
@@ -80,16 +80,18 @@ void CComponentCore::cleanup()
 {
     //make sure no one is using the object
     baci::ThreadSyncGuard guard(&m_mutex);
-    if (m_control) {
-        m_control->closeConnection();
-        delete m_control;
+    try{
+        if (m_control) {
+            m_control->closeConnection();
+            delete m_control;
+        }
+        m_mixer.releaseComponents();
+    catch(...){
+        /* Do nothing, exit without throwing anything as requested by idl */
     }
-    m_mixer.releaseComponents();
 }
 
-void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
-        ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl,ReceiversErrors::NoRemoteControlErrorExImpl,
-        ReceiversErrors::ReceiverControlBoardErrorExImpl)
+void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ReceiversErrorsExImpl,ComponentErrors::ComponentErrorsExImpl)
 {
 	MED_TRACE_MSG(" IN ");    
     /* activate mode */
@@ -111,10 +113,16 @@ void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ModeErro
     /* For every feed ( L R for med C) populate core member  
      * arrays eg bandwidth polarization.. */
     ReceiverConfHandler::ConfigurationSetup l_setup= m_configuration.getCurrentSetup();	   
-    m_startFreq.length(l_setup.m_IFs);
-    m_bandwidth.length(l_setup.m_IFs);
-    m_polarization.length(l_setup.m_IFs);
-    m_localOscillatorValue.length(l_setup.m_IFs);
+    try{
+        m_startFreq.length(l_setup.m_IFs);
+        m_bandwidth.length(l_setup.m_IFs);
+        m_polarization.length(l_setup.m_IFs);
+        m_localOscillatorValue.length(l_setup.m_IFs);
+    }catch(...){
+         MED_TRACE_MSG(" Unexpected configuration exception! ");
+        _EXCPT(ComponentErrors::ComponentErrorsExImpl,impl,"CComponentErrors::acitvate()");
+        throw impl;
+    }
 
     MED_TRACE_FMT("IFMin len %d\n",l_setup.m_IFMin.size());
 	MED_TRACE_FMT("IFBandwidth len %d\n",l_setup.m_IFBandwidth.size());
@@ -128,20 +136,19 @@ void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ModeErro
         MED_TRACE_FMT("Fixed LO2[0] %f\n",l_setup.m_fixedLO2[0]);
     }
 
-
     try{
-    for (WORD i=0; i < l_setup.m_IFs; i++) {
-    	MED_TRACE_MSG(" SET PARAMS IF ");
-        m_startFreq[i]=l_setup.m_IFMin[i];
-        m_bandwidth[i]=l_setup.m_IFBandwidth[i];
-        m_polarization[i]=(long)l_setup.m_polarizations[i];                        
-        m_localOscillatorValue[i]=l_setup.m_defaultLO[i];
-        MED_TRACE_FMT("\n --- cyle %d --- \n", i);
-        MED_TRACE_FMT("m_startFreq %f\n",m_startFreq[i]);
-        MED_TRACE_FMT("m_bandwidth %f\n",m_bandwidth[i]);
-        MED_TRACE_FMT("m_polarization %f\n",m_polarization[i]);
-        MED_TRACE_FMT("m_localOscillatorValue %f\n",m_localOscillatorValue[i]);
-    }
+        for (WORD i=0; i < l_setup.m_IFs; i++) {
+            MED_TRACE_MSG(" SET PARAMS IF ");
+            m_startFreq[i]=l_setup.m_IFMin[i];
+            m_bandwidth[i]=l_setup.m_IFBandwidth[i];
+            m_polarization[i]=(long)l_setup.m_polarizations[i];                        
+            m_localOscillatorValue[i]=l_setup.m_defaultLO[i];
+            MED_TRACE_FMT("\n --- cyle %d --- \n", i);
+            MED_TRACE_FMT("m_startFreq %f\n",m_startFreq[i]);
+            MED_TRACE_FMT("m_bandwidth %f\n",m_bandwidth[i]);
+            MED_TRACE_FMT("m_polarization %f\n",m_polarization[i]);
+            MED_TRACE_FMT("m_localOscillatorValue %f\n",m_localOscillatorValue[i]);
+        }
     }catch(...){
     	MED_TRACE_MSG(" EXC SET IFS ");
     }
@@ -161,8 +168,8 @@ void CComponentCore::activate(const char *mode) throw (ReceiversErrors::ModeErro
         setComponentStatus(Management::MNG_FAILURE);
         throw impl;
     }
-    MED_TRACE_FMT("Setting default value to LO %f", l_setup.m_defaultLO[0]);
-    m_mixer.setValue(l_setup.m_defaultLO[0]);
+    MED_TRACE_FMT("Setting default value to LO %f", l_setup.m_defaultLO[0]);    
+    m_mixer.setValue(l_setup.m_defaultLO[0]); /* Throws receiver or component exImpl */
     // Basic operations
     lnaOn(); // throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)    
     // Remote control check
@@ -195,7 +202,7 @@ void CComponentCore::deactivate() throw (ReceiversErrors::NoRemoteControlErrorEx
 {
     // no guard needed.
     lnaOff(); // throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
-    m_mixer.releaseComponents();
+    m_mixer.releaseComponents(); // throws throw (ReceiversErrors::LocalOscillatorErrorExImpl)
 }
 
 
@@ -233,14 +240,12 @@ const Management::TSystemStatus& CComponentCore::getComponentStatus()
 
 /* *** SETUP *** */
 
-void CComponentCore::setReceiverHigh()throw  (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
-            ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl)
+void CComponentCore::setReceiverHigh()throw  (ReceiversErrors::ReceiversErrorsExImpl,ComponentErrors::ComponentErrorsExImpl)
 {
-     baci::ThreadSyncGuard guard(&m_mutex);
+    baci::ThreadSyncGuard guard(&m_mutex);
     try {
         m_control->setReceiverHigh();
-    }
-    catch (IRA::ReceiverControlEx& ex) {
+    }catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::setReceiverHigh()");
         impl.setDetails(ex.what().c_str());
         setStatusBit(CONNECTIONERROR);
@@ -250,14 +255,12 @@ void CComponentCore::setReceiverHigh()throw  (ReceiversErrors::ModeErrorExImpl,C
     clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
 }
 
-void CComponentCore::setReceiverLow()throw  (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
-            ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl)
+void CComponentCore::setReceiverLow()throw  (ReceiversErrors::ReceiversErrorsExImpl,ComponentErrors::ComponentErrorsExImpl)
 {
-     baci::ThreadSyncGuard guard(&m_mutex);
-    try {
-        m_control->setReceiverLow();
-    }
-    catch (IRA::ReceiverControlEx& ex) {
+    baci::ThreadSyncGuard guard(&m_mutex);
+    try{
+        m_control->setReceiverLow();   
+     }catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::setReceiverHigh()");
         impl.setDetails(ex.what().c_str());
         setStatusBit(CONNECTIONERROR);
@@ -267,17 +270,16 @@ void CComponentCore::setReceiverLow()throw  (ReceiversErrors::ModeErrorExImpl,Co
     clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
 }
 
-void CComponentCore::setMode(const char * mode) throw (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
-        ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl)
+void CComponentCore::setMode(const char * mode) throw (ReceiversErrors::ReceiversErrorsExImpl,ComponentErrors::ComponentErrorsExImpl)
 {
 	 MED_TRACE_MSG(" IN ");
     baci::ThreadSyncGuard guard(&m_mutex);
     m_calDiode=false;
     IRA::CString cmdMode(mode);
     cmdMode.MakeUpper();        
-    bool l_res= m_configuration.m_conf_hnd.setMode(mode);
+    bool l_res= m_configuration.m_conf_hnd.setMode(mode); // throw (ReceiversErrors::ReceiversErrorsExImpl,ComponentErrors::ComponentErrorsExImpl)
     if (!l_res) {
-			MED_TRACE_MSG(" EXCP ");
+		MED_TRACE_MSG(" EXCP ");
         _EXCPT(ReceiversErrors::ModeErrorExImpl,impl,"CComponentErrors::setMode()");
         throw impl;
     }    	 
@@ -291,12 +293,14 @@ void CComponentCore::setMode(const char * mode) throw (ReceiversErrors::ModeErro
 	    	  fprintf(stderr,"IFBandwidth %f\n",l_setup.m_IFBandwidth[i]);			  
 			  fprintf(stderr,"IFBandwidth %d\n",l_setup.m_polarizations[i]);
 			 #endif   	     
-   	     m_startFreq[i]= l_setup.m_IFMin[i];			  
-      	  m_bandwidth[i]= l_setup.m_IFBandwidth[i];			  
-      	  m_polarization[i]= (long)l_setup.m_polarizations[i];        
+   	        m_startFreq[i]= l_setup.m_IFMin[i];			  
+      	    m_bandwidth[i]= l_setup.m_IFBandwidth[i];			  
+      	    m_polarization[i]= (long)l_setup.m_polarizations[i];        
     	}
     }catch(...){
     	MED_TRACE_MSG(" EXC 1 ");	
+        _EXCPT(ComponentErrors::ComponentErrorsExImpl,impl,"CComponentErrors::setMode()");
+        throw impl;
     }
     // the set the default LO for the default LO for the selected mode.....
     ACS::doubleSeq lo;
@@ -326,8 +330,7 @@ const IRA::CString CComponentCore::getSetupMode(){
 /* *** LO *** */
 
 void CComponentCore::setLO(const ACS::doubleSeq& lo)
-         throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
-        ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl)
+         throw (ReceiversErrors::ReceiversErrorsExImpl,ComponentErrors::ComponentErrorsExImpl)
 {    
 	MED_TRACE_MSG(" IN ");	
     baci::ThreadSyncGuard guard(&m_mutex);
@@ -350,14 +353,15 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo)
             m_bandwidth[0]= l_setup.m_IFBandwidth[0];        
         MED_TRACE_FMT( "m_bandwidth[0] : %f", m_bandwidth[0]);
     }catch(...){
-        ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"Exception calculating bw"));    
-        return;
+        ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"Exception calculating bw"));  
+        _EXCPT(ComponentErrors::ComponentErrorsExImpl,impl,"CComponentErrors::setMode()");
+        throw impl;          
     }
     ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"LOCAL_OSCILLATOR %lf",l_lo_value));
 	MED_TRACE_MSG(" OUT ");
 }
 
-void CComponentCore::getLO(ACS::doubleSeq& lo)
+void CComponentCore::getLO(ACS::doubleSeq& lo) throw (ReceiversErrors::LocalOscillatorErrorExImpl)
 {
     baci::ThreadSyncGuard guard(&m_mutex);    
     lo[0]= m_mixer.getValue();    
@@ -377,10 +381,17 @@ void CComponentCore::checkLocalOscillator() throw (ComponentErrors::CORBAProblem
 
 void CComponentCore::loadLocalOscillator() throw (ComponentErrors::CouldntGetComponentExImpl)
 {
-    m_mixer.loadComponents();   
+    try{
+        m_mixer.loadComponents();   
+    }catch(ComponentErrors::CouldntGetComponentExImpl& ex){
+        setComponentStatus(Management::MNG_FAILURE);
+        _IRA_LOGFILTER_LOG(LM_CRITICAL,"CComponentCore::loadLocalOscillator()","ReceiverControl allocation error");
+        _EXCPT(ComponentErrors::ComponentErrorsExImpl,dummy,"CComponentCore::loadLocalOscillator()");
+        throw dummy;
+    }
 }
 
-void CComponentCore::unloadLocalOscillator()
+void CComponentCore::unloadLocalOscillator() throw (ReceiversErrors::LocalOscillatorErrorExImpl)
 {
     m_mixer.releaseComponents();   
 }

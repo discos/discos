@@ -60,11 +60,12 @@ void MedicinaCBandImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	MED_TRACE_MSG(" OUT ");
 }
 
-void MedicinaCBandImpl::execute() throw (ACSErr::ACSbaseExImpl)
+void MedicinaCBandImpl::execute() throw (ACSErr::ACSbaseExImpl, ComponentErrors::ComponentErrorsEx)
 {
 	MED_TRACE_MSG(" IN ");
 	AUTO_TRACE("MedicinaCBandImpl::execute()");
 	ACS::Time timestamp;
+	/* Throws ExImpl, catched by ACSBaseExMpl */
 	const CConfiguration *config=m_core.execute(); //throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::SocketErrorExImpl)
 
 	ACS_LOG(LM_FULL_INFO,"MedicinaCBandImpl::execute()",(LM_INFO,"ACTIVATING_LOG_REPETITION_FILTER"));
@@ -157,11 +158,15 @@ void MedicinaCBandImpl::execute() throw (ACSErr::ACSbaseExImpl)
 void MedicinaCBandImpl::cleanUp()
 {
 	AUTO_TRACE("MedicinaCBandImpl::cleanUp()");
+	try{
 	stopPropertiesMonitoring();
-	if (m_monitor!=NULL) {
-		m_monitor->suspend();
-		getContainerServices()->getThreadManager()->destroy(m_monitor);
-		m_monitor=NULL;
+		if (m_monitor!=NULL) {
+			m_monitor->suspend();
+			getContainerServices()->getThreadManager()->destroy(m_monitor);
+			m_monitor=NULL;
+		}
+	}catch(...){
+		/* do not throw */
 	}
 	m_core.cleanup();
 	_IRA_LOGFILTER_FLUSH;
@@ -172,13 +177,17 @@ void MedicinaCBandImpl::cleanUp()
 void MedicinaCBandImpl::aboutToAbort()
 {
 	AUTO_TRACE("MedicinaCBandImpl::aboutToAbort()");
-	if (m_monitor!=NULL) {
-		getContainerServices()->getThreadManager()->destroy(m_monitor);
+	try{
+		if (m_monitor!=NULL) {
+			getContainerServices()->getThreadManager()->destroy(m_monitor);
+		}
+	}catch(...){ 
+		/* Do not throw */
 	}
 	m_core.cleanup();
 }
 
-void MedicinaCBandImpl::activate(const char * setup_mode) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void MedicinaCBandImpl::activate(const char * setup_mode) throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	MED_TRACE();
 	try {
@@ -200,7 +209,7 @@ void MedicinaCBandImpl::activate(const char * setup_mode) throw (CORBA::SystemEx
 	MED_TRACE();
 }
 
-void MedicinaCBandImpl::deactivate() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void MedicinaCBandImpl::deactivate() throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	MED_TRACE();
 	try {
@@ -263,7 +272,7 @@ void MedicinaCBandImpl::setReceiverLow() throw (ComponentErrors::ComponentErrors
 	}
 }
 
-void MedicinaCBandImpl::calOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void MedicinaCBandImpl::calOn() throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {	
 	try {
 		m_core.calOn();
@@ -283,7 +292,7 @@ void MedicinaCBandImpl::calOn() throw (CORBA::SystemException,ComponentErrors::C
 	}
 }
 
-void MedicinaCBandImpl::calOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void MedicinaCBandImpl::calOff() throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {
 		m_core.calOff();
@@ -303,11 +312,7 @@ void MedicinaCBandImpl::calOff() throw (CORBA::SystemException,ComponentErrors::
 	}
 }
 
-void MedicinaCBandImpl::externalCalOn() throw (
-        CORBA::SystemException,
-        ComponentErrors::ComponentErrorsEx,
-        ReceiversErrors::ReceiversErrorsEx
-        )
+void MedicinaCBandImpl::externalCalOn() throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {   
     try {
         m_core.externalCalOn();
@@ -328,11 +333,7 @@ void MedicinaCBandImpl::externalCalOn() throw (
 }
 
 
-void MedicinaCBandImpl::externalCalOff() throw (
-        CORBA::SystemException,
-        ComponentErrors::ComponentErrorsEx,
-        ReceiversErrors::ReceiversErrorsEx
-        )
+void MedicinaCBandImpl::externalCalOff() throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {   
     try {
         m_core.externalCalOff();
@@ -353,7 +354,7 @@ void MedicinaCBandImpl::externalCalOff() throw (
 }
 
 
-void MedicinaCBandImpl::setLO(const ACS::doubleSeq& lo) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void MedicinaCBandImpl::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {
 		m_core.setLO(lo);
@@ -367,13 +368,13 @@ void MedicinaCBandImpl::setLO(const ACS::doubleSeq& lo) throw (CORBA::SystemExce
 		throw ex.getReceiversErrorsEx();
 	}
 	catch (...) {
-		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"MedicinaCBandImpl::setLO()");
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"MedicinaCBandImpl::setLO()");		
 		impl.log(LM_DEBUG);
 		throw impl.getComponentErrorsEx();
 	}
 }
 
-void MedicinaCBandImpl::setMode(const char * mode) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void MedicinaCBandImpl::setMode(const char * mode) throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	MED_TRACE_MSG(" IN ");
 	try {		
@@ -396,7 +397,7 @@ void MedicinaCBandImpl::setMode(const char * mode) throw (CORBA::SystemException
 }
 
 ACS::doubleSeq *MedicinaCBandImpl::getCalibrationMark(const ACS::doubleSeq& freqs, const ACS::doubleSeq& bandwidths, const ACS::longSeq& feeds,const ACS::longSeq& ifs,
-		ACS::doubleSeq_out skyFreq,ACS::doubleSeq_out skyBw,CORBA::Boolean_out onoff,CORBA::Double_out scaleFactor) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+		ACS::doubleSeq_out skyFreq,ACS::doubleSeq_out skyBw,CORBA::Boolean_out onoff,CORBA::Double_out scaleFactor) throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	ACS::doubleSeq_var result=new ACS::doubleSeq;
 	ACS::doubleSeq_var resFreq=new ACS::doubleSeq;
@@ -422,8 +423,7 @@ ACS::doubleSeq *MedicinaCBandImpl::getCalibrationMark(const ACS::doubleSeq& freq
 	return result._retn();
 }
 
-CORBA::Long MedicinaCBandImpl::getFeeds(ACS::doubleSeq_out X,ACS::doubleSeq_out Y,ACS::doubleSeq_out power) throw (CORBA::SystemException,
-		ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+CORBA::Long MedicinaCBandImpl::getFeeds(ACS::doubleSeq_out X,ACS::doubleSeq_out Y,ACS::doubleSeq_out power) throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	ACS::doubleSeq_var tempX=new ACS::doubleSeq;
 	ACS::doubleSeq_var tempY=new ACS::doubleSeq;
@@ -458,7 +458,7 @@ void MedicinaCBandImpl::getIFOutput(
         ACS::doubleSeq_out bw,
         ACS::longSeq_out pols,
         ACS::doubleSeq_out LO
-) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx)
+) throw (ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx)
 {
     ACS::doubleSeq_var freqs_res = new ACS::doubleSeq;
     ACS::doubleSeq_var bw_res = new ACS::doubleSeq;
@@ -487,8 +487,7 @@ void MedicinaCBandImpl::getIFOutput(
     LO = LO_res._retn();
 }
 
-CORBA::Double MedicinaCBandImpl::getTaper(CORBA::Double freq,CORBA::Double bandWidth,CORBA::Long feed,CORBA::Long ifNumber,CORBA::Double_out waveLen) throw (
-		CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+CORBA::Double MedicinaCBandImpl::getTaper(CORBA::Double freq,CORBA::Double bandWidth,CORBA::Long feed,CORBA::Long ifNumber,CORBA::Double_out waveLen) throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	CORBA::Double res;
 	double wL;
@@ -512,7 +511,7 @@ CORBA::Double MedicinaCBandImpl::getTaper(CORBA::Double freq,CORBA::Double bandW
 	}	
 }
 
-void MedicinaCBandImpl::turnLNAsOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void MedicinaCBandImpl::turnLNAsOn() throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {
 		m_core.lnaOn();
@@ -532,7 +531,7 @@ void MedicinaCBandImpl::turnLNAsOn() throw (CORBA::SystemException,ComponentErro
 	}
 }
 
-void MedicinaCBandImpl::turnLNAsOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void MedicinaCBandImpl::turnLNAsOff() throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {
 		m_core.lnaOff();
@@ -552,20 +551,20 @@ void MedicinaCBandImpl::turnLNAsOff() throw (CORBA::SystemException,ComponentErr
 	}
 }
 
-void MedicinaCBandImpl::turnAntennaUnitOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void MedicinaCBandImpl::turnAntennaUnitOn() throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	//has it to be implemented?
 	ACS_LOG(LM_FULL_INFO,"MedicinaCBandImpl::turnAntennaUnitOn()",(LM_NOTICE,"CBAND_ANTENNA_UNIT_ON"));
 }
 
-void MedicinaCBandImpl::turnAntennaUnitOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void MedicinaCBandImpl::turnAntennaUnitOff() throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	//has it to be implemented?
 	ACS_LOG(LM_FULL_INFO,"MedicinaCBandImpl::turnAntennaUnitOff()",(LM_NOTICE,"CBAND_ANTENNA_UNIT_OFF"));
 }
 
 
-void MedicinaCBandImpl::turnVacuumSensorOn() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void MedicinaCBandImpl::turnVacuumSensorOn() throw  (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {		
 		m_core.vacuumSensorOn();
@@ -585,7 +584,7 @@ void MedicinaCBandImpl::turnVacuumSensorOn() throw  (CORBA::SystemException,Comp
 	}
 }
 
-void MedicinaCBandImpl::turnVacuumSensorOff() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void MedicinaCBandImpl::turnVacuumSensorOff() throw  (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {		
 		m_core.vacuumSensorOff();
@@ -605,7 +604,7 @@ void MedicinaCBandImpl::turnVacuumSensorOff() throw  (CORBA::SystemException,Com
 	}
 }
 
-void MedicinaCBandImpl::turnVacuumPumpOn(const char * p_mode) throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void MedicinaCBandImpl::turnVacuumPumpOn(const char * p_mode) throw  (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {							
 		m_core.vacuumPumpOn(p_mode);
@@ -625,7 +624,7 @@ void MedicinaCBandImpl::turnVacuumPumpOn(const char * p_mode) throw  (CORBA::Sys
 	}
 }
 
-void MedicinaCBandImpl::turnVacuumPumpOff() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void MedicinaCBandImpl::turnVacuumPumpOff() throw  (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {		
 		m_core.vacuumPumpOff();
@@ -645,7 +644,7 @@ void MedicinaCBandImpl::turnVacuumPumpOff() throw  (CORBA::SystemException,Compo
 	}
 }
 
-void MedicinaCBandImpl::openVacuumValve(const char * p_mode ) throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void MedicinaCBandImpl::openVacuumValve(const char * p_mode ) throw  (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {		
 		m_core.openVacuumValve(p_mode);
@@ -665,7 +664,7 @@ void MedicinaCBandImpl::openVacuumValve(const char * p_mode ) throw  (CORBA::Sys
 	}
 }
 
-void MedicinaCBandImpl::turnDewarHeatResistorsOn() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void MedicinaCBandImpl::turnDewarHeatResistorsOn() throw  (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {
 		/** @todo */		
@@ -686,7 +685,7 @@ void MedicinaCBandImpl::turnDewarHeatResistorsOn() throw  (CORBA::SystemExceptio
 	}
 }
 
-void MedicinaCBandImpl::turnDewarHeatResistorsOff() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void MedicinaCBandImpl::turnDewarHeatResistorsOff() throw  (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {	
 		/** @todo */		
@@ -707,7 +706,7 @@ void MedicinaCBandImpl::turnDewarHeatResistorsOff() throw  (CORBA::SystemExcepti
 	}
 }
 
-void MedicinaCBandImpl::turnColdHeadOn() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void MedicinaCBandImpl::turnColdHeadOn() throw  (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {					
 		m_core.coldHeadOn();
@@ -727,7 +726,7 @@ void MedicinaCBandImpl::turnColdHeadOn() throw  (CORBA::SystemException,Componen
 	}
 }
 
-void MedicinaCBandImpl::turnColdHeadOff() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void MedicinaCBandImpl::turnColdHeadOff() throw  (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 {
 	try {				
 		m_core.coldHeadOff();

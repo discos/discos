@@ -13,7 +13,10 @@
 			"cmath": "cpp",
 			"complex": "cpp",
 			"valarray": "cpp",
-			"set": "cpp"
+			"set": "cpp",
+			"ostream": "cpp",
+			"xlocale": "cpp",
+			"xstring": "cpp"
 		}
 	}
 }

@@ -25,7 +25,7 @@
 #include <enumpropROImpl.h>
 #include <SP_parser.h>
 #include <IRA>
-#include <MedicinaCBandS.h> /** @todo da dove arriva questo ?*/
+#include <MedicinaCBandS.h> 
 #include <ComponentErrors.h>
 #include <ReceiversErrors.h>
 #include "ComponentCore.h"
@@ -91,7 +91,7 @@ public:
 	 * logs the COMPSTATE_OPERATIONAL
 	 * @throw ACSErr::ACSbaseExImpl
 	*/
-	virtual void execute() throw (ACSErr::ACSbaseExImpl);
+	virtual void execute() throw (ACSErr::ACSbaseExImpl, ComponentErrors::ComponentErrorsEx);
 	
 	/** 
 	 * Called by the container before destroying the server in a normal situation. This function takes charge of 
@@ -113,7 +113,7 @@ public:
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 */
-	 virtual void activate(const char * setup_mode) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+	 virtual void activate(const char * setup_mode) throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 	/**
 	 * It must be called to switch off the receiver.
@@ -121,7 +121,7 @@ public:
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 */
-	 virtual void deactivate() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+	 virtual void deactivate() throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 		
 
 	/**
@@ -142,7 +142,7 @@ public:
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 */
-	void calOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+	void calOn() throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 	/**
 	 * This method is used to turn the calibration diode off.
@@ -150,7 +150,7 @@ public:
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 */
-	void calOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+	void calOff() throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 	
 
     /**
@@ -159,10 +159,7 @@ public:
      * @throw ComponentErrors::ComponentErrorsEx
      * @throw ReceiversErrors::ReceiversErrorsEx
      */
-    void externalCalOn() throw (
-            CORBA::SystemException, 
-            ComponentErrors::ComponentErrorsEx, 
-            ReceiversErrors::ReceiversErrorsEx);
+    void externalCalOn() throw (ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
 
 
     /**
@@ -171,10 +168,7 @@ public:
      * @throw ComponentErrors::ComponentErrorsEx
      * @throw ReceiversErrors::ReceiversErrorsEx
      */
-    void externalCalOff() throw (
-            CORBA::SystemException, 
-            ComponentErrors::ComponentErrorsEx, 
-            ReceiversErrors::ReceiversErrorsEx);
+    void externalCalOff() throw (ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
 
 
 	/**
@@ -184,7 +178,7 @@ public:
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 */
-	void setLO(const ACS::doubleSeq& lo) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+	void setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 	
 	/**
 	 * This method allows to set the operating mode of the receiver. In that implementation the receiver does not have special modes so a call to this method
@@ -194,12 +188,11 @@ public:
 	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 */
-	void setMode(const char * mode) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+	void setMode(const char * mode) throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 	
 	/**
 	 * This method is called when the values of the calibration mark of the receiver are required. A value is returned for every provided sub bands.
-	 * The sub bands are defined by giving the feed number, the polarization, the initial frequency and the bandwidth.
-	 * @throw CORBA::SystemException
+	 * The sub bands are defined by giving the feed number, the polarization, the initial frequency and the bandwidth.	 
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 * @param freqs for each sub band this is the list of the starting frequencies (in MHz). The value is compared and adjusted to the the real
@@ -215,12 +208,11 @@ public:
 	 * @return the list of the noise calibration value in Kelvin degrees.
 	 */
     virtual ACS::doubleSeq * getCalibrationMark(const ACS::doubleSeq& freqs, const ACS::doubleSeq& bandwidths, const ACS::longSeq& feeds, const ACS::longSeq& ifs,
-    		ACS::doubleSeq_out skyFreq,ACS::doubleSeq_out skyBw,CORBA::Boolean_out onoff,CORBA::Double_out scaleFactor) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+    		ACS::doubleSeq_out skyFreq,ACS::doubleSeq_out skyBw,CORBA::Boolean_out onoff,CORBA::Double_out scaleFactor) throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 	/**
 	 * This method is called in order to know the geometry of the receiver. The geometry is given along the X and Y axis where the central feed is the origin
-	 * the axis. The relative power (normalized to one) with respect to the central feed is also given.
-	 * @throw CORBA::SystemException
+	 * the axis. The relative power (normalized to one) with respect to the central feed is also given.	 
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 * @param X the positions relative to the central beam of the feeds along the X axis (radians)
@@ -228,8 +220,7 @@ public:
 	 * @param power the relative power of the feeds
 	 * @return the number of feeds
 	 */    
-    virtual CORBA::Long getFeeds(ACS::doubleSeq_out X,ACS::doubleSeq_out Y,ACS::doubleSeq_out power) throw (CORBA::SystemException,
-    		ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+    virtual CORBA::Long getFeeds(ACS::doubleSeq_out X,ACS::doubleSeq_out Y,ACS::doubleSeq_out power) throw (ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
     
 
     /**
@@ -245,7 +236,6 @@ public:
      * @param LO it gives (if present) the value of the local oscillator (MHz).
      * @throw ComponentErrors::ComponentErrorsEx
      * @throw ReceiversErrors::ReceiversErrorsEx
-     * @throw CORBA::SystemException
      */
     virtual void getIFOutput(
             const ACS::longSeq& feeds,
@@ -254,11 +244,10 @@ public:
             ACS::doubleSeq_out bw,
             ACS::longSeq_out pols,
             ACS::doubleSeq_out LO
-    ) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
+    ) throw ( ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx);
 
 	/**
-	 * This method is called in order to know the taper of the receiver.
-	 * @throw CORBA::SystemException
+	 * This method is called in order to know the taper of the receiver.	
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 * @param freq starting frequency of the detector in MHz. The value is compared and adjusted to the the real initial frequency of the receiver.
@@ -268,41 +257,36 @@ public:
 	 * @param waveLen corresponding wave length in meters
 	 * @return the value of the taper in db
 	 */        
-    virtual CORBA::Double getTaper(CORBA::Double freq,CORBA::Double bandWidth,CORBA::Long feed,CORBA::Long ifNumber,CORBA::Double_out waveLen) throw (
-    		CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+    virtual CORBA::Double getTaper(CORBA::Double freq,CORBA::Double bandWidth,CORBA::Long feed,CORBA::Long ifNumber,CORBA::Double_out waveLen) throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
     
 	/**
 	 * This method is called in order to turn the LNA On.
-	 * @throw CORBA::SystemException
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 */
-    virtual void turnLNAsOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+    virtual void turnLNAsOn() throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 	/**
-	 * This method is called in order to turn the LNA Off.
-	 * @throw CORBA::SystemException
+	 * This method is called in order to turn the LNA Off.	
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 */
-    virtual void turnLNAsOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+    virtual void turnLNAsOff() throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
     
 
 	/**
 	 * It allows to turn the antenna unit on
-	 * @throw CORBA::SystemException
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 */
-	virtual void turnAntennaUnitOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+	virtual void turnAntennaUnitOn() throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 	/**
 	 *  It allows to turn the antenna unit off
-	 * @throw CORBA::SystemException
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ReceiversErrors::ReceiversErrorsEx
 	 */
-	virtual void turnAntennaUnitOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+	virtual void turnAntennaUnitOff() throw (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 	/**
 	 * Returns a reference to the mode property implementation of the IDL interface.
@@ -410,7 +394,7 @@ public:
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ReceiversErrors::ReceiversErrorsEx
      */
-    virtual void turnVacuumSensorOn() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+    virtual void turnVacuumSensorOn() throw  (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
     /**
      * it turns the vacuum sensor on
@@ -418,32 +402,32 @@ public:
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ReceiversErrors::ReceiversErrorsEx
      */
-    virtual void turnVacuumSensorOff() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+    virtual void turnVacuumSensorOff() throw  (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
     
     /**
     * @brief Vacuum pump on
     */
-    virtual void turnVacuumPumpOn(const char *) throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+    virtual void turnVacuumPumpOn(const char *) throw  (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 	/**
     * @brief Vacuum pump off
     */
-    virtual void turnVacuumPumpOff() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+    virtual void turnVacuumPumpOff() throw  (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
     
     /**
     * @brief Vacuum valve opening
     */
-    virtual void openVacuumValve(const char *) throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+    virtual void openVacuumValve(const char *) throw  (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 	/**
     * @brief Heat resistors on
     */
-    virtual void turnDewarHeatResistorsOn() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+    virtual void turnDewarHeatResistorsOn() throw  (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
     
 	/**
     * @brief Heat resistor off
     */
-    virtual void turnDewarHeatResistorsOff() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);    
+    virtual void turnDewarHeatResistorsOff() throw  (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);    
 
 
 	/**
