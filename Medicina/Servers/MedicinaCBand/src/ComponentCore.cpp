@@ -354,8 +354,8 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo)
             m_bandwidth[0]= l_setup.m_IFBandwidth[0];        
         MED_TRACE_FMT( "m_bandwidth[0] : %f", m_bandwidth[0]);
     }catch(...){
-        ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"Exception calculating bw"));  
-        _EXCPT(ComponentErrors::ModeErrorExImpl,impl,"CComponentErrors::setMode()");
+        _IRA_LOGFILTER_LOG(LM_CRITICAL,"CComponentCore::setLO()","ReceiverControl allocation error");
+        _EXCPT(ComponentErrors::ModeErrorExImpl,impl,"CComponentCore::setLO()");
         throw impl;          
     }
     ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"LOCAL_OSCILLATOR %lf",l_lo_value));
