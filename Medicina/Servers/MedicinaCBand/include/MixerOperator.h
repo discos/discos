@@ -109,7 +109,7 @@ class MixerOperator{
          * 
          * @return true Resurce is locked         
          */
-        bool isLocked() throw (ReceiversErrors::LocalOscillatorErrorExImpl, ReceiversErrors::LocalOscillatorErrorExImpl);
+        bool isLocked() throw (ReceiversErrors::LocalOscillatorErrorExImpl);
 
     private:
 
@@ -135,7 +135,7 @@ class MixerOperator{
         * @param p_lo_name Component instance name
         * @return true id Device is locked
         */
-        bool isDeviceLocked() throw (ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntGetAttributeExImpl);
+        bool isDeviceLocked() throw (ComponentErrors::CouldntGetAttributeExImpl);
 			
     private:
         

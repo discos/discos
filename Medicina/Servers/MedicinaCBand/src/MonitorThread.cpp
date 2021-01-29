@@ -58,7 +58,7 @@ void CMonitorThread::onStart()
 	 			 m_core->updateVacuum();
 	 		 }
 	 		 catch (ACSErr::ACSbaseExImpl& ex) {
-	 			 _ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl,impl,ex,"CMonitorThread::runLoop");
+	 			_ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl,impl,ex,"CMonitorThread::runLoop");
 	 			_IRA_LOGFILTER_LOG_EXCEPTION(impl,LM_ERROR);
 	 		 }
 	 		 break;

@@ -334,7 +334,7 @@ double MixerOperator::getEffectiveValue() throw (ReceiversErrors::LocalOscillato
     return l_freq;
 }
 
-bool MixerOperator::isLocked() throw (ReceiversErrors::LocalOscillatorErrorExImpl, ReceiversErrors::LocalOscillatorErrorExImpl)
+bool MixerOperator::isLocked() throw (ReceiversErrors::LocalOscillatorErrorExImpl)
 {
 #ifndef EXCLUDE_MIXER
     if (! m_configuration ){
@@ -381,21 +381,21 @@ void MixerOperator::loadDevices()
         m_mixer_fault= false;
     }
     catch (maciErrType::CannotGetComponentExImpl& ex) {
-        _EXCPT(ComponentErrors::CouldntGetComponentExImpl,Impl,"MixerOperator::loadLocalOscillator()");
+        _EXCPT(ComponentErrors::CouldntGetComponentExImpl,Impl,"MixerOperator::loadLocalOscillator() CannotGetComponentExImpl");
         Impl.setComponentName("LO1 or LO2");
         m_loDev_1st= Receivers::LocalOscillator::_nil();
         m_loDev_2nd= Receivers::LocalOscillator::_nil();
         throw Impl;
     }
     catch (maciErrType::NoPermissionExImpl& ex) {
-        _EXCPT(ComponentErrors::CouldntGetComponentExImpl,Impl,"MixerOperator::loadLocalOscillator()");
+        _EXCPT(ComponentErrors::CouldntGetComponentExImpl,Impl,"MixerOperator::loadLocalOscillator() NoPermissionExImpl");
         Impl.setComponentName("LO1 or LO2");
         m_loDev_1st= Receivers::LocalOscillator::_nil();
         m_loDev_2nd= Receivers::LocalOscillator::_nil();
         throw Impl;
     }
     catch (maciErrType::NoDefaultComponentExImpl& ex) {
-        _EXCPT(ComponentErrors::CouldntGetComponentExImpl,Impl,"MixerOperator::loadLocalOscillator()");
+        _EXCPT(ComponentErrors::CouldntGetComponentExImpl,Impl,"MixerOperator::loadLocalOscillator() NoDefaultComponentExImpl");
         Impl.setComponentName("LO1 or LO2");
         m_loDev_1st= Receivers::LocalOscillator::_nil();
         m_loDev_2nd= Receivers::LocalOscillator::_nil();
@@ -403,7 +403,7 @@ void MixerOperator::loadDevices()
     }
     catch(...){
         MED_TRACE_MSG(" Failed to load LOs ");
-        _EXCPT(ComponentErrors::CouldntGetComponentExImpl,Impl,"MixerOperator::loadLocalOscillator()");
+        _EXCPT(ComponentErrors::CouldntGetComponentExImpl,Impl,"MixerOperator::loadLocalOscillator() (...)");
         Impl.setComponentName("LO1 or LO2");
         m_loDev_1st= Receivers::LocalOscillator::_nil();
         m_loDev_2nd= Receivers::LocalOscillator::_nil();
@@ -414,7 +414,7 @@ void MixerOperator::loadDevices()
 
 void MixerOperator::releaseDevices()
                         throw (ComponentErrors::CouldntReleaseComponentExImpl,
-                            ComponentErrors::UnexpectedExImpl)
+                                ComponentErrors::UnexpectedExImpl)
 {
 	#ifndef EXCLUDE_MIXER
     try {
@@ -424,12 +424,12 @@ void MixerOperator::releaseDevices()
             m_services->releaseComponent((const char*)m_configuration->getLocalOscillatorInstance2nd());
     }
     catch (maciErrType::CannotReleaseComponentExImpl& ex) {
-        _EXCPT(ComponentErrors::CouldntReleaseComponentExImpl,Impl,"MixerOperator::unloadLocalOscillator()");
+        _EXCPT(ComponentErrors::CouldntReleaseComponentExImpl,Impl,"MixerOperator::unloadLocalOscillator() CannotReleaseComponentExImpl");
         Impl.setComponentName("LO1 or LO2");
         Impl.log(LM_WARNING);
     }
     catch (...) {
-        _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"MixerOperator::unloadLocalOscillator()");
+        _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"MixerOperator::unloadLocalOscillator() (...)");
         impl.log(LM_WARNING);
     }
     m_loDev_1st= Receivers::LocalOscillator::_nil();
@@ -443,8 +443,7 @@ void MixerOperator::releaseDevices()
 }
 
 bool MixerOperator::isDeviceLocked()
-                            throw (ComponentErrors::CORBAProblemExImpl,
-                                    ComponentErrors::CouldntGetAttributeExImpl)
+                            throw (ComponentErrors::CouldntGetAttributeExImpl)
 {
 	ACSErr::Completion_var comp;
     ACS::ROlong_var isLockedRef1;
@@ -463,7 +462,7 @@ bool MixerOperator::isDeviceLocked()
     }
     catch (CORBA::SystemException& ex) {
         m_mixer_fault=true;
-        _EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"MixerOperator::checkLocalOscillator()");
+        _EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"MixerOperator::checkLocalOscillator() SystemException");
         impl.setName(ex._name());
         impl.setMinor(ex.minor());
         throw impl;

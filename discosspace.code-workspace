@@ -16,7 +16,16 @@
 			"set": "cpp",
 			"ostream": "cpp",
 			"xlocale": "cpp",
-			"xstring": "cpp"
+			"xstring": "cpp",
+			"istream": "cpp",
+			"memory": "cpp",
+			"tuple": "cpp",
+			"type_traits": "cpp",
+			"utility": "cpp",
+			"xlocmon": "cpp",
+			"xlocnum": "cpp",
+			"xloctime": "cpp",
+			"xutility": "cpp"
 		}
 	}
 }
