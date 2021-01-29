@@ -121,7 +121,7 @@ void CComponentCore::activate(const char *mode) throw (ReceiversErrors::Receiver
         m_localOscillatorValue.length(l_setup.m_IFs);
     }catch(...){
          MED_TRACE_MSG(" Unexpected configuration exception! ");
-        _EXCPT(ComponentErrors::ComponentErrorsExImpl,impl,"CComponentErrors::acitvate()");
+        _EXCPT(ComponentErrors::ModeErrorExImpl,impl,"CComponentErrors::acitvate()");
         throw impl;
     }
 
