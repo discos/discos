@@ -300,7 +300,7 @@ void CComponentCore::setMode(const char * mode) throw (ReceiversErrors::Receiver
     	}
     }catch(...){
     	MED_TRACE_MSG(" EXC 1 ");	
-        _EXCPT(ComponentErrors::ModeErrorExImpl,impl,"CComponentErrors::setMode()");
+        _EXCPT(ReceiversErrors::ModeErrorExImpl,impl,"CComponentErrors::setMode()");
         throw impl;
     }
     // the set the default LO for the default LO for the selected mode.....
