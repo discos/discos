@@ -121,7 +121,7 @@ void CComponentCore::activate(const char *mode) throw (ReceiversErrors::Receiver
         m_localOscillatorValue.length(l_setup.m_IFs);
     }catch(...){
          MED_TRACE_MSG(" Unexpected configuration exception! ");
-        _EXCPT(ComponentErrors::ModeErrorExImpl,impl,"CComponentErrors::acitvate()");
+        _EXCPT(ReceiversErrors::ModeErrorExImpl,impl,"CComponentErrors::acitvate()");
         throw impl;
     }
 
@@ -355,7 +355,7 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo)
         MED_TRACE_FMT( "m_bandwidth[0] : %f", m_bandwidth[0]);
     }catch(...){
         _IRA_LOGFILTER_LOG(LM_CRITICAL,"CComponentCore::setLO()","ReceiverControl allocation error");
-        _EXCPT(ComponentErrors::ModeErrorExImpl,impl,"CComponentCore::setLO()");
+        _EXCPT(ReceiversErrors::ModeErrorExImpl,impl,"CComponentCore::setLO()");
         throw impl;          
     }
     ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"LOCAL_OSCILLATOR %lf",l_lo_value));
