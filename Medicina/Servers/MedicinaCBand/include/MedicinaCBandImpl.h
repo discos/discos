@@ -433,12 +433,12 @@ public:
 	/**
     * @brief Cold head on
     */
-	 virtual void turnColdHeadOn() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+	 virtual void turnColdHeadOn() throw  (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 
 	/**
     * @brief Cold head off
     */
-	 virtual void turnColdHeadOff() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+	 virtual void turnColdHeadOff() throw  (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
 	
 	/**
     * @brief Property getter
