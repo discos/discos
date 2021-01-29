@@ -300,7 +300,7 @@ void CComponentCore::setMode(const char * mode) throw (ReceiversErrors::Receiver
     	}
     }catch(...){
     	MED_TRACE_MSG(" EXC 1 ");	
-        _EXCPT(ComponentErrors::ComponentErrorsExImpl,impl,"CComponentErrors::setMode()");
+        _EXCPT(ComponentErrors::ModeErrorExImpl,impl,"CComponentErrors::setMode()");
         throw impl;
     }
     // the set the default LO for the default LO for the selected mode.....
@@ -355,7 +355,7 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo)
         MED_TRACE_FMT( "m_bandwidth[0] : %f", m_bandwidth[0]);
     }catch(...){
         ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"Exception calculating bw"));  
-        _EXCPT(ComponentErrors::ComponentErrorsExImpl,impl,"CComponentErrors::setMode()");
+        _EXCPT(ComponentErrors::ModeErrorExImpl,impl,"CComponentErrors::setMode()");
         throw impl;          
     }
     ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"LOCAL_OSCILLATOR %lf",l_lo_value));
@@ -387,7 +387,7 @@ void CComponentCore::loadLocalOscillator() throw (ComponentErrors::CouldntGetCom
     }catch(ComponentErrors::CouldntGetComponentExImpl& ex){
         setComponentStatus(Management::MNG_FAILURE);
         _IRA_LOGFILTER_LOG(LM_CRITICAL,"CComponentCore::loadLocalOscillator()","ReceiverControl allocation error");
-        _EXCPT(ComponentErrors::ComponentErrorsExImpl,dummy,"CComponentCore::loadLocalOscillator()");
+        _EXCPT(ComponentErrors::CouldntGetComponentExImpl,dummy,"CComponentCore::loadLocalOscillator()");
         throw dummy;
     }
 }
