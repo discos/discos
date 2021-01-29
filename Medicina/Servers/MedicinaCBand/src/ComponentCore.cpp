@@ -86,6 +86,7 @@ void CComponentCore::cleanup()
             delete m_control;
         }
         m_mixer.releaseComponents();
+    }
     catch(...){
         /* Do nothing, exit without throwing anything as requested by idl */
     }
