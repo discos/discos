@@ -326,6 +326,11 @@ public:
 	* Get the scan offsets configured for the current scan 
 	*/	
 	void getScanOffsets(double& lonOff,double& latOff,Antenna::TCoordinateFrame& frame);
+
+	/**
+	* Get the scan offsets configured for the current scan 
+	*/		
+	void getUserOffsets(double& lonOff,double& latOff,Antenna::TCoordinateFrame& frame);
 	
 	/**
 	 * @return the J2000 right ascension of the target
