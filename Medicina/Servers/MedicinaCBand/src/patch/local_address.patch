@@ -1,0 +1,32 @@
+diff --git a/Medicina/Configuration/CDB/alma/RECEIVERS/MedicinaCBand/MedicinaCBand.xml b/Medicina/Configuration/CDB/alma/RECEIVERS/MedicinaCBand/MedicinaCBand.xml
+index 7325ce88..a0f55f15 100644
+--- a/Medicina/Configuration/CDB/alma/RECEIVERS/MedicinaCBand/MedicinaCBand.xml
++++ b/Medicina/Configuration/CDB/alma/RECEIVERS/MedicinaCBand/MedicinaCBand.xml
+@@ -8,10 +8,10 @@
+ 				xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+ 				xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+ 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"   
+-				DewarIPAddress="192.168.51.2"
+-				DewarPort="10002"
+-				LNAIPAddress="192.168.51.2"
+-				LNAPort="10003"		
++				DewarIPAddress="192.168.1.10"
++				DewarPort="50002"
++				LNAIPAddress="192.168.1.10"
++				LNAPort="5003"		
+ 				WatchDogResponseTime="400000"
+ 				WatchDogSleepTime="500000"
+ 				LNASamplingTime="250000"
+diff --git a/Medicina/Servers/MedicinaCBand/src/Makefile b/Medicina/Servers/MedicinaCBand/src/Makefile
+index 613fd858..b3b426f0 100644
+--- a/Medicina/Servers/MedicinaCBand/src/Makefile
++++ b/Medicina/Servers/MedicinaCBand/src/Makefile
+@@ -19,7 +19,7 @@
+ 
+ #
+ # user definable C-compilation flags
+-USER_CFLAGS = -DMED_DEBUG_LVL
++USER_CFLAGS = -DMED_DEBUG_LVL -DEXCLUDE_MIXER -DEXCLUDE_MONITOR -DSTOP_MONITOR_PROPERTY
+ # availables:-DMED_DEBUG_LVL  -DEXCLUDE_MIXER -DEXCLUDE_MONITOR -DSTOP_MONITOR_PROPERTY
+ 
+ #
