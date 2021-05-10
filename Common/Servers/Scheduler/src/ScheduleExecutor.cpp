@@ -209,8 +209,10 @@ void CScheduleExecutor::runLoop()
 			case WRITING_INITIALIZATION: { //prepare the data transfer, it configures the backend and the writer. In case of error the scan is aborted.
 				//printf("WRITING_INIT\n");
 				try {
-					ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"PREPARE_DATA_ACQUISITION"));
-					prepareFileWriting(/*m_currentScan*/);
+					if ((m_currentScan.backendProc!=_SCHED_NULLTARGET) && (m_currentScan.duration>0.0))  {
+						ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"PREPARE_DATA_ACQUISITION"));
+						prepareFileWriting(/*m_currentScan*/);
+					}
 				}
 				catch (ACSErr::ACSbaseExImpl& Ex) {
 					_ADD_BACKTRACE(ManagementErrors::SubscanErrorExImpl,impl,Ex,"CScheduleExecutor::runLoop()");
@@ -323,8 +325,16 @@ void CScheduleExecutor::runLoop()
 								  m_schedReport.addScanPath(fullScanFolder);
 							  }
 						}
-						else {
-							ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_NOTICE,"NO_RECORDING_REQUIRED"));
+						else if ((m_currentScan.duration<=0.0)) { //this is the case a 0.0 is set as integration time
+							m_startRecordTime=0;
+							ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_NOTICE,"No Recording required"));
+						}
+						else { // this is the case a backend is not selected but a integration time greater than zero is given
+							TIMEVALUE cUTime;
+							IRA::CIRATools::getTime(cUTime); // get the current time
+							m_startRecordTime=cUTime.value().value;
+							ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_NOTICE,"Dry recording started"));						
+							ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_NOTICE,"Running for: %lf seconds",m_currentScan.duration));
 						}
 						//startRecording(m_currentScan,m_currentScanRec,layoutProc);
 						m_scanStopError=false;
@@ -357,6 +367,19 @@ void CScheduleExecutor::runLoop()
 						break;
 					}
 				}
+				else if (m_startRecordTime>0) { //dry run.....
+					m_lastScheduledTime=m_startRecordTime+(unsigned long long)(m_currentScan.duration*10000000); // this is the stop time in 100 ns.
+					IRA::CString out;
+					IRA::CIRATools::timeToStr(m_lastScheduledTime,out);
+					if (!m_core->addTimerEvent(m_lastScheduledTime,&stopDryRecordingEventHandler,static_cast<void *>(this))) {
+						_EXCPT(ComponentErrors::TimerErrorExImpl,dummy,"CScheduleExecutor::runLoop()");
+						dummy.setReason("The scan stop event could not be scheduled");
+						m_core->changeSchedulerStatus(Management::MNG_FAILURE);
+						dummy.log(LM_ERROR);
+						cleanSchedule(true);
+						break;
+					}
+				} 
 				else {
 					m_subScanDone=true;
 				}
@@ -449,8 +472,10 @@ void CScheduleExecutor::runLoop()
 				//printf("RECORDING_FINALIZE\n");
 				// wait for the recorder to consume all the data in its cache
 				try {
-					if (m_core->checkRecording()) {
-						break;
+					if ((m_currentScan.backendProc!=_SCHED_NULLTARGET) && (m_currentScan.duration>0.0))  {
+						if (m_core->checkRecording()) {
+							break;
+						}
 					}
 				}
 				catch (ACSErr::ACSbaseExImpl& ex) {
@@ -644,6 +669,14 @@ void CScheduleExecutor::stopRecording()
 	catch (...) {
 		m_scanStopError=true;
 	}
+	m_subScanDone=true;
+	m_scansCounter++;
+}
+
+void CScheduleExecutor::stopDryRecording()
+{
+	baci::ThreadSyncGuard guard(&m_mutex); // not called directly by the thread runLoop, which is synchronized, but called by the timer handler, so an explicit sync is required.
+	m_lastScheduledTime=0;
 	m_subScanDone=true;
 	m_scansCounter++;
 }
@@ -862,6 +895,14 @@ void CScheduleExecutor::stopRecordingEventHandler(const ACS::Time& time,const vo
 	me=static_cast<CScheduleExecutor *>(const_cast<void *>(par));
 	me->stopRecording();
 }
+
+void CScheduleExecutor::stopDryRecordingEventHandler(const ACS::Time& time,const void *par)
+{
+	CScheduleExecutor *me;
+	me=static_cast<CScheduleExecutor *>(const_cast<void *>(par));
+	me->stopRecording();
+}
+
 
 void CScheduleExecutor::restartEventHandler(const ACS::Time& time,const void *par)
 {

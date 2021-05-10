@@ -350,6 +350,11 @@ private:
 	void stopRecording();
 	
 	/**
+	 * Stops the data dry recording.
+	 */	
+	void stopDryRecording();
+	
+	/**
 	 * get the reference to the current writer
 	 */
 	//void openWriter(const IRA::CString& wrt) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl);
@@ -399,6 +404,11 @@ private:
 	 * This is the timer handler that reacts to the stop recording event
 	 */
 	static void stopRecordingEventHandler(const ACS::Time& time,const void *par);
+	
+	/**
+	 * This is the timer handler that reacts to the stop dry recording event
+	 */
+	static void stopDryRecordingEventHandler(const ACS::Time& time,const void *par);
 	
 	/**
 	 * This is the timer handler that reacts to the re-try schedule event
