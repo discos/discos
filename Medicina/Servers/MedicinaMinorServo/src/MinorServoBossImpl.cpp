@@ -790,7 +790,9 @@ throw (MinorServoErrors::MinorServoErrorsEx,
         m_servo_status.scan_active = false;
     }else{
         timeToStop = 0;
-        THROW_MINORSERVO_EX(StatusErrorEx, "no scan active", true);
+	CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::closeScan",
+               (LM_DEBUG, "No scan presently active"));
+        //THROW_MINORSERVO_EX(StatusErrorEx, "no scan active", true);
     }
 }
 
