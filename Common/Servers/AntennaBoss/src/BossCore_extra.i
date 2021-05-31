@@ -122,6 +122,16 @@ void CBossCore::preset(const double& az,const double& el) throw (ComponentErrors
 		changeBossStatus(Management::MNG_FAILURE);
 		throw impl;
 	}
+	catch (AntennaErrors::AntennaErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CBossCore::preset()");
+		impl.setComponentName((const char*)m_mount->name());
+		impl.setOperationName("preset()");
+		throw impl;
+	}
+	catch (...) {
+		changeBossStatus(Management::MNG_FAILURE);
+		_THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"CBossCore::preset()");
+	}
 }
 
 #endif
