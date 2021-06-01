@@ -126,6 +126,7 @@ void CBossCore::preset(const double& az,const double& el) throw (ComponentErrors
 		_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CBossCore::preset()");
 		impl.setComponentName((const char*)m_mount->name());
 		impl.setOperationName("preset()");
+		changeBossStatus(Management::MNG_WARNING);
 		throw impl;
 	}
 	catch (...) {
