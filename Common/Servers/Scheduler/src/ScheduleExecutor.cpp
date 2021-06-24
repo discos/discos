@@ -790,7 +790,7 @@ void CScheduleExecutor::cleanSchedule(bool error)
 			ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::cleanSchedule()",(LM_NOTICE,"END_OF_SCHEDULE"));
 		}
 	}
-	if (m_schedReport.deactivate()) {
+	if (!m_schedReport.deactivate()) {
 		IRA::CString msg;
 		msg.Format("Error in schedule reporting: %s",(const char *)m_schedReport.getLastError());
 		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::cleanSchedule()",(LM_WARNING,"%s",(const char *)msg));
