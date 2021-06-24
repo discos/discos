@@ -407,7 +407,7 @@ throw (MinorServoErrors::SetupErrorExImpl)
         THROW_EX(MinorServoErrors, SetupErrorEx, sce.what(), false);
     }catch(...){
         m_servo_status.starting = false;
-        THROW_EX(MinorServoErrors, SetupErrorEx, "Cannot conclude setup", false);
+        THROW_EX(MinorServoErrors, SetupErrorEx, "Cannot conclude setup >> "+boost::current_exception_diagnostic_information(), false);
     }
 }
 
