@@ -372,6 +372,7 @@ throw (MinorServoErrors::SetupErrorExImpl)
     }catch(const ServoConnectionError& sce){
         THROW_EX(MinorServoErrors, SetupErrorEx, sce.what(), false);
     }catch(...){
+        m_servo_status.starting = false;
         THROW_EX(MinorServoErrors, SetupErrorEx, "Cannot conclude setup", false);
     }
     /**
@@ -405,6 +406,7 @@ throw (MinorServoErrors::SetupErrorExImpl)
     }catch(const ServoConnectionError& sce){
         THROW_EX(MinorServoErrors, SetupErrorEx, sce.what(), false);
     }catch(...){
+        m_servo_status.starting = false;
         THROW_EX(MinorServoErrors, SetupErrorEx, "Cannot conclude setup", false);
     }
 }
