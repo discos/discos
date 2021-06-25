@@ -625,10 +625,11 @@ MinorServoBossImpl::checkScanImpl(
      ) throw (MinorServoErrors::MinorServoErrorsEx,
               ComponentErrors::ComponentErrorsEx)
 {
+	cout << "checkScanImpl" << endl;
     minor_servo_parameters = new TRunTimeParameters;
     double center = 0;
     MedMinorServoPosition central_position = 
-        m_actual_config->get_position(antenna_parameters.elevation);
+        m_actual_config->get_position(antenna_parameters.elevation,&m_offset);
 
     MedMinorServoScan scan(central_position, 
                            starting_time, 
@@ -638,6 +639,7 @@ MinorServoBossImpl::checkScanImpl(
                            isElevationTracking());
     minor_servo_parameters->startEpoch = scan.getStartingTime();
     try{
+    	  cout << "axis code: " << string(scan_parameters.axis_code) << endl;
         center = central_position.get_axis_position(
                                         scan_parameters.axis_code);
     }catch(const MinorServoAxisNameError& msane){
@@ -710,6 +712,7 @@ MinorServoBossImpl::startScanImpl(
         const Antenna::TRunTimeParameters& antenna_parameters
      ) throw (MinorServoErrors::MinorServoErrorsEx)
 {
+	cout << "startScanImpl" << endl;	
     if(!(m_control))
         THROW_MINORSERVO_EX(CommunicationErrorEx, 
                  "Minor Servo Server is not connected", false);
@@ -721,7 +724,7 @@ MinorServoBossImpl::startScanImpl(
     bool was_elevation_tracking = isElevationTracking();
     turnTrackingOff();
     MedMinorServoPosition central_position = 
-        m_actual_config->get_position(antenna_parameters.elevation);
+        m_actual_config->get_position(antenna_parameters.elevation,&m_offset);
     MedMinorServoScan scan(central_position, 
                            starting_time, 
                            scan_parameters.range,
