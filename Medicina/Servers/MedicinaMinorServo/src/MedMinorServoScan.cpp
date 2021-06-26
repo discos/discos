@@ -88,18 +88,13 @@ MedMinorServoScan::init(const MedMinorServoPosition central_position,
     m_min_start_time = MedMinorServoGeometry::min_time(m_central_position,
                                                        m_start_position);
     CUSTOM_LOG(LM_FULL_INFO, "MedMinorServoControl::MedMinorServoScan::check()",(LM_DEBUG, "min start time: %f", m_min_start_time));          
-    IRA::CString out;                                                 
     m_interval_to_start_pos = MedMinorServoTime::deltaToACSTimeInterval(m_min_start_time);   
-    IRA::CIRATools::intervalToStr( m_interval_to_start_pos,out);
-        cout << "interval : " << (const char *) out << endl;                                          
+
    if(starting_time == 0){
       TIMEVALUE now;
 		IRA::CIRATools::getTime(now);  
 		m_starting_time = now.value().value + START_SCAN_TOLERANCE +  m_interval_to_start_pos;
-		IRA::CString out;
-		IRA::CIRATools::timeToStr(m_starting_time,out);
-		cout << "start time :" << (const char *)out << endl; 
-		m_asap = true;
+				m_asap = true;
     }else{
         m_starting_time = starting_time;
         m_asap = false;
@@ -136,21 +131,13 @@ throw (MinorServoErrors::ScanErrorEx)
               (LM_NOTICE, "Central position out of limits"));
         return false;
     }
-///////
 
-	IRA::CString out;
-	IRA::CIRATools::timeToStr(m_starting_time,out);
-	cout << "time :" << (const char *)out << endl; 
+
 	
     if(!m_asap)
     {
         TIMEVALUE now;
         IRA::CIRATools::getTime(now);
-//        ACS::TimeInterval interval =
-//        MedMinorServoTime::deltaToACSTimeInterval(m_min_start_time);
-        
-        	IRA::CIRATools::timeToStr(now.value().value +  m_interval_to_start_pos,out);
-			cout << "soglia :" << (const char *)out << endl; 
 
         if(m_starting_time <= (now.value().value + m_interval_to_start_pos ))
         //if(m_starting_time <= (now.value().value + m_min_start_time * 10000000))
