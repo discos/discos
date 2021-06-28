@@ -348,18 +348,12 @@ MedMinorServoGeometry::positionToAxes(const MedMinorServoPosition& position)
             command.pos_y_zp = _get_inverse_zp(position);
             break;
         case(MED_MINOR_SERVO_SECONDARY):
-        		cout << position.x << " " << position.z << " " << position.y << " " << position.theta_x << " " << position.theta_y << endl;
             command.mode = 1;       
             command.pos_x_yp = _get_inverse_x(position);
-            cout << command.pos_x_yp << endl;
             command.pos_y_zp = _get_inverse_y(position);
-            cout << command.pos_y_zp << endl;
             command.pos_z1 = _get_inverse_z1(position);
-            cout << command.pos_z1 << endl;
             command.pos_z2 = _get_inverse_z2(position);
-            cout << command.pos_z2 << endl;
             command.pos_z3 = _get_inverse_z3(position);
-            cout << command.pos_z3 << endl;
             break;
         default:
             throw MinorServoGeometryError("Invalid mode converting position to command");
