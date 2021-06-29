@@ -1,0 +1,22 @@
+
+CC = c++
+CFLAGS= -O2 -Wall -lm
+CFLAGS_TEST= -L/opt/gtest/lib -lgtest -lgtest_main -lpthread 
+DEPS=
+INCLUDE= -I../libastro/
+HS = 
+
+%.o: %.cpp $(DEPS)
+	$(CC) -c  -o  $@ $< $(CFLAGS) $(INCLUDE)
+
+myephem:  testlibastro.o
+	$(CC)  -o testlibastro testlibastro.o ../libastro/libastro.a 
+	
+debug:  testlibastro.o
+	$(CC)  -g -o testlibastro testlibastro.o ../libastro/libastro.a 
+	
+astrotest: mainastro.o libastrowrapper.o
+	$(CC)  -g -o mainastro libastrowrapper.o mainastro.o ../libastro/libastro.a 
+
+test:    libastrowrapper.o test.o 
+	$(CC) -o test  -I/usr/local/include    libastrowrapper.o test.o   ../libastro/libastro.a $(CFLAGS_TEST) 	
