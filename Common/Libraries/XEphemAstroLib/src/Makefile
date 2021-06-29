@@ -55,12 +55,12 @@
 
 #
 # user definable C-compilation flags
-#USER_CFLAGS = 
+USER_CFLAGS = -c -pedantic -Wall
 
 #
 # additional include and library search paths
 #USER_INC = 
-#USER_LIB = 
+USER_LIB = -lm
 
 #
 # MODULE CODE DESCRIPTION:
@@ -76,15 +76,15 @@ EXECUTABLES_L   =
 
 #
 # <brief description of xxxxx program>
-libastro_OBJECTS   =	aa_hadec.c aberration.c  actan.c \
-    airmass.c anomaly.c ap_as.c atlas.c  auxil.c \
-    bdl.c chap95.c chap95_data.c circum.c comet.c constel.c \
-    dbfmt.c  deep.c  deltat.c  earthsat.c  eq_ecl.c eq_gal.c \
-    formats.c  helio.c  jupmoon.c  libration.c magdecl.c marsmoon.c \
-    misc.c mjd.c moon.c mooncolong.c moonnf.c nutation.c obliq.c \
-    parallactic.c parallax.c plans.c plmoon.c plshadow.c precess.c \
-    reduce.c refract.c rings.c riset.c riset_cir.c satmoon.c sdp4.c\
-    sgp4.c sphcart.c sun.c thetag.c twobody.c umoon.c utc_gst.c vsop87.c vsop87_data.c 
+libastro_OBJECTS   =	aa_hadec aberration  actan \
+    airmass anomaly ap_as atlas  auxil \
+    bdl chap95 chap95_data circum comet constel \
+    dbfmt  deep  deltat  earthsat  eq_ecl eq_gal \
+    formats  helio  jupmoon  libration magdecl marsmoon \
+    misc mjd moon mooncolong moonnf nutation obliq \
+    parallactic parallax plans plmoon plshadow precess \
+    reduce refract rings riset riset_cir satmoon sdp4\
+    sgp4 sphcart sun thetag twobody umoon utc_gst vsop87 vsop87_data 
 
 #
 # special compilation flags for single c sources
