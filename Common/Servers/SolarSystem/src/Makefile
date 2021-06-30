@@ -35,7 +35,7 @@
 #
 # C programs (public and local)
 # -----------------------------
-# EXECUTABLES     =
+ EXECUTABLES     = testastrolib
 # EXECUTABLES_L   = 
 
 
@@ -64,6 +64,9 @@ SolarSystemBodyImpl_LIBS      = EphemGeneratorStubs SolarSystemBodyStubs baci ma
 				ComponentErrors AntennaErrors \
 				AntennaDefinitionsStubs ManagmentDefinitionsStubs \
 				ManagementErrors
+
+testastrolib_OBJECTS  = 	 libastrowrapper 	mainastro		
+testastrolib_LIBS  =		astro		
 #
 # Scripts (public and local)
 # ----------------------------

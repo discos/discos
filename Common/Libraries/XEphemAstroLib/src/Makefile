@@ -76,7 +76,7 @@ EXECUTABLES_L   =
 
 #
 # <brief description of xxxxx program>
-libastro_OBJECTS   =	aa_hadec aberration  actan \
+astro_OBJECTS   =	aa_hadec aberration  actan \
     airmass anomaly ap_as atlas  auxil \
     bdl chap95 chap95_data circum comet constel \
     dbfmt  deep  deltat  earthsat  eq_ecl eq_gal \
@@ -100,7 +100,7 @@ INCLUDES        = astro.h  chap95.h     preferences.h  satspec.h   vector.h \
 #
 # Libraries (public and local)
 # ----------------------------
-LIBRARIES       = libastro
+LIBRARIES       = astro
 LIBRARIES_L     =
 
 #
