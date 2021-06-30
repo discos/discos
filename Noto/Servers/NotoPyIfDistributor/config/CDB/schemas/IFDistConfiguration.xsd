@@ -11,17 +11,13 @@
     elementFormDefault="qualified"
     attributeFormDefault="unqualified">
 
-	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
-	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+   <xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+   <xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
    
    <xs:complexType name="IFDistConfigurationType">
+  	   <xs:attribute name="IP" type="xs:string" use="required" />
+	   <xs:attribute name="PORT" type="xs:unsignedShort" use="required" />
+   </xs:complexType>
 
-		<xs:attribute name="IP" type="xs:string" use="required" />
-      <xs:attribute name="PORT" type="xs:unsignedShort" use="required" />
-
-	</xs:complexType>
-
-
-    <xs:element name="IFDistConfiguration" type="IFDistConfigurationType" />
+   <xs:element name="IFDistConfiguration" type="IFDistConfigurationType" />
 </xs:schema>
-
