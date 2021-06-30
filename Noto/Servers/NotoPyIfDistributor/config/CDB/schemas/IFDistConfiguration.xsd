@@ -13,45 +13,8 @@
 
 	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
 	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
-    
-    
-   <xs:simpleType name="AttIDType">
-	   <xs:restriction base="xs:unsignedInt">
-   	   <xs:minInclusive value="0" />
-         <xs:maxInclusive value="3" />
-      </xs:restriction>
-	</xs:simpleType>
-
-   <xs:simpleType name="AttValueType">
-	   <xs:restriction base="xs:decimal">
-   	   <xs:minInclusive value="0.0" />
-         <xs:maxInclusive value="31.5" />
-      </xs:restriction>
-	</xs:simpleType>
-
-   <xs:complexType name="AttHeader">
-   	<xs:attribute name="ID" type="AttIDType"   />
-      <xs:attribute name="Value" type="AttValueType" />
-	</xs:complexType> 
-    
-	<xs:complexType name="BoardHeader">
-        <xs:sequence>
-            <xs:element name="Attenuator" type="AttHeader" minOccurs="1" maxOccurs="unbounded" />
-        </xs:sequence>
-        <xs:attribute name="number" type="xs:unsignedInt" use="required"/>
-   </xs:complexType>
-   
-  	<xs:complexType name="ConfigurationHeader">
- 		<xs:sequence>
-         <xs:element name="Board" type="BoardHeader" minOccurs="1" maxOccurs="unbounded" />
-      </xs:sequence>
-      <xs:attribute name="name" type="xs:string" use="required" />
- 	</xs:complexType>
    
    <xs:complexType name="IFDistConfigurationType">
-		<xs:sequence>	
-			<xs:element name="Configuration" type="ConfigurationHeader" minOccurs="0" maxOccurs="unbounded" />
-		</xs:sequence>
 
 		<xs:attribute name="IP" type="xs:string" use="required" />
       <xs:attribute name="PORT" type="xs:unsignedShort" use="required" />

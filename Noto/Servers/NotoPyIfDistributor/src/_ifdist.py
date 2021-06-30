@@ -75,9 +75,7 @@ def send_command(ip, port, command):
 	return response
 
 def cdb(xmlstr):
-	root=ET.fromstring(xmlstr)
-	configurations=root.findall('{urn:schemas-cosylab-com:IFDistConfiguration:1.0}Configuration')
-	
+	root=ET.fromstring(xmlstr)	
 	return root.items()[0][1],root.items()[1][1]
 	
 def main(argv):
