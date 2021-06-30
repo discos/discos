@@ -5,5 +5,5 @@
 				xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 				IP="ifd.noto.ira.inaf.it"
-				PORT="5000"> 
-/>
+				PORT="5000"
+				/>
