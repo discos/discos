@@ -69,7 +69,7 @@ NT_ERRORS:=NotoActiveSurfaceErrors
 NT_INTERFACES:=NotoAntennaInterface NotoReceiversInterface NotoWeatherStationInterface NotoActiveSurfaceInterface \
                 NotoMinorServoInterface
 NT_LIBRARIES:=
-NT_SERVERS:= NotoReceivers NotoMount NotoWeatherStation NotoActiveSurface NotoMinorServo NotoPyLocalOscillator
+NT_SERVERS:= NotoReceivers NotoMount NotoWeatherStation NotoActiveSurface NotoMinorServo NotoPyLocalOscillator NotoPyIfDistributor
 NT_CLIENTS:=NotoMountTextClient 
 NT_MISC:=NotoScripts
 
@@ -153,7 +153,7 @@ ifeq ($(STATION),Noto)
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
 		TotalPower NotoMount CustomLogger \
 		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal SchedulerTextClient \
-		NotoMountTextClient CustomLoggingClient Scripts
+		NotoMountTextClient CustomLoggingClient Scripts NotoPyIfDistributor
 
 	IDL_DOC:=Managment Antenna Backends Metrology
 	CPP_DOC:=Libraries AntennaImplementation ManagementImplementation BackendsImplementation ReceiversImplementation
