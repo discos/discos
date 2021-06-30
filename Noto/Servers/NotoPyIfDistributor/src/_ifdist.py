@@ -76,6 +76,8 @@ def send_command(ip, port, command):
 
 def cdb(xmlstr):
 	root=ET.fromstring(xmlstr)	
+	print root.items()[0][1]
+	print root.items()[1][1]
 	return root.items()[0][1],root.items()[1][1]
 	
 def main(argv):

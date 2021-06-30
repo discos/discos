@@ -6,5 +6,4 @@
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 				IP="ifd.noto.ira.inaf.it"
 				PORT="5000"> 
-
 </IFDistConfiguration>
