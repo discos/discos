@@ -18,7 +18,7 @@
 	<Member name="Reason" type="string" description="Reason" />
 </ErrorCode>	
 
-<ErrorCode name="CouldntLogManager" shortDescription="Manager couldn't be accessed" Description=" "/>
+<ErrorCode name="CouldntLogManager" shortDescription="Manager couldn't be accessed" description=" "/>
 
 <ErrorCode name="CouldntInit" shortDescription="Client could not be initialized" description=" "/>
 
