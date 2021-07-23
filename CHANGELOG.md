@@ -99,4 +99,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/
 ## Added
 ## Fixed
     issue #448 - Added Sky Offsets to calibration tool client
+    issue #585 - Fixed misshandled schedule with NULL as backend (Dry Run)
 ## Changed
