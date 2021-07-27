@@ -52,6 +52,7 @@ import maciErrType
 import cdbErrType
 import maciErrTypeImpl
 import ManagementErrorsImpl
+import ComponentErrorsImpl
 from IRAPy import logger,userLogger
 from SimpleParserPy import add_user_message
 import xml.etree.ElementTree as ET
@@ -60,6 +61,7 @@ import os
 import socket
 import time
 from collections import namedtuple
+
 
 def send_command(ip, port, command):
 	s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -75,9 +77,7 @@ def send_command(ip, port, command):
 	return response
 
 def cdb(xmlstr):
-	root=ET.fromstring(xmlstr)	
-	print root.items()[0][1]
-	print root.items()[1][1]
+	root=ET.fromstring(xmlstr)
 	return root.items()[0][1],root.items()[1][1]
 	
 def main(argv):
@@ -115,15 +115,31 @@ def main(argv):
 		sys.exit(1)
 	
 	
-	userLogger.logNotice("IFDist setup according to %s configuration"%(argv[0]))	
-				
-	if not found:
-		newEx = ComponentErrorsImpl.ValidationErrorExImpl()
-		add_user_message(newEx,"The required IFDist configuration is not known")
-		userLogger.logException(newEx)
-		simpleClient.disconnect()
-		sys.exit(1)
-	
+	parameters = ['input1','input2','att1','att2']
+	for i in range(0,len(argv)):
+		if argv[i] != '-1':
+			commandstr = parameters[i]+","+argv[i]
+			userLogger.logNotice("IFDist setup according to %s command"%(commandstr))
+			answer=send_command(ip,port, commandstr)
+			
+			if answer=="Fail":
+				newEx = ComponentErrorsImpl.SocketErrorExImpl()
+				add_user_message(newEx,"Unable to communicate to IFDist")
+				userLogger.logException(newEx)
+				simpleClient.disconnect()
+				sys.exit(1)
+
+			elif answer[0]=="NAK":				 
+				newEx = ComponentErrorsImpl.NakExImpl()
+				add_user_message(newEx,"IFDist command error")
+				userLogger.logException(newEx)
+				simpleClient.disconnect()
+				sys.exit(1)
+
+			else:
+				userLogger.logNotice( "Answer: %s"%(answer))
+
+
 if __name__=="__main__":
    main(sys.argv[1:])  
 	

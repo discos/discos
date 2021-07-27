@@ -141,7 +141,7 @@ void CCore::execute() throw(ComponentErrors::TimerErrorExImpl, ComponentErrors::
 	// m_parser->add("ifd","_ifd",1,"SRT");
 	m_parser->add("calmux", "_calmux", 1);
 	m_parser->add("dmed", "_dmed", 1, "Medicina");
-	m_parser->add("ifdist", "_ifdist", 1, "Noto");
+	m_parser->add("ifdist", "_ifdist", 4, "Noto");
 
 	m_parser->add("restFrequency", new function1<CCore, non_constant, void_type, I<doubleSeq_type> >(this, &CCore::_setRestFrequency), 1);
 	m_parser->add("fTrack", new function1<CCore, non_constant, void_type, I<string_type> >(this, &CCore::_fTrack), 1);
