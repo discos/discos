@@ -11,7 +11,7 @@
 	Name="ExternalClients"
 	Code="ExternalClientsImpl"
 	Type="IDL:alma/Management/ExternalClients:1.0"
-	Container="ExternalClientContainer"
+	Container="ExternalClientsContainer"
 	Default="true"
     ImplLang="cpp"
 />

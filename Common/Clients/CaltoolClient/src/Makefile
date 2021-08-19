@@ -66,7 +66,7 @@ lllll_OBJECTS   =
 #
 # Scripts (public and local)
 # ----------------------------
-SCRIPTS         =
+SCRIPTS         = calibrationtoolclient
 SCRIPTS_L       =
 
 #
@@ -78,7 +78,7 @@ TCL_SCRIPTS_L   =
 #
 # Python stuff (public and local)
 # ----------------------------
-PY_SCRIPTS         =  calibrationtoolclient
+PY_SCRIPTS         =  _ctc
 PY_SCRIPTS_L       =  
 
 PY_MODULES         = customwidgets calibrationtool_ui 

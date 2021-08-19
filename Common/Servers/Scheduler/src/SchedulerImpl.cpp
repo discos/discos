@@ -46,8 +46,13 @@ void SchedulerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 		_ADD_BACKTRACE(ComponentErrors::InitializationProblemExImpl,_dummy,E,"SchedulerImpl::initialize()");
 		throw _dummy;
 	}
+	if (!m_stationConfig.initialize(getContainerServices())) {
+		_EXCPT(ComponentErrors::CDBAccessExImpl,dummy,"SchedulerImpl::initialize()"); \
+		dummy.setFieldName("Station Locals Config");
+		throw dummy;
+	}
 	try {
-		m_core=new CCore(getContainerServices(),&m_config);
+		m_core=new CCore(getContainerServices(),&m_config,&m_stationConfig);
 		m_pscheduleName=new ROstring(getContainerServices()->getName()+":scheduleName",getComponent(),
 				new DevIOScheduleName(m_core),true);
 		m_pstatus=new ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus),POA_Management::ROTSystemStatus>(getContainerServices()->getName()+":status",getComponent(),
@@ -71,15 +76,14 @@ void SchedulerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	ACS_LOG(LM_FULL_INFO,"SchedulerImpl::initialize()",(LM_INFO,"COMPSTATE_INITIALIZED"));
 }
 
-void SchedulerImpl::execute() throw (ACSErr::ACSbaseExImpl)
+void SchedulerImpl::execute()
 {
 	AUTO_TRACE("SchedulerImpl::execute()");
-	_IRA_LOGFILTER_ACTIVATE(m_config.getRepetitionCacheTime(),m_config.getRepetitionExpireTime());
 	try {
 		m_core->execute();
 	}
 	catch (ACSErr::ACSbaseExImpl& E) {
-		_ADD_BACKTRACE(ComponentErrors::InitializationProblemExImpl,_dummy,E,"SchedulerImpl::execute()");
+		_ADD_BACKTRACE(ComponentErrors::InitializationProblemExImpl,_dummy,E,"SchedulerImpl::execute()");		
 		throw _dummy;
 	}
 	try {
@@ -93,6 +97,7 @@ void SchedulerImpl::execute() throw (ACSErr::ACSbaseExImpl)
 		_ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,__dummy,E,"SchedulerImpl::execute()");
 		throw __dummy;		
 	}
+	_IRA_LOGFILTER_ACTIVATE(m_config.getRepetitionCacheTime(),m_config.getRepetitionExpireTime());
 	ACS_LOG(LM_FULL_INFO,"SchedulerImpl::execute()",(LM_INFO,"COMPSTATE_OPERATIONAL"));
 }
 
@@ -362,10 +367,12 @@ void SchedulerImpl::fTrack(const char* dev) throw (ComponentErrors::ComponentErr
 	m_core->_fTrack(dev);
 }
 
-void SchedulerImpl::setProjectCode(const char *code) throw (CORBA::SystemException,ManagementErrors::ManagementErrorsEx)
+void SchedulerImpl::setProjectCode(const char *code, CORBA::String_out message) throw (CORBA::SystemException,ManagementErrors::ManagementErrorsEx)
 {
+	IRA::CString msg;
 	try {
-		m_core->_setProjectCode(code);
+		m_core->_setProjectCode(code, msg);
+		message=(const char *)msg;
 	}
 	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);

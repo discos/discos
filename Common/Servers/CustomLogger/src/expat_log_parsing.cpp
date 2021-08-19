@@ -21,12 +21,12 @@ LogRecord::add_data(std::string k, std::string v)
 std::string 
 LogRecord::get_data(std::string key)
 {
-    KVMap::iterator finder;
-    finder = kwargs.find(key);
-    if(finder != kwargs.end())
-        return finder->second;
-    else
-        return NULL;
+	KVMap::iterator finder;
+	finder = kwargs.find(key);
+	if(finder != kwargs.end())
+   	return finder->second;
+ 	else
+ 		return "";
 };
 
 std::string

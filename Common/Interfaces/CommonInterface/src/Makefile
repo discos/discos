@@ -37,13 +37,16 @@ MAKE_PDF = ON
 # C programs (public and local)
 # -----------------------------
 EXECUTABLES     =
-EXECUTABLES_L   = TestReceivers TestManagement #TestAntenna
+EXECUTABLES_L   = TestReceivers TestManagement TestAntenna
 
 TestReceivers_OBJECTS = ReceiversModule
 TestReceivers_LIBS= baci maci
 
 TestManagement_OBJECTS = ManagementModule
 TestManagement_LIBS= ManagementErrors baci maci
+
+TestAntenna_OBJECTS = AntennaModule
+TestAntenna_LIBS= baci maci
 
 #
 # <brief description of xxxxx program>

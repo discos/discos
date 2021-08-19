@@ -32,6 +32,7 @@
 #include <DateTime.h>
 #include <acsncSimpleConsumer.h>
 #include <SP_parser.h>
+#include <StationConfig.h>
 #include "Configuration.h"
 #include "Schedule.h"
 
@@ -53,10 +54,11 @@ class CCore {
 public:
 	/**
 	 * Constructor. Default Constructor.
-	 * @param service pointer to the continaer services.
-	 * @param conf pointer to the class CConfiguration tat conatains all the configuration regarding the component
+	 * @param service pointer to the container services.
+	 * @param conf pointer to the class CConfiguration that contains all the configuration regarding the component
+	 * @param stConfig further configurations regarding station locals 
 	*/
-	CCore(maci::ContainerServices *service,CConfiguration *conf);
+	CCore(maci::ContainerServices *service,CConfiguration *conf,DiscosLocals::StationConfig* stConfig);
 
 	/** 
 	 * Destructor.
@@ -68,8 +70,10 @@ public:
 	 * @throw ComponentErrors::TimerErrorExImpl
 	 * @throw ComponentErrors::CouldntGetComponentExImpl
 	 * @thorw ManagementErrors::ProcedureFileLoadingErrorExImpl
+	 * @throw ComponentErrors::UnexpectedExImpl
 	*/
-	virtual void execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::MemoryAllocationExImpl,ManagementErrors::ProcedureFileLoadingErrorExImpl);
+	virtual void execute() throw (ComponentErrors::TimerErrorExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::MemoryAllocationExImpl,
+	  ManagementErrors::ProcedureFileLoadingErrorExImpl,ComponentErrors::UnexpectedExImpl);
 	
 	/**
 	 * This function initializes the core, all preliminary operation are performed here.
@@ -132,7 +136,11 @@ private:
 	/**
 	 * pointer to the configuration object
 	 */
-	 CConfiguration*  m_config;
+	CConfiguration* m_config;
+	/**
+	 * Discos
+	 */
+	DiscosLocals::StationConfig *m_stationConf;
 	/**
 	 * pointer to the container services
 	 */

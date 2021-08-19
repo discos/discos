@@ -566,6 +566,8 @@ void CEngineThread::runLoop()
 				IRA::CString sourceName;
 				double sourceRa,sourceDec,sourceVlsr;
 				double azOff,elOff,raOff,decOff,lonOff,latOff;
+				double lonUserOff,latUserOff;
+				Antenna::TCoordinateFrame frameUserOff;
 				double dut1;
 				long scanTag;
 				long scanID,subScanID;
@@ -596,6 +598,7 @@ void CEngineThread::runLoop()
 				m_info.getReceiverPolarization(polarizations);
 				m_info.getSource(sourceName,sourceRa,sourceDec,sourceVlsr);
 				m_info.getAntennaOffsets(azOff,elOff,raOff,decOff,lonOff,latOff);
+				m_info.getAntennaUserOffsets(lonUserOff,latUserOff,frameUserOff);
 				scanTag=m_data->getScanTag();
 				scanID=m_data->getScanID();
 				subScanID=m_data->getSubScanID();
@@ -742,6 +745,27 @@ void CEngineThread::runLoop()
 					m_data->setStatus(Management::MNG_FAILURE);
 				}
 				else if(!m_file->setPrimaryHeaderKey("GalacticLat Offset",latOff,"Latitude offset in galactic frame")) {
+					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
+					impl.setFileName((const char *)m_data->getFileName());
+					impl.setError(m_file->getLastError());
+					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
+					m_data->setStatus(Management::MNG_FAILURE);
+				}
+				else if(!m_file->setPrimaryHeaderKey("UserLatOffset",latUserOff,"User Latitude Offset")) {
+					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
+					impl.setFileName((const char *)m_data->getFileName());
+					impl.setError(m_file->getLastError());
+					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
+					m_data->setStatus(Management::MNG_FAILURE);
+				}
+				else if(!m_file->setPrimaryHeaderKey("UserLonOffset",lonUserOff,"User Longitude Offset")) {
+					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
+					impl.setFileName((const char *)m_data->getFileName());
+					impl.setError(m_file->getLastError());
+					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
+					m_data->setStatus(Management::MNG_FAILURE);
+				}			
+				else if(!m_file->setPrimaryHeaderKey("UserOffsetFrame",Antenna::Definitions::map(frameUserOff),"User Offset frame")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
 					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
@@ -978,9 +1002,24 @@ void CEngineThread::collectAntennaData(FitsWriter_private::CFile* summaryFile)
 		ACSErr::Completion_var comp;
 		CORBA::Double ra=0.0,dec=0.0,vrad=0.0;
 		CORBA::Double raOff=0.0,decOff=0.0,azOff=0.0,elOff=0.0,lonOff=0.0,latOff=0.0;
+		CORBA::Double userLonOff=0.0,userLatOff=0.0;
 		IRA::CString sourceName="";
 		Antenna::TReferenceFrame VFrame=Antenna::ANT_UNDEF_FRAME;
 		Antenna::TVradDefinition VDefinition=Antenna::ANT_UNDEF_DEF;
+		Antenna::TCoordinateFrame userFrameOff=Antenna::ANT_HORIZONTAL;
+		
+		try {
+			m_antennaBoss->getUserOffsets(userLonOff,userLatOff,userFrameOff);
+		}
+		catch (CORBA::SystemException& ex) {
+			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::collectAntennaData()");
+			impl.setName(ex._name());
+			impl.setMinor(ex.minor());
+			impl.log(LM_ERROR);
+			m_data->setStatus(Management::MNG_WARNING);
+			antennaBossError=true;
+		}
+		m_info.setAntennaUserOffsets(userLonOff,userLatOff,userFrameOff);
 
 		try { //get the target name and parameters
 			ACS::ROstring_var targetRef;

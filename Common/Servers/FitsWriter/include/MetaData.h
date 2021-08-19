@@ -168,10 +168,24 @@ public:
 	}
 
 	/**
+	 * It allows to set the antenna scan offsets as directly returned by the Antenna subsystem
+	*/	
+	void setAntennaUserOffsets(const double& lon,const double& lat, const Antenna::TCoordinateFrame& frame) {
+		m_lonUserOff=lon;m_latUserOff=lat;m_frameUserOff=frame;	
+	}
+
+	/**
 	 * @return the antenna position offsets
 	 */
 	void getAntennaOffsets(double& azOff,double& elOff,double& raOff,double& decOff,double& lonOff,double& latOff) const {
 		azOff=m_azOff; elOff=m_elOff; raOff=m_raOff; decOff=m_decOff; lonOff=m_lonOff; latOff=m_latOff;
+	}
+
+	/**
+	 * @return the antenna user offsets
+	*/	
+	void getAntennaUserOffsets(double& lon,double& lat,Antenna::TCoordinateFrame& frame) {
+		lon=m_lonUserOff;lat=m_latUserOff;frame=m_frameUserOff;	
 	}
 
 	/**
@@ -300,6 +314,8 @@ private:
 	 * antenna position offsets
 	 */
 	double m_azOff,m_elOff,m_raOff,m_decOff,m_lonOff,m_latOff;
+	double m_lonUserOff,m_latUserOff;
+	Antenna::TCoordinateFrame m_frameUserOff;
 	/**
 	 * stores the  estimated source fluxes, one for each section.
 	 */

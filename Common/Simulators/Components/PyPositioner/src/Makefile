@@ -5,16 +5,12 @@
 # Marco Buttu <marco.buttu@inaf.it>
 #*****************************************************************
 
-ACSERRDEF= ComponentErrors
-
-ERRXMLFILE= ../idl/ComponentErrors.xml
 
 # Interface
 # ----------------------------
 CDB_SCHEMAS = Positioner
 IDL_FILES = TestNamespaceInterface
-TestNamespaceInterfaceStubs_LIBS = baciStubs acscomponentStubs ACSErrTypeCommon \
-								 ComponentErrors
+TestNamespaceInterfaceStubs_LIBS = baciStubs acscomponentStubs
 
 
 # Python directives
@@ -72,15 +68,7 @@ clean_dist : clean_all clean_dist_all
 man   : do_man 
 	@echo " . . . man page(s) done"
 
-install : xmlpatch_pre install_all
-	@chmod $(PERM) $(ERRXMLFILE)
-	@echo "Patch applied" 
+install : install_all
 	@rm -rf /tmp/tmp.txt
 	@echo " . . . installation done"
 	@echo " . . . installation done"
-
-
-xmlpatch_pre :
-	@echo "File permissions: " $(PERM)
-	@chmod a+w $(ERRXMLFILE)
-	@echo $(PERM) > /tmp/tmp.txt

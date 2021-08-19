@@ -268,31 +268,31 @@ public:
      * This is getter method. No need to make it thread safe......
      * @return the current value of the cryogenic temperature at cool head in °K
      */
-    double getCryoCoolHead() const { return m_cryoCoolHead; }
+    CConfiguration::BoardValue getCryoCoolHead() const { return m_cryoCoolHead; }
 
     /**
      * This is getter method. No need to make it thread safe......
       * @return the current value of the cryogenic temperature at cool head window in °K
      */
-    double getCryoCoolHeadWin() const { return m_cryoCoolHeadWin; }
+    CConfiguration::BoardValue getCryoCoolHeadWin() const { return m_cryoCoolHeadWin; }
 
     /**
      * This is getter method. No need to make it thread safe......
       * @return the current value of the cryogenic temperature at LNA in °K
      */
-    double getCryoLNA() const { return m_cryoLNA; }
+    CConfiguration::BoardValue getCryoLNA() const { return m_cryoLNA; }
 
     /**
      * This is getter method. No need to make it thread safe......
      * @return the current value of the cryogenic temperature at LNA  window in °K
      */
-    double getCryoLNAWin() const { return m_cryoLNAWin; }
+    CConfiguration::BoardValue getCryoLNAWin() const { return m_cryoLNAWin; }
 
     /**
      * This is getter method. No need to make it thread safe......
      * @return the current value of the vertex temperature
      */
-    double getEnvironmentTemperature() const { return m_environmentTemperature; }
+    CConfiguration::BoardValue getEnvironmentTemperature() const { return m_environmentTemperature; }
 
     /**
      * This is getter method. No need to make it thread safe......
@@ -405,12 +405,12 @@ private:
     ACS::longSeq m_polarization;
     IRA::CString m_setupMode;
     double m_vacuum;
-    double m_cryoCoolHead;
-    double m_cryoCoolHeadWin;
-    double m_cryoLNA;
-    double m_cryoLNAWin;
+    CConfiguration::BoardValue m_cryoCoolHead;
+    CConfiguration::BoardValue m_cryoCoolHeadWin;
+    CConfiguration::BoardValue m_cryoLNA;
+    CConfiguration::BoardValue m_cryoLNAWin;
+    CConfiguration::BoardValue m_environmentTemperature;
     double m_vacuumDefault;
-    double m_environmentTemperature;
     bool m_calDiode;
     IRA::ReceiverControl::FetValues m_fetValues;
     DWORD m_statusWord;

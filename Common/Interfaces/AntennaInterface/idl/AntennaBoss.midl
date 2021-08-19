@@ -647,7 +647,7 @@ module Antenna {
 		void getObservedHorizontal(in ACS::Time timestamp,in ACS::TimeInterval duration,out double az,out double el);
 		
 		/**
-		 * This method should only be used internally to know the user offsets currently commanded
+		 * This method should only be used internally to know the offsets currently commanded. i.e. the sum of all offset types
 		 * @throw CORBA::SystemExcpetion
 		 * @param azOff user offset for the azimuth (radians)
 		 * @param elOff user offset for the elevation (radians)
@@ -657,6 +657,24 @@ module Antenna {
 		 * @param latOff user offset for the latitude (radians)
 		 */
 		void getAllOffsets(out double azOff,out double elOff,out double raOff,out double decOff,out double lonOff,out double latOff);
+
+		/**
+		 * This method should only be used internally to know the scan offsets currently commanded
+		 * @throw CORBA::SystemException
+		 * @param lonOff scan offset for the longitude (radians)
+		 * @param latOff scan offset for the latitude (radians)
+		 * @param offFrame reference frame of the offsets
+		 */
+		void getScanOffsets(out double lonOff, out double latOff,out TCoordinateFrame offFrame);
+		
+		/**
+		 * This method should only be used internally to know the user offsets currently commanded
+		 * @throw CORBA::SystemException
+		 * @param lonOff user offset for the longitude (radians)
+		 * @param latOff user offset for the latitude (radians)
+		 * @param offFrame reference frame of the offsets
+		 */
+		void getUserOffsets(out double lonOff, out double latOff,out TCoordinateFrame offFrame);
 		
 		/**
 		 * This method is used internally to know the scan axis/direction os the presently commanded scan

@@ -323,6 +323,16 @@ public:
 	void getAllOffsets(double& azOff,double& elOff,double& raOff,double& decOff,double& lonOff,double& latOff) const;
 	
 	/**
+	* Get the scan offsets configured for the current scan 
+	*/	
+	void getScanOffsets(double& lonOff,double& latOff,Antenna::TCoordinateFrame& frame);
+
+	/**
+	* Get the scan offsets configured for the current scan 
+	*/		
+	void getUserOffsets(double& lonOff,double& latOff,Antenna::TCoordinateFrame& frame);
+	
+	/**
 	 * @return the J2000 right ascension of the target
 	 */
 	const double& getTargetDeclination() const { return m_targetDec; }
