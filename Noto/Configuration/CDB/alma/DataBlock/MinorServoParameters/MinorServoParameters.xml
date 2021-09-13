@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+    Noto MINOR SERVO PARAMETERS
+-->
+<MinorServoParameters 
+    xmlns="urn:schemas-cosylab-com:MinorServoParameters:1.0"
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <MinorServo>
+        <code>KKC</code>
+        <primary>0</primary>
+        <trackel>1</trackel>
+        <!--
+        for each axis we sepcify name an scharacteristics as:
+
+        <NAME>unit,min,max,pol0,pol1,pol2,pol3,pol4</NAME>
+
+        where:
+        * NAME can be one of Xaxis, Yaxis, Zaxis, THETAXaxis, THETAYaxis,
+        or YPaxis, ZPaxis for primary focus
+        * unit is the the unit measure for the axis
+        * min and max are the maximum and minimum values the axis can get
+        * pol0-4 are the coefficients of the 5th grade polynomial which describes
+        elevation tracking corrections
+        -->
+        <Xaxis>mm,-70.0,70.0,-0.5,0,0,0,0</Xaxis>
+        <Yaxis>mm,-70.0,70.0,-10.543150320180,-0.29785599705,0.00689783562,0,0</Yaxis>
+        <Zaxis>mm,-70.0,70.0,4.714991747520,-0.2295351858,0.000716647680,0,0</Zaxis>
+        <THETAXaxis>deg,-5,5.0, 0.00340591848129537,0,0,0,0</THETAXaxis>
+        <THETAYaxis>deg,-5,5.0,-0.00135396518375242,0,0,0,0</THETAYaxis>
+    </MinorServo>
+</MinorServoParameters>
