@@ -469,6 +469,23 @@ void SRTActiveSurfaceBossImpl::usdStatus4GUIClient (CORBA::Long circle, CORBA::L
     }
 }
 
+void SRTActiveSurfaceBossImpl::asStatus4GUIClient (ACS::longSeq_out status) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
+{
+    AUTO_TRACE("SRTActiveSurfaceBossImpl::asStatus4GUIClient()");
+
+    CSecAreaResourceWrapper<CSRTActiveSurfaceBossCore> resource=m_core->Get();
+    try
+    {
+        status = new ACS::longSeq;
+        resource->asStatus4GUIClient(*status);
+    }
+    catch (ComponentErrors::ComponentErrorsExImpl& ex)
+    {
+        ex.log(LM_DEBUG);
+        throw ex.getComponentErrorsEx();
+    }
+}
+
 void SRTActiveSurfaceBossImpl::setActuator (CORBA::Long circle, CORBA::Long actuator, CORBA::Long_out actPos, CORBA::Long_out cmdPos, CORBA::Long_out Fmin, CORBA::Long_out Fmax, CORBA::Long_out acc, CORBA::Long_out delay) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
 {
     AUTO_TRACE("SRTActiveSurfaceBossImpl::setActuator");

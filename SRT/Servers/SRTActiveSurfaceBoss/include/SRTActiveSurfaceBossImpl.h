@@ -185,6 +185,8 @@ class SRTActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl, publ
 
 	void usdStatus4GUIClient( CORBA::Long circle,  CORBA::Long actuator, CORBA::Long_out status) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
+	void asStatus4GUIClient( ACS::longSeq_out status) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
+
 	void setActuator (CORBA::Long circle, CORBA::Long actuator, CORBA::Long_out actPos, CORBA::Long_out cmdPos, CORBA::Long_out Fmin, CORBA::Long_out Fmax, CORBA::Long_out acc, CORBA::Long_out delay) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
 	void up ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);

@@ -73,7 +73,7 @@ class SRTActiveSurfaceCore : public QThread
         int ActuatorStatusCalLabelCode;
 
     signals:
-        int setGUIActuatorColor(int, int, const char*, bool);
+        int setGUIActuatorColor(int, int, bool, bool);
         int setGUIAllActuators(bool callfromfunction = false);
         int setGUIcircleORradius(bool callfromfunction = false);
         int setGUIActuator(bool callfromfunction = false);

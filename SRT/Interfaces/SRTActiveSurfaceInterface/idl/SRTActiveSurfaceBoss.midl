@@ -115,6 +115,8 @@ module ActiveSurface {
 
         void usdStatus4GUIClient (in long circle, in long actuator, out long status) raises (ComponentErrors::ComponentErrorsEx);
 
+        void asStatus4GUIClient (out ACS::longSeq status) raises (ComponentErrors::ComponentErrorsEx);
+
         void setActuator (in long circle, in long actuator, out long actPos, out long cmdPos, out long Fmin, out long Fmax, out long acc, out long delay) raises (ComponentErrors::ComponentErrorsEx);
 
         /**

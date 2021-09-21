@@ -1621,6 +1621,29 @@ void CSRTActiveSurfaceBossCore::usdStatus4GUIClient(int circle, int actuator, CO
     }
 }
 
+void CSRTActiveSurfaceBossCore::asStatus4GUIClient(ACS::longSeq& status) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl)
+{
+    status.length(lastUSD);
+    unsigned int i = 0;
+
+    for (int circle = 1; circle <= CIRCLES; circle++)
+    {
+        for (int actuator = 1; actuator <= actuatorsInCircle[circle]; actuator++)
+        {
+            int usdStatus = 0;
+
+            if(!CORBA::is_nil(usd[circle][actuator]))
+            {
+                usd[circle][actuator]->getStatus(usdStatus);
+            }
+
+            status[i] = usdStatus;
+
+            i++;
+        }
+    }
+}
+
 void CSRTActiveSurfaceBossCore::recoverUSD(int circleIndex, int usdCircleIndex) throw (ComponentErrors::CouldntGetComponentExImpl)
 {
     char serial_usd[23];
