@@ -28,7 +28,7 @@
         <Xaxis>mm,-70.0,70.0,-0.5,0,0,0,0</Xaxis>
         <Yaxis>mm,-70.0,70.0,-10.543150320180,-0.29785599705,0.00689783562,0,0</Yaxis>
         <Zaxis>mm,-70.0,70.0,4.714991747520,-0.2295351858,0.000716647680,0,0</Zaxis>
-        <THETAXaxis>deg,-5,5.0, 0.00340591848129537,0,0,0,0</THETAXaxis>
-        <THETAYaxis>deg,-5,5.0,-0.00135396518375242,0,0,0,0</THETAYaxis>
+        <THETAXaxis>deg,-5,5.0,0.0034059185,0,0,0,0</THETAXaxis>
+        <THETAYaxis>deg,-5,5.0,-0.001353962,0,0,0,0</THETAYaxis>
     </MinorServo>
 </MinorServoParameters>

@@ -25,10 +25,18 @@
         * pol0-4 are the coefficients of the 5th grade polynomial which describes
         elevation tracking corrections
         -->
+        <Xaxis>mm,-80.0,80.0,-5.79,0,0,0,0</Xaxis>
+        <Yaxis>mm,-80.0,80.0,-25.93241232,-0.29785599,0.00689783,0,0</Yaxis>
+        <Zaxis>mm,-125.0,125.0,-33.5544632,-0.22953518,0.00071664,0,0</Zaxis>
+        <THETAXaxis>deg,-5,5.0,-0.00435231,0,0,0,0</THETAXaxis>
+        <THETAYaxis>deg,-5,5.0,0.00367988,0,0,0,0</THETAYaxis>
+        
+        <!--
         <Xaxis>mm,-70.0,70.0,-0.5,0,0,0,0</Xaxis>
         <Yaxis>mm,-70.0,70.0,-10.543150320180,-0.29785599705,0.00689783562,0,0</Yaxis>
         <Zaxis>mm,-70.0,70.0,4.714991747520,-0.2295351858,0.000716647680,0,0</Zaxis>
-        <THETAXaxis>deg,-5,5.0, 0.00340591848129537,0,0,0,0</THETAXaxis>
-        <THETAYaxis>deg,-5,5.0,-0.00135396518375242,0,0,0,0</THETAYaxis>
+        <THETAXaxis>deg,-5,5.0,0.0034059185,0,0,0,0</THETAXaxis>
+        <THETAYaxis>deg,-5,5.0,-0.0013539652,0,0,0,0</THETAYaxis>
+        -->
     </MinorServo>
 </MinorServoParameters>
