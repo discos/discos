@@ -33,6 +33,8 @@
 		</xs:sequence>
 		<!-- sleep time of the watching thread (microseconds), this is the thread that keeps data up to date -->
 		<xs:attribute name="WatchingThreadTime" type="xs:unsignedLong" use="required" />
+		<!-- sleep time of the working thread (microseconds), this is the thread that updated the AS -->
+		<xs:attribute name="WorkingThreadTime" type="xs:unsignedLong" use="required" />
 		<!-- the cache time (microseconds) for logging repetition filter -->
 		<xs:attribute name="RepetitionCacheTime" type="xs:unsignedLong" use="required" />
 		<!-- the expire time (microseconds) for logging repetition filter -->
