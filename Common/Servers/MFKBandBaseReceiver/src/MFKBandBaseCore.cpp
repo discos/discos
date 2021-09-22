@@ -171,7 +171,7 @@ void CComponentCore::activate() throw (
     guard.release();
     
 	lnaOn(); // Throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
-    externalCalOff();
+    //externalCalOff();
 
     bool answer;
     try {
@@ -360,7 +360,6 @@ void CComponentCore::calOff() throw (
         throw impl;
     }
 }
-
 
 void CComponentCore::vacuumSensorOff() throw (
         ReceiversErrors::NoRemoteControlErrorExImpl,

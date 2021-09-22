@@ -61,11 +61,11 @@ LIBRARIES_L     =
 
 #
 # <brief description of lllll library>
-MedicinaKBandDualFReceiverImpl_OBJECTS = MedicinaKBandDualFReceiverImpl MedicinaKBandDualFCore MonitorThread
+MedicinaKBandDualFReceiverImpl_OBJECTS = MedicinaKBandDualFReceiverImpl MedicinaKBandDualFCore MonitorThread MedicinaKBandDualFConf
  
 MedicinaKBandDualFReceiverImpl_LIBS = IRALibrary ComponentErrors ManagementErrors ReceiversErrors \
 	CommonReceiverInterfaceStubs GenericReceiverStubs MedicinaKBandDualFStubs MFKBandCore \
-	LocalOscillatorInterfaceStubs ReceiversDefinitionsStubs ManagmentDefinitionsStubs
+	LocalOscillatorInterfaceStubs ReceiversDefinitionsStubs ManagmentDefinitionsStubs MedicinaVertexLibrary
 	
 #
 # Scripts (public and local)

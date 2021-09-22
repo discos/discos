@@ -73,7 +73,7 @@ public:
 	/**
 	 * Destructor
 	 */
-	~CConfiguration();
+	virtual ~CConfiguration();
 
 	/**
 	 * @return the IP address of the board that controls the dewar
@@ -224,13 +224,13 @@ public:
 	 * @throw ComponentErrors::CDBAccess
 	 * @param Services pointer to the container services object
 	*/
-	void init(maci::ContainerServices *Services)  throw (
+	virtual void init(maci::ContainerServices *Services)  throw (
             ComponentErrors::CDBAccessExImpl,
             ComponentErrors::MemoryAllocationExImpl,
             ReceiversErrors::ModeErrorExImpl
     );
 	
-private:
+protected:
 	IRA::CString m_dewarIPAddress;
 	WORD m_dewarPort;
 	IRA::CString m_LNAIPAddress;
