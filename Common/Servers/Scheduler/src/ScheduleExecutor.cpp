@@ -559,6 +559,7 @@ void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subS
  		ManagementErrors::CannotClosePendingTaskExImpl)
 {
  	baci::ThreadSyncGuard guard(&m_mutex);
+ 	bool projectChanged;
  	if (isScheduleActive()) {
  		_EXCPT(ManagementErrors::AlreadyRunningExImpl,dummy,"CScheduleExecutor::startSchedule()");
  		throw dummy;
@@ -566,7 +567,7 @@ void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subS
  	char *passedSchedule=new char [strlen(scheduleFile)+1]; // make a copy because the man pages states that the input string may be changed in functions basename() and dirname()
  	strcpy(passedSchedule,scheduleFile);
  	char *tmp=dirname(passedSchedule);
- 	IRA::CString projectCode=IRA::CString(tmp);
+ 	IRA::CString projectCode=IRA::CString(tmp); 
  	strcpy(passedSchedule,scheduleFile);
  	tmp=basename(passedSchedule);
  	IRA::CString schedule=IRA::CString(tmp);
@@ -574,23 +575,19 @@ void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subS
  	IRA::CString fullPath;
  	if (projectCode==".") { //no project given......use the current project code
  		fullPath=m_core->m_config->getScheduleDirectory()+m_projectCode+"/";
+ 		projectCode=m_projectCode;
+ 		projectChanged=false;
  	}
  	else {
  		fullPath=m_core->m_config->getScheduleDirectory()+projectCode+"/";
+ 		projectChanged=(projectCode==m_projectCode);
  	}
- 	if (!IRA::CIRATools::fileExists(fullPath+schedule)) {
+ 	//this also means that the project directory exists, so for discos the project is legal 
+ 	if (!IRA::CIRATools::fileExists(fullPath+schedule)) { 
  		_EXCPT(ManagementErrors::ScheduleNotExistExImpl,dummy,"CScheduleExecutor::startSchedule()");
  		throw dummy;
  	}
- 	ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::startSchedule()",(LM_NOTICE,"Stopping all pending tasks"));
- 	try {
- 		m_core->closeScan(true);
- 	}
- 	catch (ACSErr::ACSbaseExImpl& ex) {
- 		_ADD_BACKTRACE(ManagementErrors::CannotClosePendingTaskExImpl,impl,ex,"CScheduleExecutor::startSchedule()");
- 		m_core->changeSchedulerStatus(Management::MNG_FAILURE);
- 		throw impl;
- 	}
+ 
  	try {
  		m_schedule=new CSchedule(fullPath,schedule);
  	}
@@ -605,7 +602,7 @@ void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subS
  		dummy.setReason((const char *)m_schedule->getLastError());
  		delete m_schedule;
  		m_schedule=NULL;
- 		m_core->changeSchedulerStatus(Management::MNG_FAILURE);
+ 		//m_core->changeSchedulerStatus(Management::MNG_FAILURE);
  		throw dummy;
  	}
  	if (!m_schedule->isComplete()) {
@@ -613,10 +610,32 @@ void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subS
  		dummy.setReason((const char *)m_schedule->getLastError());
  		delete m_schedule;
  		m_schedule=NULL;		
- 		m_core->changeSchedulerStatus(Management::MNG_FAILURE);
+ 		//m_core->changeSchedulerStatus(Management::MNG_FAILURE);
  		throw dummy;		
  	}
+ 	if (m_schedule->getProjectName()!=projectCode) {
+ 		_EXCPT(ManagementErrors::ScheduleProjectNotMatchExImpl,dummy,"CScheduleExecutor::startSchedule()");
+ 		dummy.setProject((const char *)projectCode);
+ 		delete m_schedule;
+ 		m_schedule=NULL;
+ 		CUSTOM_LOG(LM_FULL_INFO,"CScheduleExecutor::startSchedule()",
+ 		  (LM_WARNING,"Please make sure the project of the schedule match with the currently active project"));
+ 		throw dummy;
+ 	}
+	m_projectCode=projectCode;
+ 	if (projectChanged) {
+ 		CUSTOM_LOG(LM_FULL_INFO,"CScheduleExecutor::startSchedule()",(LM_NOTICE,"New active project: %s",(const char *)m_projectCode));
+ 	}
  	m_scheduleLoaded=true;
+	ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::startSchedule()",(LM_NOTICE,"Stopping all pending tasks"));
+ 	try {
+ 		m_core->closeScan(true);
+ 	}
+ 	catch (ACSErr::ACSbaseExImpl& ex) {
+ 		_ADD_BACKTRACE(ManagementErrors::CannotClosePendingTaskExImpl,impl,ex,"CScheduleExecutor::startSchedule()");
+ 		m_core->changeSchedulerStatus(Management::MNG_FAILURE);
+ 		throw impl;
+ 	} 	 	
  	m_scheduleCounter=m_schedule->getSubScanCounter(subScanidentifier)-1; //need to point before the first scan in the schedule, the first scan has counter==1
  	m_schedReport.addScheduleName(m_schedule->getFileName());
  	if (m_schedule->getScanList()) {
@@ -642,11 +661,7 @@ void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subS
  	m_startSubScan=m_scheduleCounter+1;
 	m_scansCounter=-1;
  	m_scheduleName=schedule;
- 	if (projectCode!=".") {
- 		m_projectCode=projectCode;
- 		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::startSchedule()",
- 		  (LM_NOTICE,"Project: %s",(const char *)m_projectCode));
- 	}
+ 
  	// if the schedule is properly started the status of the scheduler is considered now to be ok.
  	m_core->clearStatus();
  	m_stage=INIT;  // put the executor in the init stage.

@@ -108,4 +108,8 @@
 
 <ErrorCode name="CannotClosePendingTask" shortDescription="Cannot close all pending tasks" description=" "/>
 
+<ErrorCode name="ScheduleProjectNotMatch" shortDescription="Schedule PROJECT keyword does not match with active project" description=" ">
+	<Member name="Project" type="string" description="Describes the cause of the error" />
+</ErrorCode>
+
 </Type>

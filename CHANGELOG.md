@@ -101,3 +101,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/
     issue #585 - Fixed misshandled schedule with NULL as backend (Dry Run)
 ## Changed
     issues #481, #484, #486, #487, #491, #493, #497. SRT Active Surface module has been improved in order to speed up its booting time and optimize its overall behavior
+	 issue #604 - The control software will not allow anymore that a schedule, belonging to another project, could be run. In that case a warning message is sent to user console
+	              and the execution aborted. 
