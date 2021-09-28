@@ -1,3 +1,4 @@
+
 #*******************************************************************************
 # PPPPPPPP
 #
@@ -7,11 +8,31 @@
 #
 # who       when      what
 # --------  --------  ----------------------------------------------
-# andrea  01/08/11  created
+# discos  22/09/21  created
 #
 
+# ALMA - Atacama Large Millimeter Array
+# Copyright (c) ESO - European Southern Observatory, 2014
+# (in the framework of the ALMA collaboration).
+# All rights reserved.
+# 
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 #*******************************************************************************
-# This Makefile follows VLT Standards (see Makefile(5) for more).
+
+#*******************************************************************************
+# This Makefile follows ALMA/ACS Standards (see Makefile(5) for more).
 #*******************************************************************************
 # REMARKS
 #    None
@@ -51,22 +72,19 @@ xxxxx_LIBS      =
 #
 # Includes (.h) files (public only)
 # ---------------------------------
-INCLUDES        =
+INCLUDES        = MedicinaVertex.h
 
 #
 # Libraries (public and local)
 # ----------------------------
-LIBRARIES       = MedicinaKBandDualFReceiverImpl
-LIBRARIES_L     = 
+LIBRARIES       = MedicinaVertexLibrary
+LIBRARIES_L     =
 
 #
 # <brief description of lllll library>
-MedicinaKBandDualFReceiverImpl_OBJECTS = MedicinaKBandDualFReceiverImpl MedicinaKBandDualFCore MonitorThread MedicinaKBandDualFConf
- 
-MedicinaKBandDualFReceiverImpl_LIBS = IRALibrary ComponentErrors ManagementErrors ReceiversErrors \
-	CommonReceiverInterfaceStubs GenericReceiverStubs MedicinaKBandDualFStubs MFKBandCore \
-	LocalOscillatorInterfaceStubs ReceiversDefinitionsStubs ManagmentDefinitionsStubs MedicinaVertexLibrary
-	
+MedicinaVertexLibrary_OBJECTS   = MedicinaVertex
+MedicinaVertexLibrary_LIBS = IRALibrary
+
 #
 # Scripts (public and local)
 # ----------------------------
@@ -111,7 +129,7 @@ tttlll_OBJECTS  =
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS = MedicinaKBandDualFReceiver
+CDB_SCHEMAS = 
 
 # 
 # IDL Files and flags
@@ -124,7 +142,9 @@ USER_IDL =
 #
 JARFILES= 
 jjj_DIRS=
-jjj_EXTRAS= 
+jjj_EXTRAS=
+# For expressing dependencies between jarfiles (parallel builds)
+jjj_JLIBS= 
 #
 # java sources in Jarfile on/off
 DEBUG= 
