@@ -249,6 +249,10 @@ public:
 		m_restFreq.length(0);
 	}
 	void getRestFreq(ACS::doubleSeq& rf) const { rf=m_restFreq; }
+	
+	WORD getTotalDumps() const { return m_totalDumps; }
+	void resetTotalDumps() { m_totalDumps=0; }
+	void incTotalDumps() { m_totalDumps++; }
 
 private:
 
@@ -344,6 +348,10 @@ private:
 	 * It reports if the calibration diode has been fired on subscan basis
 	*/
 	bool m_calDiode;
+	/*
+	* Reports how many dumps have been taken in the observation (scan)
+	*/
+	WORD m_totalDumps;
 };
 
 };

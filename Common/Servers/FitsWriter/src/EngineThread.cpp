@@ -407,7 +407,6 @@ void CEngineThread::runLoop()
 {
 	TIMEVALUE nowEpoch;
 	IRA::CString filePath,fileName;
-	unsigned totalDumps=0;
 	//CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
 	IRA::CIRATools::getTime(nowEpoch); // it marks the start of the activity job
 	//cout << "inizio : " << nowEpoch.value().value << endl;
@@ -434,7 +433,7 @@ void CEngineThread::runLoop()
 		m_summary->getFilePointer()->setKeyword("ScheduleName",m_data->getScheduleName());
 		m_summary->getFilePointer()->setKeyword("LogFileName",m_data->getLogName());
 
-		exptime=(totalDumps*m_data->getIntegrationTime())/1000.0;
+		exptime=(m_info.getTotalDumps()*m_data->getIntegrationTime())/1000.0;
 		m_summary->getFilePointer()->setKeyword("EXPTIME",exptime);
 	
 
@@ -494,8 +493,9 @@ void CEngineThread::runLoop()
 			if (!m_summaryOpened) {
 			 	TIMEVALUE currentUT;
 				IRA::CDateTime now;
-				TIMEDIFFERENCE currentLST;
+				//TIMEDIFFERENCE currentLST;
 				IRA::CString lstStr;
+				double currentLST;
 
 				// now let's create the summary file.
 				m_summary=new CSummaryWriter();
@@ -512,14 +512,16 @@ void CEngineThread::runLoop()
 				// compute the LST time for the scan
 			 	IRA::CIRATools::getTime(currentUT); // get the current time
 			 	now.setDateTime(currentUT,m_data->getDut1());  // transform the current time in a CDateTime object
-			 	now.LST(m_data->getSite()).getDateTime(currentLST);  // get the current LST time
-			 	currentLST.day(0);
-			 	IRA::CIRATools::intervalToStr(currentLST.value().value,lstStr);
-			 	m_summary->getFilePointer()->setKeyword("LST",lstStr);
+			 	//now.LST(m_data->getSite()).getDateTime(currentLST);  // get the current LST time
+			 	//currentLST.day(0);
+			 	//IRA::CIRATools::intervalToStr(currentLST.value().value,lstStr);
+			 	currentLST=(double)now.LST(m_data->getSite()).getDayMilliSeconds()/1000.0;
+			 	m_summary->getFilePointer()->setKeyword("LST",currentLST);
+			 	//m_summary->getFilePointer()->setKeyword("LST",lstStr);
 			 	IRA::CIRATools::timeToStrExtended(currentUT.value().value,lstStr);
 			 	m_summary->getFilePointer()->setKeyword("DATE-OBS",lstStr);
 				m_summaryOpened=true;
-				totalDumps=0;
+				m_info.resetTotalDumps();
 				ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_NOTICE,"SUMMARY_OPENED"));
 			}
 			m_file = new CFitsWriter();
@@ -903,7 +905,7 @@ void CEngineThread::runLoop()
 		if (m_fileOpened) {
 			//cout << "Stopping, cached  dumps: " << m_data->getDumpCollectionSize() << endl;
 			while (processData()) {
-				totalDumps++;
+				m_info.incTotalDumps();
 			};
 
 #ifdef FW_DEBUG
@@ -937,7 +939,7 @@ void CEngineThread::runLoop()
 		if (m_fileOpened) {
 			//cout << "cached before dumps: " << m_data->getDumpCollectionSize() << endl;
 			while (checkTime(nowEpoch.value().value) && checkTimeSlot(nowEpoch.value().value) && processData()) {
-				totalDumps++;
+				m_info.incTotalDumps();
 			}
 			//cout << "cached after  dumps: " << m_data->getDumpCollectionSize() << endl;
 			//IRA::CIRATools::getTime(nowEpoch);

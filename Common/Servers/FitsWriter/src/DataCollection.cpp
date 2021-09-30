@@ -66,6 +66,7 @@ void CDataCollection::saveMainHeaders(Backends::TMainHeader const * h,Backends::
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	memcpy(&m_mainH,h,sizeof(Backends::TMainHeader));
+	cout << "Ricevuto backend header " << m_mainH.integration << endl;
 	if (m_sectionH!=NULL) delete[] m_sectionH;
 	m_sectionH=new Backends::TSectionHeader[m_mainH.sections];
 	memcpy(m_sectionH,ch,sizeof(Backends::TSectionHeader)*m_mainH.sections);
