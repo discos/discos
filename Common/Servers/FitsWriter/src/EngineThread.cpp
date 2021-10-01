@@ -1189,6 +1189,9 @@ void CEngineThread::collectAntennaData(FitsWriter_private::CFile* summaryFile)
 			summaryFile->setKeyword("OBJECT",sourceName);
 			summaryFile->setKeyword("RightAscension",ra);
 			summaryFile->setKeyword("Declination",dec);
+			//The Object coordinates are taken from Antenna Boss interface which always expose J2000 coordinates
+			summaryFile->setKeyword("EQUINOX",2000.0);
+			//**************************************************************************************************
 			summaryFile->setKeyword("VRAD",vrad);
 		}
 		try { //get the estimated source fluxes
