@@ -80,41 +80,43 @@ def main(argv):
 	
 	commandstr=[]
 
-	if argv[0] not in [1,2]:
-		userLogger.logError("Enter input channel number (allowed 1 or 2)")
+	if int(argv[0]) not in range (1,3):
+		userLogger.logError("Enter input channel number (allowed 1 or 2), your input %s" %(argv[0]))
 		simpleClient.disconnect()
 		sys.exit(1)
 	
 	selectedInput='input'+argv[0]
 
-	if argv[1] not in range (-1,6):
-		userLogger.logError("Enter an allowed value for pol (-1 to not change the pol value or 0-6 to set pol)")
+	if int(argv[1]) not in range (-1,7):
+		userLogger.logError("Enter an allowed value for pol (-1 to not change the pol value or 0-6 to set pol), your input %s" %(argv[0]))
 		simpleClient.disconnect()
 		sys.exit(1)
 	
 	selectedPol=argv[1]
 	
-	if argv[2] not in range (-1,63):
-		userLogger.logError("Enter an allowed value for att (-1 to get att value or 0-63 to set att)")
+	if float(argv[2]) not in range (-1,64):
+		userLogger.logError("Enter an allowed value for att (-1 to get att value or 0-63 to set att), your input %s" %(argv[0]))
 		simpleClient.disconnect()
 		sys.exit(1)
 	
 	selectedAtt=argv[2]
 
 	#if selectedPol and selectedAtt are -1 print information on current pol and att
-	if selectedPol == -1 and selectedAtt==-1:
+	if int(selectedPol) == -1 and float(selectedAtt)==-1:
 		commandstr=[selectedInput,"att"+argv[0]]
 	#if selectedPol is -1 and selectedAtt is not -1 change att for selected input and current pol
-	elif selectedPol == -1 and selectedAtt !=-1:
+	elif int(selectedPol) == -1 and float(selectedAtt) !=-1:
 		commandstr=["att"+argv[0]+","+selectedAtt]
 	#if selectedPol is not -1 and selectedAtt is -1 change pol for selected input
-	elif selectedPol != -1 and selectedAtt ==-1:
+	elif int(selectedPol) != -1 and float(selectedAtt) ==-1:
 		commandstr=[selectedInput+","+selectedPol]
 	#if selectedPol is not -1 and selectedAtt is not -1 change pol and att for selected input
-	elif selectedPol != -1 and selectedAtt !=-1:
+	elif int(selectedPol) != -1 and float(selectedAtt) !=-1:
 		commandstr=[selectedInput+","+selectedPol, "att"+argv[0]+","+selectedAtt]
 
 	for i in range(0,len(commandstr)):
+		userLogger.logNotice("IFDist setup according to %s command"%(commandstr[i]))
+
 		answer=send_command(ip,port, commandstr[i])
 		if answer=="Fail":
 				newEx = ComponentErrorsImpl.SocketErrorExImpl()
@@ -132,31 +134,6 @@ def main(argv):
 		else:
 				userLogger.logNotice( "Answer: %s"%(answer))
 
-	"""
-	parameters = ['input1','input2','att1','att2']
-	for i in range(0,len(argv)):
-		if argv[i] != '-1':
-			commandstr = parameters[i]+","+argv[i]
-			userLogger.logNotice("IFDist setup according to %s command"%(commandstr))
-			answer=send_command(ip,port, commandstr)
-			
-			if answer=="Fail":
-				newEx = ComponentErrorsImpl.SocketErrorExImpl()
-				add_user_message(newEx,"Unable to communicate to IFDist")
-				userLogger.logError(newEx)
-				simpleClient.disconnect()
-				sys.exit(1)
-
-			elif answer[0]=="NAK":				 
-				newEx = ComponentErrorsImpl.NakExImpl()
-				add_user_message(newEx,"IFDist command error")
-				userLogger.logError(newEx)
-				simpleClient.disconnect()
-				sys.exit(1)
-
-			else:
-				userLogger.logNotice( "Answer: %s"%(answer))
-	"""
 
 if __name__=="__main__":
    main(sys.argv[1:])  
