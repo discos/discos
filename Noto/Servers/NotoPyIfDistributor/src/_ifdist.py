@@ -8,8 +8,6 @@
 #who                                   when           what
 #fabio vitello (fabio.vitello@inaf.it)  28/06/2021     Creation
 
-
-
 from Acspy.Clients.SimpleClient import PySimpleClient
 import ACSLog
 import maciErrType
@@ -25,7 +23,6 @@ import os
 import socket
 import time
 from collections import namedtuple
-
 
 def send_command(ip, port, command):
 	s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -134,7 +131,5 @@ def main(argv):
 		else:
 				userLogger.logNotice( "Answer: %s"%(answer))
 
-
 if __name__=="__main__":
    main(sys.argv[1:])  
-	
