@@ -22,6 +22,7 @@
 	antennaSetup=SEC
 	initialize=MMC
 	receiversSetup=MMC
+   	asOn
 	device=0
 	calmux=TotalPower
 	calOff
@@ -35,6 +36,8 @@
 	antennaSetup=SEC
 	initialize=KKC
 	receiversSetup=KKC
+	servoSetup=KKC
+   	asOn
 	device=0
 	calmux=TotalPower
 	calOff
@@ -45,7 +48,56 @@
 <body>
 	antennaSetup=SEC
 	initialize=QQC
-	receiversSetup=QQC
+    	receiversSetup=QQC
+    	asOn
+	device=0
+	calmux=TotalPower
+	calOff
+</body>
+</Procedure>
+
+<Procedure name="setupXXP" args="0">
+<body>
+	antennaSetup=PRIM
+	initialize=XXP
+    	receiversSetup=XXP
+    	asOn
+	device=0
+	calmux=TotalPower
+	calOff
+</body>
+</Procedure>
+
+<Procedure name="setupXSP" args="0">
+<body>
+	antennaSetup=PRIM
+	initialize=XXP
+    	receiversSetup=XXP
+    	asOff
+	device=0
+	calmux=TotalPower
+	calOff
+</body>
+</Procedure>
+
+<Procedure name="setupLLP" args="0">
+<body>
+	antennaSetup=LL
+	initialize=LLP
+    	receiversSetup=LLP
+    	asOff
+	device=0
+	calmux=TotalPower
+	calOff
+</body>
+</Procedure>
+
+<Procedure name="setupSSP" args="0">
+<body>
+	antennaSetup=PRIM
+	initialize=SSP
+    	receiversSetup=SSP
+    	asOff
 	device=0
 	calmux=TotalPower
 	calOff
@@ -55,8 +107,9 @@
 <Procedure name="setupSXP" args="0">
 <body>
 	antennaSetup=PRIM
-	initialize=SXP
-	receiversSetup=SXP
+	initialize=SSP
+    	receiversSetup=SSP
+    	asOff
 	device=0
 	calmux=TotalPower
 	calOff
@@ -65,8 +118,7 @@
 
 <Procedure name="telescopePark" args="0">
 <body>
-	goTo=180d,90d
-	receiversPark
+	antennaPark
 	asPark
 </body>
 </Procedure>

@@ -22,7 +22,7 @@
 	antennaSetup=SEC
 	initialize=MMC
 	receiversSetup=MMC
-    	asOn
+   	asOn
 	device=0
 	calmux=TotalPower
 	calOff
@@ -36,7 +36,8 @@
 	antennaSetup=SEC
 	initialize=KKC
 	receiversSetup=KKC
-    	asOn
+	servoSetup=KKC
+   	asOn
 	device=0
 	calmux=TotalPower
 	calOff
