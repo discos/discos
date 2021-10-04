@@ -3,44 +3,8 @@
 # This is a python script that can be used to configure the IF distributor. 
 # The script is adapted from DMED. 
 # PARAMETERS:
-#  input1,[ingresso] per selezionare cosa si vuole in uscita su A
-'''
-input1,[ingresso] per selezionare cosa si vuole in uscita su A
-input2,[ingresso] per selezionare cosa si vuole in uscita su B
+#    ifdist=input,pol,att
 
-input1 o input2 senza parametri ritorna l'ingresso selezionato come
-ACK,input1=ingresso
-
-att1,[valore] setta attenuazione A
-att2,[valore] setta attenuazione B
-
-att1 o att2 senza parametri ritorna il valore di attenuazione impostato come
-ACK,att1=valore
-
-i valori consentiti di ingresso per A sono:
-0 nessun ingresso selezionato
-1 ricevitore in vertex Right Pol
-2 ricevitore L Right Pol
-3 ricevitore X Right Pol
-4 ricevitore S Right Pol
-5 spare1
-6 spare2
-
-i valori consentiti di ingresso per B sono:
-0 nessun ingresso selezionato
-1 ricevitore in vertex Left Pol
-2 ricevitore L Left Pol
-3 ricevitore X Left Pol
-4 ricevitore S Left Pol
-5 ricevitore S Right Pol (per oss. geo)
-6 spare1
-
-i valori consentiti per att1 e att2 sono:
-da 0 a 63. Ogni step corrisponde a 0.5 dB
-
-Un comando errato ottiene in risposta
-NAK
-'''
 #who                                   when           what
 #fabio vitello (fabio.vitello@inaf.it)  28/06/2021     Creation
 
@@ -114,7 +78,61 @@ def main(argv):
 		simpleClient.disconnect()
 		sys.exit(1)
 	
+	commandstr=[]
+
+	if argv[0] not in [1,2]:
+		userLogger.logError("Enter input channel number (allowed 1 or 2)")
+		simpleClient.disconnect()
+		sys.exit(1)
 	
+	selectedInput='input'+argv[0]
+
+	if argv[1] not in range (-1,6):
+		userLogger.logError("Enter an allowed value for pol (-1 to not change the pol value or 0-6 to set pol)")
+		simpleClient.disconnect()
+		sys.exit(1)
+	
+	selectedPol=argv[1]
+	
+	if argv[2] not in range (-1,63):
+		userLogger.logError("Enter an allowed value for att (-1 to get att value or 0-63 to set att)")
+		simpleClient.disconnect()
+		sys.exit(1)
+	
+	selectedAtt=argv[2]
+
+	#if selectedPol and selectedAtt are -1 print information on current pol and att
+	if selectedPol == -1 and selectedAtt==-1:
+		commandstr=[selectedInput,"att"+argv[0]]
+	#if selectedPol is -1 and selectedAtt is not -1 change att for selected input and current pol
+	elif selectedPol == -1 and selectedAtt !=-1:
+		commandstr=["att"+argv[0]+","+selectedAtt]
+	#if selectedPol is not -1 and selectedAtt is -1 change pol for selected input
+	elif selectedPol != -1 and selectedAtt ==-1:
+		commandstr=[selectedInput+","+selectedPol]
+	#if selectedPol is not -1 and selectedAtt is not -1 change pol and att for selected input
+	elif selectedPol != -1 and selectedAtt !=-1:
+		commandstr=[selectedInput+","+selectedPol, "att"+argv[0]+","+selectedAtt]
+
+	for i in range(0,len(commandstr)):
+		answer=send_command(ip,port, commandstr[i])
+		if answer=="Fail":
+				newEx = ComponentErrorsImpl.SocketErrorExImpl()
+				add_user_message(newEx,"Unable to communicate to IFDist")
+				userLogger.logError(newEx)
+				simpleClient.disconnect()
+				sys.exit(1)
+
+		elif answer[0]=="NAK":				 
+				newEx = ComponentErrorsImpl.NakExImpl()
+				add_user_message(newEx,"IFDist command error")
+				userLogger.logError(newEx)
+				simpleClient.disconnect()
+				sys.exit(1)
+		else:
+				userLogger.logNotice( "Answer: %s"%(answer))
+
+	"""
 	parameters = ['input1','input2','att1','att2']
 	for i in range(0,len(argv)):
 		if argv[i] != '-1':
@@ -125,20 +143,20 @@ def main(argv):
 			if answer=="Fail":
 				newEx = ComponentErrorsImpl.SocketErrorExImpl()
 				add_user_message(newEx,"Unable to communicate to IFDist")
-				userLogger.logException(newEx)
+				userLogger.logError(newEx)
 				simpleClient.disconnect()
 				sys.exit(1)
 
 			elif answer[0]=="NAK":				 
 				newEx = ComponentErrorsImpl.NakExImpl()
 				add_user_message(newEx,"IFDist command error")
-				userLogger.logException(newEx)
+				userLogger.logError(newEx)
 				simpleClient.disconnect()
 				sys.exit(1)
 
 			else:
 				userLogger.logNotice( "Answer: %s"%(answer))
-
+	"""
 
 if __name__=="__main__":
    main(sys.argv[1:])  
