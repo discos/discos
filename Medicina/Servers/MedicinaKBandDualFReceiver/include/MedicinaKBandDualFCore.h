@@ -2,13 +2,14 @@
  *  Author Info
  *  ===========
  *  Andrea Orlati <orlati@ira.inaf.it>
- *  Marco Buttu <mbuttu@oa-cagliari.inaf.it>
 \*******************************************************************************/
 
 #ifndef _MEDICINAKBANDMFCORE_H_
 #define _MEDICINAKBANDMFCORE_H_
 
 #include "MFKBandBaseCore.h"
+#include "MedicinaKBandDualFCore.h"
+#include "MedicinaKBandDualFConf.h"
 
 /**
  * This class inherits from CComponentCore and so contains the code of almost 
@@ -199,6 +200,7 @@ private:
     std::vector<IRA::ReceiverControl::StageValues> m_vdStageValues;
     std::vector<IRA::ReceiverControl::StageValues> m_idStageValues;
     std::vector<IRA::ReceiverControl::StageValues> m_vgStageValues;
+    CKBandConfiguration m_medConfig;
 };
 
 

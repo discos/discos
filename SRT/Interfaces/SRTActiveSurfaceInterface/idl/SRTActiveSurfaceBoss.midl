@@ -17,36 +17,11 @@
 #include <ASErrors.idl>
 #include <ManagmentDefinitions.idl>
 #include <ActiveSurfaceBoss.idl>
+#include <SRTActiveSurfaceCommon.idl>
 
 #pragma prefix "alma"
 
 module ActiveSurface {
-
-    enum TASOneWayAction {
-        AS_STOP,
-        AS_SETUP,
-        AS_STOW,
-        AS_REFPOS,
-        AS_UP,
-        AS_DOWN,
-        AS_BOTTOM,
-        AS_TOP,
-        AS_UPDATE,
-        AS_CORRECTION,
-        AS_MOVE,
-	AS_PROFILE
-    };
-    ACS_ENUM(TASOneWayAction);
-
-    enum TASProfile {
-        AS_SHAPED,
-	    AS_SHAPED_FIXED,
-        AS_PARABOLIC,
-	    AS_PARABOLIC_FIXED,
-        AS_PARK
-    };
-    ACS_ENUM(TASProfile);
-	
 	/**
 	 * This component is the supervisor of the SRT Active Surface subsystem.
      * It will be used to control the entire active surface, i. e. during an
@@ -139,6 +114,8 @@ module ActiveSurface {
         void setProfile (in ActiveSurface::TASProfile profile) raises (ComponentErrors::ComponentErrorsEx);
 
         void usdStatus4GUIClient (in long circle, in long actuator, out long status) raises (ComponentErrors::ComponentErrorsEx);
+
+        void asStatus4GUIClient (out ACS::longSeq status) raises (ComponentErrors::ComponentErrorsEx);
 
         void setActuator (in long circle, in long actuator, out long actPos, out long cmdPos, out long Fmin, out long Fmax, out long acc, out long delay) raises (ComponentErrors::ComponentErrorsEx);
 
