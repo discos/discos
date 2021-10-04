@@ -59,7 +59,7 @@ SRT_MISC:=SRTScripts
 MED_DOC:=MEDDox
 MED_ERRORS:=
 MED_INTERFACES:=MedicinaAntennaInterface MedicinaReceiversInterface
-MED_LIBRARIES:=
+MED_LIBRARIES:=MedicinaVertexLibrary
 MED_SERVERS:=MedicinaMount MedicinaMinorServo WeatherStation MedicinaPyDMed MedicinaKBandDualFReceiver
 MED_CLIENTS:=MedicinaMountTextClient
 MED_MISC:=MedScripts
@@ -118,7 +118,7 @@ ifeq ($(STATION),Medicina)
 		CommonInterface ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface XBackendInterface\
 		MedicinaAntennaInterface MedicinaWeatherStationInterface \
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary ComponentProxy ModbusChannel XarcosLibrary \
-	    PyTestingLibrary \
+	    PyTestingLibrary MedicinaVertexLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
 		TotalPower NoiseGenerator MedicinaMount MedicinaPyLocalOscillator MedicinaPyDMed CustomLogger XBackend MedicinaMinorServo\
 		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient SchedulerTextClient MinorServoBossTextClient\

@@ -4,6 +4,10 @@
 
 using namespace baci;
 
+#define NORMAL_RECORDING (m_currentScan.backendProc!=_SCHED_NULLTARGET) && (m_currentScan.duration>0.0)
+#define NO_RECORDING m_currentScan.duration<=0.0
+#define DRY_RUN (m_currentScan.backendProc==_SCHED_NULLTARGET) && (m_currentScan.duration>0.0)
+
 CScheduleExecutor::CScheduleExecutor(const ACE_CString& name,CCore *param, 
 			const ACS::TimeInterval& responseTime,const ACS::TimeInterval& sleepTime) : ACS::Thread(name,responseTime,sleepTime)
 {
@@ -86,7 +90,8 @@ void CScheduleExecutor::runLoop()
 				 	 	m_goAhead=false;
 				 	 	IRA::CString out;
 				 	 	IRA::CIRATools::intervalToStr(lstStartTime,out);
-			 	 		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_NOTICE,"SCHEDULE_IS_WAITING_LST: %s",(const char *)out));
+			 	 		CUSTOM_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",
+			 	 		  (LM_NOTICE,"Waiting for LST: %s",(const char *)out));
 			 	 	}
 					m_stage=SCAN_SELECTION;
 					break;
@@ -115,7 +120,9 @@ void CScheduleExecutor::runLoop()
 					if (m_currentScan.rewind) m_scheduleRewound=m_currentScan.rewind;
 				}
 				m_scheduleCounter=m_currentScan.counter;
-				ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_NOTICE,"NEXT_SUBSCAN_IS: %s",(const char *)m_schedule->getIdentifiers(m_scheduleCounter)));
+				//printf("scan selection: %u\n",m_scheduleCounter);
+				CUSTOM_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",
+				  (LM_NOTICE,"Next subscan: %s",(const char *)m_schedule->getIdentifiers(m_scheduleCounter)));
 				m_subScanDone=false;
 				m_stage=SCAN_CHECK;
 			}
@@ -143,12 +150,14 @@ void CScheduleExecutor::runLoop()
 					break;
 				}
 				if (!ok) {
-					ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_WARNING,"SUBSCAN_SKIPPED: %s",(const char *)m_schedule->getIdentifiers(m_scheduleCounter)));
+					CUSTOM_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",
+					  (LM_WARNING,"Skipping subscan: %s",(const char *)m_schedule->getIdentifiers(m_scheduleCounter)));
 					// 1) if the whole schedule has been parsed...or it is the first iteration
 					if (m_startSubScan==m_scheduleCounter) {
 						// 1) this is not the first iteration (m_scansCounter==-1) and no scan performed during the repetition (m_scanCounter>0)
 						if (m_scansCounter==0) { 
-							ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_NOTICE,"NO_SCANS_COULD_BE_DONE"));
+							CUSTOM_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",
+							  (LM_NOTICE,"No scans done, current schedule will be aborted"));
 							cleanSchedule(false);
 							break;
 						}
@@ -160,14 +169,16 @@ void CScheduleExecutor::runLoop()
 				else { 
 					if (m_scansCounter==-1) m_scansCounter=0; // this is not the first iteration any more
 					if ((m_firstSubScan<=m_scheduleCounter) && (m_scheduleRewound)) { //check if one repetition is complete.....
-						ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_NOTICE,"REPETITION_COMPLETED"));
+						CUSTOM_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",
+						  (LM_NOTICE,"Repetition completed, restarting from the beginning"));
 						m_scansCounter=0; // during the new repetition the number of done scans is reset
 						m_scheduleRewound=false;
 						m_repetition++;
 						if (m_schedule->getSchedMode()==CSchedule::LST) { //if the schedule is sequential or timetagged is run continuosly
 							if (m_schedule->getSchedReps()>0) { // if negative the schedule is repeated continuosly
 								if (m_repetition>=(DWORD)m_schedule->getSchedReps()) { // END OF SCHEDULE
-									ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_NOTICE,"ALL_REPETITIONS_COMPLETED"));
+									CUSTOM_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",
+									  (LM_NOTICE,"All repetions are completed, schedule will be halted"));
 									cleanSchedule(false);
 									break;
 								}
@@ -176,7 +187,8 @@ void CScheduleExecutor::runLoop()
 					}
 					if (m_firstSubScan==0) { // if this is the first call: the first scan executed in the schedule
 						m_firstSubScan=m_scheduleCounter;
-						ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_NOTICE,"FIRST_SUBSCAN_IS: %s",(const char *)m_schedule->getIdentifiers(m_scheduleCounter)));
+						CUSTOM_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",
+						  (LM_NOTICE,"Starting from subscan: %s",(const char *)m_schedule->getIdentifiers(m_scheduleCounter)));
 					}
 					m_stage=SCAN_PREPARATION;
 				}
@@ -200,7 +212,8 @@ void CScheduleExecutor::runLoop()
 					impl.setSubScanID(m_scheduleCounter);
 					impl.setReason("cannot command scan to the telescope");
 					m_core->changeSchedulerStatus(Management::MNG_FAILURE);
-					impl.log(LM_ERROR);
+					CUSTOM_EXCPT_LOG(impl,LM_ERROR);
+					//impl.log(LM_ERROR);
 					cleanScan();
 					break;
 				}
@@ -209,10 +222,11 @@ void CScheduleExecutor::runLoop()
 			case WRITING_INITIALIZATION: { //prepare the data transfer, it configures the backend and the writer. In case of error the scan is aborted.
 				//printf("WRITING_INIT\n");
 				try {
-					if ((m_currentScan.backendProc!=_SCHED_NULLTARGET) && (m_currentScan.duration>0.0))  {
-						ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"PREPARE_DATA_ACQUISITION"));
-						prepareFileWriting(/*m_currentScan*/);
-					}
+					//if ((m_currentScan.backendProc!=_SCHED_NULLTARGET) && (m_currentScan.duration>0.0))  {
+					//printf("PREPARING FILE WRITING\n");
+					ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"PREPARE_DATA_ACQUISITION"));
+					prepareFileWriting(/*m_currentScan*/);
+					//}
 				}
 				catch (ACSErr::ACSbaseExImpl& Ex) {
 					_ADD_BACKTRACE(ManagementErrors::SubscanErrorExImpl,impl,Ex,"CScheduleExecutor::runLoop()");
@@ -291,9 +305,10 @@ void CScheduleExecutor::runLoop()
 					// This happens, for example, when the previous backend configuration is too slow and the scan could not start on time
 					if (m_currentScan.ut<currentUTime.value().value) {  // if the forseen time for the start recording is already elapsed....we give up the current recording
 						m_stage=STOP_SCHEDULING; // this will skip the start recording command, the next stage (STOPSCHEDULING) does nothing if the start was not done
-						ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_WARNING,"SUBSCAN_PREPARATION_IS_LATE"));
-						ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_WARNING,"SUBSCAN_SKIPPED: %s",(const char *)m_schedule->getIdentifiers(m_scheduleCounter)));
-						ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_NOTICE,"WAITING_FOR_THE_NEXT_ONE"));
+						//ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_WARNING,"sub scan preparation is late"));
+						CUSTOM_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_WARNING,"Subscan preparation is late, skipping subscan: %s",
+						  (const char *)m_schedule->getIdentifiers(m_scheduleCounter)));
+						CUSTOM_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_NOTICE,"Waiting for next subscan...."));
 						break;
 					}
 					start=true;
@@ -303,6 +318,7 @@ void CScheduleExecutor::runLoop()
 					IRA::CString fullSubscanFileName;
 					IRA::CString fullScanFolder;
 					try {
+						//printf("Scan duration: %lf\n",m_currentScan.duration);
 						ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"STARTING_DATA_RECORDING"));
 						if (m_schedule->getLayoutList()) {
 							if (!m_schedule->getLayoutList()->getScanLayout(m_currentScan.layout,layoutProc)) { // get the scan layout definition
@@ -317,24 +333,26 @@ void CScheduleExecutor::runLoop()
 							ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_DEBUG,"NO_LAYOUT_FILE_DEFINED"));
 							layoutProc.length(0);
 						}
-						if ((m_currentScan.backendProc!=_SCHED_NULLTARGET) && (m_currentScan.duration>0.0))  { // if the writing has not been disabled  and data transfer is started only if the duration is bigger than zero......
+						if (NORMAL_RECORDING)  { 
+							  //printf("START RECORDING...normal\n");		
 							  m_startRecordTime=m_core->startRecording(m_currentScan.ut,m_currentScan.scanid,m_currentScan.subscanid,m_schedule->getScanTag(),
-							  m_config->getDataDirectory(), m_currentScan.suffix,m_schedule->getObserverName(), m_schedule->getProjectName(),
-							  m_schedReport.getSchedule(),m_schedReport.getLogFileName(),m_currentScan.layout,layoutProc,fullSubscanFileName,fullScanFolder);
+							  m_config->getDataDirectory(), m_currentScan.suffix,m_schedule->getObserverName(), m_schedule->getProjectName(),							 
+							  m_schedReport.getSchedule(),m_schedReport.getLogFileName(),m_currentScan.layout,layoutProc,fullSubscanFileName,fullScanFolder);	  
 							  if (fullScanFolder!="") {
 								  m_schedReport.addScanPath(fullScanFolder);
 							  }
 						}
-						else if ((m_currentScan.duration<=0.0)) { //this is the case a 0.0 is set as integration time
-							m_startRecordTime=0;
-							ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_NOTICE,"No Recording required"));
+						else if (NO_RECORDING) { //this is the case a 0.0 is set as integration time
+							m_startRecordTime=0;	
+							CUSTOM_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_NOTICE,"No recording required"));
 						}
+						// DRY_RUN
 						else { // this is the case a backend is not selected but a integration time greater than zero is given
 							TIMEVALUE cUTime;
 							IRA::CIRATools::getTime(cUTime); // get the current time
-							m_startRecordTime=cUTime.value().value;
-							ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_NOTICE,"Dry recording started"));						
-							ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_NOTICE,"Running for: %lf seconds",m_currentScan.duration));
+							m_startRecordTime=cUTime.value().value;								
+							CUSTOM_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_NOTICE,"Dry recording started"));						
+							CUSTOM_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_NOTICE,"Running for: %lf seconds",m_currentScan.duration));
 						}
 						//startRecording(m_currentScan,m_currentScanRec,layoutProc);
 						m_scanStopError=false;
@@ -357,7 +375,7 @@ void CScheduleExecutor::runLoop()
 					m_lastScheduledTime=m_startRecordTime+(unsigned long long)(m_currentScan.duration*10000000); // this is the stop time in 100 ns.
 					IRA::CString out;
 					IRA::CIRATools::timeToStr(m_lastScheduledTime,out);
-					ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_NOTICE,"RECORDING_STOP_TIME_IS: %s",(const char *)out));
+					CUSTOM_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",(LM_NOTICE,"Recording will stop at: %s",(const char *)out));
 					if (!m_core->addTimerEvent(m_lastScheduledTime,&stopRecordingEventHandler,static_cast<void *>(this))) {
 						_EXCPT(ComponentErrors::TimerErrorExImpl,dummy,"CScheduleExecutor::runLoop()");
 						dummy.setReason("The scan stop event could not be scheduled");
@@ -472,7 +490,7 @@ void CScheduleExecutor::runLoop()
 				//printf("RECORDING_FINALIZE\n");
 				// wait for the recorder to consume all the data in its cache
 				try {
-					if ((m_currentScan.backendProc!=_SCHED_NULLTARGET) && (m_currentScan.duration>0.0))  {
+					if (NORMAL_RECORDING)  {
 						if (m_core->checkRecording()) {
 							break;
 						}
@@ -541,6 +559,7 @@ void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subS
  		ManagementErrors::CannotClosePendingTaskExImpl)
 {
  	baci::ThreadSyncGuard guard(&m_mutex);
+ 	bool projectChanged;
  	if (isScheduleActive()) {
  		_EXCPT(ManagementErrors::AlreadyRunningExImpl,dummy,"CScheduleExecutor::startSchedule()");
  		throw dummy;
@@ -548,7 +567,7 @@ void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subS
  	char *passedSchedule=new char [strlen(scheduleFile)+1]; // make a copy because the man pages states that the input string may be changed in functions basename() and dirname()
  	strcpy(passedSchedule,scheduleFile);
  	char *tmp=dirname(passedSchedule);
- 	IRA::CString projectCode=IRA::CString(tmp);
+ 	IRA::CString projectCode=IRA::CString(tmp); 
  	strcpy(passedSchedule,scheduleFile);
  	tmp=basename(passedSchedule);
  	IRA::CString schedule=IRA::CString(tmp);
@@ -556,23 +575,19 @@ void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subS
  	IRA::CString fullPath;
  	if (projectCode==".") { //no project given......use the current project code
  		fullPath=m_core->m_config->getScheduleDirectory()+m_projectCode+"/";
+ 		projectCode=m_projectCode;
+ 		projectChanged=false;
  	}
  	else {
  		fullPath=m_core->m_config->getScheduleDirectory()+projectCode+"/";
+ 		projectChanged=(projectCode==m_projectCode);
  	}
- 	if (!IRA::CIRATools::fileExists(fullPath+schedule)) {
+ 	//this also means that the project directory exists, so for discos the project is legal 
+ 	if (!IRA::CIRATools::fileExists(fullPath+schedule)) { 
  		_EXCPT(ManagementErrors::ScheduleNotExistExImpl,dummy,"CScheduleExecutor::startSchedule()");
  		throw dummy;
  	}
- 	ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::startSchedule()",(LM_NOTICE,"Stopping all pending tasks"));
- 	try {
- 		m_core->closeScan(true);
- 	}
- 	catch (ACSErr::ACSbaseExImpl& ex) {
- 		_ADD_BACKTRACE(ManagementErrors::CannotClosePendingTaskExImpl,impl,ex,"CScheduleExecutor::startSchedule()");
- 		m_core->changeSchedulerStatus(Management::MNG_FAILURE);
- 		throw impl;
- 	}
+ 
  	try {
  		m_schedule=new CSchedule(fullPath,schedule);
  	}
@@ -587,7 +602,7 @@ void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subS
  		dummy.setReason((const char *)m_schedule->getLastError());
  		delete m_schedule;
  		m_schedule=NULL;
- 		m_core->changeSchedulerStatus(Management::MNG_FAILURE);
+ 		//m_core->changeSchedulerStatus(Management::MNG_FAILURE);
  		throw dummy;
  	}
  	if (!m_schedule->isComplete()) {
@@ -595,10 +610,32 @@ void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subS
  		dummy.setReason((const char *)m_schedule->getLastError());
  		delete m_schedule;
  		m_schedule=NULL;		
- 		m_core->changeSchedulerStatus(Management::MNG_FAILURE);
+ 		//m_core->changeSchedulerStatus(Management::MNG_FAILURE);
  		throw dummy;		
  	}
+ 	if (m_schedule->getProjectName()!=projectCode) {
+ 		_EXCPT(ManagementErrors::ScheduleProjectNotMatchExImpl,dummy,"CScheduleExecutor::startSchedule()");
+ 		dummy.setProject((const char *)projectCode);
+ 		delete m_schedule;
+ 		m_schedule=NULL;
+ 		CUSTOM_LOG(LM_FULL_INFO,"CScheduleExecutor::startSchedule()",
+ 		  (LM_WARNING,"Please make sure the project of the schedule match with the currently active project"));
+ 		throw dummy;
+ 	}
+	m_projectCode=projectCode;
+ 	if (projectChanged) {
+ 		CUSTOM_LOG(LM_FULL_INFO,"CScheduleExecutor::startSchedule()",(LM_NOTICE,"New active project: %s",(const char *)m_projectCode));
+ 	}
  	m_scheduleLoaded=true;
+	ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::startSchedule()",(LM_NOTICE,"Stopping all pending tasks"));
+ 	try {
+ 		m_core->closeScan(true);
+ 	}
+ 	catch (ACSErr::ACSbaseExImpl& ex) {
+ 		_ADD_BACKTRACE(ManagementErrors::CannotClosePendingTaskExImpl,impl,ex,"CScheduleExecutor::startSchedule()");
+ 		m_core->changeSchedulerStatus(Management::MNG_FAILURE);
+ 		throw impl;
+ 	} 	 	
  	m_scheduleCounter=m_schedule->getSubScanCounter(subScanidentifier)-1; //need to point before the first scan in the schedule, the first scan has counter==1
  	m_schedReport.addScheduleName(m_schedule->getFileName());
  	if (m_schedule->getScanList()) {
@@ -624,10 +661,7 @@ void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subS
  	m_startSubScan=m_scheduleCounter+1;
 	m_scansCounter=-1;
  	m_scheduleName=schedule;
- 	if (projectCode!=".") {
- 		m_projectCode=projectCode;
- 		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::startSchedule()",(LM_NOTICE,"PROJECT: %s",(const char *)m_projectCode));
- 	}
+ 
  	// if the schedule is properly started the status of the scheduler is considered now to be ok.
  	m_core->clearStatus();
  	m_stage=INIT;  // put the executor in the init stage.
@@ -641,8 +675,8 @@ void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subS
 		msg.Format("Error in schedule reporting: %s",(const char *)m_schedReport.getLastError());
 		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::startSchedule()",(LM_WARNING,"%s",(const char *)msg));
 	}
-
- 	ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::startSchedule()",(LM_NOTICE,"SCHEDULE_STARTED_FROM_SCAN: %s %u",(const char *)schedule,m_startSubScan));
+ 	CUSTOM_LOG(LM_FULL_INFO,"CScheduleExecutor::startSchedule()",
+ 	  (LM_NOTICE,"Schedule will start from subscan: %s %u",(const char *)schedule,m_startSubScan));
  	ACS::Thread::resume();  // resume the thread execution.... 	
 }
 
@@ -704,7 +738,8 @@ void CScheduleExecutor::cleanScan()
 	m_stage=SCAN_SELECTION;
 	m_subScanDone=false;
 	m_scanStopError=false;
-	ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::cleanScan()",(LM_NOTICE,"SCAN_ABORTED: %s",(const char *)m_schedule->getIdentifiers(m_scheduleCounter)));
+	CUSTOM_LOG(LM_FULL_INFO,"CScheduleExecutor::cleanScan()",
+	  (LM_NOTICE,"Aborted subscan: %s",(const char *)m_schedule->getIdentifiers(m_scheduleCounter)));
 
 	//now setup the timer to wake the thread up in order to try to start the next scan
 	if (m_schedule->getSchedMode()==CSchedule::LST) {
@@ -783,11 +818,11 @@ void CScheduleExecutor::cleanSchedule(bool error)
 	m_stopMe=false;
 	m_haltMe=false;
 	if (error) {
-		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::cleanSchedule()",(LM_NOTICE,"SCHEDULE_HALTED"));
+		CUSTOM_LOG(LM_FULL_INFO,"CScheduleExecutor::cleanSchedule()",(LM_NOTICE,"Schedule halted"));
 	}
 	else {
 		if (isScheduleActive()) {
-			ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::cleanSchedule()",(LM_NOTICE,"END_OF_SCHEDULE"));
+			ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::cleanSchedule()",(LM_NOTICE,"End of the schedule"));
 		}
 	}
 	if (!m_schedReport.deactivate()) {
@@ -852,13 +887,14 @@ void CScheduleExecutor::prepareFileWriting(/*const CSchedule::TRecord& rec*/) th
  	// case 1 : the transfer is disabled, the procedure (if not NULL) retrieved, if it is different from the previous one , component are loaded(if necessary), bck configured and transfer enabled again
  	// case 4: we are in this case if the currentBackendProcedure is the same of the current subscan...so nothing to do
  	if (m_lastScanID!=0) {  //if this is the first scan...nothing to do
-		// otherwise if current scanid is different from the previous one, or the current scan is consequence of a schedule rewind (to deal with the case just one scan is present in the schedule and it will be executed continuously)
+		// otherwise if current scanid is different from the previous one, or the current scan is consequence of a schedule rewind 
+		//(to deal with the case just one scan is present in the schedule and it will be executed continuously)
 		if ((m_lastScanID!=m_currentScan.scanid) || (m_currentScan.rewind)) {
 			// stop  // we need to stop previous scan before starting a new one.
  			m_core->disableDataTransfer();
 		}
 	}
- 	if (m_currentScan.backendProc!=_SCHED_NULLTARGET) { // if the writing has been disabled
+ 	if (NORMAL_RECORDING) { // if the writing has been disabled
  	 	if (m_currentScan.backendProc!=m_currentBackendProcedure) {
  	 		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::prepareFileWriting()",(LM_DEBUG,"NEW_BACKEND_PROCEDURE"));
  	 		if (!m_schedule->getBackendList()->getBackend(m_currentScan.backendProc,bckInstance,command)) {

@@ -140,6 +140,10 @@
 		<xs:attribute name="DewarPort" type="xs:unsignedShort" use="required" />
 		<xs:attribute name="LNAIPAddress" type="xs:string" use="required"/>
 		<xs:attribute name="LNAPort" type="xs:unsignedShort" use="required" />
+		<!-- This is used for configuration related to the vertex room is needed, if command is empty nothing is done -->
+		<xs:attribute name="VertexIPAddress" type="xs:string" use="required"/>
+		<xs:attribute name="VertexPort" type="xs:unsignedShort" use="required" />
+		<xs:attribute name="VertexCommand" type="xs:string" use="required" />
 		<!-- The WatchDog working time(microseconds) -->
 		<xs:attribute name="WatchDogResponseTime" type="xs:unsignedLong" use="required" />
 		<!-- The WatchDog sleep time(microseconds) -->
