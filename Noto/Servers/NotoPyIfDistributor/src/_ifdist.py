@@ -118,6 +118,7 @@ def main(argv):
 		if answer=="Fail":
 				newEx = ComponentErrorsImpl.SocketErrorExImpl()
 				add_user_message(newEx,"Unable to communicate to IFDist")
+				sys.stderr.write('error Unable to communicate to IFDist')
 				userLogger.logError(newEx)
 				simpleClient.disconnect()
 				sys.exit(1)
@@ -125,10 +126,12 @@ def main(argv):
 		elif answer[0]=="NAK":				 
 				newEx = ComponentErrorsImpl.NakExImpl()
 				add_user_message(newEx,"IFDist command error")
+				sys.stderr.write('error IFDist command error')
 				userLogger.logError(newEx)
 				simpleClient.disconnect()
 				sys.exit(1)
 		else:
+				sys.stderr.write(answer)
 				userLogger.logNotice( "Answer: %s"%(answer))
 
 if __name__=="__main__":
