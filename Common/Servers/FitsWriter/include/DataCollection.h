@@ -531,6 +531,8 @@ public:
 private:
 	/** the name of the file */
 	IRA::CString m_fileName;
+	/** The name of the summary file */
+	IRA::CString m_summaryFileName;
 	/**
 	 * the full path of the file in system disk
 	 */

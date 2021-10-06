@@ -20,7 +20,7 @@ CDataCollection::CDataCollection()
 	m_reset=false;
 	m_writeSummary=false;
 	m_sectionH=NULL;
-	m_fileName=m_fullPath="";
+	m_fileName=m_summaryFileName=m_fullPath="";
 	m_project="";
 	m_observer="";
 	m_backendName="";
@@ -341,7 +341,7 @@ IRA::CString CDataCollection::getFileName() const
 
 IRA::CString CDataCollection::getSummaryFileName() const
 {
-	return m_fullPath+"summary.fits";
+	return m_fullPath+m_summaryFileName;
 }
 
 bool CDataCollection::setScanSetup(const Management::TScanSetup& setup,bool& recording,bool& inconsistent)
@@ -411,6 +411,7 @@ bool CDataCollection::setSubScanSetup(const Management::TSubScanSetup& setup,boo
 			baseName=setup.baseName;
 			temp.Format("_%03d_%03d",m_scanID,m_subScanID);
 			m_fileName=baseName+temp+".fits";
+			m_summaryFileName="sum_"+baseName+".fits";
 			m_subScanHeader=true;
 			m_scanAxis=setup.axis;
 			m_startUTTime=setup.startUt;
