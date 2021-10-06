@@ -88,12 +88,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/
     issue #518 - KBand receivers cryo temperature read wrongly with connection problems. More information: https://github.com/discos/discos/issues/518#issuecomment-590838480
     issue #533 - New Fitszilla version 1.21 online. The user offsets related keywords added to the primary header.
     issue #556 - Added API to send emails to local system administrators. This feature is now exploted when a servo system oscillation is detected at Noto and Medicina
+    issue #595 - Added ifdist command to use IF Distributor (for Nt telescope) from operator input.
 ## Fixed
     issue #518 - In case of communication error we set a dummy value (100000) for the temperature properties, and the related timestamp keeps the value of the last communication timestamp.
     issue #525 - When in LOCAL mode the receivers can turn on/off the noise mark and LNAs. There is no more MNG_FAILURE logging in case of LOCAL mode: only the LOCAL/REMOTE status (during component activation) and the change of status (LOCAL to REMOTE and viceversa) are written to the logfile.
 ## Changed  
     issue #545 - Oscillation checks enabled for Mc and Nt telescopes, this setting is now under control of a CDB argument
-    issue #595 - Added ifdist command to use IF Distributor (for Nt telescope) from operator input.
 
 ## [next release]
 ## Added
