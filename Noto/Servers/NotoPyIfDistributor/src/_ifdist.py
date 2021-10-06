@@ -78,26 +78,30 @@ def main(argv):
 	commandstr=[]
 
 	if int(argv[0]) not in range (1,3):
-		userLogger.logError("Enter input channel number (allowed 1 or 2), your input %s" %(argv[0]))
+		sys.stderr.write(str('error Enter a valid input channel number'))
+		userLogger.logError("Enter a valid input channel number")
 		simpleClient.disconnect()
 		sys.exit(1)
 	
 	selectedInput='input'+argv[0]
 
 	if int(argv[1]) not in range (-1,7):
-		userLogger.logError("Enter an allowed value for pol (-1 to not change the pol value or 0-6 to set pol), your input %s" %(argv[0]))
+		sys.stderr.write(str('error Enter an allowed value for pol'))
+		userLogger.logError("Enter an allowed value for pol")
 		simpleClient.disconnect()
 		sys.exit(1)
 	
 	selectedPol=argv[1]
 	
 	if float(argv[2]) not in range (-1,64):
-		userLogger.logError("Enter an allowed value for att (-1 to get att value or 0-63 to set att), your input %s" %(argv[0]))
+		sys.stderr.write(str('error Enter an allowed value for att'))
+		userLogger.logError("Enter an allowed value for att")
 		simpleClient.disconnect()
 		sys.exit(1)
 	
 	selectedAtt=argv[2]
 
+	answer = []
 	#if selectedPol and selectedAtt are -1 print information on current pol and att
 	if int(selectedPol) == -1 and float(selectedAtt)==-1:
 		commandstr=[selectedInput,"att"+argv[0]]
@@ -111,14 +115,16 @@ def main(argv):
 	elif int(selectedPol) != -1 and float(selectedAtt) !=-1:
 		commandstr=[selectedInput+","+selectedPol, "att"+argv[0]+","+selectedAtt]
 
+	answerstr = ""
 	for i in range(0,len(commandstr)):
 		userLogger.logNotice("IFDist setup according to %s command"%(commandstr[i]))
 
 		answer=send_command(ip,port, commandstr[i])
+		answerstr+=str(answer)
 		if answer=="Fail":
 				newEx = ComponentErrorsImpl.SocketErrorExImpl()
 				add_user_message(newEx,"Unable to communicate to IFDist")
-				sys.stderr.write('error Unable to communicate to IFDist')
+				sys.stderr.write(str('error Unable to communicate to IFDist'))
 				userLogger.logError(newEx)
 				simpleClient.disconnect()
 				sys.exit(1)
@@ -126,13 +132,14 @@ def main(argv):
 		elif answer[0]=="NAK":				 
 				newEx = ComponentErrorsImpl.NakExImpl()
 				add_user_message(newEx,"IFDist command error")
-				sys.stderr.write('error IFDist command error')
+				sys.stderr.write(str('error IFDist command error'))
 				userLogger.logError(newEx)
 				simpleClient.disconnect()
 				sys.exit(1)
 		else:
-				sys.stderr.write(answer)
 				userLogger.logNotice( "Answer: %s"%(answer))
+		
+	sys.stderr.write(str(answerstr))
 
 if __name__=="__main__":
    main(sys.argv[1:])  
