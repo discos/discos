@@ -101,7 +101,6 @@ def main(argv):
 	
 	selectedAtt=argv[2]
 
-	answer = []
 	#if selectedPol and selectedAtt are -1 print information on current pol and att
 	if int(selectedPol) == -1 and float(selectedAtt)==-1:
 		commandstr=[selectedInput,"att"+argv[0]]
