@@ -76,30 +76,38 @@ def main(argv):
 		sys.exit(1)
 	
 	commandstr=[]
+	
+	
+	try:
+		if int(argv[0]) not in range (1,3):
+			sys.stderr.write(str('error Enter a valid input channel number'))
+			userLogger.logError("Enter a valid input channel number")
+			simpleClient.disconnect()
+			sys.exit(1)
+	
+		selectedInput='input'+argv[0]
 
-	if int(argv[0]) not in range (1,3):
-		sys.stderr.write(str('error Enter a valid input channel number'))
-		userLogger.logError("Enter a valid input channel number")
-		simpleClient.disconnect()
-		sys.exit(1)
+		if int(argv[1]) not in range (-1,7):
+			sys.stderr.write(str('error Enter an allowed value for pol'))
+			userLogger.logError("Enter an allowed value for pol")
+			simpleClient.disconnect()
+			sys.exit(1)
 	
-	selectedInput='input'+argv[0]
+		selectedPol=argv[1]
+	
+		if float(argv[2]) not in range (-1,64):
+			sys.stderr.write(str('error Enter an allowed value for att'))
+			userLogger.logError("Enter an allowed value for att")
+			simpleClient.disconnect()
+			sys.exit(1)
+	
+		selectedAtt=argv[2]
 
-	if int(argv[1]) not in range (-1,7):
-		sys.stderr.write(str('error Enter an allowed value for pol'))
-		userLogger.logError("Enter an allowed value for pol")
+	except ValueError:
+		sys.stderr.write(str('error Enter a numeric value'))
+		userLogger.logError("Enter a numeric value")
 		simpleClient.disconnect()
 		sys.exit(1)
-	
-	selectedPol=argv[1]
-	
-	if float(argv[2]) not in range (-1,64):
-		sys.stderr.write(str('error Enter an allowed value for att'))
-		userLogger.logError("Enter an allowed value for att")
-		simpleClient.disconnect()
-		sys.exit(1)
-	
-	selectedAtt=argv[2]
 
 	#if selectedPol and selectedAtt are -1 print information on current pol and att
 	if int(selectedPol) == -1 and float(selectedAtt)==-1:
@@ -115,30 +123,34 @@ def main(argv):
 		commandstr=[selectedInput+","+selectedPol, "att"+argv[0]+","+selectedAtt]
 
 	answerstr = ""
+	
 	for i in range(0,len(commandstr)):
 		userLogger.logNotice("IFDist setup according to %s command"%(commandstr[i]))
 
 		answer=send_command(ip,port, commandstr[i])
-		answerstr+=str(answer)
+		answerstr+= str(answer)
+        
 		if answer=="Fail":
-				newEx = ComponentErrorsImpl.SocketErrorExImpl()
-				add_user_message(newEx,"Unable to communicate to IFDist")
-				sys.stderr.write(str('error Unable to communicate to IFDist'))
-				userLogger.logError(newEx)
-				simpleClient.disconnect()
-				sys.exit(1)
+			newEx = ComponentErrorsImpl.SocketErrorExImpl()
+			add_user_message(newEx,"Unable to communicate to IFDist")
+			sys.stderr.write(str('error Unable to communicate to IFDist'))
+			userLogger.logError(newEx)
+			simpleClient.disconnect()
+			sys.exit(1)
 
-		elif answer[0]=="NAK":				 
-				newEx = ComponentErrorsImpl.NakExImpl()
-				add_user_message(newEx,"IFDist command error")
-				sys.stderr.write(str('error IFDist command error'))
-				userLogger.logError(newEx)
-				simpleClient.disconnect()
-				sys.exit(1)
+		elif answer[0]=="NAK":
+			newEx = ComponentErrorsImpl.NakExImpl()
+			add_user_message(newEx,"IFDist command error")
+			sys.stderr.write(str('error IFDist command error'))
+			userLogger.logError(newEx)
+			simpleClient.disconnect()
+			sys.exit(1)
 		else:
-				userLogger.logNotice( "Answer: %s"%(answer))
-		
-	sys.stderr.write(str(answerstr))
+			userLogger.logNotice( "Answer: %s"%(answer))
+	
+	
+	print >> sys.stderr, answerstr.replace(","," ")
+
 
 if __name__=="__main__":
    main(sys.argv[1:])  
