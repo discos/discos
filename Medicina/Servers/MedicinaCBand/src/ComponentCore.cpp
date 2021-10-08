@@ -339,24 +339,26 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo)
     ReceiverConfHandler::ConfigurationSetup l_setup;
 
     m_mixer.setValue(lo);           
-    l_lo_value= m_mixer.getValue();    
+    l_lo_value= m_mixer.getEffectiveValue();    
     l_setup= m_configuration.getCurrentSetup();	   
-
-    try{    
-        /* TEST */
-        MED_TRACE_FMT("m_IFBandwidth[0] : %f\n", l_setup.m_IFBandwidth[0]);
-        MED_TRACE_FMT("m_rfmax[0] : %f\n", l_setup.m_RFMax[0]);    
-        MED_TRACE_FMT("lo_value : %f\n", l_lo_value);
-        MED_TRACE_FMT("m_startfreq[0] : %f\n", m_startFreq[0]);        
-        m_bandwidth[0]= l_setup.m_RFMax[0]-( m_startFreq[0] + l_lo_value );        
-        // the if bandwidth could never be larger than the max IF bandwidth:
-        if (m_bandwidth[0] > l_setup.m_IFBandwidth[0])
-            m_bandwidth[0]= l_setup.m_IFBandwidth[0];        
-        MED_TRACE_FMT( "m_bandwidth[0] : %f", m_bandwidth[0]);
-    }catch(...){
-        _IRA_LOGFILTER_LOG(LM_CRITICAL,"CComponentCore::setLO()","ReceiverControl allocation error");
-        _EXCPT(ReceiversErrors::ModeErrorExImpl,impl,"CComponentCore::setLO()");
-        throw impl;          
+    /* For every IF */
+    for (int i=0; i < l_setup.m_IFs ;i++) {
+        try{        
+            /* TEST */
+            MED_TRACE_FMT("m_IFBandwidth[%d] : %f\n",i, l_setup.m_IFBandwidth[i]);
+            MED_TRACE_FMT("m_rfmax[%d] : %f\n",i, l_setup.m_RFMax[i]);    
+            MED_TRACE_FMT("lo_value : %f\n",i, l_lo_value);
+            MED_TRACE_FMT("m_startfreq[%d] : %f\n",i, m_startFreq[i]);        
+            m_bandwidth[i]= l_setup.m_RFMax[i]-( m_startFreq[i] + l_lo_value );        
+            // the if bandwidth could never be larger than the max IF bandwidth:
+            if (m_bandwidth[i] > l_setup.m_IFBandwidth[i])
+                m_bandwidth[i]= l_setup.m_IFBandwidth[i];        
+            MED_TRACE_FMT( "m_bandwidth[%d] : %f", i, m_bandwidth[i]);
+        }catch(...){
+            _IRA_LOGFILTER_LOG(LM_CRITICAL,"CComponentCore::setLO()","ReceiverControl allocation error");
+            _EXCPT(ReceiversErrors::ModeErrorExImpl,impl,"CComponentCore::setLO()");
+            throw impl;          
+        }
     }
     ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"LOCAL_OSCILLATOR %lf",l_lo_value));
 	MED_TRACE_MSG(" OUT ");
@@ -669,7 +671,7 @@ void CComponentCore::getCalibrationMark(ACS::doubleSeq& result,
                 realBw=0.0;
         }
         ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"SUB_BAND %lf %lf",realFreq,realBw));
-        realFreq+=m_mixer.getValue();
+        realFreq+=m_mixer.getEffectiveValue();
         resFreq[i]=realFreq;
         resBw[i]=realBw;
         realFreq+=realBw/2.0;

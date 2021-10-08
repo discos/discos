@@ -482,8 +482,8 @@ private:
 	baci::SmartPropertyPointer<baci::ROdouble> m_pId_2;
 	baci::SmartPropertyPointer<baci::ROdouble> m_pVg_1;
 	baci::SmartPropertyPointer<baci::ROdouble> m_pVg_2;
-	baci::SmartPropertyPointer<baci::ROpattern> m_vacuum_status;
-	baci::SmartPropertyPointer<baci::ROpattern> m_cryo_status;	
+	//baci::SmartPropertyPointer<baci::ROpattern> m_vacuum_status;
+	//baci::SmartPropertyPointer<baci::ROpattern> m_cryo_status;	
 	baci::SmartPropertyPointer<baci::ROdouble> m_env_temp;
 	baci::SmartPropertyPointer<baci::ROdouble> m_shield_temp;	
 	baci::SmartPropertyPointer<baci::ROdouble> m_lna_temp;		

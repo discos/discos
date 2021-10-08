@@ -60,7 +60,7 @@ module Receivers {
          *  The returned pattern is a X bits field with a meaning depending on the implementation.
          *  Bits are referring to control flags ( remote or local control ) and cold head status 
          */
-        readonly attribute ACS::ROpattern cryoStatus;                 
+        //readonly attribute ACS::ROpattern cryoStatus;                 
         
         /**
          * Cryogenic temperature of the Low Noise Amplifier. Approximately 20K
@@ -110,7 +110,7 @@ module Receivers {
          *  The returned pattern is a X bits field with a meaning depending on the implementation.
          *  Bits are referring to vacuum status (working, failure ...)
          */
-        readonly attribute ACS::ROpattern vacuumStatus;
+        //readonly attribute ACS::ROpattern vacuumStatus;
 
         /** 
          * It allows to turn the vacuum sensor on. The vacuum sensor is necessary to have a correct measurment of the vacuum characteristic. 
