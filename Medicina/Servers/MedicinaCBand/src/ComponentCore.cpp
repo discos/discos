@@ -680,18 +680,18 @@ void CComponentCore::getCalibrationMark(ACS::doubleSeq& result,
         resFreq[i]=realFreq;
         resBw[i]=realBw;
         realFreq+=realBw/2.0;
-        MED_TRACE_FMT("resFreq[%d] %f",i, resFreq[i]);
-        MED_TRACE_FMT("resBW[%d] %f",i, resBw[i]);
-        MED_TRACE_FMT("realFreq[%d] %f",i, realFreq);
+        MED_TRACE_FMT("resFreq[%d] %f\n",i, resFreq[i]);
+        MED_TRACE_FMT("resBW[%d] %f\n",i, resBw[i]);
+        MED_TRACE_FMT("realFreq[%d] %f\n",i, realFreq);
         ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"REFERENCE_FREQUENCY %lf",realFreq));
         if (m_polarization[ifs[i]]== (long)Receivers::RCV_LCP) {            
             result[i]= m_configuration.getLeftMarkTemp(realFreq);                        
-            MED_TRACE_FMT("LCP mark temp [%d] %f", i, result[i] );
+            MED_TRACE_FMT("LCP mark temp [%d] %f\n", i, result[i] );
             ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"LEFT_MARK_VALUE %lf",result[i]));
         }
         else { //RCV_RCP            
             result[i]= m_configuration.getRightMarkTemp(realFreq);
-            MED_TRACE_FMT("RCP mark temp [%d] %f", i, result[i] );
+            MED_TRACE_FMT("RCP mark temp [%d] %f\n", i, result[i] );
             ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"RIGHT_MARK_VALUE %lf",result[i]));
         }
     }

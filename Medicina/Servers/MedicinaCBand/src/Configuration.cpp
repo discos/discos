@@ -175,10 +175,10 @@ double CConfiguration::getLeftMarkTemp(double freq)
 	DWORD l_coeffs_len;
 	double l_ret= 0.0;
 	l_coeffs_len= getLeftMarkCoeffs(l_coeffs);	
-	MED_TRACE_FMT("LCP coeff len %d", l_coeffs_len );			
+	MED_TRACE_FMT("LCP coeff len %d\n", l_coeffs_len );			
 	for(DWORD i=0; i< l_coeffs_len; i++){
 		l_ret+= l_coeffs[i] *  pow(freq, i);
-		MED_TRACE_FMT("LCP coeff [%] %d", i, l_coeffs[i] );
+		MED_TRACE_FMT("LCP coeff [%d] %f\n", i, l_coeffs[i] );
 	}
 	return l_ret;
 }
@@ -189,10 +189,10 @@ double CConfiguration::getRightMarkTemp(double freq)
 	DWORD l_coeffs_len;
 	double l_ret= 0.0;	
 	l_coeffs_len= getRightMarkCoeffs(l_coeffs);				
-	MED_TRACE_FMT("RCP coeff len %d", l_coeffs_len );		
+	MED_TRACE_FMT("RCP coeff len %d\n", l_coeffs_len );		
 	for(DWORD i=0; i< l_coeffs_len; i++){
 		l_ret+= l_coeffs[i] *  pow(freq, i);
-		MED_TRACE_FMT("RCP coeff [%] %d", i, l_coeffs[i] );
+		MED_TRACE_FMT("RCP coeff [%d] %f\n", i, l_coeffs[i] );
 	}
 	return l_ret;
 }
