@@ -394,20 +394,35 @@ void CConfiguration::readNoiseMarkPoly(const IRA::CString & p_conf_path,
  	/* Collecting LCP "C0 C1 .."" coefficients from appropriate configuration file */ 
 	int l_start=0;
 	_GET_STRING_ATTRIBUTE("LCoeffs","LCP noise mark poly coefficients :", l_value, p_conf_path);	
-	while(IRA::CIRATools::getNextToken(l_value, l_start, ' ', l_token)){		
+	while(IRA::CIRATools::getNextToken(l_value, l_start, ' ', l_token)){	
+		MED_TRACE_FMT("%s\n",(const char*)l_value);	
+		MED_TRACE_FMT("%s\n",(const char*)l_token);	
 		p_conf_setup.m_noise_mark_lcp_coeffs.push_back(l_token.ToDouble());
+		MED_TRACE_FMT("%f\n",l_token.ToDouble());			
 	}	
 	/* wo token convert string to value */
 	if (!l_start)
 		p_conf_setup.m_noise_mark_lcp_coeffs.push_back(l_value.ToDouble());
-	/* Collecting RCP "C0 C1 .."" coefficients from appropriate configuration file */ 
-	/* wo token convert string to value */
-	if (!l_start)
-		p_conf_setup.m_noise_mark_lcp_coeffs.push_back(l_value.ToDouble());
+	int _l=p_conf_setup.m_noise_mark_lcp_coeffs.size();
+	/* Print whole coeff array from conf */
+	for(int i=0; i< _l; i++){
+		MED_TRACE_FMT("%f\n",p_conf_setup.m_noise_mark_lcp_coeffs[i]);			
+	}
+	/* Collecting RCP "C0 C1 .."" coefficients from appropriate configuration file */ 	
 	l_start=0;
 	_GET_STRING_ATTRIBUTE("RCoeffs","RCP noise mark poly coefficients :", l_value, p_conf_path);	
-	while(IRA::CIRATools::getNextToken(l_value, l_start, ' ', l_token)){		
+	while(IRA::CIRATools::getNextToken(l_value, l_start, ' ', l_token)){
+		MED_TRACE_FMT("%s\n",(const char*)l_value);	
+		MED_TRACE_FMT("%s\n",(const char*)l_token);			
 		p_conf_setup.m_noise_mark_rcp_coeffs.push_back(l_token.ToDouble());
+		MED_TRACE_FMT("%f\n",l_token.ToDouble());		
+	}
+	/* wo token convert string to value */
+	if (!l_start)
+		p_conf_setup.m_noise_mark_rcp_coeffs.push_back(l_value.ToDouble());
+		/* Print whole coeff array from conf */
+	for(int i=0; i< _l; i++){
+		MED_TRACE_FMT("%f\n",p_conf_setup.m_noise_mark_rcp_coeffs[i]);			
 	}
 	MED_TRACE_MSG("OUT");
 }
