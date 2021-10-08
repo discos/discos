@@ -273,15 +273,13 @@ ReceiverConfHandler::ConfigurationName ReceiverConfHandler::getActualConf(){
     return m_current_conf.m_name;
 }
 
-ReceiverConfHandler::ConfigurationSetup ReceiverConfHandler::getCurrentSetup()  {
-	MED_TRACE_MSG(" IN ");    
+ReceiverConfHandler::ConfigurationSetup ReceiverConfHandler::getCurrentSetup()  {	 
     ReceiverConfHandler::ConfigurationName l_name_enum = m_current_conf.m_name;
     if (!findConfiguration(l_name_enum)){    
         setConfiguration(CCC_Normal);
         MED_TRACE_MSG(" OUT DEFAULT ");
         return m_conf_data[CCC_Normal];
-    }
-	 MED_TRACE_MSG(" OUT ");
+    }	 
     return m_conf_data[l_name_enum];
 }
 

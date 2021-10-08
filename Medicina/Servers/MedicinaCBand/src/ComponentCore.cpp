@@ -306,7 +306,6 @@ void CComponentCore::setMode(const char * mode) throw (ReceiversErrors::Receiver
     // the set the default LO for the default LO for the selected mode.....
     ACS::doubleSeq lo;
     MED_TRACE_MSG(" LO ");
-    /** @todo rivedere assegnazioni */
     lo.length(l_setup.m_IFs);
     lo[0]= l_setup.m_defaultLO[0];    
     /* LOs loading */
@@ -337,6 +336,12 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo)
     baci::ThreadSyncGuard guard(&m_mutex);
     double l_lo_value;
     ReceiverConfHandler::ConfigurationSetup l_setup;
+    /* Just one frequency for every if!*/
+    if(lo.length() != 1){
+        _IRA_LOGFILTER_LOG(LM_CRITICAL,"CComponentCore::setLO()","ReceiverControl parameter error");
+        _EXCPT(ReceiversErrors::ModeErrorExImpl,impl,"CComponentCore::setLO()");
+        throw impl;
+    }
 
     m_mixer.setValue(lo);           
     l_lo_value= m_mixer.getEffectiveValue();    
@@ -675,13 +680,18 @@ void CComponentCore::getCalibrationMark(ACS::doubleSeq& result,
         resFreq[i]=realFreq;
         resBw[i]=realBw;
         realFreq+=realBw/2.0;
+        MED_TRACE_FMT("resFreq[%d] %f",i, resFreq[i]);
+        MED_TRACE_FMT("resBW[%d] %f",i, resBw[i]);
+        MED_TRACE_FMT("realFreq[%d] %f",i, realFreq);
         ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"REFERENCE_FREQUENCY %lf",realFreq));
-        if (m_polarization[ifs[i]]== (long)Receivers::RCV_LCP) {
-            result[i]= m_configuration.getLeftMarkTemp(realFreq);            
+        if (m_polarization[ifs[i]]== (long)Receivers::RCV_LCP) {            
+            result[i]= m_configuration.getLeftMarkTemp(realFreq);                        
+            MED_TRACE_FMT("LCP mark temp [%d] %f", i, result[i] );
             ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"LEFT_MARK_VALUE %lf",result[i]));
         }
         else { //RCV_RCP            
             result[i]= m_configuration.getRightMarkTemp(realFreq);
+            MED_TRACE_FMT("RCP mark temp [%d] %f", i, result[i] );
             ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"RIGHT_MARK_VALUE %lf",result[i]));
         }
     }
