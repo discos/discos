@@ -144,11 +144,19 @@ public:
      * @thorw ReceiversErrors::LocalOscillatorErrorExImpl
      */
     void setLO(const ACS::doubleSeq& lo) throw (ReceiversErrors::ReceiversErrorsExImpl,ComponentErrors::ComponentErrorsExImpl);
+
     /**
      * It returns back the current local oscillator frequency settings.
      * @param lo output sequence
      */
     void getLO(ACS::doubleSeq& lo) throw (ReceiversErrors::LocalOscillatorErrorExImpl);
+
+    /**
+     * It returns back the current local oscillator frequency settings taking into account double stage frequency calc
+     * @param lo output sequence
+     */
+    void getEffectiveLO(ACS::doubleSeq& lo) throw (ReceiversErrors::LocalOscillatorErrorExImpl);
+
 
     /**
      * I checks if the local oscillator is locked properly

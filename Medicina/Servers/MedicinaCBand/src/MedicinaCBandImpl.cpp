@@ -138,9 +138,10 @@ void MedicinaCBandImpl::execute() throw (ACSErr::ACSbaseExImpl, ComponentErrors:
 
 	ACS_LOG(LM_FULL_INFO,"MedicinaCBandImpl::execute()",(LM_INFO,"WATCH_DOG_SPAWNED"));
 	try {
-		#ifndef STOP_MONITOR_PROPERTY
-		#warning "not starting property monitoring!"
+		#ifndef STOP_MONITOR_PROPERTY		
 			startPropertiesMonitoring();
+		#else
+                        #warning "not starting property monitoring!"
 		#endif
 	}
 	catch (acsthreadErrType::CanNotStartThreadExImpl& E) {

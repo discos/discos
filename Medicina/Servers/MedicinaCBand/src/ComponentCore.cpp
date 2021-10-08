@@ -365,7 +365,22 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo)
 void CComponentCore::getLO(ACS::doubleSeq& lo) throw (ReceiversErrors::LocalOscillatorErrorExImpl)
 {
     baci::ThreadSyncGuard guard(&m_mutex);    
-    lo[0]= m_mixer.getValue();    
+    lo.length(m_configuration.getIFs());
+    int i=0;
+    for(i=0; i< m_configuration.getIFs(); i++){
+        lo[i]= m_mixer.getValue();    
+    }
+}
+
+
+void CComponentCore::getEffectiveLO(ACS::doubleSeq& lo) throw (ReceiversErrors::LocalOscillatorErrorExImpl)
+{
+    baci::ThreadSyncGuard guard(&m_mutex);
+    lo.length(m_configuration.getIFs());
+    int i=0;
+    for(i=0; i< m_configuration.getIFs(); i++){
+        lo[i]= m_mixer.getEffectiveValue();
+    }
 }
 
 void CComponentCore::checkLocalOscillator() throw (ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntGetAttributeExImpl)
