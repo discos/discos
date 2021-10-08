@@ -101,7 +101,12 @@ IRA::CString CParser<OBJ>::executeCommand(const IRA::CString& command,IRA::CStri
 			composeCall+=elem->m_syscall;
 			for (WORD k=0;k<parNum;k++) {
 				composeCall+=" ";
-				composeCall+=inParams[k];
+				if (inParams[k]==IRA::CString(_SP_JOLLYCHARACTER)) {
+					composeCall+=_SP_JOLLYCHARACTER_REPLACEMENT;
+				}
+				else {
+					composeCall+=inParams[k]; 
+				}
 			}
 			/*if (system((const char *)composeCall)<0) {
 				_EXCPT(ParserErrors::SystemCommandErrorExImpl,err,"CParser::executeCommand()");
@@ -214,6 +219,7 @@ typename CParser<OBJ>::TRule *CParser<OBJ>::checkCommand(const IRA::CString& lin
 	IRA::CString timeMark;
 	TRule *elem;
 	int result=parseCommand(line,instr,inParams,timeTagged,timeCommand,timeMark,m_maxArgs);
+	
 	if (result<0) {
 		_EXCPT(ParserErrors::SyntaxErrorExImpl,err,"CParser::checkCommand()");
 		throw err;
