@@ -412,12 +412,40 @@ void CEngineThread::runLoop()
 	//cout << "inizio : " << nowEpoch.value().value << endl;
 	if (m_summaryOpened && m_data->isWriteSummary()) {
 		double exptime=0.0;
-		std::list<double> va;
-		ACS::doubleSeq rf;
+		long sectionNumber;
+		std::list<long> bins;
+		std::list<double> va, bWidth, freq, fRes;
+		ACS::doubleSeq rf,skyF,sectionSkyF;
+		
+		sectionNumber=m_data->getSectionsNumber();
+		m_summary->getFilePointer()->setKeyword("NUSEBANDS",sectionNumber);
+		m_info.getSkyFrequency(skyF);	
+		m_data->getSectionSkyFrequency(sectionSkyF,skyF);
+		bins.clear();
+		bWidth.clear();		
+		freq.clear();
+		fRes.clear();
+		for(long j=0;j<sectionNumber;j++) {
+			double bw,bb;
+			bb=m_data->getSectionBins(j);
+			bins.push_back(bb);
+			bw=m_data->getSectionBandWidth(j);
+			bWidth.push_back(bw);
+			freq.push_back(sectionSkyF[j]);
+			fRes.push_back(bw/(double)bb);
+		}
+		m_summary->getFilePointer()->setKeyword("BWID",bWidth);
+		m_summary->getFilePointer()->setKeyword("FREQBIN",bins);
+		m_summary->getFilePointer()->setKeyword("FREQ",freq);
+		m_summary->getFilePointer()->setKeyword("FREQRES",fRes);
+
 		m_info.getRestFreq(rf);
 		va.clear();
 		CCommonTools::map(rf,va);
 		m_summary->getFilePointer()->setKeyword("RESTFREQ",va);
+
+		//Backends::TSectionHeader const *sectHeader=m_data->getSectionHeader();	
+		
 		if (m_data->getBackendName()!="") {
 			m_summary->getFilePointer()->setKeyword("BackendName",m_data->getBackendName());
 		}
@@ -429,9 +457,10 @@ void CEngineThread::runLoop()
 		}
 		m_summary->getFilePointer()->setKeyword("CREATOR",DiscosVersion::CurrentVersion::getVersion());
 		m_summary->getFilePointer()->setKeyword("TELESCOP",DiscosVersion::CurrentVersion::station);
-		m_summary->getFilePointer()->setKeyword("NUSEBANDS",m_data->getSectionsNumber());
+		
 		m_summary->getFilePointer()->setKeyword("ScheduleName",m_data->getScheduleName());
 		m_summary->getFilePointer()->setKeyword("LogFileName",m_data->getLogName());
+		m_summary->getFilePointer()->setKeyword("WOBUSED","F");
 
 		exptime=(m_info.getTotalDumps()*m_data->getIntegrationTime())/1000.0;
 		m_summary->getFilePointer()->setKeyword("EXPTIME",exptime);
@@ -588,16 +617,19 @@ void CEngineThread::runLoop()
 
 				m_data->getSite(site,dut1,siteName);			
 				
+				/** The multiplicity of these arrays is the total number of inputs */
 				m_info.getLocalOscillator(LocalOscillator);
 				m_info.getSectionsID(sectionsID);
 				m_info.getBackendAttenuations(atts);
 				m_info.getFeedsID(feedsID);
 				m_info.getIFsID(ifsID);
-				m_info.getSkyBandwidth(skyBw);
+				// useful bandwidth, resulting from the matching of backend and frontend settings 
+				m_info.getSkyBandwidth(skyBw); 
 				m_info.getSkyFrequency(skyFreq);
 				m_info.getCalibrationMarks(calib);
 				m_info.getSourceFlux(fluxes);
 				m_info.getReceiverPolarization(polarizations);
+				/********************************************************************/
 				m_info.getSource(sourceName,sourceRa,sourceDec,sourceVlsr);
 				m_info.getAntennaOffsets(azOff,elOff,raOff,decOff,lonOff,latOff);
 				m_info.getAntennaUserOffsets(lonUserOff,latUserOff,frameUserOff);
@@ -1380,8 +1412,11 @@ void CEngineThread::collectReceiversData(FitsWriter_private::CFile* summaryFile)
 			ACS::doubleSeq_var IFBw;
 			double scale;
 			bool onoff;
+			/** Get the configuration of the IF inputs out of the sections configuration */
 			m_data->getInputsConfiguration(sectionsID,feeds,ifs,freqs,bws,atts);
+			/** Get value of noise cal diode from the receiver */
 			calMarks=m_receiversBoss->getCalibrationMark(freqs,bws,feeds,ifs,skyFreq.out(),skyBw.out(),onoff,scale);
+			/** Get the receiver IF configuration from the RX component (One record for each of the total inputs) */
 			m_receiversBoss->getIFOutput(feeds,ifs,IFFreq.out(),IFBw.out(),rcvPol.out(),LO.out());
 			m_info.setInputsTable(sectionsID,feeds,ifs,rcvPol.in(),skyFreq.in(),skyBw.in(),LO.in(),atts,calMarks.in());
 			m_info.setCalDiode(onoff);

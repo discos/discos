@@ -1,6 +1,7 @@
 // $Id: DataCollection.cpp,v 1.9 2011-04-22 18:51:48 a.orlati Exp $
 
 #include "DataCollection.h"
+#include "FitsTools.h"
 #include <SecureArea.h>
 #include <libgen.h>
 
@@ -66,7 +67,7 @@ void CDataCollection::saveMainHeaders(Backends::TMainHeader const * h,Backends::
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	memcpy(&m_mainH,h,sizeof(Backends::TMainHeader));
-	cout << "Ricevuto backend header " << m_mainH.integration << endl;
+	//cout << "Ricevuto backend header " << m_mainH.integration << endl;
 	if (m_sectionH!=NULL) delete[] m_sectionH;
 	m_sectionH=new Backends::TSectionHeader[m_mainH.sections];
 	memcpy(m_sectionH,ch,sizeof(Backends::TSectionHeader)*m_mainH.sections);
@@ -177,6 +178,18 @@ IRA::CString CDataCollection::getSubScanType() const
 		return "UNKNOWN";
 	}
 }
+
+void CDataCollection::getSectionSkyFrequency(ACS::doubleSeq& outFreq,const ACS::doubleSeq& skyFreqs) const
+{
+	outFreq.length(m_mainH.sections);
+	long inputs=0;
+	long maxlen=skyFreqs.length();
+	for(int i=0;i<m_mainH.sections;i++) {
+		if (i<maxlen) outFreq[i]=skyFreqs[inputs];
+		else outFreq[i]=DOUBLE_DUNNY_VALUE;
+		inputs+=m_sectionH[i].inputs;
+	}
+} 
 
 void CDataCollection::getInputsConfiguration(ACS::longSeq& sectionID,ACS::longSeq& feeds,ACS::longSeq& ifs,ACS::doubleSeq& freqs,ACS::doubleSeq& bws,ACS::doubleSeq& atts)
 {

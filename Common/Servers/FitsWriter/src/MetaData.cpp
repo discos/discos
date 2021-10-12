@@ -32,7 +32,7 @@ CMetaData::CMetaData()
 	m_calDiode=false;
 	m_totalDumps=0;
 }
-	
+
 CMetaData::~CMetaData()
 {
 	if (m_feeds!=NULL) {
