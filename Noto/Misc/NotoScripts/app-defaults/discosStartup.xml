@@ -137,7 +137,7 @@
             <remoteAccount>discos</remoteAccount>
         </container>
         <container>
-            <name>NotoMinorServoContainer</name>
+            <name>MinorServoBossContainer</name>
             <type>cpp</type>
             <heapSizeMB></heapSizeMB>
             <useDedicatedSettings>true</useDedicatedSettings>
