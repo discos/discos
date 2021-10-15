@@ -150,7 +150,7 @@ ifeq ($(STATION),Noto)
 		NotoAntennaInterface \
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary PyTestingLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
-		TotalPower NotoMount CustomLogger MedicinaMinorServo\
+		TotalPower NotoMount CustomLogger NotoMinorServo\
 		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal SchedulerTextClient MinorServoBossTextClient\
 		NotoMountTextClient CustomLoggingClient Scripts
 
