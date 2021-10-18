@@ -354,7 +354,7 @@ throw (MinorServoErrors::SetupErrorExImpl)
         THROW_EX(MinorServoErrors, SetupErrorEx, 
                  "Cannot find requested configuration", false);
     try {
-        setElevationTrackingImpl(IRA::CString("OFF"));
+            setElevationTrackingImpl(IRA::CString("OFF"));
     }catch(...) {
         THROW_EX(MinorServoErrors, SetupErrorEx, "cannot turn the tracking off",
         false);
@@ -405,7 +405,8 @@ throw (MinorServoErrors::SetupErrorExImpl)
         //enable elevation tracking
         try
         {
-            setElevationTrackingImpl(IRA::CString("ON"));
+            if (isElevationTrackingEn())
+                setElevationTrackingImpl(IRA::CString("ON"));
         }
         catch (...)
         {
