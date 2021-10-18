@@ -49,8 +49,8 @@
         * pol0-4 are the coefficients of the 5th grade polynomial which describes
         elevation tracking corrections
         -->
-        <YPaxis>mm,-80.0,80.0,107,0,0,0,0</YPaxis>
-        <ZPaxis>mm,-125.0,125.0,206,0,0,0,0</ZPaxis>
+        <YPaxis>mm,-5.0,365,107,0,0,0,0</YPaxis>
+        <ZPaxis>mm,-5.0,345,206,0,0,0,0</ZPaxis>
     </MinorServo>
 
     <MinorServo>
@@ -70,8 +70,8 @@
         * pol0-4 are the coefficients of the 5th grade polynomial which describes
         elevation tracking corrections
         -->
-        <YPaxis>mm,-80.0,80.0,355,0,0,0,0</YPaxis>
-        <ZPaxis>mm,-125.0,125.0,196,0,0,0,0</ZPaxis>
+        <YPaxis>mm,-5.0,365.0,355,0,0,0,0</YPaxis>
+        <ZPaxis>mm,-5.0,345.0,196,0,0,0,0</ZPaxis>
     </MinorServo>
 
 </MinorServoParameters>
