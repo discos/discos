@@ -190,7 +190,7 @@ int main(int argc, char *argv[])
 
 
 	parser.add("naviga","firefox",0);
-	parser.add("terminale","xterm -title ",1);
+	parser.add("terminale","xterm -title",2);
 
 	parser.add("remoteok","extern",0,&CTest::remoteCall);
 	parser.add("remotefail","extern",1,&CTest::remoteCall);
