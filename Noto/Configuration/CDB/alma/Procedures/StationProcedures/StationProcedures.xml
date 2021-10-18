@@ -14,6 +14,8 @@
 	calOff
 	setAttenuation=0,15
 	setAttenuation=1,5
+	ifdist=1,1,44
+	ifdist=2,1,32
 </body>	
 </Procedure>
 
@@ -27,7 +29,9 @@
 	calmux=TotalPower
 	calOff
 	setAttenuation=0,0
-	setAttenuation=1,4	
+	setAttenuation=1,4
+	ifdist=1,1,44
+	ifdist=2,1,32
 </body>
 </Procedure>
 
@@ -41,6 +45,8 @@
 	device=0
 	calmux=TotalPower
 	calOff
+	ifdist=1,1,44
+	ifdist=2,1,32
 </body>
 </Procedure>
 
@@ -48,11 +54,13 @@
 <body>
 	antennaSetup=SEC
 	initialize=QQC
-    	receiversSetup=QQC
-    	asOn
+    receiversSetup=QQC
+    asOn
 	device=0
 	calmux=TotalPower
 	calOff
+	ifdist=1,1,44
+	ifdist=2,1,32
 </body>
 </Procedure>
 
@@ -60,11 +68,13 @@
 <body>
 	antennaSetup=PRIM
 	initialize=XXP
-    	receiversSetup=XXP
-    	asOn
+    receiversSetup=XXP
+    asOn
 	device=0
 	calmux=TotalPower
 	calOff
+	ifdist=1,3,44
+	ifdist=2,3,32
 </body>
 </Procedure>
 
@@ -72,11 +82,13 @@
 <body>
 	antennaSetup=PRIM
 	initialize=XXP
-    	receiversSetup=XXP
-    	asOff
+    receiversSetup=XXP
+    asOff
 	device=0
 	calmux=TotalPower
 	calOff
+	ifdist=1,4,44
+	ifdist=2,3,32
 </body>
 </Procedure>
 
@@ -84,11 +96,13 @@
 <body>
 	antennaSetup=LL
 	initialize=LLP
-    	receiversSetup=LLP
-    	asOff
+    receiversSetup=LLP
+    asOff
 	device=0
 	calmux=TotalPower
 	calOff
+	ifdist=1,2,44
+	ifdist=2,2,32
 </body>
 </Procedure>
 
@@ -101,6 +115,8 @@
 	device=0
 	calmux=TotalPower
 	calOff
+	ifdist=1,4,44
+	ifdist=2,4,32
 </body>
 </Procedure>
 
@@ -108,11 +124,13 @@
 <body>
 	antennaSetup=PRIM
 	initialize=SSP
-    	receiversSetup=SSP
-    	asOff
+    receiversSetup=SSP
+    asOff
 	device=0
 	calmux=TotalPower
 	calOff
+	ifdist=1,3,44
+	ifdist=2,5,32
 </body>
 </Procedure>
 

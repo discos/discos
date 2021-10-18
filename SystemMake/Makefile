@@ -68,7 +68,7 @@ NT_DOC:=NTDox
 NT_ERRORS:=NotoActiveSurfaceErrors
 NT_INTERFACES:=NotoAntennaInterface NotoReceiversInterface NotoWeatherStationInterface NotoActiveSurfaceInterface \
 NT_LIBRARIES:=
-NT_SERVERS:= NotoReceivers NotoMount NotoWeatherStation NotoActiveSurface NotoMinorServo NotoPyLocalOscillator
+NT_SERVERS:= NotoReceivers NotoMount NotoWeatherStation NotoActiveSurface NotoMinorServo NotoPyLocalOscillator NotoPyIfDistributor
 NT_CLIENTS:=NotoMountTextClient 
 NT_MISC:=NotoScripts
 

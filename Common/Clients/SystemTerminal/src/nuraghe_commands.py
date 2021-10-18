@@ -416,6 +416,36 @@ def help(command):
         print 'e.g. > help(setupCCB)'
         print 'help() (without argument) lists all the available commands'
 
+
+def ifdist():
+    """
+    ifdist=input,pol,att
+    allowed values for input:
+        1 input1 
+        2 input2 
+
+    allowed value for pol for input1
+        0 nessun ingresso selezionato
+        1 ricevitore in vertex Right Pol
+        2 ricevitore L Right Pol
+        3 ricevitore X Right Pol
+        4 ricevitore S Right Pol
+        5 spare1
+        6 spare2
+
+    allowed value for pol for input2
+        0 nessun ingresso selezionato
+        1 ricevitore in vertex Left Pol
+        2 ricevitore L Left Pol
+        3 ricevitore X Left Pol
+        4 ricevitore S Left Pol
+        5 ricevitore S Right Pol (per oss. geo)
+        6 spare1
+
+    allowed values for att:
+        from 0 to 63, each step is 0.5 dB
+    """
+
 def initialize():
     """
     initialize=code 
