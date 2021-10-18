@@ -327,6 +327,17 @@ MinorServoBossImpl::setup(const char *config) throw (
         setupImpl(config);
         CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::setup",
                    (LM_NOTICE, "Minor Servo Setup: %s", config));
+                   //enable elevation tracking
+        try
+        {
+            if (isElevationTrackingEn())
+                setElevationTrackingImpl(IRA::CString("ON"));
+        }
+        catch (...)
+        {
+            THROW_EX(MinorServoErrors, SetupErrorEx, "cannot turn the tracking on",
+                     false);
+        }
     }
     catch (MinorServoErrors::SetupErrorExImpl& ex) {
         ex.log(LM_WARNING);
@@ -402,17 +413,6 @@ throw (MinorServoErrors::SetupErrorExImpl)
         CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::setupImpl",
                    (LM_DEBUG, "Started setup positioning thread"));
 
-        //enable elevation tracking
-        try
-        {
-            if (isElevationTrackingEn())
-                setElevationTrackingImpl(IRA::CString("ON"));
-        }
-        catch (...)
-        {
-            THROW_EX(MinorServoErrors, SetupErrorEx, "cannot turn the tracking on",
-                     false);
-        }
     }catch(const ServoTimeoutError& ste){
         THROW_EX(MinorServoErrors, SetupErrorEx, ste.what(), false);
     }catch(const ServoConnectionError& sce){
