@@ -8,6 +8,7 @@
 	antennaSetup=SEC
 	initialize=CCC
 	receiversSetup=CCC
+	servoSetup=SEC
 	asOn
 	device=0
 	calmux=TotalPower
@@ -24,6 +25,7 @@
 	antennaSetup=SEC
 	initialize=MMC
 	receiversSetup=MMC
+	servoSetup=SEC
    	asOn
 	device=0
 	calmux=TotalPower
@@ -40,7 +42,7 @@
 	antennaSetup=SEC
 	initialize=KKC
 	receiversSetup=KKC
-	servoSetup=KKC
+	servoSetup=SEC
    	asOn
 	device=0
 	calmux=TotalPower
@@ -54,56 +56,9 @@
 <body>
 	antennaSetup=SEC
 	initialize=QQC
-	receiversSetup=QQC
+    receiversSetup=QQC
+	servoSetup=SEC
     asOn
-	device=0
-	calmux=TotalPower
-	calOff
-</body>
-</Procedure>
-
-<Procedure name="setupXXP" args="0">
-<body>
-	antennaSetup=PRIM
-	initialize=XXP
-	receiversSetup=XXP
-    asOn
-	device=0
-	calmux=TotalPower
-	calOff
-</body>
-</Procedure>
-
-<Procedure name="setupXSP" args="0">
-<body>
-	antennaSetup=PRIM
-	initialize=XXP
-	receiversSetup=XXP
-    asOff
-	device=0
-	calmux=TotalPower
-	calOff
-</body>
-</Procedure>
-
-<Procedure name="setupLLP" args="0">
-<body>
-	antennaSetup=LL
-	initialize=LLP
-	receiversSetup=LLP
-    asOff
-	device=0
-	calmux=TotalPower
-	calOff
-</body>
-</Procedure>
-
-<Procedure name="setupSSP" args="0">
-<body>
-	antennaSetup=PRIM
-	initialize=SSP
-	receiversSetup=SSP
-    asOff
 	device=0
 	calmux=TotalPower
 	calOff
@@ -117,6 +72,7 @@
 	antennaSetup=PRIM
 	initialize=XXP
     receiversSetup=XXP
+	servoSetup=SXP
     asOn
 	device=0
 	calmux=TotalPower
@@ -131,6 +87,7 @@
 	antennaSetup=PRIM
 	initialize=XXP
     receiversSetup=XXP
+	servoSetup=SXP
     asOff
 	device=0
 	calmux=TotalPower
@@ -145,6 +102,7 @@
 	antennaSetup=LL
 	initialize=LLP
     receiversSetup=LLP
+	servoSetup=LLP
     asOff
 	device=0
 	calmux=TotalPower
@@ -158,8 +116,9 @@
 <body>
 	antennaSetup=PRIM
 	initialize=SSP
-    	receiversSetup=SSP
-    	asOff
+	receiversSetup=SSP
+    asOff
+	servoSetup=SXP
 	device=0
 	calmux=TotalPower
 	calOff
@@ -172,7 +131,8 @@
 <body>
 	antennaSetup=PRIM
 	initialize=SSP
-	receiversSetup=SSP
+    receiversSetup=SSP
+	servoSetup=SXP
     asOff
 	device=0
 	calmux=TotalPower
