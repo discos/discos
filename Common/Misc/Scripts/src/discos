@@ -69,6 +69,12 @@ if [ "$CL_HELP" ] ; then
    exit
 fi
 
+# Load current DISCOS environment
+# ===============================
+if [ -f /discos-sw/config/misc/load_branch ]; then
+    source /discos-sw/config/misc/load_branch
+fi
+
 STARTUP_SCRIPT="$INTROOT/app-defaults/discosStartup.xml"
 
 if [ "$CDB" == "test" ] ; then
