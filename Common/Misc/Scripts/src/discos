@@ -69,13 +69,22 @@ if [ "$CL_HELP" ] ; then
    exit
 fi
 
+STARTUP_SCRIPT="$INTROOT/app-defaults/discosStartup.xml"
+
+if [ "$CDB" == "test" ] ; then
+    SIMULATION_SCRIPT="$INTROOT/app-defaults/simulationStartup.xml"
+    if [ -f "$SIMULATION_SCRIPT" ] ; then
+        STARTUP_SCRIPT="$SIMULATION_SCRIPT"
+    fi
+fi
+
 if [ "$CL_START" ] ; then
-   acscommandcenter -g $GEOMETRY -r $INTROOT/app-defaults/discosStartup.xml &
+   acscommandcenter -g $GEOMETRY -r $STARTUP_SCRIPT &
    exit
 fi
 
 if [ "$CL_VIEW" ] ; then
-   acscommandcenter -g $GEOMETRY -r $INTROOT/app-defaults/discosStartup.xml $MANAGER &
+   acscommandcenter -g $GEOMETRY -r $STARTUP_SCRIPT $MANAGER &
 fi
 
 
