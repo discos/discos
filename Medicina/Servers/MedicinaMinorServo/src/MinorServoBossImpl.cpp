@@ -327,22 +327,11 @@ MinorServoBossImpl::setup(const char *config) throw (
         setupImpl(config);
         CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::setup",
                    (LM_NOTICE, "Minor Servo Setup: %s", config));
-                   //enable elevation tracking
-        try
-        {
-            if (isElevationTrackingEn())
-                setElevationTrackingImpl(IRA::CString("ON"));
-        }
-        catch (...)
-        {
-            THROW_EX(MinorServoErrors, SetupErrorEx, "cannot turn the tracking on",
-                     false);
-        }
     }
     catch (MinorServoErrors::SetupErrorExImpl& ex) {
         ex.log(LM_WARNING);
         throw ex.getSetupErrorEx();     
-    }
+    }    
 }
 
 void 
@@ -408,11 +397,13 @@ throw (MinorServoErrors::SetupErrorExImpl)
         m_setup_thread_ptr = getContainerServices()->getThreadManager()->
                                 create<SetupThread, SetupThreadParameters>
                                  (SETUP_THREAD_NAME, thread_params);
+
         if(m_setup_thread_ptr->isSuspended())
             m_setup_thread_ptr->resume();
+
         CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::setupImpl",
                    (LM_DEBUG, "Started setup positioning thread"));
-
+        
     }catch(const ServoTimeoutError& ste){
         THROW_EX(MinorServoErrors, SetupErrorEx, ste.what(), false);
     }catch(const ServoConnectionError& sce){
@@ -421,6 +412,7 @@ throw (MinorServoErrors::SetupErrorExImpl)
         m_servo_status.starting = false;
         THROW_EX(MinorServoErrors, SetupErrorEx, "Cannot conclude setup >> "+boost::current_exception_diagnostic_information(), false);
     }
+
 }
 
 void 
