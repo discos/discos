@@ -100,13 +100,15 @@ IRA::CString CParser<OBJ>::executeCommand(const IRA::CString& command,IRA::CStri
 			IRA::CString answer("");
 			composeCall+=elem->m_syscall;
 			for (WORD k=0;k<parNum;k++) {
+				composeCall+=" ";
          	if (inParams[k]==IRA::CString(_SP_JOLLYCHARACTER)) {
 					composeCall+=_SP_JOLLYCHARACTER_REPLACEMENT;
 				}
 				else {
 					composeCall+=inParams[k];
             }
-			}			
+			}	
+			printf("call: %s\n",(const char *)composeCall);		
 			/*if (system((const char *)composeCall)<0) {
 				_EXCPT(ParserErrors::SystemCommandErrorExImpl,err,"CParser::executeCommand()");
 				err.setSystemCommand((const char *)composeCall);
