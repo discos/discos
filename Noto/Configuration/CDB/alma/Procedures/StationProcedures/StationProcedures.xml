@@ -9,7 +9,6 @@
 	initialize=CCC
 	receiversSetup=CCC
 	servoSetup=SEC
-	setServoElevationTracking=ON
 	asOn
 	device=0
 	calmux=TotalPower
@@ -27,7 +26,6 @@
 	initialize=MMC
 	receiversSetup=MMC
 	servoSetup=SEC
-	setServoElevationTracking=ON
    	asOn
 	device=0
 	calmux=TotalPower
@@ -45,7 +43,6 @@
 	initialize=KKC
 	receiversSetup=KKC
 	servoSetup=SEC
-	setServoElevationTracking=ON
    	asOn
 	device=0
 	calmux=TotalPower
@@ -61,7 +58,6 @@
 	initialize=QQC
     receiversSetup=QQC
 	servoSetup=SEC
-	setServoElevationTracking=ON
     asOn
 	device=0
 	calmux=TotalPower
@@ -77,7 +73,6 @@
 	initialize=XXP
     receiversSetup=XXP
 	servoSetup=SXP
-	setServoElevationTracking=OFF
     asOn
 	device=0
 	calmux=TotalPower
@@ -93,7 +88,6 @@
 	initialize=XXP
     receiversSetup=XXP
 	servoSetup=SXP
-	setServoElevationTracking=OFF
     asOff
 	device=0
 	calmux=TotalPower
@@ -109,7 +103,6 @@
 	initialize=LLP
     receiversSetup=LLP
 	servoSetup=LLP
-	setServoElevationTracking=OFF
     asOff
 	device=0
 	calmux=TotalPower
@@ -126,7 +119,6 @@
 	receiversSetup=SSP
     asOff
 	servoSetup=SXP
-	setServoElevationTracking=OFF
 	device=0
 	calmux=TotalPower
 	calOff
@@ -141,7 +133,6 @@
 	initialize=SSP
     receiversSetup=SSP
 	servoSetup=SXP
-	setServoElevationTracking=OFF
     asOff
 	device=0
 	calmux=TotalPower
