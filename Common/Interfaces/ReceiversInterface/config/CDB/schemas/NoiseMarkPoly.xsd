@@ -17,14 +17,11 @@
 	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
 	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
 
-	
-	<xs:complexType name="NoiseMarkPolySequence">
-		<xs:sequence>	
-			<xs:element name="LCoeffs" type="xs:string" />
-			<xs:element name="RCoeffs" type="xs:string" />
-		</xs:sequence>
+	<xs:complexType name="NoiseMarkPolyAttr">
+		<xs:attribute name="LCoeffs" type="xs:string" use="required"/>
+		<xs:attribute name="RCoeffs" type="xs:string" use="required"/>
 	</xs:complexType>
-	
-	<xs:element name="NoiseMarkPoly" type="NoiseMarkPolySequence"/>
+
+	<xs:element name="NoiseMarkPoly" type="NoiseMarkPolyAttr"/>
 
 </xs:schema>

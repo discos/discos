@@ -4,7 +4,7 @@
       xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
 		xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"			
-		>				
-	<LCoeffs>"31.593 -0.0023"</LCoeffs>
-	<RCoeffs>"32.764 -0.0023"</RCoeffs>
-</NoiseMarkPoly>
+
+	LCoeffs="31.593 -0.0023"
+	RCoeffs="32.764 -0.0023"
+/>
