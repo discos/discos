@@ -404,6 +404,9 @@ throw (MinorServoErrors::SetupErrorExImpl)
         CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::setupImpl",
                    (LM_DEBUG, "Started setup positioning thread"));
         
+        if(isElevationTrackingEn())
+            turnTrackingOn();
+
     }catch(const ServoTimeoutError& ste){
         THROW_EX(MinorServoErrors, SetupErrorEx, ste.what(), false);
     }catch(const ServoConnectionError& sce){
@@ -840,12 +843,12 @@ throw (MinorServoErrors::MinorServoErrorsEx)
     if(!(m_control))
         THROW_MINORSERVO_EX(CommunicationErrorEx, 
                  "Minor Servo Server is not connected", false);
-    if(isStarting())
-        THROW_MINORSERVO_EX(TrackingErrorEx, "turnTrackingOn: the system is starting.", true);
+    //if(isStarting())
+    //    THROW_MINORSERVO_EX(TrackingErrorEx, "turnTrackingOn: the system is starting.", true);
     if(isParking())
         THROW_MINORSERVO_EX(TrackingErrorEx, "turnTrackingOn: the system is parking.", true);
-    if(!isReady())
-        THROW_MINORSERVO_EX(TrackingErrorEx, "turnTrackingOn: the system is not ready.", true);
+    //if(!isReady())
+    //    THROW_MINORSERVO_EX(TrackingErrorEx, "turnTrackingOn: the system is not ready.", true);
 
     if(m_tracking_thread_ptr != NULL) {
         m_tracking_thread_ptr->suspend();
