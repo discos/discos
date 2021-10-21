@@ -79,12 +79,12 @@ INCLUDES        =
 #
 # Libraries (public and local)
 # ----------------------------
-LIBRARIES       = usdImpl
+LIBRARIES       = ActiveSurfaceUSDImpl
 LIBRARIES_L     =
 #
 # <brief description of lllll library>
-usdImpl_OBJECTS = usdImpl
-usdImpl_LIBS= usdStubs lanStubs IRALibrary ASErrors
+ActiveSurfaceUSDImpl_OBJECTS = ActiveSurfaceUSDImpl
+ActiveSurfaceUSDImpl_LIBS= usdStubs lanStubs IRALibrary ASErrors
 #
 # error file
 # ----------------------------
@@ -133,7 +133,7 @@ tttlll_OBJECTS  =
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS = usd
+CDB_SCHEMAS =
 
 #
 # IDL Files and flags

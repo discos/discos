@@ -4,12 +4,12 @@
 /* This code is under GNU General Public Licence (GPL).              */
 /*                                                                   */
 /* Who                                          when        what     */
-/* Giuseppe Carboni (giuseppe.carboni@inaf.it)  04/12/2019  Creation */
+/* Giuseppe Carboni (giuseppe.carboni@inaf.it)  20/10/2021  Creation */
 /*********************************************************************/
 
-#ifndef _SRTACTIVESURFACECOMMON_IDL_
+#ifndef _ACTIVESURFACECOMMON_IDL_
 
-#define _SRTACTIVESURFACECOMMON_IDL_
+#define _ACTIVESURFACECOMMON_IDL_
 
 #include <baci.idl>
 #include <enumpropMACRO.idl>

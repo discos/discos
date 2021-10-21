@@ -125,19 +125,16 @@ tttlll_OBJECTS  =
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS =
+CDB_SCHEMAS = SRTActiveSurfaceBoss usd
 
 #
 # IDL Files and flags
 # 
-IDL_FILES = lan usd SRTActiveSurfaceBoss SRTActiveSurfaceCommon
+IDL_FILES = SRTActiveSurfaceBoss
 IDL_TAO_FLAGS =
 USER_IDL =
-lanStubs_LIBS = baciStubs ASErrorsStubs
-usdStubs_LIBS = baciStubs ASErrorsStubs SRTActiveSurfaceCommonStubs
 SRTActiveSurfaceBossStubs_LIBS = baciStubs ComponentErrorsStubs ASErrorsStubs \
-    ManagmentDefinitionsStubs ActiveSurfaceBossStubs SRTActiveSurfaceCommonStubs
-SRTActiveSurfaceCommonStubs_LIBS = baciStubs
+    ManagmentDefinitionsStubs ActiveSurfaceBossStubs ActiveSurfaceCommonStubs
 
 #
 # Jarfiles and their directories
