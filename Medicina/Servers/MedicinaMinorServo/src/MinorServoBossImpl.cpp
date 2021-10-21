@@ -856,7 +856,7 @@ throw (MinorServoErrors::MinorServoErrorsEx)
         m_tracking_thread_ptr = NULL;
     }
 
-    m_servo_status.elevation_tracking = true;
+    //m_servo_status.elevation_tracking = true;
     try {
         TrackerThreadParameters params(&m_servo_status,
                                         m_control,
