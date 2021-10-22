@@ -130,7 +130,7 @@ tttlll_OBJECTS  =
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS = SRTActiveSurfaceBoss
+CDB_SCHEMAS =
 
 # 
 # IDL Files and flags

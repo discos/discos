@@ -134,7 +134,7 @@ tttlll_OBJECTS  =
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS = lan
+CDB_SCHEMAS =
 
 #
 # IDL Files and flags

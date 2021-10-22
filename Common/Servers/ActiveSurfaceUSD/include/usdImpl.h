@@ -476,12 +476,12 @@ public:
 	 
 	/**
 	* setProfile().  Set the surface active profile.
-	* @param prof	0 shaped, 1 parabolic, 2 parabolic fixed
+	* @param prof	0 shaped, 1 shaped fixed, 2 parabolic, 3 parabolic fixed
 	*/
-	void setProfile(CORBA::Long prof) throw (CORBA::SystemException, ASErrors::ASErrorsEx)
-	{
-		m_profile = prof;
-	} 
+	virtual void setProfile(CORBA::Long prof) throw (CORBA::SystemException, ASErrors::ASErrorsEx)
+    {
+        m_profile = prof;
+    }
 	 
 	/**
 	* correction().The last minute coorection to be applied.

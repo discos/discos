@@ -17,7 +17,7 @@
 #include <ASErrors.idl>
 #include <ManagmentDefinitions.idl>
 #include <ActiveSurfaceBoss.idl>
-#include <SRTActiveSurfaceCommon.idl>
+#include <ActiveSurfaceCommon.idl>
 
 #pragma prefix "alma"
 
