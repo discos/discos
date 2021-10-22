@@ -31,6 +31,7 @@
 
 // Sleep Time in 100ns
 #define TRACKER_SLEEP_TIME 1000000 // 100 mseconds
+#define READY_MAX_WAIT 3000000000 // 5 minutes
 
 using namespace std;
 
