@@ -49,6 +49,7 @@ void USDImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 {
     cs = getContainerServices();
 
+    IRA::CString accepted_profiles;
     if(CIRATools::getDBValue(cs,"sector",(long&)m_sector) &&
         CIRATools::getDBValue(cs,"lan",(long&)m_lanNum) &&
         CIRATools::getDBValue(cs,"serialAddress",(long&)m_addr) &&
@@ -58,7 +59,8 @@ void USDImpl::initialize() throw (ACSErr::ACSbaseExImpl)
         CIRATools::getDBValue(cs,"cammaPos",(double&)m_cammaPos) &&
         CIRATools::getDBValue(cs,"step_giro",(long&)m_step_giro) &&
         CIRATools::getDBValue(cs,"step_res",(long&) m_rs) &&
-        CIRATools::getDBValue(cs,"calibrate",(long&)m_calibrate))
+        CIRATools::getDBValue(cs,"calibrate",(long&)m_calibrate) &&
+        CIRATools::getDBValue(cs,"accepted_profiles",accepted_profiles))
     {
         ACS_SHORT_LOG((LM_INFO,"USD%d: CDB parameter read",m_addr));
 
@@ -67,6 +69,10 @@ void USDImpl::initialize() throw (ACSErr::ACSbaseExImpl)
         m_top = -m_zeroRef;
         m_bottom = m_fullRange-m_zeroRef;
         m_lastCmdStep = m_top + 1; // a value outside of full range will never be commanded, so the next commanded position will for sure be different
+        std::stringstream ss((const char *)accepted_profiles);
+        int buffer;
+        while(ss >> buffer)
+            m_accepted_profiles.insert(buffer);
     }
     else
     {

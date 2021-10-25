@@ -29,6 +29,7 @@
 
 //error
 #include <ASErrors.h>
+#include <ManagementErrors.h>
 
 //others
 #include <time.h>
@@ -479,9 +480,16 @@ public:
 	* @param prof	0 shaped, 1 shaped fixed, 2 parabolic, 3 parabolic fixed
 	*/
 	virtual void setProfile(CORBA::Long prof) throw (CORBA::SystemException, ASErrors::ASErrorsEx)
-    {
-        m_profile = prof;
-    }
+	{
+		if(m_accepted_profiles.count(prof))
+		{
+			m_profile = prof;
+		}
+		else
+		{
+			_THROW_EX(UnknownProfile,"::usdImpl::setProfile()", prof);
+		}
+	}
 	 
 	/**
 	* correction().The last minute coorection to be applied.
@@ -585,8 +593,17 @@ public:
 	BYTE m_ploop;
 
 private:
+	/**
+	 * current profile;
+	 */
 	CORBA::Long m_profile;
-   	/**
+
+	/**
+	 * accepted profiles
+	 */
+	std::set<CORBA::Long> m_accepted_profiles;
+
+	/**
 	* pointer to LAN/485 component
 	*/
 	ActiveSurface::lan* m_pLan;
