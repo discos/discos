@@ -17,6 +17,7 @@ class SetupThreadParameters
         virtual ~SetupThreadParameters();
         MedMinorServoControl_sp m_control;
         MedMinorServoStatus *m_status;
+
 };
 
 class SetupThread : public ACS::Thread

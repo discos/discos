@@ -47,4 +47,5 @@
  <ErrorCode name="USDStillRunning" shortDescription=" " description="USD still running while shouldn't be!.Error"/>
  <ErrorCode name="USDunCalibrated" shortDescription=" " description="USD not calibrated.Warning"/>
  <ErrorCode name="CannotGetUSD" shortDescription=" " description="USD not activated.Warning"/>
+ <ErrorCode name="UnknownProfile" shortDescription=" " description="Set profile is unknown for this station.Error"/>
  </Type>
