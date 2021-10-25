@@ -1,6 +1,6 @@
 #ifndef  _ASErrors_IDL_
 #define  _ASErrors_IDL_
-	
+
 /*******************************************************************************
 * ALMA - Atacama Large Millimiter Array
 * (c) European Southern Observatory, 2003 
@@ -26,7 +26,7 @@
 #include <acserr.idl>
 
 #pragma prefix "alma"
- 	
+
 module ACSErr 
 {
 	// type
@@ -59,106 +59,111 @@ module ASErrors
 	 const ACSErr::ErrorCode USDStillRunning = 21;
 	 const ACSErr::ErrorCode USDunCalibrated = 22;
 	 const ACSErr::ErrorCode CannotGetUSD = 23;
-	
+	 const ACSErr::ErrorCode UnknownProfile = 24;
+
 	// excption for type:
 	exception ASErrorsEx {
-		ACSErr::ErrorTrace errorTrace;	
+		ACSErr::ErrorTrace errorTrace;
 	};
-	
+
 	// excptions for codes:
 	exception USDCalibratedEx {
-		ACSErr::ErrorTrace errorTrace;	
+		ACSErr::ErrorTrace errorTrace;
 	};
-	
+
 	exception LibrarySocketErrorEx {
-		ACSErr::ErrorTrace errorTrace;	
+		ACSErr::ErrorTrace errorTrace;
 	};
-	
+
 	exception SocketReconnEx {
-		ACSErr::ErrorTrace errorTrace;	
+		ACSErr::ErrorTrace errorTrace;
 	};
-	
+
 	exception SocketFailEx {
-		ACSErr::ErrorTrace errorTrace;	
+		ACSErr::ErrorTrace errorTrace;
 	};
-	
+
 	exception SocketTOutEx {
-		ACSErr::ErrorTrace errorTrace;	
+		ACSErr::ErrorTrace errorTrace;
 	};
-	
+
 	exception SocketNotRdyEx {
-		ACSErr::ErrorTrace errorTrace;	
+		ACSErr::ErrorTrace errorTrace;
 	};
-	
+
 	exception MemoryAllocationEx {
-		ACSErr::ErrorTrace errorTrace;	
+		ACSErr::ErrorTrace errorTrace;
 	};
-	
+
 	exception LANConnectionErrorEx {
-		ACSErr::ErrorTrace errorTrace;	
+		ACSErr::ErrorTrace errorTrace;
 	};
-	
+
 	exception LAN_UnavailableEx {
-		ACSErr::ErrorTrace errorTrace;	
+		ACSErr::ErrorTrace errorTrace;
 	};
-	
+
 	exception sendCmdErrEx {
-		ACSErr::ErrorTrace errorTrace;	
+		ACSErr::ErrorTrace errorTrace;
 	};
-	
+
 	exception IncompleteEx {
-		ACSErr::ErrorTrace errorTrace;	
+		ACSErr::ErrorTrace errorTrace;
 	};
-	
+
 	exception InvalidResponseEx {
-		ACSErr::ErrorTrace errorTrace;	
+		ACSErr::ErrorTrace errorTrace;
 	};
-	
+
 	exception NakEx {
-		ACSErr::ErrorTrace errorTrace;	
+		ACSErr::ErrorTrace errorTrace;
 	};
-	
+
 	exception CDBAccessErrorEx {
-		ACSErr::ErrorTrace errorTrace;	
+		ACSErr::ErrorTrace errorTrace;
 	};
-	
+
 	exception USDConnectionErrorEx {
-		ACSErr::ErrorTrace errorTrace;	
+		ACSErr::ErrorTrace errorTrace;
 	};
-	
+
 	exception USDTimeoutEx {
-		ACSErr::ErrorTrace errorTrace;	
+		ACSErr::ErrorTrace errorTrace;
 	};
-	
+
 	exception USDUnavailableEx {
-		ACSErr::ErrorTrace errorTrace;	
+		ACSErr::ErrorTrace errorTrace;
 	};
-	
+
 	exception USDErrorEx {
-		ACSErr::ErrorTrace errorTrace;	
+		ACSErr::ErrorTrace errorTrace;
 	};
-	
+
 	exception DevIOErrorEx {
-		ACSErr::ErrorTrace errorTrace;	
+		ACSErr::ErrorTrace errorTrace;
 	};
-	
+
 	exception corbaErrorEx {
-		ACSErr::ErrorTrace errorTrace;	
+		ACSErr::ErrorTrace errorTrace;
 	};
-	
+
 	exception USDStillRunningEx {
-		ACSErr::ErrorTrace errorTrace;	
+		ACSErr::ErrorTrace errorTrace;
 	};
-	
+
 	exception USDunCalibratedEx {
-		ACSErr::ErrorTrace errorTrace;	
+		ACSErr::ErrorTrace errorTrace;
 	};
-	
+
 	exception CannotGetUSDEx {
-		ACSErr::ErrorTrace errorTrace;	
+		ACSErr::ErrorTrace errorTrace;
 	};
-	
-	
+
+	exception UnknownProfileEx {
+		ACSErr::ErrorTrace errorTrace;
+	};
+
+
 }; // module ASErrors
 
 #endif
