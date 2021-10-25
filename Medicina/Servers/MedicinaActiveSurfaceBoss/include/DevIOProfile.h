@@ -1,5 +1,5 @@
-#ifndef _MedicinaACTIVESURFACEBOSSIMPLDEVIOPROFILE_H_
-#define _MedicinaACTIVESURFACEBOSSIMPLDEVIOPROFILE_H_
+#ifndef _MEDICINAACTIVESURFACEBOSSIMPLDEVIOPROFILE_H_
+#define _MEDICINAACTIVESURFACEBOSSIMPLDEVIOPROFILE_H_
 
 /* ************************************************************************************* */
 /* OAC Osservatorio Astronomico di Cagliari                                              */

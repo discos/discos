@@ -137,7 +137,7 @@ IDL_FILES = MedicinaActiveSurfaceBoss
 TAO_IDLFLAGS =
 USER_IDL =
 MedicinaActiveSurfaceBossStubs_LIBS = baciStubs ComponentErrorsStubs ASErrorsStubs \
-					ManagmentDefinitionsStubs ActiveSurfaceBossStubs
+					ManagmentDefinitionsStubs ActiveSurfaceBossStubs ActiveSurfaceCommonStubs
 #
 # Jarfiles and their directories
 #

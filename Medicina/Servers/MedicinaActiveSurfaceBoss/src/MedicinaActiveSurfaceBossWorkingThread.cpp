@@ -14,6 +14,7 @@ CMedicinaActiveSurfaceBossWorkingThread::~CMedicinaActiveSurfaceBossWorkingThrea
 void CMedicinaActiveSurfaceBossWorkingThread::onStart()
 {
 	AUTO_TRACE("CMedicinaActiveSurfaceBossWorkingThread::onStart()");
+	m_sleepTime = this->getSleepTime();
 }
 
 void CMedicinaActiveSurfaceBossWorkingThread::onStop()
@@ -23,12 +24,24 @@ void CMedicinaActiveSurfaceBossWorkingThread::onStop()
 
 void CMedicinaActiveSurfaceBossWorkingThread::runLoop()
 {
-    IRA::CSecAreaResourceWrapper<CMedicinaActiveSurfaceBossCore> resource=m_core->Get();
+	IRA::CSecAreaResourceWrapper<CMedicinaActiveSurfaceBossCore> resource=m_core->Get();
 
-    try {
-        resource->workingActiveSurface();
-    }
-    catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+	TIMEVALUE now;
+	IRA::CIRATools::getTime(now);
+	ACS::Time t0 = now.value().value;
+
+	try
+	{
+		resource->workingActiveSurface();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex)
+	{
 		ex.log(LM_DEBUG);
-    }
+	}
+	resource.Release();
+
+	IRA::CIRATools::getTime(now);
+	ACS::Time t1 = now.value().value;
+	ACS::TimeInterval elapsed = t1 - t0;
+	this->setSleepTime(std::max(long(m_sleepTime - elapsed), (long)0));
 }

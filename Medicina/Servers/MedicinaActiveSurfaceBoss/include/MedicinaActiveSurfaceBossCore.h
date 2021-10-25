@@ -1,14 +1,14 @@
 #ifndef _MEDICINAACTIVESURFACEBOSSCORE_H_
 #define _MEDICINAACTIVESURFACEBOSSCORE_H_
 
-/* *******************************************************************************/
-/* OAC Osservatorio Astronomico di Cagliari                                      */
+/* ************************************************************************ */
+/* OAC Osservatorio Astronomico di Cagliari                                 */
 /* $Id: MedicinaActiveSurfaceBossCore.h,v 1.6 2011-03-11 12:30:53 c.migoni Exp $ */
-/*                                                                               */
-/* This code is under GNU General Public Licence (GPL).                          */
-/*                                                                               */
-/* Who                                  when        What                         */
-/* Carlo Migoni (Ccarlo.migoni@inaf.it) 24/02/2021  Creation                     */
+/*                                                                          */
+/* This code is under GNU General Public Licence (GPL).                     */
+/*                                                                          */
+/* Who                                  when        What                    */
+/* Carlo Migoni (migoni@ca.astro.it)   26/01/2009  Creation                 */
 
 #include <acsContainerServices.h>
 #include <maciContainerServices.h>
@@ -36,8 +36,7 @@
 #define LOOPTIME 100000 // 0,10 sec
 #define CDBPATH std::string(getenv("ACS_CDB")) + "/CDB/"
 #define USDTABLE (CDBPATH + "alma/AS/tab_convUSD.txt").c_str()
-#define USDDEFAULTTABLECORRECTIONS (CDBPATH + "alma/AS/default_lut.txt").c_str()
-#define USDNEWTABLECORRECTIONS (CDBPATH + "alma/AS/new_lut.txt").c_str()
+#define USDTABLECORRECTIONS (CDBPATH + "alma/AS/act_rev02.txt").c_str()
 #define MM2HSTEP    350 //(10500 HSTEP / 30 MM)
 #define MM2STEP     1400 //(42000 STEP / 30 MM)
 #define WARNINGUSDPERCENT 0.95
@@ -67,7 +66,7 @@ using namespace ComponentErrors;
 using namespace std;
 
 class MedicinaActiveSurfaceBossImpl;
-class CMedicinaActiveSurfaceBossWatchingThread;
+//class CMedicinaActiveSurfaceBossWatchingThread;
 class CMedicinaActiveSurfaceBossWorkingThread;
 
 /**
@@ -78,8 +77,9 @@ class CMedicinaActiveSurfaceBossWorkingThread;
  */
 class CMedicinaActiveSurfaceBossCore {
     friend class MedicinaActiveSurfaceBossImpl;
-    friend class CMedicinaActiveSurfaceBossWatchingThread;
+    //friend class CMedicinaActiveSurfaceBossWatchingThread;
     friend class CMedicinaActiveSurfaceBossWorkingThread;
+    friend class CMedicinaActiveSurfaceBossSectorThread;
 public:
     /**
      * Constructor. Default Constructor.
@@ -110,21 +110,19 @@ public:
     */
     virtual void cleanUp();
 
-    void reset(int circle, int actuator, int radius) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentNotActiveExImpl);
-
     void calibrate(int circle, int actuator, int radius) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl);
 
     void calVer(int circle, int actuator, int radius) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl);
 
-    void onewayAction(ActiveSurface::TASOneWayAction onewayAction, int circle, int actuator, int radius, double elevation, double correction, long incr, ActiveSurface::TASProfile profile) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentNotActiveExImpl);
+    void onewayAction(ActiveSurface::TASOneWayAction action, int circle, int actuator, int radius, double elevation, double correction, long incr, ActiveSurface::TASProfile profile);
 
     void workingActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx);
 
-    void sectorActiveSurface(int sector) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx);
-
-    void watchingActiveSurfaceStatus() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl);
+    //void watchingActiveSurfaceStatus() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl);
 
     void usdStatus4GUIClient(int circle, int actuator, CORBA::Long_out status) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl);
+
+    void asStatus4GUIClient(ACS::longSeq& status) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl);
 
     void setActuator(int circle, int actuator, long int& actPos, long int& cmdPos, long int& Fmin, long int& Fmax, long int& acc, long int& delay) throw (ComponentErrors::PropertyErrorExImpl, ComponentErrors::ComponentNotActiveExImpl);
 
@@ -158,39 +156,33 @@ public:
     void enableAutoUpdate();
 
     void checkASerrors(const char* str, int circle, int actuator, ASErrors::ASErrorsEx Ex);
-
-    void checkAScompletionerrors (char *str, int circle, int actuator, CompletionImpl comp);
+    void checkASerrors(const char *str, int circle, int actuator, CompletionImpl comp);
+    void checkASerrors(const char *str, int circle, int actuator, int code);
 
     void asSetup() throw (ComponentErrors::ComponentErrorsEx);
 
-    void asOn() throw (ComponentErrors::ComponentErrorsEx);
+    void asOn();
 
     void asOff() throw (ComponentErrors::ComponentErrorsEx);
 
     void asPark() throw (ComponentErrors::ComponentErrorsEx);
 
-    void asNewLutOn() throw (ComponentErrors::ComponentErrorsEx);
-
-    void asNewLutOff() throw (ComponentErrors::ComponentErrorsEx);
-
     void setProfile (const ActiveSurface::TASProfile& profile) throw (ComponentErrors::ComponentErrorsExImpl);
 
 private:
+    std::map<int, std::string> m_error_strings;
     ContainerServices* m_services;
 
     ActiveSurface::USD_var usd[CIRCLES+1][ACTUATORS+1];
 
     ActiveSurface::USD_var lanradius[CIRCLES+1][ACTUATORS+1];
 
-    ActiveSurface::lan_var lan[9][13];
+    ActiveSurface::lan_var lan[SECTORS+1][13];
 
     IRA::CString lanCobName;
 
-    int usdCounter, lanIndex, circleIndex, usdCircleIndex;
+    int usdCounter;
     std::vector<int> usdCounters;
-    std::vector<int> lanIndexes;
-    std::vector<int> circleIndexes;
-    std::vector<int> usdCircleIndexes;
     int actuatorcounter, circlecounter, totacts;
     ACS::doubleSeq actuatorsCorrections;
 
@@ -214,6 +206,8 @@ private:
 
     void setserial (int circle, int actuator, int &lanIndex, char *serial_usd);
 
+    void singleUSDonewayAction(ActiveSurface::TASOneWayAction action, ActiveSurface::USD_var usd, double elevation, double correction, long incr, ActiveSurface::TASProfile profile);
+
     Antenna::AntennaBoss_var m_antennaBoss;
 
     ActiveSurface::TASProfile m_profile;
@@ -229,8 +223,6 @@ private:
     bool m_profileSetted;
 
     bool m_ASup;
-
-    bool m_newLUT;
 };
 
-#endif /*MedicinaACTIVESURFACEBOSSCORE_H_*/
+#endif /*MEDICINAACTIVESURFACEBOSSCORE_H_*/

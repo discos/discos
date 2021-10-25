@@ -1,15 +1,15 @@
 #ifndef MEDICINAACTIVESURFACEBOSSIMPL_H
 #define MEDICINAACTIVESURFACEBOSSIMPL_H
 
-/* *******************************************************************************/
-/* OAC Osservatorio Astronomico di Cagliari                                      */
-/* $Id: MedicinaActiveSurfaceBossImpl.h,v 1.4 2011-03-11 12:30:53 c.migoni Exp $ */
-/*                                                                               */
-/* This code is under GNU General Public Licence (GPL).                          */
-/*                                                                               */
-/* Who                                  when            What                     */
-/* Carlo Migoni (carlo.migoni@inaf.it)  24/02/2021      Creation                 */
-/* *******************************************************************************/
+/* ****************************************************************************** */
+/* OAC Osservatorio Astronomico di Cagliari                                       */
+/* $Id: MedicinaActiveSurfaceBossImpl.h,v 1.4 2011-03-11 12:30:53 c.migoni Exp $  */
+/*                                                                                */
+/* This code is under GNU General Public Licence (GPL).                           */
+/*                                                                                */
+/* Who                                when            What                        */
+/* Carlo Migoni (migoni@ca.astro.it)  25/02/2009      Creation                    */
+/* ****************************************************************************** */
 
 #ifndef __cplusplus
 #error This is a C++ include file and cannot be used from plain C
@@ -34,7 +34,6 @@
 #include <SP_parser.h>
 
 #define LOOPSTATUSTIME 10000000 // 1.0 second
-#define LOOPWORKINGTIME 5000000 // 0.5 seconds
 #define SECTORTIME 1000000 // 0.1 seconds
 
 #define _SET_CDB(PROP,LVAL,ROUTINE) {	\
@@ -186,6 +185,8 @@ class MedicinaActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl,
 
 	void usdStatus4GUIClient( CORBA::Long circle,  CORBA::Long actuator, CORBA::Long_out status) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
+	void asStatus4GUIClient( ACS::longSeq_out status) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
+
 	void setActuator (CORBA::Long circle, CORBA::Long actuator, CORBA::Long_out actPos, CORBA::Long_out cmdPos, CORBA::Long_out Fmin, CORBA::Long_out Fmax, CORBA::Long_out acc, CORBA::Long_out delay) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
 	void up ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
@@ -231,4 +232,4 @@ class MedicinaActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl,
 	CMedicinaActiveSurfaceBossCore *boss;
 };
 
-#endif /*MedicinaACTIVESURFACEBOSSIMPL_H*/
+#endif /*MEDICINAACTIVESURFACEBOSSIMPL_H*/

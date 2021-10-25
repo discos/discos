@@ -53,6 +53,7 @@ public:
 
 private:
 
+	ACS::TimeInterval m_sleepTime;
 	IRA::CSecureArea<CMedicinaActiveSurfaceBossCore> *m_core;
 };
 

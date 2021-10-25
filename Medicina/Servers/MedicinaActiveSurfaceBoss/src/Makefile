@@ -83,7 +83,7 @@ LIBRARIES       = MedicinaActiveSurfaceBossImpl
 LIBRARIES_L     =
 #
 # <brief description of lllll library>
-MedicinaActiveSurfaceBossImpl_OBJECTS = MedicinaActiveSurfaceBossImpl MedicinaActiveSurfaceBossCore MedicinaActiveSurfaceBossWatchingThread MedicinaActiveSurfaceBossWorkingThread MedicinaActiveSurfaceBossSectorThread
+MedicinaActiveSurfaceBossImpl_OBJECTS = MedicinaActiveSurfaceBossImpl MedicinaActiveSurfaceBossCore MedicinaActiveSurfaceBossWorkingThread MedicinaActiveSurfaceBossSectorThread
 MedicinaActiveSurfaceBossImpl_LIBS = lanStubs usdStubs ActiveSurfaceBossStubs MedicinaActiveSurfaceBossStubs AntennaDefinitionsStubs ManagmentDefinitionsStubs AntennaBossStubs ComponentErrors ASErrors ManagementErrors AntennaErrors IRALibrary ParserErrors DiscosVersion
 
 #
@@ -130,7 +130,7 @@ tttlll_OBJECTS  =
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS = 
+CDB_SCHEMAS =
 
 # 
 # IDL Files and flags
