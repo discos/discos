@@ -23,8 +23,8 @@
 	<xs:import namespace="urn:schemas-cosylab-com:ActiveSurface:1.0" schemaLocation="ActiveSurface.xsd"/>
 
 	<xs:complexType name="MedicinaActiveSurfaceBossType">
-     <xs:complexContent>
-      <xs:extension base="baci:CharacteristicComponent">
+	 <xs:complexContent>
+	  <xs:extension base="baci:CharacteristicComponent">
 		<xs:sequence>
 			<xs:element name="status" type="mng:SystemStatusType" />	
 			<xs:element name="enabled" type="mng:BooleanType" />
@@ -33,13 +33,15 @@
 		</xs:sequence>
 		<!-- sleep time of the watching thread (microseconds), this is the thread that keeps data up to date -->
 		<xs:attribute name="WatchingThreadTime" type="xs:unsignedLong" use="required" />
+		<!-- sleep time of the working thread (microseconds), this is the thread that updated the AS -->
+		<xs:attribute name="WorkingThreadTime" type="xs:unsignedLong" use="required" />
 		<!-- the cache time (microseconds) for logging repetition filter -->
 		<xs:attribute name="RepetitionCacheTime" type="xs:unsignedLong" use="required" />
 		<!-- the expire time (microseconds) for logging repetition filter -->
 		<xs:attribute name="RepetitionExpireTime" type="xs:unsignedLong" use="required" />
-        <xs:attribute name="profile" 			type="xs:unsignedByte" 	use="required" />
-      </xs:extension>
-     </xs:complexContent>
+		<xs:attribute name="profile" 			type="xs:unsignedByte" 	use="required" />
+	  </xs:extension>
+	 </xs:complexContent>
 	</xs:complexType>
 
 	<xs:element name="MedicinaActiveSurfaceBoss" type="MedicinaActiveSurfaceBossType"/>

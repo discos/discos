@@ -61,6 +61,7 @@
      <xs:attribute name="zeroRef" 	type="xs:int"		use="optional" default="-9100"/>
      <xs:attribute name="step_giro" 	type="xs:int"		use="optional" default="200"/>
      <xs:attribute name="step_res" 	type="xs:unsignedByte" 	use="optional" default="1"/>
+     <xs:attribute name="accepted_profiles"  type="xs:string"    use="optional" default="2 3 4"/>
     </xs:extension>
    </xs:complexContent>
   </xs:complexType>
