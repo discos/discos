@@ -11,7 +11,7 @@
 #ifndef SUMMARYSCHEMA_H_
 #define SUMMARYSCHEMA_H_
 
-#define SCHEMA_HEADER_ENTRY_NUMBER 36
+#define SCHEMA_HEADER_ENTRY_NUMBER 45
 
 #define SCHEMA_HEADER_ENTRY1 ( 0, _FILE_STRING_TYPE,_FILE_SINGLE_ENTRY,"TELESCOP","Telescope name" )
 #define SCHEMA_HEADER_ENTRY2 ( 0, _FILE_STRING_TYPE,_FILE_SINGLE_ENTRY,"ReceiverCode","Receiver name" )
@@ -34,12 +34,12 @@
 #define SCHEMA_HEADER_ENTRY19 ( 0, _FILE_STRING_TYPE,_FILE_SINGLE_ENTRY,"OBSID","Observer or operator initials" )
 #define SCHEMA_HEADER_ENTRY20 ( 0, _FILE_STRING_TYPE,_FILE_SINGLE_ENTRY,"CREATOR","Software (incl. version)" )
 #define SCHEMA_HEADER_ENTRY21 ( 0, _FILE_STRING_TYPE,_FILE_SINGLE_ENTRY,"FITSVER","FITS version" )
-#define SCHEMA_HEADER_ENTRY22 ( 0, _FILE_LONG_TYPE,_FILE_SINGLE_ENTRY,"NUSEBANDS","Number of sections" )
-#define SCHEMA_HEADER_ENTRY23 ( 0, _FILE_DOUBLE_TYPE,_FILE_MULTI_ENTRY,"FREQRES","Frequency resolution (MHz)" )
-#define SCHEMA_HEADER_ENTRY24 ( 0, _FILE_DOUBLE_TYPE,_FILE_MULTI_ENTRY,"RESTFREQ","Rest frequency (MHz)" )
-#define SCHEMA_HEADER_ENTRY25 ( 0, _FILE_DOUBLE_TYPE,_FILE_MULTI_ENTRY,"FREQ","frequency of the Nth section(MHz)" )
-#define SCHEMA_HEADER_ENTRY26 ( 0, _FILE_DOUBLE_TYPE,_FILE_MULTI_ENTRY,"BWID","bandwidth of the Nth section (MHz)" )
-#define SCHEMA_HEADER_ENTRY27 ( 0, _FILE_LONG_TYPE,_FILE_MULTI_ENTRY,"FREQBIN","Number of spectral bins of the Nth section" )
+#define SCHEMA_HEADER_ENTRY22 ( 0, _FILE_LONG_TYPE,_FILE_SINGLE_ENTRY,"NUSEBAND","Number of sections" )
+#define SCHEMA_HEADER_ENTRY23 ( 0, _FILE_DOUBLE_TYPE,_FILE_MULTI_ENTRY,"FREQRESOL","Frequency resolution of the Nth section (MHz)" )
+#define SCHEMA_HEADER_ENTRY24 ( 0, _FILE_DOUBLE_TYPE,_FILE_MULTI_ENTRY,"RESTFREQ","Rest frequency of the Nth setcion (MHz)" )
+#define SCHEMA_HEADER_ENTRY25 ( 0, _FILE_DOUBLE_TYPE,_FILE_MULTI_ENTRY,"FREQ","Start frequency of the Nth section(MHz)" )
+#define SCHEMA_HEADER_ENTRY26 ( 0, _FILE_DOUBLE_TYPE,_FILE_MULTI_ENTRY,"BWID","Bandwidth of the Nth section (MHz)" )
+#define SCHEMA_HEADER_ENTRY27 ( 0, _FILE_LONG_TYPE,_FILE_MULTI_ENTRY,"FREQBINS","Number of spectral bins of the Nth section" )
 #define SCHEMA_HEADER_ENTRY28 ( 0, _FILE_DOUBLE_TYPE,_FILE_SINGLE_ENTRY,"VRAD","Radial velocity" )
 #define SCHEMA_HEADER_ENTRY29 ( 0, _FILE_STRING_TYPE,_FILE_SINGLE_ENTRY,"VFRAME","Radial velocity reference frame" )
 #define SCHEMA_HEADER_ENTRY30 ( 0, _FILE_STRING_TYPE,_FILE_SINGLE_ENTRY,"VDEF","Radial velocity definition" )
@@ -49,8 +49,15 @@
 #define SCHEMA_HEADER_ENTRY34 ( 0, _FILE_STRING_TYPE,_FILE_SINGLE_ENTRY,"SCANDIR","(Optional) scan direction" )
 #define SCHEMA_HEADER_ENTRY35 ( 0, _FILE_STRING_TYPE,_FILE_SINGLE_ENTRY,"DUTYCYC","(Optional) On-Off-Cal duty cycle" )
 #define SCHEMA_HEADER_ENTRY36 ( 0, _FILE_STRING_TYPE,_FILE_SINGLE_ENTRY,"USRFRAME","Description of the user frame" )
-
-
+#define SCHEMA_HEADER_ENTRY37 ( 0, _FILE_STRING_TYPE,_FILE_MULTI_ENTRY,"POLATYPE","LCP, RCP, HLP, VLP, stokes type of the Nth section" )
+#define SCHEMA_HEADER_ENTRY38 ( 0, _FILE_DOUBLE_TYPE,_FILE_SINGLE_ENTRY,"XMINDEG","Scan start x coordinate (degree, optional)")
+#define SCHEMA_HEADER_ENTRY39 ( 0, _FILE_DOUBLE_TYPE,_FILE_SINGLE_ENTRY,"XMAXDEG","Scan end x coordinate (degree, optional)" )
+#define SCHEMA_HEADER_ENTRY40 ( 0, _FILE_DOUBLE_TYPE,_FILE_SINGLE_ENTRY,"YMINDEG","Scan start y coordinate (degree, optional)" )
+#define SCHEMA_HEADER_ENTRY41 ( 0, _FILE_DOUBLE_TYPE,_FILE_SINGLE_ENTRY,"YMAXDEG","Scan end y coordinate (degree, optional)" )
+#define SCHEMA_HEADER_ENTRY42 ( 0, _FILE_DOUBLE_TYPE,_FILE_SINGLE_ENTRY,"SCANOFF","Scan offset (deg)" )
+#define SCHEMA_HEADER_ENTRY43 ( 0, _FILE_DOUBLE_TYPE,_FILE_SINGLE_ENTRY,"SCANLEN","Scan span (deg)" )
+#define SCHEMA_HEADER_ENTRY44 ( 0, _FILE_DOUBLE_TYPE,_FILE_SINGLE_ENTRY,"SCANSTART","Scan start (deg)" )
+#define SCHEMA_HEADER_ENTRY45 ( 0, _FILE_DOUBLE_TYPE,_FILE_SINGLE_ENTRY,"TSYS","System temperature (K)" )
 
 //#define SCHEMA_TABLE_NUMBER 1
 

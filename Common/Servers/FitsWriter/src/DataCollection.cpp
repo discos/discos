@@ -4,6 +4,7 @@
 #include "FitsTools.h"
 #include <SecureArea.h>
 #include <libgen.h>
+#include <ReceiversModule.h>
 
 void FitsWriter_private::getTsysFromBuffer(char *& buffer,const DWORD& channels ,double *tsys) {
 	for (DWORD i=0;i<channels;i++) {
@@ -185,12 +186,30 @@ void CDataCollection::getSectionSkyFrequency(ACS::doubleSeq& outFreq,const ACS::
 	long inputs=0;
 	long maxlen=skyFreqs.length();
 	for(int i=0;i<m_mainH.sections;i++) {
-		if (i<maxlen) outFreq[i]=skyFreqs[inputs];
-		else outFreq[i]=DOUBLE_DUNNY_VALUE;
+		if (inputs<maxlen) outFreq[i]=skyFreqs[inputs];
+		else outFreq[i]=DOUBLE_DUMMY_VALUE;
 		inputs+=m_sectionH[i].inputs;
 	}
 } 
 
+void CDataCollection::getSectionTypeAndPols(std::list<IRA::CString>& outPols,const ACS::longSeq& pols) const
+{
+	//outFreq.length(m_mainH.sections);
+	long inputs=0;
+	long maxlen=pols.length();
+	Receivers::TPolarization pol;
+	for(int i=0;i<m_mainH.sections;i++) {
+		if (m_sectionH[i].polarization==Backends::BKND_FULL_STOKES) {
+			outPols.push_back("stokes");
+		}
+		else if (inputs<maxlen) {
+			pol=(Receivers::TPolarization)pols[inputs];
+			outPols.push_back(Receivers::Definitions::map(pol));
+		}
+		else outPols.push_back(STRING_DUMMY_VALUE);
+		inputs+=m_sectionH[i].inputs;
+	}
+}
 void CDataCollection::getInputsConfiguration(ACS::longSeq& sectionID,ACS::longSeq& feeds,ACS::longSeq& ifs,ACS::doubleSeq& freqs,ACS::doubleSeq& bws,ACS::doubleSeq& atts)
 {
 	long inputs=0;
@@ -424,7 +443,7 @@ bool CDataCollection::setSubScanSetup(const Management::TSubScanSetup& setup,boo
 			baseName=setup.baseName;
 			temp.Format("_%03d_%03d",m_scanID,m_subScanID);
 			m_fileName=baseName+temp+".fits";
-			m_summaryFileName="sum_"+baseName+".fits";
+			m_summaryFileName="Sum_"+baseName+".fits";
 			m_subScanHeader=true;
 			m_scanAxis=setup.axis;
 			m_startUTTime=setup.startUt;

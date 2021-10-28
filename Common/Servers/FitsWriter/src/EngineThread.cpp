@@ -11,6 +11,7 @@
 #include <AntennaModule.h>
 #include "CommonTools.h"
 #include <DiscosVersion.h>
+#include "FitsTools.h"
 
 using namespace IRA;
 using namespace FitsWriter_private;
@@ -415,16 +416,23 @@ void CEngineThread::runLoop()
 		long sectionNumber;
 		std::list<long> bins;
 		std::list<double> va, bWidth, freq, fRes;
+		std::list<IRA::CString> sPols;
 		ACS::doubleSeq rf,skyF,sectionSkyF;
+		ACS::longSeq pols;
 		
 		sectionNumber=m_data->getSectionsNumber();
-		m_summary->getFilePointer()->setKeyword("NUSEBANDS",sectionNumber);
+		m_summary->getFilePointer()->setKeyword("NUSEBAND",sectionNumber);
 		m_info.getSkyFrequency(skyF);	
 		m_data->getSectionSkyFrequency(sectionSkyF,skyF);
+		m_info.getRestFreq(rf);
+		m_info.getReceiverPolarization(pols);
+		sPols.clear();
+		m_data->getSectionTypeAndPols(sPols,pols);		
 		bins.clear();
 		bWidth.clear();		
 		freq.clear();
 		fRes.clear();
+		va.clear();
 		for(long j=0;j<sectionNumber;j++) {
 			double bw,bb;
 			bb=m_data->getSectionBins(j);
@@ -434,15 +442,25 @@ void CEngineThread::runLoop()
 			freq.push_back(sectionSkyF[j]);
 			fRes.push_back(bw/(double)bb);
 		}
+		if (rf.length()==1) {
+			for (long j=0;j<sectionNumber;j++) {
+				if (rf[0]>0.0) va.push_back(rf[0]);
+				else va.push_back(DOUBLE_DUMMY_VALUE);
+			}
+		}
+		else {
+			for (long j=0;j<rf.length();j++) {
+				if (rf[j]>0.0) va.push_back(rf[j]);
+				else va.push_back(DOUBLE_DUMMY_VALUE);
+			}	
+		}
 		m_summary->getFilePointer()->setKeyword("BWID",bWidth);
-		m_summary->getFilePointer()->setKeyword("FREQBIN",bins);
+		m_summary->getFilePointer()->setKeyword("FREQBINS",bins);
 		m_summary->getFilePointer()->setKeyword("FREQ",freq);
-		m_summary->getFilePointer()->setKeyword("FREQRES",fRes);
+		m_summary->getFilePointer()->setKeyword("FREQRESOL",fRes);
 
-		m_info.getRestFreq(rf);
-		va.clear();
-		CCommonTools::map(rf,va);
 		m_summary->getFilePointer()->setKeyword("RESTFREQ",va);
+		m_summary->getFilePointer()->setKeyword("POLATYPE",sPols);
 
 		//Backends::TSectionHeader const *sectHeader=m_data->getSectionHeader();	
 		

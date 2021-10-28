@@ -3,7 +3,7 @@
 
 using namespace FitsWriter_private; 
 
-double CDoubleTypeEntry::defaultValue=DOUBLE_DUNNY_VALUE;
+double CDoubleTypeEntry::defaultValue=DOUBLE_DUMMY_VALUE;
 IRA::CString CStringTypeEntry::defaultValue(STRING_DUMMY_VALUE);
 long CLongTypeEntry::defaultValue=LONG_DUMMY_VALUE;
 TFileTypeEnumeration CDoubleTypeEntry::typeSpec=_FILE_DOUBLE_TYPE_S;

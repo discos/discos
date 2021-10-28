@@ -233,7 +233,8 @@ bool CFitsWriter::create()
 	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY9,m_lastError)) return false;
 	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY10,m_lastError)) return false;
 	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY11,m_lastError)) return false;
-	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY12,m_lastError)) return false;	
+	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY12,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY13,m_lastError)) return false;	
 	
 	if (!CFitsTools::primaryHeaderComment(pFits,CREDITS1,m_lastError)) return false;
 	if (!CFitsTools::primaryHeaderComment(pFits,CREDITS2,m_lastError)) return false;

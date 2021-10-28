@@ -100,19 +100,19 @@ public:
 	}
 
 	static bool map(const char *strMode,TPolarization& mode) {
-		if (strcasecmp(strMode,"LEFT")==0) {
+		if (strcasecmp(strMode,"LCP")==0) {
 			mode=RCV_LCP;
 			return true;
 		}
-		if (strcasecmp(strMode,"RIGHT")==0) {
+		if (strcasecmp(strMode,"RCP")==0) {
 			mode=RCV_RCP;
 			return true;
 		}
-		if (strcasecmp(strMode,"VERTICAL")==0) {
+		if (strcasecmp(strMode,"VLP")==0) {
 			mode=RCV_VLP;
 			return true;
 		}
-		if (strcasecmp(strMode,"HORIZONTAL")==0) {
+		if (strcasecmp(strMode,"HLP")==0) {
 			mode=RCV_HLP;
 			return true;
 		}
@@ -122,16 +122,16 @@ public:
 	}
 	static const char *map(const TPolarization& mode ) {
 		if (mode==RCV_LCP) {
-			return "LEFT";
+			return "LCP";
 		}
 		if (mode==RCV_RCP) {
-			return "RIGHT";
+			return "RCP";
 		}
 		if (mode==RCV_VLP) {
-			return "VERTICAL";
+			return "VLP";
 		}
 		else { //RCV_HLP
-			return "HORIZONTAL";
+			return "HLP";
 		}
 	}
 };

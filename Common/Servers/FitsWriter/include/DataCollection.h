@@ -361,6 +361,8 @@ public:
 	*/
 	void getSectionSkyFrequency(ACS::doubleSeq& outFreq,const ACS::doubleSeq& skyFreqs) const;
 	
+	void getSectionTypeAndPols(std::list<IRA::CString>& outPols,const ACS::longSeq& pols) const;
+	
 	/**
 	 * Get number of expected streams coming from a section.
 	 * @param section section identifier

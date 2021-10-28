@@ -29,6 +29,10 @@ int main(int argc, char *argv[])
 	freq.push_back(22040.12345);
 	//restFreq.push_back(90.1);
 	//restFreq.push_back(123.77);
+	std::list<IRA::CString> pols;
+	pols.push_back("RCP");
+	pols.push_back("LCP");
+	
 
 	// time
 	IRA::CIRATools::getTime(currentUT); // get the current time
@@ -47,6 +51,7 @@ int main(int argc, char *argv[])
 	sumWriter.getFile().setKeyword("RESTFREQ",restFreq); //double multi
 	sumWriter.getFile().setKeyword("FREQ",freq); //double multi
 	sumWriter.getFile().setKeyword("BackendName","TP");  //string single
+	sumWriter.getFile().setKeyword("POLATYPE",pols);
 
 	//
 	//sumWriter.getFile().setKeyword("test",2341.2213); //double single, table header keyword
