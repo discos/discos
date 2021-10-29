@@ -13,6 +13,10 @@
 #include <CCfits>
 #include <IRA>
 
+#define LONG_DUMMY_VALUE -999
+#define DOUBLE_DUMMY_VALUE -999.0
+#define STRING_DUMMY_VALUE "NULL"
+
 namespace FitsWriter_private {
 
 class CFitsTools {
