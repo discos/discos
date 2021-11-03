@@ -18,4 +18,9 @@
         Type="IDL:alma/Antenna/Moon:1.0"
         Container="AntennaContainer"
         ImplLang="cpp"/>     
+     <_ Name="*"	    
+        Code="SolarSystemBodyImpl"	  
+        Type="IDL:alma/Antenna/SolarSystemBody:1.0"
+        Container="AntennaContainer"
+        ImplLang="cpp"/>     
 </Components>
