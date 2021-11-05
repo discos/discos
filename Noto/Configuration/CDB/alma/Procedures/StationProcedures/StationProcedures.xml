@@ -47,8 +47,8 @@
 	device=0
 	calmux=TotalPower
 	calOff
-	ifdist=1,1,44
-	ifdist=2,1,32
+	ifdist=1,1,22
+	ifdist=2,1,22
 </body>
 </Procedure>
 
