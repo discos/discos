@@ -26,20 +26,30 @@
         elevation tracking corrections
         -->
         <Xaxis>mm,-70.0,70.0,15,0,0,0,0</Xaxis>
-        <Yaxis>mm,-70.0,70.0,-37.9929,0,0,0,0</Yaxis>
-        <Zaxis>mm,-70.0,70.0,14.4818,0,0,0,0</Zaxis>
-        <THETAXaxis>deg,-5,5.0,-0.0150346,0,0,0,0</THETAXaxis>
-        <THETAYaxis>deg,-5,5.0,-0.0486663,0,0,0,0</THETAYaxis>
+        <Yaxis>mm,-70.0,70.0,-37.9928595,0.73212879,-0.00306993,0,0</Yaxis>
+        <Zaxis>mm,-70.0,70.0,14.4818271,-0.33632055,0.0016314,0,0</Zaxis>
+        <THETAXaxis>deg,-5,5.0,-0.015034618,0.000379257,-0.0000031825,0,0</THETAXaxis>
+        <THETAYaxis>deg,-5,5.0,-0.048666344,-0.000499178,0.0000063829,0,0</THETAYaxis>
     </MinorServo>
     <MinorServo>
         <code>CCC</code>
         <primary>0</primary>
         <trackel>1</trackel>
         <Xaxis>mm,-70.0,70.0,-7.62,0,0,0,0</Xaxis>
-        <Yaxis>mm,-70.0,70.0,-18.2314,0,0,0,0</Yaxis>
-        <Zaxis>mm,-70.0,70.0,-6.53656,0,0,0,0</Zaxis>
-        <THETAXaxis>deg,-5,5.0,-0.0663735,0,0,0,0</THETAXaxis>
-        <THETAYaxis>deg,-5,5.0,0.0287089,0,0,0,0</THETAYaxis>
+        <Yaxis>mm,-70.0,70.0,-18.231423,0,0,0,0</Yaxis>
+        <Zaxis>mm,-70.0,70.0,-6.536418,0,0,0,0</Zaxis>
+        <THETAXaxis>deg,-5,5.0,-0.066373534,0,0,0,0</THETAXaxis>
+        <THETAYaxis>deg,-5,5.0,0.028708897,0,0,0,0</THETAYaxis>
+    </MinorServo>
+    <MinorServo>
+        <code>CHC</code>
+        <primary>0</primary>
+        <trackel>1</trackel>
+        <Xaxis>mm,-70.0,70.0,-18.41,0,0,0,0</Xaxis>
+        <Yaxis>mm,-70.0,70.0,7.546086,0,0,0,0</Yaxis>
+        <Zaxis>mm,-70.0,70.0,14.781045,-0.41865813,0.00259974,0,0</Zaxis>
+        <THETAXaxis>deg,-5,5.0,0.025683975,0,0,0,0</THETAXaxis>
+        <THETAYaxis>deg,-5,5.0,0.066054159,0,0,0,0</THETAYaxis>
     </MinorServo>
     <MinorServo>
         <code>XXP</code>

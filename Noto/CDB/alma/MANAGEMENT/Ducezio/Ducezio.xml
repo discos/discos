@@ -23,7 +23,7 @@
              AntennaBossInterface="IDL:alma/Antenna/AntennaBoss:1.0"
              ObservatoryInterface="IDL:alma/Antenna/Observatory:1.0"
 	         ReceiversBossInterface="IDL:alma/Receivers/ReceiversBoss:1.0"
-	         MinorServoBossInterface=""
+			   MinorServoBossInterface="IDL:alma/MinorServo/MinorServoBoss:1.0"
 	         ActiveSurfaceBossInterface="IDL:alma/ActiveSurface/NotoActiveSurfaceBoss:1.0"
 		 	 CustomLoggerInterface="IDL:alma/Management/CustomLogger:1.0"
 	     	 WeatherStationInstance="IDL:alma/Weather/NotoWeatherStation:1.0"	         

@@ -49,4 +49,9 @@ SRT/Clients/SRTActiveSurfaceGUIClient/src/moc_SRTActiveSurfaceCore.cpp
 SRT/Clients/SRTActiveSurfaceGUIClient/src/moc_SRTActiveSurfaceGUIui.cpp
 SRT/Errors/SRTActiveSurfaceErrors/idl/ASErrors.idl
 SRT/Interfaces/SRTActiveSurfaceInterface/idl/SRTActiveSurfaceBoss.idl
+<<<<<<< HEAD
 Common/Libraries/build.log
+=======
+SRT/Interfaces/SRTActiveSurfaceInterface/idl/SRTActiveSurfaceCommon.idl
+.DS_Store
+>>>>>>> origin/master

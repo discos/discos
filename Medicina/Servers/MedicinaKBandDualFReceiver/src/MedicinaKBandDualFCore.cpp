@@ -1,4 +1,5 @@
 #include "MedicinaKBandDualFCore.h"
+#include <MedicinaVertex.h>
 
 #define NUMBER_OF_STAGES 5 // Amplification stages
 
@@ -19,6 +20,12 @@ void MedicinaKBandDualFCore::initialize(maci::ContainerServices* services)
     m_idStageValues = std::vector<IRA::ReceiverControl::StageValues>(NUMBER_OF_STAGES);
     m_vgStageValues = std::vector<IRA::ReceiverControl::StageValues>(NUMBER_OF_STAGES); 
     CComponentCore::initialize(services);
+    try {
+    	m_medConfig.init(services); 
+    }
+    catch (ACSErr::ACSbaseExImpl& ex) {
+    	ACS_LOG(LM_FULL_INFO,"MedicinaKBandDualFCore::initialize",(LM_ERROR,"Vertex configuration not properly set"));
+    }
 }
 
 
@@ -83,7 +90,6 @@ ACS::doubleSeq MedicinaKBandDualFCore::getStageValues(const IRA::ReceiverControl
     return values;
 }
 
-
 void MedicinaKBandDualFCore::setMode(const char * mode) throw (
         ReceiversErrors::ModeErrorExImpl,
         ReceiversErrors::ReceiverControlBoardErrorExImpl,
@@ -108,6 +114,7 @@ void MedicinaKBandDualFCore::setMode(const char * mode) throw (
    }
 
 	m_configuration.setMode(cmdMode);
+	CMedicinaVertex vertex(m_medConfig.getVertexIPAddress(),m_medConfig.getVertexPort());
 
 	for (WORD i=0;i<m_configuration.getIFs();i++) {
 		m_startFreq[i]=m_configuration.getIFMin()[i];
@@ -127,6 +134,15 @@ void MedicinaKBandDualFCore::setMode(const char * mode) throw (
 	//     ComponentErrors::CORBAProblemExImpl,
 	//     ReceiversErrors::LocalOscillatorErrorExImpl
 	setLO(lo); 
+	if (m_medConfig.getVertexCommand()!="") {
+		int size=m_medConfig.getVertexCommand().GetLength();
+		if (!vertex.sendTo((const char *)m_medConfig.getVertexCommand(),size)) {
+			ACS_LOG(LM_FULL_INFO,"MedicinaKBandDualFCore::setMode()",
+			  (LM_ERROR,"Vertex Communication Error: %s",(const char *)vertex.getLastErrorMessage()));
+			CUSTOM_LOG(LM_FULL_INFO,"MedicinaKBandDualFCore::setMode()",
+			  (LM_WARNING,"Vertex not properly configured"));
+		}
+	}
 	
 	m_setupMode = cmdMode;
    //Here an error is raised when mode variable is inserted into the log string

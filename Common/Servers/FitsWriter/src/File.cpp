@@ -1,11 +1,11 @@
 #include "File.h"
 #include "FitsTools.h"
 
-using namespace FitsWriter_private;
+using namespace FitsWriter_private; 
 
-double CDoubleTypeEntry::defaultValue=0.0;
-IRA::CString CStringTypeEntry::defaultValue("NULL");
-long CLongTypeEntry::defaultValue=0;
+double CDoubleTypeEntry::defaultValue=DOUBLE_DUMMY_VALUE;
+IRA::CString CStringTypeEntry::defaultValue(STRING_DUMMY_VALUE);
+long CLongTypeEntry::defaultValue=LONG_DUMMY_VALUE;
 TFileTypeEnumeration CDoubleTypeEntry::typeSpec=_FILE_DOUBLE_TYPE_S;
 TFileTypeEnumeration CStringTypeEntry::typeSpec=_FILE_STRING_TYPE_S;
 TFileTypeEnumeration CLongTypeEntry::typeSpec=_FILE_LONG_TYPE_S;

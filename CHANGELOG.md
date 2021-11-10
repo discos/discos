@@ -84,19 +84,23 @@ and this project adheres to [Semantic Versioning](http://semver.org/
     
 ## [discos1.0.5] - 
 ## Added
-	issue #504 - added credits clause (regarding INAF data ownership) to fits files headers
-   issue #518 - KBand receivers cryo temperature read wrongly with connection problems. More information:
-    https://github.com/discos/discos/issues/518#issuecomment-590838480
-   issue #533 - New Fitszilla versione 1.21 online. The user offsets related keywords added to the primary header.
-	issue #556 - Added API to send emails to local system administrators. This feature is now exploted when a servo system oscillation is detected at Noto and Medicina
+    issue #504 - added credits clause (regarding INAF data ownership) to fits files headers
+    issue #518 - KBand receivers cryo temperature read wrongly with connection problems. More information: https://github.com/discos/discos/issues/518#issuecomment-590838480
+    issue #533 - New Fitszilla version 1.21 online. The user offsets related keywords added to the primary header.
+    issue #556 - Added API to send emails to local system administrators. This feature is now exploted when a servo system oscillation is detected at Noto and Medicina
+    issue #595 - Added ifdist command to use IF Distributor (for Nt telescope) from operator input.
 ## Fixed
     issue #518 - In case of communication error we set a dummy value (100000) for the temperature properties, and the related timestamp keeps the value of the last communication timestamp.
     issue #525 - When in LOCAL mode the receivers can turn on/off the noise mark and LNAs. There is no more MNG_FAILURE logging in case of LOCAL mode: only the LOCAL/REMOTE status (during component activation) and the change of status (LOCAL to REMOTE and viceversa) are written to the logfile.
 ## Changed  
-    issue #545 - Oscillation checks enabled for Mc and Nt telescopes, this setting is now under control of a CDB argument   
+    issue #545 - Oscillation checks enabled for Mc and Nt telescopes, this setting is now under control of a CDB argument
 
 ## [next release]
 ## Added
 ## Fixed
     issue #448 - Added Sky Offsets to calibration tool client
+    issue #585 - Fixed misshandled schedule with NULL as backend (Dry Run)
 ## Changed
+    issues #481, #484, #486, #487, #491, #493, #497. SRT Active Surface module has been improved in order to speed up its booting time and optimize its overall behavior
+	 issue #604 - The control software will not allow anymore that a schedule, belonging to another project, could be run. In that case a warning message is sent to user console
+	              and the execution aborted. 

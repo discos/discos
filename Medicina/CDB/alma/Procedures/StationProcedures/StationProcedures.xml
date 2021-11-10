@@ -7,6 +7,7 @@
 <body>
 	antennaSetup=CCC
 	receiversSetup=CCC
+	servoSetup=CCC
 	chooseBackend=TotalPower
 	initialize=CCC
 	setSection=0,*,730.0,*,*,*,*
@@ -21,6 +22,7 @@
 <body>
 	antennaSetup=CHC
 	receiversSetup=CHC
+	servoSetup=CHC
 	chooseBackend=TotalPower
 	initialize=CHC
 	setSection=0,*,300.0,*,*,*,*
@@ -37,6 +39,7 @@
 <body>
 	antennaSetup=KKC
 	receiversSetup=KKC
+	servoSetup=KKC
 	chooseBackend=TotalPower
 	initialize=KKC
 	device=0
@@ -53,6 +56,7 @@
 <body>
 	antennaSetup=XXP
 	receiversSetup=XXP
+	servoSetup=XXP
 	chooseBackend=TotalPower
 	initialize=XXP
 	setSection=0,*,730.0,*,*,*,*
@@ -67,6 +71,7 @@
 <body>
 	antennaSetup=CCC
 	receiversSetup=CCC
+	servoSetup=CCC
 	receiversMode=NARROWBANDWIDTH
 	chooseBackend=TotalPower
 	initialize=CCCL
@@ -84,6 +89,7 @@
 <body>
 	antennaSetup=CHC
 	receiversSetup=CHC
+	servoSetup=CHC
 	receiversMode=NARROWBANDWIDTH
 	chooseBackend=TotalPower
 	initialize=CHCL
