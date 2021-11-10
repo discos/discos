@@ -32,6 +32,7 @@ Common/Interfaces/AntennaInterface/idl/Mount.idl
 Common/Interfaces/AntennaInterface/idl/OTF.idl
 Common/Interfaces/AntennaInterface/idl/Observatory.idl
 Common/Interfaces/AntennaInterface/idl/SkySource.idl
+Common/Interfaces/AntennaInterface/idl/SolarSystemBody.idl
 Common/Interfaces/CommonInterface/idl/AntennaDefinitions.idl
 Common/Interfaces/CommonInterface/idl/BackendsDefinitions.idl
 Common/Interfaces/CommonInterface/idl/ManagmentDefinitions.idl
