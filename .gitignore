@@ -26,6 +26,9 @@ Common/Errors/ParserErrors/idl/ParserErrors.idl
 Common/Errors/ReceiversErrors/idl/DerotatorErrors.idl
 Common/Errors/ReceiversErrors/idl/ReceiversErrors.idl
 Common/Errors/XBackendErrors/idl/XBackendsErrors.idl
+Common/Errors/ActiveSurfaceErrors/idl/ASErrors.idl
+Common/Interfaces/ActiveSurfaceInterface/idl/ActiveSurfaceCommon.idl
+Common/Interfaces/AntennaInterface/idl/SolarSystemBody.idl
 Common/Interfaces/AntennaInterface/idl/AntennaBoss.idl
 Common/Interfaces/AntennaInterface/idl/Moon.idl
 Common/Interfaces/AntennaInterface/idl/Mount.idl
