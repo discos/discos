@@ -55,7 +55,11 @@ TEST_F(SolarSystemBodyTest,JupiterPosition){
 
 TEST_F(SolarSystemBodyTest,Sun){
     
-     Site *site = new Site(59393.5,degrad(9.5),degrad(39.5),700);
+     Site *site = new Site();
+     site -> setCoordinate(degrad(9.5),degrad(39.5),700);
+     site -> setTime(59393.5)
+     
+
      SolarSystemBody* p =   new SolarSystemBody(SUN);
      p->compute(site);
       

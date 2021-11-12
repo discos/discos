@@ -26,6 +26,11 @@ class Site: public  Now {
 public:  
       
     Site(double mj, double lon, double lt, double height);
+    Site();
+
+    void setCoordinate(double lon, double lt, double height);
+    void setTime(double mj);
+    
     void stampa(void);
     double getMjd();
     

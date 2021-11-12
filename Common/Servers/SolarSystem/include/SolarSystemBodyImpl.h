@@ -150,7 +150,7 @@ private:
         double m_az, m_el,az_off, el_off;
         double m_glon, m_glat;
         double m_ra2000,m_dec2000;
-
+        double m_dut1;
         /*
          * Currently used frame for the offsets 
          */

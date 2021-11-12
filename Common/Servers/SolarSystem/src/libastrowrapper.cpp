@@ -13,9 +13,36 @@ Site::Site(double mj, double lon, double lt, double height)
     this->n_lat=lt;
     this->n_lng=lon;
     this->n_epoch=J2000;
-//     this->n_heigt=height;
+   // this->n_height=height;
     
 }
+
+Site::Site()
+
+{
+	
+}
+
+void Site::setCoordinate(double lon, double lt,double height)
+{
+
+    this->n_lat=lt;
+    this->n_lng=lon;
+  //  this->n_heigt=height;
+
+}
+
+void Site::setTime(double mj)
+{
+
+    this->n_mjd=mj-15020; // xephem uses mjd 0 as 1899 12 31 at 12:00
+
+
+
+}
+	
+
+
 
 void Site::stampa(void){
 
@@ -53,6 +80,7 @@ SolarSystemBody::SolarSystemBody(PLCode code)
     
     
 }
+
 
 
 
