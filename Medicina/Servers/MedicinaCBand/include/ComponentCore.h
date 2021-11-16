@@ -6,7 +6,7 @@
 /*                                                                                                      */
 /* This code is under GNU General Public License (GPL).                                                 */
 /*                                                                                                      */
-/* Who                                		when            What                                    */
+/* Who                                		when            What                                        */
 /* Matteo De Biaggi(matteo.debiaggi@inaf.it) 15/10/2021        pull req                                 */
 
 #include "Configuration.h"

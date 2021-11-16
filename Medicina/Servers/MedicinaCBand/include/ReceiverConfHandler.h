@@ -1,6 +1,14 @@
 #ifndef MED_C_BAND_RECEIVER_CONF_H
 #define MED_C_BAND_RECEIVER_CONF_H
 
+/* **************************************************************************************************** */
+/* IRA Istituto di Radioastronomia                                                                      */
+/*                                                                                                      */
+/* This code is under GNU General Public License (GPL).                                                 */
+/*                                                                                                      */
+/* Who                                		when            What                                        */
+/* Matteo De Biaggi(matteo.debiaggi@inaf.it) 15/10/2021        pull req                                 */
+
 #include <IRA>
 #include <map>
 #include <vector>

@@ -6,10 +6,8 @@
 /*                                                                                                               */
 /* This code is under GNU General Public License (GPL).                                                          */
 /*                                                                                                               */
-/* Who                                when                     What                                              */
-/* Andrea Orlati(aorlati@ira.inaf.it) 02/08/2011       		   Creation                                          */
-/* Marco Buttu (mbuttu@oa-cagliari.inaf.it) 20/05/2015         External Mark                                     */
-
+/* Who                                when              What		                                             */
+/* Matteo De Biaggi(matteo.debiaggi) 15/11/2021     pull review													 */
 
 #ifndef __cplusplus
 #error This is a C++ include file and cannot be used from plain C

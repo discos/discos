@@ -1,6 +1,14 @@
 #ifndef MEDICINA_C_BAND_COMMONS_H
 #define MEDICINA_C_BAND_COMMONS_H
 
+/* **************************************************************************************************** */
+/* IRA Istituto di Radioastronomia                                                                      */
+/*                                                                                                      */
+/* This code is under GNU General Public License (GPL).                                                 */
+/*                                                                                                      */
+/* Who                                		when            What                                        */
+/* Matteo De Biaggi(matteo.debiaggi@inaf.it) 15/10/2021        pull req                                 */
+
 #include <IRA>
 #include <maciContainerServices.h>
 #include <ComponentErrors.h>

@@ -6,8 +6,8 @@
 /*                                                                                                               */
 /* This code is under GNU General Public Licence (GPL).                                                          */
 /*                                                                                                               */
-/* Who                                            when             What                                                       */
-/* Andrea Orlati(aorlati@ira.inaf.it)  11/08/2011      Creation                                                  */
+/* Who                                		when            What                                                */
+/* Matteo De Biaggi(matteo.debiaggi@inaf.it) 15/10/2021        pull req                                          */
 
 #include <acsThread.h>
 #include <ComponentCore.h>

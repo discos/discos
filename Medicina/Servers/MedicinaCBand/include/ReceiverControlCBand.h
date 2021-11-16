@@ -1,6 +1,14 @@
 #ifndef RECEIVER_CONTROL_C_BAND
 #define RECEIVER_CONTROL_C_BAND
 
+/* **************************************************************************************************** */
+/* IRA Istituto di Radioastronomia                                                                      */
+/*                                                                                                      */
+/* This code is under GNU General Public License (GPL).                                                 */
+/*                                                                                                      */
+/* Who                                		when            What                                        */
+/* Matteo De Biaggi(matteo.debiaggi@inaf.it) 15/10/2021        pull req                                 */
+
 #include <ReceiverControl.h>
 
 /**

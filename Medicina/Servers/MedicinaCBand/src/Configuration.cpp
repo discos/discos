@@ -1,5 +1,3 @@
-// $Id: Configuration.cpp,v 1.5 2011-06-01 18:24:44 a.orlati Exp $
-
 #include "Configuration.h"
 #include <math.h>
 #include "Defs.h"

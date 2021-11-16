@@ -5,9 +5,8 @@
 #
 # Makefile of ........
 #
-# who       when      what
-# --------  --------  ----------------------------------------------
-# andrea  01/08/11  created
+# Who                                		when            What      
+# Matteo De Biaggi(matteo.debiaggi@inaf.it) 15/10/2021        pull req
 #
 
 #*******************************************************************************
