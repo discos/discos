@@ -96,6 +96,7 @@ typedef struct {
 } Now;
 
 /* handy shorthands for fields in a Now pointer, np */
+/*
 #define mjd	np->n_mjd
 #define lat	np->n_lat
 #define lng	np->n_lng
@@ -107,7 +108,7 @@ typedef struct {
 #define epoch	np->n_epoch
 #define tznm	np->n_tznm
 #define mjed	mm_mjed(np)
-
+*/
 /* structures to describe objects of various types.
  */
 
