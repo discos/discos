@@ -32,6 +32,11 @@
 #include <AntennaErrors.h>
 #include  <EphemGeneratorS.h>
 #include <AntennaDefinitionsS.h>
+#include <map>
+#include <cctype>
+
+#include "libastrowrapper.h"
+
 
 class SolarSystemBodyImpl: public virtual acscomponent::ACSComponentImpl,public virtual POA_Antenna::SolarSystemBody
 
@@ -136,8 +141,12 @@ public:
 private:
   
       IRA::CString m_bodyName;
+      int m_bodycode;
+      
+      
       IRA::CSite m_site;
-
+        Site* m_sitex;  // site class for libastro 
+        
         double m_longitude;
         double m_latitude;
         double m_height;

@@ -11,6 +11,9 @@
 #include <SkySource.h>
 #include <iostream>
 
+
+
+
 using namespace ComponentErrors;
 // using namespace baci;
 using namespace IRA;
@@ -88,6 +91,15 @@ void SolarSystemBodyImpl::execute() throw (ACSErr::ACSbaseExImpl)
 	m_longitude=site->longitude;
 	m_latitude=site->latitude;
 	m_height=site->height;
+	
+	m_sitex= new Site();
+	m_sitex-> setCoordinate(site->longitude,site->latitude,site->height);
+	
+	
+	
+	
+	
+	
 	try {
 		getContainerServices()->releaseComponent((const char*)observatory->name());
 	}
@@ -163,9 +175,35 @@ bool SolarSystemBodyImpl::checkTracking(ACS::Time time,CORBA::Double az,CORBA::D
 void SolarSystemBodyImpl::setBodyName(const char* bodyName) throw (CORBA::SystemException)
 {
 
+
+typedef enum {
+    MERCURY,
+    VENUS,
+    MARS,
+    JUPITER,
+    SATURN,
+    URANUS,
+    NEPTUNE,
+    PLUTO,
+    SUN,
+    MOON,
+    NOBJ	/* total number of basic objects */
+} PLCode;
+
+
+
         AUTO_TRACE("SolarSystemBodyImpl::setBodyName()");
         m_bodyName=CString(bodyName);
+        m_bodyName.MakeUpper();
+        std::map<CString,int> plan;
+        plan["JUPITER"]=JUPITER;
+        
+         
+        
+        
+        
         std::cout << "name:" << bodyName <<std::endl;
+        std::cout << "code:" << plan[bodyName] <<std::endl;
         
 
 }
@@ -182,8 +220,10 @@ void SolarSystemBodyImpl::computeFlux(CORBA::Double freq, CORBA::Double fwhm, CO
 void SolarSystemBodyImpl::BodyPosition(TIMEVALUE &time)
 {
 
-        AUTO_TRACE("BodyPosition::computeFlux()");
-
+        AUTO_TRACE("SolarSystemBodyImpl::BodyPosition()");
+     
+     
+     
 }
 
 #include <maciACSComponentDefines.h>
