@@ -36,7 +36,7 @@ COMMON_SERVERS:=AntennaBoss Observatory OTF PointingModel Refraction SkySource \
                 Moon FitsWriter Scheduler ReceiversBoss ExternalClients \
                 CalibrationTool TotalPower NoiseGenerator CustomLogger \
                 XBackend PyDewarPositioner Sardara PyLocalOscillator MFKBandBaseReceiver PyCalmux \
-				ActiveSurfaceLan
+				ActiveSurfaceLan ActiveSurfaceUSD
 COMMON_CLIENTS:=AntennaBossTextClient ObservatoryTextClient \
                 GenericBackendTextClient ReceiversBossTextClient \
                 SystemTerminal CaltoolClient CustomLoggingClient \
@@ -104,7 +104,7 @@ ifeq ($(STATION),SRT)
 	BackendsImplementation_MODULES:=TotalPower NoiseGenerator XBackend
 	ReceiversImplementation_MODULES:=ReceiversBoss SRTKBandMFReceiver SRT7GHzReceiver SRTLPBandReceiver
 	WeatherStationImplementation_MODULES:=SRTWeatherStation
-	SRTActiveSurfaceImplementation_MODULES:=ActiveSurfaceUSDServer SRTActiveSurfaceBoss
+	SRTActiveSurfaceImplementation_MODULES:=SRTActiveSurfaceBoss
 	MinorServoImplementation_MODULES:=SRTMinorServo
 	
 	CDB_SVN_LOCATION="SRT/Configuration/CDB"
