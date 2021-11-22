@@ -32,6 +32,7 @@ CSRTActiveSurfaceBossCore::CSRTActiveSurfaceBossCore(ContainerServices *service,
     m_error_strings[ASErrors::USDStillRunning   ] = "USDStillRunning";
     m_error_strings[ASErrors::USDunCalibrated   ] = "USDunCalibrated";
     m_error_strings[ASErrors::CannotGetUSD      ] = "CannotGetUSD";
+    m_error_strings[ASErrors::UnknownProfile    ] = "UnknownProfile";
 }
 
 CSRTActiveSurfaceBossCore::~CSRTActiveSurfaceBossCore()
