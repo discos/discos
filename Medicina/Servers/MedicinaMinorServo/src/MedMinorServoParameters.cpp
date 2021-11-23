@@ -174,6 +174,8 @@ MedMinorServoConfiguration
 get_configuration_from_CDB(maci::ContainerServices* services)
 {
     MedMinorServoConfiguration configuration;
+    MedMinorServoConstants *medMinorServoConstants = MedMinorServoConstants::getInstance();
+
     IRA::CError error;
     error.Reset();
     IRA::CDBTable minor_servo_table(services,
@@ -230,12 +232,18 @@ get_configuration_from_CDB(maci::ContainerServices* services)
                     (const char*)minor_servo_table["YPaxis"]->asString()
                 )
             );
+            medMinorServoConstants->MINOR_SERVO_YP.position_min= parameters.getAxesVector().back().get_min();
+            medMinorServoConstants->MINOR_SERVO_YP.position_max= parameters.getAxesVector().back().get_min();
+
             parameters.add_axis(
                 parseAxisLine(
                     "ZP",
                     (const char*)minor_servo_table["ZPaxis"]->asString()
                 )
             );
+            medMinorServoConstants->MINOR_SERVO_ZP.position_min= parameters.getAxesVector().back().get_min();
+            medMinorServoConstants->MINOR_SERVO_ZP.position_max= parameters.getAxesVector().back().get_min();
+
         }else{ //secondary focus
             parameters.add_axis(
                 parseAxisLine(
@@ -243,12 +251,18 @@ get_configuration_from_CDB(maci::ContainerServices* services)
                     (const char*)minor_servo_table["Xaxis"]->asString()
                 )
             );
+            medMinorServoConstants->MINOR_SERVO_X.position_min= parameters.getAxesVector().back().get_min();
+            medMinorServoConstants->MINOR_SERVO_X.position_max= parameters.getAxesVector().back().get_min();
+
             parameters.add_axis(
                 parseAxisLine(
                     "Y",
                     (const char*)minor_servo_table["Yaxis"]->asString()
                 )
             );
+            medMinorServoConstants->MINOR_SERVO_Y.position_min= parameters.getAxesVector().back().get_min();
+            medMinorServoConstants->MINOR_SERVO_Y.position_max= parameters.getAxesVector().back().get_min();
+
             parameters.add_axis(
                 parseAxisLine(
                     "Z",
