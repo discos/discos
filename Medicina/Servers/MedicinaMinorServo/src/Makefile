@@ -16,7 +16,7 @@ LIBRARIES_L     =
 
 #
 # <brief description of lllll library>
-MedMinorServoControl_OBJECTS   = MedMinorServoControl MedMinorServoGeometry \
+MedMinorServoControl_OBJECTS   = MedMinorServoConstants MedMinorServoControl MedMinorServoGeometry \
                                  MedMinorServoTime MedMinorServoModbus \
                                  PositionQueue
 
@@ -24,13 +24,13 @@ MedMinorServoControl_LIBS   = baci acsnc IRALibrary ModbusChannel ManagmentDefin
                               ManagementErrors \
                               ComponentErrors boost_thread-mt boost_system
 
-MinorServoBossImpl_OBJECTS = MedMinorServoControl MedMinorServoGeometry \
+MinorServoBossImpl_OBJECTS = MedMinorServoConstants MedMinorServoControl MedMinorServoGeometry \
                              MedMinorServoStatus MedMinorServoParameters \
                              MedMinorServoTime MedMinorServoModbus \
                              MedMinorServoScan PositionQueue \
                              PositionMonitoringThread MSBossPublisher \
                              SetupThread ScanThread \
-                             MSBossTracker MedMinorServoOffset MinorServoBossImpl
+                             MSBossTracker MedMinorServoOffset  MinorServoBossImpl
 
 MinorServoBossImpl_LIBS = MedMinorServoBossStubs MinorServoBossStubs \
                           ManagmentDefinitionsStubs MinorServoDefinitionsStubs \
@@ -42,7 +42,7 @@ MinorServoBossImpl_LIBS = MedMinorServoBossStubs MinorServoBossStubs \
                           baci DiscosVersion
 
 EXECUTABLES_L     = real_to_virtual# testclient testgeometry testprimary testsecondary testpassive real_to_virtual
-real_to_virtual_OBJECTS = real_to_virtual testutils MedMinorServoGeometry MedMinorServoTime
+real_to_virtual_OBJECTS = real_to_virtual testutils MedMinorServoConstants MedMinorServoGeometry MedMinorServoTime
 real_to_virtual_LIBS = IRALibrary
 #testclient_OBJECTS = testclient testutils MedMinorServoModbus MedMinorServoGeometry MedMinorServoTime MedMinorServoControl PositionQueue
 #testclient_LIBS = IRALibrary boost_thread ModbusChannel
@@ -56,7 +56,7 @@ real_to_virtual_LIBS = IRALibrary
 #testgeometry_LIBS = IRALibrary boost_unit_test_framework boost_thread 
 
 EXECUTABLES = scudisconnect
-scudisconnect_OBJECTS = scudisconnect MedMinorServoModbus MedMinorServoGeometry MedMinorServoTime MedMinorServoControl PositionQueue
+scudisconnect_OBJECTS = scudisconnect MedMinorServoModbus MedMinorServoConstants MedMinorServoGeometry MedMinorServoTime MedMinorServoControl PositionQueue
 scudisconnect_LIBS = IRALibrary ModbusChannel boost_thread-mt boost_system
 
 #
