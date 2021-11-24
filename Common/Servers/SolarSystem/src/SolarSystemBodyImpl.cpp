@@ -92,7 +92,7 @@ void SolarSystemBodyImpl::execute() throw (ACSErr::ACSbaseExImpl)
 	m_latitude=site->latitude;
 	m_height=site->height;
 	
-	m_sitex= new Site();
+	m_sitex= new xephemlib::Site();
 	m_sitex-> setCoordinate(site->longitude,site->latitude,site->height);
 	
 	
@@ -175,7 +175,7 @@ bool SolarSystemBodyImpl::checkTracking(ACS::Time time,CORBA::Double az,CORBA::D
 void SolarSystemBodyImpl::setBodyName(const char* bodyName) throw (CORBA::SystemException)
 {
 
-
+/*
 typedef enum {
     MERCURY,
     VENUS,
@@ -187,23 +187,26 @@ typedef enum {
     PLUTO,
     SUN,
     MOON,
-    NOBJ	/* total number of basic objects */
+    NOBJ	// total number of basic objects 
 } PLCode;
-
+*/
 
 
         AUTO_TRACE("SolarSystemBodyImpl::setBodyName()");
         m_bodyName=CString(bodyName);
         m_bodyName.MakeUpper();
-        std::map<CString,int> plan;
-        plan["JUPITER"]=JUPITER;
+//        std::map<CString,int> plan;
+
+        PLCode  code;
+        
+        code=xephemlib::SolarSystemBody::getPlanetCodeFromName(bodyName);
         
          
         
         
         
         std::cout << "name:" << bodyName <<std::endl;
-        std::cout << "code:" << plan[bodyName] <<std::endl;
+        std::cout << "code:" << code <<std::endl;
         
 
 }

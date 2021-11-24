@@ -145,7 +145,7 @@ private:
       
       
       IRA::CSite m_site;
-        Site* m_sitex;  // site class for libastro 
+        xephemlib::Site* m_sitex;  // site class for libastro 
         
         double m_longitude;
         double m_latitude;

@@ -1,11 +1,14 @@
 #include "libastrowrapper.h"
 
-
+namespace xephemlib {
+	
 
 
 const char  *planetnames[]={"Mercury","Venus","Mars","Jupiter","Saturn",
                             "Uranus","Neptune","Pluto","Sun","Moon","NOBJ"};
                             
+
+
 
 Site::Site(double mj, double lon, double lt, double height)
 {
@@ -81,6 +84,47 @@ SolarSystemBody::SolarSystemBody(PLCode code)
     
 }
 
+PLCode  SolarSystemBody::getPlanetCodeFromName(std::string  str)
+{
+     std::locale loc;
+    for (std::string::size_type i=0; i<str.length(); ++i)
+           str[i]=std::toupper(str[i],loc);
+ 
+
+     return SolarSystemBody::plan[str];
+     
+		
+		
+}
+	
+
+
+
+std::string  SolarSystemBody::getPlanetNameFromCode(PLCode code ){
+	
+
+
+
+
+    std::string name;
+    for (std::map<std::string,PLCode>::iterator it=SolarSystemBody::plan.begin(); it!=SolarSystemBody::plan.end(); ++it)
+    {       
+#ifdef DEBUG        
+         //   std::cout << it->first << " => " << it->second << '\n';
+#endif
+            if (it->second == code)
+            name=it->first;
+            
+    }
+
+
+  
+    return name;
+    
+    
+
+
+}
 
 
 
@@ -117,3 +161,43 @@ void SolarSystemBody::report()
     
     
 }
+
+std::map<std::string,PLCode>SolarSystemBody::plan;  //definition of static variable
+
+
+ bool  createMap() // function to initialize static map 
+{        /*
+typedef enum {
+    MERCURY,
+    VENUS,
+    MARS,
+    JUPITER,
+    SATURN,
+    URANUS,
+    NEPTUNE,
+    PLUTO,
+    SUN,
+    MOON,
+    NOBJ	// total number of basic objects 
+} PLCode;
+*/
+   
+         SolarSystemBody::plan["MERCURY"]=MERCURY;
+         SolarSystemBody::plan["VENUS"]=VENUS ; 
+         SolarSystemBody::plan["MARS"]=MARS ;          
+         SolarSystemBody::plan["JUPITER"]=JUPITER;
+         SolarSystemBody::plan["SATURN"]=SATURN ; 
+         SolarSystemBody::plan["URANUS"]=URANUS ; 
+         SolarSystemBody::plan["NEPTUNE"]=NEPTUNE ;        
+         SolarSystemBody::plan["PLUTO"]=PLUTO ;   
+         SolarSystemBody::plan["SUN"]=SUN ;                          
+         SolarSystemBody::plan["MOON"]=MOON ;   
+         SolarSystemBody::plan["NOBJ"]=NOBJ ;                                            
+	      return 0;
+}
+
+
+static bool _tmp=createMap();  // call to the function
+
+}
+
