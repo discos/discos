@@ -29,6 +29,7 @@
 #define DT_SIDERSEC 1.00273790935
 #define DT_RAD2SIDERSEC (2*DPI/86164.0905)
 #define DT_SIDERDAY_HOUR 23.9344696
+#define DT_UNIX_OFFSET 122192928000000000
 
 namespace IRA {
 
@@ -159,6 +160,12 @@ public:
 	 * @return the epoch which is the year with the fracional part of the year.
 	*/	
 	double getBesselianEpoch() const;
+
+	/**
+	 * Returns the UNIX epoch of the date.
+	 * @return the epoch which is the total elapsed seconds.microseconds since 01/10/1970 00:00 UT (return precision is milliseconds)
+	*/
+	double getUNIXEpoch() const;
 	
 	/**
 	 * @return the year of the current calendar

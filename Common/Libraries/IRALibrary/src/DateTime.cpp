@@ -147,6 +147,13 @@ double CDateTime::getBesselianEpoch() const
 	return slaEpb(m_jd-DT_MJD0);
 }
 
+double CDateTime::getUNIXEpoch() const
+{
+	TIMEVALUE tv;
+	this->getDateTime(tv);
+	return (double)(tv.value().value - DT_UNIX_OFFSET) / 10000000;
+}
+
 unsigned CDateTime::getDayOfYear() const
 {
 	unsigned tmp=0;
