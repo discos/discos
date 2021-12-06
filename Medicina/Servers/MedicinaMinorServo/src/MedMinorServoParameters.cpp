@@ -233,7 +233,7 @@ get_configuration_from_CDB(maci::ContainerServices* services)
                 )
             );
             medMinorServoConstants->MINOR_SERVO_YP.position_min= parameters.getAxesVector().back().get_min();
-            medMinorServoConstants->MINOR_SERVO_YP.position_max= parameters.getAxesVector().back().get_min();
+            medMinorServoConstants->MINOR_SERVO_YP.position_max= parameters.getAxesVector().back().get_max();
 
             parameters.add_axis(
                 parseAxisLine(
@@ -242,7 +242,7 @@ get_configuration_from_CDB(maci::ContainerServices* services)
                 )
             );
             medMinorServoConstants->MINOR_SERVO_ZP.position_min= parameters.getAxesVector().back().get_min();
-            medMinorServoConstants->MINOR_SERVO_ZP.position_max= parameters.getAxesVector().back().get_min();
+            medMinorServoConstants->MINOR_SERVO_ZP.position_max= parameters.getAxesVector().back().get_max();
 
         }else{ //secondary focus
             parameters.add_axis(
@@ -252,7 +252,7 @@ get_configuration_from_CDB(maci::ContainerServices* services)
                 )
             );
             medMinorServoConstants->MINOR_SERVO_X.position_min= parameters.getAxesVector().back().get_min();
-            medMinorServoConstants->MINOR_SERVO_X.position_max= parameters.getAxesVector().back().get_min();
+            medMinorServoConstants->MINOR_SERVO_X.position_max= parameters.getAxesVector().back().get_max();
 
             parameters.add_axis(
                 parseAxisLine(
@@ -261,7 +261,7 @@ get_configuration_from_CDB(maci::ContainerServices* services)
                 )
             );
             medMinorServoConstants->MINOR_SERVO_Y.position_min= parameters.getAxesVector().back().get_min();
-            medMinorServoConstants->MINOR_SERVO_Y.position_max= parameters.getAxesVector().back().get_min();
+            medMinorServoConstants->MINOR_SERVO_Y.position_max= parameters.getAxesVector().back().get_max();
 
             parameters.add_axis(
                 parseAxisLine(
