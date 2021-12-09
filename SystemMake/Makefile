@@ -66,7 +66,7 @@ MED_CLIENTS:=MedicinaMountTextClient
 MED_MISC:=MedScripts
 
 NT_DOC:=NTDox
-NT_ERRORS:=NotoActiveSurfaceErrors
+NT_ERRORS:= #ActiveSurfaceErrors NotoActiveSurfaceErrors
 NT_INTERFACES:=NotoAntennaInterface NotoReceiversInterface NotoWeatherStationInterface NotoActiveSurfaceInterface \
 NT_LIBRARIES:=
 NT_SERVERS:= NotoReceivers NotoMount NotoWeatherStation NotoActiveSurface NotoMinorServo NotoPyLocalOscillator NotoPyIfDistributor
@@ -146,7 +146,7 @@ else
 ifeq ($(STATION),Noto)
 	#Add all modules included in the Noto system in this sequence
 	#Doc, (Errors, Interfacies, Libraries, Servers, Clients, Misc)
-	MODULES:= ClientErrors ComponentErrors AntennaErrors ParserErrors BackendsErrors ManagementErrors ReceiversErrors MetrologyErrors MinorServoErrors \
+	MODULES:= ActiveSurfaceErrors ClientErrors ComponentErrors AntennaErrors ParserErrors BackendsErrors ManagementErrors ReceiversErrors MetrologyErrors MinorServoErrors \
 		ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface \
 		NotoAntennaInterface \
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary PyTestingLibrary \
