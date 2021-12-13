@@ -55,8 +55,8 @@ INCLUDES        = hexlib.h SRTMinorServoCommandLibrary.h
 #
 # Libraries (public and local)
 # ----------------------------
-LIBRARIES       = SRTMinorServoLibrary SRTMinorServoCommandLibrary
-LIBRARIES_L     = PySRTMinorServoCommandLibrary
+LIBRARIES       = SRTMinorServoLibrary SRTMinorServoCommandLibrary PySRTMinorServoCommandLibrary
+LIBRARIES_L     =
 SRTMinorServoLibrary_OBJECTS = hexlib
 SRTMinorServoLibrary_LIBS =
 SRTMinorServoCommandLibrary_OBJECTS = SRTMinorServoCommandLibrary
@@ -89,7 +89,7 @@ PY_SCRIPTS_L       =
 PY_MODULES         =
 PY_MODULES_L       =
 
-PY_PACKAGES        =
+PY_PACKAGES        = SRTMinorServoCommandLibrary
 PY_PACKAGES_L      =
 pppppp_MODULES	   =
 
