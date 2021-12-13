@@ -51,9 +51,24 @@ void CIRATools::getTime(TIMEVALUE& Now)
 
 ACS::Time CIRATools::getACSTime()
 {
-    TIMEVALUE now;
-    CIRATools::getTime(now);
-    return now.value().value;
+	TIMEVALUE now;
+	CIRATools::getTime(now);
+	return now.value().value;
+}
+
+double CIRATools::getUNIXEpoch()
+{
+	return CIRATools::ACSTime2UNIXEpoch(CIRATools::getACSTime());
+}
+
+double CIRATools::ACSTime2UNIXEpoch(ACS::Time acs_time)
+{
+	return double(acs_time - ACSTIME2UNIXEPOCHOFFSET) / 10000000;
+}
+
+ACS::Time CIRATools::UNIXEpoch2ACSTime(double unix_epoch)
+{
+	return ACS::Time(long(unix_epoch * 10000000) + ACSTIME2UNIXEPOCHOFFSET);
 }
 
 void CIRATools::timeCopy(TIMEVALUE& dst,const TIMEVALUE& src)
