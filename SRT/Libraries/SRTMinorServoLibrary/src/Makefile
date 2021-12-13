@@ -56,11 +56,13 @@ INCLUDES        = hexlib.h SRTMinorServoCommandLibrary.h
 # Libraries (public and local)
 # ----------------------------
 LIBRARIES       = SRTMinorServoLibrary SRTMinorServoCommandLibrary
-LIBRARIES_L     =
+LIBRARIES_L     = PySRTMinorServoCommandLibrary
 SRTMinorServoLibrary_OBJECTS = hexlib
 SRTMinorServoLibrary_LIBS =
 SRTMinorServoCommandLibrary_OBJECTS = SRTMinorServoCommandLibrary
 SRTMinorServoCommandLibrary_LIBS = IRALibrary
+PySRTMinorServoCommandLibrary_OBJECTS = PySRTMinorServoCommandLibrary
+PySRTMinorServoCommandLibrary_LIBS = SRTMinorServoCommandLibrary boost_python
 
 #
 # <brief description of lllll library>
