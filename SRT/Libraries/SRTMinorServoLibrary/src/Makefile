@@ -23,7 +23,6 @@ USER_CFLAGS = -Wall
 #
 # additional include and library search paths
 # USER_INC = /usr/local/include
-USER_LIB = -lgsl -lgslcblas -lm
 
 #
 # MODULE CODE DESCRIPTION:
@@ -58,9 +57,9 @@ INCLUDES        = hexlib.h SRTMinorServoCommandLibrary.h
 LIBRARIES       = SRTMinorServoLibrary SRTMinorServoCommandLibrary PySRTMinorServoCommandLibrary
 LIBRARIES_L     =
 SRTMinorServoLibrary_OBJECTS = hexlib
-SRTMinorServoLibrary_LIBS =
+SRTMinorServoLibrary_LIBS = gsl gslcblas m
 SRTMinorServoCommandLibrary_OBJECTS = SRTMinorServoCommandLibrary
-SRTMinorServoCommandLibrary_LIBS = IRALibrary
+SRTMinorServoCommandLibrary_LIBS =
 PySRTMinorServoCommandLibrary_OBJECTS = PySRTMinorServoCommandLibrary
 PySRTMinorServoCommandLibrary_LIBS = SRTMinorServoCommandLibrary boost_python
 
