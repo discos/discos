@@ -1,0 +1,134 @@
+#scp -P 9922 -o ProxyCommand="ssh -p 5122 -W %h:%p observer@192.167.189.30" vncStart staff@192.167.189.98:~/
+
+
+#!/usr/bin/env bash
+
+print_help() {
+    echo " "
+    echo "`basename $0` v1.0"
+    echo " "
+    echo "Copy files from and toward the DISCOS system."
+    echo "Usage: '`basename $0` [OPTIONS] <projectid>@<gatein>'"
+    echo "<projectid> indicates the project for which the files are copied."
+    echo "<gatein> access point into the observatory lan. This information is provided by local staff. Use 'local' if already inside the local area network."
+    echo "Options:"
+    echo "    -h | --help               prints this help message and exit"
+    echo "    -p | --port               ssh port if different from the default one" 
+    echo "    -d | --download           this allows to download files or folders from DISCOS to your local machine"
+    echo "    -u | --upload             this allows to upload files or folders to DISCOS from your local machine"
+    echo "    -f | --file               local file(s) o folder(s) involved in the copy process. Normal placehlder are allowed"
+    exit 1
+}
+
+current_system="LINUX"
+upload=""
+download=""
+ssh_port="22"
+project=""
+gatein=""
+local="FALSE"
+files=""
+
+while [[ $# -gt 0 ]]
+do
+key="$1"
+case $key in
+    -h|--help)
+    print_help
+    ;;
+    -p|--port)
+    ssh_port=$2
+    shift
+    shift
+    ;;
+    -d|--download)
+    download=$2
+    shift
+    shift
+    ;;
+    -u|--upload)
+    upload=$2
+    shift
+    shift
+    ;;
+    -f|--file)
+    files=$2
+    shift
+    shift
+    ;;
+    *)
+    if [[ $1 == *"@"* ]]; then
+        while IFS='@' read -ra ARG; do
+            if [[ "${#ARG[@]}" -ne 2 ]]; then
+                echo -e "Please provide a correct <projectid>@<gatein> pair, retry!"
+                print_help
+            fi
+            project=${ARG[0]}
+            gatein=${ARG[1]}
+        done <<< "$1"
+    else
+        echo "Unrecognized option: '$1'!"
+        print_help
+    fi
+    shift
+    ;;
+esac
+done
+
+if [[ "$gatein" == "local" ]]; then
+    local="TRUE"
+fi
+
+if [[ "$upload" == "" && "$download" == "" ]]; then
+   echo -e "Inconsistent input, at least one of '--upload' and '--download' should be provided!"
+   print_help
+fi
+
+if [[ "$upload" != "" && "$download" != "" ]]; then
+   echo -e "Inconsistent input, only one of '--upload' and '--download' should be provided!"
+   print_help
+fi
+
+if [[ "$files" == "" ]]; then
+   echo -e "Inconsistent input, '--file' is mandatory!"
+   print_help
+fi
+
+if [[ "$OSTYPE" == *"linux-gnu"* ]]
+then
+   echo -e "Linux OS is detected..."
+   current_system="LINUX"
+elif [[ "$OSTYPE" == *"darwin"* ]]
+then
+   echo -e "Mac OS is detected..."
+   current_system="MACOS"
+else
+   echo -e "Not supported OS, some unpredictables results may happen!"	
+fi
+
+#echo $local
+#echo $project
+#echo $gatein
+#echo $ssh_port
+#echo $files
+#echo $upload
+#echo $download
+#echo $current_system
+
+proxy="ProxyCommand=ssh -p 5122 -W %h:%p observer@""$gatein"
+#echo $proxy
+
+if [[ "$local" == "FALSE" ]]; then 
+    if [[ -n "$upload" ]]; then
+        scp -P 9922 -o "$proxy" $files staff@192.167.189.98:$upload
+    elif [[ -n "$download" ]]; then
+        scp -P 9922 -o "$proxy" staff@192.167.189.98:$download $files
+    fi
+else
+    if [[ -n "$upload" ]]; then
+        scp -P 9922 $files staff@192.167.189.98:$upload
+    elif [[ -n "$download" ]]; then
+        scp -P 9922 staff@192.167.189.98:$download $files
+    fi
+fi
+
