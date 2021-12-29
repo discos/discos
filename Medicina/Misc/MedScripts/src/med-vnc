@@ -110,7 +110,10 @@ for session in "${remote_sessions[@]}" ; do
     lport="${ports#*:}"
     if [[ "$role" == "$role_name" ]]; then
         if [ "$local_connection" = "TRUE" ]; then
-            remote_port=$lport
+        		#this is for local area connection when it will enabled
+            #remote_port=$lport
+            remote_port=$rport
+            ssh_port=5122 
         else
             remote_port=$rport
         fi
@@ -147,10 +150,12 @@ fi
 #echo $vnc_avail
 
 if [[ "$local_connection" = "TRUE" ]]; then
-    #ssh -N -f -L $local_port:192.167.189.98:$remote_port $role@$gatein
+    echo "Connecting from local area...."
+    #ssh -N -f -L $local_port:192.168.1.99:$remote_port $role@192.167.189.98
 else
-    ssh -N -f -p $ssh_port -L $local_port:192.167.189.98:$remote_port $role@$gatein
+    echo "Connecting from wide area....."
 fi
+ssh -N -f -p $ssh_port -L $local_port:192.167.189.98:$remote_port $role@$gatein
 if [[ "$vnc_avail" == "TRUE" ]]; then
     echo "Starting vncviewer...."
     vncviewer localhost:$local_port $viewonly &>/dev/null

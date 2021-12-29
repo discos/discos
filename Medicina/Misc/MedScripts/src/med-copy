@@ -1,6 +1,3 @@
-#scp -P 9922 -o ProxyCommand="ssh -p 5122 -W %h:%p observer@192.167.189.30" vncStart staff@192.167.189.98:~/
-
-
 #!/usr/bin/env bash
 
 print_help() {
