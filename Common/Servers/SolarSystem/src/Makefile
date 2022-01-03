@@ -58,12 +58,12 @@ LIBRARIES_L     =
 #
 # <brief description of lllll library>
 
-SolarSystemBodyImpl_OBJECTS   = SolarSystemBodyImpl
+SolarSystemBodyImpl_OBJECTS   = SolarSystemBodyImpl libastrowrapper
 SolarSystemBodyImpl_LIBS      = EphemGeneratorStubs SolarSystemBodyStubs baci maci IRALibrary \
                                 SlaLibrary ObservatoryStubs \
 				ComponentErrors AntennaErrors \
 				AntennaDefinitionsStubs ManagmentDefinitionsStubs \
-				ManagementErrors
+				ManagementErrors astro
 
 testastrolib_OBJECTS  = 	 libastrowrapper 	mainastro		
 testastrolib_LIBS  =		astro		
