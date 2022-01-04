@@ -97,6 +97,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/
 
 ## [next release]
 ## Added
+    issue 655 - ACU Component for Noto and Medicina is now capble to prevent seldom mode changes coming from ACU reset
 ## Fixed
     issue #448 - Added Sky Offsets to calibration tool client
     issue #585 - Fixed misshandled schedule with NULL as backend (Dry Run)

@@ -15,6 +15,7 @@
                ControlThreadPeriod="200000"
                RepetitionCacheTime="2000000"
                RepetitionExpireTime="5000000"
+               CheckMode="false"
                CheckOscillation="true"
 			   OscillationThreshold="0.01"
 			   OscillationAlarmDuration="2000000"	

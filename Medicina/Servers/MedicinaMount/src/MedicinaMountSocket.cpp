@@ -130,6 +130,7 @@ void CMedicinaMountSocket::Init(CConfiguration *config,maci::ContainerServices *
 	m_oscStopTime=0;
 	m_oscMode=CACUInterface::STANDBY;
 	m_lastScanEpoch=0;
+	m_modeCheckRecover=false;
 }
 
 CACUInterface::TAxeModes CMedicinaMountSocket::getAzimuthMode() throw (ConnectionExImpl,SocketErrorExImpl,TimeoutExImpl)
@@ -587,8 +588,11 @@ void CMedicinaMountSocket::Mode(CACUInterface::TAxeModes azMode,CACUInterface::T
 	TIMEVALUE now;
 	IRA::CIRATools::getTime(now);
 	m_Data.setLastCommandedMode(azMode); 
-	m_Data.setAzimuthOffset(0.0);
-	m_Data.setElevationOffset(0.0);
+	if (!m_modeCheckRecover) { // need to keep current offsets in case a recovery procedure is ongoing.....
+		m_Data.setAzimuthOffset(0.0);
+		m_Data.setElevationOffset(0.0);
+		m_modeCheckRecover=false;
+	}
 	m_lastScanEpoch=now.value().value;
 }
 
@@ -842,6 +846,25 @@ double CMedicinaMountSocket::getHWAzimuth(double destination,const CACUInterface
 	else if (commandedSection==CACUInterface::CW) section=1;
 	else section=0;
 	return CIRATools::getHWAzimuth(pos,dest,m_configuration->azimuthLowerLimit(),m_configuration->azimuthUpperLimit(),section,m_configuration->cwLimit());
+}
+
+void CMedicinaMountSocket::checkCommandedMode() throw (ConnectionExImpl,SocketErrorExImpl,TimeoutExImpl,AntennaErrors::NakExImpl,AntennaBusyExImpl)
+{
+	CACUInterface::TAxeModes commandedMode, mode;
+	if (!m_configuration->checkForMode()) return;
+	commandedMode=m_Data.getLastCommandedMode();
+	if ((commandedMode!=CACUInterface::STANDBY)  && (commandedMode!=CACUInterface::UNSTOW) &&
+	  (commandedMode!=CACUInterface::STOW) && (commandedMode!=CACUInterface::STOP)) {
+	  	mode=getAzimuthMode(); // throw (ConnectionExImpl,SocketErrorExImpl,TimeoutExImpl)
+	  	if ((mode!=CACUInterface::UNKNOWN)) {
+	  		if ((commandedMode!=mode)) {
+	  			CUSTOM_LOG(LM_FULL_INFO,"CMedicinaMountSocket::checkCommandedMode()",
+	  			  (LM_WARNING,"ACU operation mode differs from commanded one, trying to recover..."));
+	  			m_modeCheckRecover=true;
+	  			Mode(commandedMode,commandedMode);
+	  		}
+	  	}
+	}
 }
 
 void CMedicinaMountSocket::detectOscillation() throw (ConnectionExImpl,SocketErrorExImpl,TimeoutExImpl,AntennaErrors::NakExImpl,AntennaBusyExImpl)

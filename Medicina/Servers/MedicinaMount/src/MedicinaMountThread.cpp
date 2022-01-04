@@ -51,6 +51,7 @@ void CMedicinaMountControlThread::runLoop()
 	CSecAreaResourceWrapper<CMedicinaMountSocket> socket=m_pACUControl->Get();
 	socket->updateComponent();  // before commenting out or deleting consider that inside this method the flushing of pending event of the log dike object is called
 	socket->detectOscillation();
+	socket->checkCommandedMode();
 	if (currentJobID!=0) {
 		ACSErr::Completion_var comp;
 		if (socket->updateLongJobs(currentJobID,comp.out())) {

@@ -66,6 +66,11 @@ void CConfiguration::Init(maci::ContainerServices *Services) throw (ComponentErr
 	_GET_DOUBLE_ATTRIBUTE("cw_ccw_limit","CW/CCW limit (degrees):",m_cwLimit,"DataBlock/Mount");
 	
 	_GET_STRING_ATTRIBUTE("CheckOscillation","Check oscillation during tracking: ",check,"");
+	m_checkOsc=(check=="TRUE");
+	
+	_GET_STRING_ATTRIBUTE("CheckMode","Check ACU mode enabled: ",check,"");
+	m_checkMode=(check=="TRUE");
+	
 	_GET_DOUBLE_ATTRIBUTE("OscillationThreshold","Oscillation theshold (deg):",m_doscThreashold,"");
 	_GET_DWORD_ATTRIBUTE("OscillationAlarmDuration","Oscillation alarm duration (uSec):",m_dwoscAlarmDuration,"");
 	_GET_DWORD_ATTRIBUTE("OscillationNumberThreshold","Oscillation number threashold:",m_dwoscNumberThreshold,"");
@@ -74,5 +79,5 @@ void CConfiguration::Init(maci::ContainerServices *Services) throw (ComponentErr
 	m_dwoscRecoverTime*=10;
 	m_dwcontrolThreadPeriod*=10;
 	check.MakeUpper();
-	m_checkOsc=(check=="TRUE");
+	
 }
