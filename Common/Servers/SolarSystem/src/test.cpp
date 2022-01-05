@@ -48,7 +48,7 @@ TEST_F(SolarSystemBodyTest,JupiterPosition){
      EXPECT_NEAR( -11.764766054 ,raddeg(p->dec),2.7e-4);
      EXPECT_NEAR( 4.39448666972074  ,p->range,2.7e-5);
 
-   
+   //334.16711 -11.76477 
       
      
 }

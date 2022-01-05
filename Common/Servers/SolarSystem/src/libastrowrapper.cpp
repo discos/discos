@@ -150,6 +150,12 @@ Obj* SolarSystemBody::getObject()
 
 void SolarSystemBody::report()
 {
+/* Astrometric right ascension and declination of the target center with
+respect to the observing site (coordinate origin) in the reference frame of
+the planetary ephemeris (ICRF). Compensated for down-leg light-time delay
+aberration.*/
+
+
 
     std::cout << "Ra : " << ra << std::endl;
     std::cout << "Dec: " << dec << std::endl;

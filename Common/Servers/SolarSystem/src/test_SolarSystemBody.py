@@ -61,7 +61,7 @@ hwRef = simpleClient.getDynamicComponent(None,
 if hwRef != None:
     simpleClient.getLogger().logInfo("Retrieved valid reference from manager.")
     #Do something useful with the reference.
-    hwRef.setBodyName('ssss')
+    hwRef.setBodyName('Jupiter')
     simpleClient.getLogger().logInfo("Method of dynamic component successfully invoked. Have a nice day!")
 else:
     simpleClient.getLogger().logAlert("Bad reference retrieved from manager")

@@ -1,16 +1,16 @@
 #include "SolarSystemBodyImpl.h"
-#include <IRA>
+//#include <IRA>
 #include <Definitions.h>
 #include <ObservatoryS.h>
-#include <slamac.h>
-#include <slalib.h>
-#include <baci.h>
-#include <acstimeEpochHelper.h>
-#include <Site.h>
-#include <DateTime.h>
-#include <SkySource.h>
+//#include <slamac.h>
+//#include <slalib.h>
+//#include <baci.h>
+//#include <acstimeEpochHelper.h>
+//#include <Site.h>
+//#include <DateTime.h>
+//#include <SkySource.h>
 #include <iostream>
-
+//#include <Site.h>
 
 
 
@@ -61,54 +61,51 @@ void SolarSystemBodyImpl::aboutToAbort()
 
 void SolarSystemBodyImpl::execute() throw (ACSErr::ACSbaseExImpl)
 {
-        AUTO_TRACE("SolarSystemBodyImpl::execute()");
-        CError error;
-	Antenna::TSiteInformation_var site;
+         AUTO_TRACE("SolarSystemBodyImpl::execute()");
+         CError error;
+       	  Antenna::TSiteInformation_var site;
  
 	
-	Antenna::Observatory_var observatory=Antenna::Observatory::_nil();
-	try {
-		observatory=getContainerServices()->getComponent<Antenna::Observatory>("ANTENNA/Observatory");
-	}
-	catch (maciErrType::CannotGetComponentExImpl & ex){
-		_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"SolarSystemBodyImpl::execute()");
-		Impl.setComponentName("ANTENNA/Observatory");
-		throw Impl;
-	}
+	     Antenna::Observatory_var observatory=Antenna::Observatory::_nil();
+	     try {
+                 observatory=getContainerServices()->getComponent<Antenna::Observatory>("ANTENNA/Observatory");
+	         }
+	     catch (maciErrType::CannotGetComponentExImpl & ex){
+		         _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"SolarSystemBodyImpl::execute()");
+		         Impl.setComponentName("ANTENNA/Observatory");
+	            throw Impl;
+	     }
 	
-	ACS_LOG(LM_FULL_INFO,"MoonImpl::execute()", (LM_INFO, (const char *)CString(m_componentName+"::OBSERVATORY_LOCATED")));
-	try {
-		site=observatory->getSiteSummary();
-	}
-	catch (CORBA::SystemException& ex)		{
-		_EXCPT(ComponentErrors::CORBAProblemExImpl,_dummy, "SolarSystemBodyImpl::execute()");
-		_dummy.setName(ex._name());
-		_dummy.setMinor(ex.minor());
-		throw _dummy;
-	}
-    m_site=CSite(site.out());
-	m_dut1=site->DUT1;
-	m_longitude=site->longitude;
-	m_latitude=site->latitude;
-	m_height=site->height;
+	     ACS_LOG(LM_FULL_INFO,"MoonImpl::execute()", (LM_INFO, (const char *)CString(m_componentName+"::OBSERVATORY_LOCATED")));
+	     try {
+		        site=observatory->getSiteSummary();
+	     }
+	     catch (CORBA::SystemException& ex)		{
+		        _EXCPT(ComponentErrors::CORBAProblemExImpl,_dummy, "SolarSystemBodyImpl::execute()");
+		        _dummy.setName(ex._name());
+		        _dummy.setMinor(ex.minor());
+		         throw _dummy;
+	     }
+         m_site=CSite(site.out());
+         m_ssbody_dummy=IRA::CSkySource();  // dummy obj for coordiante conversion
+         
+	     m_dut1=site->DUT1;
+	     m_longitude=site->longitude;
+	     m_latitude=site->latitude;
+	     m_height=site->height;
 	
-	m_sitex= new xephemlib::Site();
-	m_sitex-> setCoordinate(site->longitude,site->latitude,site->height);
-	
-	
-	
-	
-	
-	
-	try {
-		getContainerServices()->releaseComponent((const char*)observatory->name());
-	}
-	catch  (maciErrType::CannotReleaseComponentExImpl& ex) {
-		_ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"SolarSystemBodyImpl::initialize()");
-		Impl.setComponentName("ANTENNA/Observatory");
-		throw Impl;
-	} 
-	ACS_LOG(LM_FULL_INFO,"SolarSystemBodyImpl::execute()", (LM_INFO,"SITE_INITIALIZED"));        
+	     m_sitex= new xephemlib::Site();
+	     m_sitex-> setCoordinate(site->longitude,site->latitude,site->height);
+		
+	     try {
+		          getContainerServices()->releaseComponent((const char*)observatory->name());
+         	 }
+	     catch  (maciErrType::CannotReleaseComponentExImpl& ex) {
+		         _ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"SolarSystemBodyImpl::initialize()");
+		         Impl.setComponentName("ANTENNA/Observatory");
+		         throw Impl;
+	     } 
+	     ACS_LOG(LM_FULL_INFO,"SolarSystemBodyImpl::execute()", (LM_INFO,"SITE_INITIALIZED"));        
 }
 
 
@@ -117,8 +114,6 @@ void SolarSystemBodyImpl::getAttributes(Antenna::SolarSystemBodyAttributes_out a
 {
 
         AUTO_TRACE("SolarSystemBodyImpl::getAttributes()");
-
-     
 
 }
 
@@ -200,7 +195,7 @@ typedef enum {
         PLCode  code;
         
         code=xephemlib::SolarSystemBody::getPlanetCodeFromName(bodyName);
-        
+        m_body_xephem =   new xephemlib::SolarSystemBody(code);
          
         
         
@@ -224,9 +219,27 @@ void SolarSystemBodyImpl::BodyPosition(TIMEVALUE &time)
 {
 
         AUTO_TRACE("SolarSystemBodyImpl::BodyPosition()");
-     
-     
-     
+        double TDB;
+	    IRA::CDateTime date(time,m_dut1);
+	    TDB=date.getTDB(m_site);
+	
+	/*
+	 * TDB as a Modified Julian Date (JD - 2400000.5
+	 * )*/
+	   TDB = TDB - 2400000.5;     
+       
+       
+       
+
+//   Site *site = new Site(59319.5,degrad(9.5),degrad(39.5),600);
+
+        m_sitex -> setTime(TDB) ;  
+        m_body_xephem->compute( m_sitex );
+        m_ra2000 = m_body_xephem->ra;
+        m_dec2000= m_body_xephem->dec;
+        m_ssbody_dummy.setInputEquatorial(m_ra2000, m_dec2000, IRA::CSkySource::SS_J2000);
+                // IRA::CSkySource m_ssbody_dummy;   // dummy CSkySource onj for coordinate conversion  
+        
 }
 
 #include <maciACSComponentDefines.h>

@@ -26,6 +26,8 @@
 #include "SolarSystemBodyS.h"
 #include <String.h>
 #include <Site.h>
+#include <SkySource.h>
+
 #include <IRA>
 #include <ComponentErrors.h>
 #include <acscomponentImpl.h>
@@ -145,8 +147,10 @@ private:
       
       
       IRA::CSite m_site;
+      IRA::CSkySource m_ssbody_dummy;   
         xephemlib::Site* m_sitex;  // site class for libastro 
-        
+        xephemlib::SolarSystemBody* m_body_xephem;
+        // dummy CSkySource onj for coordinate conversion  
         double m_longitude;
         double m_latitude;
         double m_height;
