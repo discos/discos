@@ -144,10 +144,10 @@ private:
   
       IRA::CString m_bodyName;
       int m_bodycode;
-      
+      BACIMutex m_mutex;
       
       IRA::CSite m_site;
-      IRA::CSkySource m_ssbody_dummy;   
+      IRA::CSkySource m_source;   
         xephemlib::Site* m_sitex;  // site class for libastro 
         xephemlib::SolarSystemBody* m_body_xephem;
         // dummy CSkySource onj for coordinate conversion  

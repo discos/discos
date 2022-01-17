@@ -87,7 +87,7 @@ void SolarSystemBodyImpl::execute() throw (ACSErr::ACSbaseExImpl)
 		         throw _dummy;
 	     }
          m_site=CSite(site.out());
-         m_ssbody_dummy=IRA::CSkySource();  // dummy obj for coordiante conversion
+         m_source=IRA::CSkySource();  // dummy obj for coordiante conversion
          
 	     m_dut1=site->DUT1;
 	     m_longitude=site->longitude;
@@ -168,7 +168,7 @@ void SolarSystemBodyImpl::setOffsets(CORBA::Double lon,CORBA::Double lat,Antenna
 		m_dec_off=lat;
 	}
 	else {
-		_EXCPT(AntennaErrors::OffsetFrameNotSupportedExImpl,impl,"MoonImpl::setOffsets()");
+		_EXCPT(AntennaErrors::OffsetFrameNotSupportedExImpl,impl,"SolarSystemBodyImpl::setOffsets()");
 		throw impl.getAntennaErrorsEx();
 	}
 
@@ -177,8 +177,15 @@ void SolarSystemBodyImpl::setOffsets(CORBA::Double lon,CORBA::Double lat,Antenna
 void SolarSystemBodyImpl::getHorizontalCoordinate(ACS::Time time, CORBA::Double_out az, CORBA::Double_out el) throw (CORBA::SystemException)
 
 {
-
         AUTO_TRACE("SolarSystemBodyImpl::getHorizontalCoordinate()");
+	     double azi,ele;
+        TIMEVALUE val(time);
+	     IRA::CDateTime ctime(val,m_dut1);	
+	     baci::ThreadSyncGuard guard(&m_mutex);	
+	     m_source.process(ctime,m_site);
+	     m_source.getApparentHorizontal(azi,ele);
+	     az=azi; el=ele;
+
 
 
 }
@@ -187,17 +194,34 @@ void SolarSystemBodyImpl::getAllCoordinates(ACS::Time time,CORBA::Double_out az,
                 CORBA::Double_out lat) throw (CORBA::SystemException)
 {
 
-        AUTO_TRACE("SolarSystemBodyImpl::getAllCoordinates()");
-
-
+    AUTO_TRACE("SolarSystemBodyImpl::getAllCoordinates()")
+    TIMEVALUE val(time);
+	double azi,ele,rae,dece,lone,late,jepoche;
+	IRA::CDateTime ctime(val,m_dut1);
+	baci::ThreadSyncGuard guard(&m_mutex);
+	m_source.process(ctime,m_site);
+	m_source.getApparentHorizontal(azi,ele);
+	m_source.getApparentEquatorial(rae,dece,jepoche);
+	m_source.getApparentGalactic(lone,late);
+	az=azi; el=ele;
+	ra=rae; dec=dece; jepoch=jepoch;
+	lon=lone; lat=late;
 }
 
+ 
 bool SolarSystemBodyImpl::checkTracking(ACS::Time time,CORBA::Double az,CORBA::Double el,CORBA::Double HPBW) throw (CORBA::SystemException)
 {
-     
-     AUTO_TRACE("SolarSystemBodyImpl::getAllCoordinates()");
-
-     return false;
+     	AUTO_TRACE("SolarSystemBodyImpl::checkTracking()")
+	   double computedAz,computedEl,azErr,elErr,skyErr;
+    	TIMEVALUE val(time);
+	   IRA::CDateTime refTime(val,m_dut1);
+	   baci::ThreadSyncGuard guard(&m_mutex);  // obtain access
+   	m_source.process(refTime,m_site);
+	   m_source.getApparentHorizontal(computedAz,computedEl);
+	   elErr=computedEl-el;
+	   azErr=(computedAz-az)*cos(el);
+   	skyErr=sqrt(elErr*elErr+azErr*azErr); //total skyError
+	   return skyErr<=HPBW*0.1;
      
 }
 
@@ -255,6 +279,11 @@ void SolarSystemBodyImpl::BodyPosition(TIMEVALUE &time)
 
         AUTO_TRACE("SolarSystemBodyImpl::BodyPosition()");
         double TDB;
+        
+        
+       baci::ThreadSyncGuard guard(&m_mutex);	
+       
+        
 	    IRA::CDateTime date(time,m_dut1);
 	    TDB=date.getTDB(m_site);
 	
@@ -266,7 +295,7 @@ void SolarSystemBodyImpl::BodyPosition(TIMEVALUE &time)
 	   TDB = TDB - 2400000.5;     
        
        
-       double ra,dec,eph,az,el;
+       double ra,dec,eph,az,el,lone,late;
 
 //   Site *site = new Site(59319.5,degrad(9.5),degrad(39.5),600);
 
@@ -274,18 +303,22 @@ void SolarSystemBodyImpl::BodyPosition(TIMEVALUE &time)
         m_body_xephem->compute( m_sitex );
         m_ra2000 = m_body_xephem->ra;
         m_dec2000= m_body_xephem->dec;
-        m_ssbody_dummy.setInputEquatorial(m_ra2000, m_dec2000, IRA::CSkySource::SS_J2000);
-                // IRA::CSkySource m_ssbody_dummy;   // dummy CSkySource onj for coordinate conversion  
-               
-        m_ssbody_dummy.getApparentEquatorial (ra,dec,eph);
-        m_ssbody_dummy.apparentToHorizontal(date,m_site);	
+        m_source.setInputEquatorial(m_ra2000, m_dec2000, IRA::CSkySource::SS_J2000);
+                // IRA::CSkySource m_source;   // dummy CSkySource onj for coordinate conversion  
+        m_source.process(date,m_site);	       
+        m_source.getApparentEquatorial (ra,dec,eph);
+        
+        m_source.getApparentHorizontal(az,el);
+	     m_source.getApparentGalactic(lone,late);            
+        m_source.apparentToHorizontal(date,m_site);	
         m_ra=ra;
         m_dec=dec;
-        m_ssbody_dummy.getApparentHorizontal(az,el);
         m_az=az;
         m_el=el;
-        m_parallacticAngle=CSkySource::paralacticAngle(date,m_site,az,el);
-	     IRA::CSkySource::equatorialToGalactic(m_ra2000,m_dec2000,m_glon,m_glat);        
+        m_glon=lone;
+        m_glat=late;
+        
+        m_parallacticAngle=m_source.getParallacticAngle();
 }
 
 #include <maciACSComponentDefines.h>
