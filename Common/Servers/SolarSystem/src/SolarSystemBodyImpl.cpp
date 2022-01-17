@@ -2,8 +2,8 @@
 //#include <IRA>
 #include <Definitions.h>
 #include <ObservatoryS.h>
-//#include <slamac.h>
-//#include <slalib.h>
+#include <slamac.h>
+#include <slalib.h>
 //#include <baci.h>
 //#include <acstimeEpochHelper.h>
 //#include <Site.h>
@@ -39,8 +39,8 @@ void SolarSystemBodyImpl::initialize() throw(ACSErr::ACSbaseExImpl)
 {
         AUTO_TRACE("SolarSystemBodyImpl::initialize()");
  
-	ra_off = dec_off = 0.0;
-	az_off = el_off = 0.0;
+	m_ra_off = m_dec_off = 0.0;
+	m_az_off = m_el_off = 0.0;
 	m_offsetFrame=Antenna::ANT_HORIZONTAL;
  
  
@@ -115,22 +115,57 @@ void SolarSystemBodyImpl::getAttributes(Antenna::SolarSystemBodyAttributes_out a
 
         AUTO_TRACE("SolarSystemBodyImpl::getAttributes()");
 
+
+TIMEVALUE now;
+	IRA::CIRATools::getTime(now);
+	BodyPosition(now);
+				
+	/* Returns the julian epoch of the date.
+	 * @return the epoch which is the year with the fracional part of the year.
+	 */
+	double JulianEpoch; 
+	IRA::CDateTime currentTime(now,m_dut1);
+	JulianEpoch = currentTime.getJulianEpoch();
+		
+	/* Getting the output field 
+	 */
+ 
+	att=new Antenna::SolarSystemBodyAttributes;
+	
+	att->sourceID=CORBA::string_dup(m_bodyName);
+	att->J2000RightAscension=slaDranrm(m_ra2000);
+	att->J2000Declination=IRA::CIRATools::latRangeRad(m_dec2000);
+	att-> rightAscension = slaDranrm(m_ra);
+	att-> declination = IRA::CIRATools::latRangeRad(m_dec) ;
+	att-> azimuth = slaDranrm(m_az);
+	att-> elevation = IRA::CIRATools::latRangeRad(m_el);
+	att-> julianEpoch = JulianEpoch;
+	att-> parallacticAngle = m_parallacticAngle;
+	att-> userAzimuthOffset = m_az_off;
+	att-> userElevationOffset = m_el_off;
+	att-> userRightAscensionOffset = m_ra_off;
+	att-> userDeclinationOffset = m_dec_off;
+	att->gLongitude=slaDranrm(m_glon);
+	att->gLatitude=IRA::CIRATools::latRangeRad(m_glat);
+	att->userLatitudeOffset=att->userLongitudeOffset=0.0;
+	att->axis=Management::MNG_TRACK;
+
 }
 
 void SolarSystemBodyImpl::setOffsets(CORBA::Double lon,CORBA::Double lat,Antenna::TCoordinateFrame frame) throw (CORBA::SystemException,AntennaErrors::AntennaErrorsEx)
 {       
         AUTO_TRACE("SolarSystemBodyImpl::setOffsets()");
         if (frame==Antenna::ANT_HORIZONTAL) {
-		az_off=lon;
-		el_off=lat;
-		ra_off=0.0;
-		dec_off=0.0;
+		m_az_off=lon;
+		m_el_off=lat;
+		m_ra_off=0.0;
+		m_dec_off=0.0;
 	}
 	else if (frame==Antenna::ANT_EQUATORIAL) {
-		az_off=0.0;
-		el_off=0.0;
-		ra_off=lon;
-		dec_off=lat;
+		m_az_off=0.0;
+		m_el_off=0.0;
+		m_ra_off=lon;
+		m_dec_off=lat;
 	}
 	else {
 		_EXCPT(AntennaErrors::OffsetFrameNotSupportedExImpl,impl,"MoonImpl::setOffsets()");
@@ -223,13 +258,15 @@ void SolarSystemBodyImpl::BodyPosition(TIMEVALUE &time)
 	    IRA::CDateTime date(time,m_dut1);
 	    TDB=date.getTDB(m_site);
 	
+
+	
 	/*
 	 * TDB as a Modified Julian Date (JD - 2400000.5
 	 * )*/
 	   TDB = TDB - 2400000.5;     
        
        
-       
+       double ra,dec,eph,az,el;
 
 //   Site *site = new Site(59319.5,degrad(9.5),degrad(39.5),600);
 
@@ -239,7 +276,16 @@ void SolarSystemBodyImpl::BodyPosition(TIMEVALUE &time)
         m_dec2000= m_body_xephem->dec;
         m_ssbody_dummy.setInputEquatorial(m_ra2000, m_dec2000, IRA::CSkySource::SS_J2000);
                 // IRA::CSkySource m_ssbody_dummy;   // dummy CSkySource onj for coordinate conversion  
-        
+               
+        m_ssbody_dummy.getApparentEquatorial (ra,dec,eph);
+        m_ssbody_dummy.apparentToHorizontal(date,m_site);	
+        m_ra=ra;
+        m_dec=dec;
+        m_ssbody_dummy.getApparentHorizontal(az,el);
+        m_az=az;
+        m_el=el;
+        m_parallacticAngle=CSkySource::paralacticAngle(date,m_site,az,el);
+	     IRA::CSkySource::equatorialToGalactic(m_ra2000,m_dec2000,m_glon,m_glat);        
 }
 
 #include <maciACSComponentDefines.h>

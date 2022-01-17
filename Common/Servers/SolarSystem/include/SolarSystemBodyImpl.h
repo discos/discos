@@ -159,8 +159,8 @@ private:
          * right ascension, declination, right ascension and declination offset
          * azimuth, elevation, azimuth and elevation offset
          */
-        double m_ra, m_dec,ra_off, dec_off;
-        double m_az, m_el,az_off, el_off;
+        double m_ra, m_dec,m_ra_off, m_dec_off;
+        double m_az, m_el,m_az_off, m_el_off;
         double m_glon, m_glat;
         double m_ra2000,m_dec2000;
         double m_dut1;
