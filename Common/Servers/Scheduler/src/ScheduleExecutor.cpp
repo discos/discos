@@ -556,7 +556,7 @@ void CScheduleExecutor::initialize(maci::ContainerServices *services,const doubl
 void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subScanidentifier) throw (
  		ManagementErrors::ScheduleErrorExImpl, ManagementErrors::AlreadyRunningExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::CouldntGetComponentExImpl,
  		ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl,ManagementErrors::ScheduleNotExistExImpl,
- 		ManagementErrors::CannotClosePendingTaskExImpl)
+ 		ManagementErrors::CannotClosePendingTaskExImpl,ManagementErrors::ScheduleProjectNotMatchExImpl)
 {
  	baci::ThreadSyncGuard guard(&m_mutex);
  	bool projectChanged;
