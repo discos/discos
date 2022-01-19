@@ -142,6 +142,7 @@ void MedicinaKBandDualFCore::setMode(const char * mode) throw (
 			CUSTOM_LOG(LM_FULL_INFO,"MedicinaKBandDualFCore::setMode()",
 			  (LM_WARNING,"Vertex not properly configured"));
 		}
+		CUSTOM_LOG(LM_FULL_INFO,"MedicinaKBandDualFCore::setMode()",(LM_NOTICE,"Vertex configured"));
 	}
 	
 	m_setupMode = cmdMode;
