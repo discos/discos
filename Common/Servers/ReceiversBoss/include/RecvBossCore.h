@@ -415,7 +415,9 @@ private:
 	void unloadReceiver();
 
 #ifdef COMPILE_TARGET_MED
-	void setup(const char * code) throw(ComponentErrors::SocketErrorExImpl,ComponentErrors::ValidationErrorExImpl);
+	void setup(const char * code) throw (ComponentErrors::SocketErrorExImpl,ComponentErrors::ValidationErrorExImpl,
+  ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,
+  ComponentErrors::OperationErrorExImpl);
 	bool sendToRecvControl(const void *buffer,int size);
 	bool sendToFS(const void *buffer,int size);
 
