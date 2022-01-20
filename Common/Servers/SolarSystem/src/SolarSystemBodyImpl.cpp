@@ -149,6 +149,9 @@ TIMEVALUE now;
 	att->gLatitude=IRA::CIRATools::latRangeRad(m_glat);
 	att->userLatitudeOffset=att->userLongitudeOffset=0.0;
 	att->axis=Management::MNG_TRACK;
+    att->angularSize= att->distance=att->radialVelocity=0;
+    att->vradFrame= Antenna::ANT_TOPOCEN  ;
+    att->vradDefinition=Antenna::ANT_RADIO;
 
 }
 

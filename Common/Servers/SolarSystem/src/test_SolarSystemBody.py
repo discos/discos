@@ -49,6 +49,9 @@ from sys import argv
 # Import the SimpleClient class
 from Acspy.Clients.SimpleClient import PySimpleClient
 
+import Antenna
+
+
 # Make an instance of the PySimpleClient
 simpleClient = PySimpleClient()
 
@@ -62,6 +65,16 @@ if hwRef != None:
     simpleClient.getLogger().logInfo("Retrieved valid reference from manager.")
     #Do something useful with the reference.
     hwRef.setBodyName('Jupiter')
+    sourceID = J2000RightAscension=  J2000Declination= rightAscension= declination= julianEpoch= gLongitude= gLatitude= azimuth= elevation= parallacticAngle=0.
+    
+    userAzimuthOffset=userElevationOffset= userRightAscensionOffset= userDeclinationOffset= userLongitudeOffset= userLatitudeOffset=axis=angularSize=0.
+    distance= radialVelocity= vradFrame= vradDefinition=0.
+#    hwRef.getAttributes(sourceID, J2000RightAscension, J2000Declination, rightAscension, declination, julianEpoch, gLongitude, gLatitude, azimuth, elevation, parallacticAngle, userAzimuthOffset, userElevationOffset, userRightAscensionOffset,
+#    userDeclinationOffset, userLongitudeOffset, userLatitudeOffset, axis, angularSize, distance, radialVelocity, vradFrame, vradDefinition)
+#print(att)
+    att=hwRef.getAttributes()
+    dec=att.declination 
+    print(dec)
     simpleClient.getLogger().logInfo("Method of dynamic component successfully invoked. Have a nice day!")
 else:
     simpleClient.getLogger().logAlert("Bad reference retrieved from manager")

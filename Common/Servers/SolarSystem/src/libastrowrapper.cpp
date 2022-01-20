@@ -129,7 +129,7 @@ std::string  SolarSystemBody::getPlanetNameFromCode(PLCode code ){
 
 
 void  SolarSystemBody::compute(Site* site){
-        std::cout << "Compute " <<std::endl;
+     //   std::cout << "Compute " <<std::endl;
     obj_cir (site, obj);
 
     ra=obj->any.co_ra;
