@@ -18,7 +18,7 @@ public:
 	virtual ~CMedicinaVertex();
 	inline IRA::CString getLastErrorMessage() const { return m_lastErrorMessage; }
 	
-	bool sendTo(const void *buffer,int size);
+	bool sendTo(const IRA::CString& buffer,int size);
 	
 protected:
 	IRA::CString m_vertexAddr;
