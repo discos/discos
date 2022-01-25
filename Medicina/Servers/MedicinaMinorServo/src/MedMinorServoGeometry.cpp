@@ -327,14 +327,6 @@ MedMinorServoGeometry::_check_axis_limit(const double position,
                                          const MedMinorServoAxis axis)
 {
 	
-/*
- CUSTOM_LOG(LM_FULL_INFO,
-                   "MinorServo::check_axis_limit",
-                   (LM_DEBUG, "axis.position %s min: %f max: %f", axis.name, axis.position_min,axis.position_max ));	
-	*/
-
-	
-	
     if(position < axis.position_min){
         throw MinorServoAxisLimitError("axis too low");
         //return axis.position_min;
