@@ -45,6 +45,8 @@ class VirtualAxis
  */
 VirtualAxis parseAxisLine(const char* name, const char* line);
 
+std::vector<double> parseLimitsLine(const char* line);
+
 std::vector<std::string> split(const char* line, char delim = ',');
 
 class MedMinorServoParameters

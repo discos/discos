@@ -14,6 +14,17 @@ VirtualAxis::VirtualAxis(const char* name,
                          _coefficients(coefficients)
 {}
 
+std::vector<double> parseLimitsLine(const char* line)
+{
+    std::vector<std::string> tokens = split(line);
+    double min = boost::lexical_cast<double>(tokens[1]);
+    double max = boost::lexical_cast<double>(tokens[2]);
+    std::vector<double> limits;
+    limits.push_back(boost::lexical_cast<double>(tokens[i]));
+
+    return limits;
+}
+
 VirtualAxis
 parseAxisLine(const char* name, const char* line)
 {
@@ -175,9 +186,29 @@ get_configuration_from_CDB(maci::ContainerServices* services)
 {
     MedMinorServoConfiguration configuration;
     MedMinorServoConstants *medMinorServoConstants = MedMinorServoConstants::getInstance();
-
+    
     IRA::CError error;
     error.Reset();
+
+    IRA::CDBTable minor_servo_limits_table(services,
+                               "MinorServoLimits",
+                               "DataBlock/MinorServoParameters");
+
+    if(!minor_servo_limits_table.addField(error, "MINOR_SERVO_X", IRA::CDataField::STRING))
+        error.setExtra("code MINOR_SERVO_X not found", 0);
+    if(!minor_servo_limits_table.addField(error, "MINOR_SERVO_YP", IRA::CDataField::STRING))
+        error.setExtra("code MINOR_SERVO_YP not found", 0);
+    if(!minor_servo_limits_table.addField(error, "MINOR_SERVO_Y", IRA::CDataField::STRING))
+        error.setExtra("code MINOR_SERVO_Y not found", 0);
+    if(!minor_servo_limits_table.addField(error, "MINOR_SERVO_ZP", IRA::CDataField::STRING))
+        error.setExtra("code MINOR_SERVO_ZP not found", 0);
+    if(!minor_servo_limits_table.addField(error, "MINOR_SERVO_Z1", IRA::CDataField::STRING))
+        error.setExtra("code MINOR_SERVO_Z1 not found", 0);
+    if(!minor_servo_limits_table.addField(error, "MINOR_SERVO_Z2", IRA::CDataField::STRING))
+        error.setExtra("code MINOR_SERVO_Z2 not found", 0);
+    if(!minor_servo_limits_table.addField(error, "MINOR_SERVO_Z3", IRA::CDataField::STRING))
+        error.setExtra("code MINOR_SERVO_Z3 not found", 0);
+
     IRA::CDBTable minor_servo_table(services,
                                "MinorServo",
                                "DataBlock/MinorServoParameters");
@@ -208,6 +239,44 @@ get_configuration_from_CDB(maci::ContainerServices* services)
         dummy.setDescription((const char*)error.getDescription());
         throw dummy;
     }
+
+    minor_servo_table.First();
+    std::vector<double> limits;
+    
+    limits=parseLimitsLine ((const char*)minor_servo_table["MINOR_SERVO_YP"]->asString())
+    medMinorServoConstants->MINOR_SERVO_YP.position_min= limits[0];
+    medMinorServoConstants->MINOR_SERVO_YP.position_max= limits[1];
+
+    limits=parseLimitsLine ((const char*)minor_servo_table["MINOR_SERVO_ZP"]->asString())
+    medMinorServoConstants->MINOR_SERVO_ZP.position_min= limits[0];
+    medMinorServoConstants->MINOR_SERVO_ZP.position_max= limits[1];
+
+    limits=parseLimitsLine ((const char*)minor_servo_table["MINOR_SERVO_X"]->asString())
+    medMinorServoConstants->MINOR_SERVO_X.position_min= limits[0];
+    medMinorServoConstants->MINOR_SERVO_X.position_max= limits[1];
+
+    limits=parseLimitsLine ((const char*)minor_servo_table["MINOR_SERVO_Y"]->asString())
+    medMinorServoConstants->MINOR_SERVO_Y.position_min= limits[0];
+    medMinorServoConstants->MINOR_SERVO_Y.position_max= limits[1];
+
+    limits=parseLimitsLine ((const char*)minor_servo_table["MINOR_SERVO_Z1"]->asString())
+    medMinorServoConstants->MINOR_SERVO_Z1.position_min= limits[0];
+    medMinorServoConstants->MINOR_SERVO_Z1.position_max= limits[1];
+
+    limits=parseLimitsLine ((const char*)minor_servo_table["MINOR_SERVO_Z2"]->asString())
+    medMinorServoConstants->MINOR_SERVO_Z2.position_min= limits[0];
+    medMinorServoConstants->MINOR_SERVO_Z2.position_max= limits[1];
+
+    limits=parseLimitsLine ((const char*)minor_servo_table["MINOR_SERVO_Z3"]->asString())
+    medMinorServoConstants->MINOR_SERVO_Z3.position_min= limits[0];
+    medMinorServoConstants->MINOR_SERVO_Z3.position_max= limits[1];
+
+
+    if(!minor_servo_limits_table.openTable(error)){
+        _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
+        throw dummy;
+    }
+
     if(!minor_servo_table.openTable(error)){
         _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
         throw dummy;
@@ -232,18 +301,14 @@ get_configuration_from_CDB(maci::ContainerServices* services)
                     (const char*)minor_servo_table["YPaxis"]->asString()
                 )
             );
-            medMinorServoConstants->MINOR_SERVO_YP.position_min= parameters.getAxesVector().back().get_min();
-            medMinorServoConstants->MINOR_SERVO_YP.position_max= parameters.getAxesVector().back().get_max();
-
+           
             parameters.add_axis(
                 parseAxisLine(
                     "ZP",
                     (const char*)minor_servo_table["ZPaxis"]->asString()
                 )
             );
-            medMinorServoConstants->MINOR_SERVO_ZP.position_min= parameters.getAxesVector().back().get_min();
-            medMinorServoConstants->MINOR_SERVO_ZP.position_max= parameters.getAxesVector().back().get_max();
-
+          
         }else{ //secondary focus
             parameters.add_axis(
                 parseAxisLine(
@@ -251,8 +316,6 @@ get_configuration_from_CDB(maci::ContainerServices* services)
                     (const char*)minor_servo_table["Xaxis"]->asString()
                 )
             );
-            medMinorServoConstants->MINOR_SERVO_X.position_min= parameters.getAxesVector().back().get_min();
-            medMinorServoConstants->MINOR_SERVO_X.position_max= parameters.getAxesVector().back().get_max();
 
             parameters.add_axis(
                 parseAxisLine(
@@ -260,8 +323,6 @@ get_configuration_from_CDB(maci::ContainerServices* services)
                     (const char*)minor_servo_table["Yaxis"]->asString()
                 )
             );
-            medMinorServoConstants->MINOR_SERVO_Y.position_min= parameters.getAxesVector().back().get_min();
-            medMinorServoConstants->MINOR_SERVO_Y.position_max= parameters.getAxesVector().back().get_max();
 
             parameters.add_axis(
                 parseAxisLine(
