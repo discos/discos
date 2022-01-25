@@ -57,9 +57,10 @@ import time
 '''
 Date__(UT)__HR:MN     R.A.___(ICRF)___DEC  R.A._(a-appar)_DEC.  Azi____(a-app)___Elev
 **************************************************************************************
-$$SOE
- 2022-Jan-21 00:00  m  336.65825 -10.79656  336.94218 -10.68735  312.713556 -52.460888
- 2022-Jan-22 00:00  m  336.86766 -10.71510  337.15143 -10.60573  313.822261 -52.830146
+2022-Jan-21 00:00:00.000  m  336.65825 -10.79656  336.94218 -10.68735  312.371754 -52.320793
+
+
+ 
 '''
 
 
@@ -74,8 +75,7 @@ tm=time.mktime(struct_time)
 
 acstime=epoch.py2epoch(tm)
 
-
-
+print (acstime.value)
 # Make an instance of the PySimpleClient
 simpleClient = PySimpleClient()
 
@@ -96,14 +96,18 @@ if hwRef != None:
 #    hwRef.getAttributes(sourceID, J2000RightAscension, J2000Declination, rightAscension, declination, julianEpoch, gLongitude, gLatitude, azimuth, elevation, parallacticAngle, userAzimuthOffset, userElevationOffset, userRightAscensionOffset,
 #    userDeclinationOffset, userLongitudeOffset, userLatitudeOffset, axis, angularSize, distance, radialVelocity, vradFrame, vradDefinition)
 #print(att)
+
+    az,el,ra,dec,l,lon,lat = hwRef.getAllCoordinates(acstime.value)
+
+    print ("az,el",degrees(az),degrees(el))
+    print ("ra,dec",degrees(ra),degrees(dec))
+    
+    
     att=hwRef.getAttributes()
     dec=att.declination 
     print(dec)
     
-#    az,el,ra,dec,l,lon,lat = hwRef.getAllCoordinates(acstime)
 
-#    print ("az,el",degrees(az),degrees(el))
-    
     simpleClient.getLogger().logInfo("Method of dynamic component successfully invoked. Have a nice day!")
 else:
     simpleClient.getLogger().logAlert("Bad reference retrieved from manager")

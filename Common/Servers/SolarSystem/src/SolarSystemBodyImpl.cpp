@@ -198,10 +198,12 @@ void SolarSystemBodyImpl::getAllCoordinates(ACS::Time time,CORBA::Double_out az,
 {
 
     AUTO_TRACE("SolarSystemBodyImpl::getAllCoordinates()")
+
     TIMEVALUE val(time);
 	double azi,ele,rae,dece,lone,late,jepoche;
 	IRA::CDateTime ctime(val,m_dut1);
 	baci::ThreadSyncGuard guard(&m_mutex);
+		BodyPosition(val);
 	m_source.process(ctime,m_site);
 	m_source.getApparentHorizontal(azi,ele);
 	m_source.getApparentEquatorial(rae,dece,jepoche);
@@ -281,7 +283,7 @@ void SolarSystemBodyImpl::BodyPosition(TIMEVALUE &time)
 {
 
         AUTO_TRACE("SolarSystemBodyImpl::BodyPosition()");
-        double TDB;
+        double TDB,time_utc,TT;
         
         
        baci::ThreadSyncGuard guard(&m_mutex);	
@@ -289,20 +291,22 @@ void SolarSystemBodyImpl::BodyPosition(TIMEVALUE &time)
         
 	    IRA::CDateTime date(time,m_dut1);
 	    TDB=date.getTDB(m_site);
-	
-
+	    TT=date.getTT() ;
+     
 	
 	/*
 	 * TDB as a Modified Julian Date (JD - 2400000.5
 	 * )*/
 	   TDB = TDB - 2400000.5;     
-       
-       
+	   TT = TT - 2400000.5;     
+        
+       time_utc=  CDateTime::julianEpoch2JulianDay (date.getJulianEpoch());
+       	   time_utc = time_utc - 2400000.5;     
        double ra,dec,eph,az,el,lone,late;
 
 //   Site *site = new Site(59319.5,degrad(9.5),degrad(39.5),600);
 
-        m_sitex -> setTime(TDB) ;  
+        m_sitex -> setTime(time_utc) ;  
         m_body_xephem->compute( m_sitex );
         m_ra2000 = m_body_xephem->ra;
         m_dec2000= m_body_xephem->dec;

@@ -19,4 +19,4 @@ astrotest: mainastro.o libastrowrapper.o
 	$(CC)  -g -o mainastro libastrowrapper.o mainastro.o ../libastro/libastro.a 
 
 test:    libastrowrapper.o test.o 
-	$(CC) -o test  -I/usr/local/include    libastrowrapper.o test.o   ../libastro/libastro.a $(CFLAGS_TEST) 	
+	$(CC) -o test  -I$(INTROOT)/include    libastrowrapper.o test.o   ../libastro/libastro.a $(CFLAGS_TEST) 	
