@@ -243,31 +243,31 @@ get_configuration_from_CDB(maci::ContainerServices* services)
     minor_servo_table.First();
     std::vector<double> limits;
     
-    limits=parseLimitsLine ((const char*)minor_servo_table["MINOR_SERVO_YP"]->asString())
+    limits=parseLimitsLine ((const char*)minor_servo_table["MINOR_SERVO_YP"]->asString());
     medMinorServoConstants->MINOR_SERVO_YP.position_min= limits[0];
     medMinorServoConstants->MINOR_SERVO_YP.position_max= limits[1];
 
-    limits=parseLimitsLine ((const char*)minor_servo_table["MINOR_SERVO_ZP"]->asString())
+    limits=parseLimitsLine ((const char*)minor_servo_table["MINOR_SERVO_ZP"]->asString());
     medMinorServoConstants->MINOR_SERVO_ZP.position_min= limits[0];
     medMinorServoConstants->MINOR_SERVO_ZP.position_max= limits[1];
 
-    limits=parseLimitsLine ((const char*)minor_servo_table["MINOR_SERVO_X"]->asString())
+    limits=parseLimitsLine ((const char*)minor_servo_table["MINOR_SERVO_X"]->asString());
     medMinorServoConstants->MINOR_SERVO_X.position_min= limits[0];
     medMinorServoConstants->MINOR_SERVO_X.position_max= limits[1];
 
-    limits=parseLimitsLine ((const char*)minor_servo_table["MINOR_SERVO_Y"]->asString())
+    limits=parseLimitsLine ((const char*)minor_servo_table["MINOR_SERVO_Y"]->asString());
     medMinorServoConstants->MINOR_SERVO_Y.position_min= limits[0];
     medMinorServoConstants->MINOR_SERVO_Y.position_max= limits[1];
 
-    limits=parseLimitsLine ((const char*)minor_servo_table["MINOR_SERVO_Z1"]->asString())
+    limits=parseLimitsLine ((const char*)minor_servo_table["MINOR_SERVO_Z1"]->asString());
     medMinorServoConstants->MINOR_SERVO_Z1.position_min= limits[0];
     medMinorServoConstants->MINOR_SERVO_Z1.position_max= limits[1];
 
-    limits=parseLimitsLine ((const char*)minor_servo_table["MINOR_SERVO_Z2"]->asString())
+    limits=parseLimitsLine ((const char*)minor_servo_table["MINOR_SERVO_Z2"]->asString());
     medMinorServoConstants->MINOR_SERVO_Z2.position_min= limits[0];
     medMinorServoConstants->MINOR_SERVO_Z2.position_max= limits[1];
 
-    limits=parseLimitsLine ((const char*)minor_servo_table["MINOR_SERVO_Z3"]->asString())
+    limits=parseLimitsLine ((const char*)minor_servo_table["MINOR_SERVO_Z3"]->asString());
     medMinorServoConstants->MINOR_SERVO_Z3.position_min= limits[0];
     medMinorServoConstants->MINOR_SERVO_Z3.position_max= limits[1];
 
