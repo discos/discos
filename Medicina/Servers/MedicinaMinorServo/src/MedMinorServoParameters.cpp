@@ -17,11 +17,11 @@ VirtualAxis::VirtualAxis(const char* name,
 std::vector<double> parseLimitsLine(const char* line)
 {
     std::vector<double> limits;
-
     std::vector<std::string> tokens = split(line);
-    limits.push_back(boost::lexical_cast<double>(tokens[1]));
-    limits.push_back(boost::lexical_cast<double>(tokens[2]));
-
+    for(int i=0; i<6; ++i)
+    {
+        limits.push_back(boost::lexical_cast<double>(tokens[i]));
+    }
     return limits;
 }
 
@@ -246,31 +246,58 @@ get_configuration_from_CDB(maci::ContainerServices* services)
     limits=parseLimitsLine ((const char*)minor_servo_table["MINOR_SERVO_YP"]->asString());
     medMinorServoConstants->MINOR_SERVO_YP.position_min= limits[0];
     medMinorServoConstants->MINOR_SERVO_YP.position_max= limits[1];
+    medMinorServoConstants->MINOR_SERVO_YP.position_zero= limits[2];
+    medMinorServoConstants->MINOR_SERVO_YP.position_error= limits[3];
+    medMinorServoConstants->MINOR_SERVO_YP.speed_min= limits[4];
+    medMinorServoConstants->MINOR_SERVO_YP.speed_max= limits[5];
 
     limits=parseLimitsLine ((const char*)minor_servo_table["MINOR_SERVO_ZP"]->asString());
     medMinorServoConstants->MINOR_SERVO_ZP.position_min= limits[0];
     medMinorServoConstants->MINOR_SERVO_ZP.position_max= limits[1];
+    medMinorServoConstants->MINOR_SERVO_ZP.position_zero= limits[2];
+    medMinorServoConstants->MINOR_SERVO_ZP.position_error= limits[3];
+    medMinorServoConstants->MINOR_SERVO_ZP.speed_min= limits[4];
+    medMinorServoConstants->MINOR_SERVO_ZP.speed_max= limits[5];
 
     limits=parseLimitsLine ((const char*)minor_servo_table["MINOR_SERVO_X"]->asString());
     medMinorServoConstants->MINOR_SERVO_X.position_min= limits[0];
     medMinorServoConstants->MINOR_SERVO_X.position_max= limits[1];
+    medMinorServoConstants->MINOR_SERVO_X.position_zero= limits[2];
+    medMinorServoConstants->MINOR_SERVO_X.position_error= limits[3];
+    medMinorServoConstants->MINOR_SERVO_X.speed_min= limits[4];
+    medMinorServoConstants->MINOR_SERVO_X.speed_max= limits[5];
 
     limits=parseLimitsLine ((const char*)minor_servo_table["MINOR_SERVO_Y"]->asString());
     medMinorServoConstants->MINOR_SERVO_Y.position_min= limits[0];
     medMinorServoConstants->MINOR_SERVO_Y.position_max= limits[1];
+    medMinorServoConstants->MINOR_SERVO_Y.position_zero= limits[2];
+    medMinorServoConstants->MINOR_SERVO_Y.position_error= limits[3];
+    medMinorServoConstants->MINOR_SERVO_Y.speed_min= limits[4];
+    medMinorServoConstants->MINOR_SERVO_Y.speed_max= limits[5];
 
     limits=parseLimitsLine ((const char*)minor_servo_table["MINOR_SERVO_Z1"]->asString());
     medMinorServoConstants->MINOR_SERVO_Z1.position_min= limits[0];
     medMinorServoConstants->MINOR_SERVO_Z1.position_max= limits[1];
+    medMinorServoConstants->MINOR_SERVO_Z1.position_zero= limits[2];
+    medMinorServoConstants->MINOR_SERVO_Z1.position_error= limits[3];
+    medMinorServoConstants->MINOR_SERVO_Z1.speed_min= limits[4];
+    medMinorServoConstants->MINOR_SERVO_Z1.speed_max= limits[5];
 
     limits=parseLimitsLine ((const char*)minor_servo_table["MINOR_SERVO_Z2"]->asString());
     medMinorServoConstants->MINOR_SERVO_Z2.position_min= limits[0];
     medMinorServoConstants->MINOR_SERVO_Z2.position_max= limits[1];
+    medMinorServoConstants->MINOR_SERVO_Z2.position_zero= limits[2];
+    medMinorServoConstants->MINOR_SERVO_Z2.position_error= limits[3];
+    medMinorServoConstants->MINOR_SERVO_Z2.speed_min= limits[4];
+    medMinorServoConstants->MINOR_SERVO_Z2.speed_max= limits[5];
 
     limits=parseLimitsLine ((const char*)minor_servo_table["MINOR_SERVO_Z3"]->asString());
     medMinorServoConstants->MINOR_SERVO_Z3.position_min= limits[0];
     medMinorServoConstants->MINOR_SERVO_Z3.position_max= limits[1];
-
+    medMinorServoConstants->MINOR_SERVO_Z3.position_zero= limits[2];
+    medMinorServoConstants->MINOR_SERVO_Z3.position_error= limits[3];
+    medMinorServoConstants->MINOR_SERVO_Z3.speed_min= limits[4];
+    medMinorServoConstants->MINOR_SERVO_Z3.speed_max= limits[5];
 
     if(!minor_servo_limits_table.openTable(error)){
         _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);

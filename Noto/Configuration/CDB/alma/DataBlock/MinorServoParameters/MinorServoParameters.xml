@@ -9,13 +9,13 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     <MinorServoLimits>
-        <MINOR_SERVO_X>-80, 80</MINOR_SERVO_X>
-        <MINOR_SERVO_YP>5, 395 </MINOR_SERVO_YP>
-        <MINOR_SERVO_Y>-80, 80</MINOR_SERVO_Y>
-        <MINOR_SERVO_ZP>-5, 345</MINOR_SERVO_ZP>
-        <MINOR_SERVO_Z1>-125, 125</MINOR_SERVO_Z1>
-        <MINOR_SERVO_Z2>-125, 125</MINOR_SERVO_Z2>
-        <MINOR_SERVO_Z3>-125, 125</MINOR_SERVO_Z3>
+        <MINOR_SERVO_X>-80, 80, 0.0, 0.05, 0.01, 14.0</MINOR_SERVO_X>
+        <MINOR_SERVO_YP>-5, 395, 0.0, 0.05, 0.01, 8.0 </MINOR_SERVO_YP>
+        <MINOR_SERVO_Y>-80, 80, 0.0, 0.05, 0.01, 14.0 </MINOR_SERVO_Y>
+        <MINOR_SERVO_ZP>-5, 345, 0.0, 0.05, 0.01, 8.0</MINOR_SERVO_ZP>
+        <MINOR_SERVO_Z1>-125, 125, 0.0, 0.05, 0.01, 14.0</MINOR_SERVO_Z1>
+        <MINOR_SERVO_Z2>-125, 125, 0.0, 0.05, 0.01, 14.0</MINOR_SERVO_Z2>
+        <MINOR_SERVO_Z3>-125, 125, 0.0, 0.05, 0.01, 14.0</MINOR_SERVO_Z3>
     </MinorServoLimits>
 
     <MinorServo>
