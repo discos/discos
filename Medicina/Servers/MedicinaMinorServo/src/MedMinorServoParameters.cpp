@@ -16,11 +16,11 @@ VirtualAxis::VirtualAxis(const char* name,
 
 std::vector<double> parseLimitsLine(const char* line)
 {
-    std::vector<std::string> tokens = split(line);
-    double min = boost::lexical_cast<double>(tokens[1]);
-    double max = boost::lexical_cast<double>(tokens[2]);
     std::vector<double> limits;
-    limits.push_back(boost::lexical_cast<double>(tokens[i]));
+
+    std::vector<std::string> tokens = split(line);
+    limits.push_back(boost::lexical_cast<double>(tokens[1]));
+    limits.push_back(boost::lexical_cast<double>(tokens[2]));
 
     return limits;
 }
