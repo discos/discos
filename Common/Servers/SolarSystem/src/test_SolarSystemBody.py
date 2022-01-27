@@ -58,16 +58,17 @@ import time
 Date__(UT)__HR:MN     R.A.___(ICRF)___DEC  R.A._(a-appar)_DEC.  Azi____(a-app)___Elev
 **************************************************************************************
 2022-Jan-21 00:00:00.000  m  336.65825 -10.79656  336.94218 -10.68735  312.371754 -52.320793
+ 2021-Apr-15 00:00 2459319.500000000     328.035447923 -13.662097629  327.791152902 -13.167532812   84.489404675 -27.482527702  5.49776328729022 -23.8801089
+                                         328.03548968344006, -13.662066250524141
 
-
- 
+ 328.03548968344006, -13.66206625052414
 '''
 
 
 
 epoch = Acspy.Common.TimeHelper.TimeUtil()
 
-struct_time = time.strptime("2022-Jan-21 00:00", "%Y-%b-%d %H:%M")
+struct_time = time.strptime("2021-Apr-15 00:00", "%Y-%b-%d %H:%M")
 
 tm=time.mktime(struct_time)
 
@@ -97,15 +98,18 @@ if hwRef != None:
 #    userDeclinationOffset, userLongitudeOffset, userLatitudeOffset, axis, angularSize, distance, radialVelocity, vradFrame, vradDefinition)
 #print(att)
 
-    az,el,ra,dec,l,lon,lat = hwRef.getAllCoordinates(acstime.value)
+#    az,el,ra,dec,l,lon,lat = hwRef.getAllCoordinates(acstime.value)
 
-    print ("az,el",degrees(az),degrees(el))
+    ra,dec=hwRef.getJ2000EquatorialCoordinate(acstime.value)
+
+#    print ("az,el",degrees(az),degrees(el))
     print ("ra,dec",degrees(ra),degrees(dec))
     
     
     att=hwRef.getAttributes()
-    dec=att.declination 
-    print(dec)
+    dec2000=att.J2000Declination 
+    ra2000=att.J2000RightAscension
+    print(degrees(ra2000),degrees(dec2000))
     
 
     simpleClient.getLogger().logInfo("Method of dynamic component successfully invoked. Have a nice day!")

@@ -12,7 +12,7 @@ const char  *planetnames[]={"Mercury","Venus","Mars","Jupiter","Saturn",
 
 Site::Site(double mj, double lon, double lt, double height)
 {
-    this->n_mjd=mj-15020; // xephem uses mjd 0 as 1899 12 31 at 12:00
+    this->n_mjd=mj-15019.5; // xephem uses mjd 0 as 1899 12 31 at 12:00
     this->n_lat=lt;
     this->n_lng=lon;
     this->n_epoch=J2000;
@@ -23,7 +23,7 @@ Site::Site(double mj, double lon, double lt, double height)
 Site::Site()
 
 {
-	
+	    this->n_epoch=J2000;
 }
 
 void Site::setCoordinate(double lon, double lt,double height)
@@ -38,7 +38,7 @@ void Site::setCoordinate(double lon, double lt,double height)
 void Site::setTime(double mj)
 {
 
-    this->n_mjd=mj-15020; // xephem uses mjd 0 as 1899 12 31 at 12:00
+    this->n_mjd=mj-15019.5; // xephem uses mjd 0 as 1899 12 31 at 12:00
 
 
 
@@ -59,7 +59,7 @@ void Site::stampa(void){
 double Site::getMjd()
 {
 
-    return this->n_mjd+15020;
+    return this->n_mjd+15019.5;
     
 }
 

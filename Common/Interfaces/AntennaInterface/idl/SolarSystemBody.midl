@@ -50,6 +50,17 @@ module Antenna {
 		 * # double parallacticAngle in radians
 		 */
 		void getAttributes(out SolarSystemBodyAttributes att); /*this method is the attribute accessor*/
+
+      	/**
+		 * This method is only for control software internal use. It used, given a timestamp, to retrive the apparent
+		 * J2000 Equatorial coordiantes coordinates in one shot.
+		 * @throw CORBA::SystemException
+		 * @param timestamp this parameter is used to pass the exact time the caller wants to know the topocentric coordinates.
+		 * @param ra that's the returned value in radians of the right ascension for the requested time.
+		 * @param re that's the returned value in radians of the declination for the requested time.
+		*/
+		void getJ2000EquatorialCoordinate(in ACS::Time timestamp, out double ra,out double dec);
+			   
 	        
                 /**
                       @param bodyName of the target

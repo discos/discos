@@ -103,6 +103,18 @@ public:
          * @param az that's the returned value in radians  of the elevation for the requested time.
          */
         void getHorizontalCoordinate(ACS::Time time, CORBA::Double_out az, CORBA::Double_out el) throw (CORBA::SystemException);
+
+      	/**
+		 * This method is only for control software internal use. It used, given a timestamp, to retrive the apparent
+		 * J2000 Equatorial coordiantes coordinates in one shot.
+		 * @throw CORBA::SystemException
+		 * @param timestamp this parameter is used to pass the exact time the caller wants to know the topocentric coordinates.
+		 * @param ra that's the returned value in radians of the right ascension for the requested time.
+		 * @param re that's the returned value in radians of the declination for the requested time.
+		*/
+        void getJ2000EquatorialCoordinate(ACS::Time time, CORBA::Double_out ra, CORBA::Double_out dec) throw (CORBA::SystemException);
+
+
         
          /**
           *  It used, given a timestamp, to retrieve the all apparent coordinates in all frames in one shot.

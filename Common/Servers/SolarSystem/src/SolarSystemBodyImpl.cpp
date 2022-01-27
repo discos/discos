@@ -12,7 +12,7 @@
 #include <iostream>
 //#include <Site.h>
 
-
+#define R2D 57.29577951308232
 
 using namespace ComponentErrors;
 // using namespace baci;
@@ -50,7 +50,7 @@ void SolarSystemBodyImpl::initialize() throw(ACSErr::ACSbaseExImpl)
 void SolarSystemBodyImpl::cleanUp()
 {
         AUTO_TRACE("SolarSystemBodyImpl::cleanUp()");
-        
+        delete m_sitex;
         ACSComponentImpl::cleanUp();
 }
 
@@ -93,9 +93,9 @@ void SolarSystemBodyImpl::execute() throw (ACSErr::ACSbaseExImpl)
 	     m_longitude=site->longitude;
 	     m_latitude=site->latitude;
 	     m_height=site->height;
-	
+	     std::cout << "Site:" << site->longitude *R2D << " " << m_latitude ;
 	     m_sitex= new xephemlib::Site();
-	     m_sitex-> setCoordinate(site->longitude,site->latitude,site->height);
+	     m_sitex-> setCoordinate(site->longitude,site->latitude,site->height); //coordinates in degres.
 		
 	     try {
 		          getContainerServices()->releaseComponent((const char*)observatory->name());
@@ -177,6 +177,21 @@ void SolarSystemBodyImpl::setOffsets(CORBA::Double lon,CORBA::Double lat,Antenna
 
 }
 
+void SolarSystemBodyImpl::getJ2000EquatorialCoordinate(ACS::Time time, CORBA::Double_out ra2000, CORBA::Double_out dec2000) throw (CORBA::SystemException)
+
+{
+	  AUTO_TRACE("SolarSystemBodyImpl::getJ2000EquatorialCoordinate()");
+	  double _ra,_dec;
+	  TIMEVALUE val(time);
+	  BodyPosition(val);
+	  
+	  IRA::CDateTime ctime(val,m_dut1);	
+	 ra2000 =slaDranrm(m_ra2000);
+	 dec2000 =IRA::CIRATools::latRangeRad(m_dec2000);
+
+}
+
+
 void SolarSystemBodyImpl::getHorizontalCoordinate(ACS::Time time, CORBA::Double_out az, CORBA::Double_out el) throw (CORBA::SystemException)
 
 {
@@ -209,7 +224,7 @@ void SolarSystemBodyImpl::getAllCoordinates(ACS::Time time,CORBA::Double_out az,
 	m_source.getApparentEquatorial(rae,dece,jepoche);
 	m_source.getApparentGalactic(lone,late);
 	az=azi; el=ele;
-	ra=rae; dec=dece; jepoch=jepoch;
+	ra=m_ra; dec=m_dec; jepoch=jepoch;
 	lon=lone; lat=late;
 }
 
@@ -284,15 +299,18 @@ void SolarSystemBodyImpl::BodyPosition(TIMEVALUE &time)
 
         AUTO_TRACE("SolarSystemBodyImpl::BodyPosition()");
         double TDB,time_utc,TT;
-        
-        
-       baci::ThreadSyncGuard guard(&m_mutex);	
+#ifdef DEBUG
+        std::cout <<time.year() << " " << time.month() << " " <<time.day() ;
+        std::cout <<time.hour() << " " << time.minute() << " " <<time.second()  << std::endl  ;
+#endif
+
+        baci::ThreadSyncGuard guard(&m_mutex);	
        
         
 	    IRA::CDateTime date(time,m_dut1);
 	    TDB=date.getTDB(m_site);
 	    TT=date.getTT() ;
-     
+       
 	
 	/*
 	 * TDB as a Modified Julian Date (JD - 2400000.5
@@ -302,19 +320,23 @@ void SolarSystemBodyImpl::BodyPosition(TIMEVALUE &time)
         
        time_utc=  CDateTime::julianEpoch2JulianDay (date.getJulianEpoch());
        	   time_utc = time_utc - 2400000.5;     
+       std::cout << time_utc-(int)time_utc << "    " <<TDB << std::endl;
+       
+
+       
        double ra,dec,eph,az,el,lone,late;
 
 //   Site *site = new Site(59319.5,degrad(9.5),degrad(39.5),600);
 
         m_sitex -> setTime(time_utc) ;  
         m_body_xephem->compute( m_sitex );
+        m_body_xephem->report();
         m_ra2000 = m_body_xephem->ra;
         m_dec2000= m_body_xephem->dec;
         m_source.setInputEquatorial(m_ra2000, m_dec2000, IRA::CSkySource::SS_J2000);
                 // IRA::CSkySource m_source;   // dummy CSkySource onj for coordinate conversion  
         m_source.process(date,m_site);	       
         m_source.getApparentEquatorial (ra,dec,eph);
-        
         m_source.getApparentHorizontal(az,el);
 	     m_source.getApparentGalactic(lone,late);            
         m_source.apparentToHorizontal(date,m_site);	
