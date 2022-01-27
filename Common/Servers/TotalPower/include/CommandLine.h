@@ -235,8 +235,8 @@ public:
 	/**
 	 * This method will change the current value of the <i>m_enabled</i> array.
 	 * @throw BackendsErrors::BackendBusyExImpl
-	 * @param en new values sequence for the <i>m_enabled</i> elements. A value grater than zero correspond to a true,
-	 *                a zero match to a false, while a negative will keep the things unchanged.
+	 * @param en new values sequence for the <i>m_enabled</i> elements. 
+	 *				 Each value entered  means the activation of a specific feed.
 	 */ 
 	void setEnabled(const ACS::longSeq& en) throw (BackendsErrors::BackendBusyExImpl);
 	

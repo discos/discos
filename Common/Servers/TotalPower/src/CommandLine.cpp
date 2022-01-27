@@ -1234,6 +1234,8 @@ void CCommandLine::activateCalSwitching(const char * argument) throw (BackendsEr
 	}
 }
 
+
+
 void CCommandLine::setEnabled(const ACS::longSeq& en) throw (BackendsErrors::BackendBusyExImpl)
 {
 	int bound;
@@ -1241,18 +1243,22 @@ void CCommandLine::setEnabled(const ACS::longSeq& en) throw (BackendsErrors::Bac
 		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::setEnabled()");
 		throw impl;
 	}
+
 	if ((long)en.length()>=m_sectionsNumber) {
 		bound=m_sectionsNumber;
+		cout << "m_sectionsNumber: " << m_sectionsNumber << endl;
 	}
 	else {
 		bound=en.length();
 	}
-	for (int i=0;i<bound;i++) {
-		if (en[i]>0) m_enabled[i]=true;
-		else if (en[i]==0) m_enabled[i]=false;
-	}	
+	
+	for (int j=0; j < MAX_SECTION_NUMBER; j++){ m_enabled[j] = false; }
+	for (int i=0; i < bound; i++) { if (en[i] < bound) {m_enabled[en[i]] = true;} }	
+
 	ACS_LOG(LM_FULL_INFO,"CCommandLine::setEnabled()",(LM_NOTICE,"CHANGED_ENABLED_CHANNEL"));
 }
+
+
 
 void CCommandLine::setIntegration(const long& integration)  throw (BackendsErrors::BackendBusyExImpl)
 {
