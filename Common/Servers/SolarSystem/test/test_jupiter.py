@@ -25,18 +25,16 @@ class JupiterPositionTest(unittest.TestCase):
          print(tm)
          simpleClient = PySimpleClient()
          hwRef = simpleClient.getDynamicComponent(None,"IDL:alma/Antenna/SolarSystemBody:1.0","SolarSystemBodyImpl",None)
-         try:
-             print ('wwww')
-             ra,dec=hwRef.getJ2000EquatorialCoordinate(self.acstime.value)
-             time.sleep(1)
-             print(ra,dec)	 
+         hwRef.setBodyName('Jupiter')
+         print ('wwww')
+         ra,dec=hwRef.getJ2000EquatorialCoordinate(self.acstime.value)
+         time.sleep(1)
+         print(ra,dec)	 
              
              
-             #self.assertAlmostEqual(ra, 328.035447923, places=1)
+         self.assertAlmostEqual(degrees(ra), 328.035447923, places=4)
 
 
-         except:
-         	 print('except')
 
 
 if __name__ == '__main__':
