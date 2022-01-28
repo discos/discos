@@ -186,8 +186,11 @@ void SolarSystemBodyImpl::getJ2000EquatorialCoordinate(ACS::Time time, CORBA::Do
 	  BodyPosition(val);
 	  
 	  IRA::CDateTime ctime(val,m_dut1);	
-	 ra2000 =slaDranrm(m_ra2000);
-	 dec2000 =IRA::CIRATools::latRangeRad(m_dec2000);
+	 _ra =slaDranrm(m_ra2000);
+	 _dec =IRA::CIRATools::latRangeRad(m_dec2000);
+     ra2000=_ra;
+     dec2000=_dec;
+
 
 }
 
