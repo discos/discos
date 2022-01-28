@@ -326,14 +326,13 @@ double
 MedMinorServoGeometry::_check_axis_limit(const double position,
                                          const MedMinorServoAxis axis)
 {
-	
     if(position < axis.position_min){
-        throw MinorServoAxisLimitError("axis too low");
-        //return axis.position_min;
+        throw MinorServoAxisLimitError("axis %s too low, setting to min position %f",axis.name,axis.position_min);
+        return axis.position_min;
     }
     if(position > axis.position_max){
-        throw MinorServoAxisLimitError("axis too high");
-        //return axis.position_max;
+        throw MinorServoAxisLimitError("axis %s too high  setting to max position %f",axis.name,axis.position_max);
+        return axis.position_max;
     }
     return position;
 }
@@ -364,7 +363,8 @@ MedMinorServoGeometry::positionToAxes(const MedMinorServoPosition& position)
     }
     catch(MinorServoAxisLimitError& ex)
     {
-        return false;
+        CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoGeometry::positionToAxes",
+                (LM_DEBUG, "MinorServoAxisLimitError %s", ex.what()));
     }
 
     command.time = MedMinorServoTime::ACSToServoTime(position.time);
