@@ -327,16 +327,20 @@ MedMinorServoGeometry::_check_axis_limit(const double position,
                                          const MedMinorServoAxis axis)
 {
     if(position < axis.position_min){
-        //throw MinorServoAxisLimitError("axis too low);
+        throw MinorServoAxisLimitError("axis too low");
+    /*
         CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoGeometry::_check_axis_limit",
                    (LM_DEBUG, "axis %s too low, setting to min position %f",axis.name,axis.position_min));
         return axis.position_min;
+    */
     }
     if(position > axis.position_max){
-        //throw MinorServoAxisLimitError("axis too high");
+        throw MinorServoAxisLimitError("axis too high");
+    /*
         CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoGeometry::_check_axis_limit",
             (LM_DEBUG, "axis %s too high, setting to max position %f",axis.name,axis.position_max));
         return axis.position_max;
+    */
     }
     return position;
 }
@@ -348,17 +352,29 @@ MedMinorServoGeometry::positionToAxes(const MedMinorServoPosition& position)
     switch(position.mode)
     {
         case(MED_MINOR_SERVO_PRIMARY):
-            command.mode = 0;       
-            command.pos_x_yp = _get_inverse_yp(position);
-            command.pos_y_zp = _get_inverse_zp(position);
+         try{
+                command.mode = 0;       
+                command.pos_x_yp = _get_inverse_yp(position);
+                command.pos_y_zp = _get_inverse_zp(position);
+            }
+            catch(MinorServoAxisLimitError& ex)
+            {
+                throw MinorServoGeometryError("axis out of range");
+            }
             break;
         case(MED_MINOR_SERVO_SECONDARY):
-            command.mode = 1;       
-            command.pos_x_yp = _get_inverse_x(position);
-            command.pos_y_zp = _get_inverse_y(position);
-            command.pos_z1 = _get_inverse_z1(position);
-            command.pos_z2 = _get_inverse_z2(position);
-            command.pos_z3 = _get_inverse_z3(position);
+            try{
+                command.mode = 1;       
+                command.pos_x_yp = _get_inverse_x(position);
+                command.pos_y_zp = _get_inverse_y(position);
+                command.pos_z1 = _get_inverse_z1(position);
+                command.pos_z2 = _get_inverse_z2(position);
+                command.pos_z3 = _get_inverse_z3(position);
+            }
+            catch(MinorServoAxisLimitError& ex)
+            {
+                throw MinorServoGeometryError("axis out of range");
+            }
             break;
         default:
             throw MinorServoGeometryError("Invalid mode converting position to command");
