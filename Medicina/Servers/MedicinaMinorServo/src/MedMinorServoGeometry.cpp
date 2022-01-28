@@ -342,24 +342,31 @@ MEDMINORSERVOSETPOS
 MedMinorServoGeometry::positionToAxes(const MedMinorServoPosition& position)
 {
     MEDMINORSERVOSETPOS command;
-    switch(position.mode)
-    {
-        case(MED_MINOR_SERVO_PRIMARY):
-            command.mode = 0;       
-            command.pos_x_yp = _get_inverse_yp(position);
-            command.pos_y_zp = _get_inverse_zp(position);
-            break;
-        case(MED_MINOR_SERVO_SECONDARY):
-            command.mode = 1;       
-            command.pos_x_yp = _get_inverse_x(position);
-            command.pos_y_zp = _get_inverse_y(position);
-            command.pos_z1 = _get_inverse_z1(position);
-            command.pos_z2 = _get_inverse_z2(position);
-            command.pos_z3 = _get_inverse_z3(position);
-            break;
-        default:
-            throw MinorServoGeometryError("Invalid mode converting position to command");
+    try {
+        switch(position.mode)
+        {
+            case(MED_MINOR_SERVO_PRIMARY):
+                command.mode = 0;       
+                command.pos_x_yp = _get_inverse_yp(position);
+                command.pos_y_zp = _get_inverse_zp(position);
+                break;
+            case(MED_MINOR_SERVO_SECONDARY):
+                command.mode = 1;       
+                command.pos_x_yp = _get_inverse_x(position);
+                command.pos_y_zp = _get_inverse_y(position);
+                command.pos_z1 = _get_inverse_z1(position);
+                command.pos_z2 = _get_inverse_z2(position);
+                command.pos_z3 = _get_inverse_z3(position);
+                break;
+            default:
+                throw MinorServoGeometryError("Invalid mode converting position to command");
+        }
     }
+    catch(MinorServoAxisLimitError& ex)
+    {
+        return false;
+    }
+
     command.time = MedMinorServoTime::ACSToServoTime(position.time);
     return command;
 }
