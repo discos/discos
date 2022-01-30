@@ -221,13 +221,13 @@ void SolarSystemBodyImpl::getAllCoordinates(ACS::Time time,CORBA::Double_out az,
 	double azi,ele,rae,dece,lone,late,jepoche;
 	IRA::CDateTime ctime(val,m_dut1);
 	baci::ThreadSyncGuard guard(&m_mutex);
-		BodyPosition(val);
+	BodyPosition(val);
 	m_source.process(ctime,m_site);
 	m_source.getApparentHorizontal(azi,ele);
 	m_source.getApparentEquatorial(rae,dece,jepoche);
 	m_source.getApparentGalactic(lone,late);
 	az=azi; el=ele;
-	ra=m_ra; dec=m_dec; jepoch=jepoch;
+	ra=rae; dec=dece; jepoch=jepoche;
 	lon=lone; lat=late;
 }
 
