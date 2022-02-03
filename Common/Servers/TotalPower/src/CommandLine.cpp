@@ -1236,21 +1236,27 @@ void CCommandLine::activateCalSwitching(const char * argument) throw (BackendsEr
 
 void CCommandLine::setEnabled(const ACS::longSeq& en) throw (BackendsErrors::BackendBusyExImpl)
 {
-	int bound;
 	if (getIsBusy()) {
 		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::setEnabled()");
 		throw impl;
 	}
-	if ((long)en.length()>=m_sectionsNumber) {
-		bound=m_sectionsNumber;
+	
+	if((long) en.length() > m_beams){
+		 CUSTOM_LOG(LM_FULL_INFO,"CCommandLine::setEnabled()",(LM_NOTICE,"the number of input elements are greater than allowed"));
 	}
-	else {
-		bound=en.length();
-	}
-	for (int i=0;i<bound;i++) {
-		if (en[i]>0) m_enabled[i]=true;
-		else if (en[i]==0) m_enabled[i]=false;
+	
+	for (int j = 0; j < MAX_SECTION_NUMBER; j++){ m_enabled[j] = false; }
+	
+	for (int i = 0; i < (int) en.length(); i++) { 
+	  for (int k = 0; k < m_sectionsNumber; k++){  
+	    if(m_feedNumber[k] == en[i]){ m_enabled[k] = true;}
+	    if(en[i] >= m_beams){ 
+		    CUSTOM_LOG(LM_FULL_INFO,"CCommandLine::setEnabled()",(LM_NOTICE,"feeds inserted in input are invalid for this backend configuration")); 
+		    break;
+	    }
+	  } 
 	}	
+	
 	ACS_LOG(LM_FULL_INFO,"CCommandLine::setEnabled()",(LM_NOTICE,"CHANGED_ENABLED_CHANNEL"));
 }
 
