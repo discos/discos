@@ -159,16 +159,19 @@ void SolarSystemBodyImpl::setOffsets(CORBA::Double lon,CORBA::Double lat,Antenna
 {       
         AUTO_TRACE("SolarSystemBodyImpl::setOffsets()");
         if (frame==Antenna::ANT_HORIZONTAL) {
+		m_source.setHorizontalOffsets(lon,lat);		
 		m_az_off=lon;
 		m_el_off=lat;
 		m_ra_off=0.0;
 		m_dec_off=0.0;
 	}
-	else if (frame==Antenna::ANT_EQUATORIAL) {
+	else if (frame==Antenna::ANT_EQUAATORIAL) {
 		m_az_off=0.0;
 		m_el_off=0.0;
 		m_ra_off=lon;
 		m_dec_off=lat;
+		m_source.setEquatorialOffsets(lon,lat);
+
 	}
 	else {
 		_EXCPT(AntennaErrors::OffsetFrameNotSupportedExImpl,impl,"SolarSystemBodyImpl::setOffsets()");
@@ -202,7 +205,8 @@ void SolarSystemBodyImpl::getHorizontalCoordinate(ACS::Time time, CORBA::Double_
 	     double azi,ele;
         TIMEVALUE val(time);
 	     IRA::CDateTime ctime(val,m_dut1);	
-	     baci::ThreadSyncGuard guard(&m_mutex);	
+	     baci::ThreadSyncGuard guard(&m_mutex);
+      	BodyPosition(val);
 	     m_source.process(ctime,m_site);
 	     m_source.getApparentHorizontal(azi,ele);
 	     az=azi; el=ele;
