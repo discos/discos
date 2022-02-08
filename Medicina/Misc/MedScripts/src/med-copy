@@ -1,0 +1,147 @@
+#!/usr/bin/env bash
+
+print_help() {
+    echo " "
+    echo "`basename $0` v1.0"
+    echo " "
+    echo "Copy files from and toward the DISCOS system."
+    echo "Usage: '`basename $0` [-t|--port portnumber] -r|--remote <projectid>@<gatein> -d|--download Source Destination"
+    echo "       '`basename $0` [-t|--port portnumber] -r|--remote <projectid>@<gatein> -u|--upload Source Destination"
+    echo "       '`basename $0` -h|--help'"
+    echo "-d | --download this allows to download files or folders from DISCOS to your local machine"
+    echo "-h | --help prints this help message and exit"
+	 echo "-p | --port ssh port, if different from the default one"
+    echo "-r | --remote provides the credentials to log into DISCOS"
+    echo "       <projectid> indicates the project for which files are copied."
+    echo "       <gatein> access point into the observatory lan. This information is provided by local staff."
+    echo "                Use 'local' if already inside the local area network."	     
+    echo "-u | --upload this allows to upload files or folders to DISCOS from your local machine"
+    exit 1
+}
+
+current_system="LINUX"
+upload=""
+download=""
+ssh_port="22"
+project=""
+gatein=""
+local="FALSE"
+src=""
+dest=""
+
+while [[ $# -gt 0 ]]
+do
+key="$1"
+case $key in
+    -h|--help)
+    print_help
+    ;;
+    -p|--port)
+    ssh_port=$2
+    shift
+    shift
+    ;;
+    -d|--download)
+    download="TRUE"
+    shift
+    ;;
+    -u|--upload)
+    upload="TRUE"
+    shift
+    ;;
+    -r|--remote)
+    if [[ $2 == *"@"* ]]; then
+        while IFS='@' read -ra ARG; do
+            if [[ "${#ARG[@]}" -ne 2 ]]; then
+                echo -e "Please provide a correct <projectid>@<gatein> pair, retry!"
+                print_help
+            fi
+            project=${ARG[0]}
+            gatein=${ARG[1]}
+        done <<< "$2"
+    else
+        echo "Bad argument format: '$2'!"
+        print_help
+    fi
+    shift
+    shift    
+    ;;
+    *)
+    if [[ "$src" == "" ]]
+    then
+        src=$key
+    elif [[ "$dest" == "" ]]
+    then
+        dest=$key
+    else
+        echo "Too many arguments provided!"
+        print_help
+    fi
+    shift
+    ;;
+esac
+done
+
+if [[ "$src" == "" || "$dest" == "" ]]; then
+   echo -e "Inconsistent input, both source and destination should be provided!"
+   print_help
+fi
+
+if [[ "$gatein" == "" ]]; then
+   echo -e "Remote credentials must be provided!"
+   print_help
+fi
+
+if [[ "$gatein" == "local" ]]; then
+    local="TRUE"
+fi
+
+if [[ "$upload" == "" && "$download" == "" ]]; then
+   echo -e "Inconsistent input, at least one of '--upload' and '--download' should be provided!"
+   print_help
+fi
+
+if [[ "$upload" != "" && "$download" != "" ]]; then
+   echo -e "Inconsistent input, only one of '--upload' and '--download' should be provided!"
+   print_help
+fi
+
+if [[ "$OSTYPE" == *"linux-gnu"* ]]
+then
+   echo -e "Linux OS is detected..."
+   current_system="LINUX"
+elif [[ "$OSTYPE" == *"darwin"* ]]
+then
+   echo -e "Mac OS is detected..."
+   current_system="MACOS"
+else
+   echo -e "Not supported OS, some unpredictable results may happen!"	
+fi
+
+#echo $local
+#echo $project
+#echo $gatein
+#echo $ssh_port
+#echo $files
+#echo $upload
+#echo $download
+#echo $current_system
+
+proxy="ProxyCommand=ssh -p ""$ssh_port"" -W %h:%p observer@""$gatein"
+#echo $proxy
+
+
+if [[ "$local" == "FALSE" ]]; then 
+    if [[ "$upload" == "TRUE" ]]; then
+        scp -r -P 9922 -o "$proxy" $src "$project"@192.167.189.98:$dest 2> /dev/null
+    elif [[ "$download" == "TRUE" ]]; then
+        scp -r -P 9922 -o "$proxy" "$project"@192.167.189.98:$src $dest 2> /dev/null
+    fi
+else
+    if [[ "$upload" == "TRUE" ]]; then
+        scp -r -P 9922 $src "$project"@192.167.189.98:$dest 2> /dev/null
+    elif [[ "$download" == "TRUE" ]]; then
+        scp -r -P 9922 "$project"@192.167.189.98:$src $dest 2> /dev/null
+    fi
+fi
+
