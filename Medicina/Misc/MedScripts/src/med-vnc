@@ -5,14 +5,17 @@ print_help() {
     echo "`basename $0` v1.0"
     echo " "
     echo "Start a new session toward DISCOS control software"
-    echo "Usage: '`basename $0` [OPTIONS] <role>@<gatein>'"
+    echo "Usage: '`basename $0` [OPTIONS] [-t|--port portnumber] <role>@<gatein>'"
+    echo "       '`basename $0` -r|--roles'"
+    echo "       '`basename $0` -h|--help'"
     echo "<role> indicates the role (observer or administrative privileges) for which the connection is done"
-    echo "<gatein> access point into the observatory lan. This information is provided by local staff. Use 'local' if already inside the local area network."
+    echo "<gatein> access point into the observatory LAN. This information is provided by local staff." 
+    echo "         Use 'local' if already inside the local area network."
+    echo "-h | --help prints this help message and exit"
+    echo "-r | --roles shows all the available roles"
+    echo "-p | --port ssh port if different from the default one" 
     echo "Options:"
-    echo "    -h | --help               prints this help message and exit"
-    echo "    -p | --port               ssh port if different from the default one" 
     echo "    -v | --viewonly           start the vncviewer in view only mode"
-    echo "    -r | --roles              show all the availables roles"
     exit 1
 }
 
@@ -84,7 +87,7 @@ then
    echo -e "Mac OS is detected..."
    current_system="MACOS"
 else
-   echo -e "Not supported OS, some unpredictables results may happen!"	
+   echo -e "Not supported OS, some unpredictable results may happen!"	
 fi
 
 if ! hash vncviewer &>/dev/null; then

@@ -5,15 +5,17 @@ print_help() {
     echo "`basename $0` v1.0"
     echo " "
     echo "Copy files from and toward the DISCOS system."
-    echo "Usage: '`basename $0` [OPTIONS] <projectid>@<gatein>'"
-    echo "<projectid> indicates the project for which the files are copied."
-    echo "<gatein> access point into the observatory lan. This information is provided by local staff. Use 'local' if already inside the local area network."
-    echo "Options:"
-    echo "    -h | --help               prints this help message and exit"
-    echo "    -p | --port               ssh port if different from the default one" 
-    echo "    -d | --download           this allows to download files or folders from DISCOS to your local machine"
-    echo "    -u | --upload             this allows to upload files or folders to DISCOS from your local machine"
-    echo "    -f | --file               local file(s) o folder(s) involved in the copy process. Normal placehlder are allowed"
+    echo "Usage: '`basename $0` [-t|--port portnumber] -r|--remote <projectid>@<gatein> -d|--download Source Destination"
+    echo "       '`basename $0` [-t|--port portnumber] -r|--remote <projectid>@<gatein> -u|--upload Source Destination"
+    echo "       '`basename $0` -h|--help'"
+    echo "-d | --download this allows to download files or folders from DISCOS to your local machine"
+    echo "-h | --help prints this help message and exit"
+	 echo "-p | --port ssh port, if different from the default one"
+    echo "-r | --remote provides the credentials to log into DISCOS"
+    echo "       <projectid> indicates the project for which files are copied."
+    echo "       <gatein> access point into the observatory lan. This information is provided by local staff."
+    echo "                Use 'local' if already inside the local area network."	     
+    echo "-u | --upload this allows to upload files or folders to DISCOS from your local machine"
     exit 1
 }
 
@@ -24,7 +26,8 @@ ssh_port="22"
 project=""
 gatein=""
 local="FALSE"
-files=""
+src=""
+dest=""
 
 while [[ $# -gt 0 ]]
 do
@@ -39,22 +42,15 @@ case $key in
     shift
     ;;
     -d|--download)
-    download=$2
-    shift
+    download="TRUE"
     shift
     ;;
     -u|--upload)
-    upload=$2
-    shift
-    shift
-    ;;
-    -f|--file)
-    files=$2
-    shift
+    upload="TRUE"
     shift
     ;;
-    *)
-    if [[ $1 == *"@"* ]]; then
+    -r|--remote)
+    if [[ $2 == *"@"* ]]; then
         while IFS='@' read -ra ARG; do
             if [[ "${#ARG[@]}" -ne 2 ]]; then
                 echo -e "Please provide a correct <projectid>@<gatein> pair, retry!"
@@ -62,15 +58,39 @@ case $key in
             fi
             project=${ARG[0]}
             gatein=${ARG[1]}
-        done <<< "$1"
+        done <<< "$2"
     else
-        echo "Unrecognized option: '$1'!"
+        echo "Bad argument format: '$2'!"
+        print_help
+    fi
+    shift
+    shift    
+    ;;
+    *)
+    if [[ "$src" == "" ]]
+    then
+        src=$key
+    elif [[ "$dest" == "" ]]
+    then
+        dest=$key
+    else
+        echo "Too many arguments provided!"
         print_help
     fi
     shift
     ;;
 esac
 done
+
+if [[ "$src" == "" || "$dest" == "" ]]; then
+   echo -e "Inconsistent input, both source and destination should be provided!"
+   print_help
+fi
+
+if [[ "$gatein" == "" ]]; then
+   echo -e "Remote credentials must be provided!"
+   print_help
+fi
 
 if [[ "$gatein" == "local" ]]; then
     local="TRUE"
@@ -86,11 +106,6 @@ if [[ "$upload" != "" && "$download" != "" ]]; then
    print_help
 fi
 
-if [[ "$files" == "" ]]; then
-   echo -e "Inconsistent input, '--file' is mandatory!"
-   print_help
-fi
-
 if [[ "$OSTYPE" == *"linux-gnu"* ]]
 then
    echo -e "Linux OS is detected..."
@@ -100,7 +115,7 @@ then
    echo -e "Mac OS is detected..."
    current_system="MACOS"
 else
-   echo -e "Not supported OS, some unpredictables results may happen!"	
+   echo -e "Not supported OS, some unpredictable results may happen!"	
 fi
 
 #echo $local
@@ -112,20 +127,21 @@ fi
 #echo $download
 #echo $current_system
 
-proxy="ProxyCommand=ssh -p 5122 -W %h:%p observer@""$gatein"
+proxy="ProxyCommand=ssh -p ""$ssh_port"" -W %h:%p observer@""$gatein"
 #echo $proxy
 
+
 if [[ "$local" == "FALSE" ]]; then 
-    if [[ -n "$upload" ]]; then
-        scp -P 9922 -o "$proxy" $files staff@192.167.189.98:$upload
-    elif [[ -n "$download" ]]; then
-        scp -P 9922 -o "$proxy" staff@192.167.189.98:$download $files
+    if [[ "$upload" == "TRUE" ]]; then
+        scp -r -P 9922 -o "$proxy" $src "$project"@192.167.189.98:$dest 2> /dev/null
+    elif [[ "$download" == "TRUE" ]]; then
+        scp -r -P 9922 -o "$proxy" "$project"@192.167.189.98:$src $dest 2> /dev/null
     fi
 else
-    if [[ -n "$upload" ]]; then
-        scp -P 9922 $files staff@192.167.189.98:$upload
-    elif [[ -n "$download" ]]; then
-        scp -P 9922 staff@192.167.189.98:$download $files
+    if [[ "$upload" == "TRUE" ]]; then
+        scp -r -P 9922 $src "$project"@192.167.189.98:$dest 2> /dev/null
+    elif [[ "$download" == "TRUE" ]]; then
+        scp -r -P 9922 "$project"@192.167.189.98:$src $dest 2> /dev/null
     fi
 fi
 
