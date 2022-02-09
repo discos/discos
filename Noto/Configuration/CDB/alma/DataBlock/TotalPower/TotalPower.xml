@@ -65,7 +65,7 @@
 	<configurationID>XXP</configurationID>
 	<sections>2</sections>
 	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
-	<inputPort>PRIMARY</inputPort>
+	<inputPort>GREGORIAN</inputPort>
 	<inputPortDB>7</inputPortDB>
 	<inputPortBW>2350</inputPortBW>
 	<beams>1</beams>
@@ -79,9 +79,9 @@
 	<configurationID>LLP</configurationID>
 	<sections>2</sections>
 	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
-	<inputPort>PRIMARY</inputPort>
+	<inputPort>GREGORIAN</inputPort>
 	<inputPortDB>3</inputPortDB>
-	<inputPortBW>2350</inputPortBW>
+	<inputPortBW>730</inputPortBW>
 	<beams>1</beams>
 	<section_boards>0 1</section_boards>
 	<polarizations>L R</polarizations>
@@ -93,7 +93,7 @@
 	<configurationID>SSP</configurationID>
 	<sections>2</sections>
 	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
-	<inputPort>PRIMARY</inputPort>
+	<inputPort>GREGORIAN</inputPort>
 	<inputPortDB>7</inputPortDB>
 	<inputPortBW>730</inputPortBW>
 	<beams>1</beams>
@@ -107,7 +107,7 @@
 	<configurationID>LNP</configurationID>
 	<sections>2</sections>
 	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
-	<inputPort>PRIMARY</inputPort>
+	<inputPort>GREGORIAN</inputPort>
 	<inputPortDB>0</inputPortDB>
 	<inputPortBW>2350</inputPortBW>
 	<beams>1</beams>

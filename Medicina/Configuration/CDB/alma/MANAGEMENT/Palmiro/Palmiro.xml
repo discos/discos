@@ -29,8 +29,8 @@
 	     	 WeatherStationInstance="IDL:alma/Weather/GenericWeatherStation:1.0"
 	     	 DefaultBackendInstance="BACKENDS/TotalPower"
 	     	 DefaultDataReceiverInstance="MANAGEMENT/FitsZilla"
-	     	 DefaultProjectCode="maintenance"
-	     	 CheckProjectCode="false"
+	     	 DefaultProjectCode="staff"
+	     	 CheckProjectCode="true"
 >
              
 <scheduleName/>

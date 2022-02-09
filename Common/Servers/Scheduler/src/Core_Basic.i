@@ -410,7 +410,7 @@ void CCore::setupDataTransfer(bool& scanStarted,
  				setup.path=CORBA::string_dup((const char *)path);
  				setup.extraPath=CORBA::string_dup((const char *)extraPath);
  				setup.schedule=CORBA::string_dup((const char *)schedule);
-				setup.schedule=CORBA::string_dup((const char *)log);
+				setup.log=CORBA::string_dup((const char *)log);
 				setup.backendName=CORBA::string_dup((const char *)backendName);
  				if (layoutName!=_SCHED_NULLTARGET) {
  					setup.scanLayout=CORBA::string_dup((const char *)layoutName);

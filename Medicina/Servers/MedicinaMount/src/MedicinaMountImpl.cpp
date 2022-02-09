@@ -18,8 +18,8 @@
 using namespace AntennaErrors;
 using namespace ComponentErrors;
 
-static char *rcsId="@(#) $Id: MedicinaMountImpl.cpp,v 1.17 2011-04-22 17:15:07 a.orlati Exp $";
-static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
+//static char *rcsId="@(#) $Id: MedicinaMountImpl.cpp,v 1.17 2011-04-22 17:15:07 a.orlati Exp $";
+//static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
 
 
 MedicinaMountImpl::MedicinaMountImpl(const ACE_CString &CompName,maci::ContainerServices *containerServices) : 
@@ -131,7 +131,7 @@ void MedicinaMountImpl::execute() throw (ACSErr::ACSbaseExImpl)
 	CSecAreaResourceWrapper<CMedicinaMountSocket> Socket=m_ACULink->Get();
 	CUSTOM_LOG(LM_FULL_INFO,"MedicinaMountImpl::execute()",(LM_INFO,"MedicinaMount::ACU_SOCKET_CONNECTING"));
 	// this could throw an exception.....
-	Socket->Init(&m_CompConfiguration);
+	Socket->Init(&m_CompConfiguration,getContainerServices());
 	CUSTOM_LOG(LM_FULL_INFO,"MedicinaMountImpl::execute()",(LM_INFO,"MedicinaMount::ACU_SOCKET_CONNECTED"));
 	timeSlice=m_CompConfiguration.controlThreadPeriod();
 	CUSTOM_LOG(LM_FULL_INFO,"MedicinaMountImpl::execute()",(LM_INFO,"MedicinaMount::CONTROL_THREAD_STARTING"));

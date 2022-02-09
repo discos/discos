@@ -143,9 +143,6 @@ MedMinorServoControl::set_position(const MedMinorServoPosition& position)
     _commanded_status.enable = 1;
     _commanded_status.acknowledge = 0;
     _send_commanded_status();
-    CUSTOM_LOG(LM_FULL_INFO,
-               "MinorServo::MedMinorServoControl::set_position",
-               (LM_DEBUG, "set new position"));
 }
 
 void 
@@ -172,9 +169,6 @@ MedMinorServoControl::set_position_with_speed(const MedMinorServoPosition& posit
     _commanded_status.vel_z3 = speed;
     
     _send_commanded_status();
-    CUSTOM_LOG(LM_FULL_INFO,
-               "MinorServo::MedMinorServoControl::set_position_with_speed",
-               (LM_DEBUG, "set new position"));
 }
 
 void 
@@ -211,9 +205,6 @@ MedMinorServoControl::set_position_with_time(const MedMinorServoPosition& positi
                                 _commanded_status.pos_z3) / time_offset;
     }
     _send_commanded_status();
-    CUSTOM_LOG(LM_FULL_INFO,
-               "MinorServo::MedMinorServoControl::set_position_with_time",
-               (LM_DEBUG, "set new position"));
 }
 
 void 
@@ -222,9 +213,6 @@ MedMinorServoControl::set_last_position()
     boost::mutex::scoped_lock lock(_command_guard);
     boost::recursive_mutex::scoped_lock rlock(_read_guard);
     _send_commanded_status();
-    CUSTOM_LOG(LM_FULL_INFO,
-               "MinorServo::MedMinorServoControl::set_last_position",
-               (LM_DEBUG, "set new position"));
 }
 
 MedMinorServoPosition

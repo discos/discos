@@ -14,6 +14,7 @@ import maciErrType
 import cdbErrType
 import maciErrTypeImpl
 import ManagementErrorsImpl
+import ComponentErrorsImpl
 from IRAPy import logger,userLogger
 from SimpleParserPy import add_user_message
 import xml.etree.ElementTree as ET

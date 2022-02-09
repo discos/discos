@@ -633,6 +633,28 @@ public:
 	void getAllOffsets(CORBA::Double_out azOff,CORBA::Double_out elOff,CORBA::Double_out raOff,CORBA::Double_out decOff,CORBA::Double_out lonOff,CORBA::Double_out latOff) throw (CORBA::SystemException);
 	
 	/**
+	 * This method should only be used internally to know the scan offsets currently commanded
+	 * @throw CORBA::SystemException
+	 * @param lonOff scan offset for longitude (radians)
+	 * @param latOff scan offset for latitude (radians)
+	 * @param frameOff scan offset frame
+	*/
+	void getScanOffsets(CORBA::Double_out lonOff,CORBA::Double_out latOff,
+	 Antenna::TCoordinateFrame_out frameOff) throw (CORBA::SystemException);
+	 
+	/**
+	 * This method should only be used internally to know the user offsets currently commanded
+	 * @throw CORBA::SystemException
+	 * @throw CORBA::SystemException
+	 * @param lonOff user offset for longitude (radians)
+	 * @param latOff user offset for latitude (radians)
+	 * @param frameOff user offset frame
+	*/
+	void getUserOffsets(CORBA::Double_out lonOff,CORBA::Double_out latOff,
+	 Antenna::TCoordinateFrame_out frameOff) throw (CORBA::SystemException);
+	 
+	
+	/**
 	 * It can be called to know which is the axis the antenna is currently performing the scan
 	 * @param axis returned identfier of the axis
 	 */

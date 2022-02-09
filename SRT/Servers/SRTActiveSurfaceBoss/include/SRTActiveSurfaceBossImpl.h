@@ -34,7 +34,6 @@
 #include <SP_parser.h>
 
 #define LOOPSTATUSTIME 10000000 // 1.0 second
-#define LOOPWORKINGTIME 5000000 // 0.5 seconds
 #define SECTORTIME 1000000 // 0.1 seconds
 
 #define _SET_CDB(PROP,LVAL,ROUTINE) {	\
@@ -185,6 +184,8 @@ class SRTActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl, publ
 	void setProfile ( ActiveSurface::TASProfile profile) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
 	void usdStatus4GUIClient( CORBA::Long circle,  CORBA::Long actuator, CORBA::Long_out status) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
+
+	void asStatus4GUIClient( ACS::longSeq_out status) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
 	void setActuator (CORBA::Long circle, CORBA::Long actuator, CORBA::Long_out actPos, CORBA::Long_out cmdPos, CORBA::Long_out Fmin, CORBA::Long_out Fmax, CORBA::Long_out acc, CORBA::Long_out delay) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 

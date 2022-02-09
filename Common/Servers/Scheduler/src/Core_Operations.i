@@ -733,7 +733,7 @@ void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponent
 	}
 }
 
-void CCore::_setProjectCode(const char* code) throw (ManagementErrors::UnkownProjectCodeErrorExImpl)
+void CCore::_setProjectCode(const char* code,IRA::CString& message) throw (ManagementErrors::UnkownProjectCodeErrorExImpl)
 {
 	IRA::CString newCode(code);
 	if (newCode=="''") { // if '' given...maps to default user
@@ -750,6 +750,11 @@ void CCore::_setProjectCode(const char* code) throw (ManagementErrors::UnkownPro
 	if (m_schedExecuter) {
 		m_schedExecuter->setProjectCode(newCode);
 	}
+    std::string msg = "Welcome to this facility, " + std::string(code) + "!";
+    std::string welcome = std::string(m_stationConf->getWelcomeMessage());
+    if(welcome != "")
+        msg += "\n" + welcome;
+    message.Format("STR %s", msg.c_str());
 }
 
 /*void CCore::_winkingMark(const char *arg) throw (ComponentErrors::ValidationErrorExImpl);
@@ -1151,12 +1156,11 @@ void CCore::_haltSchedule()
 
 void CCore::_startSchedule(const char* scheduleFile,const char * startSubScan) throw (ManagementErrors::ScheduleErrorExImpl,ManagementErrors::AlreadyRunningExImpl,
 		ComponentErrors::MemoryAllocationExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
-		ManagementErrors::LogFileErrorExImpl,ManagementErrors::ScheduleNotExistExImpl,ManagementErrors::CannotClosePendingTaskExImpl)
+		ManagementErrors::LogFileErrorExImpl,ManagementErrors::ScheduleNotExistExImpl,ManagementErrors::CannotClosePendingTaskExImpl,
+		ManagementErrors::ScheduleProjectNotMatchExImpl)
 {
 	//no need to get the mutex, because it is already done inside the Schedule Executor thread
 	if (m_schedExecuter) {
- 		//ManagementErrors::ScheduleErrorExImpl, ManagementErrors::AlreadyRunningExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::CouldntGetComponentExImpl,
- 		//ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl,ManagementErrors::ScheduleNotExistExImpl
 		m_schedExecuter->startSchedule(scheduleFile,startSubScan);
 	}
 }

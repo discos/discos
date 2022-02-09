@@ -40,8 +40,7 @@ def usage():
     print "[-h|--help]           displays this help"
 
 def handler(num, stack):
-    global stopAll
-    stopAll=True
+    raise EOFError
 
 def get_history_items():
     return [readline.get_history_item(i) for i in xrange(1,readline.get_current_history_length()+1)]
@@ -133,7 +132,6 @@ def main():
 					cmd=raw_input("<%d> "%cmdCounter)
 				except IOError:
 					cmd='exit'
-					pass
 			else:
 				cmd="version"
 			cmdCounter=cmdCounter+1
@@ -157,15 +155,24 @@ def main():
 					idx = res.find('\\')
 					cmd_name, response = res[:idx+1], res[idx+1:].rstrip('\\')
 					if success and response:
-						groups = response.split(',')
-						for group in groups:
-							values = group.split(';')
-							if len(values) > 1:
-								print cmd_name
-								for i, value in enumerate(values):
-									print '%02d) %s' %(i, value)
-							elif res:
-								print res
+						if response.startswith('STR '):
+							# We got a formatted string in return, print it
+							# without any modification
+							response = response[4:]
+							lines = response.split('\n')
+							print cmd_name
+							for line in lines:
+								print line
+						else:
+							groups = response.split(',')
+							for group in groups:
+								values = group.split(';')
+								if len(values) > 1:
+									print cmd_name
+									for i, value in enumerate(values):
+										print '%02d) %s' %(i, value)
+								elif res:
+									print res
 					elif res:
 						print res
 				except Exception, ex:
@@ -173,8 +180,13 @@ def main():
 					newEx.setAction("command()")
 					newEx.setReason(ex.message)
 					newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR) 
-		except KeyboardInterrupt:
+		except EOFError:
+			# CTRL + D event: Equivalent to the exit command, we stop the loop
 			stopAll=True
+		except KeyboardInterrupt:
+			# CTRL + C event: Ignore whatever string was written on the
+			# terminal and show a new prompt line
+			print '^C'
             
 	readline.write_history_file(historyFile)            
 	simpleClient.releaseComponent(compName)     

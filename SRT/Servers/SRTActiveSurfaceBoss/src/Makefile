@@ -83,7 +83,7 @@ LIBRARIES       = SRTActiveSurfaceBossImpl
 LIBRARIES_L     =
 #
 # <brief description of lllll library>
-SRTActiveSurfaceBossImpl_OBJECTS = SRTActiveSurfaceBossImpl SRTActiveSurfaceBossCore SRTActiveSurfaceBossWatchingThread SRTActiveSurfaceBossWorkingThread SRTActiveSurfaceBossSectorThread
+SRTActiveSurfaceBossImpl_OBJECTS = SRTActiveSurfaceBossImpl SRTActiveSurfaceBossCore SRTActiveSurfaceBossWorkingThread SRTActiveSurfaceBossSectorThread
 SRTActiveSurfaceBossImpl_LIBS = lanStubs usdStubs ActiveSurfaceBossStubs SRTActiveSurfaceBossStubs AntennaDefinitionsStubs ManagmentDefinitionsStubs AntennaBossStubs ComponentErrors ASErrors ManagementErrors AntennaErrors IRALibrary ParserErrors DiscosVersion
 
 #
@@ -130,7 +130,7 @@ tttlll_OBJECTS  =
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS = SRTActiveSurfaceBoss
+CDB_SCHEMAS =
 
 # 
 # IDL Files and flags

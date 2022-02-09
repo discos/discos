@@ -1,10 +1,6 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
 <!-- 
- *  Authors Info
- *  ===========
- *  Name:         Marco Buttu
- *  E-mail:       mbuttu@oa-cagliari.inaf.it
- *  Personal Web: http://www.pypeople.com/
+
 -->
 <!-- *DewarPort="10000" -->
 <!-- LNAPort="10001" -->
@@ -17,13 +13,16 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     actionThreadStackSize="2048"
     monitoringThreadStackSize="4096"
-    DewarIPAddress="192.167.189.2"
+    DewarIPAddress="192.168.51.2"
     DewarPort="10000"
-    LNAIPAddress="192.167.189.2"
-    LNAPort="10001"      
+    LNAIPAddress="192.168.51.2"
+    LNAPort="10001"   
+    VertexIPAddress="192.168.51.2"
+    VertexPort="2096"
+    VertexCommand="proc kkc"   
     WatchDogResponseTime="10000000"
     WatchDogSleepTime="10000000"
-    LNASamplingTime="250000"
+    LNASamplingTime="25000000"
     RepetitionCacheTime="7000000"
     RepetitionExpireTime="10000000"
     LocalOscillatorInstance="RECEIVERS/LO"

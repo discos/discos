@@ -56,6 +56,18 @@ void MSBossTracker::runLoop()
     double elevation = 45.0;
     double azimuth;
     MedMinorServoPosition offset_position, correct_position;
+
+    IRA::CTimer timer;
+
+    while(!(m_status->ready))
+    {
+        usleep(5000000);
+        if(timer.elapsed() > READY_MAX_WAIT)
+        {
+            throw ServoTimeoutError("Timeout wating for Minor Servo to became ready");
+        }
+    }
+    m_status->elevation_tracking = true;
     if(m_status->elevation_tracking)
     {
         try {

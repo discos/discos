@@ -337,6 +337,11 @@ public:
 	long getSectionsNumber() const { return m_mainH.sections; }
 	
 	/**
+	 * Get the bandwidth of a section
+	*/
+	double getSectionBandWidth(const long& ch) const { return m_sectionH[ch].bandWidth; }
+	
+	/**
 	 * Get the millisecond of integration
 	 */
 	long getIntegrationTime() const { return m_mainH.integration; }
@@ -350,6 +355,13 @@ public:
 	 * Gets the inputs configuration from the backend
 	 */
 	void getInputsConfiguration(ACS::longSeq& sectionID,ACS::longSeq& feeds,ACS::longSeq& ifs,ACS::doubleSeq& freqs,ACS::doubleSeq& bws,ACS::doubleSeq& atts);
+	
+	/**
+	 * Gets the frequency (sky) associated to the sections
+	*/
+	void getSectionSkyFrequency(ACS::doubleSeq& outFreq,const ACS::doubleSeq& skyFreqs) const;
+	
+	void getSectionTypeAndPols(std::list<IRA::CString>& outPols,const ACS::longSeq& pols) const;
 	
 	/**
 	 * Get number of expected streams coming from a section.
@@ -531,6 +543,8 @@ public:
 private:
 	/** the name of the file */
 	IRA::CString m_fileName;
+	/** The name of the summary file */
+	IRA::CString m_summaryFileName;
 	/**
 	 * the full path of the file in system disk
 	 */

@@ -19,6 +19,34 @@ namespace Antenna {
  */
 class Definitions {
 public:
+	static bool map(const char *str,TCoordinateFrame& frame) {
+		if (strcasecmp(str,"EQ")==0) {
+			frame=Antenna::ANT_EQUATORIAL;
+			return true;
+		}
+		else if (strcasecmp(str,"HOR")==0) {
+			frame=Antenna::ANT_HORIZONTAL;
+			return true;
+		}
+		else if (strcasecmp(str,"GAL")==0) {
+			frame=Antenna::ANT_GALACTIC;
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	static const char *map(const TCoordinateFrame& frame) {
+		if (frame==Antenna::ANT_EQUATORIAL) {
+			return "EQ";
+		}
+		if (frame==Antenna::ANT_HORIZONTAL) {
+			return "HOR";
+		}
+		else { // Antenna::ANT_GALACTIC
+			return "GAL";
+		}
+	}
 	static bool map(const char *str,TsubScanGeometry& geometry) {
 		if (strcasecmp(str,"LAT")==0) {
 			geometry=Antenna::SUBSCAN_CONSTLAT;
@@ -72,7 +100,7 @@ public:
 			frame=Antenna::ANT_LGROUP;
 			return true;
 		}
-		else if (strcasecmp(str,"UNDEF")==0) {
+		else if (strcasecmp(str,"NULL")==0) {
 			frame=Antenna::ANT_UNDEF_FRAME;
 			return true;
 		}
@@ -101,7 +129,7 @@ public:
 			return "LGRP";
 		}
 		else { //if (frame==Antenna::ANT_UNDEF_FRAME) {
-			return "UNDEF";
+			return "NULL";
 		}
 	};
 
@@ -118,7 +146,7 @@ public:
 			frame=Antenna::ANT_REDSHIFT;
 			return true;
 		}
-		else if (strcasecmp(str,"UNDEF")==0) {
+		else if (strcasecmp(str,"NULL")==0) {
 			frame=Antenna::ANT_UNDEF_DEF;
 			return true;
 		}
@@ -138,7 +166,7 @@ public:
 			return "Z";
 		}
 		else { // if (frame==Antenna::ANT_UNDEF_DEF) {
-			return "UNDEF";
+			return "NULL";
 		}
 	};
 };

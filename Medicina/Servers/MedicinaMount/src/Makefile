@@ -43,7 +43,7 @@ LIBRARIES       = MedicinaMountImpl
 LIBRARIES_L     =
 MedicinaMountImpl_OBJECTS = MedicinaMountImpl MedicinaMountSocket ACUData MedicinaMountThread ACUInterface Configuration
 MedicinaMountImpl_LIBS = MedicinaMountStubs MountStubs acsnc IRALibrary \
-    ComponentErrors AntennaErrors ManagementErrors AntennaDefinitionsStubs ManagmentDefinitionsStubs
+    ComponentErrors AntennaErrors ManagementErrors AntennaDefinitionsStubs ManagmentDefinitionsStubs DiscosLocals
 
 #
 # Configuration Database Files

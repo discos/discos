@@ -61,6 +61,8 @@ bool CSummaryWriter::create()
 	if (!CFitsTools::primaryHeaderHistory(m_pFits,HISTORY9,m_lastError)) return false;
 	if (!CFitsTools::primaryHeaderHistory(m_pFits,HISTORY10,m_lastError)) return false;
 	if (!CFitsTools::primaryHeaderHistory(m_pFits,HISTORY11,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderHistory(m_pFits,HISTORY12,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderHistory(m_pFits,HISTORY13,m_lastError)) return false;
 	
 	if (!CFitsTools::primaryHeaderComment(m_pFits,CREDITS1,m_lastError)) return false;
 	if (!CFitsTools::primaryHeaderComment(m_pFits,CREDITS2,m_lastError)) return false;

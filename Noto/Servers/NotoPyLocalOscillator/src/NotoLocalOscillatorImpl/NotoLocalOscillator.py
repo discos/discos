@@ -108,7 +108,7 @@ class NotoLocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComponen
 		try:
 			self.cl.configure(IP,PORT)
 		except CommandLineError as ex:
-			msg="cannot get synthesiser IP %s with message %s" %(IP,ex.__str__)
+			msg="cannot connect to synthesiser, IP %s, error message is %s" %(IP,ex.__str__)
 			exc=ComponentErrorsImpl.SocketErrorExImpl()
 			exc.setData('Reason',msg)
 			raise exc	
@@ -117,34 +117,33 @@ class NotoLocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComponen
 		addProperty(self, 'isLocked', devio_ref=GenericDevIO(value=1))
    
 	def set(self,rf_power,rf_freq):
-		try:
-			self.cl.setFrequency(rf_freq)
-		except CommandLineError as ex:
-			msg="cannot set frequency with message %s" % (ex.__str__)
-			exc=ReceiversErrorsImpl.SynthetiserErrorExImpl()
-			exc.setData('Details',msg);
-			raise exc.getReceiversErrorsEx()
-		try:
-			self.cl.setPower(rf_power)
-		except CommandLineError as ex:
-			msg="cannot set power with message %s" % (ex.__str__)
-			exc=ReceiversErrorsImpl.SynthetiserErrorExImpl()
-			exc.setData('Details',msg);
-			raise exc.getReceiversErrorsEx()     
+		res,msg=self.cl.setFrequency(rf_freq)
+		if not res:
+			ex=ReceiversErrorsImpl.SynthetiserErrorExImpl()
+			ex.setData('Details',msg);
+			raise ex.getReceiversErrorsEx()
+		res,msg=self.cl.setPower(rf_power)
+		if not res:
+			ex=ReceiversErrorsImpl.SynthetiserErrorExImpl()
+			ex.setData('Details',msg);
+			raise ex.getReceiversErrorsEx()
 		userLogger.logNotice("Synthesiser set to %f MHz at power %f dBm\n"%(rf_freq,rf_power))   	
    
 	def get(self):
 		txt=""
 		power=0.0
 		freq=0.0
-		try:
-			txt,power=self.cl.getPower()
-			txt,freq=self.cl.getFrequency()
-		except CommandLineError as ex:
-			msg="cannot get readout values with message %s" % (ex.__str__)
-			exc=ReceiversErrorsImpl.SynthetiserErrorExImpl()
-			exc.setData('Details',msg);
-			raise exc.getReceiversErrorsEx()
+		res=True
+		res,txt,power=self.cl.getPower()
+		if not res:		
+			ex=ReceiversErrorsImpl.SynthetiserErrorExImpl()
+			ex.setData('Details',txt)
+			raise ex.getReceiversErrorsEx()
+		res,txt,freq=self.cl.getFrequency()
+		if not res:
+			ex=ReceiversErrorsImpl.SynthetiserErrorExImpl()
+			ex.setData('Details',txt)
+			raise ex.getReceiversErrorsEx()
 		return (power,freq)   	
 
 	def rfon(self): 

@@ -8,35 +8,35 @@
 
     <Code name="Communicating" 
          shortDescription="No Error" 
-         description="No error condition found"/>
+         description=" "/>
 
     <ErrorCode name="CommunicationError" 
-         shortDescription="An error occured during the communication" 
-         description="Cannot communicate properly with the derotator"/>
+         shortDescription="Cannot communicate properly with the derotator" 
+         description=" "/>
 
     <ErrorCode name="ConfigurationError" 
-         shortDescription="Error configuring the derotator" 
-         description="Cannot perform the derotator configuration"/>
+         shortDescription="Cannot perform the derotator configuration" 
+         description=" "/>
 
     <ErrorCode name="RemoteControlError" 
-         shortDescription=" " 
-         description="The derotator is not remotely controllable"/>
+         shortDescription="The derotator is not remotely controllable" 
+         description=" "/>
 
     <ErrorCode name="ValidationError" 
          shortDescription="Cannot validate the derotator answer" 
-         description="Cannot understand the derotator answer"/>
+         description=" "/>
 
     <ErrorCode name="PositioningError" 
-         shortDescription=" "
-         description="Cannot set the position"/>
+         shortDescription="Cannot set derotator position"
+         description=" "/>
 
     <ErrorCode name="OutOfRangeError" 
-         shortDescription=" " 
-         description="Position out of range"/>
+         shortDescription="Derotator position out of range" 
+         description=" "/>
 
     <ErrorCode name="UnexpectedError" 
-         shortDescription=" " 
-         description="Unexpected error"/>
+         shortDescription="Unexpected error" 
+         description=" "/>
 </Type>
 
 

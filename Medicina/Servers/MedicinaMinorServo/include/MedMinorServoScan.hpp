@@ -46,6 +46,7 @@ class MedMinorServoScan
     private:
         MedMinorServoPosition m_central_position, m_start_position, m_stop_position;
         ACS::Time m_starting_time, m_total_time;
+        ACS::TimeInterval m_interval_to_start_pos;
         double m_range, m_min_time, m_max_time, m_min_start_time;
         string m_axis_code;
         bool m_initialized, m_was_tracking, m_asap;
