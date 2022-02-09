@@ -5,7 +5,7 @@ print_help() {
     echo "`basename $0` v1.0"
     echo " "
     echo "Start a new session toward DISCOS control software"
-    echo "Usage: '`basename $0` [OPTIONS] [-t|--port portnumber] <role>@<gatein>'"
+    echo "Usage: '`basename $0` [OPTIONS] [-p|--port portnumber] <role>@<gatein>'"
     echo "       '`basename $0` -r|--roles'"
     echo "       '`basename $0` -h|--help'"
     echo "<role> indicates the role (observer or administrative privileges) for which the connection is done"
@@ -114,9 +114,9 @@ for session in "${remote_sessions[@]}" ; do
     if [[ "$role" == "$role_name" ]]; then
         if [ "$local_connection" = "TRUE" ]; then
         		#this is for local area connection when it will enabled
-            #remote_port=$lport
-            remote_port=$rport
-            ssh_port=5122 
+            remote_port=$lport
+            #remote_port=$rport
+            ssh_port=22 
         else
             remote_port=$rport
         fi
@@ -154,11 +154,11 @@ fi
 
 if [[ "$local_connection" = "TRUE" ]]; then
     echo "Connecting from local area...."
-    #ssh -N -f -L $local_port:192.168.1.99:$remote_port $role@192.167.189.98
+    ssh -N -f -L $local_port:192.168.1.99:$remote_port $role@192.167.189.98
 else
     echo "Connecting from wide area....."
+    ssh -N -f -p $ssh_port -L $local_port:192.167.189.98:$remote_port $role@$gatein
 fi
-ssh -N -f -p $ssh_port -L $local_port:192.167.189.98:$remote_port $role@$gatein
 if [[ "$vnc_avail" == "TRUE" ]]; then
     echo "Starting vncviewer...."
     vncviewer localhost:$local_port $viewonly &>/dev/null
