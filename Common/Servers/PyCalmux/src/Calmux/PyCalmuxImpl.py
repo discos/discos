@@ -5,15 +5,15 @@ from Backends__POA import CalMux
 from Acspy.Servants.CharacteristicComponent import CharacteristicComponent as cc
 from Acspy.Servants.ContainerServices import ContainerServices as services
 from Acspy.Servants.ComponentLifecycle import ComponentLifecycle as lcycle
-from IRAPy import logger
+from IRAPy import logger, Connection
 
 from xml.etree import ElementTree
 from Acspy.Util import ACSCorba
 
-import socket
 import ComponentErrorsImpl
 import cdbErrType
 import time
+
 
 class PyCalmuxImpl(CalMux, cc, services, lcycle):
 
@@ -30,6 +30,7 @@ class PyCalmuxImpl(CalMux, cc, services, lcycle):
         self.attributes['PORT'] = int(self.attributes['PORT'])
         self.attributes['MAX_CHANNELS'] = int(self.attributes['MAX_CHANNELS'])
         self.attributes['INTERNAL_CHANNEL'] = int(self.attributes['INTERNAL_CHANNEL'])
+        self.connection = Connection((self.attributes['IP'], self.attributes['PORT']))
 
         try:
             self.calOff()
@@ -50,8 +51,9 @@ class PyCalmuxImpl(CalMux, cc, services, lcycle):
             exc = ComponentErrorsImpl.ValueOutofRangeExImpl()
             exc.setData('Reason', reason)
             raise exc
-        self.current_backend = backend_name
-        self._set_input(channel, polarity)
+        with self.connection as s:
+            self._set_input(s, channel, polarity)
+            self.current_backend = backend_name
 
     def getSetup(self):
         return self.current_backend
@@ -59,46 +61,51 @@ class PyCalmuxImpl(CalMux, cc, services, lcycle):
     def calOn(self):
         try:
             channel = self.attributes['INTERNAL_CHANNEL']
-            self._set_calibration(1)
-            self._set_input(channel, 0)
-            self.current_backend = ''
+            with self.connection as s:
+                self._set_calibration(s, 1)
+                self._set_input(s, channel, 0)
+                self.current_backend = ''
         except ComponentErrorsImpl.SocketErrorExImpl, ex:
             raise ex.getComponentErrorsEx()
 
     def calOff(self):
         try:
             channel = self.attributes['INTERNAL_CHANNEL']
-            self._set_calibration(0)
-            self._set_input(channel, 0)
-            self.current_backend = ''
+            with self.connection as s:
+                self._set_calibration(s, 0)
+                self._set_input(s, channel, 0)
+                self.current_backend = ''
         except ComponentErrorsImpl.SocketErrorExImpl, ex:
             raise ex.getComponentErrorsEx()
 
-    def _get_status(self):
-        return self._send_command(b'?\n')
+    def _get_status(self, s):
+        return self._send_command(s, b'?\n')
 
     def getChannel(self):
         try:
-            channel, polarity, status = self._get_status()
-            return channel
+            with self.connection as s:
+                channel, polarity, status = self._get_status(s)
+                return channel
         except ComponentErrorsImpl.SocketErrorExImpl, ex:
             raise ex.getComponentErrorsEx()
 
     def getPolarity(self):
         try:
-            channel, polarity, status = self._get_status()
-            return polarity
+            with self.connection as s:
+                channel, polarity, status = self._get_status(s)
+                return polarity
         except ComponentErrorsImpl.SocketErrorExImpl, ex:
             raise ex.getComponentErrorsEx()
 
     def getCalStatus(self):
         try:
-            channel, polarity, status = self._get_status()
-            return bool(status)
+            with self.connection as s:
+                channel, polarity, status = self._get_status(s)
+                return bool(status)
         except ComponentErrorsImpl.SocketErrorExImpl, ex:
             raise ex.getComponentErrorsEx()
 
-    def _set_input(self, channel, polarity):
+    def _set_input(self, s, channel, polarity):
         if channel not in range(self.attributes['MAX_CHANNELS']):
             reason = 'Channel out of range!'
             logger.logError(reason)
@@ -112,9 +119,9 @@ class PyCalmuxImpl(CalMux, cc, services, lcycle):
             exc.setData('Reason', reason)
             raise exc
         command = 'I %d %d\n' % (channel, polarity)
-        return self._send_command(command)
+        return self._send_command(s, command)
 
-    def _set_calibration(self, calon):
+    def _set_calibration(self, s, calon):
         if calon not in [0, 1]:
             reason = 'Calon value must be 0 or 1!'
             logger.logError(reason)
@@ -122,32 +129,17 @@ class PyCalmuxImpl(CalMux, cc, services, lcycle):
             exc.setData('Reason', reason)
             raise exc
         command = 'C %d\n' % calon
-        return self._send_command(command)
+        return self._send_command(s, command)
 
-    def _send_command(self, command):
-        """This method opens a socket and send the given command.
+    def _send_command(self, s, command):
+        """This method sends the given command and returns an answer.
 
+        :param s: the socket on which the command will be sent
         :param command: the command to be sent to the device.
         """
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        connected = 1
-        t0 = time.time()
-        while time.time() - t0 < 2:
-            connected = s.connect_ex((self.attributes['IP'], self.attributes['PORT']))
-            if connected == 0:
-                break
-            time.sleep(0.01)
-        if connected:
-            reason = 'Could not reach the device!'
-            logger.logError(reason)
-            exc = ComponentErrorsImpl.SocketErrorExImpl()
-            exc.setData('Reason', reason)
-            raise exc
-
         s.sendall(command)
 
         response = s.recv(1024)
-        s.close()
         response = response.strip().split()
         if len(response) == 1:
             response = response[0]
