@@ -23,6 +23,7 @@ USER_CFLAGS = -Wall
 #
 # additional include and library search paths
 # USER_INC = /usr/local/include
+# USER_LIB =
 
 #
 # MODULE CODE DESCRIPTION:
@@ -34,11 +35,15 @@ USER_CFLAGS = -Wall
 # C programs (public and local)
 # -----------------------------
 EXECUTABLES     =
-EXECUTABLES_L   = 
+EXECUTABLES_L   = TestSRTMinorServoCommandLibrary
+
+TestSRTMinorServoCommandLibrary_OBJECTS   = TestSRTMinorServoCommandLibrary
+TestSRTMinorServoCommandLibrary_CFLAGS    = -std=c++0x
+TestSRTMinorServoCommandLibrary_LIBS      = SRTMinorServoCommandLibrary IRALibrary
 
 #
 # <brief description of xxxxx program>
-xxxxx_OBJECTS   =	
+xxxxx_OBJECTS   =
 xxxxx_LDFLAGS   =
 xxxxx_LIBS      =
 
