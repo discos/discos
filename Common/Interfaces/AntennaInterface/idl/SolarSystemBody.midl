@@ -77,7 +77,7 @@ module Antenna {
 		      * J2000 Equatorial coordiantes coordinates in one shot.
 
                 */
-                void getDistance(in ACS::Time timestamp, out double ra);
+                void getDistance(in ACS::Time timestamp, out double distance);
                 
                 
 	};

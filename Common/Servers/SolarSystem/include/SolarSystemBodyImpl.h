@@ -161,7 +161,7 @@ public:
 
 
 
-    void getDistance(ACS::Time time,CORBA::Double distance);
+    void getDistance(ACS::Time time,CORBA::Double_out distance) throw (CORBA::SystemException);
 
 private:
   

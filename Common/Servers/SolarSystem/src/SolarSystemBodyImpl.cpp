@@ -299,7 +299,7 @@ void SolarSystemBodyImpl::computeFlux(CORBA::Double freq, CORBA::Double fwhm, CO
 
 }
 
-void SolarSystemBodyImpl::getDistance(ACS::Time time,CORBA::Double distance)
+void SolarSystemBodyImpl::getDistance(ACS::Time time,CORBA::Double_out distance) throw (CORBA::SystemException)
 {
     AUTO_TRACE("SolarSystemBodyImpl::getDistance()");
 	     double azi,ele;
