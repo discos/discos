@@ -66,7 +66,19 @@ module Antenna {
                       @param bodyName of the target
                      
                 */
+       
                 void setBodyName(in string bodyName);
+
+            /**
+		 * This method is only for control software internal use. It used, given a timestamp, to retrive the distance of the body
+		 * @param timestamp this parameter is used to pass the exact time the caller wants to know the topocentric coordinates.
+		 * @param distance  body distance in AU.
+
+		      * J2000 Equatorial coordiantes coordinates in one shot.
+
+                */
+                void getDistance(in ACS::Time timestamp, out double ra);
+                
                 
 	};
 

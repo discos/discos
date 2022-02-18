@@ -165,7 +165,7 @@ void SolarSystemBodyImpl::setOffsets(CORBA::Double lon,CORBA::Double lat,Antenna
 		m_ra_off=0.0;
 		m_dec_off=0.0;
 	}
-	else if (frame==Antenna::ANT_EQUAATORIAL) {
+	else if (frame==Antenna::ANT_EQUATORIAL) {
 		m_az_off=0.0;
 		m_el_off=0.0;
 		m_ra_off=lon;
@@ -299,6 +299,18 @@ void SolarSystemBodyImpl::computeFlux(CORBA::Double freq, CORBA::Double fwhm, CO
 
 }
 
+void SolarSystemBodyImpl::getDistance(ACS::Time time,CORBA::Double distance)
+{
+    AUTO_TRACE("SolarSystemBodyImpl::getDistance()");
+	     double azi,ele;
+       TIMEVALUE val(time);
+	     IRA::CDateTime ctime(val,m_dut1);
+	     baci::ThreadSyncGuard guard(&m_mutex);
+     	BodyPosition(val);
+     	distance=m_distance;
+
+}
+
 
 
 void SolarSystemBodyImpl::BodyPosition(TIMEVALUE &time)
@@ -340,6 +352,7 @@ void SolarSystemBodyImpl::BodyPosition(TIMEVALUE &time)
         m_body_xephem->report();
         m_ra2000 = m_body_xephem->ra;
         m_dec2000= m_body_xephem->dec;
+        m_distance=m_body_xephem->range;
         m_source.setInputEquatorial(m_ra2000, m_dec2000, IRA::CSkySource::SS_J2000);
                 // IRA::CSkySource m_source;   // dummy CSkySource onj for coordinate conversion  
         m_source.process(date,m_site);	       

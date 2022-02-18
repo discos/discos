@@ -6,7 +6,7 @@ object/
 *~
 *.swp
 *.pyc
-
+.project*
 
 # Ignore the SliLibrary directory
 Common/Libraries/SlaLibrary

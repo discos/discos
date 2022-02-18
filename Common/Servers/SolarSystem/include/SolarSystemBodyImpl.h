@@ -152,6 +152,17 @@ public:
      * @param flux computed flux (Jy)
      */ 
     void computeFlux(CORBA::Double freq, CORBA::Double fwhm, CORBA::Double_out flux) throw (CORBA::SystemException);
+  	/**
+	 * This method is only for control software internal use. It used, given a timestamp, to body distance in AY.
+	 * @throw CORBA::SystemException
+	 * @param timestamp this parameter is used to pass the exact time the caller wants to know the topocentric coordinates.
+	 * @param distance  that's the returned distance at given time in AU
+     */
+
+
+
+    void getDistance(ACS::Time time,CORBA::Double distance);
+
 private:
   
       IRA::CString m_bodyName;
@@ -176,6 +187,8 @@ private:
         double m_glon, m_glat;
         double m_ra2000,m_dec2000;
         double m_dut1;
+
+        double m_distance;
         /*
          * Currently used frame for the offsets 
          */
