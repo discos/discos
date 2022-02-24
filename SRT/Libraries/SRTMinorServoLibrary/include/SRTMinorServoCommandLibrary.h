@@ -9,7 +9,6 @@
 
 #include <sstream>
 #include <vector>
-#include <iomanip>
 
 /**
  * SRT Minor Servo Command Library
