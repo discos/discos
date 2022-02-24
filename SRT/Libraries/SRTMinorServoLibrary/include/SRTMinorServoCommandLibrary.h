@@ -9,8 +9,6 @@
 
 #include <sstream>
 #include <vector>
-#include <acstimeEpochHelper.h>
-#include <IRA>
 
 /**
  * SRT Minor Servo Command Library
@@ -40,7 +38,7 @@ public:
      * @param stow_position the position to which the servo have to stow to
      * @return the composed message
      */
-    static std::string stow(std::string servo_id, unsigned int stow_position = 0);
+    static std::string stow(std::string servo_id, unsigned int stow_position = 1);
 
     /*
      * Builds the command used to stop a single servo system
