@@ -23,24 +23,34 @@ public:
      * Builds the command used to move a single servo to a given set of coordinates
      * This is an overload of the original SRTMinorServoCommandLibrary::preset function
      * An overload was needed in order to handle the coordinates parameter as a Python list instead of a C++ std::vector
-     * @param servo_id the ID number of the single servo to be moved
+     * @param servo_id the ID of the single servo to be moved
      * @param coordinates a Python list containing the N coordinates to be sent to the servo
      * @return the composed message
      */
-    static std::string preset(unsigned int servo_id, boost::python::list& coordinates);
+    static std::string preset(std::string servo_id, boost::python::list& coordinates);
 
     /*
      * Builds the command used to provide a single tracking set of coordinates to a single servo
      * This is an overload of the original SRTMinorServoCommandLibrary::programTrack function
      * An overload was needed in order to handle the coordinates parameter as a Python list instead of a C++ std::vector
-     * @param servo_id the ID number of the single servo to send the command to
+     * @param servo_id the ID of the single servo to send the command to
      * @param trajectory_id the ID number of the trajectory the given set of coordinates belongs to
      * @param point_id the ID number of the given set of coordinates inside the trajectory
      * @param coordinates a Python list containing the N coordinates the servo have to move to at the given time
      * @param start_time only mandatory for the first point in the trajectory, a double representing the UNIX epoch of the starting instant of the trajectory
      * @return the composed message
      */
-    static std::string programTrack(unsigned int servo_id, unsigned int trajectory_id, unsigned int point_id, boost::python::list& coordinates, double start_time=-1);
+    static std::string programTrack(std::string servo_id, unsigned int trajectory_id, unsigned int point_id, boost::python::list& coordinates, double start_time=-1);
+
+    /*
+     * Builds the command used to provide a set of offsets to a given servo
+     * This is an overload of the original SRTMinorServoCommandLibrary::offset function
+     * An overload was needed in order to handle the coordinates parameter as a Python list instead of a C++ std::vector
+     * @param servo_id the ID of the single servo to be moved
+     * @param coordinates a Python list containing the N coordinates to be sent to the servo
+     * @return the composed message
+     */
+    static std::string offset(std::string servo_id, boost::python::list& coordinates);
 
 private:
     /*
@@ -64,11 +74,12 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(programTrack, PySRTMinorServoCommandLibrary::pro
 BOOST_PYTHON_MODULE(libPySRTMinorServoCommandLibrary)
 {
     using namespace boost::python;
-    def("status", &PySRTMinorServoCommandLibrary::status, status(arg("servo_id") = -1));
+    def("status", &PySRTMinorServoCommandLibrary::status, status(arg("servo_id") = ""));
     def("setup", &PySRTMinorServoCommandLibrary::setup);
-    def("stow", &PySRTMinorServoCommandLibrary::stow, stow(arg("stow_position") = 0));
+    def("stow", &PySRTMinorServoCommandLibrary::stow, stow(arg("stow_position") = 1));
     def("stop", &PySRTMinorServoCommandLibrary::stop);
     def("preset", &PySRTMinorServoCommandLibrary::preset);
     def("programTrack", &PySRTMinorServoCommandLibrary::programTrack, programTrack(arg("start_time") = -1));
+    def("offset", &PySRTMinorServoCommandLibrary::offset);
 }
 #endif

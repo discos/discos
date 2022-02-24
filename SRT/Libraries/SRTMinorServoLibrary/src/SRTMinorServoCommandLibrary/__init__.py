@@ -10,7 +10,7 @@ import sys
 # Temporarily add the $INTROOT/lib path to Python libraries path
 sys.path.append(os.path.join(os.environ['INTROOT'], 'lib'))
 # Import the functions we need
-from libPySRTMinorServoCommandLibrary import status, setup, stop, stow, preset, programTrack
+from libPySRTMinorServoCommandLibrary import status, setup, stop, stow, preset, programTrack, offset
 # Remove the added path and unused imported modules
 sys.path.remove(os.path.join(os.environ['INTROOT'], 'lib'))
 del os

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <IRA>
 #include "SRTMinorServoCommandLibrary.h"
 
 using namespace IRA;
