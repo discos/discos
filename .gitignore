@@ -50,4 +50,3 @@ SRT/Clients/SRTActiveSurfaceGUIClient/include/SRTActiveSurfaceGUI.h
 SRT/Clients/SRTActiveSurfaceGUIClient/src/moc_SRTActiveSurfaceCore.cpp
 SRT/Clients/SRTActiveSurfaceGUIClient/src/moc_SRTActiveSurfaceGUIui.cpp
 SRT/Interfaces/SRTActiveSurfaceInterface/idl/SRTActiveSurfaceBoss.idl
-SRT/Interfaces/SRTActiveSurfaceInterface/idl/SRTActiveSurfaceCommon.idl
