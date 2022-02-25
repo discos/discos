@@ -6,10 +6,12 @@ C{from IRAPy import logger}
 list of modules:
   - customlogging: custom logging functionalities to replace standard logging
   - bsqueue: BoundedSortedQueue class implements a priority queue structure
+  - Connection: Connection class implements a contextmanager for a socket
 
 """
 import customlogging
 import ACSLog
+import Connection
 
 #Some comments required here. The custom logger mechanism is not working in python. 
 #do the way to separate the system logs to the ones do be shown to the user is to use different

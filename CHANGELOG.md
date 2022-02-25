@@ -97,6 +97,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/
 
 ## [next release]
 ## Added
+    issue #653 - added a couple of scriptsto ease vnc conection from remote a file copying. The scripts support 
+                 linux and macos
 ## Fixed
     issue #448 - Added Sky Offsets to calibration tool client
     issue #585 - Fixed misshandled schedule with NULL as backend (Dry Run)

@@ -30,8 +30,9 @@ CMetaData::CMetaData()
 	m_frameUserOff=Antenna::ANT_HORIZONTAL;
 	m_subScanConf.signal=Management::MNG_SIGNAL_NONE;
 	m_calDiode=false;
+	m_totalDumps=0;
 }
-	
+
 CMetaData::~CMetaData()
 {
 	if (m_feeds!=NULL) {
