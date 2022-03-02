@@ -35,11 +35,11 @@ USER_CFLAGS = -Wall
 # C programs (public and local)
 # -----------------------------
 EXECUTABLES     =
-EXECUTABLES_L   = TestSRTMinorServoCommandLibrary
+EXECUTABLES_L   =
 
-TestSRTMinorServoCommandLibrary_OBJECTS   = TestSRTMinorServoCommandLibrary
-TestSRTMinorServoCommandLibrary_CFLAGS    = -std=c++0x
-TestSRTMinorServoCommandLibrary_LIBS      = SRTMinorServoCommandLibrary IRALibrary
+xxxxx_OBJECTS   =
+xxxxx_CFLAGS    =
+xxxxx_LIBS      =
 
 #
 # <brief description of xxxxx program>
