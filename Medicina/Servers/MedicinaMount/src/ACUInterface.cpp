@@ -247,3 +247,9 @@ CACUInterface::TAntennaSection CACUInterface::getSection(WORD controlWord)
 	else return CACUInterface::CCW;
 }
 
+bool CACUInterface::getDrivePower(WORD controlWord)
+{
+	if (controlWord & (1 << 15)) return true;
+	else return false;
+}
+

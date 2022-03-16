@@ -453,15 +453,26 @@ public:
 
 	/**
 	 * This method has been added to detect the event the ACU mode differs from previously commanded. In case it tries to
-	 * recover from this event by commandind the correct mode.
+	 * recover from this event by commanding the correct mode.
 	 * @throw AntennaErrors::ConnectionExImpl
 	 * @throw ComponentErrors::SocketErrorExImpl
 	 * @throw ComponentErrors::TimeoutExImpl
 	 * @throw AntennaErrors::NakExImpl
-	 * @throwAntennaErrors::AntennaBusyExImpl
+	 * @throw AntennaErrors::AntennaBusyExImpl
 	*/
 	void checkCommandedMode() throw (AntennaErrors::ConnectionExImpl,ComponentErrors::SocketErrorExImpl,
 	  ComponentErrors::TimeoutExImpl,AntennaErrors::NakExImpl,AntennaErrors::AntennaBusyExImpl);
+
+	/**
+	 * This method has been added to detect a power failure in the servo system. In case it tries to
+	 * recover from this event by reseting the servo.
+	 * @throw AntennaErrors::ConnectionExImpl
+	 * @throw ComponentErrors::SocketErrorExImpl
+	 * @throw ComponentErrors::TimeoutExImpl
+	 * @throw AntennaErrors::NakExImpl
+	*/
+	void checkPowerFailure() throw (ComponentErrors::TimeoutExImpl,AntennaErrors::NakExImpl,
+	  AntennaErrors::ConnectionExImpl,ComponentErrors::SocketErrorExImpl);
 
 	/** 
 	 * This member function is used by the control thread in order to check if a long job that was started as completed or not.
@@ -622,7 +633,12 @@ private:
 	/**
 	 * this flag indicates that a recovery from mode check in ongoing.....
 	 */	
-	bool m_modeCheckRecover;	
+	bool m_modeCheckRecover;
+
+	/**
+	 * this flag indicates that a power failure has been detected
+	 */		
+	bool m_powerFailDetected;
 	
 	/**
 	 * Stores the epoch of the last scan. Used in oscillation prevention

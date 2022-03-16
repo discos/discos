@@ -131,6 +131,7 @@ void CMedicinaMountSocket::Init(CConfiguration *config,maci::ContainerServices *
 	m_oscMode=CACUInterface::STANDBY;
 	m_lastScanEpoch=0;
 	m_modeCheckRecover=false;
+	m_powerFailDetected=false;
 }
 
 CACUInterface::TAxeModes CMedicinaMountSocket::getAzimuthMode() throw (ConnectionExImpl,SocketErrorExImpl,TimeoutExImpl)
@@ -848,10 +849,35 @@ double CMedicinaMountSocket::getHWAzimuth(double destination,const CACUInterface
 	return CIRATools::getHWAzimuth(pos,dest,m_configuration->azimuthLowerLimit(),m_configuration->azimuthUpperLimit(),section,m_configuration->cwLimit());
 }
 
+void CMedicinaMountSocket::checkPowerFailure() throw (ComponentErrors::TimeoutExImpl,AntennaErrors::NakExImpl,
+	  AntennaErrors::ConnectionExImpl,ComponentErrors::SocketErrorExImpl)
+{
+	//_IRA_LOGDIKE_COMPLETION(m_logDike,__dummy,LM_DEBUG);
+	if (!m_configuration->checkForMode()) return;
+	if (m_Data.getDrivePower()) {  //in case of a power outage of failure.....
+		if (!m_powerFailDetected) { //first detection
+			CUSTOM_LOG(LM_FULL_INFO,"CMedicinaMountSocket::checkPowerFailure()",(LM_CRITICAL,
+			  "Servo system power failure detected"));
+		}
+		m_powerFailDetected=true;	
+	}
+	else {  // no power error
+		if (!m_powerFailDetected) { //first detection
+			CUSTOM_LOG(LM_FULL_INFO,"CMedicinaMountSocket::checkPowerFailure()",(LM_CRITICAL,
+			  "Servo system power failure cleared"));
+		   CUSTOM_LOG(LM_FULL_INFO,"CMedicinaMountSocket::checkPowerFailure()",(LM_NOTICE,
+			  "Trying a servo system reset"));
+ 			failureReset();// throw (TimeoutExImpl,AntennaErrors::NakExImpl,ConnectionExImpl,SocketErrorExImpl)  
+			m_powerFailDetected=false;		
+		}	
+	}
+}
+
 void CMedicinaMountSocket::checkCommandedMode() throw (ConnectionExImpl,SocketErrorExImpl,TimeoutExImpl,AntennaErrors::NakExImpl,AntennaBusyExImpl)
 {
 	CACUInterface::TAxeModes commandedMode, mode;
 	if (!m_configuration->checkForMode()) return;
+	if (m_powerFailDetected) return; // no need to try to recover from mode discrepancy if the cause is a power failure
 	commandedMode=m_Data.getLastCommandedMode();
 	if ((commandedMode!=CACUInterface::STANDBY)  && (commandedMode!=CACUInterface::UNSTOW) &&
 	  (commandedMode!=CACUInterface::STOW) && (commandedMode!=CACUInterface::STOP)) {
