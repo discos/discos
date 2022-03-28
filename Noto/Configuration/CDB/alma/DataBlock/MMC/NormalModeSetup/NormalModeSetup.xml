@@ -18,7 +18,7 @@
 	Feeds="1"
 	IFs="2"
 	Polarization="L R"
-	DefaultLO="6956.0 6956.0"
+	DefaultLO="6936.0 6936.0"
 	LOMultiplier="1 1"
 	FixedLO2="0.0 0.0"
 	LOMin="5000.0 5000.0"
