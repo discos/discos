@@ -146,6 +146,8 @@ class PyCalmuxImpl(CalMux, cc, services, lcycle):
 
         s.sendall(command)
 
+#        time.sleep(0.1)
+
         response = s.recv(1024)
         s.close()
         response = response.strip().split()
