@@ -72,11 +72,12 @@ public:
  	 * @throw ComponentErrors::CORBAProblemExImpl
  	 * @throw ManagementErrors::LogFileErrorExImpl
  	 * @thorw ManagementErrors::CannotClosePendingTaskExImpl
+ 	 * @throw ManagementErrors::ScheduleProjectNotMatchExImpl
  	*/
      void startSchedule(const char* scheduleFile,const char * subScanidentifier) throw (ManagementErrors::ScheduleErrorExImpl,
     		 ManagementErrors::AlreadyRunningExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
     		 ManagementErrors::LogFileErrorExImpl,ManagementErrors::ScheduleNotExistExImpl,
-    		 ManagementErrors::CannotClosePendingTaskExImpl);
+    		 ManagementErrors::CannotClosePendingTaskExImpl,ManagementErrors::ScheduleProjectNotMatchExImpl);
      
      /**
       * initialize the schedule executor.

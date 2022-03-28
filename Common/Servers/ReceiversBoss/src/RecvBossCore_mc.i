@@ -283,7 +283,9 @@ void CRecvBossCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::Vali
 	IRA::CIRATools::Wait(0,500000);  //wait half a second to settle things down
 }
 
-void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketErrorExImpl,ComponentErrors::ValidationErrorExImpl)
+void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketErrorExImpl,ComponentErrors::ValidationErrorExImpl,
+  ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,
+  ComponentErrors::OperationErrorExImpl)
 {
 	IRA::CError err;
 	IRA::CString rec(code);
@@ -369,8 +371,8 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 		m_pols[1]=Receivers::RCV_RCP;
 		m_startFreq[0]=100.0;
 		m_startFreq[1]=100.0;
-		m_bandWidth[0]=400.0;
-		m_bandWidth[1]=400.0;
+		m_bandWidth[0]=800.0;
+		m_bandWidth[1]=800.0;
 		m_currentRecvCode="CCC";
 		m_currentOperativeMode="NORMAL";
 	}
@@ -397,8 +399,8 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 		m_pols[1]=Receivers::RCV_RCP;
 		m_startFreq[0]=100.0;
 		m_startFreq[1]=100.0;
-		m_bandWidth[0]=400.0;
-		m_bandWidth[1]=400.0;
+		m_bandWidth[0]=800.0;
+		m_bandWidth[1]=800.0;
 		m_currentRecvCode="CHC";
 		m_currentOperativeMode="NORMAL";
 	}
