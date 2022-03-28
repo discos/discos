@@ -26,7 +26,7 @@
 	initialize=MMC
 	receiversSetup=MMC
 	servoSetup=SEC
-   	asOn
+   asOn
 	device=0
 	calmux=TotalPower
 	calOff
@@ -47,8 +47,8 @@
 	device=0
 	calmux=TotalPower
 	calOff
-	ifdist=1,1,44
-	ifdist=2,1,32
+	ifdist=1,1,36
+	ifdist=2,1,34
 </body>
 </Procedure>
 
@@ -56,9 +56,9 @@
 <body>
 	antennaSetup=SEC
 	initialize=QQC
-    receiversSetup=QQC
+   receiversSetup=QQC
 	servoSetup=SEC
-    asOn
+   asOn
 	device=0
 	calmux=TotalPower
 	calOff
@@ -86,9 +86,9 @@
 <body>
 	antennaSetup=PRIM
 	initialize=XXP
-    receiversSetup=XXP
+   receiversSetup=XXP
 	servoSetup=SXP
-    asOff
+   asOff
 	device=0
 	calmux=TotalPower
 	calOff
@@ -101,14 +101,16 @@
 <body>
 	antennaSetup=LL
 	initialize=LLP
-    receiversSetup=LLP
+   receiversSetup=LLP
 	servoSetup=LLP
-    asOff
+   asOff
 	device=0
 	calmux=TotalPower
 	calOff
-	ifdist=1,2,44
-	ifdist=2,2,32
+   ifdist=1,2,-1
+   ifdist=2,2,-1
+	ifdist=1,-1,44
+	ifdist=2,-1,44
 </body>
 </Procedure>
 
