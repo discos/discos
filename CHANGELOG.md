@@ -82,7 +82,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/
     issue #433 - limited refraction correction values to a meaningful range in order to avoid flooding the jlog with warning messages whenever the elevation is close to 90 degrees
     issue #502 - removed last service daemon reference from Manager.xml io SRT production line
     
-## [discos1.0.5] - 
+## [discos1.0.5] - 09-03-2020
 ## Added
     issue #504 - added credits clause (regarding INAF data ownership) to fits files headers
     issue #518 - KBand receivers cryo temperature read wrongly with connection problems. More information: https://github.com/discos/discos/issues/518#issuecomment-590838480
@@ -95,10 +95,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/
 ## Changed  
     issue #545 - Oscillation checks enabled for Mc and Nt telescopes, this setting is now under control of a CDB argument
 
-## [next release]
+## [discos1.0.6] - 09-02-2022
 ## Added
+    issue #655 - ACU Component for Noto and Medicina is now capble to prevent seldom mode changes coming from ACU reset
     issue #653 - added a couple of scriptsto ease vnc conection from remote a file copying. The scripts support 
                  linux and macos
+	 issue #588 - added the control of the new Noto subreflector and primary focus receiver box servo system.     
+    
 ## Fixed
     issue #448 - Added Sky Offsets to calibration tool client
     issue #585 - Fixed misshandled schedule with NULL as backend (Dry Run)
@@ -106,3 +109,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/
     issues #481, #484, #486, #487, #491, #493, #497. SRT Active Surface module has been improved in order to speed up its booting time and optimize its overall behavior
 	 issue #604 - The control software will not allow anymore that a schedule, belonging to another project, could be run. In that case a warning message is sent to user console
 	              and the execution aborted. 
+	              
+## [next release] - 
+## Added
+  
+## Fixed
+ 
+## Changed
+
+	              

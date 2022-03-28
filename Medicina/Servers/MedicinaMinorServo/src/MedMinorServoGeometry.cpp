@@ -325,12 +325,16 @@ double
 MedMinorServoGeometry::_check_axis_limit(const double position,
                                          const MedMinorServoAxis axis)
 {
-    if(position < axis.position_min){
+	int iposition = (int)position;
+
+
+    if(iposition < axis.position_min){
         throw MinorServoAxisLimitError("axis too low");
         //return axis.position_min;
     }
-    if(position > axis.position_max){
-        throw MinorServoAxisLimitError("axis too high");
+    if(iposition > axis.position_max){
+	     std::cout<<axis.name<<" "<<iposition<<" " <<axis.position_max<< std::endl;
+        throw MinorServoAxisLimitError("axis too high ");
         //return axis.position_max;
     }
     return position;

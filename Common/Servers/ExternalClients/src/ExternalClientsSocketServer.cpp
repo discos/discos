@@ -560,17 +560,24 @@ CExternalClientsSocketServer::cmdToScheduler ()
 	      printf("dentro ans==false\n");
 	    }*/
 	}
+	out.ReplaceAll('\n','-');
+	/*out.Replace('\n','-');
 	out.Replace('\n','-');
+	out.Replace('\n','-');
+	out.Replace('\n','-');*/
       Len = out.GetLength ();
       int i;
-      for (i = 0; i < Len; i++)
-	{
-	  outBuffer[i] = out.CharAt (i);
-	}
+      for (i = 0; i < Len; i++) {
+	//if (out.CharAt(i)=='\n')
+	  // break;	
+	outBuffer[i] = out.CharAt (i);
+      }
       out.Empty();
       outBuffer[Len] = '\n';
+      //outBuffer[i] = '\n';
       //printf ("Command returned = %s", outBuffer);
       Res = sendBuffer (outBuffer, Len + 1);
+      //Res = sendBuffer (outBuffer, i + 1);
       if (Res == WOULDBLOCK || Res == FAIL)
 	{
 	  _EXCPT (SocketErrorExImpl, impl,
