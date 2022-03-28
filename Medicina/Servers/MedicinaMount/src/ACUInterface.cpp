@@ -249,7 +249,7 @@ CACUInterface::TAntennaSection CACUInterface::getSection(WORD controlWord)
 
 bool CACUInterface::getDrivePower(WORD controlWord)
 {
-	if (controlWord & (1 << 15)) return true;
-	else return false;
+	if (controlWord & (1 << 15)) return false;
+	else return true;
 }
 

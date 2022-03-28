@@ -862,13 +862,13 @@ void CMedicinaMountSocket::checkPowerFailure() throw (ComponentErrors::TimeoutEx
 		m_powerFailDetected=true;	
 	}
 	else {  // no power error
-		if (!m_powerFailDetected) { //first detection
-			CUSTOM_LOG(LM_FULL_INFO,"CMedicinaMountSocket::checkPowerFailure()",(LM_CRITICAL,
-			  "Servo system power failure cleared"));
+		if (m_powerFailDetected) { //first detection
 		   CUSTOM_LOG(LM_FULL_INFO,"CMedicinaMountSocket::checkPowerFailure()",(LM_NOTICE,
 			  "Trying a servo system reset"));
  			failureReset();// throw (TimeoutExImpl,AntennaErrors::NakExImpl,ConnectionExImpl,SocketErrorExImpl)  
-			m_powerFailDetected=false;		
+			m_powerFailDetected=false;	
+			CUSTOM_LOG(LM_FULL_INFO,"CMedicinaMountSocket::checkPowerFailure()",(LM_CRITICAL,
+			  "Servo system power failure cleared"));				
 		}	
 	}
 }
