@@ -99,8 +99,11 @@ public:
 	/** Gets the number of times the oscillation has to be hit before an oscillation is declared*/
 	inline DWORD oscillationNumberThreashold() const { return m_dwoscNumberThreshold; }
 	
-	/** Flag that indicates whether the oscillation chek must performed or not. */
+	/** Flag that indicates whether the oscillation check must performed or not. */
 	inline bool checkForOscillation() const { return m_checkOsc; }
+	
+	/** Flag that indicates whether the ACU check mode must performed or not. */
+	inline bool checkForMode() const { return m_checkMode; }
 	
 	/**
     * This member function is used to configure component by reading the configuration parameter from the CDB.
@@ -139,9 +142,9 @@ private:
 	DWORD m_dwcontrolThreadPeriod;
 	/** This is the precision (degree) of the antenna */
 	//double m_dtrackingPrecision; 
-	/** This indicates the cache time for the repetion log filter */
+	/** This indicates the cache time for the repetition log filter */
 	DDWORD m_dwrepetitionCacheTime;
-	/** This indicates the expire time for the repetion log filter */
+	/** This indicates the expire time for the repetition log filter */
 	DDWORD m_dwexpireCacheTime;
 	/** this number is the separation value between the CW and CCW, if the azimuth is greater than this the section is CW */
 	double m_cwLimit;
@@ -151,6 +154,7 @@ private:
 	WORD m_dwoscNumberThreshold;
 	DDWORD m_dwoscRecoverTime;
 	bool m_checkOsc;
+	bool m_checkMode;
 };
 
 

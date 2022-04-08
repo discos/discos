@@ -186,9 +186,14 @@ public:
 	static TAxeModes getMode(BYTE mode);
 	
 	/**
-	 * This function returns the antenna presnt section given the control word
+	 * This function returns the antenna present section given the control word
 	*/
 	static TAntennaSection getSection(WORD controlWord);
+
+	/**
+	 * This function returns true i drive power is on, false otherwise
+	*/	
+	static bool getDrivePower(WORD controlWord);
 			
 };
 

@@ -9,12 +9,17 @@ CMedicinaVertex::~CMedicinaVertex()
 {
 }
 
-bool CMedicinaVertex::sendTo(const void *buffer,int size)
+bool CMedicinaVertex::sendTo(const IRA::CString& buffer,int size)
 {
 	int count;
 	char readout[128];
+	IRA::CString sendBuffer;
+	int sendSize;
 	m_err.Reset();
 	try {
+		sendBuffer=buffer;
+		sendBuffer+=" \n";
+		sendSize=sendBuffer.GetLength();
 		if (m_sock.Create(m_err,IRA::CSocket::STREAM)!=IRA::CSocket::SUCCESS) {
 			m_lastErrorMessage.Format("Cannot create socket with error code %d",m_err.getErrorCode());
 			return false;
@@ -23,7 +28,7 @@ bool CMedicinaVertex::sendTo(const void *buffer,int size)
 			m_lastErrorMessage.Format("Cannot connect with error code %d",m_err.getErrorCode());
 			return false;
 		}
-		if (m_sock.Send(m_err,buffer,size)!=(int)size) {
+		if (m_sock.Send(m_err,(const char *)sendBuffer,sendSize)!=(int)sendSize) {
 			m_lastErrorMessage.Format("Error code %d while sending data",m_err.getErrorCode());
 			return false;
 		}

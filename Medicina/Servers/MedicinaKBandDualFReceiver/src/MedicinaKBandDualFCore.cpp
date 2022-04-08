@@ -136,7 +136,7 @@ void MedicinaKBandDualFCore::setMode(const char * mode) throw (
 	setLO(lo); 
 	if (m_medConfig.getVertexCommand()!="") {
 		int size=m_medConfig.getVertexCommand().GetLength();
-		if (!vertex.sendTo((const char *)m_medConfig.getVertexCommand(),size)) {
+		if (!vertex.sendTo(m_medConfig.getVertexCommand(),size)) {
 			ACS_LOG(LM_FULL_INFO,"MedicinaKBandDualFCore::setMode()",
 			  (LM_ERROR,"Vertex Communication Error: %s",(const char *)vertex.getLastErrorMessage()));
 			CUSTOM_LOG(LM_FULL_INFO,"MedicinaKBandDualFCore::setMode()",

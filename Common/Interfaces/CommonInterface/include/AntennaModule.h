@@ -100,7 +100,7 @@ public:
 			frame=Antenna::ANT_LGROUP;
 			return true;
 		}
-		else if (strcasecmp(str,"UNDEF")==0) {
+		else if (strcasecmp(str,"NULL")==0) {
 			frame=Antenna::ANT_UNDEF_FRAME;
 			return true;
 		}
@@ -129,7 +129,7 @@ public:
 			return "LGRP";
 		}
 		else { //if (frame==Antenna::ANT_UNDEF_FRAME) {
-			return "UNDEF";
+			return "NULL";
 		}
 	};
 
@@ -146,7 +146,7 @@ public:
 			frame=Antenna::ANT_REDSHIFT;
 			return true;
 		}
-		else if (strcasecmp(str,"UNDEF")==0) {
+		else if (strcasecmp(str,"NULL")==0) {
 			frame=Antenna::ANT_UNDEF_DEF;
 			return true;
 		}
@@ -166,7 +166,7 @@ public:
 			return "Z";
 		}
 		else { // if (frame==Antenna::ANT_UNDEF_DEF) {
-			return "UNDEF";
+			return "NULL";
 		}
 	};
 };
