@@ -346,7 +346,6 @@ MedMinorServoGeometry::_check_axis_limit(const double position,
                    (LM_DEBUG, "axis %s too high, setting to max position %f",axis.name,axis.position_max));
                return axis.position_max;
            */
-            >>>>>>> master
     }
     return position;
 }
