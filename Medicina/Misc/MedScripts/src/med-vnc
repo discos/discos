@@ -91,7 +91,7 @@ else
 fi
 
 if ! hash vncviewer &>/dev/null; then
-    echo -e "'vncviewer' is not installed, this script is setting up the connection but won't automatically start vnc.\nA custom client should be manually started."
+    echo -e "'vncviewer' is not available, this script is setting up the connection but won't automatically start vnc.\nA custom vnc client will have to be manually started after the connection."
     vnc_avail="FALSE"
 fi
 

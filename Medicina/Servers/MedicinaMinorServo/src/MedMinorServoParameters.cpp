@@ -14,6 +14,17 @@ VirtualAxis::VirtualAxis(const char* name,
                          _coefficients(coefficients)
 {}
 
+std::vector<double> parseLimitsLine(const char* line)
+{
+	 std::vector<double> limits;
+    std::vector<std::string> tokens = split(line);
+    for(int i=0; i<6; ++i)
+    {
+        limits.push_back(boost::lexical_cast<double>(tokens[i]));
+    }
+    return limits;
+}
+
 VirtualAxis
 parseAxisLine(const char* name, const char* line)
 {
@@ -174,8 +185,30 @@ MedMinorServoConfiguration
 get_configuration_from_CDB(maci::ContainerServices* services)
 {
     MedMinorServoConfiguration configuration;
+    MedMinorServoConstants *medMinorServoConstants = MedMinorServoConstants::getInstance();
+    
     IRA::CError error;
     error.Reset();
+
+    IRA::CDBTable minor_servo_limits_table(services,
+                               "MinorServoLimits",
+                               "DataBlock/MinorServoParameters");
+
+    if(!minor_servo_limits_table.addField(error, "MINOR_SERVO_X", IRA::CDataField::STRING))
+        error.setExtra("code MINOR_SERVO_X not found", 0);
+    if(!minor_servo_limits_table.addField(error, "MINOR_SERVO_YP", IRA::CDataField::STRING))
+        error.setExtra("code MINOR_SERVO_YP not found", 0);
+    if(!minor_servo_limits_table.addField(error, "MINOR_SERVO_Y", IRA::CDataField::STRING))
+        error.setExtra("code MINOR_SERVO_Y not found", 0);
+    if(!minor_servo_limits_table.addField(error, "MINOR_SERVO_ZP", IRA::CDataField::STRING))
+        error.setExtra("code MINOR_SERVO_ZP not found", 0);
+    if(!minor_servo_limits_table.addField(error, "MINOR_SERVO_Z1", IRA::CDataField::STRING))
+        error.setExtra("code MINOR_SERVO_Z1 not found", 0);
+    if(!minor_servo_limits_table.addField(error, "MINOR_SERVO_Z2", IRA::CDataField::STRING))
+        error.setExtra("code MINOR_SERVO_Z2 not found", 0);
+    if(!minor_servo_limits_table.addField(error, "MINOR_SERVO_Z3", IRA::CDataField::STRING))
+        error.setExtra("code MINOR_SERVO_Z3 not found", 0);
+
     IRA::CDBTable minor_servo_table(services,
                                "MinorServo",
                                "DataBlock/MinorServoParameters");
@@ -206,6 +239,78 @@ get_configuration_from_CDB(maci::ContainerServices* services)
         dummy.setDescription((const char*)error.getDescription());
         throw dummy;
     }
+    
+    if(!minor_servo_limits_table.openTable(error)){
+        _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
+        throw dummy;
+    }
+  
+    minor_servo_limits_table.First();
+    std::vector<double> limits;
+  
+    limits=parseLimitsLine ((const char*)minor_servo_limits_table["MINOR_SERVO_YP"]->asString());
+    medMinorServoConstants->MINOR_SERVO_YP.name= "YP";
+    medMinorServoConstants->MINOR_SERVO_YP.position_min= limits[0];
+    medMinorServoConstants->MINOR_SERVO_YP.position_max= limits[1];
+    medMinorServoConstants->MINOR_SERVO_YP.position_zero= limits[2];
+    medMinorServoConstants->MINOR_SERVO_YP.position_error= limits[3];
+    medMinorServoConstants->MINOR_SERVO_YP.speed_min= limits[4];
+    medMinorServoConstants->MINOR_SERVO_YP.speed_max= limits[5];
+    
+    limits=parseLimitsLine ((const char*)minor_servo_limits_table["MINOR_SERVO_ZP"]->asString());
+    medMinorServoConstants->MINOR_SERVO_ZP.name= "ZP";
+    medMinorServoConstants->MINOR_SERVO_ZP.position_min= limits[0];
+    medMinorServoConstants->MINOR_SERVO_ZP.position_max= limits[1];
+    medMinorServoConstants->MINOR_SERVO_ZP.position_zero= limits[2];
+    medMinorServoConstants->MINOR_SERVO_ZP.position_error= limits[3];
+    medMinorServoConstants->MINOR_SERVO_ZP.speed_min= limits[4];
+    medMinorServoConstants->MINOR_SERVO_ZP.speed_max= limits[5];
+ 
+    limits=parseLimitsLine ((const char*)minor_servo_limits_table["MINOR_SERVO_X"]->asString());
+    medMinorServoConstants->MINOR_SERVO_X.name= "X";
+    medMinorServoConstants->MINOR_SERVO_X.position_min= limits[0];
+    medMinorServoConstants->MINOR_SERVO_X.position_max= limits[1];
+    medMinorServoConstants->MINOR_SERVO_X.position_zero= limits[2];
+    medMinorServoConstants->MINOR_SERVO_X.position_error= limits[3];
+    medMinorServoConstants->MINOR_SERVO_X.speed_min= limits[4];
+    medMinorServoConstants->MINOR_SERVO_X.speed_max= limits[5];
+
+    limits=parseLimitsLine ((const char*)minor_servo_limits_table["MINOR_SERVO_Y"]->asString());
+    medMinorServoConstants->MINOR_SERVO_Y.name= "Y";
+    medMinorServoConstants->MINOR_SERVO_Y.position_min= limits[0];
+    medMinorServoConstants->MINOR_SERVO_Y.position_max= limits[1];
+    medMinorServoConstants->MINOR_SERVO_Y.position_zero= limits[2];
+    medMinorServoConstants->MINOR_SERVO_Y.position_error= limits[3];
+    medMinorServoConstants->MINOR_SERVO_Y.speed_min= limits[4];
+    medMinorServoConstants->MINOR_SERVO_Y.speed_max= limits[5];
+
+    limits=parseLimitsLine ((const char*)minor_servo_limits_table["MINOR_SERVO_Z1"]->asString());
+    medMinorServoConstants->MINOR_SERVO_Z1.name= "Z1";
+    medMinorServoConstants->MINOR_SERVO_Z1.position_min= limits[0];
+    medMinorServoConstants->MINOR_SERVO_Z1.position_max= limits[1];
+    medMinorServoConstants->MINOR_SERVO_Z1.position_zero= limits[2];
+    medMinorServoConstants->MINOR_SERVO_Z1.position_error= limits[3];
+    medMinorServoConstants->MINOR_SERVO_Z1.speed_min= limits[4];
+    medMinorServoConstants->MINOR_SERVO_Z1.speed_max= limits[5];
+
+    limits=parseLimitsLine ((const char*)minor_servo_limits_table["MINOR_SERVO_Z2"]->asString());
+    medMinorServoConstants->MINOR_SERVO_Z2.name= "Z2";
+    medMinorServoConstants->MINOR_SERVO_Z2.position_min= limits[0];
+    medMinorServoConstants->MINOR_SERVO_Z2.position_max= limits[1];
+    medMinorServoConstants->MINOR_SERVO_Z2.position_zero= limits[2];
+    medMinorServoConstants->MINOR_SERVO_Z2.position_error= limits[3];
+    medMinorServoConstants->MINOR_SERVO_Z2.speed_min= limits[4];
+    medMinorServoConstants->MINOR_SERVO_Z2.speed_max= limits[5];
+
+    limits=parseLimitsLine ((const char*)minor_servo_limits_table["MINOR_SERVO_Z3"]->asString());
+    medMinorServoConstants->MINOR_SERVO_Z3.name= "Z3";
+    medMinorServoConstants->MINOR_SERVO_Z3.position_min= limits[0];
+    medMinorServoConstants->MINOR_SERVO_Z3.position_max= limits[1];
+    medMinorServoConstants->MINOR_SERVO_Z3.position_zero= limits[2];
+    medMinorServoConstants->MINOR_SERVO_Z3.position_error= limits[3];
+    medMinorServoConstants->MINOR_SERVO_Z3.speed_min= limits[4];
+    medMinorServoConstants->MINOR_SERVO_Z3.speed_max= limits[5];
+
     if(!minor_servo_table.openTable(error)){
         _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
         throw dummy;
@@ -230,12 +335,14 @@ get_configuration_from_CDB(maci::ContainerServices* services)
                     (const char*)minor_servo_table["YPaxis"]->asString()
                 )
             );
+           
             parameters.add_axis(
                 parseAxisLine(
                     "ZP",
                     (const char*)minor_servo_table["ZPaxis"]->asString()
                 )
             );
+          
         }else{ //secondary focus
             parameters.add_axis(
                 parseAxisLine(
@@ -243,12 +350,14 @@ get_configuration_from_CDB(maci::ContainerServices* services)
                     (const char*)minor_servo_table["Xaxis"]->asString()
                 )
             );
+
             parameters.add_axis(
                 parseAxisLine(
                     "Y",
                     (const char*)minor_servo_table["Yaxis"]->asString()
                 )
             );
+
             parameters.add_axis(
                 parseAxisLine(
                     "Z",
