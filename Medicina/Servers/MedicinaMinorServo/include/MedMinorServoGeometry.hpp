@@ -97,6 +97,9 @@ class MedMinorServoPosition
         double theta_y;
         MedMinorServoMode mode;
         ACS::Time time;
+    
+    private:
+        MedMinorServoConstants *medMinorServoConstants;
 };
 
 /**

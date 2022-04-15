@@ -14,6 +14,7 @@
 
 #include "MedMinorServoGeometry.hpp"
 #include "MedMinorServoOffset.hpp"
+#include "MedMinorServoConstants.hpp"
 
 class VirtualAxis
 {
@@ -24,6 +25,8 @@ class VirtualAxis
                   double min,
                   double max);
         ~VirtualAxis();
+        double get_min(){ return _min;};
+        double get_max(){ return _max;};
         std::string get_name(){ return _name;};
         std::string get_unit(){ return _unit;};
         std::vector<double> get_coefficients(){ return _coefficients;};
@@ -41,6 +44,8 @@ class VirtualAxis
  * "unit,min,max,coeff1,coeff2,coeff3,coeff4,coeff5"
  */
 VirtualAxis parseAxisLine(const char* name, const char* line);
+
+std::vector<double> parseLimitsLine(const char* line);
 
 std::vector<std::string> split(const char* line, char delim = ',');
 
@@ -69,6 +74,7 @@ class MedMinorServoParameters
         std::string get_name(){ return _name;};
         bool can_track_elevation(){ return _can_track_elevation;};
         bool is_primary_focus(){ return _primary_focus;};
+        std::vector<VirtualAxis> getAxesVector(){return _axes;};
         std::vector<std::string> getAxes(){return _axes_names;};
         std::vector<std::string> getUnits(){return _axes_units;};
         int getAxisMapping(std::string axis_name);
@@ -78,6 +84,7 @@ class MedMinorServoParameters
         std::vector<VirtualAxis> _axes;
         std::vector<std::string> _axes_names;
         std::vector<std::string> _axes_units;
+
 };
 
 typedef std::map<std::string, MedMinorServoParameters> MedMinorServoConfiguration;
