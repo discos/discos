@@ -276,6 +276,14 @@ int main(int argc, char *argv[]) {
         _GET_ACS_PROPERTY(Management::ROTBoolean, tracking);
 		_GET_ACS_PROPERTY(Management::ROTSystemStatus,status);
         _GET_ACS_PROPERTY(ACS::ROstring, motionInfo);
+        _GET_ACS_PROPERTY(ACS::ROdouble, axisZ1);
+        _GET_ACS_PROPERTY(ACS::ROdouble, axisZ2);
+        _GET_ACS_PROPERTY(ACS::ROdouble, axisZ3);
+        _GET_ACS_PROPERTY(ACS::ROdouble, axisX);
+        _GET_ACS_PROPERTY(ACS::ROdouble, axisY);
+        _GET_ACS_PROPERTY(ACS::ROdouble, axisYP);
+        _GET_ACS_PROPERTY(ACS::ROdouble, axisZP);
+
         /* ********************************* */
         ACE_OS::sleep(1);
         actualSetup_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_ROSTRING>(actualSetup.in());
