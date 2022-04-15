@@ -8,6 +8,10 @@
     xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
+    <!--
+        for each axis we specify name and characteristics as:
+        <NAME>position_min,position_max,position_zero,position_error,speed_min,speed_max</NAME>
+    -->
     <MinorServoLimits>
         <MINOR_SERVO_X>-80,80,0.0,0.05,0.01,14</MINOR_SERVO_X>
         <MINOR_SERVO_YP>-5,395,0.0,0.05,0.01,8</MINOR_SERVO_YP>
@@ -23,7 +27,7 @@
         <primary>0</primary>
         <trackel>1</trackel>
         <!--
-        for each axis we sepcify name an scharacteristics as:
+        for each axis we specify name and characteristics as:
 
         <NAME>unit,min,max,pol0,pol1,pol2,pol3,pol4</NAME>
 
