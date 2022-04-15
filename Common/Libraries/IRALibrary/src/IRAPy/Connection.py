@@ -22,12 +22,13 @@ class Connection(object):
 
     def __init__(self, address, timeout=2):
         self.address = address
+        self.timeout = timeout
 
     def __enter__(self):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         connected = 1
         t0 = time.time()
-        while time.time() - t0 < timeout:
+        while time.time() - t0 < self.timeout:
             connected = self.s.connect_ex(self.address)
             if connected == 0:
                 break
