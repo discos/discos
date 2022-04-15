@@ -173,6 +173,13 @@ int main(int argc, char *argv[]) {
     TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN> * tracking_display;
 	TW::CPropertyStatusBox<TEMPLATE_4_ROTSYSTEMSTATUS,Management::TSystemStatus> * status_box;
     TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_ROSTRING> * motionInfo_field;
+	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *axisZ1_field;
+	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *axisZ2_field;
+	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *axisZ3_field;
+	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *axisX_field;
+	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *axisY_field;
+	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *axisYP_field;
+	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)> *axisZP_field;
 
     /* ******************************* */
     TW::CLabel *output_label;
@@ -275,6 +282,15 @@ int main(int argc, char *argv[]) {
         tracking_display=new TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>(tracking.in());
 		status_box=new TW::CPropertyStatusBox<TEMPLATE_4_ROTSYSTEMSTATUS,Management::TSystemStatus> (status.in(),Management::MNG_OK);
         motionInfo_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_ROSTRING>(motionInfo.in());
+        axisZ1_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(axisZ1.in());
+        axisZ2_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(axisZ2.in());
+        axisZ3_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(axisZ3.in());
+        axisX_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(axisX.in());
+        axisY_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(axisY.in());
+        axisYP_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(axisYP.in());
+        axisZP_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(double)>(axisZP.in());
+
+
         /* ************************ */
         #if USE_OUTPUT_FIELD >=1 
             output_label=new TW::CLabel("");
@@ -296,6 +312,14 @@ int main(int argc, char *argv[]) {
 		status_box->setStatusLook(Management::MNG_FAILURE,CStyle(BLACK_RED,CStyle::BOLD));
         _TW_SET_COMPONENT(motionInfo_field,18,3,23,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 
+        _TW_SET_COMPONENT(axisZ1_field,18,4,23,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+        _TW_SET_COMPONENT(axisZ2_field,18,5,23,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+        _TW_SET_COMPONENT(axisZ3_field,18,6,23,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+        _TW_SET_COMPONENT(axisX_field,18,7,23,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+        _TW_SET_COMPONENT(axisY_field,18,8,23,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+        _TW_SET_COMPONENT(axisYP_field,18,9,23,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+        _TW_SET_COMPONENT(axisZP_field,18,10,23,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+
         /* ****************************************************************** */
         _TW_SET_COMPONENT(userInput,0,WINDOW_HEIGHT-6,WINDOW_WIDTH-1,1,USER_INPUT_COLOR_PAIR,USER_INPUT_STYLE,NULL);
         #if USE_OUTPUT_FIELD >=1 
@@ -309,6 +333,13 @@ int main(int argc, char *argv[]) {
         _INSTALL_MONITOR(tracking_display,3000);
 		_INSTALL_MONITOR(status_box,3000);
         _INSTALL_MONITOR(motionInfo_field,3000);
+        _INSTALL_MONITOR(axisZ1_field,3000);
+        _INSTALL_MONITOR(axisZ2_field,3000);
+        _INSTALL_MONITOR(axisZ3_field,3000);
+        _INSTALL_MONITOR(axisX_field,3000);
+        _INSTALL_MONITOR(axisY_field,3000);
+        _INSTALL_MONITOR(axisYP_field,3000);
+        _INSTALL_MONITOR(axisZP_field,3000);
         /* ****************************************** */
         ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::DONE"));
         
@@ -317,6 +348,14 @@ int main(int argc, char *argv[]) {
         _TW_ADD_LABEL("Tracking      :",0,1,27,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 		_TW_ADD_LABEL("Status        :",0,2,27,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
         _TW_ADD_LABEL("Motion Info   :",0,3,27,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+        _TW_ADD_LABEL("Axis Z1       :",0,4,27,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+        _TW_ADD_LABEL("Axis Z2       :",0,5,27,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+        _TW_ADD_LABEL("Axis Z3       :",0,6,27,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+        _TW_ADD_LABEL("Axis X        :",0,7,27,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+        _TW_ADD_LABEL("Axis Y        :",0,8,27,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+        _TW_ADD_LABEL("Axis YP       :",0,9,27,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+        _TW_ADD_LABEL("Axis ZP       :",0,10,27,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+        
         /* ************************* */
         
         /** Add all required association: components/Frame */
@@ -324,6 +363,13 @@ int main(int argc, char *argv[]) {
         window.addComponent((CFrameComponent*)tracking_display);
 		window.addComponent((CFrameComponent*)status_box);
         window.addComponent((CFrameComponent*)motionInfo_field);
+        window.addComponent((CFrameComponent*)axisZ1_field);
+        window.addComponent((CFrameComponent*)axisZ2_field);
+        window.addComponent((CFrameComponent*)axisZ3_field);
+        window.addComponent((CFrameComponent*)axisX_field);
+        window.addComponent((CFrameComponent*)axisY_field);
+        window.addComponent((CFrameComponent*)axisYP_field);
+        window.addComponent((CFrameComponent*)axisZP_field);
         /* ********************************************** */
         window.addComponent((CFrameComponent*)userInput);       
         #if USE_OUTPUT_FIELD >=1 
