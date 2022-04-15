@@ -45,13 +45,13 @@ module MinorServo {
         readonly attribute Management::ROTBoolean scanActive;
         readonly attribute Management::ROTBoolean scanning;
 	
-        readonly attribute Management::ROdouble axisZ1;
-        readonly attribute Management::ROdouble axisZ2;
-        readonly attribute Management::ROdouble axisZ3;
-        readonly attribute Management::ROdouble axisX;
-        readonly attribute Management::ROdouble axisY;
-        readonly attribute Management::ROdouble axisYP;
-        readonly attribute Management::ROdouble axisZP;
+        readonly attribute ACS::ROdouble axisZ1;
+        readonly attribute ACS::ROdouble axisZ2;
+        readonly attribute ACS::ROdouble axisZ3;
+        readonly attribute ACS::ROdouble axisX;
+        readonly attribute ACS::ROdouble axisY;
+        readonly attribute ACS::ROdouble axisYP;
+        readonly attribute ACS::ROdouble axisZP;
 
 
         /**
