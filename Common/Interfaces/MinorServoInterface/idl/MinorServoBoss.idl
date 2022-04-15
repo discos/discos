@@ -45,6 +45,15 @@ module MinorServo {
         readonly attribute Management::ROTBoolean scanActive;
         readonly attribute Management::ROTBoolean scanning;
 	
+        readonly attribute Management::ROdouble axisZ1;
+        readonly attribute Management::ROdouble axisZ2;
+        readonly attribute Management::ROdouble axisZ3;
+        readonly attribute Management::ROdouble axisX;
+        readonly attribute Management::ROdouble axisY;
+        readonly attribute Management::ROdouble axisYP;
+        readonly attribute Management::ROdouble axisZP;
+
+
         /**
          * Set the elevation tracking flag to "ON" or "OFF"
          * @param value "ON" or "OFF"
