@@ -31,6 +31,8 @@
 #e) geometry (LAT, LON)	constant latitude or constant longitude OTF. GC not allowed.
 #e) direction (INC,DEC)
 #f) duration duration of the scan in seconds 
+# In case position offset switch of rdaila velocity switch are provided they overload the one provided with the
+# scan center
 
 #for SIDEREAL scans:
 #a) sourceName
@@ -58,7 +60,7 @@
 #a) targetScan, gives the identifier of the target source(i.d. a defined SIDEREAL o MOON scan).  Any offset given in the centerScan will be ignored. 
 #   The identifier must exist in the file and must be already defined 
 #b) axis_identifier, identifier of the axis to be moved for the scan, it could be X,Y,Z or THETAY or SRP_TY,SRP_RY (for SRT) 
-#c) range, span of the scan or total movment required by the scan along the given axis. The unit can vary according the axis,
+#c) range, span of the scan or total movement required by the scan along the given axis. The unit can vary according the axis,
 #   for example if the axis is rotation the unit is arcseconds, mm in case of translation
 #d) duration, duration of the scan in seconds 
 
@@ -78,7 +80,7 @@
 5	MOON	-EQOFFS	00:00:15.0	00:01:30.00
 
 #ID	type	centerScan	span	frame	subscanFrame geometry	direction	duration
-9	OTFC	3	2.0d	EQ	HOR	LAT	INC	15.0
+9	OTFC	3	2.0d	EQ	HOR	LAT	INC	15.0	-RVEL	12.1	BARY	OP
 10	OTFC	5	5.0d	EQ	HOR	LON	INC	30.0	-EQOFFS	0.5d	0.5d
 
 11	SIDEREAL	3c123
