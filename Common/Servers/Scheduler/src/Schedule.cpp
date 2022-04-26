@@ -626,6 +626,31 @@ bool CSchedule::getSubScan(const DWORD& counter,TRecord& rec)
 	}
 }
 
+bool CSchedule::printAll() {
+	TIterator p;
+	for (p=m_schedule.begin();p<m_schedule.end();p++) {
+		if (!printSubScan(*(*p))) {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool CSchedule::printSubScan(const TRecord& rec) {
+	cout << "subscan: " << rec.scanid << "_" << rec.subscanid;	
+	cout << " duration: " << rec.duration;
+	cout << " suffix: " << rec.suffix;		
+	cout << " pre: " << rec.preScan << "(" << rec.preScanArgs << ")";
+	cout << " post: " << rec.postScan << "(" << rec.postScanArgs << ")";
+	cout << " bck: " << rec.backendProc << " writer : " << rec.writerInstance;
+	cout << endl;
+	if (!m_scanListUnit->printScan(rec.scan)) {
+		return false;
+	}
+	cout << endl;
+	return true;
+}
+
 DWORD CSchedule::getSubScanCounter(const DWORD& scanid,const DWORD& subscanid)
 {
 	TIterator p;
