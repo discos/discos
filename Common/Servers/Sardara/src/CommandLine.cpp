@@ -41,37 +41,39 @@ CCommandLine::CCommandLine(ContainerServices *service): CSocket(),
 	m_backendStatus=0;
 	setStatus(NOTCNTD);
 	m_setTpiIntegration=true;
-    m_SK00=false;
-    m_SK01=false;
-    m_SK02=false;
-    m_SK03=false;
-    m_SK04=false;
-    m_SK05=false;
-    m_SK06=false;
-    m_SK77=false;
-    m_SC00=false;
-    m_SL00=false;
-    m_SP00=false;
-    m_SK00S=false;
-    m_SK01S=false;
-    m_SK02S=false;
-    m_SK03S=false;
-    m_SK04S=false;
-    m_SK05S=false;
-    m_SK06S=false;
-    m_SK77S=false;
-    m_SC00S=false;
-    m_SL00S=false;
-    m_SP00S=false;
-    // SARDARA Medicina configurations
+    m_sectionsNumber=0;
+    m_inputsNumber=0;
+    m_stokes=false;
+    m_CK=false;
+    m_TsysRange_freq=0.0;
+    m_TsysRange_bw=0.0;
+
+    // SRT configurations
+    m_SK00=false; m_SK01=false; m_SK02=false; m_SK03=false; m_SK04=false; m_SK05=false; m_SK06=false;
+    m_SK10=false; m_SK11=false; m_SK12=false; m_SK13=false; m_SK14=false; m_SK15=false; m_SK16=false;
+    m_SK20=false; m_SK21=false; m_SK22=false; m_SK23=false; m_SK24=false; m_SK25=false; m_SK26=false;
+    m_SK30=false; m_SK31=false; m_SK32=false; m_SK33=false; m_SK34=false; m_SK35=false; m_SK36=false;
+    m_SK40=false; m_SK41=false; m_SK42=false; m_SK43=false; m_SK44=false; m_SK45=false; m_SK46=false;
+    m_SK50=false; m_SK51=false; m_SK52=false; m_SK53=false; m_SK54=false; m_SK55=false; m_SK56=false;
+    m_SK60=false; m_SK61=false; m_SK62=false; m_SK63=false; m_SK64=false; m_SK65=false; m_SK66=false;
+    m_SK00S=false; m_SK01S=false; m_SK02S=false; m_SK03S=false; m_SK04S=false; m_SK05S=false; m_SK06S=false;
+    m_SK10S=false; m_SK11S=false; m_SK12S=false; m_SK13S=false; m_SK14S=false; m_SK15S=false; m_SK16S=false;
+    m_SK20S=false; m_SK21S=false; m_SK22S=false; m_SK23S=false; m_SK24S=false; m_SK25S=false; m_SK26S=false;
+    m_SK30S=false; m_SK31S=false; m_SK32S=false; m_SK33S=false; m_SK34S=false; m_SK35S=false; m_SK36S=false;
+    m_SK40S=false; m_SK41S=false; m_SK42S=false; m_SK43S=false; m_SK44S=false; m_SK45S=false; m_SK46S=false;
+    m_SK50S=false; m_SK51S=false; m_SK52S=false; m_SK53S=false; m_SK54S=false; m_SK55S=false; m_SK56S=false;
+    m_SK77=false; m_SK77S=false;
+    m_SC00=false; m_SC00S=false;
+    m_SL00=false; m_SL00S=false;
+    m_SP00=false; m_SP00S=false;
+    m_stationSRT=false;
+
+    // Medicina configurations
     m_SCC00=false;
     m_SCH00=false;
     m_SCC00S=false;
     m_SCH00S=false;
-    m_stationSRT=false;
     m_stationMED=false;
-    m_sectionsNumber=0;
-    m_inputsNumber=0;
 }
 
 CCommandLine::~CCommandLine()
@@ -340,6 +342,16 @@ void CCommandLine::setAttenuation(const long&inputId, const double& attenuation)
 
 }
 
+void CCommandLine::setTsysRange(const double& freq, const double& bw) throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,BackendsErrors::NakExImpl,
+		ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl)
+{
+	AUTO_TRACE("CCommandLine::setTsysRange()");
+	m_TsysRange_freq = freq;
+	m_TsysRange_bw = bw;
+    ACS_LOG(LM_FULL_INFO,"CCommandLine::setTsysRange()",(LM_NOTICE,"TSYS RANGE FREQUENCY = %lf, BANDWIDTH = %lf",m_TsysRange_freq,m_TsysRange_bw));
+
+}
+
 void CCommandLine::setConfiguration(const long& inputId,const double& freq,const double& bw,const long& feed,const long& pol, const double& sr,const long& bins) throw (
 		ComponentErrors::ValidationErrorExImpl,BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
 		ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::ValueOutofRangeExImpl,
@@ -349,6 +361,7 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 	double newBW,newSR,newFreq;
     long newBins, newFeed, newPol;
     double filter;
+    int j;
 
 /*	if (getIsBusy()) {
 		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::setConfiguration()");
@@ -456,49 +469,83 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
         newBins = m_bins[inputId];
 
     if (m_stationSRT == true) {
-	try {
-        Message request = Command::setSection(inputId, newFreq, newBW, newFeed, newPol, newSR, newBins);
-        Message reply = sendBackendCommand(request);
-        if (reply.is_success_reply()) {
-		    for (int j=0;j<m_sectionsNumber;j++)
-                m_sampleRate[j]=newSR; //the given sample rate is taken also for all the others
-		    m_commonSampleRate=newSR;
-            if (m_SK00S==true || m_SC00S==true || m_SK77S==true || m_SK03S==true || m_SK06S==true || m_SL00S==true || m_SP00S==true || m_SK01S==true || m_SK02S==true || m_SK04S==true || m_SK05S==true) {
-                m_frequency[2*inputId]=newFreq;
-                m_frequency[2*inputId+1]=newFreq;
-                m_bandWidth[2*inputId]=newBW;
-                m_bandWidth[2*inputId+1]=newBW;
-            }
-            else {
-                m_frequency[inputId]=newFreq;
-                m_bandWidth[inputId]=newBW;
-            }
-            m_feedNumber[inputId]=newFeed;
-            m_bins[inputId]=newBins;
-		    m_polarization[inputId]=newPol;
-		    IRA::CString temp;
-		    if (m_polarization[inputId]==Backends::BKND_LCP)
-			    temp="LCP";
-            else if (m_polarization[inputId]==Backends::BKND_RCP)
-			    temp="RCP";
-            else
-        	    temp="FULL_STOKES";
-		    ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"SECTION_CONFIGURED %ld,FREQ=%lf,BW=%lf,FEED=%ld,POL=%s,SR=%lf,BINS=%ld",inputId,m_frequency[inputId],newBW,m_feedNumber[inputId],
-				(const char *)temp,newSR,m_bins[inputId]));		
-            if (m_SK00==true || m_SC00==true || m_SK00S==true || m_SC00S==true || m_SK77==true || m_SK77S==true || m_SK03==true || m_SK03S==true || m_SK06==true || m_SK06S==true || m_SK01==true || m_SK01S==true
-                    || m_SK02==true || m_SK02S==true || m_SK04==true || m_SK04S==true || m_SK05==true || m_SK05S==true) {
-                if (newBW==420.00)
-                    filter=300.00;
-                if (newBW==1500.00)
-                    filter=1250.00;
-                if (newBW==2300.00)
-                    filter=2350.00;
-                if (newBW == 420.00 || newBW == 1500.00 || newBW == 2300.00) {
-                    if (m_SK00S==true || m_SC00S==true || m_SK77S==true) {
-                        m_totalPower->setSection(2*inputId,-1, filter, -1, -1, -1, -1);
-                        m_totalPower->setSection(2*inputId+1,-1, filter, -1, -1, -1, -1);
+        try {
+            Message request = Command::setSection(inputId, newFreq, newBW, newFeed, newPol, newSR, newBins);
+            Message reply = sendBackendCommand(request);
+            if (reply.is_success_reply()) {
+                for (j=0;j<m_sectionsNumber;j++)
+                    m_sampleRate[j]=newSR; //the given sample rate is taken also for all the others
+                m_commonSampleRate=newSR;
+                if (m_stokes==true /*
+                        m_SK00S==true || m_SK01S==true || m_SK02S==true || m_SK03S==true || m_SK04S==true || m_SK05S==true || m_SK06S==true ||
+                        m_SK10S==true || m_SK11S==true || m_SK12S==true || m_SK13S==true || m_SK14S==true || m_SK15S==true || m_SK16S==true ||
+                        m_SK20S==true || m_SK21S==true || m_SK22S==true || m_SK23S==true || m_SK24S==true || m_SK25S==true || m_SK26S==true ||
+                        m_SK30S==true || m_SK31S==true || m_SK32S==true || m_SK33S==true || m_SK34S==true || m_SK35S==true || m_SK36S==true ||
+                        m_SK40S==true || m_SK41S==true || m_SK42S==true || m_SK43S==true || m_SK44S==true || m_SK45S==true || m_SK46S==true ||
+                        m_SK50S==true || m_SK51S==true || m_SK52S==true || m_SK53S==true || m_SK54S==true || m_SK55S==true || m_SK56S==true ||
+                        m_SK60S==true || m_SK61S==true || m_SK62S==true || m_SK63S==true || m_SK64S==true || m_SK65S==true || m_SK66S==true ||
+                        m_SC00S==true || m_SK77S==true || m_SL00S==true || m_SP00S==true*/) {
+                    m_frequency[2*inputId]=newFreq;
+                    m_frequency[2*inputId+1]=newFreq;
+                    m_bandWidth[2*inputId]=newBW;
+                    m_bandWidth[2*inputId+1]=newBW;
+                }
+                else {
+                    m_frequency[inputId]=newFreq;
+                    m_bandWidth[inputId]=newBW;
+                }
+                m_feedNumber[inputId]=newFeed;
+                m_bins[inputId]=newBins;
+                m_polarization[inputId]=newPol;
+                IRA::CString temp;
+                if (m_polarization[inputId]==Backends::BKND_LCP)
+                    temp="LCP";
+                else if (m_polarization[inputId]==Backends::BKND_RCP)
+                    temp="RCP";
+                else
+                    temp="FULL_STOKES";
+                ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"SECTION_CONFIGURED %ld,FREQ=%lf,BW=%lf,FEED=%ld,POL=%s,SR=%lf,BINS=%ld",inputId,m_frequency[inputId],newBW,m_feedNumber[inputId],
+                                (const char *)temp,newSR,m_bins[inputId]));		
+                if (m_CK == true) {
+                    if (newBW==420.00)
+                        filter=300.00;
+                    if (newBW==1500.00)
+                        filter=1250.00;
+                    if (newBW==2300.00)
+                        filter=2350.00;
+                    if (newBW == 420.00 || newBW == 1500.00 || newBW == 2300.00) {
+                        for (j=0; j<m_inputsNumber; j++)
+                            m_totalPower->setSection(j,-1, filter, -1, -1, -1, -1);
+                        /*
+                        if (m_SK00S==true || m_SC00S==true || m_SK77S==true) {
+                                m_totalPower->setSection(2*inputId,-1, filter, -1, -1, -1, -1);
+                                m_totalPower->setSection(2*inputId+1,-1, filter, -1, -1, -1, -1);
+                            }
+                    else if (m_SK11S==true) {
+                        m_totalPower->setSection(inputId+2,-1, filter, -1, -1, -1, -1);
+                        m_totalPower->setSection(inputId+3,-1, filter, -1, -1, -1, -1);
                     }
-                    else if (m_SK01S==true) {
+                    else if (m_SK22S==true) {
+                        m_totalPower->setSection(inputId+4,-1, filter, -1, -1, -1, -1);
+                        m_totalPower->setSection(inputId+5,-1, filter, -1, -1, -1, -1);
+                    }
+                    else if (m_SK33S==true) {
+                        m_totalPower->setSection(inputId+6,-1, filter, -1, -1, -1, -1);
+                        m_totalPower->setSection(inputId+7,-1, filter, -1, -1, -1, -1);
+                    }
+                    else if (m_SK44S==true) {
+                        m_totalPower->setSection(inputId+8,-1, filter, -1, -1, -1, -1);
+                        m_totalPower->setSection(inputId+9,-1, filter, -1, -1, -1, -1);
+                    }
+                    else if (m_SK55S==true) {
+                        m_totalPower->setSection(inputId+10,-1, filter, -1, -1, -1, -1);
+                        m_totalPower->setSection(inputId+11,-1, filter, -1, -1, -1, -1);
+                    }
+                    else if (m_SK66S==true) {
+                        m_totalPower->setSection(inputId+12,-1, filter, -1, -1, -1, -1);
+                        m_totalPower->setSection(inputId+13,-1, filter, -1, -1, -1, -1);
+                    }
+                    else if (m_SK01S==true || m_SK10S==true) {
                         if (inputId == 0) {
                             m_totalPower->setSection(inputId,-1, filter, -1, -1, -1, -1);
                             m_totalPower->setSection(inputId+1,-1, filter, -1, -1, -1, -1);
@@ -508,7 +555,7 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
                             m_totalPower->setSection(inputId+2,-1, filter, -1, -1, -1, -1);
                         }
                     }
-                    else if (m_SK02S==true) {
+                    else if (m_SK02S==true || m_SK20S==true) {
                         if (inputId == 0) {
                             m_totalPower->setSection(inputId,-1, filter, -1, -1, -1, -1);
                             m_totalPower->setSection(inputId+1,-1, filter, -1, -1, -1, -1);
@@ -518,7 +565,7 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
                             m_totalPower->setSection(inputId+4,-1, filter, -1, -1, -1, -1);
                         }
                     }
-                    else if (m_SK03S==true) {
+                    else if (m_SK03S==true || m_SK30S==true) {
                         if (inputId == 0) {
                             m_totalPower->setSection(inputId,-1, filter, -1, -1, -1, -1);
                             m_totalPower->setSection(inputId+1,-1, filter, -1, -1, -1, -1);
@@ -528,7 +575,7 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
                             m_totalPower->setSection(inputId+6,-1, filter, -1, -1, -1, -1);
                         }
                     }
-                    else if (m_SK04S==true) {
+                    else if (m_SK04S==true || m_SK40S==true) {
                         if (inputId == 0) {
                             m_totalPower->setSection(inputId,-1, filter, -1, -1, -1, -1);
                             m_totalPower->setSection(inputId+1,-1, filter, -1, -1, -1, -1);
@@ -538,7 +585,7 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
                             m_totalPower->setSection(inputId+8,-1, filter, -1, -1, -1, -1);
                         }
                     }
-                    else if (m_SK05S==true) {
+                    else if (m_SK05S==true || m_SK50S==true) {
                         if (inputId == 0) {
                             m_totalPower->setSection(inputId,-1, filter, -1, -1, -1, -1);
                             m_totalPower->setSection(inputId+1,-1, filter, -1, -1, -1, -1);
@@ -548,7 +595,7 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
                             m_totalPower->setSection(inputId+10,-1, filter, -1, -1, -1, -1);
                         }
                     }
-                    else if (m_SK06S==true) {
+                    else if (m_SK06S==true || m_SK60S==true) {
                         if (inputId == 0) {
                             m_totalPower->setSection(inputId,-1, filter, -1, -1, -1, -1);
                             m_totalPower->setSection(inputId+1,-1, filter, -1, -1, -1, -1);
@@ -558,7 +605,157 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
                             m_totalPower->setSection(inputId+12,-1, filter, -1, -1, -1, -1);
                         }
                     }
-                    else if (m_SK01==true) {
+                    else if (m_SK12S==true || m_SK21S==true) {
+                        if (inputId == 0) {
+                            m_totalPower->setSection(inputId+2,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+3,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 1) {
+                            m_totalPower->setSection(inputId+4,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+5,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK13S==true || m_SK31S==true) {
+                        if (inputId == 0) {
+                            m_totalPower->setSection(inputId+2,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+3,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 1) {
+                            m_totalPower->setSection(inputId+6,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+7,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK14S==true || m_SK41S==true) {
+                        if (inputId == 0) {
+                            m_totalPower->setSection(inputId+2,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+3,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 1) {
+                            m_totalPower->setSection(inputId+8,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+9,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK15S==true || m_SK51S==true) {
+                        if (inputId == 0) {
+                            m_totalPower->setSection(inputId+2,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+3,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 1) {
+                            m_totalPower->setSection(inputId+10,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+11,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK16S==true || m_SK61S==true) {
+                        if (inputId == 0) {
+                            m_totalPower->setSection(inputId+2,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+3,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 1) {
+                            m_totalPower->setSection(inputId+12,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+13,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK23S==true || m_SK32S==true) {
+                        if (inputId == 0) {
+                            m_totalPower->setSection(inputId+4,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+5,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 1) {
+                            m_totalPower->setSection(inputId+6,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+7,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK24S==true || m_SK42S==true) {
+                        if (inputId == 0) {
+                            m_totalPower->setSection(inputId+4,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+5,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 1) {
+                            m_totalPower->setSection(inputId+8,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+9,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK25S==true || m_SK52S==true) {
+                        if (inputId == 0) {
+                            m_totalPower->setSection(inputId+4,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+5,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 1) {
+                            m_totalPower->setSection(inputId+10,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+11,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK26S==true || m_SK62S==true) {
+                        if (inputId == 0) {
+                            m_totalPower->setSection(inputId+4,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+5,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 1) {
+                            m_totalPower->setSection(inputId+12,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+13,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK34S==true || m_SK43S==true) {
+                        if (inputId == 0) {
+                            m_totalPower->setSection(inputId+6,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+7,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 1) {
+                            m_totalPower->setSection(inputId+8,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+9,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK35S==true || m_SK53S==true) {
+                        if (inputId == 0) {
+                            m_totalPower->setSection(inputId+6,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+7,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 1) {
+                            m_totalPower->setSection(inputId+10,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+11,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK36S==true || m_SK63S==true) {
+                        if (inputId == 0) {
+                            m_totalPower->setSection(inputId+6,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+7,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 1) {
+                            m_totalPower->setSection(inputId+12,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+13,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK45S==true || m_SK54S==true) {
+                        if (inputId == 0) {
+                            m_totalPower->setSection(inputId+8,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+9,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 1) {
+                            m_totalPower->setSection(inputId+10,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+11,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK46S==true || m_SK64S==true) {
+                        if (inputId == 0) {
+                            m_totalPower->setSection(inputId+8,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+9,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 1) {
+                            m_totalPower->setSection(inputId+12,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+13,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK56S==true || m_SK65S==true) {
+                        if (inputId == 0) {
+                            m_totalPower->setSection(inputId+10,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+11,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 1) {
+                            m_totalPower->setSection(inputId+12,-1, filter, -1, -1, -1, -1);
+                            m_totalPower->setSection(inputId+13,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK01==true || m_SK10==true) {
                         if (inputId == 0 || inputId == 1) {
                             m_totalPower->setSection(inputId,-1, filter, -1, -1, -1, -1);
                         }
@@ -566,7 +763,7 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
                             m_totalPower->setSection(inputId,-1, filter, -1, -1, -1, -1);
                         }
                     }
-                    else if (m_SK02==true) {
+                    else if (m_SK02==true || m_SK20==true) {
                         if (inputId == 0 || inputId == 1) {
                             m_totalPower->setSection(inputId,-1, filter, -1, -1, -1, -1);
                         }
@@ -574,7 +771,7 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
                             m_totalPower->setSection(inputId+2,-1, filter, -1, -1, -1, -1);
                         }
                     }
-                    else if (m_SK03==true) {
+                    else if (m_SK03==true || m_SK30==true) {
                         if (inputId == 0 || inputId == 1) {
                             m_totalPower->setSection(inputId,-1, filter, -1, -1, -1, -1);
                         }
@@ -582,7 +779,7 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
                             m_totalPower->setSection(inputId+4,-1, filter, -1, -1, -1, -1);
                         }
                     }
-                    else if (m_SK04==true) {
+                    else if (m_SK04==true || m_SK40==true) {
                         if (inputId == 0 || inputId == 1) {
                             m_totalPower->setSection(inputId,-1, filter, -1, -1, -1, -1);
                         }
@@ -590,7 +787,7 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
                             m_totalPower->setSection(inputId+6,-1, filter, -1, -1, -1, -1);
                         }
                     }
-                    else if (m_SK01==true) {
+                    else if (m_SK05==true || m_SK50==true) {
                         if (inputId == 0 || inputId == 1) {
                             m_totalPower->setSection(inputId,-1, filter, -1, -1, -1, -1);
                         }
@@ -598,7 +795,7 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
                             m_totalPower->setSection(inputId+8,-1, filter, -1, -1, -1, -1);
                         }
                     }
-                    else if (m_SK06==true) {
+                    else if (m_SK06==true || m_SK60==true) {
                         if (inputId == 0 || inputId == 1) {
                             m_totalPower->setSection(inputId,-1, filter, -1, -1, -1, -1);
                         }
@@ -606,8 +803,128 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
                             m_totalPower->setSection(inputId+10,-1, filter, -1, -1, -1, -1);
                         }
                     }
+                    else if (m_SK12==true || m_SK21==true) {
+                        if (inputId == 0 || inputId == 1) {
+                            m_totalPower->setSection(inputId+2,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 2 || inputId == 3) {
+                            m_totalPower->setSection(inputId+2,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK13==true || m_SK31==true) {
+                        if (inputId == 0 || inputId == 1) {
+                            m_totalPower->setSection(inputId+2,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 2 || inputId == 3) {
+                            m_totalPower->setSection(inputId+4,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK14==true || m_SK41==true) {
+                        if (inputId == 0 || inputId == 1) {
+                            m_totalPower->setSection(inputId+2,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 2 || inputId == 3) {
+                            m_totalPower->setSection(inputId+6,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK15==true || m_SK51==true) {
+                        if (inputId == 0 || inputId == 1) {
+                            m_totalPower->setSection(inputId+2,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 2 || inputId == 3) {
+                            m_totalPower->setSection(inputId+8,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK16==true || m_SK61==true) {
+                        if (inputId == 0 || inputId == 1) {
+                            m_totalPower->setSection(inputId+2,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 2 || inputId == 3) {
+                            m_totalPower->setSection(inputId+10,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK23==true || m_SK32==true) {
+                        if (inputId == 0 || inputId == 1) {
+                            m_totalPower->setSection(inputId+4,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 2 || inputId == 3) {
+                            m_totalPower->setSection(inputId+4,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK24==true || m_SK42==true) {
+                        if (inputId == 0 || inputId == 1) {
+                            m_totalPower->setSection(inputId+4,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 2 || inputId == 3) {
+                            m_totalPower->setSection(inputId+6,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK25==true || m_SK52==true) {
+                        if (inputId == 0 || inputId == 1) {
+                            m_totalPower->setSection(inputId+4,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 2 || inputId == 3) {
+                            m_totalPower->setSection(inputId+8,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK26==true || m_SK62==true) {
+                        if (inputId == 0 || inputId == 1) {
+                            m_totalPower->setSection(inputId+4,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 2 || inputId == 3) {
+                            m_totalPower->setSection(inputId+10,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK34==true || m_SK43==true) {
+                        if (inputId == 0 || inputId == 1) {
+                            m_totalPower->setSection(inputId+6,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 2 || inputId == 3) {
+                            m_totalPower->setSection(inputId+6,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK35==true || m_SK53==true) {
+                        if (inputId == 0 || inputId == 1) {
+                            m_totalPower->setSection(inputId+6,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 2 || inputId == 3) {
+                            m_totalPower->setSection(inputId+8,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK36==true || m_SK63==true) {
+                        if (inputId == 0 || inputId == 1) {
+                            m_totalPower->setSection(inputId+6,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 2 || inputId == 3) {
+                            m_totalPower->setSection(inputId+10,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK45==true || m_SK54==true) {
+                        if (inputId == 0 || inputId == 1) {
+                            m_totalPower->setSection(inputId+8,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 2 || inputId == 3) {
+                            m_totalPower->setSection(inputId+8,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK46==true || m_SK64==true) {
+                        if (inputId == 0 || inputId == 1) {
+                            m_totalPower->setSection(inputId+8,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 2 || inputId == 3) {
+                            m_totalPower->setSection(inputId+10,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
+                    else if (m_SK56==true || m_SK65==true) {
+                        if (inputId == 0 || inputId == 1) {
+                            m_totalPower->setSection(inputId+10,-1, filter, -1, -1, -1, -1);
+                        }
+                        if (inputId == 2 || inputId == 3) {
+                            m_totalPower->setSection(inputId+10,-1, filter, -1, -1, -1, -1);
+                        }
+                    }
                     else
-                        m_totalPower->setSection(inputId,-1, filter, -1, -1, -1, -1);
+                        m_totalPower->setSection(inputId,-1, filter, -1, -1, -1, -1); */
                 }
                 ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"TOTALPOWER_FILTER_CONFIGURED %ld,FILTER=%lf",inputId,filter));
             }
@@ -863,7 +1180,7 @@ void CCommandLine::getSample(ACS::doubleSeq& tpi,bool zero) throw (ComponentErro
 {
 	AUTO_TRACE("CCommandLine::getSample()");
     try {
-        Message reply = sendBackendCommand(Command::getTpi());
+        Message reply = sendBackendCommand(Command::getTpi(m_TsysRange_freq,m_TsysRange_bw));
         if(reply.is_success_reply()){
 		    tpi.length(m_inputsNumber/*m_sectionsNumber*/);
 		    for (int j=0;j<m_inputsNumber/*m_sectionsNumber*/;j++) {
@@ -903,241 +1220,856 @@ void CCommandLine::setDefaultConfiguration(const IRA::CString & config) throw (C
 {
 	AUTO_TRACE("CCommandLine::setDefaultConfiguration()");
     if (m_stationSRT==true) {
-    if (config.Compare("SK77")==0) {
-        m_filter=1250.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_SK77=true;
-        m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SK00S=m_SC00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SK00")==0) {
-        m_filter=1250.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_SK00=true;
-        m_SK77=m_SK03=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK03S=m_SK06S=m_SK00S=m_SC00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SK01")==0) {
-        m_filter=1250.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_SK01=true;
-        m_SK77=m_SK00=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SK02")==0) {
-        m_filter=1250.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_SK02=true;
-        m_SK77=m_SK00=m_SK01=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SK03")==0) {
-        m_filter=1250.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_SK03=true;
-        m_SK77=m_SK00=m_SK01=m_SK02=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SK04")==0) {
-        m_filter=1250.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_SK04=true;
-        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SK05")==0) {
-        m_filter=1250.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_SK05=true;
-        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SK06")==0) {
-        m_filter=1250.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_SK06=true;
-        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SC00")==0) {
-        m_filter=1250.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_SC00=true;
-        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SL00")==0) {
-        m_filter = 2300.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_SL00=true;
-        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
-        /*if (m_stationSRT == true) {
-            m_ifDistributor->setup("BW-UNFILTERED");
-            ACS_LOG(LM_FULL_INFO,"CCommandLine::setDefaultConfiguration()",(LM_NOTICE,"IFDISTRIBUTOR_BW-UNFILTERED_CONFIGURED"));
+        m_SK77=m_SK77S=false;
+        m_SK00=m_SK00S=false;
+        /*m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=false;
+        m_SK10=m_SK11=m_SK12=m_SK13=m_SK14=m_SK15=m_SK16=m_SK10S=m_SK11S=m_SK12S=m_SK13S=m_SK14S=m_SK15S=m_SK16S=false;
+        m_SK20=m_SK21=m_SK22=m_SK23=m_SK24=m_SK25=m_SK26=m_SK20S=m_SK21S=m_SK22S=m_SK23S=m_SK24S=m_SK25S=m_SK26S=false;
+        m_SK30=m_SK31=m_SK32=m_SK33=m_SK34=m_SK35=m_SK36=m_SK30S=m_SK31S=m_SK32S=m_SK33S=m_SK34S=m_SK35S=m_SK36S=false;
+        m_SK40=m_SK41=m_SK42=m_SK43=m_SK44=m_SK45=m_SK46=m_SK40S=m_SK41S=m_SK42S=m_SK43S=m_SK44S=m_SK45S=m_SK46S=false;
+        m_SK50=m_SK51=m_SK52=m_SK53=m_SK54=m_SK55=m_SK56=m_SK50S=m_SK51S=m_SK52S=m_SK53S=m_SK54S=m_SK55S=m_SK56S=false;
+        m_SK60=m_SK61=m_SK62=m_SK63=m_SK64=m_SK65=m_SK66=m_SK60S=m_SK61S=m_SK62S=m_SK63S=m_SK64S=m_SK65S=m_SK66S=false;*/
+        m_SC00=m_SC00S=false;
+        m_SL00=m_SL00S=false;
+        m_SP00=m_SP00S=false;
+        m_stokes=false;
+        m_CK=false;
+        if (config.Compare("SK77")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK77=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK00")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK00=true;
+            m_CK=true;
+        }
+        /*if (config.Compare("SK01")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK01=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK02")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK02=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK03")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK03=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK04")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK04=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK05")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK05=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK06")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK06=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK10")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK10=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK11")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK11=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK12")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK12=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK13")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK13=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK14")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK14=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK15")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK15=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK16")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK16=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK20")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK20=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK21")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK21=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK22")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK22=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK23")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK23=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK24")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK24=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK25")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK25=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK26")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK26=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK30")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK30=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK31")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK31=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK32")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK32=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK33")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK33=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK34")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK34=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK35")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK35=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK36")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK36=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK40")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK40=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK41")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK41=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK42")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK42=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK43")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK43=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK44")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK44=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK45")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK45=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK46")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK46=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK50")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK50=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK51")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK51=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK52")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK52=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK53")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK53=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK54")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK54=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK55")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK55=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK56")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK56=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK60")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK60=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK61")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK61=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK62")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK62=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK63")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK63=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK64")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK64=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK65")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK65=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK66")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK66=true;
+            m_CK=true;
         }*/
-    }
-    if (config.Compare("SP00")==0) {
-        m_filter = 730.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_SP00=true;
-        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SK77S")==0) {
-        m_filter=1250.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_sectionsNumber=m_sectionsNumber/2;
-        m_SK77S=true;
-        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SK00S")==0) {
-        m_filter=1250.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_sectionsNumber=m_sectionsNumber/2;
-        m_SK00S=true;
-        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SK01S")==0) {
-        m_filter=1250.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_sectionsNumber=m_sectionsNumber/2;
-        m_SK01S=true;
-        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SK02S")==0) {
-        m_filter=1250.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_sectionsNumber=m_sectionsNumber/2;
-        m_SK02S=true;
-        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SK03S")==0) {
-        m_filter=1250.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_sectionsNumber=m_sectionsNumber/2;
-        m_SK03S=true;
-        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SK04S")==0) {
-        m_filter=1250.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_sectionsNumber=m_sectionsNumber/2;
-        m_SK04S=true;
-        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SK05S")==0) {
-        m_filter=1250.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_sectionsNumber=m_sectionsNumber/2;
-        m_SK05S=true;
-        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK06S=m_SC00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SK06S")==0) {
-        m_filter=1250.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_sectionsNumber=m_sectionsNumber/2;
-        m_SK06S=true;
-        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SC00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SC00S")==0) {
-        m_filter=1250.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_sectionsNumber=m_sectionsNumber/2;
-        m_SC00S=true;
-        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SL00S")==0) {
-        m_filter = 2300.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_sectionsNumber=m_sectionsNumber/2;
-        m_SL00S=true;
-        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SP00S=false;
-        /*if (m_stationSRT == true) {
-            m_ifDistributor->setup("BW-UNFILTERED");
-            ACS_LOG(LM_FULL_INFO,"CCommandLine::setDefaultConfiguration()",(LM_NOTICE,"IFDISTRIBUTOR_BW-UNFILTERED_CONFIGURED"));
+        if (config.Compare("SC00")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SC00=true;
+            m_CK=true;
+        }
+        if (config.Compare("SL00")==0) {
+            m_filter = 2300.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SL00=true;
+            /*if (m_stationSRT == true) {
+                m_ifDistributor->setup("BW-UNFILTERED");
+                ACS_LOG(LM_FULL_INFO,"CCommandLine::setDefaultConfiguration()",(LM_NOTICE,"IFDISTRIBUTOR_BW-UNFILTERED_CONFIGURED"));
+            }*/
+        }
+        if (config.Compare("SP00")==0) {
+            m_filter = 730.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SP00=true;
+        }
+        if (config.Compare("SK77S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK77S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK00S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK00S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        /*if (config.Compare("SK01S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK01S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK02S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK02S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK03S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK03S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK04S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK04S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK05S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK05S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK06S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK06S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK10S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK10S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK11S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK11S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK12S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK12S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK13S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK13S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK14S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK14S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK15S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK15S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK16S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK16S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK20S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK20S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK21S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK21S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK22S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK22S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK23S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK23S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK24S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK24S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK25S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK25S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK26S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK26S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK30S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK30S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK31S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK31S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK32S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK32S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK33S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK33S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK34S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK34S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK35S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK35S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK36S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK36S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK40S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK40S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK41S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK41S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK42S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK42S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK43S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK43S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK44S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK44S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK45S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK45S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK46S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK46S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK50S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK50S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK51S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK51S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK52S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK52S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK53S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK53S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK54S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK54S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK55S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK55S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK56S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK56S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK60S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK60S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK61S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK61S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK62S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK62S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK63S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK63S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK64S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK64S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK65S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK65S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK66S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK66S=true;
+            m_stokes=true;
+            m_CK=true;
         }*/
-    }
-    if (config.Compare("SP00S")==0) {
-        m_filter = 730.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_sectionsNumber=m_sectionsNumber/2;
-        m_SP00S=true;
-        m_SK77=m_SK00=m_SK01=m_SK02=m_SK03=m_SK04=m_SK05=m_SK06=m_SC00=m_SL00=m_SP00=m_SK77S=m_SK00S=m_SK01S=m_SK02S=m_SK03S=m_SK04S=m_SK05S=m_SK06S=m_SC00S=m_SL00S=false;
-    }
+        if (config.Compare("SC00S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SC00S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SL00S")==0) {
+            m_filter = 2300.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SL00S=true;
+            m_stokes=true;
+            /*if (m_stationSRT == true) {
+                m_ifDistributor->setup("BW-UNFILTERED");
+                ACS_LOG(LM_FULL_INFO,"CCommandLine::setDefaultConfiguration()",(LM_NOTICE,"IFDISTRIBUTOR_BW-UNFILTERED_CONFIGURED"));
+            }*/
+        }
+        if (config.Compare("SP00S")==0) {
+            m_filter = 730.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SP00S=true;
+            m_stokes=true;
+            m_CK=false;
+        }
     }
     if (m_stationMED==true) {
-    if (config.Compare("SK01")==0) {
-        m_filter=1250.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_SK01=true;
-        m_SK00=m_SCC00=m_SCH00=m_SL00=m_SP00=m_SK01S=m_SK00S=m_SCC00S=m_SCH00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SK00")==0) {
-        m_filter=1250.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_SK00=true;
-        m_SK01=m_SCC00=m_SCH00=m_SL00=m_SP00=m_SK01S=m_SK00S=m_SCC00S=m_SCH00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SCC00")==0) {
-        m_filter=1250.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_SCC00=true;
-        m_SK00=m_SK01=m_SL00=m_SP00=m_SK00S=m_SK01S=m_SCH00=m_SCC00S=m_SCH00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SCH00")==0) {
-        m_filter=1250.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_SCH00=true;
-        m_SK00=m_SK01=m_SL00=m_SP00=m_SCC00=m_SK00S=m_SK01S=m_SCC00S=m_SCH00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SL00")==0) {
-        m_filter = 2300.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_SL00=true;
-        m_SK00=m_SK01=m_SCC00=m_SP00=m_SCH00=m_SK00S=m_SK01S=m_SCC00S=m_SCH00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SP00")==0) {
-        m_filter = 730.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_SP00=true;
-        m_SK00=m_SK01=m_SCC00=m_SCH00=m_SL00=m_SK00S=m_SK01S=m_SCC00S=m_SCH00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SK00S")==0) {
-        m_filter=1250.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_sectionsNumber=m_sectionsNumber/2;
-        m_SK00S=true;
-        m_SK00=m_SK01=m_SCC00=m_SCH00=m_SL00=m_SP00=m_SK01S=m_SCC00S=m_SCH00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SK01S")==0) {
-        m_filter=1250.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_sectionsNumber=m_sectionsNumber/2;
-        m_SK01S=true;
-        m_SK00=m_SK01=m_SCC00=m_SCH00=m_SL00=m_SP00=m_SK00S=m_SCC00S=m_SCH00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SCC00S")==0) {
-        m_filter=1250.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_sectionsNumber=m_sectionsNumber/2;
-        m_SCC00S=true;
-        m_SK00=m_SK01=m_SCC00=m_SCH00=m_SL00=m_SP00=m_SK00S=m_SK01S=m_SCH00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SCH00S")==0) {
-        m_filter=1250.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_sectionsNumber=m_sectionsNumber/2;
-        m_SCH00S=true;
-        m_SK00=m_SK01=m_SCC00=m_SCH00=m_SL00=m_SP00=m_SK00S=m_SK01S=m_SCC00S=m_SL00S=m_SP00S=false;
-    }
-    if (config.Compare("SL00S")==0) {
-        m_filter = 2300.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_sectionsNumber=m_sectionsNumber/2;
-        m_SL00S=true;
-        m_SK00=m_SK01=m_SCC00=m_SCH00=m_SL00=m_SP00=m_SK00S=m_SK01S=m_SCC00S=m_SCH00S=m_SP00S=false;
-        /*if (m_stationSRT == true) {
-            m_ifDistributor->setup("BW-UNFILTERED");
-            ACS_LOG(LM_FULL_INFO,"CCommandLine::setDefaultConfiguration()",(LM_NOTICE,"IFDISTRIBUTOR_BW-UNFILTERED_CONFIGURED"));
-        }*/
-    }
-    if (config.Compare("SP00S")==0) {
-        m_filter = 730.0;
-        m_inputsNumber=m_sectionsNumber;
-        m_sectionsNumber=m_sectionsNumber/2;
-        m_SP00S=true;
-        m_SK00=m_SK01=m_SCC00=m_SCH00=m_SL00=m_SP00=m_SK00S=m_SK01S=m_SCC00S=m_SCH00S=m_SL00S=false;
-    }
+        m_SK00=m_SK01=m_SCC00=m_SCH00=m_SL00=m_SP00=m_SK01S=m_SK00S=m_SCC00S=m_SCH00S=m_SL00S=m_SP00S=false;
+        m_stokes=false;
+        m_CK=false;
+        if (config.Compare("SK01")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK01=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK00")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK00=true;
+            m_CK=true;
+        }
+        if (config.Compare("SCC00")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SCC00=true;
+            m_CK=true;
+        }
+        if (config.Compare("SCH00")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SCH00=true;
+            m_CK=true;
+        }
+        if (config.Compare("SL00")==0) {
+            m_filter = 2300.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SL00=true;
+        }
+        if (config.Compare("SP00")==0) {
+            m_filter = 730.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SP00=true;
+        }
+        if (config.Compare("SK00S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK00S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK01S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SK01S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SCC00S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SCC00S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SCH00S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SCH00S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SL00S")==0) {
+            m_filter = 2300.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SL00S=true;
+            m_stokes=true;
+            /*if (m_stationSRT == true) {
+                m_ifDistributor->setup("BW-UNFILTERED");
+                ACS_LOG(LM_FULL_INFO,"CCommandLine::setDefaultConfiguration()",(LM_NOTICE,"IFDISTRIBUTOR_BW-UNFILTERED_CONFIGURED"));
+            }*/
+        }
+        if (config.Compare("SP00S")==0) {
+            m_filter = 730.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SP00S=true;
+            m_stokes=true;
+        }
     }
 }
 
@@ -1207,7 +2139,7 @@ void CCommandLine::setup(const char *conf) throw (BackendsErrors::BackendBusyExI
     	if(reply.is_success_reply()) {
             setDefaultConfiguration(conf);
             for (int i=0;i<m_inputsNumber;i++) {
-                if (m_SK02S==true || m_SK02==true) {
+                /*if (m_SK02S==true || m_SK02==true || m_SK20S==true || m_SK20==true) {
                     if (i == 0 || i == 1) {
                         m_totalPower->setSection(i,-1, m_filter, -1, -1, -1, -1);
                     }
@@ -1215,7 +2147,7 @@ void CCommandLine::setup(const char *conf) throw (BackendsErrors::BackendBusyExI
                         m_totalPower->setSection(i+2,-1, m_filter, -1, -1, -1, -1);
                     }
                 }
-                if (m_SK03S==true || m_SK03==true) {
+                else if (m_SK03S==true || m_SK03==true || m_SK30S==true || m_SK30==true) {
                     if (i == 0 || i == 1) {
                         m_totalPower->setSection(i,-1, m_filter, -1, -1, -1, -1);
                     }
@@ -1223,7 +2155,7 @@ void CCommandLine::setup(const char *conf) throw (BackendsErrors::BackendBusyExI
                         m_totalPower->setSection(i+4,-1, m_filter, -1, -1, -1, -1);
                     }
                 }
-                if (m_SK04S==true || m_SK04==true) {
+                else if (m_SK04S==true || m_SK04==true || m_SK40S==true || m_SK40==true) {
                     if (i == 0 || i == 1) {
                         m_totalPower->setSection(i,-1, m_filter, -1, -1, -1, -1);
                     }
@@ -1231,7 +2163,7 @@ void CCommandLine::setup(const char *conf) throw (BackendsErrors::BackendBusyExI
                         m_totalPower->setSection(i+6,-1, m_filter, -1, -1, -1, -1);
                     }
                 }
-                if (m_SK05S==true || m_SK03==true) {
+                else if (m_SK05S==true || m_SK05==true || m_SK50S==true || m_SK50==true) {
                     if (i == 0 || i == 1) {
                         m_totalPower->setSection(i,-1, m_filter, -1, -1, -1, -1);
                     }
@@ -1239,7 +2171,7 @@ void CCommandLine::setup(const char *conf) throw (BackendsErrors::BackendBusyExI
                         m_totalPower->setSection(i+8,-1, m_filter, -1, -1, -1, -1);
                     }
                 }
-                else if (m_SK06S==true || m_SK06==true) {
+                else if (m_SK06S==true || m_SK06==true || m_SK60S==true || m_SK60==true) {
                     if (i == 0 || i == 1) {
                         m_totalPower->setSection(i,-1, m_filter, -1, -1, -1, -1);
                     }
@@ -1247,7 +2179,175 @@ void CCommandLine::setup(const char *conf) throw (BackendsErrors::BackendBusyExI
                         m_totalPower->setSection(i+10,-1, m_filter, -1, -1, -1, -1);
                     }
                 }
-                else
+                else if (m_SK11S==true || m_SK11==true) {
+                    if (i == 0 || i == 1) {
+                        m_totalPower->setSection(i+2,-1, m_filter, -1, -1, -1, -1);
+                    }
+                    if (i == 2 || i == 3) {
+                        m_totalPower->setSection(i+2,-1, m_filter, -1, -1, -1, -1);
+                    }
+                }
+                else if (m_SK12S==true || m_SK12==true || m_SK21S==true || m_SK21==true) {
+                    if (i == 0 || i == 1) {
+                        m_totalPower->setSection(i+2,-1, m_filter, -1, -1, -1, -1);
+                    }
+                    if (i == 2 || i == 3) {
+                        m_totalPower->setSection(i+2,-1, m_filter, -1, -1, -1, -1);
+                    }
+                }
+                else if (m_SK13S==true || m_SK13==true || m_SK31S==true || m_SK31==true) {
+                    if (i == 0 || i == 1) {
+                        m_totalPower->setSection(i+2,-1, m_filter, -1, -1, -1, -1);
+                    }
+                    if (i == 2 || i == 3) {
+                        m_totalPower->setSection(i+4,-1, m_filter, -1, -1, -1, -1);
+                    }
+                }
+                else if (m_SK14S==true || m_SK14==true || m_SK41S==true || m_SK41==true) {
+                    if (i == 0 || i == 1) {
+                        m_totalPower->setSection(i+2,-1, m_filter, -1, -1, -1, -1);
+                    }
+                    if (i == 2 || i == 3) {
+                        m_totalPower->setSection(i+6,-1, m_filter, -1, -1, -1, -1);
+                    }
+                }
+                else if (m_SK15S==true || m_SK15==true || m_SK51S==true || m_SK51==true) {
+                    if (i == 0 || i == 1) {
+                        m_totalPower->setSection(i+2,-1, m_filter, -1, -1, -1, -1);
+                    }
+                    if (i == 2 || i == 3) {
+                        m_totalPower->setSection(i+8,-1, m_filter, -1, -1, -1, -1);
+                    }
+                }
+                else if (m_SK16S==true || m_SK16==true || m_SK61S==true || m_SK61==true) {
+                    if (i == 0 || i == 1) {
+                        m_totalPower->setSection(i+2,-1, m_filter, -1, -1, -1, -1);
+                    }
+                    if (i == 2 || i == 3) {
+                        m_totalPower->setSection(i+10,-1, m_filter, -1, -1, -1, -1);
+                    }
+                }
+                else if (m_SK22S==true || m_SK22==true) {
+                    if (i == 0 || i == 1) {
+                        m_totalPower->setSection(i+4,-1, m_filter, -1, -1, -1, -1);
+                    }
+                    if (i == 2 || i == 3) {
+                        m_totalPower->setSection(i+4,-1, m_filter, -1, -1, -1, -1);
+                    }
+                }
+                else if (m_SK23S==true || m_SK23==true || m_SK32S==true || m_SK32==true) {
+                    if (i == 0 || i == 1) {
+                        m_totalPower->setSection(i+4,-1, m_filter, -1, -1, -1, -1);
+                    }
+                    if (i == 2 || i == 3) {
+                        m_totalPower->setSection(i+4,-1, m_filter, -1, -1, -1, -1);
+                    }
+                }
+                else if (m_SK24S==true || m_SK24==true || m_SK42S==true || m_SK42==true) {
+                    if (i == 0 || i == 1) {
+                        m_totalPower->setSection(i+4,-1, m_filter, -1, -1, -1, -1);
+                    }
+                    if (i == 2 || i == 3) {
+                        m_totalPower->setSection(i+6,-1, m_filter, -1, -1, -1, -1);
+                    }
+                }
+                else if (m_SK25S==true || m_SK25==true || m_SK52S==true || m_SK52==true) {
+                    if (i == 0 || i == 1) {
+                        m_totalPower->setSection(i+4,-1, m_filter, -1, -1, -1, -1);
+                    }
+                    if (i == 2 || i == 3) {
+                        m_totalPower->setSection(i+8,-1, m_filter, -1, -1, -1, -1);
+                    }
+                }
+                else if (m_SK26S==true || m_SK26==true || m_SK62S==true || m_SK62==true) {
+                    if (i == 0 || i == 1) {
+                        m_totalPower->setSection(i+4,-1, m_filter, -1, -1, -1, -1);
+                    }
+                    if (i == 2 || i == 3) {
+                        m_totalPower->setSection(i+10,-1, m_filter, -1, -1, -1, -1);
+                    }
+                }
+                else if (m_SK33S==true || m_SK33==true) {
+                    if (i == 0 || i == 1) {
+                        m_totalPower->setSection(i+6,-1, m_filter, -1, -1, -1, -1);
+                    }
+                    if (i == 2 || i == 3) {
+                        m_totalPower->setSection(i+6,-1, m_filter, -1, -1, -1, -1);
+                    }
+                }
+                else if (m_SK34S==true || m_SK34==true || m_SK43S==true || m_SK43==true) {
+                    if (i == 0 || i == 1) {
+                        m_totalPower->setSection(i+6,-1, m_filter, -1, -1, -1, -1);
+                    }
+                    if (i == 2 || i == 3) {
+                        m_totalPower->setSection(i+6,-1, m_filter, -1, -1, -1, -1);
+                    }
+                }
+                else if (m_SK35S==true || m_SK35==true || m_SK53S==true || m_SK53==true) {
+                    if (i == 0 || i == 1) {
+                        m_totalPower->setSection(i+6,-1, m_filter, -1, -1, -1, -1);
+                    }
+                    if (i == 2 || i == 3) {
+                        m_totalPower->setSection(i+8,-1, m_filter, -1, -1, -1, -1);
+                    }
+                }
+                else if (m_SK36S==true || m_SK36==true || m_SK63S==true || m_SK63==true) {
+                    if (i == 0 || i == 1) {
+                        m_totalPower->setSection(i+6,-1, m_filter, -1, -1, -1, -1);
+                    }
+                    if (i == 2 || i == 3) {
+                        m_totalPower->setSection(i+10,-1, m_filter, -1, -1, -1, -1);
+                    }
+                }
+                else if (m_SK44S==true || m_SK44==true) {
+                    if (i == 0 || i == 1) {
+                        m_totalPower->setSection(i+8,-1, m_filter, -1, -1, -1, -1);
+                    }
+                    if (i == 2 || i == 3) {
+                        m_totalPower->setSection(i+8,-1, m_filter, -1, -1, -1, -1);
+                    }
+                }
+                else if (m_SK45S==true || m_SK45==true || m_SK54S==true || m_SK54==true) {
+                    if (i == 0 || i == 1) {
+                        m_totalPower->setSection(i+8,-1, m_filter, -1, -1, -1, -1);
+                    }
+                    if (i == 2 || i == 3) {
+                        m_totalPower->setSection(i+8,-1, m_filter, -1, -1, -1, -1);
+                    }
+                }
+                else if (m_SK46S==true || m_SK46==true || m_SK64S==true || m_SK64==true) {
+                    if (i == 0 || i == 1) {
+                        m_totalPower->setSection(i+8,-1, m_filter, -1, -1, -1, -1);
+                    }
+                    if (i == 2 || i == 3) {
+                        m_totalPower->setSection(i+10,-1, m_filter, -1, -1, -1, -1);
+                    }
+                }
+                else if (m_SK55S==true || m_SK55==true) {
+                    if (i == 0 || i == 1) {
+                        m_totalPower->setSection(i+10,-1, m_filter, -1, -1, -1, -1);
+                    }
+                    if (i == 2 || i == 3) {
+                        m_totalPower->setSection(i+10,-1, m_filter, -1, -1, -1, -1);
+                    }
+                }
+                else if (m_SK56S==true || m_SK56==true || m_SK65S==true || m_SK65==true) {
+                    if (i == 0 || i == 1) {
+                        m_totalPower->setSection(i+10,-1, m_filter, -1, -1, -1, -1);
+                    }
+                    if (i == 2 || i == 3) {
+                        m_totalPower->setSection(i+10,-1, m_filter, -1, -1, -1, -1);
+                    }
+                }
+                else if (m_SK66S==true || m_SK66==true) {
+                    if (i == 0 || i == 1) {
+                        m_totalPower->setSection(i+12,-1, m_filter, -1, -1, -1, -1);
+                    }
+                    if (i == 2 || i == 3) {
+                        m_totalPower->setSection(i+12,-1, m_filter, -1, -1, -1, -1);
+                    }
+                }
+                else */
                     m_totalPower->setSection(i,-1, m_filter, -1, -1, -1, -1);
                 ACS_LOG(LM_FULL_INFO,"CCommandLine::setup()",(LM_NOTICE,"TOTALPOWER_FILTER_CONFIGURED %d,FILTER=%lf",i,m_filter));
             }
@@ -1394,21 +2494,43 @@ void CCommandLine::activateCalSwitching(const long& interleave) throw (BackendsE
 void CCommandLine::setEnabled(const ACS::longSeq& en) throw (BackendsErrors::BackendBusyExImpl)
 {
 	int bound;
+    int i;
+    long m_en[4];
+
 	if (getIsBusy()) {
 		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::setEnabled()");
 		throw impl;
 	}
-	if ((long)en.length()>=m_sectionsNumber) {
-		bound=m_sectionsNumber;
+	if ((long)en.length()!=2/*m_sectionsNumber*/) {
+		/*errore;*/
 	}
-	else {
+	/*else {
 		bound=en.length();
 	}
 	for (int i=0;i<bound;i++) {
 		if (en[i]>0) m_enabled[i]=true;
 		else if (en[i]==0) m_enabled[i]=false;
-	}	
-	ACS_LOG(LM_FULL_INFO,"CCommandLine::setEnabled()",(LM_NOTICE,"CHANGED_ENABLED_CHANNEL"));
+	}*/
+    m_inputsNumber = 4;
+    if (m_stokes == false)
+        m_sectionsNumber = 4;
+    if (m_stokes == true)
+        m_sectionsNumber = 2;
+	m_beams = 2;
+    m_en[0] = en[0];
+    m_en[1] = en[0];
+    m_en[2] = en[1];
+    m_en[3] = en[1];
+	for (i=0;i<m_inputsNumber;i++) {
+		m_feedNumber[i] = m_en[i];
+	}
+    /* qui una chiamata al frontend di Sardara per comunicare quali feed e quindi quali roach utilizzare */
+    Message request = Command::setNodding(m_en[0],m_en[2]);
+    Message reply = sendBackendCommand(request);
+    if (reply.is_success_reply()) {
+        // TBD
+        ACS_LOG(LM_FULL_INFO,"CCommandLine::setNodding()",(LM_NOTICE,"NODDING enabled"));
+    }
 }
 
 void CCommandLine::setIntegration(const long& integration)  throw (BackendsErrors::BackendBusyExImpl, ComponentErrors::ValueOutofRangeExImpl)
@@ -1534,8 +2656,8 @@ void CCommandLine::getPolarization(ACS::longSeq& pol) const
 {
 	pol.length(m_sectionsNumber);
 	for (int i=0;i<m_sectionsNumber;i++) {
-        if (m_SK77S==true || m_SC00S==true || m_SK00S==true || m_SL00S==true || m_SP00S==true || m_SK01S==true || m_SK02S==true || m_SK03S==true || m_SK04S==true || m_SK05S==true || m_SK06S==true
-                || m_SCC00S==true || m_SCH00S==true)
+        if (m_stokes==true /*m_SK77S==true || m_SC00S==true || m_SK00S==true || m_SL00S==true || m_SP00S==true || m_SK01S==true || m_SK02S==true || m_SK03S==true || m_SK04S==true || m_SK05S==true || m_SK06S==true
+                || m_SCC00S==true || m_SCH00S==true*/)
             pol[i]=2;
         else
             pol[i]=(long)m_polarization[i];
@@ -1554,8 +2676,23 @@ void CCommandLine::getFeedAttr(ACS::longSeq& feed) const
 {
 	feed.length(m_sectionsNumber);
 	for (int i=0;i<m_sectionsNumber;i++) {
+        if (m_stokes==true)
+		    feed[i]=m_feedNumber[2*i];
+        /*
         if (m_SK77S == true)
 		    feed[i]=m_feedNumber[2*i];
+        else if (m_SK11S == true)
+		    feed[i]=i+1;
+        else if (m_SK22S == true)
+		    feed[i]=i+2;
+        else if (m_SK33S == true)
+		    feed[i]=i+3;
+        else if (m_SK44S == true)
+		    feed[i]=i+4;
+        else if (m_SK55S == true)
+		    feed[i]=i+5;
+        else if (m_SK66S == true)
+		    feed[i]=i+6;
         else if (m_SK01S == true || m_SK02S == true || m_SK03S==true || m_SK04S==true || m_SK05S==true || m_SK06S==true) {
             if (i < 1)
                 feed[i] = 0;
@@ -1574,6 +2711,114 @@ void CCommandLine::getFeedAttr(ACS::longSeq& feed) const
                     feed[i] = 6;
                 }
         }
+        else if (m_SK10S == true || m_SK12S == true || m_SK13S==true || m_SK14S==true || m_SK15S==true || m_SK16S==true) {
+            if (i < 1)
+                feed[i] = 1;
+            else {
+                if (m_SK10S == true)
+                    feed[i] = 0;
+                if (m_SK12S == true)
+                    feed[i] = 2;
+                if (m_SK13S == true)
+                    feed[i] = 3;
+                if (m_SK14S == true)
+                    feed[i] = 4;
+                if (m_SK15S == true)
+                    feed[i] = 5;
+                if (m_SK16S == true)
+                    feed[i] = 6;
+                }
+        }
+        else if (m_SK20S == true || m_SK21S == true || m_SK23S==true || m_SK24S==true || m_SK25S==true || m_SK26S==true) {
+            if (i < 1)
+                feed[i] = 2;
+            else {
+                if (m_SK20S == true)
+                    feed[i] = 0;
+                if (m_SK21S == true)
+                    feed[i] = 1;
+                if (m_SK23S == true)
+                    feed[i] = 3;
+                if (m_SK24S == true)
+                    feed[i] = 4;
+                if (m_SK25S == true)
+                    feed[i] = 5;
+                if (m_SK26S == true)
+                    feed[i] = 6;
+                }
+        }
+        else if (m_SK30S == true || m_SK31S == true || m_SK32S==true || m_SK34S==true || m_SK35S==true || m_SK36S==true) {
+            if (i < 1)
+                feed[i] = 3;
+            else {
+                if (m_SK30S == true)
+                    feed[i] = 0;
+                if (m_SK31S == true)
+                    feed[i] = 1;
+                if (m_SK32S == true)
+                    feed[i] = 2;
+                if (m_SK34S == true)
+                    feed[i] = 4;
+                if (m_SK35S == true)
+                    feed[i] = 5;
+                if (m_SK36S == true)
+                    feed[i] = 6;
+                }
+        }
+        else if (m_SK40S == true || m_SK41S == true || m_SK42S==true || m_SK43S==true || m_SK45S==true || m_SK46S==true) {
+            if (i < 1)
+                feed[i] = 4;
+            else {
+                if (m_SK40S == true)
+                    feed[i] = 0;
+                if (m_SK41S == true)
+                    feed[i] = 1;
+                if (m_SK42S == true)
+                    feed[i] = 2;
+                if (m_SK43S == true)
+                    feed[i] = 3;
+                if (m_SK45S == true)
+                    feed[i] = 5;
+                if (m_SK46S == true)
+                    feed[i] = 6;
+                }
+        }
+        else if (m_SK50S == true || m_SK51S == true || m_SK52S==true || m_SK53S==true || m_SK54S==true || m_SK56S==true) {
+            if (i < 1)
+                feed[i] = 5;
+            else {
+                if (m_SK50S == true)
+                    feed[i] = 0;
+                if (m_SK51S == true)
+                    feed[i] = 1;
+                if (m_SK52S == true)
+                    feed[i] = 2;
+                if (m_SK53S == true)
+                    feed[i] = 3;
+                if (m_SK54S == true)
+                    feed[i] = 4;
+                if (m_SK56S == true)
+                    feed[i] = 6;
+                }
+        }
+        else if (m_SK60S == true || m_SK61S == true || m_SK62S==true || m_SK63S==true || m_SK64S==true || m_SK65S==true) {
+            if (i < 1)
+                feed[i] = 6;
+            else {
+                if (m_SK60S == true)
+                    feed[i] = 0;
+                if (m_SK61S == true)
+                    feed[i] = 1;
+                if (m_SK62S == true)
+                    feed[i] = 2;
+                if (m_SK63S == true)
+                    feed[i] = 3;
+                if (m_SK64S == true)
+                    feed[i] = 4;
+                if (m_SK65S == true)
+                    feed[i] = 5;
+                }
+        }*/
         else
 		    feed[i]=m_feedNumber[i];
 	}
@@ -1599,10 +2844,14 @@ void CCommandLine::getInputSectionAttr(ACS::longSeq& inpSection) const
 {
     long index=0;
 
-	if (m_SK00==true || m_SC00==true || m_SK77==true || m_SK03==true || m_SK06==true || m_SL00==true || m_SP00==true || m_SK01==true || m_SK02==true || m_SK04==true || m_SK05==true || m_SCC00==true || m_SCH00==true)
+	/*if (m_SK00==true || m_SC00==true || m_SK77==true || m_SK03==true || m_SK06==true || m_SL00==true || m_SP00==true || m_SK01==true || m_SK02==true || m_SK04==true || m_SK05==true || m_SCC00==true || m_SCH00==true)
         index = m_inputsNumber;
 	if (m_SK00S==true || m_SC00S==true || m_SK77S==true || m_SK03S==true || m_SK06S==true || m_SL00S==true || m_SP00S==true || m_SK01S==true || m_SK02S==true || m_SK04S==true || m_SK05S==true || m_SCC00S==true || m_SCH00S==true)
+        index = m_sectionsNumber;*/
+    if (m_stokes==true)
         index = m_sectionsNumber;
+    else
+        index = m_inputsNumber;
 
     inpSection.length(index);
 	for (int i=0;i<index;i++) {
@@ -1692,7 +2941,7 @@ void CCommandLine::fillChannelHeader(Backends::TSectionHeader *chHr,const long& 
 				chHr[index].attenuation[0]=m_attenuation[i];
 				chHr[index].attenuation[1]=m_attenuation[i];
 				chHr[index].sampleRate=/*m_sampleRate[i];*/m_commonSampleRate;
-                if (m_SK77S==true || m_SK03S==true || m_SK06S==true || m_SC00S==true || m_SK00S==true || m_SL00S==true || m_SP00S==true) {
+                if (m_stokes==true /*m_SK77S==true || m_SK03S==true || m_SK06S==true || m_SC00S==true || m_SK00S==true || m_SL00S==true || m_SP00S==true*/) {
                     chHr[index].inputs=2;
 				    chHr[index].feed=m_feedNumber[2*i];
 				    chHr[index].polarization=m_polarization[2*i];

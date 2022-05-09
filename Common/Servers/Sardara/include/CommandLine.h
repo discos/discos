@@ -426,6 +426,22 @@ public:
 			ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl);
 	
 	/**
+	 * Called to configure a range where compute a Tsys.
+	 * @throw BackendsErrors::BackendBusyExImpl
+	 * @throw ComponentErrors::ValidationErrorExImpl
+	 * @throw ComponentErrors::ValueOutofRangeExImpl
+	 * @throw BackendsErrors::NakExImpl,
+	 * @throw ComponentErrors::SocketErrorExImpl
+	 * @arg \c ComponentErrors::IRALibraryResource
+	 * @throw ComponentErrors::TimeoutExImpl
+	 * @throw BackendsErrors::ConnectionExImpl
+	 * @param starting frequency
+	 * @param bandwidth range;
+	 */
+	void setTsysRange(const double& freq, const double& bw)  throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,BackendsErrors::NakExImpl,
+			ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl);
+	
+	/**
 	 * Called by the component to fill the <i>Backends::TMainHeader</i> with the proper informations.
 	 * @param bkd the stucture that contains the required information.
 	 */
@@ -654,6 +670,9 @@ private:
     long m_inputsNumber;
 
     double m_filter;
+
+    double m_TsysRange_freq;
+    double m_TsysRange_bw;
 	
 	/**
 	 * Pointer to the configuration table, every record of the table stores a possible backend setup.
@@ -758,9 +777,48 @@ private:
     bool m_SK04;
     bool m_SK05;
     bool m_SK06;
-    bool m_SC00;
-    bool m_SL00;
-    bool m_SP00;
+    bool m_SK10;
+    bool m_SK11;
+    bool m_SK12;
+    bool m_SK13;
+    bool m_SK14;
+    bool m_SK15;
+    bool m_SK16;
+    bool m_SK20;
+    bool m_SK21;
+    bool m_SK22;
+    bool m_SK23;
+    bool m_SK24;
+    bool m_SK25;
+    bool m_SK26;
+    bool m_SK30;
+    bool m_SK31;
+    bool m_SK32;
+    bool m_SK33;
+    bool m_SK34;
+    bool m_SK35;
+    bool m_SK36;
+    bool m_SK40;
+    bool m_SK41;
+    bool m_SK42;
+    bool m_SK43;
+    bool m_SK44;
+    bool m_SK45;
+    bool m_SK46;
+    bool m_SK50;
+    bool m_SK51;
+    bool m_SK52;
+    bool m_SK53;
+    bool m_SK54;
+    bool m_SK55;
+    bool m_SK56;
+    bool m_SK60;
+    bool m_SK61;
+    bool m_SK62;
+    bool m_SK63;
+    bool m_SK64;
+    bool m_SK65;
+    bool m_SK66;
     bool m_SK77S;
     bool m_SK00S;
     bool m_SK01S;
@@ -769,6 +827,51 @@ private:
     bool m_SK04S;
     bool m_SK05S;
     bool m_SK06S;
+    bool m_SK10S;
+    bool m_SK11S;
+    bool m_SK12S;
+    bool m_SK13S;
+    bool m_SK14S;
+    bool m_SK15S;
+    bool m_SK16S;
+    bool m_SK20S;
+    bool m_SK21S;
+    bool m_SK22S;
+    bool m_SK23S;
+    bool m_SK24S;
+    bool m_SK25S;
+    bool m_SK26S;
+    bool m_SK30S;
+    bool m_SK31S;
+    bool m_SK32S;
+    bool m_SK33S;
+    bool m_SK34S;
+    bool m_SK35S;
+    bool m_SK36S;
+    bool m_SK40S;
+    bool m_SK41S;
+    bool m_SK42S;
+    bool m_SK43S;
+    bool m_SK44S;
+    bool m_SK45S;
+    bool m_SK46S;
+    bool m_SK50S;
+    bool m_SK51S;
+    bool m_SK52S;
+    bool m_SK53S;
+    bool m_SK54S;
+    bool m_SK55S;
+    bool m_SK56S;
+    bool m_SK60S;
+    bool m_SK61S;
+    bool m_SK62S;
+    bool m_SK63S;
+    bool m_SK64S;
+    bool m_SK65S;
+    bool m_SK66S;
+    bool m_SC00;
+    bool m_SL00;
+    bool m_SP00;
     bool m_SC00S;
     bool m_SL00S;
     bool m_SP00S;
@@ -779,6 +882,9 @@ private:
 
     bool m_stationSRT;
     bool m_stationMED;
+
+    bool m_stokes;
+    bool m_CK;
 	
 };
 

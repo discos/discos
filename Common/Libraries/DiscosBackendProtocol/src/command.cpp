@@ -68,4 +68,3 @@ Command::setFilename(string filename)
     command.add_argument<string>(filename);
     return command;
 }
-
