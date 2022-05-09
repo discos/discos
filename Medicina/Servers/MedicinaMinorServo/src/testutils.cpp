@@ -26,6 +26,8 @@ get_random_axis_value(const MedMinorServoAxis& axis)
 MEDMINORSERVOSTATUS
 get_random_status()
 {
+     MedMinorServoConstants *medMinorServoConstants = MedMinorServoConstants::getInstance();
+
      MEDMINORSERVOSTATUS status;
      int mode = std::rand() % 2;
      if(mode == 0)
@@ -33,8 +35,8 @@ get_random_status()
          status.mode = 0;
          status.time = MedMinorServoTime::ACSToServoNow();
          status.system_status = MED_MINOR_SERVO_STATUS_PRIMARY;
-         status.pos_x_yp = get_random_axis_value(MINOR_SERVO_YP);
-         status.pos_y_zp = get_random_axis_value(MINOR_SERVO_ZP);
+         status.pos_x_yp = get_random_axis_value(medMinorServoConstants->MINOR_SERVO_YP);
+         status.pos_y_zp = get_random_axis_value(medMinorServoConstants->MINOR_SERVO_ZP);
          status.pos_z1 = 0.0;
          status.pos_z2 = 0.0;
          status.pos_z3 = 0.0;
@@ -42,11 +44,11 @@ get_random_status()
          status.mode = 1;
          status.time = MedMinorServoTime::ACSToServoNow();
          status.system_status = MED_MINOR_SERVO_STATUS_SECONDARY;
-         status.pos_x_yp = get_random_axis_value(MINOR_SERVO_X);
-         status.pos_y_zp = get_random_axis_value(MINOR_SERVO_Y);
-         status.pos_z1 = get_random_axis_value(MINOR_SERVO_Z1);
-         status.pos_z2 = get_random_axis_value(MINOR_SERVO_Z2);
-         status.pos_z3 = get_random_axis_value(MINOR_SERVO_Z3);
+         status.pos_x_yp = get_random_axis_value(medMinorServoConstants->MINOR_SERVO_X);
+         status.pos_y_zp = get_random_axis_value(medMinorServoConstants->MINOR_SERVO_Y);
+         status.pos_z1 = get_random_axis_value(medMinorServoConstants->MINOR_SERVO_Z1);
+         status.pos_z2 = get_random_axis_value(medMinorServoConstants->MINOR_SERVO_Z2);
+         status.pos_z3 = get_random_axis_value(medMinorServoConstants->MINOR_SERVO_Z3);
      }
      return status;
 }
@@ -54,12 +56,13 @@ get_random_status()
 MedMinorServoPosition
 get_random_primary_position()
 {
+     MedMinorServoConstants *medMinorServoConstants = MedMinorServoConstants::getInstance();
      MEDMINORSERVOSTATUS status;
      status.mode = 0;
      status.time = MedMinorServoTime::ACSToServoNow();
      status.system_status = MED_MINOR_SERVO_STATUS_PRIMARY;
-     status.pos_x_yp = get_random_axis_value(MINOR_SERVO_YP);
-     status.pos_y_zp = get_random_axis_value(MINOR_SERVO_ZP);
+     status.pos_x_yp = get_random_axis_value(medMinorServoConstants->MINOR_SERVO_YP);
+     status.pos_y_zp = get_random_axis_value(medMinorServoConstants->MINOR_SERVO_ZP);
      status.pos_z1 = 0.0;
      status.pos_z2 = 0.0;
      status.pos_z3 = 0.0;
@@ -69,15 +72,16 @@ get_random_primary_position()
 MedMinorServoPosition
 get_random_secondary_position()
 {
+     MedMinorServoConstants *medMinorServoConstants = MedMinorServoConstants::getInstance();
      MEDMINORSERVOSTATUS status;
      status.mode = 1;
      status.time = MedMinorServoTime::ACSToServoNow();
      status.system_status = MED_MINOR_SERVO_STATUS_SECONDARY;
-     status.pos_x_yp = get_random_axis_value(MINOR_SERVO_X);
-     status.pos_y_zp = get_random_axis_value(MINOR_SERVO_Y);
-     status.pos_z1 = get_random_axis_value(MINOR_SERVO_Z1);
-     status.pos_z2 = get_random_axis_value(MINOR_SERVO_Z2);
-     status.pos_z3 = get_random_axis_value(MINOR_SERVO_Z3);
+     status.pos_x_yp = get_random_axis_value(medMinorServoConstants->MINOR_SERVO_X);
+     status.pos_y_zp = get_random_axis_value(medMinorServoConstants->MINOR_SERVO_Y);
+     status.pos_z1 = get_random_axis_value(medMinorServoConstants->MINOR_SERVO_Z1);
+     status.pos_z2 = get_random_axis_value(medMinorServoConstants->MINOR_SERVO_Z2);
+     status.pos_z3 = get_random_axis_value(medMinorServoConstants->MINOR_SERVO_Z3);
      return MedMinorServoGeometry::positionFromAxes(status);
 }
 

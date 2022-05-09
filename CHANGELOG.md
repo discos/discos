@@ -65,7 +65,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/
     issue #433 - limited refraction correction values to a meaningful range in order to avoid flooding the jlog with warning messages whenever the elevation is close to 90 degrees
     issue #502 - removed last service daemon reference from Manager.xml io SRT production line
     
-## [discos1.0.5] -09-03-2020
+
+## [discos1.0.5] - 09-03-2020
 ## Added
     issue #504 - added credits clause (regarding INAF data ownership) to fits files headers
     issue #518 - KBand receivers cryo temperature read wrongly with connection problems. More information: https://github.com/discos/discos/issues/518#issuecomment-590838480
@@ -78,10 +79,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/
 ## Changed  
     issue #545 - Oscillation checks enabled for Mc and Nt telescopes, this setting is now under control of a CDB argument
 
-## [discos1.0.6] - 09/02/2022
+## [discos1.0.6] - 09-02-2022
 ## Added
-    issue #653 - added a couple of scripts to ease vnc connection from remote a file copying. The scripts support 
+    issue #655 - ACU Component for Noto and Medicina is now capble to prevent seldom mode changes coming from ACU reset
+    issue #653 - added a couple of scriptsto ease vnc conection from remote a file copying. The scripts support 
                  linux and macos
+	 issue #588 - added the control of the new Noto subreflector and primary focus receiver box servo system.     
+    
 ## Fixed
     issue #448 - Added Sky Offsets to calibration tool client
     issue #585 - Fixed misshandled schedule with NULL as backend (Dry Run)
@@ -95,3 +99,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/
 ## Fixed
 ## Changed
 	 issue #689 - The dataset provided by wether station has been enlarged by the wind direction. The correctponding RAL 'wx' command will noe provided wind direction readout, as well
+
