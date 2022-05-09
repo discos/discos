@@ -11,6 +11,7 @@
 	chooseBackend=TotalPower
 	initialize=CCC
 	dmed=default
+	calmux=TotalPower
 	setSection=0,*,730.0,*,*,*,*
 	setSection=1,*,730.0,*,*,*,*
 	device=0
@@ -27,6 +28,7 @@
 	chooseBackend=TotalPower
 	initialize=CHC
 	dmed=default
+	calmux=TotalPower
 	setSection=0,*,300.0,*,*,*,*
 	setSection=1,*,300.0,*,*,*,*
 	setAttenuation=0,8
@@ -45,6 +47,7 @@
 	chooseBackend=TotalPower
 	initialize=KKC
 	dmed=default
+	calmux=TotalPower
 	device=0
 	setAttenuation=0,9
 	setAttenuation=1,9
@@ -63,6 +66,7 @@
 	chooseBackend=TotalPower
 	initialize=XXP
 	dmed=default
+	calmux=TotalPower
 	setSection=0,*,730.0,*,*,*,*
 	setSection=1,*,730.0,*,*,*,*
 	device=0
@@ -80,6 +84,7 @@
 	chooseBackend=TotalPower
 	initialize=CCCL
 	dmed=default
+	calmux=TotalPower
 	setSection=0,*,300.0,*,*,*,*
 	setSection=1,*,300.0,*,*,*,*
 	setAttenuation=0,8
@@ -99,6 +104,7 @@
 	chooseBackend=TotalPower
 	initialize=CHCL
 	dmed=default
+	calmux=TotalPower
 	setSection=0,*,300.0,*,*,*,*
 	setSection=1,*,300.0,*,*,*,*
 	setAttenuation=0,8
