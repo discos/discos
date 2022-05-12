@@ -114,6 +114,14 @@ CACUInterface::TAntennaSection CACUData::getSection() const
 	memcpy(&Value,(m_MonitorData+36),2);
 	return CACUInterface::getSection(Value);	
 }
+
+bool CACUData::getDrivePower() const
+{
+	WORD val;
+	memcpy(&val,(m_MonitorData+36),2);
+	return CACUInterface::getDrivePower(val);
+}
+
 	
 WORD CACUData::getFreeStackPositions() const
 {

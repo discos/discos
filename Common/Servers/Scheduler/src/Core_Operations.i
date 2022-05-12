@@ -288,7 +288,7 @@ void CCore::_logMessage(const char *message) {
     CUSTOM_LOG(LM_FULL_INFO,"CCore::_logMessage",(LM_NOTICE, message));
 }
 
-void CCore::_getWeatherStationParameters(double &temp,double& hum,double& pres, double& wind) throw (ComponentErrors::CouldntGetComponentExImpl,
+void CCore::_getWeatherStationParameters(double &temp,double& hum,double& pres, double& wind,double& windDir) throw (ComponentErrors::CouldntGetComponentExImpl,
 		ManagementErrors::WeatherStationErrorExImpl,ComponentErrors::CORBAProblemExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
@@ -315,6 +315,7 @@ void CCore::_getWeatherStationParameters(double &temp,double& hum,double& pres, 
 	hum=m_weatherPar.humidity;
 	pres=m_weatherPar.pressure;
 	wind=m_weatherPar.windspeed;
+	windDir=m_weatherPar.winddir;
 }
 
 void CCore::_initRecording(const long& scanid) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,
@@ -1156,12 +1157,11 @@ void CCore::_haltSchedule()
 
 void CCore::_startSchedule(const char* scheduleFile,const char * startSubScan) throw (ManagementErrors::ScheduleErrorExImpl,ManagementErrors::AlreadyRunningExImpl,
 		ComponentErrors::MemoryAllocationExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
-		ManagementErrors::LogFileErrorExImpl,ManagementErrors::ScheduleNotExistExImpl,ManagementErrors::CannotClosePendingTaskExImpl)
+		ManagementErrors::LogFileErrorExImpl,ManagementErrors::ScheduleNotExistExImpl,ManagementErrors::CannotClosePendingTaskExImpl,
+		ManagementErrors::ScheduleProjectNotMatchExImpl)
 {
 	//no need to get the mutex, because it is already done inside the Schedule Executor thread
 	if (m_schedExecuter) {
- 		//ManagementErrors::ScheduleErrorExImpl, ManagementErrors::AlreadyRunningExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::CouldntGetComponentExImpl,
- 		//ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl,ManagementErrors::ScheduleNotExistExImpl
 		m_schedExecuter->startSchedule(scheduleFile,startSubScan);
 	}
 }

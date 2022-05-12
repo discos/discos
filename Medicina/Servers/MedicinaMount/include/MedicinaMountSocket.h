@@ -447,10 +447,33 @@ public:
 	 * 1) if the tracking error is beyond a threashold an alarm condition is triggered.  This condition has a certain validity time.
 	 * 2) If more than a number of direction changes (of the tracking error with respect to the zero error) are detected during the alarm time window, the oscillation is declared-
 	 * 3) The alarm condition is cleared if the time validity window of the alarm elapsed and the tracking error is again under the threshold.
-	 * In case of detection counter mesures are immediately taken.
+	 * In case of detection counter measures are immediately taken.
 	 */
 	void detectOscillation() throw (AntennaErrors::ConnectionExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,AntennaErrors::NakExImpl,AntennaErrors::AntennaBusyExImpl);
-	
+
+	/**
+	 * This method has been added to detect the event the ACU mode differs from previously commanded. In case it tries to
+	 * recover from this event by commanding the correct mode.
+	 * @throw AntennaErrors::ConnectionExImpl
+	 * @throw ComponentErrors::SocketErrorExImpl
+	 * @throw ComponentErrors::TimeoutExImpl
+	 * @throw AntennaErrors::NakExImpl
+	 * @throw AntennaErrors::AntennaBusyExImpl
+	*/
+	void checkCommandedMode() throw (AntennaErrors::ConnectionExImpl,ComponentErrors::SocketErrorExImpl,
+	  ComponentErrors::TimeoutExImpl,AntennaErrors::NakExImpl,AntennaErrors::AntennaBusyExImpl);
+
+	/**
+	 * This method has been added to detect a power failure in the servo system. In case it tries to
+	 * recover from this event by reseting the servo.
+	 * @throw AntennaErrors::ConnectionExImpl
+	 * @throw ComponentErrors::SocketErrorExImpl
+	 * @throw ComponentErrors::TimeoutExImpl
+	 * @throw AntennaErrors::NakExImpl
+	*/
+	void checkPowerFailure() throw (ComponentErrors::TimeoutExImpl,AntennaErrors::NakExImpl,
+	  AntennaErrors::ConnectionExImpl,ComponentErrors::SocketErrorExImpl);
+
 	/** 
 	 * This member function is used by the control thread in order to check if a long job that was started as completed or not.
 	 * @param job job identifier
@@ -606,6 +629,16 @@ private:
 	 * last commanded mode before oscillation detection;
 	 */
 	CACUInterface::TAxeModes m_oscMode;
+	
+	/**
+	 * this flag indicates that a recovery from mode check in ongoing.....
+	 */	
+	bool m_modeCheckRecover;
+
+	/**
+	 * this flag indicates that a power failure has been detected
+	 */		
+	bool m_powerFailDetected;
 	
 	/**
 	 * Stores the epoch of the last scan. Used in oscillation prevention

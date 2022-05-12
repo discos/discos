@@ -83,6 +83,9 @@ public:
 	/** Returns the section which the antenna is located in, at present */
 	CACUInterface::TAntennaSection getSection() const;
 	
+	/** Return true if the driver power is on */
+	bool getDrivePower() const;
+	
 	/**Returns the number of free stack slots reserved for time tagged program track positions */
 	WORD getFreeStackPositions() const;
 	

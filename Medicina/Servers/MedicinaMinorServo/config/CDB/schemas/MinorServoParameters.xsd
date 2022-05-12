@@ -25,13 +25,26 @@
             <xs:element name="ZPaxis" type="xs:string" minOccurs="0" maxOccurs="1" />
  		</xs:sequence>
  	</xs:complexType>
- 	
-	<xs:complexType name="TTableMinorServo">
-		<xs:sequence>
-		 	<xs:element name="MinorServo" type="TTableHeader" minOccurs="1" maxOccurs="unbounded" />
+ 		
+	<xs:complexType name="TTableLimitsHeader">
+ 		<xs:sequence>
+            <xs:element name="MINOR_SERVO_X" type="xs:string" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="MINOR_SERVO_YP" type="xs:string" minOccurs="0" maxOccurs="1" />
+            <xs:element name="MINOR_SERVO_Y" type="xs:string" minOccurs="0" maxOccurs="1" />
+            <xs:element name="MINOR_SERVO_ZP" type="xs:string" minOccurs="0" maxOccurs="1" />
+            <xs:element name="MINOR_SERVO_Z1" type="xs:string" minOccurs="0" maxOccurs="1" />
+            <xs:element name="MINOR_SERVO_Z2" type="xs:string" minOccurs="0" maxOccurs="1" />
+            <xs:element name="MINOR_SERVO_Z3" type="xs:string" minOccurs="0" maxOccurs="1" />
  		</xs:sequence>
  	</xs:complexType>
- 		
+
+	<xs:complexType name="TTableMinorServo">
+		<xs:sequence>
+		 	<xs:element name="MinorServoLimits" type="TTableLimitsHeader" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="MinorServo" type="TTableHeader" minOccurs="1" maxOccurs="unbounded" />
+ 		</xs:sequence>
+ 	</xs:complexType>
+	
 	<xs:element name="MinorServoParameters" type="TTableMinorServo"/>
 	
 </xs:schema>

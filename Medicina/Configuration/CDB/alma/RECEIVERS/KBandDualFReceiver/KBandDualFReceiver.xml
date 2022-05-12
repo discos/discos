@@ -19,7 +19,7 @@
     LNAPort="10001"   
     VertexIPAddress="192.168.51.2"
     VertexPort="2096"
-    VertexCommand="proc kkc\n"   
+    VertexCommand="proc kkc"   
     WatchDogResponseTime="10000000"
     WatchDogSleepTime="10000000"
     LNASamplingTime="25000000"
