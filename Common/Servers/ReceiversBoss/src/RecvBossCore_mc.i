@@ -45,6 +45,8 @@ void CRecvBossCore::initialize(maci::ContainerServices* services,CConfiguration 
 	catch (...) {
 		_THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"CRecvBossCore::initialize()");
 	}
+	m_calMux_proxy.setContainerServices(services);
+   m_calMux_proxy.setComponentName("IDL:alma/Backends/CalMux:1.0");
 	ACS_LOG(LM_FULL_INFO,"CRecvBossCore::initialize()",(LM_INFO,"ReceiversBoss notification channel open"));
 }
 
@@ -108,13 +110,14 @@ void CRecvBossCore::calOn() throw (ComponentErrors::ValidationErrorExImpl,Compon
 		}
 	}
 	else if (m_currentRecvCode=="XXP") {
+		m_calMux_proxy->calOn();
 		// turn the marca on through the FS
-		IRA::CString fsBuffer("calon\n");
+		/*IRA::CString fsBuffer("calon\n");
 		if (!sendToFS((const void *)fsBuffer,fsBuffer.GetLength())) {
 			_EXCPT(ComponentErrors::SocketErrorExImpl,impl,"CRecvBossCore::calOn()");
 			m_status=Management::MNG_FAILURE;
 			throw impl;
-		}
+		}*/
 	}
 	else {
 		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::calOn()");
@@ -173,12 +176,13 @@ void CRecvBossCore::calOff() throw (ComponentErrors::ValidationErrorExImpl,Compo
 	}
 	else if (m_currentRecvCode=="XXP") {
 		// turn the marca on through thr FS
-		IRA::CString fsBuffer("caloff\n");
+		/*IRA::CString fsBuffer("caloff\n");
 		if (!sendToFS((const void *)fsBuffer,fsBuffer.GetLength())) {
 			_EXCPT(ComponentErrors::SocketErrorExImpl,impl,"CRecvBossCore::calOff()");
 			m_status=Management::MNG_FAILURE;
 			throw impl;
-		}				
+		}*/
+		m_calMux_proxy->calOff();			
 	}
 	else {
 		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::calOff()");
