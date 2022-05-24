@@ -351,7 +351,7 @@ private:
 	ACS::Time m_feedsEpoch;
 	ACS::Time m_IFsEpoch;
 	ACS::Time m_modeEpoch;
-	Backends::CalMux_proxy m_xalMux_proxy;
+	Backends::CalMux_proxy m_calMux_proxy;
 
 #elif COMPILE_TARGET_NT
 

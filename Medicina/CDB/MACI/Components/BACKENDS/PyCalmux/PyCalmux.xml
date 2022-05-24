@@ -15,5 +15,5 @@
     Container="PyCalmuxContainer"
     ImplLang="py"
     KeepAliveTime="-1"
-    Default="false"
+    Default="true"
 />
