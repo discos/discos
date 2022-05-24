@@ -7,7 +7,6 @@
 <body>
 	antennaSetup=CCC
 	receiversSetup=CCC
-	servoSetup=CCC
 	chooseBackend=TotalPower
 	initialize=CCC
 	dmed=default
@@ -24,7 +23,6 @@
 <body>
 	antennaSetup=CHC
 	receiversSetup=CHC
-	servoSetup=CHC
 	chooseBackend=TotalPower
 	initialize=CHC
 	dmed=default
@@ -43,7 +41,6 @@
 <body>
 	antennaSetup=KKC
 	receiversSetup=KKC
-	servoSetup=KKC
 	chooseBackend=TotalPower
 	initialize=KKC
 	dmed=default
@@ -62,7 +59,6 @@
 <body>
 	antennaSetup=XXP
 	receiversSetup=XXP
-	servoSetup=XXP
 	chooseBackend=TotalPower
 	initialize=XXP
 	dmed=default
@@ -79,7 +75,6 @@
 <body>
 	antennaSetup=CCC
 	receiversSetup=CCC
-	servoSetup=CCC
 	receiversMode=NARROWBANDWIDTH
 	chooseBackend=TotalPower
 	initialize=CCCL
@@ -99,7 +94,6 @@
 <body>
 	antennaSetup=CHC
 	receiversSetup=CHC
-	servoSetup=CHC
 	receiversMode=NARROWBANDWIDTH
 	chooseBackend=TotalPower
 	initialize=CHCL
@@ -121,7 +115,6 @@
 	receiversPark
 	waitOnSource
 	antennaPark
-	servoPark
 </body>
 </Procedure>
 

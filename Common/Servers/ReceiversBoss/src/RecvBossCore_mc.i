@@ -101,15 +101,15 @@ void CRecvBossCore::calOn() throw (ComponentErrors::ValidationErrorExImpl,Compon
 			throw impl;
 		}
 	}
-	else if ((m_currentRecvCode=="CCC") || (m_currentRecvCode=="CHC")){
+/*	else if ((m_currentRecvCode=="CCC") || (m_currentRecvCode=="CHC")){
 		char buffer [14] = {'s','e','t',' ','m','a','r','c','a','c',' ','o','n','\n' };
 		if (!sendToRecvControl((const void *)buffer,14)) {
 			_EXCPT(ComponentErrors::SocketErrorExImpl,impl,"CRecvBossCore::calOn()");
 			m_status=Management::MNG_FAILURE;
 			throw impl;
 		}
-	}
-	else if (m_currentRecvCode=="XXP") {
+	}*/
+	else if ((m_currentRecvCode=="XXP") || (m_currentRecvCode=="CCC") || (m_currentRecvCode=="CHC")) {
 		m_calMux_proxy->calOn();
 		// turn the marca on through the FS
 		/*IRA::CString fsBuffer("calon\n");
@@ -166,15 +166,15 @@ void CRecvBossCore::calOff() throw (ComponentErrors::ValidationErrorExImpl,Compo
 			throw impl;
 		}
 	}
-	else if ((m_currentRecvCode=="CCC") || (m_currentRecvCode=="CHC")) {
+	/*else if ((m_currentRecvCode=="CCC") || (m_currentRecvCode=="CHC")) {
 		char buffer [15] = {'s','e','t',' ','m','a','r','c','a','c',' ','o','f','f','\n' };
 		if (!sendToRecvControl((const void *)buffer,15)) {
 			_EXCPT(ComponentErrors::SocketErrorExImpl,impl,"CRecvBossCore::calOff()");
 			m_status=Management::MNG_FAILURE;
 			throw impl;
 		}
-	}
-	else if (m_currentRecvCode=="XXP") {
+	}*/
+	else if ((m_currentRecvCode=="XXP") || (m_currentRecvCode=="CCC") || (m_currentRecvCode=="CHC")) {
 		// turn the marca on through thr FS
 		/*IRA::CString fsBuffer("caloff\n");
 		if (!sendToFS((const void *)fsBuffer,fsBuffer.GetLength())) {
