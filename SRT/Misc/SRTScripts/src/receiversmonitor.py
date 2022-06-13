@@ -53,6 +53,7 @@ mapping = (
     ('ANTENNA/Boss', ('rawAzimuth', 'rawElevation')),
     ('RECEIVERS/SRTLPBandReceiver', common_receiver_properties),
     ('RECEIVERS/SRTKBandMFReceiver', common_receiver_properties),
+    ('RECEIVERS/SRTQBandReceiver', common_receiver_properties),
     ('RECEIVERS/SRT7GHzReceiver', common_receiver_properties),
 )
 

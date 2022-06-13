@@ -218,6 +218,15 @@
             <remoteAccount>discos</remoteAccount>
         </container>
         <container>
+            <name>SRTQBandContainer</name>
+            <type>cpp</type>
+            <heapSizeMB></heapSizeMB>
+            <useDedicatedSettings>true</useDedicatedSettings>
+            <scriptBase>0</scriptBase>
+            <remoteHost>MASTERHOST</remoteHost>
+            <remoteAccount>discos</remoteAccount>
+        </container>
+        <container>
             <name>TotalPowerContainer</name>
             <type>cpp</type>
             <heapSizeMB></heapSizeMB>
