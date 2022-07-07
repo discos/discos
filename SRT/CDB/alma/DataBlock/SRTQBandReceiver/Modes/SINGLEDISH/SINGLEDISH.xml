@@ -10,7 +10,7 @@
 	RFMax="24000.0 24000.0"
 	IFMin="100.0 100.0"
 	IFBandwidth="2000.0 2000.0"
-	Feeds="7"
+	Feeds="19"
 	IFs="2"
 	Polarization="L R"
 	DefaultLO="21964.0 21964.0"

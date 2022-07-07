@@ -48,7 +48,7 @@ using namespace IRA;
 #ifdef COMPILE_TARGET_MED
 #define CONFIG_PATH "DataBlock/KBandDualFReceiver"
 #else
-#define CONFIG_PATH "DataBlock/SRTKBandMFReceiver"
+#define CONFIG_PATH "DataBlock/SRTQBandReceiver"
 #endif 
 
 #define LOTABLE_PATH CONFIG_PATH"/Synthesizer"

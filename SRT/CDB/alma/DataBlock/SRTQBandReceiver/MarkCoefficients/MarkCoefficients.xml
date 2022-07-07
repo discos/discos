@@ -19,5 +19,30 @@
                 <MarkEntry><Feed>5</Feed><Polarization>RIGHT</Polarization><Coefficients>0.3955,-28.468,672.77,-5192.0</Coefficients></MarkEntry>
                 <MarkEntry><Feed>6</Feed><Polarization>LEFT</Polarization><Coefficients>0.2725,-19.926,478.05,-3737.9</Coefficients></MarkEntry>
                 <MarkEntry><Feed>6</Feed><Polarization>RIGHT</Polarization><Coefficients>0.201,-15.761,398.52,-3237.7</Coefficients></MarkEntry>
-
+					 
+					 
+					 <MarkEntry><Feed>7</Feed><Polarization>LEFT</Polarization><Coefficients>0.2912, -21.21, 506.97, -3955.5</Coefficients></MarkEntry>
+                <MarkEntry><Feed>7</Feed><Polarization>RIGHT</Polarization><Coefficients>0.2141, -15.771, 379.96, -2976.8</Coefficients></MarkEntry>
+                <MarkEntry><Feed>8</Feed><Polarization>LEFT</Polarization><Coefficients>0.558,-40.436,961.81,-7472.1</Coefficients></MarkEntry>
+                <MarkEntry><Feed>8</Feed><Polarization>RIGHT</Polarization><Coefficients>0.523,-37.88,899.74,-6974.4</Coefficients></MarkEntry>
+                <MarkEntry><Feed>9</Feed><Polarization>LEFT</Polarization><Coefficients>0.8963,-63.274,1469.2,-11170.0</Coefficients></MarkEntry>
+                <MarkEntry><Feed>9</Feed><Polarization>RIGHT</Polarization><Coefficients>0.8572,-60.324,1396.3,-10581.0</Coefficients></MarkEntry>
+                <MarkEntry><Feed>10</Feed><Polarization>LEFT</Polarization><Coefficients>0.5176,-37.47,889.81,-6895.8</Coefficients></MarkEntry>
+                <MarkEntry><Feed>10</Feed><Polarization>RIGHT</Polarization><Coefficients>0.5173,-37.339,884.31,-6838.1</Coefficients></MarkEntry>
+                <MarkEntry><Feed>11</Feed><Polarization>LEFT</Polarization><Coefficients>0.662,-47.86,1136.2,-8809.9</Coefficients></MarkEntry>
+                <MarkEntry><Feed>11</Feed><Polarization>RIGHT</Polarization><Coefficients>0.7267,-52.213,1231.4,-9486.9</Coefficients></MarkEntry>
+                <MarkEntry><Feed>12</Feed><Polarization>LEFT</Polarization><Coefficients>0.3535,-25.63,609.53,-4727.4</Coefficients></MarkEntry>
+                <MarkEntry><Feed>12</Feed><Polarization>RIGHT</Polarization><Coefficients>0.3955,-28.468,672.77,-5192.0</Coefficients></MarkEntry>
+                <MarkEntry><Feed>13</Feed><Polarization>LEFT</Polarization><Coefficients>0.2725,-19.926,478.05,-3737.9</Coefficients></MarkEntry>
+                <MarkEntry><Feed>13</Feed><Polarization>RIGHT</Polarization><Coefficients>0.201,-15.761,398.52,-3237.7</Coefficients></MarkEntry>
+                <MarkEntry><Feed>14</Feed><Polarization>LEFT</Polarization><Coefficients>0.2912, -21.21, 506.97, -3955.5</Coefficients></MarkEntry>
+                <MarkEntry><Feed>14</Feed><Polarization>RIGHT</Polarization><Coefficients>0.2141, -15.771, 379.96, -2976.8</Coefficients></MarkEntry>
+                <MarkEntry><Feed>15</Feed><Polarization>LEFT</Polarization><Coefficients>0.558,-40.436,961.81,-7472.1</Coefficients></MarkEntry>
+                <MarkEntry><Feed>15</Feed><Polarization>RIGHT</Polarization><Coefficients>0.523,-37.88,899.74,-6974.4</Coefficients></MarkEntry>
+                <MarkEntry><Feed>16</Feed><Polarization>LEFT</Polarization><Coefficients>0.8963,-63.274,1469.2,-11170.0</Coefficients></MarkEntry>
+                <MarkEntry><Feed>16</Feed><Polarization>RIGHT</Polarization><Coefficients>0.8572,-60.324,1396.3,-10581.0</Coefficients></MarkEntry>
+                <MarkEntry><Feed>17</Feed><Polarization>LEFT</Polarization><Coefficients>0.5176,-37.47,889.81,-6895.8</Coefficients></MarkEntry>
+                <MarkEntry><Feed>17</Feed><Polarization>RIGHT</Polarization><Coefficients>0.5173,-37.339,884.31,-6838.1</Coefficients></MarkEntry>
+                <MarkEntry><Feed>18</Feed><Polarization>LEFT</Polarization><Coefficients>0.662,-47.86,1136.2,-8809.9</Coefficients></MarkEntry>
+                <MarkEntry><Feed>18</Feed><Polarization>RIGHT</Polarization><Coefficients>0.7267,-52.213,1231.4,-9486.9</Coefficients></MarkEntry>
 </MarkCoefficientsKBandLookUpTable>

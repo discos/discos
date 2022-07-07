@@ -59,18 +59,14 @@
 			<xs:element name="vdL1" type="baci:ROdouble"/>
             <!-- LNA Drain voltage: stage number 1, right channel (ROdoubleSeq) -->
 			<xs:element name="vdR1" type="baci:ROdouble"/>
-
             <!-- LNA Drain current: stage number 1, left channel (ROdoubleSeq) -->
 			<xs:element name="idL1" type="baci:ROdouble"/>
             <!-- LNA Drain current: stage number 1, right channel (ROdoubleSeq) -->
 			<xs:element name="idR1" type="baci:ROdouble"/>
-
             <!-- LNA Gate voltage: stage number 1, left channel (ROdoubleSeq) -->
 			<xs:element name="vgL1" type="baci:ROdouble"/>
             <!-- LNA Gate voltage: stage number 1, right channel (ROdoubleSeq) -->
 			<xs:element name="vgR1" type="baci:ROdouble"/>
-
-
 			<!-- cryogenic temp (K) (ROdouble) -->
 			<xs:element name="cryoTemperatureCoolHead" type="baci:ROdouble"/>
 			<!-- cryogenic temp (K) (ROdouble) -->
