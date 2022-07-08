@@ -5,10 +5,10 @@ print_help() {
     echo "`basename $0` v1.0"
     echo " "
     echo "Log project into the DISCOS system homes."
-    echo "Usage: '`basename $0` [-p|--port portnumber] <projectid>@<gatein> 
+    echo "Usage: '`basename $0` [-p|--port portnumber] <projectid>@<gatein>'" 
     echo "       '`basename $0` -h|--help'"
     echo "-h | --help prints this help message and exit"
-	 echo "-p | --port ssh port, if different from the default one"
+    echo "-p | --port ssh port, if different from the default one"
     echo "       <projectid> indicates the project you wanto to log in."
     echo "       <gatein> access point into the observatory lan. This information is provided by local staff."
     echo "                Use 'local' if already inside the local area network."	     
@@ -50,6 +50,10 @@ case $key in
     ;;    
 esac
 done
+
+if [[ "$gatein" == "local" ]]; then
+    local="TRUE"
+fi
 
 if [[ "$OSTYPE" == *"linux-gnu"* ]]
 then
