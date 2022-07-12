@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 
 # This is a python client that can be used to display value read from properties of a given 
 # component
@@ -186,65 +187,65 @@ class GraphThread(threading.Thread):
             time.sleep(self.data.sleepTime) 
 
 def usage():
-    print "plotter [-h|--help] [-l|--list] [-s|--sample val] [-g|--gap val] [-c|--call=val]"
-    print  "       [-Y|--yscale=val] [-X|--xscale=val]  -y|--yaxe=val ComponentName"
-    print "       "
-    print "[-h|--help]           displays this help"
-    print "[-l|--list]           list all the available components, then the program exits"
-    print "[-s|--sample=val]     maximum number of samples in the plots, default is 300"
-    print "[-g|--gap=val]        gap in milliseconds between two sample,"
-    print "                      default value is 1000 milliseconds"
-    print "[-c|--call=val]       name of an action of the component from which the values to be"
-    print "                      plotted are taken from. The pure name is required, no parentesis or"
-    print "                      anything else. The action must be of type void and so cannot retrurns values back."
-    print "                      Just one name can be provided at a time."
-    print "-y|--yaxe=val         comma separated list of the names of component attributes"
-    print "                      that must be plotted along the Y axe. At least one item must be"
-    print "                      provided, but a maximum of three will be considered. if the -c option"
-    print "                      is provided this must be a comma separeted list of integers. Each integer"
-    print "                      indicates a parameter in the argument sequence of the function given with -c."
-    print "                      The value of that parameter is drawn in the plot. 0 represents the first parameter."
-    print "                      A maximum of three can be given."
-    print "[-x|--xaxe=val]       the name of the component attribute that will be the value"
-    print "                      for the X axe. If not specified a sample counter will be adopted. In case of"
-    print "                      option -c an integer is expected as for -y option."
-    print "[-Y|--yscale=val]     the value set here will be used as a scale factor for attributes "
-    print "                      plotted along the Y axis. The list must be comma separated, a maximum" 
-    print "                      of three values is considered"       
-    print "[-X|--xscale=val]     the value set here will be used a scale factor for the X axis. If the special token"
-    print "                      'time' is provided then the value is treated as time and it is formatted as milliseconds "
-    print "                      midnight of the the current day."
-    print "ComponentName         this is the name of the component that must be loaded"
+    print("plotter [-h|--help] [-l|--list] [-s|--sample val] [-g|--gap val] [-c|--call=val]")
+    print( "       [-Y|--yscale=val] [-X|--xscale=val]  -y|--yaxe=val ComponentName")
+    print("       ")
+    print("[-h|--help]           displays this help")
+    print("[-l|--list]           list all the available components, then the program exits")
+    print("[-s|--sample=val]     maximum number of samples in the plots, default is 300")
+    print("[-g|--gap=val]        gap in milliseconds between two sample,")
+    print("                      default value is 1000 milliseconds")
+    print("[-c|--call=val]       name of an action of the component from which the values to be")
+    print("                      plotted are taken from. The pure name is required, no parentesis or")
+    print("                      anything else. The action must be of type void and so cannot retrurns values back.")
+    print("                      Just one name can be provided at a time.")
+    print("-y|--yaxe=val         comma separated list of the names of component attributes")
+    print("                      that must be plotted along the Y axe. At least one item must be")
+    print("                      provided, but a maximum of three will be considered. if the -c option")
+    print("                      is provided this must be a comma separeted list of integers. Each integer")
+    print("                      indicates a parameter in the argument sequence of the function given with -c.")
+    print("                      The value of that parameter is drawn in the plot. 0 represents the first parameter.")
+    print("                      A maximum of three can be given.")
+    print("[-x|--xaxe=val]       the name of the component attribute that will be the value")
+    print("                      for the X axe. If not specified a sample counter will be adopted. In case of")
+    print("                      option -c an integer is expected as for -y option.")
+    print("[-Y|--yscale=val]     the value set here will be used as a scale factor for attributes ")
+    print("                      plotted along the Y axis. The list must be comma separated, a maximum" )
+    print("                      of three values is considered"       )
+    print("[-X|--xscale=val]     the value set here will be used a scale factor for the X axis. If the special token")
+    print("                      'time' is provided then the value is treated as time and it is formatted as milliseconds ")
+    print("                      midnight of the the current day.")
+    print("ComponentName         this is the name of the component that must be loaded")
 
 def onlineUsage():
-    print "help                displays this help"
-    print "stop                stops the automatic update of the plot"
-    print "start               starts the automatic update of the plot"
-    print "clear               clears the current plot"
-    print "exit                exits this application"
-    print "save [filename]     saves the plot into a ps file in the current working directory"
-    print "savefile [filename] saves the data into a text file in the current working directory"
-    print ""
-    print "Then all Gnuplot commands are accepted for example: "
-    print "set xrange [{x1}:{x2]] - changes the X axis ranges"
-    print "set yyange [{y1}:{y2}] - changes the Y axis ranges"
-    print "set autoscale - lets Gnuplot to choose the better scale"
-    print "set logscale - sets the logaritmic scale"
-    print "set ytics {value} - sets the spaces between tics in the Y axis"
-    print "set ytics auto -  sets the spaces between tics automatically"
-    print "set xlabel ""{label}"" - sets the label for the X axis"
-    print "set style data {lines}{linespoints}{dots}{points} - sets the drawing style for the plot"
-    print ""
-    print "show ytics - shows the current configuration for the ytics"
-    print "unset ytics - resets the current configuration for the ytics"
+    print("help                displays this help")
+    print("stop                stops the automatic update of the plot")
+    print("start               starts the automatic update of the plot")
+    print("clear               clears the current plot")
+    print("exit                exits this application")
+    print("save [filename]     saves the plot into a ps file in the current working directory")
+    print("savefile [filename] saves the data into a text file in the current working directory")
+    print("")
+    print("Then all Gnuplot commands are accepted for example: ")
+    print("set xrange [{x1}:{x2]] - changes the X axis ranges")
+    print("set yyange [{y1}:{y2}] - changes the Y axis ranges")
+    print("set autoscale - lets Gnuplot to choose the better scale")
+    print("set logscale - sets the logaritmic scale")
+    print("set ytics {value} - sets the spaces between tics in the Y axis")
+    print("set ytics auto -  sets the spaces between tics automatically")
+    print("set xlabel ""{label}"" - sets the label for the X axis")
+    print("set style data {lines}{linespoints}{dots}{points} - sets the drawing style for the plot")
+    print("")
+    print("show ytics - shows the current configuration for the ytics")
+    print("unset ytics - resets the current configuration for the ytics")
     
 
 def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:],"hls:g:y:x:Y:X:c:",
         ["help","list","sample=","gap=","yaxe=","xaxe=","yscale=","xscale=","call="])
-    except getopt.GetoptError, err:
-        print str(err)
+    except getopt.GetoptError as err:
+        print(str(err))
         usage()
         sys.exit(1)
 
@@ -299,13 +300,13 @@ def main():
     if list == True:  #Lists all available components
         components = simpleClient.availableComponents()
         for cob in components:
-            print cob.name + " of type "+ cob.type
+            print(cob.name + " of type "+ cob.type)
         a = sys.__stdin__.readline()
         sys.exit(0)
     elif not len(args)==0: #if one component has been set... then run
         try:
             component=simpleClient.getComponent(args[0])
-        except Exception , ex:
+        except Exception as ex:
             newEx = ClientErrorsImpl.CouldntAccessComponentExImpl( exception=ex, create=1 )
             newEx.setComponentName(args[0])
             newEx.log(ACS_LOG_ERROR)
@@ -340,7 +341,7 @@ def main():
                     data.Y3 = f3()
                 if not (fx == None):
                     data.X = fx()
-            except Exception, ex:
+            except Exception as ex:
                 newEx = ClientErrorsImpl.CouldntAccessPropertyExImpl( exception=ex, create=1 )
                 newEx.setPropertyName("")
                 newEx.log(ACS_LOG_ERROR)
@@ -368,7 +369,7 @@ def main():
         loop = GraphThread(data)
         loop.start()
         stop = False
-        print ""
+        print("")
         while not stop:
             command = raw_input("Command ( ? for help): ")
             a=command.split(" ")

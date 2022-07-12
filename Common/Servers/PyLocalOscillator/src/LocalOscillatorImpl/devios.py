@@ -38,14 +38,14 @@ class frequencyDevIO(DevIO):
         try:
            msg,value=self.cl.getFrequency()
            return value
-        except CommandLineError, ex:
+        except CommandLineError as ex:
                 success = False
                 msg = ex.message if ex.message else 'unexpected exception'
                 answer = 'Error - %s' %(ex.getReason() if hasattr(ex, 'getReason') else msg)
                 logger.logError(answer)
                 return 0
         
-        except Exception, ex:
+        except Exception as ex:
                 success = False
                 msg = ex.message if ex.message else 'unexpected exception'
                 answer = 'Error - %s' %(ex.getReason() if hasattr(ex, 'getReason') else msg)
@@ -73,14 +73,14 @@ class isLockedDevIO(DevIO):
                return 1
            else:
                return 0
-        except CommandLineError, ex:
+        except CommandLineError as ex:
                 success = False
                 msg = ex.message if ex.message else 'unexpected exception'
                 answer = 'Error - %s' %(ex.getReason() if hasattr(ex, 'getReason') else msg)
                 logger.logError(answer)
                 return 0
         
-        except Exception, ex:
+        except Exception as ex:
                 success = False
                 msg = ex.message if ex.message else 'unexpected exception'
                 answer = 'Error - %s' %(ex.getReason() if hasattr(ex, 'getReason') else msg)

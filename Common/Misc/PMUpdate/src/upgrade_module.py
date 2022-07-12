@@ -1,4 +1,5 @@
 # coding: utf-8
+from __future__ import print_function
 import os
 from shutil import copy2
 from utility import convert_time_doy_to_string_format
@@ -79,7 +80,7 @@ def load_error_file_on_xml(errorfilename, pointingxmlfilename, receivername):
 
         try:
             newmodel_date = convert_time_doy_to_string_format(errorfilename_rows[0])
-        except RuntimeError, e:
+        except RuntimeError as e:
             return (1001, "DOY convertion error: " + e.message)
         phi = errorfilename_rows[1][0]
 

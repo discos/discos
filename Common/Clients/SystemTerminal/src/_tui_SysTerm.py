@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 
 # This is a python client that can be used as a terminal to the system, It issues the command
 # action of the connected sub-system boss.
@@ -34,10 +35,10 @@ from nuraghe_commands import commands
 stopAll=False
 
 def usage():
-    print "systerm [-h|--help] [ComponentName]"
-    print "ComponentName         The name of a component that implements the CommandInterpreter interface"
-    print "                      If not given the Scheduler component is used."
-    print "[-h|--help]           displays this help"
+    print("systerm [-h|--help] [ComponentName]")
+    print("ComponentName         The name of a component that implements the CommandInterpreter interface")
+    print("                      If not given the Scheduler component is used.")
+    print("[-h|--help]           displays this help")
 
 def handler(num, stack):
     raise EOFError
@@ -76,8 +77,8 @@ def main():
 
 	try:
 		opts, args = getopt.getopt(sys.argv[1:],"h",["help"])
-	except getopt.GetoptError, err:
-		print str(err)
+	except getopt.GetoptError as err:
+		print(str(err))
 		usage()
 		sys.exit(1)
         
@@ -94,7 +95,7 @@ def main():
 		try:
 			component=simpleClient.getDefaultComponent(compType)
 			compName=component._get_name()
-		except Exception , ex:
+		except Exception as ex:
 			newEx = ClientErrorsImpl.CouldntAccessComponentExImpl( exception=ex, create=1 )
 			newEx.setComponentName(compType)
 			newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR)
@@ -103,7 +104,7 @@ def main():
 		compName = args[0]    
 		try:
 			component=simpleClient.getComponent(compName)
-		except Exception , ex:
+		except Exception as ex:
 			newEx = ClientErrorsImpl.CouldntAccessComponentExImpl( exception=ex, create=1 )
 			newEx.setComponentName(compName)
 			newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR)
@@ -139,15 +140,15 @@ def main():
 			if cmd=="exit":
 				stopAll=True
 			elif cmd == 'help()':
-				print '\t' + '\n\t'.join(sorted(commands.keys()))
+				print('\t' + '\n\t'.join(sorted(commands.keys())))
 			elif cmd.startswith('help('):
 				start = cmd.find('(') + 1
 				end = cmd.find(')')
 				arg = cmd[start:end] # help(setupCCB) -> arg=setupCCB
 				if arg not in commands:
-					print "`%s` is not a valid command" %(arg if arg else cmd)
+					print("`%s` is not a valid command" %(arg if arg else cmd))
 				else:
-					print commands['help'](arg)
+					print(commands['help'](arg))
 			elif cmd:
 				readline.write_history_file(historyFile)
 				try:
@@ -160,22 +161,22 @@ def main():
 							# without any modification
 							response = response[4:]
 							lines = response.split('\n')
-							print cmd_name
+							print(cmd_name)
 							for line in lines:
-								print line
+								print(line)
 						else:
 							groups = response.split(',')
 							for group in groups:
 								values = group.split(';')
 								if len(values) > 1:
-									print cmd_name
+									print(cmd_name)
 									for i, value in enumerate(values):
-										print '%02d) %s' %(i, value)
+										print('%02d) %s' %(i, value))
 								elif res:
-									print res
+									print(res)
 					elif res:
-						print res
-				except Exception, ex:
+						print(res)
+				except Exception as ex:
 					newEx = ClientErrorsImpl.CouldntPerformActionExImpl(exception=ex, create=1)
 					newEx.setAction("command()")
 					newEx.setReason(ex.message)
@@ -186,7 +187,7 @@ def main():
 		except KeyboardInterrupt:
 			# CTRL + C event: Ignore whatever string was written on the
 			# terminal and show a new prompt line
-			print '^C'
+			print('^C')
             
 	readline.write_history_file(historyFile)            
 	simpleClient.releaseComponent(compName)     

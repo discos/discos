@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 
 # This is a python script that can be used to configure the IF distributor. 
 # The script is adapted from DMED. 
@@ -149,7 +150,7 @@ def main(argv):
 			userLogger.logNotice( "Answer: %s"%(answer))
 	
 	
-	print >> sys.stderr, answerstr.replace(","," ")
+	print(answerstr.replace(","," "), file=sys.stderr)
 
 
 if __name__=="__main__":

@@ -65,7 +65,7 @@ class PyCalmuxImpl(CalMux, cc, services, lcycle):
                 self._set_calibration(s, 1)
                 self._set_input(s, channel, 0)
                 self.current_backend = ''
-        except ComponentErrorsImpl.SocketErrorExImpl, ex:
+        except ComponentErrorsImpl.SocketErrorExImpl as ex:
             raise ex.getComponentErrorsEx()
 
     def calOff(self):
@@ -75,7 +75,7 @@ class PyCalmuxImpl(CalMux, cc, services, lcycle):
                 self._set_calibration(s, 0)
                 self._set_input(s, channel, 0)
                 self.current_backend = ''
-        except ComponentErrorsImpl.SocketErrorExImpl, ex:
+        except ComponentErrorsImpl.SocketErrorExImpl as ex:
             raise ex.getComponentErrorsEx()
 
     def _get_status(self, s):
@@ -86,7 +86,7 @@ class PyCalmuxImpl(CalMux, cc, services, lcycle):
             with self.connection as s:
                 channel, polarity, status = self._get_status(s)
                 return channel
-        except ComponentErrorsImpl.SocketErrorExImpl, ex:
+        except ComponentErrorsImpl.SocketErrorExImpl as ex:
             raise ex.getComponentErrorsEx()
 
     def getPolarity(self):
@@ -94,7 +94,7 @@ class PyCalmuxImpl(CalMux, cc, services, lcycle):
             with self.connection as s:
                 channel, polarity, status = self._get_status(s)
                 return polarity
-        except ComponentErrorsImpl.SocketErrorExImpl, ex:
+        except ComponentErrorsImpl.SocketErrorExImpl as ex:
             raise ex.getComponentErrorsEx()
 
     def getCalStatus(self):
@@ -102,7 +102,7 @@ class PyCalmuxImpl(CalMux, cc, services, lcycle):
             with self.connection as s:
                 channel, polarity, status = self._get_status(s)
                 return bool(status)
-        except ComponentErrorsImpl.SocketErrorExImpl, ex:
+        except ComponentErrorsImpl.SocketErrorExImpl as ex:
             raise ex.getComponentErrorsEx()
 
     def _set_input(self, s, channel, polarity):

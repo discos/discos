@@ -28,7 +28,7 @@ def main():
     REC_CODE = "CCC"
     try:
         antennaBoss=simpleClient.getDefaultComponent(antennaBossType)
-    except Exception , ex:
+    except Exception as ex:
         newEx = ClientErrorsImpl.CouldntAccessComponentExImpl( exception=ex, create=1 )
         newEx.setComponentName(antennaBossType)
         #ACS_LOG_ERROR
@@ -38,7 +38,7 @@ def main():
     #setup the telescope: prepare it for movement
     try:
         antennaBoss.setup(REC_CODE);
-    except Exception, ex:
+    except Exception as ex:
         newEx = ClientErrorsImpl.CouldntPerformActionExImpl( exception=ex, create=1 )
         newEx.setAction("AntennaBoss/setup()")
         #ACS_LOG_ERROR
@@ -50,7 +50,7 @@ def main():
     #setup the receiver
     try:
         receiversBoss=simpleClient.getDefaultComponent(receiversBossType)
-    except Exception , ex:
+    except Exception as ex:
         newEx = ClientErrorsImpl.CouldntAccessComponentExImpl( exception=ex, create=1 )
         newEx.setComponentName(receiversBossType)
         #ACS_LOG_ERROR
@@ -59,7 +59,7 @@ def main():
         sys.exit(-1)
     try:
         receiversBoss.setup(REC_CODE);
-    except Exception, ex:
+    except Exception as ex:
         newEx = ClientErrorsImpl.CouldntPerformActionExImpl( exception=ex, create=1 )
         newEx.setAction("ReceiversBoss/setup()")
         #ACS_LOG_ERROR
@@ -70,7 +70,7 @@ def main():
      
     try:
         totalPowerBackend= simpleClient.getComponent(totalPowerBackendName)
-    except Exception , ex:
+    except Exception as ex:
         newEx = ClientErrorsImpl.CouldntAccessComponentExImpl( exception=ex, create=1 )
         newEx.setComponentName(receiversBossType)
         #ACS_LOG_ERROR
@@ -79,7 +79,7 @@ def main():
         sys.exit(-1)
     try:
         totalPowerBackend.initialize(REC_CODE);
-    except Exception, ex:
+    except Exception as ex:
         newEx = ClientErrorsImpl.CouldntPerformActionExImpl( exception=ex, create=1 )
         newEx.setAction("TotalPower/initialize()")
         #ACS_LOG_ERROR
@@ -90,7 +90,7 @@ def main():
      
     try:
         antennaBoss.setHPBW(HPBW)
-    except Exception, ex:
+    except Exception as ex:
         newEx = ClientErrorsImpl.CouldntPerformActionExImpl( exception=ex, create=1 )
         newEx.setAction("AntennaBoss/setHPBW")
         #ACS_LOG_ERROR
