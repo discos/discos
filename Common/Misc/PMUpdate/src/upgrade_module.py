@@ -68,14 +68,14 @@ def load_error_file_on_xml(errorfilename, pointingxmlfilename, receivername):
             return (7, "errorfilename: new model section too short")
 
 
-        if len(errorfilename_rows[0]) <> 7 or  \
-                len(errorfilename_rows[1]) <> 31 or \
-                len(errorfilename_rows[2]) <> 5 or \
-                len(errorfilename_rows[3]) <> 5 or \
-                len(errorfilename_rows[4]) <> 5 or \
-                len(errorfilename_rows[5]) <> 5 or \
-                len(errorfilename_rows[6]) <> 5 or \
-                len(errorfilename_rows[7]) <> 5:
+        if len(errorfilename_rows[0]) != 7 or  \
+                len(errorfilename_rows[1]) != 31 or \
+                len(errorfilename_rows[2]) != 5 or \
+                len(errorfilename_rows[3]) != 5 or \
+                len(errorfilename_rows[4]) != 5 or \
+                len(errorfilename_rows[5]) != 5 or \
+                len(errorfilename_rows[6]) != 5 or \
+                len(errorfilename_rows[7]) != 5:
             return (8, "errorfilename: not enough parameters in new model section")
 
         try:
