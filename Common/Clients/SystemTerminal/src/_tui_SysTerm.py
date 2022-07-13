@@ -70,128 +70,130 @@ class HistoryCompleter(object):
     
 def main():
     
-	global stopAll
+    global stopAll
    
-	#handler for the external request of termination 
-	signal.signal(signal.SIGUSR1, handler)
+    #handler for the external request of termination 
+    signal.signal(signal.SIGUSR1, handler)
 
-	try:
-		opts, args = getopt.getopt(sys.argv[1:],"h",["help"])
-	except getopt.GetoptError as err:
-		print(str(err))
-		usage()
-		sys.exit(1)
+    try:
+        opts, args = getopt.getopt(sys.argv[1:],"h",["help"])
+    except getopt.GetoptError as err:
+        print(str(err))
+        usage()
+        sys.exit(1)
         
-	for o, a in opts:
-		if o in ("-h", "--help"):
-			usage()
-			sys.exit()
+    for o, a in opts:
+        if o in ("-h", "--help"):
+            usage()
+            sys.exit()
     
-	simpleClient = PySimpleClient()
-	compName=""
+    simpleClient = PySimpleClient()
+    compName=""
     
-	if args == []:
-		compType = "IDL:alma/Management/Scheduler:1.0"
-		try:
-			component=simpleClient.getDefaultComponent(compType)
-			compName=component._get_name()
-		except Exception as ex:
-			newEx = ClientErrorsImpl.CouldntAccessComponentExImpl( exception=ex, create=1 )
-			newEx.setComponentName(compType)
-			newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR)
-			sys.exit(1)        
-	else:
-		compName = args[0]    
-		try:
-			component=simpleClient.getComponent(compName)
-		except Exception as ex:
-			newEx = ClientErrorsImpl.CouldntAccessComponentExImpl( exception=ex, create=1 )
-			newEx.setComponentName(compName)
-			newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR)
-			sys.exit(1)
+    if args == []:
+        compType = "IDL:alma/Management/Scheduler:1.0"
+        try:
+            component=simpleClient.getDefaultComponent(compType)
+            compName=component._get_name()
+        except Exception as ex:
+            newEx = ClientErrorsImpl.CouldntAccessComponentExImpl( exception=ex, create=1 )
+            newEx.setComponentName(compType)
+            newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR)
+            sys.exit(1)        
+    else:
+        compName = args[0]    
+        try:
+            component=simpleClient.getComponent(compName)
+        except Exception as ex:
+            newEx = ClientErrorsImpl.CouldntAccessComponentExImpl( exception=ex, create=1 )
+            newEx.setComponentName(compName)
+            newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR)
+            sys.exit(1)
     
-	userHome = os.getenv('HOME')
-	historyFile = None
-	if userHome == None:
-		historyFile = '/tmp/.oprin_cmd.hist'
-	else:
-		historyFile = userHome+'/.oprin_cmd.hist'
+    userHome = os.getenv('HOME')
+    historyFile = None
+    if userHome == None:
+        historyFile = '/tmp/.oprin_cmd.hist'
+    else:
+        historyFile = userHome+'/.oprin_cmd.hist'
     
-	if os.path.exists(historyFile):
-		readline.read_history_file(historyFile)
-		        
-	readline.set_completer(HistoryCompleter().complete)
-	readline.parse_and_bind('tab: complete')
+    if os.path.exists(historyFile):
+        readline.read_history_file(historyFile)
+                
+    readline.set_completer(HistoryCompleter().complete)
+    readline.parse_and_bind('tab: complete')
     
-	cmdCounter=0
+    cmdCounter=0
     
-	while not stopAll:
-		try:
-			cmd=''
-			if cmdCounter>0:
-				try:
-					cmd=raw_input("<%d> "%cmdCounter)
-				except IOError:
-					cmd='exit'
-			else:
-				cmd="version"
-			cmdCounter=cmdCounter+1
-			cmd=cmd.strip()
-			if cmd=="exit":
-				stopAll=True
-			elif cmd == 'help()':
-				print('\t' + '\n\t'.join(sorted(commands.keys())))
-			elif cmd.startswith('help('):
-				start = cmd.find('(') + 1
-				end = cmd.find(')')
-				arg = cmd[start:end] # help(setupCCB) -> arg=setupCCB
-				if arg not in commands:
-					print("`%s` is not a valid command" %(arg if arg else cmd))
-				else:
-					print(commands['help'](arg))
-			elif cmd:
-				readline.write_history_file(historyFile)
-				try:
-					success, res = component.command(cmd)
-					idx = res.find('\\')
-					cmd_name, response = res[:idx+1], res[idx+1:].rstrip('\\')
-					if success and response:
-						if response.startswith('STR '):
-							# We got a formatted string in return, print it
-							# without any modification
-							response = response[4:]
-							lines = response.split('\n')
-							print(cmd_name)
-							for line in lines:
-								print(line)
-						else:
-							groups = response.split(',')
-							for group in groups:
-								values = group.split(';')
-								if len(values) > 1:
-									print(cmd_name)
-									for i, value in enumerate(values):
-										print('%02d) %s' %(i, value))
-								elif res:
-									print(res)
-					elif res:
-						print(res)
-				except Exception as ex:
-					newEx = ClientErrorsImpl.CouldntPerformActionExImpl(exception=ex, create=1)
-					newEx.setAction("command()")
-					newEx.setReason(ex.message)
-					newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR) 
-		except EOFError:
-			# CTRL + D event: Equivalent to the exit command, we stop the loop
-			stopAll=True
-		except KeyboardInterrupt:
-			# CTRL + C event: Ignore whatever string was written on the
-			# terminal and show a new prompt line
-			print('^C')
+    while not stopAll:
+        try:
+            cmd=''
+            if cmdCounter>0:
+                try:
+                    cmd=raw_input("<%d> "%cmdCounter)
+                except NameError:
+                    cmd=input("<%d> "%cmdCounter)
+                except IOError:
+                    cmd='exit'
+            else:
+                cmd="version"
+            cmdCounter=cmdCounter+1
+            cmd=cmd.strip()
+            if cmd=="exit":
+                stopAll=True
+            elif cmd == 'help()':
+                print('\t' + '\n\t'.join(sorted(commands.keys())))
+            elif cmd.startswith('help('):
+                start = cmd.find('(') + 1
+                end = cmd.find(')')
+                arg = cmd[start:end] # help(setupCCB) -> arg=setupCCB
+                if arg not in commands:
+                    print("`%s` is not a valid command" %(arg if arg else cmd))
+                else:
+                    print(commands['help'](arg))
+            elif cmd:
+                readline.write_history_file(historyFile)
+                try:
+                    success, res = component.command(cmd)
+                    idx = res.find('\\')
+                    cmd_name, response = res[:idx+1], res[idx+1:].rstrip('\\')
+                    if success and response:
+                        if response.startswith('STR '):
+                            # We got a formatted string in return, print it
+                            # without any modification
+                            response = response[4:]
+                            lines = response.split('\n')
+                            print(cmd_name)
+                            for line in lines:
+                                print(line)
+                        else:
+                            groups = response.split(',')
+                            for group in groups:
+                                values = group.split(';')
+                                if len(values) > 1:
+                                    print(cmd_name)
+                                    for i, value in enumerate(values):
+                                        print('%02d) %s' %(i, value))
+                                elif res:
+                                    print(res)
+                    elif res:
+                        print(res)
+                except Exception as ex:
+                    newEx = ClientErrorsImpl.CouldntPerformActionExImpl(exception=ex, create=1)
+                    newEx.setAction("command()")
+                    newEx.setReason(ex.message)
+                    newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR) 
+        except EOFError:
+            # CTRL + D event: Equivalent to the exit command, we stop the loop
+            stopAll=True
+        except KeyboardInterrupt:
+            # CTRL + C event: Ignore whatever string was written on the
+            # terminal and show a new prompt line
+            print('^C')
             
-	readline.write_history_file(historyFile)            
-	simpleClient.releaseComponent(compName)     
-	simpleClient.disconnect()
+    readline.write_history_file(historyFile)            
+    simpleClient.releaseComponent(compName)     
+    simpleClient.disconnect()
             
 if __name__=="__main__":
    main()

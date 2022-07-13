@@ -698,7 +698,7 @@ import copy
 myself =  __import__(__name__)
 # Create the commands dictionary
 commands = myself.__dict__.copy() # Shallow copy, but we do not mind
-for cmd in commands.keys():
+for cmd in list(commands.keys()):
     if cmd.startswith('__'):
         del commands[cmd]
 

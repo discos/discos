@@ -14,7 +14,10 @@ import sys
 import logging
 import bisect
 import functools
-import Tkinter as tk
+try:
+    import Tkinter as tk
+except:
+    import tkinter as tk
 from IRAPy.bsqueue import BoundedSortedQueue
 
 #DEFINE LOGGING RECORDS TOTAL ORDERING RULES
@@ -57,11 +60,11 @@ class App:
         self.yscrollbar.config(command=self.list_box.yview)
   
     def handler(self, event):
-	"""
-	Handle a log_event adding it to a BoundedSortedQueue in memory and to the 
-	corresponding GUI representation (in Tkinter this sould be a Listbox).
-	@param event: the logging event.
-	"""
+        """
+        Handle a log_event adding it to a BoundedSortedQueue in memory and to the 
+        corresponding GUI representation (in Tkinter this sould be a Listbox).
+        @param event: the logging event.
+        """
         index, popped = self.record_list.push(event)
         if popped:
             self.list_box.delete(0)
