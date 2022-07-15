@@ -33,6 +33,7 @@ case $key in
     shift
     shift
     ;;
+    *)
     if [[ $1 == *"@"* ]]; then
         while IFS='@' read -ra ARG; do
             if [[ "${#ARG[@]}" -ne 2 ]]; then
