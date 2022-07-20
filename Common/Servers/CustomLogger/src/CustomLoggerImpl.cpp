@@ -661,7 +661,7 @@ void CustomStructuredPushConsumer::push_structured_event (const CosNotification:
     const char *type_name = notification.header.fixed_header.event_type.type_name;*/
     const char *xmlLog;
     notification.remainder_of_body >>= xmlLog;
-    Logging::XmlLogRecordSeq *reclist;
+    const Logging::XmlLogRecordSeq *reclist;
     notification.remainder_of_body >>= reclist;
     LogRecord_sp lr;
     try {
