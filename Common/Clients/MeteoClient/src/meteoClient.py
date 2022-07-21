@@ -420,14 +420,7 @@ class PlotProperty(Qt.QFrame):
         self.connect(temperatureMon, Qt.SIGNAL("PropertyChanghed(float)"), self.temperaturew.setVal)
 
     def __del__(self):
-        self.actMon.destroy()
-        self.WDiractMon.destroy()
-        self.temperatureactMon.destroy()
-        self.WSpeedPeakactMon.destroy()
-        #self.actMonwspeed.destroy()
-        self.simpleClient.releaseComponent(self.componentname)
         self.simpleClient.disconnect()
-        print("The end __oOo__")
 
 
 def make():
