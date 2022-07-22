@@ -79,7 +79,7 @@ class PyCalmuxImpl(CalMux, cc, services, lcycle):
             raise ex.getComponentErrorsEx()
 
     def _get_status(self, s):
-        return self._send_command(s, b'?\n')
+        return self._send_command(s, '?\n')
 
     def getChannel(self):
         try:
@@ -137,9 +137,7 @@ class PyCalmuxImpl(CalMux, cc, services, lcycle):
         :param s: the socket on which the command will be sent
         :param command: the command to be sent to the device.
         """
-        s.sendall(command)
-
-#        time.sleep(0.1)
+        s.sendall(command.encode())
 
         response = s.recv(1024)
         response = response.strip().split()

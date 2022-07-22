@@ -1,6 +1,6 @@
 from ACSImpl.DevIO import DevIO
 from math import fabs
-from CommandLine import CommandLineError
+from LocalOscillatorImpl.CommandLine import CommandLineError
 from IRAPy import logger
 
 SYNTH_TOLLERANCE = 1.

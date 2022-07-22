@@ -169,7 +169,7 @@ class CommandLine:
    def sendCmd(self,msg):
      
        try:
-           self.sock.sendall(msg)
+           self.sock.sendall(msg.encode())
            return True
        
        except socket.error as msg:
@@ -184,7 +184,7 @@ class CommandLine:
 
    def query(self,cmd):
        try:
-           self.sock.sendall(cmd) 
+           self.sock.sendall(cmd.encode())
            msg = self.sock.recv(1024) 
            print('query:received:',msg)
            return msg
