@@ -1,7 +1,7 @@
 from __future__ import print_function
 from PyQt4 import Qt
 from PyQt4.QtCore import   pyqtSlot,QThread
-import PyQt4.Qwt5 as Qwt
+import PyQt4.Qwt as Qwt
 '''
 Custom widgets classes.
 
@@ -46,8 +46,8 @@ class PlotProperty(Qwt.QwtPlot):
             step=1  #step 0 not allowed
         for i in range(0,min(len(val),1000)):
             value_decimated[int(i)] =val[int(i*step-1)]
-        #self.curve.setData(self.timeData,value_decimated)
-        self.curve.setData(self.timeData,val)
+        #self.curve.setSamples(self.timeData, value_decimated)
+        self.curve.setSamples(self.timeData, val)
         self.replot()
 
     @pyqtSlot(Qt.QObject,name="setX")  # decorator for the slot
@@ -62,8 +62,8 @@ class PlotProperty(Qwt.QwtPlot):
             step=1  #step 0 not allowed
         for i in  range(0,min(len(val),1000)):
             value_decimated[int(i)] =val[int(i*step)-1]
-        #self.curve.setData(self.timeData,value_decimated)
-        self.curve.setData(self.timeData,val)
+        #self.curve.setSamples(self.timeData, value_decimated)
+        self.curve.setSamples(self.timeData, val)
         self.replot()
 
     def setDataX(self,val):

@@ -12,7 +12,7 @@ import ACSLog
 import ACS, ACS__POA                                  # Import the Python CORBA stubs for BACI
 from PyQt4 import Qt
 from PyQt4.QtCore import pyqtSlot,QThread,QMutex,QTimer
-import PyQt4.Qwt5 as Qwt
+import PyQt4.Qwt as Qwt
 import sys,getopt,os
 from time import sleep
 import math
@@ -62,10 +62,10 @@ class MyWorker(QThread):
         self.offset       =self.caltool._get_offset()
         self.name        =self.boss._get_target()
         self.device      =self.caltool._get_deviceID()
-        self.oldscan=0L
-        self.newscan=0L
-        self.oldsubscan=0L
-        self.newsubscan=0L
+        self.oldscan=0
+        self.newscan=0
+        self.oldsubscan=0
+        self.newsubscan=0
         self.oldrecordingstatus=False
         self.newrecordingstatus=False
         self.azimuthOffset=self.boss._get_azimuthOffset()
@@ -147,7 +147,7 @@ class MyWorker(QThread):
                     self.datay_tmp=[]
 
                 QThread.msleep(200)
-                print("Exited from thread")
+            print("Exited from thread")
 
         except Exception as ex:
             newEx = ClientErrorsImpl.CouldntAccessPropertyExImpl(exception=ex, create=1)
