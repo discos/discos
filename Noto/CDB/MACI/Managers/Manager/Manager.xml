@@ -10,25 +10,25 @@
     ServerThreads="15">
 
   <Startup>
-  	<cdb:_ string="ANTENNA/Mount" />
-  	<cdb:_ string="WEATHERSTATION/WeatherStation"/>  	
-  	<cdb:_ string="ANTENNA/Boss"/>
-  	<cdb:_ string="RECEIVERS/Boss"/>
-  	<cdb:_ string="MANAGEMENT/Ducezio"/>
-  	<cdb:_ string="MANAGEMENT/CustomLogger"/>
-  	<cdb:_ string="MANAGEMENT/ExternalClients"/>
+  	<cdb:e string="ANTENNA/Mount" />
+  	<cdb:e string="WEATHERSTATION/WeatherStation"/>  	
+  	<cdb:e string="ANTENNA/Boss"/>
+  	<cdb:e string="RECEIVERS/Boss"/>
+  	<cdb:e string="MANAGEMENT/Ducezio"/>
+  	<cdb:e string="MANAGEMENT/CustomLogger"/>
+  	<cdb:e string="MANAGEMENT/ExternalClients"/>
   </Startup>
 
   <ServiceComponents>
-	<cdb:_ string="Log"/>
-	<cdb:_ string="LogFactory"/>
-	<cdb:_ string="NotifyEventChannelFactory"/>
-	<cdb:_ string="ArchivingChannel"/>
-	<cdb:_ string="LoggingChannel"/>
-	<cdb:_ string="InterfaceRepository"/>
-	<cdb:_ string="CDB"/>
-	<cdb:_ string="ACSLogSvc"/>
-	<cdb:_ string="PDB"/>
+	<cdb:e string="Log"/>
+	<cdb:e string="LogFactory"/>
+	<cdb:e string="NotifyEventChannelFactory"/>
+	<cdb:e string="ArchivingChannel"/>
+	<cdb:e string="LoggingChannel"/>
+	<cdb:e string="InterfaceRepository"/>
+	<cdb:e string="CDB"/>
+	<cdb:e string="ACSLogSvc"/>
+	<cdb:e string="PDB"/>
   </ServiceComponents>
 
   <LoggingConfig
