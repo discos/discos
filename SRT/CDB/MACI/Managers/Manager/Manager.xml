@@ -11,25 +11,25 @@
 
     <Startup>
         <!--
-        <cdb:_ string="MINORSERVO/GFR"/> 
-        <cdb:_ string="MINORSERVO/M3R"/>
-        <cdb:_ string="MINORSERVO/PFP"/>
-        <cdb:_ string="MINORSERVO/SRP"/>
+        <cdb:e string="MINORSERVO/GFR"/> 
+        <cdb:e string="MINORSERVO/M3R"/>
+        <cdb:e string="MINORSERVO/PFP"/>
+        <cdb:e string="MINORSERVO/SRP"/>
         -->
-        <cdb:_ string="MANAGEMENT/CustomLogger"/>
+        <cdb:e string="MANAGEMENT/CustomLogger"/>
     </Startup>
 
     <ServiceComponents>
-        <cdb:_ string="Log"/>
-        <cdb:_ string="LogFactory"/>
-        <cdb:_ string="NotifyEventChannelFactory"/>
-        <cdb:_ string="ArchivingChannel"/>
-        <cdb:_ string="LoggingChannel"/>
-        <cdb:_ string="InterfaceRepository"/>
-        <cdb:_ string="CDB"/>
-        <cdb:_ string="ACSLogSvc"/>
-        <cdb:_ string="PDB"/>
-	    <cdb:_ string="AcsAlarmService"/>
+        <cdb:e string="Log"/>
+        <cdb:e string="LogFactory"/>
+        <cdb:e string="NotifyEventChannelFactory"/>
+        <cdb:e string="ArchivingChannel"/>
+        <cdb:e string="LoggingChannel"/>
+        <cdb:e string="InterfaceRepository"/>
+        <cdb:e string="CDB"/>
+        <cdb:e string="ACSLogSvc"/>
+        <cdb:e string="PDB"/>
+	    <cdb:e string="AcsAlarmService"/>
     </ServiceComponents>
 
     <ServiceDaemons>
@@ -41,7 +41,7 @@
   	    minLogLevelLocal="5"
   	    dispatchPacketSize="10"
   	    immediateDispatchLevel="8">
-        <log:_ Name="jacorb@Manager" minLogLevel="5" minLogLevelLocal="5" />
+        <log:e Name="jacorb@Manager" minLogLevel="5" minLogLevelLocal="5" />
     </LoggingConfig>
 
 </Manager>
