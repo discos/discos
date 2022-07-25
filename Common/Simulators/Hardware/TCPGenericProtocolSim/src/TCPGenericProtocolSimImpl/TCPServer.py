@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # Author: Andrea Orlati <a.orlati@ira.inaf.it>
+from __future__ import print_function
 
 # **************************************************************************************************** 
 # DISCOS Project                                                                                       
@@ -67,14 +68,14 @@ class TCPServer:
 		self.s.bind((self.host, self.simPort))
 		self.s.listen(1)
 		
-		print "*"*40
-		print "TCPServer - Waiting for connections from %s port %d..." % (self.host,self.simPort)
-		print "Valid commands are: %s" % (self.command)
-		print "*"*40
+		print("*"*40)
+		print("TCPServer - Waiting for connections from %s port %d..." % (self.host,self.simPort))
+		print("Valid commands are: %s" % (self.command))
+		print("*"*40)
 		error=False
 		try:
 			connection, clientaddr = self.s.accept()
-			print "Got connection from %s port %d" % (connection.getpeername())
+			print("Got connection from %s port %d" % (connection.getpeername()))
 		except KeyboardInterrupt:
 			raise			
 		except:
@@ -96,7 +97,7 @@ class TCPServer:
 					break
 				answer=self.defaultAnswer
 				if(data):
-					#print "Received: %s" % data
+					#print("Received: %s" % data)
 					if self.terminator!=32:
 						termPos=data.find(chr(self.terminator))
 						if termPos>0:
@@ -106,7 +107,7 @@ class TCPServer:
 								answer=self.answer[index]
 						else:
 							pass
-					#print "Sending message: %s" % (answer)
+					#print("Sending message: %s" % (answer))
 					connection.send(answer)			
 		except KeyboardInterrupt:
 			raise
@@ -115,12 +116,12 @@ class TCPServer:
 		finally:
 			connection.close()
 
-		print "Exiting...."
+		print("Exiting....")
 		sys.exit(0)
 
 	@staticmethod
 	def stop():
-		print "shutdown by external command..."
+		print("shutdown by external command...")
 		stop_server.value = True
 
 if __name__ == "__main__":

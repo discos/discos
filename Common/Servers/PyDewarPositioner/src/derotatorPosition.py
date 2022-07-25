@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 
 from Acspy.Clients.SimpleClient import PySimpleClient
 from Acspy.Common.TimeHelper import getTimeStamp
@@ -17,6 +18,6 @@ while True:
     t = getTimeStamp().value + 1*10*6 # 100 ms in the future
     az, el = antenna.getRawCoordinates(t) # Values in radians
     parallactic = PosGenerator.getParallacticAngle(latitude, az, el)
-    print "%d -> %.2f  -- parallactic: %.2f" %(counter, position, parallactic)
+    print("%d -> %.2f  -- parallactic: %.2f" %(counter, position, parallactic))
     counter += 1
     time.sleep(3)

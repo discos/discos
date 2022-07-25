@@ -59,9 +59,9 @@ class Positioner(object):
             self.control.updateScanInfo({'iStaticPos': setupPosition})
             self._start(self.posgen.goto, setupPosition)
             time.sleep(0.1) # Give the thread the time to finish
-        except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx), ex:
+        except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx) as ex:
             raise PositionerError("cannot set the position: %s" %ex.message)
-        except Exception, ex:
+        except Exception as ex:
             raise PositionerError(ex.message)
         finally:
             Positioner.generalLock.release()
@@ -119,7 +119,7 @@ class Positioner(object):
                 self.goTo(position)
                 # Set the initialPosition, in order to add it to the dynamic one
                 self.control.user_position = position
-            except Exception, ex:
+            except Exception as ex:
                 raise PositionerError('cannot set the position: %s' %ex.message)
 
 
@@ -128,11 +128,11 @@ class Positioner(object):
         if self.device.getMinLimit() < self.control.target < self.device.getMaxLimit():
             try:
                 self.device.setPosition(self.control.target)
-            except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx), ex:
+            except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx) as ex:
                 raeson = "cannot set the %s position" %self.device._get_name()
                 logger.logError('%s: %s' %(raeson, ex.message))
                 raise PositionerError(raeson)
-            except Exception, ex:
+            except Exception as ex:
                 raeson = "unknown exception setting the %s position" %self.device._get_name()
                 logger.logError('%s: %s' %(raeson, ex.message))
                 raise PositionerError(raeson)
@@ -206,7 +206,7 @@ class Positioner(object):
                         )
                         self._start(posgen, self.source, self.siteInfo)
                     self.control.mustUpdate = True
-                except Exception, ex:
+                except Exception as ex:
                     raise PositionerError('configuration problem: %s' %ex.message)
         finally:
             Positioner.generalLock.release()
@@ -241,13 +241,13 @@ class Positioner(object):
                         self.control.scanInfo.update({'dParallacticPos': Pdp})
                         self._setPosition(target) # _setPosition() will add the offset
                         time.sleep(float(self.conf.getAttribute('UpdatingTime')))
-                    except OutOfRangeError, ex:
+                    except OutOfRangeError as ex:
                         logger.logInfo(ex.message)
                         self.control.isRewindingRequired = True
                         if self.control.modes['rewinding'] == 'AUTO':
                             try:
                                 self.rewind() 
-                            except Exception, ex:
+                            except Exception as ex:
                                 # In case of wrong autoRewindingSteps
                                 self.control.isRewindingRequired = True
                                 logger.logError('cannot rewind: %s' %ex.message)
@@ -261,18 +261,18 @@ class Positioner(object):
                                     time.sleep(0.1) # Wait until the user calls a rewind
                             else:
                                 logger.logError('wrong rewinding mode: %s' %self.control.modes['rewinding'])
-                    except Exception, ex:
+                    except Exception as ex:
                         logger.logError(ex.message)
                         break
             self.control.mustUpdate = False
         except KeyboardInterrupt:
             logger.logInfo('stopping Positioner._updatePosition() due to KeyboardInterrupt')
-        except AttributeError, ex:
+        except AttributeError as ex:
             logger.logError('Positioner._updatePosition(): attribute error')
             logger.logDebug('Positioner._updatePosition(): %s' %ex.message)
-        except PositionerError, ex:
+        except PositionerError as ex:
             logger.logError('Positioner._updatePosition(): %s' %ex.message)
-        except Exception, ex:
+        except Exception as ex:
             logger.logError('unexcpected exception in Positioner._updatePosition(): %s' %ex)
         finally:
             self.control.scanInfo.update({'rewindingOffset': 0})
@@ -313,7 +313,7 @@ class Positioner(object):
                 raise PositionerError('%ss exceeded' %self.conf.getAttribute('RewindingTimeout'))
 
             self.control.isRewindingRequired = False
-        except Exception, ex:
+        except Exception as ex:
             self.control.isRewindingRequired = True
             raise PositionerError(ex.message)
         finally:
@@ -612,12 +612,12 @@ class Positioner(object):
 
             try:
                 status_obj = self.device._get_status()
-            except Exception, ex:
+            except Exception as ex:
                 raise PositionerError('cannot get the device status property: %s' %ex.message)
 
             try:
                 device_status, compl = status_obj.get_sync()
-            except Exception, ex:
+            except Exception as ex:
                 raise PositionerError('cannot get the device status value: %s' %ex.message)
 
             if compl.code:
@@ -640,7 +640,7 @@ class Positioner(object):
                 # 16 we want to get the string 010000 instead of 10000
                 try:
                     binrepr = Status.dec2bin(device_status, 6) # A string of 6 values 
-                except Exception, ex:
+                except Exception as ex:
                     raise PositionerError('error in Status.dec2bin(): %s' %ex.message)
 
                 po, f, ce, nr, s, w = [bool(int(item)) for item in reversed(binrepr)]
@@ -662,9 +662,9 @@ class Positioner(object):
             status += '1' if self.isTracking() else '0'
             status += '1' if self.isReady() else '0'
             return status
-        except (NotAllowedError), ex:
+        except NotAllowedError as ex:
             return '000000' # Not ready
-        except Exception, ex:
+        except Exception as ex:
             logger.logError(ex.message)
             return '100000' # Failure
         finally:

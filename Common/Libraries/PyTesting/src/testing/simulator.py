@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import sys
 import time
@@ -21,7 +22,7 @@ def run(test_case, server_name='antenna'):
         suite = unittest.TestSuite()
         tests = unittest.TestLoader().loadTestsFromTestCase(test_case)
         suite.addTests(tests)
-        print 'Running the tests using the antenna simulators...'
+        print('Running the tests using the antenna simulators...')
         unittest.TextTestRunner(verbosity=2).run(suite)
     finally:
         subprocess.Popen('%s stop' % server_name, shell=True)
