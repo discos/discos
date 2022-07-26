@@ -185,7 +185,7 @@ class CommandLine:
    def query(self,cmd):
        try:
            self.sock.sendall(cmd.encode())
-           msg = self.sock.recv(1024) 
+           msg = self.sock.recv(1024).decode()
            print('query:received:',msg)
            return msg
        
