@@ -237,21 +237,16 @@ int main(int argc, char *argv[]) {
 	// Change the style of the main frame 
 	window.setTitleStyle(CStyle(TITLE_COLOR_PAIR,TITLE_STYLE));
 	
-	if (window.colorReady()) {
-		window.defineColor(GRAY_COLOR,255,255,255);		
-		window.defineColorPair(BLUE_GRAY,CColor::BLUE,GRAY_COLOR);
-		window.defineColorPair(GRAY_BLUE,GRAY_COLOR,CColor::BLUE);		
-	}
-	else {
-		window.defineColorPair(BLUE_GRAY,CColor::BLUE,CColor::WHITE);
-		window.defineColorPair(GRAY_BLUE,CColor::WHITE,CColor::BLUE);	
-		window.defineColorPair(BLACK_RED,CColor::BLACK,CColor::RED);	
-		window.defineColorPair(BLACK_GREEN,CColor::BLACK,CColor::GREEN);	
-		window.defineColorPair(BLACK_YELLOW,CColor::BLACK,CColor::YELLOW);	
-		window.defineColorPair(BLACK_BLUE,CColor::BLACK,CColor::BLUE);		
-		window.defineColorPair(BLACK_MAGENTA,CColor::BLACK,CColor::MAGENTA);	
-		window.defineColorPair(BLACK_WHITE,CColor::BLACK,CColor::WHITE	);			
-	}
+	window.defineColor(GRAY_COLOR,500,500,500);
+	window.defineColorPair(BLUE_GRAY,CColor::BLUE,CColor::WHITE);
+	window.defineColorPair(GRAY_BLUE,CColor::WHITE,CColor::BLUE);
+	window.defineColorPair(BLACK_RED,CColor::BLACK,CColor::RED);
+	window.defineColorPair(BLACK_GREEN,CColor::BLACK,CColor::GREEN);
+	window.defineColorPair(BLACK_YELLOW,CColor::BLACK,CColor::YELLOW);
+	window.defineColorPair(BLACK_BLUE,CColor::BLACK,CColor::BLUE);
+	window.defineColorPair(BLACK_MAGENTA,CColor::BLACK,CColor::MAGENTA);
+	window.defineColorPair(BLACK_WHITE,CColor::BLACK,CColor::WHITE);
+
 	ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::FRAME_INITIALIZED"));
 	ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::GET_COMPONENENT: %s",COMPONENT_NAME));
 	try {
