@@ -99,4 +99,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/
 ## Fixed
 ## Changed
 	 issue #689 - The dataset provided by wether station has been enlarged by the wind direction. The correctponding RAL 'wx' command will noe provided wind direction readout, as well
-    issue #621 - The maiumun numeber of chars of the schedule file name is now 37 (extension included). This is done for fits file and archive issue with the lenght of the schedule name.
+    issue #621 - The maximum number of chars of the schedule file name is now 37 (extension included). This is done for fits file and archive issue with the lenght of the schedule name.
