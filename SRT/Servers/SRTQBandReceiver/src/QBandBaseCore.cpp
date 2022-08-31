@@ -32,7 +32,6 @@ void CComponentCore::initialize(maci::ContainerServices* services)
     m_statusWord=0;
     m_ioMarkError = false;
     m_calDiode=false;
-    printf("ciao");
 }
 
 CConfiguration const * const  CComponentCore::execute() throw (

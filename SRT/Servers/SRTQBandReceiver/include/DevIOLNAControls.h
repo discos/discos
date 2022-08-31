@@ -61,7 +61,7 @@ public:
 	*/
 	ACS::doubleSeq read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
 	{
-        // In pCore I need a method to get the vector of values (An extension, so I can ereditate from ComponentCore)
+      // In pCore I need a method to get the vector of values (An extension, so I can ereditate from ComponentCore)
 		m_val=m_pCore->getStageValues(m_control, m_ifs, m_stage);
 		timestamp=getTimeStamp();  // Completion time
 		return m_val;
@@ -77,10 +77,10 @@ public:
 
 private:
 	SRTQBandCore* m_pCore;
-    ACS::doubleSeq  m_val;
+	ACS::doubleSeq  m_val;
 	IRA::ReceiverControl::FetValue m_control;
 	DWORD m_ifs;
-    DWORD m_stage;
+   DWORD m_stage;
 };
 
 #endif

@@ -1,6 +1,6 @@
 #include "SRTQBandCore.h"
 
-#define NUMBER_OF_STAGES 1 // Amplification stages
+#define NUMBER_OF_FEEDS 5 // Number of feeds per AD24 port
 
 SRTQBandCore::SRTQBandCore() {
     voltage2mbar=voltage2mbarF;
@@ -15,9 +15,9 @@ SRTQBandCore::~SRTQBandCore() {}
 
 void SRTQBandCore::initialize(maci::ContainerServices* services)
 {
-    m_vdStageValues = std::vector<IRA::ReceiverControl::StageValues>(NUMBER_OF_STAGES);
-    m_idStageValues = std::vector<IRA::ReceiverControl::StageValues>(NUMBER_OF_STAGES);
-    m_vgStageValues = std::vector<IRA::ReceiverControl::StageValues>(NUMBER_OF_STAGES);
+    m_vdStageValues = std::vector<IRA::ReceiverControl::StageValues>(NUMBER_OF_FEEDS);
+    m_idStageValues = std::vector<IRA::ReceiverControl::StageValues>(NUMBER_OF_FEEDS);
+    m_vgStageValues = std::vector<IRA::ReceiverControl::StageValues>(NUMBER_OF_FEEDS);
 
     CComponentCore::initialize(services);
 }
@@ -28,10 +28,35 @@ ACS::doubleSeq SRTQBandCore::getStageValues(const IRA::ReceiverControl::FetValue
 
     ACS::doubleSeq values;
     values.length(getFeeds());
+    cout << "getFeeds() " << getFeeds() << endl;
+	 cout << "ifs " << ifs  << endl;
+    cout << "stage " << stage << endl;
+	 cout << "m_configuration.getIFs() " << m_configuration.getIFs()  << endl;
+	 cout << "m_configuration.getFeeds()" << m_configuration.getFeeds() << endl;
     for(size_t i=0; i<getFeeds(); i++)
         values[i] = 0.0;
-    if (ifs >= m_configuration.getIFs() || stage > NUMBER_OF_STAGES || stage < 1)
-        return values;   	
+    if (ifs >= m_configuration.getIFs() || stage > NUMBER_OF_FEEDS || stage < 1)
+        return values;
+    cout << "m_polarization[ifs] " << m_polarization[ifs] << endl;
+	 cout << "Receivers::RCV_LCP " << Receivers::RCV_LCP << endl;
+    cout << "control " << control << endl;
+    cout << "IRA::ReceiverControl::DRAIN_VOLTAGE " << IRA::ReceiverControl::DRAIN_VOLTAGE << endl;
+    cout << "IRA::ReceiverControl::DRAIN_CURRENT " << IRA::ReceiverControl::DRAIN_CURRENT << endl;
+        cout << "IRA::ReceiverControl::GATE_VOLTAGE " << IRA::ReceiverControl::GATE_VOLTAGE << endl;
+	 cout << "m_vdStageValues[stage-1].left_channel.size() " << m_vdStageValues[stage-1].left_channel.size() << endl;
+    //cout << "m_vdStageValues[stage-1].left_channel " << m_vdStageValues[stage-1].left_channel << endl;	 
+	 cout << "m_idStageValues[stage-1].left_channel.size() " << m_idStageValues[stage-1].left_channel.size() << endl;
+    //cout << "m_idStageValues[stage-1].left_channel " << m_idStageValues[stage-1].left_channel << endl;	 
+	 cout << "m_vgStageValues[stage-1].left_channel.size() " << m_vgStageValues[stage-1].left_channel.size() << endl;
+	 //cout << "m_vgStageValues[stage-1].left_channel " << m_vgStageValues[stage-1].left_channel << endl;
+	 
+	 cout << "m_vdStageValues[stage-1].right_channel.size() " << m_vdStageValues[stage-1].right_channel.size() << endl;
+    //cout << "m_vdStageValues[stage-1].right_channel " << m_vdStageValues[stage-1].right_channel << endl;	 
+	 cout << "m_idStageValues[stage-1].right_channel.size() " << m_idStageValues[stage-1].right_channel.size() << endl;
+    //cout << "m_idStageValues[stage-1].right_channel " << m_idStageValues[stage-1].right_channel << endl;	 
+	 cout << "m_vgStageValues[stage-1].right_channel.size() " << m_vgStageValues[stage-1].right_channel.size() << endl;
+	 //cout << "m_vgStageValues[stage-1].right_channel " << m_vgStageValues[stage-1].right_channel << endl;
+    
     // Left Channel
     if(m_polarization[ifs] == (long)Receivers::RCV_LCP) {
         if (control == IRA::ReceiverControl::DRAIN_VOLTAGE) {
@@ -79,7 +104,10 @@ ACS::doubleSeq SRTQBandCore::getStageValues(const IRA::ReceiverControl::FetValue
             }
        }
     }
-
+    
+    for(size_t j = 0; j < getFeeds(); j++){
+      cout << "values " << values[j] << endl;
+    }    
     return values;
 }
 
@@ -101,7 +129,7 @@ void SRTQBandCore::setMode(const char * mode) throw (
 	cmdMode.MakeUpper();
 
     _EXCPT(ReceiversErrors::ModeErrorExImpl,impl,"CConfiguration::setMode()");
-    
+    cout << "cmdMode " << cmdMode << endl;
     // Set the operating mode to the board
     try {
         if(cmdMode == "SINGLEDISH")
@@ -170,8 +198,9 @@ void SRTQBandCore::updateVdLNAControls() throw (ReceiversErrors::ReceiverControl
 {
     // Not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
     try {
-        for(size_t i=0; i<NUMBER_OF_STAGES; i++)
-            m_vdStageValues[i] = m_control->stageValues(IRA::ReceiverControl::DRAIN_VOLTAGE, i+1, SRTQBandCore::voltageConverter);
+    	cout << "Number of feeds per pcb " << NUMBER_OF_FEEDS << endl;
+        for(size_t i=0; i<NUMBER_OF_FEEDS; i++)
+            m_vdStageValues[i] = m_control->feedValues(IRA::ReceiverControl::DRAIN_VOLTAGE, i+1, SRTQBandCore::voltageConverter);
     }
     catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl, "SRTQBandCore::updateVdLNAControls()");
@@ -187,8 +216,8 @@ void SRTQBandCore::updateIdLNAControls() throw (ReceiversErrors::ReceiverControl
 {
     // Not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
     try {
-        for(size_t i=0; i<NUMBER_OF_STAGES; i++)
-            m_idStageValues[i] = m_control->stageValues(IRA::ReceiverControl::DRAIN_CURRENT, i+1, SRTQBandCore::currentConverter);
+        for(size_t i=0; i<NUMBER_OF_FEEDS; i++)
+            m_idStageValues[i] = m_control->feedValues(IRA::ReceiverControl::DRAIN_CURRENT, i+1, SRTQBandCore::currentConverter);
     }
     catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl, impl, "SRTQBandCore::updateIdLNAControls()");
@@ -204,8 +233,8 @@ void SRTQBandCore::updateVgLNAControls() throw (ReceiversErrors::ReceiverControl
 {
     // Not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
     try {
-        for(size_t i=0; i<NUMBER_OF_STAGES; i++)
-            m_vgStageValues[i] = m_control->stageValues(IRA::ReceiverControl::GATE_VOLTAGE, i+1, SRTQBandCore::voltageConverter);
+        for(size_t i=0; i<NUMBER_OF_FEEDS; i++)
+            m_vgStageValues[i] = m_control->feedValues(IRA::ReceiverControl::GATE_VOLTAGE, i+1, SRTQBandCore::voltageConverter);
     }
     catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl, impl, "SRTQBandCore::updateVgLNAControls()");

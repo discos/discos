@@ -138,6 +138,16 @@ public:
         std::vector<double> right_channel;
     };
 
+    /**
+     * The left_channel member stores all the left channel values of a specific
+     * fet quantity (VD, ID or VG), and the right one stores the values for
+     * the right channel.
+     */
+    struct FeedValues {
+        std::vector<double> left_channel;
+        std::vector<double> right_channel;
+    };
+
 
     enum FetValue {DRAIN_VOLTAGE, DRAIN_CURRENT, GATE_VOLTAGE};
 
@@ -770,7 +780,25 @@ public:
              double (*converter)(double voltage)=NULL
     ) throw (ReceiverControlEx);
 
-
+    /** 
+     *
+     *  @param quantity a FetValue: DRAIN_VOLTAGE, DRAIN_CURRENT or GATE_CURRENT 
+     *  @param feed_number the feed number (from 1 to 5) in a single pcb (Qband style)
+     *  @param converter pointer to the function that performs the conversion from
+     *  voltage to the right unit or just with a scale factor; default value is NULL, and in this 
+     *  case the value returned is without conversion.
+     *  @return the StageValues for a given fet ``quantity`` and ``feed_number``. The StageValues
+     *  is a struct of two members std::vector<double>, one member for the left channel and one for 
+     *  the right one. That members contain the related quantities of all the feeds.
+     *  @throw ReceiverControlEx
+     */
+     FeedValues feedValues(
+             FetValue quantity, 
+             unsigned short feed_number, 
+             double (*converter)(double voltage)=NULL
+    ) throw (ReceiverControlEx);
+    
+    
     /** Turn the LNAs of the left channels ON
      *  @param data_type the type of the data; the default type is 1 bit
      *  @param port_type the port type; the default port is the Digital IO
