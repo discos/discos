@@ -1578,6 +1578,8 @@ ReceiverControl::FeedValues ReceiverControl::feedValues(
     std::string vg_selector;               // A03: it allows to select the value requested for a given stadium
     std::string quantity_selector;         // A03: it allows to select the value requested for a given stadium
     
+    const unsigned short feeds_per_pcb = ceil(m_number_of_feeds/5.0f); 
+    
     //cout << "m_number_of_feeds " << m_number_of_feeds << endl;
     //cout << "stage_number " << stage_number << endl;
     //cout << "quantity" << quantity << endl;
@@ -1655,6 +1657,8 @@ ReceiverControl::FeedValues ReceiverControl::feedValues(
         default:
             throw ReceiverControlEx("ReceiverControl::stageValues(): the quantity requested does not exist.");
     }
+    
+    cout << quant << " " << quantity_selector << endl;
 
     // Left channel values, right channel values, left channel disorderly values, right channel disorderly values
     std::vector<double> lvalues, rvalues, ldvalues, rdvalues;
@@ -1733,7 +1737,7 @@ ReceiverControl::FeedValues ReceiverControl::feedValues(
         rvalues.push_back(rdvalues[8]);
     }
     else 
-        if(ldvalues.size() > 50) {
+        if(m_number_of_feeds > 50) {
         	   cout << "feeds > 50" << endl;
             cout << "ldvalues.size()" << ldvalues.size() << endl;
             cout << "rdvalues.size()" << rdvalues.size() << endl;
@@ -1753,18 +1757,19 @@ ReceiverControl::FeedValues ReceiverControl::feedValues(
 	 cout << "rvalues.size() " << rvalues.size() << endl;
 	 cout << "m_number_of_feeds " << m_number_of_feeds << endl;
     
+    
     for(std::size_t i = 0; i < lvalues.size(); i++)
     	cout << i << " lvalues " << lvalues[i] << endl;
     for(std::size_t j = 0; j < rvalues.size(); j++)
     	cout  << j << "rvalues " << rvalues[j] << endl;
-    /*
-    if(lvalues.size() < m_number_of_feeds || rvalues.size() < m_number_of_feeds)
+    
+    if(lvalues.size() < feeds_per_pcb || rvalues.size() < feeds_per_pcb)
         throw ReceiverControlEx("Error: the vector size doesn't match the number of feeds.");
-	*/
-    // Add the first "number_of_feeds" converted items of lvalues and rvalues
+	
+    // Add the first "feeds_per_pcb" converted items of lvalues and rvalues
     FeedValues values;
     try {
-        for(size_t idx=0; idx<m_number_of_feeds; idx++) {
+        for(size_t idx=0; idx<feeds_per_pcb; idx++) {
             (values.left_channel).push_back(converter != NULL ? converter(lvalues[idx]) : lvalues[idx]);
             (values.right_channel).push_back(converter != NULL ? converter(rvalues[idx]) : rvalues[idx]);                   
         }

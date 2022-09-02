@@ -20,8 +20,8 @@
  * <h2>Methods defined in this class</h2>
  * <ul>
  *      <li>virtual void initialize(...): it initializes the object</li>
- *      <li>ACS::doubleSeq getStageValues(...): it returns for each feed the fet quantity value 
- *      <li>of a given channel (if) and stage</li>
+ *      <li>ACS::doubleSeq getFeedValues(...): it returns for each feed per pcb the fet quantity value 
+ *      <li>of a given channel </li>
  *      <li>void setMode(): it allows to change the operating mode of the receiver</li>
  *      <li>void updateVdLNAControls(): it reads and updates from the LNA control board the 
  *      <li>drain voltage values of the transistors</li>
@@ -93,15 +93,15 @@ public:
     virtual void initialize(maci::ContainerServices* services);
 
 
-    /** Return for each feed the fet quantity value of a given channel (if) and stage. For
+    /** Return for each feed the fet quantity value of a given channel. For
      *  instance, if you want to get the VD left channel values of all the feeds related to the amplifier stage N,
-     *  you must call the method like so: stageValues(DRAIN_VOLTAGE, 0, N).
+     *  you must call the method like so: feedValues(DRAIN_VOLTAGE, 0, N).
      *  @param quantity a FetValue: DRAIN_VOLTAGE, DRAIN_CURRENT or GATE_CURRENT 
      *  @param ifs the channel (0: LEFT, 1: RIGHT)
-     *  @param stage the stage number (from 1 to 5)
-     *  @return a doubleSeq of values for a given fet ``quantity``, channel and ``stage_number``.
+     *  @param feed the feed number per pcb (from 1 to 5)
+     *  @return a doubleSeq of values for a given fet ``quantity``, channel and ``feed_number``.
      */
-    ACS::doubleSeq getStageValues(const IRA::ReceiverControl::FetValue& control, DWORD ifs, DWORD stage);
+    ACS::doubleSeq getFeedValues(const IRA::ReceiverControl::FetValue& control, DWORD ifs, DWORD feed);
 
 
     /**
@@ -176,9 +176,9 @@ protected:
 
 private:
 
-    std::vector<IRA::ReceiverControl::StageValues> m_vdStageValues;
-    std::vector<IRA::ReceiverControl::StageValues> m_idStageValues;
-    std::vector<IRA::ReceiverControl::StageValues> m_vgStageValues;
+    std::vector<IRA::ReceiverControl::FeedValues> m_vdFeedValues;
+    std::vector<IRA::ReceiverControl::FeedValues> m_idFeedValues;
+    std::vector<IRA::ReceiverControl::FeedValues> m_vgFeedValues;
 };
 
 

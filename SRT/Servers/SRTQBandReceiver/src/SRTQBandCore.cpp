@@ -15,14 +15,14 @@ SRTQBandCore::~SRTQBandCore() {}
 
 void SRTQBandCore::initialize(maci::ContainerServices* services)
 {
-    m_vdStageValues = std::vector<IRA::ReceiverControl::StageValues>(NUMBER_OF_FEEDS);
-    m_idStageValues = std::vector<IRA::ReceiverControl::StageValues>(NUMBER_OF_FEEDS);
-    m_vgStageValues = std::vector<IRA::ReceiverControl::StageValues>(NUMBER_OF_FEEDS);
+    m_vdFeedValues = std::vector<IRA::ReceiverControl::FeedValues>(NUMBER_OF_FEEDS);
+    m_idFeedValues = std::vector<IRA::ReceiverControl::FeedValues>(NUMBER_OF_FEEDS);
+    m_vgFeedValues = std::vector<IRA::ReceiverControl::FeedValues>(NUMBER_OF_FEEDS);
 
     CComponentCore::initialize(services);
 }
 
-ACS::doubleSeq SRTQBandCore::getStageValues(const IRA::ReceiverControl::FetValue& control, DWORD ifs, DWORD stage)
+ACS::doubleSeq SRTQBandCore::getFeedValues(const IRA::ReceiverControl::FetValue& control, DWORD ifs, DWORD feed)
 {
     baci::ThreadSyncGuard guard(&m_mutex);
 
@@ -30,12 +30,12 @@ ACS::doubleSeq SRTQBandCore::getStageValues(const IRA::ReceiverControl::FetValue
     values.length(getFeeds());
     cout << "getFeeds() " << getFeeds() << endl;
 	 cout << "ifs " << ifs  << endl;
-    cout << "stage " << stage << endl;
+    cout << "feed " << feed << endl;
 	 cout << "m_configuration.getIFs() " << m_configuration.getIFs()  << endl;
 	 cout << "m_configuration.getFeeds()" << m_configuration.getFeeds() << endl;
     for(size_t i=0; i<getFeeds(); i++)
         values[i] = 0.0;
-    if (ifs >= m_configuration.getIFs() || stage > NUMBER_OF_FEEDS || stage < 1)
+    if (ifs >= m_configuration.getIFs() || feed > NUMBER_OF_FEEDS || feed < 1)
         return values;
     cout << "m_polarization[ifs] " << m_polarization[ifs] << endl;
 	 cout << "Receivers::RCV_LCP " << Receivers::RCV_LCP << endl;
@@ -43,64 +43,58 @@ ACS::doubleSeq SRTQBandCore::getStageValues(const IRA::ReceiverControl::FetValue
     cout << "IRA::ReceiverControl::DRAIN_VOLTAGE " << IRA::ReceiverControl::DRAIN_VOLTAGE << endl;
     cout << "IRA::ReceiverControl::DRAIN_CURRENT " << IRA::ReceiverControl::DRAIN_CURRENT << endl;
         cout << "IRA::ReceiverControl::GATE_VOLTAGE " << IRA::ReceiverControl::GATE_VOLTAGE << endl;
-	 cout << "m_vdStageValues[stage-1].left_channel.size() " << m_vdStageValues[stage-1].left_channel.size() << endl;
-    //cout << "m_vdStageValues[stage-1].left_channel " << m_vdStageValues[stage-1].left_channel << endl;	 
-	 cout << "m_idStageValues[stage-1].left_channel.size() " << m_idStageValues[stage-1].left_channel.size() << endl;
-    //cout << "m_idStageValues[stage-1].left_channel " << m_idStageValues[stage-1].left_channel << endl;	 
-	 cout << "m_vgStageValues[stage-1].left_channel.size() " << m_vgStageValues[stage-1].left_channel.size() << endl;
-	 //cout << "m_vgStageValues[stage-1].left_channel " << m_vgStageValues[stage-1].left_channel << endl;
-	 
-	 cout << "m_vdStageValues[stage-1].right_channel.size() " << m_vdStageValues[stage-1].right_channel.size() << endl;
-    //cout << "m_vdStageValues[stage-1].right_channel " << m_vdStageValues[stage-1].right_channel << endl;	 
-	 cout << "m_idStageValues[stage-1].right_channel.size() " << m_idStageValues[stage-1].right_channel.size() << endl;
-    //cout << "m_idStageValues[stage-1].right_channel " << m_idStageValues[stage-1].right_channel << endl;	 
-	 cout << "m_vgStageValues[stage-1].right_channel.size() " << m_vgStageValues[stage-1].right_channel.size() << endl;
-	 //cout << "m_vgStageValues[stage-1].right_channel " << m_vgStageValues[stage-1].right_channel << endl;
+	 cout << "m_vdFeedValues[feed-1].left_channel.size() " << m_vdFeedValues[feed-1].left_channel.size() << endl;
+	 cout << "m_idFeedValues[feed-1].left_channel.size() " << m_idFeedValues[feed-1].left_channel.size() << endl;
+	 cout << "m_vgFeedeValues[feed-1].left_channel.size() " << m_vgFeedValues[feed-1].left_channel.size() << endl;
+
+	 cout << "m_vdFeedValues[feed-1].right_channel.size() " << m_vdFeedValues[feed-1].right_channel.size() << endl;
+	 cout << "m_idFeedValues[feed-1].right_channel.size() " << m_idFeedValues[feed-1].right_channel.size() << endl;
+	 cout << "m_vgFeedeValues[feed-1].right_channel.size() " << m_vgFeedValues[feed-1].right_channel.size() << endl;
     
     // Left Channel
     if(m_polarization[ifs] == (long)Receivers::RCV_LCP) {
         if (control == IRA::ReceiverControl::DRAIN_VOLTAGE) {
-        		if (getFeeds()>m_vdStageValues[stage-1].left_channel.size())
+        		if (getFeeds()>m_vdFeedValues[feed-1].left_channel.size())
     				return values;
             for(size_t i=0; i<getFeeds(); i++) {
-            	values[i] = (m_vdStageValues[stage-1]).left_channel[i];
+            	values[i] = (m_vdFeedValues[feed-1]).left_channel[i];
             }
         }
         else {
             if (control == IRA::ReceiverControl::DRAIN_CURRENT) {
-           		if (getFeeds()>m_idStageValues[stage-1].left_channel.size())
+           		if (getFeeds()>m_idFeedValues[feed-1].left_channel.size())
     					return values;
                for(size_t i=0; i<getFeeds(); i++)
-               	values[i] = (m_idStageValues[stage-1]).left_channel[i];
+               	values[i] = (m_idFeedValues[feed-1]).left_channel[i];
             }
             else {
-            	if (getFeeds()>m_vgStageValues[stage-1].left_channel.size())
+            	if (getFeeds()>m_vgFeedValues[feed-1].left_channel.size())
     					return values;
                for(size_t i=0; i<getFeeds(); i++)
-               	values[i] = (m_vgStageValues[stage-1]).left_channel[i];
+               	values[i] = (m_vgFeedValues[feed-1]).left_channel[i];
             }
         }
     }
     // Right Channel
     if (m_polarization[ifs] == (long)Receivers::RCV_RCP) {
         if (control==IRA::ReceiverControl::DRAIN_VOLTAGE) {
-        		if (getFeeds()>m_vdStageValues[stage-1].right_channel.size())
+        		if (getFeeds()>m_vdFeedValues[feed-1].right_channel.size())
     				return values;
             for(size_t i=0;i<getFeeds();i++)
-                values[i] = (m_vdStageValues[stage-1]).right_channel[i];
+                values[i] = (m_vdFeedValues[feed-1]).right_channel[i];
         }
         else {
             if (control == IRA::ReceiverControl::DRAIN_CURRENT) {
-            	if (getFeeds()>m_idStageValues[stage-1].right_channel.size())
+            	if (getFeeds()>m_idFeedValues[feed-1].right_channel.size())
     					return values; 
                for(size_t i=0; i<getFeeds(); i++)
-               	values[i] = (m_idStageValues[stage-1]).right_channel[i];
+               	values[i] = (m_idFeedValues[feed-1]).right_channel[i];
             }
             else { 
-            	if (getFeeds()>m_vgStageValues[stage-1].right_channel.size())
+            	if (getFeeds()>m_vgFeedValues[feed-1].right_channel.size())
     					return values;
                for(size_t i=0; i<getFeeds(); i++)
-               	values[i] = (m_vgStageValues[stage-1]).right_channel[i];
+               	values[i] = (m_vgFeedValues[feed-1]).right_channel[i];
             }
        }
     }
@@ -198,9 +192,9 @@ void SRTQBandCore::updateVdLNAControls() throw (ReceiversErrors::ReceiverControl
 {
     // Not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
     try {
-    	cout << "Number of feeds per pcb " << NUMBER_OF_FEEDS << endl;
+        cout << "Number of feeds per pcb " << NUMBER_OF_FEEDS << endl;
         for(size_t i=0; i<NUMBER_OF_FEEDS; i++)
-            m_vdStageValues[i] = m_control->feedValues(IRA::ReceiverControl::DRAIN_VOLTAGE, i+1, SRTQBandCore::voltageConverter);
+            m_vdFeedValues[i] = m_control->feedValues(IRA::ReceiverControl::DRAIN_VOLTAGE, i+1, SRTQBandCore::voltageConverter);
     }
     catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl, "SRTQBandCore::updateVdLNAControls()");
@@ -217,7 +211,7 @@ void SRTQBandCore::updateIdLNAControls() throw (ReceiversErrors::ReceiverControl
     // Not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
     try {
         for(size_t i=0; i<NUMBER_OF_FEEDS; i++)
-            m_idStageValues[i] = m_control->feedValues(IRA::ReceiverControl::DRAIN_CURRENT, i+1, SRTQBandCore::currentConverter);
+            m_idFeedValues[i] = m_control->feedValues(IRA::ReceiverControl::DRAIN_CURRENT, i+1, SRTQBandCore::currentConverter);
     }
     catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl, impl, "SRTQBandCore::updateIdLNAControls()");
@@ -234,7 +228,7 @@ void SRTQBandCore::updateVgLNAControls() throw (ReceiversErrors::ReceiverControl
     // Not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
     try {
         for(size_t i=0; i<NUMBER_OF_FEEDS; i++)
-            m_vgStageValues[i] = m_control->feedValues(IRA::ReceiverControl::GATE_VOLTAGE, i+1, SRTQBandCore::voltageConverter);
+            m_vgFeedValues[i] = m_control->feedValues(IRA::ReceiverControl::GATE_VOLTAGE, i+1, SRTQBandCore::voltageConverter);
     }
     catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl, impl, "SRTQBandCore::updateVgLNAControls()");

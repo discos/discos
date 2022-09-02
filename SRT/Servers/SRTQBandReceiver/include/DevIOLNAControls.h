@@ -31,8 +31,8 @@ public:
             SRTQBandCore* core,
             const IRA::ReceiverControl::FetValue& control,
             const DWORD ifs,
-            const DWORD stage
-    ) :  m_pCore(core), m_control(control), m_ifs(ifs), m_stage(stage)
+            const DWORD feed
+    ) :  m_pCore(core), m_control(control), m_ifs(ifs), m_feed(feed)
 	{
 		AUTO_TRACE("DevIOLNAControls::DevIOLNAControls()");
         m_val.length(m_pCore->getFeeds());
@@ -62,7 +62,7 @@ public:
 	ACS::doubleSeq read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
 	{
       // In pCore I need a method to get the vector of values (An extension, so I can ereditate from ComponentCore)
-		m_val=m_pCore->getStageValues(m_control, m_ifs, m_stage);
+		m_val=m_pCore->getFeedValues(m_control, m_ifs, m_feed);
 		timestamp=getTimeStamp();  // Completion time
 		return m_val;
 	}
@@ -80,7 +80,7 @@ private:
 	ACS::doubleSeq  m_val;
 	IRA::ReceiverControl::FetValue m_control;
 	DWORD m_ifs;
-   DWORD m_stage;
+   DWORD m_feed;
 };
 
 #endif

@@ -984,7 +984,6 @@ private:
     /** Number of feeds of the receiver */
     const unsigned short m_number_of_feeds;
      
-
     /** The IP address of the switches board */
     const std::string m_switch_ip; 
 
