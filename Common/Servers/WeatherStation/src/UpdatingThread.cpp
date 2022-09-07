@@ -1,4 +1,10 @@
 #include "WeatherStationImpl.h"
+#include <deque>
+#include <numeric>
+using namespace std;
+deque<float> deq;
+float wind_avg;
+float deq_sum;
 
 CUpdatingThread::CUpdatingThread (const ACE_CString& name,
     WeatherStationImpl*  weatherStation,
@@ -19,11 +25,29 @@ void CUpdatingThread::runLoop()
     m_weatherstation_p->updateData();
     Weather::parameters w_pars = m_weatherstation_p->getData();
 
-    if(w_pars.windspeed > m_threshold)
+    deq.push_back(w_pars.windspeed);
+    ACS_LOG(LM_FULL_INFO,"UpdatingThread::runLoop()",(LM_INFO,"Deque size=%zu ", deq.size()));
+    deq_sum  = accumulate(deq.begin(), deq.end(), 0.0);
+    ACS_LOG(LM_FULL_INFO,"UpdatingThread::runLoop()",(LM_INFO,"Deque sum=%f ", deq_sum));
+    
+    if(deq.size() == 10)    
+    	{
+    		wind_avg = deq_sum / deq.size();
+    		ACS_LOG(LM_FULL_INFO,"UpdatingThread::runLoop()",(LM_INFO,"wind avg=%f ", wind_avg));
+    		if(wind_avg > m_threshold) 
+    			{
+       	 		m_weatherstation_p->parkAntenna();
+       	 		ACS_LOG(LM_FULL_INFO,"UpdatingThread::runLoop()",(LM_WARNING,"WINDSPEED_AVG=%f ", wind_avg));
+    			}
+    		deq.erase(deq.begin());
+   	 }
+    
+ /*   if(w_pars.windspeed > m_threshold) 
     {
         m_weatherstation_p->parkAntenna();
         ACS_LOG(LM_FULL_INFO,"UpdatingThread::runLoop()",(LM_WARNING,"WINDSPEED=%f ", w_pars.windspeed));
-    }
+        std::cout<<"parking the Antenna"<<std::endl;
+    }    */
 }
 
 void CUpdatingThread::onStart()
