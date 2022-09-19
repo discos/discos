@@ -1584,7 +1584,7 @@ ReceiverControl::FeedValues ReceiverControl::feedValues(
     //cout << "stage_number " << stage_number << endl;
     //cout << "quantity" << quantity << endl;
     
-	 if(m_number_of_feeds <= 10)
+	 if(m_number_of_feeds <= 5)
         column_selectors.push_back("0001");
     else if(m_number_of_feeds <= 40)  {
         column_selectors.push_back("0001");
@@ -1710,7 +1710,7 @@ ReceiverControl::FeedValues ReceiverControl::feedValues(
         throw ReceiverControlEx(error_msg + ex.what());
     }	 
 	 
-    if(m_number_of_feeds <= 10) { // just one column (BRD Selection 0 and 2)
+    if(m_number_of_feeds <= 5) { // just one column (BRD Selection 0)
     	  cout << "feeds <=10" << endl;
         cout << "ldvalues.size()" << ldvalues.size() << endl;
         cout << "rdvalues.size()" << rdvalues.size() << endl;
@@ -1757,12 +1757,12 @@ ReceiverControl::FeedValues ReceiverControl::feedValues(
 	 cout << "rvalues.size() " << rvalues.size() << endl;
 	 cout << "m_number_of_feeds " << m_number_of_feeds << endl;
     
-    
-    for(std::size_t i = 0; i < lvalues.size(); i++)
-    	cout << i << " lvalues " << lvalues[i] << endl;
+    /*for(std::size_t i = 0; i < lvalues.size(); i++)
+       cout << i << " lvalues " << lvalues[i] << endl;
     for(std::size_t j = 0; j < rvalues.size(); j++)
-    	cout  << j << "rvalues " << rvalues[j] << endl;
-    
+       cout  << j << "rvalues " << rvalues[j] << endl;*/
+
+
     if(lvalues.size() < feeds_per_pcb || rvalues.size() < feeds_per_pcb)
         throw ReceiverControlEx("Error: the vector size doesn't match the number of feeds.");
 	
