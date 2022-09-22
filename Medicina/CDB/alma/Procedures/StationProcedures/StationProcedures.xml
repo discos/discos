@@ -12,6 +12,8 @@
 	initialize=CCC
 	setSection=0,*,730.0,*,*,*,*
 	setSection=1,*,730.0,*,*,*,*
+	dmed=default
+	calmux=TotalPower
 	device=0
 	calOff
 	restFrequency=0
@@ -29,6 +31,8 @@
 	setSection=1,*,300.0,*,*,*,*
 	setAttenuation=0,8
 	setAttenuation=1,12
+	dmed=default
+	calmux=TotalPower
 	device=0
 	calOff
 	restFrequency=0
@@ -42,6 +46,8 @@
 	servoSetup=KKC
 	chooseBackend=TotalPower
 	initialize=KKC
+	dmed=default
+	calmux=TotalPower
 	device=0
 	setAttenuation=0,9
 	setAttenuation=1,9
@@ -61,6 +67,8 @@
 	initialize=XXP
 	setSection=0,*,730.0,*,*,*,*
 	setSection=1,*,730.0,*,*,*,*
+	dmed=default
+	calmux=TotalPower
 	device=0
 	calOff
 	restFrequency=0
@@ -77,6 +85,8 @@
 	initialize=CCCL
 	setSection=0,*,300.0,*,*,*,*
 	setSection=1,*,300.0,*,*,*,*
+	dmed=default
+	calmux=TotalPower
 	setAttenuation=0,8
 	setAttenuation=1,8
 	device=0
@@ -95,6 +105,8 @@
 	initialize=CHCL
 	setSection=0,*,300.0,*,*,*,*
 	setSection=1,*,300.0,*,*,*,*
+	dmed=default
+	calmux=TotalPower
 	setAttenuation=0,8
 	setAttenuation=1,8
 	device=0

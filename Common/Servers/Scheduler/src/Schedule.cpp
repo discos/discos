@@ -111,6 +111,10 @@ CBaseSchedule::~CBaseSchedule()
 bool CBaseSchedule::readAll(bool check)
 {
 	IRA::CString err;
+	if (m_fileName.GetLength()>MAX_SCHED_NAME_LEN) {
+		m_lastError.Format("Schedule name exceeds the maximum allowed characters of %d",MAX_SCHED_NAME_LEN);
+		return false;
+	}
 	if (!m_parser->open(m_fileName)) {
 		m_lastError.Format("Cannot open file %s",(const char *)m_fileName);
 		return false;
