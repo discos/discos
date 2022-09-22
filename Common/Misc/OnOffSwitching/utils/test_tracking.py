@@ -25,7 +25,7 @@ while True:
         el_list.append(math.degrees(el))
         time_list.append(getTimeStamp().value)
         time.sleep(0.05)
-    except KeyboardInterrupt, e:
+    except KeyboardInterrupt as e:
         break
 
 outfile = open('outfile.data', 'w')

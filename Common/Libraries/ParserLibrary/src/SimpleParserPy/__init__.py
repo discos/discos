@@ -4,7 +4,7 @@ Presently only a small support for scripting commands and the support for python
 component is included
 
 """
-from ParserConnector import add_user_message
-from ParserConnector import send_message
+from .ParserConnector import add_user_message
+from .ParserConnector import send_message
 
 

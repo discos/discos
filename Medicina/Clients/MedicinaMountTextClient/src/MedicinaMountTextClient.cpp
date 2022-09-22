@@ -179,21 +179,16 @@ int main(int argc, char *argv[]) {
 	window.initFrame();
 	window.setTitle("Mount");
 	window.setTitleStyle(CStyle(CColorPair::RED_BLACK,CStyle::BOLD|CStyle::UNDERLINE));
-	if (window.colorReady()) {
-		window.defineColor(GRAY_COLOR,255,255,255);		
-		window.defineColorPair(BLUE_GRAY,CColor::BLUE,GRAY_COLOR);
-		window.defineColorPair(GRAY_BLUE,GRAY_COLOR,CColor::BLUE);		
-	}
-	else {
-		window.defineColorPair(BLUE_GRAY,CColor::BLUE,CColor::WHITE);
-		window.defineColorPair(GRAY_BLUE,CColor::WHITE,CColor::BLUE);	
-		window.defineColorPair(BLACK_RED,CColor::BLACK,CColor::RED);	
-		window.defineColorPair(BLACK_GREEN,CColor::BLACK,CColor::GREEN);	
-		window.defineColorPair(BLACK_YELLOW,CColor::BLACK,CColor::YELLOW);	
-		window.defineColorPair(BLACK_BLUE,CColor::BLACK,CColor::BLUE);		
-		window.defineColorPair(BLACK_MAGENTA,CColor::BLACK,CColor::MAGENTA);	
-		window.defineColorPair(BLACK_WHITE,CColor::BLACK,CColor::WHITE	);			
-	}
+	window.defineColor(GRAY_COLOR,500,500,500);
+	window.defineColorPair(BLUE_GRAY,CColor::BLUE,CColor::WHITE);
+	window.defineColorPair(GRAY_BLUE,CColor::WHITE,CColor::BLUE);
+	window.defineColorPair(BLACK_RED,CColor::BLACK,CColor::RED);
+	window.defineColorPair(BLACK_GREEN,CColor::BLACK,CColor::GREEN);
+	window.defineColorPair(BLACK_YELLOW,CColor::BLACK,CColor::YELLOW);
+	window.defineColorPair(BLACK_BLUE,CColor::BLACK,CColor::BLUE);
+	window.defineColorPair(BLACK_MAGENTA,CColor::BLACK,CColor::MAGENTA);
+	window.defineColorPair(BLACK_WHITE,CColor::BLACK,CColor::WHITE);
+
 	ACS_LOG(LM_SOURCE_INFO,"mountTui::Main()",(LM_INFO,"FRAME_INITIALIZED"));
 	ACS_LOG(LM_SOURCE_INFO,"mountTui::Main()",(LM_INFO,"GET_DEFAULT_COMPONENENT: %s",COMPONENT_INTERFACE_TPYE));
 	try {

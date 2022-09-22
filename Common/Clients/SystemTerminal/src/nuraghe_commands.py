@@ -1,3 +1,4 @@
+from __future__ import print_function
 # Marco Buttu <mbuttu@oa-cagliari.inaf.it> 
 # Doctrings from the "Observing at the SRT with Nuraghe, Issue n.8, 21/10/14",
 # by Simona Righini and Andrea Orlati"
@@ -410,11 +411,11 @@ def help(command):
     try:
         cmd = getattr(myself, command)
         return cmd.__doc__
-    except Exception, ex:
-        print ex.message
-        print 'usage: help(command)'
-        print 'e.g. > help(setupCCB)'
-        print 'help() (without argument) lists all the available commands'
+    except Exception as ex:
+        print(ex.message)
+        print('usage: help(command)')
+        print('e.g. > help(setupCCB)')
+        print('help() (without argument) lists all the available commands')
 
 
 def ifdist():
@@ -697,7 +698,7 @@ import copy
 myself =  __import__(__name__)
 # Create the commands dictionary
 commands = myself.__dict__.copy() # Shallow copy, but we do not mind
-for cmd in commands.keys():
+for cmd in list(commands.keys()):
     if cmd.startswith('__'):
         del commands[cmd]
 

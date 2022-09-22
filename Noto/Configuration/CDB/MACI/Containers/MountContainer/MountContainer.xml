@@ -15,7 +15,7 @@
 	ServerThreads="5">
 
 	<Autoload>
-		<cdb:_ string="baci" />
+		<cdb:e string="baci" />
 	</Autoload>
 	
 	<LoggingConfig

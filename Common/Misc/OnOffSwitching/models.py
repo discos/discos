@@ -1,4 +1,4 @@
-from __future__ import division
+from __future__ import division, print_function
 
 __credits__ = """Author: Marco Buttu <mbuttu@oa-cagliari.inaf.it>
 Licence: GPL 2.0 <http://www.gnu.org/licenses/gpl-2.0.html>"""
@@ -23,8 +23,8 @@ class Target(object):
         """Target information: orbital parameter and observer."""
         try:
             self.source = ephem.readdb(op)
-        except Exception, e:
-            print "Unexpected exception: %s" %e
+        except Exception as e:
+            print("Unexpected exception: %s" %e)
             logging.exception('Got exception on pyephem')
             sys.exit()
         self.observer = observer

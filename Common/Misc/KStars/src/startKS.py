@@ -7,7 +7,7 @@
 #andrea orlati(a.orlati@ira.inaf.it)   22/05/2008     Creation
 
 
-
+from __future__ import print_function
 import sys
 from Acspy.Clients.SimpleClient import PySimpleClient
 from Acspy.Common.Callbacks import *
@@ -34,7 +34,7 @@ def main():
     sc = PySimpleClient()
     try:
         c = sc.getComponent("ANTENNA/Boss")
-    except Exception , ex:
+    except Exception as ex:
         newEx = ClientErrorsImpl.CouldntAccessComponentExImpl( exception=ex, create=1 )
         newEx.setComponentName("ANTENNA/Boss")
         newEx.log(ACS_LOG_ERROR)
@@ -42,14 +42,14 @@ def main():
         
     try:
         azimuth = c._get_observedAzimuth()
-    except Exception, ex:
+    except Exception as ex:
         newEx = ClientErrorsImpl.CouldntAccessPropertyExImpl( exception=ex, create=1 )
         newEx.setPropertyName("observedAzimuth")
         newEx.log(ACS_LOG_ERROR)
         sys.exit(1)
     try:
         elevation = c._get_observedElevation()
-    except Exception, ex:
+    except Exception as ex:
         newEx = ClientErrorsImpl.CouldntAccessPropertyExImpl( exception=ex, create=1 )
         newEx.setPropertyName("observedElevation")
         newEx.log(ACS_LOG_ERROR)
@@ -73,7 +73,7 @@ def main():
     	else:
     		vivo = 0 
 
-    print "Finished..."
+    print("Finished...")
     sc.releaseComponent("ANTENNA/Boss")
     sc.disconnect()
 
