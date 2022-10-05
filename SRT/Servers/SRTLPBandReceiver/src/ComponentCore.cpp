@@ -100,7 +100,7 @@ void CComponentCore::getPBandLO(ACS::doubleSeq& lo)
     baci::ThreadSyncGuard guard(&m_mutex);
     lo.length(m_configuration.getIFs());
     for (WORD i=0; i<m_configuration.getIFs(); i++) {
-        lo[i] = 0;
+        lo[i] = m_localOscillatorValue;
     }
 }
 
