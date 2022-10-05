@@ -8,6 +8,6 @@
                 <MarkEntry><Feed>0</Feed><Polarization>LEFT</Polarization><Coefficients>-0.002043493,0.2691379,-14.67779,424.5092,-6873.623,59156.21,-211726.7</Coefficients></MarkEntry>
                 <MarkEntry><Feed>0</Feed><Polarization>RIGHT</Polarization><Coefficients>-0.001613087,0.2081852,-11.10797,313.8077,-4955.943,41554.51,-144823.5</Coefficients></MarkEntry>
                 <MarkEntry><Feed>1</Feed><Polarization>LEFT</Polarization><Coefficients>-0.001590069,0.2223032,-12.87727,395.8157,-6813.837,62339.11,-236985.5 </Coefficients></MarkEntry>
-                <MarkEntry><Feed>1</Feed><Polarization>RIGHT</Polarization><Coefficients>0.002984398,-0.4071563,23.03512,-691.3777,11603.30,-103172.9,3.79469.3</Coefficients></MarkEntry>
+                <MarkEntry><Feed>1</Feed><Polarization>RIGHT</Polarization><Coefficients>0.002984398,-0.4071563,23.03512,-691.3777,11603.30,-103172.9,379469.3</Coefficients></MarkEntry>
 
 </MarkCoefficientsKBandLookUpTable>

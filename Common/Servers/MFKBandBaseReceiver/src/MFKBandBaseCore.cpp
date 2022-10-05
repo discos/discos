@@ -647,6 +647,7 @@ void CComponentCore::getCalibrationMark(
 				cout << "integralL " << integral << endl;
             mark=integral/(f2-f1);
             integral_vect.clear();
+            integral = 0;
         }
         else if (m_polarization[ifs[i]]==(long)Receivers::RCV_RCP) {
             // take the real observed bandwidth....the correlation between detectro device and the band provided by the receiver
@@ -668,6 +669,7 @@ void CComponentCore::getCalibrationMark(
             cout << "integralR " << integral << endl;
             mark=integral/(f2-f1);
             integral_vect.clear();
+            integral = 0;
         }
         result[i]=mark;
         resFreq[i]=realFreq;
