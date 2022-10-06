@@ -136,10 +136,11 @@ class SpeedoMeter(Qwt.QwtDial):
         return self.__label
 
     def drawScaleContents(self, painter, center, radius):
+        radius = int(radius)
         rect = Qt.QRect(0, 0, 2 * radius, 2 * radius - 10)
         rect.moveCenter(center.toPoint())
         painter.setPen(self.palette().color(Qt.QPalette.Text))
-        painter.drawText(rect, Qt.Qt.AlignBottom | Qt.Qt.AlignHCenter, self.__label)
+        painter.drawText(rect, int(Qt.Qt.AlignBottom | Qt.Qt.AlignHCenter), self.__label)
         rect = Qt.QRect(-1000, -1000, 2 * radius - 30, 2 * radius - 30)
         rect.moveCenter(center.toPoint())
 
@@ -150,11 +151,11 @@ class SpeedoMeter(Qwt.QwtDial):
         pen.setWidth(8)
         pen.setColor(Qt.Qt.red)
         painter.setPen(pen)
-        painter.drawArc(rect, 16 * -45, 16 * (80 - self.limit) * unit)
+        painter.drawArc(rect, 16 * -45, int(16 * (80 - self.limit) * unit))
 
         pen.setColor(Qt.Qt.green)
         painter.setPen(pen)
-        painter.drawArc(rect, 16 * (-45 + (80 - self.limit) * unit), 16 * self.limit * unit)
+        painter.drawArc(rect, int(16 * (-45 + (80 - self.limit) * unit)), int(16 * self.limit * unit))
 
     def setVal(self, value=0.):
         self.setValue(value)
@@ -176,8 +177,8 @@ class Background(Qwt.QwtPlotItem):
         red = Qt.QColor(Qt.Qt.red)
         yellow = Qt.QColor(Qt.Qt.yellow)
 
-        r.setBottom(yMap.transform(self.limit))
-        r.setTop(yMap.transform(self.limit))
+        r.setBottom(int(yMap.transform(self.limit)))
+        r.setTop(int(yMap.transform(self.limit)))
         painter.fillRect(r, red)
 
 
