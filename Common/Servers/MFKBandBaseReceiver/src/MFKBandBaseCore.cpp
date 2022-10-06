@@ -620,7 +620,6 @@ void CComponentCore::getCalibrationMark(
     double integral = 0;
     double mark=0;
     for (unsigned i=0;i<stdLen;i++) {
-    	cout << "stdLen " << i << endl;
         if (m_polarization[ifs[i]]==(long)Receivers::RCV_LCP) {
             // take the real observed bandwidth....the correlation between detector device and the band provided by the receiver
             if (!IRA::CIRATools::skyFrequency(freqs[i],bandwidths[i],m_startFreq[ifs[i]],m_bandwidth[ifs[i]],realFreq,realBw)) {
@@ -644,7 +643,6 @@ void CComponentCore::getCalibrationMark(
 					}
             for(vector<double>::iterator it = integral_vect.begin(); it != integral_vect.end(); it++)
                integral += *it;
-				cout << "integralL " << integral << endl;
             mark=integral/(f2-f1);
             integral_vect.clear();
             integral = 0;
@@ -666,7 +664,6 @@ void CComponentCore::getCalibrationMark(
 					}
             for(vector<double>::iterator it = integral_vect.begin(); it != integral_vect.end(); it++)
                integral += *it;
-            cout << "integralR " << integral << endl;
             mark=integral/(f2-f1);
             integral_vect.clear();
             integral = 0;
