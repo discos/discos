@@ -899,6 +899,7 @@ void CMedicinaMountSocket::checkCommandedMode() throw (ConnectionExImpl,SocketEr
 	  			CUSTOM_LOG(LM_FULL_INFO,"CMedicinaMountSocket::checkCommandedMode()",
 	  			  (LM_NOTICE,"Trying to activate drive power after a power failure....."));
 	  			m_modeCheckRecover=true;
+	  			m_powerFailDetected=false;
 	  			Mode(commandedMode,commandedMode);
 	  		}
 	  	}
