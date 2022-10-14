@@ -97,10 +97,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/
 
 ## [discos1.0.6] - 09-02-2022
 ## Added
-    issue #655 - ACU Component for Noto and Medicina is now capble to prevent seldom mode changes coming from ACU reset
+    issue #655 - ACU Component for Noto and Medicina is now capable to prevent seldom mode changes coming from ACU reset
     issue #653 - added a couple of scriptsto ease vnc conection from remote a file copying. The scripts support 
                  linux and macos
-	 issue #588 - added the control of the new Noto subreflector and primary focus receiver box servo system.     
+	issue #588 - added the control of the new Noto subreflector and primary focus receiver box servo system.     
+    issue #758 - Sardara enabled for Medicina
     
 ## Fixed
     issue #448 - Added Sky Offsets to calibration tool client
