@@ -84,3 +84,32 @@ std::string SRTMinorServoCommandLibrary::offset(std::string servo_id, std::vecto
     command << "\r\n";
     return command.str();
 }
+
+std::map<std::string, std::variant<int, double, std::string> > SRTMinorServoCommandLibrary::parseAnswer(std::string answer)
+{
+    std::map<std::string, std::variant<int, double, std::string> > args;
+
+    std::stringstream ss(answer);
+    std::string token;
+
+    std::pair<std::string, std::string> output;
+    std::getline(ss, token, ':');
+    output.first = token;
+    std::getline(ss, token, ',');
+    output.second = token;
+    args.insert(output);
+
+    std::getline(ss, token, ',');
+    args["TIMESTAMP"] = std::stod(token);
+
+    while(std::getline(ss, token, '|'))
+    {
+        std::stringstream sss(token);
+        std::string key, value;
+        std::getline(sss, key, '=');
+        std::getline(sss, value);
+        args[key] = std::stoi(value);
+    }
+
+    return args;
+}

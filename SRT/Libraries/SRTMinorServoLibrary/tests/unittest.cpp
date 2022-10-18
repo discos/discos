@@ -51,3 +51,21 @@ TEST(SRTMinorServoCommandLibraryTest, offset)
 {
     EXPECT_EQ(SRTMinorServoCommandLibrary::offset("PFP", std::vector<double>{0.,1.,2.,3.,4.,5.}), "OFFSET=PFP,0,1,2,3,4,5\r\n");
 }
+
+TEST(SRTMinorServoCommandLibraryTest, parseAnswer)
+{
+    std::string answer = "OUTPUT:GOOD,1665743366.123456,CURRENT_CONFIG=21|SIMULATION_ENABLED=34|PLC_TIME=78|PLC_VERSION=69|CONTROL=14|POWER=38|EMERGENCY=69|ENABLED=51|OPERATIVE_MODE=94";
+    std::map<std::string, std::variant<int, double, std::string> > args;
+    args["OUTPUT"] = "GOOD";
+    args["TIMESTAMP"] = 1665743366.123456;
+    args["CURRENT_CONFIG"] = 21;
+    args["SIMULATION_ENABLED"] = 34;
+    args["PLC_TIME"] = 78;
+    args["PLC_VERSION"] = 69;
+    args["CONTROL"] = 14;
+    args["POWER"] = 38;
+    args["EMERGENCY"] = 69;
+    args["ENABLED"] = 51;
+    args["OPERATIVE_MODE"] = 94;
+    EXPECT_EQ(SRTMinorServoCommandLibrary::parseAnswer(answer), args);
+}

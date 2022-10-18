@@ -9,6 +9,8 @@
 
 #include <sstream>
 #include <vector>
+#include <map>
+#include <variant>
 
 /**
  * SRT Minor Servo Command Library
@@ -73,6 +75,8 @@ public:
      * @return the composed message
      */
     static std::string offset(std::string servo_id, std::vector<double> coordinates);
+
+    static std::map<std::string, std::variant<int, double, std::string> > parseAnswer(std::string answer);
 };
 
 #endif

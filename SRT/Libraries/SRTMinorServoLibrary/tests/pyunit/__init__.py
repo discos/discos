@@ -56,6 +56,22 @@ class TestPySRTMinorServoCommandLibrary(unittest.TestCase):
         expected_command = 'OFFSET=PFP,0.1,1.1,2.1\r\n'
         self.assertEqual(command, expected_command)
 
+    def test_parseAnswer(self):
+        dictionary = SRTMinorServoCommandLibrary.parseAnswer("OUTPUT:GOOD,1665743366.123456,CURRENT_CONFIG=21|SIMULATION_ENABLED=34|PLC_TIME=78|PLC_VERSION=69|CONTROL=14|POWER=38|EMERGENCY=69|ENABLED=51|OPERATIVE_MODE=94")
+        expected_dictionary = {
+            'OUTPUT': 'GOOD',
+            'TIMESTAMP': 1665743366.123456,
+            'CURRENT_CONFIG': 21,
+            'SIMULATION_ENABLED': 34,
+            'PLC_TIME': 78,
+            'PLC_VERSION': 69,
+            'CONTROL': 14,
+            'POWER': 38,
+            'EMERGENCY': 69,
+            'ENABLED': 51,
+            'OPERATIVE_MODE': 94
+        }
+        self.assertEqual(dictionary, expected_dictionary)
 
 if __name__ == '__main__':
     unittest.main()

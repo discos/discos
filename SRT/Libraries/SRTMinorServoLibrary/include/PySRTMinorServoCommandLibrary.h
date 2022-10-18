@@ -52,6 +52,8 @@ public:
      */
     static std::string offset(std::string servo_id, boost::python::list& coordinates);
 
+    static boost::python::dict parseAnswer(std::string answer);
+
 private:
     /*
      * Converts the given Python list into a C++ std::vector object
@@ -81,5 +83,6 @@ BOOST_PYTHON_MODULE(libPySRTMinorServoCommandLibrary)
     def("preset", &PySRTMinorServoCommandLibrary::preset);
     def("programTrack", &PySRTMinorServoCommandLibrary::programTrack, programTrack(arg("start_time") = -1));
     def("offset", &PySRTMinorServoCommandLibrary::offset);
+    def("parseAnswer", &PySRTMinorServoCommandLibrary::parseAnswer);
 }
 #endif
