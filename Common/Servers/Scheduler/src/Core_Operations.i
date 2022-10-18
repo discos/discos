@@ -1100,11 +1100,17 @@ void CCore::_callTSys(ACS::doubleSeq& tsys) throw (ComponentErrors::CouldntGetCo
 	ratio.length(inputs);
 	tsys.length(inputs);
 	for (int i=0;i<inputs;i++) {
-		if ((mark[i]>0.0) && (tpiCal[i]>tpi[i])) {
-			//ratio[i]=(tpiCal[i]-tpi[i])/mark[i];
-			ratio[i]=mark[i]/(tpiCal[i]-tpi[i]);
-			ratio[i]*=scaleFactor;
-			tsys[i]=(tpi[i]-zero[i])*ratio[i];
+		if ((i<(int)tpiCal->length()) && (i<(int)tpi->length()) && (i<(int)zero->length()) && (i<(int)mark->length())) {
+			if ((mark[i]>0.0) && (tpiCal[i]>tpi[i])) {
+				//ratio[i]=(tpiCal[i]-tpi[i])/mark[i];
+				ratio[i]=mark[i]/(tpiCal[i]-tpi[i]);
+				ratio[i]*=scaleFactor;
+				tsys[i]=(tpi[i]-zero[i])*ratio[i];
+			}
+			else {
+				ratio[i]=1.0;
+				tsys[i]=-1.0;
+			}
 		}
 		else {
 			ratio[i]=1.0;
@@ -1125,13 +1131,17 @@ void CCore::_callTSys(ACS::doubleSeq& tsys) throw (ComponentErrors::CouldntGetCo
 	for (int i=0;i<inputs;i++) {
 		outLog.Format("DEVICE/%d Feed: %d, IF: %d, Freq: %lf, Bw: %lf/",i,feed[i],IFs[i],freq[i],bandWidth[i]);
 		ACS_LOG(LM_FULL_INFO,"CCore::callTSys()",(LM_NOTICE,(const char *)outLog));
-		outLog.Format("CALTEMP/%d %lf(%lf)",i,mark[i],scaleFactor);
+		if (i<(int)mark->length()) outLog.Format("CALTEMP/%d %lf(%lf)",i,mark[i],scaleFactor);
+		else outLog.Format("CALTEMP/%d %lf(%lf)",i,-1.0,scaleFactor);
 		ACS_LOG(LM_FULL_INFO,"CCore::callTSys()",(LM_NOTICE,(const char *)outLog));
-		outLog.Format("TPICAL/%d %lf",i,tpiCal[i]);
+		if (i<(int)tpiCal->length()) outLog.Format("TPICAL/%d %lf",i,tpiCal[i]);
+		else outLog.Format("TPICAL/%d %lf",i,-1.0);
 		ACS_LOG(LM_FULL_INFO,"CCore::callTSys()",(LM_NOTICE,(const char *)outLog));
-		outLog.Format("TPIZERO/%d %lf",i,zero[i]);
+		if (i<(int)zero->length()) outLog.Format("TPIZERO/%d %lf",i,zero[i]);
+		else outLog.Format("TPIZERO/%d %lf",i,-1.0);
 		ACS_LOG(LM_FULL_INFO,"CCore::callTSys()",(LM_NOTICE,(const char *)outLog));
-		outLog.Format("TPI/%d %lf",i,tpi[i]);
+		if (i<(int)tpi->length()) outLog.Format("TPI/%d %lf",i,tpi[i]);
+		else outLog.Format("TPI/%d %lf",i,-1.0);
 		ACS_LOG(LM_FULL_INFO,"CCore::callTSys()",(LM_NOTICE,(const char *)outLog));
 		outLog.Format("TSYS/%d %lf",i,tsys[i]);
 		ACS_LOG(LM_FULL_INFO,"CCore::callTSys()",(LM_NOTICE,(const char *)outLog));

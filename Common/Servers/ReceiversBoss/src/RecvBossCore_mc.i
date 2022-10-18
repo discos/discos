@@ -101,8 +101,17 @@ void CRecvBossCore::calOn() throw (ComponentErrors::ValidationErrorExImpl,Compon
 			throw impl;
 		}
 	}
-	else */if ((m_currentRecvCode=="XXP") || (m_currentRecvCode=="CCC") || (m_currentRecvCode=="CHC") || (m_currentRecvCode=="KKC"))  {
-		m_calMux_proxy->calOn();
+	else */
+	if ((m_currentRecvCode=="XXP") || (m_currentRecvCode=="CCC") || (m_currentRecvCode=="CHC") || (m_currentRecvCode=="KKC"))  {
+		try {
+			m_calMux_proxy->calOn();
+		}
+		catch (ComponentErrors::ComponentErrorsEx& ex) {
+			_ADD_BACKTRACE(ReceiversErrors::UnavailableReceiverOperationExImpl,impl,ex,"CRecvBossCore::calOn()");
+			impl.setReceiverCode((const char *)m_currentRecvCode);
+			changeBossStatus(Management::MNG_FAILURE);
+			throw impl;			
+		}
 		// turn the marca on through the FS
 		/*IRA::CString fsBuffer("calon\n");
 		if (!sendToFS((const void *)fsBuffer,fsBuffer.GetLength())) {
@@ -158,7 +167,8 @@ void CRecvBossCore::calOff() throw (ComponentErrors::ValidationErrorExImpl,Compo
 			throw impl;
 		}
 	}
-	else*/ if ((m_currentRecvCode=="XXP") || (m_currentRecvCode=="CCC") || (m_currentRecvCode=="CHC") || (m_currentRecvCode=="KKC")) {
+	else*/ 
+	if ((m_currentRecvCode=="XXP") || (m_currentRecvCode=="CCC") || (m_currentRecvCode=="CHC") || (m_currentRecvCode=="KKC")) {
 		// turn the marca on through thr FS
 		/*IRA::CString fsBuffer("caloff\n");
 		if (!sendToFS((const void *)fsBuffer,fsBuffer.GetLength())) {
@@ -166,7 +176,15 @@ void CRecvBossCore::calOff() throw (ComponentErrors::ValidationErrorExImpl,Compo
 			m_status=Management::MNG_FAILURE;
 			throw impl;
 		}*/
-		m_calMux_proxy->calOff();			
+		try {
+			m_calMux_proxy->calOff();
+		}
+		catch (ComponentErrors::ComponentErrorsEx& ex) {
+			_ADD_BACKTRACE(ReceiversErrors::UnavailableReceiverOperationExImpl,impl,ex,"CRecvBossCore::calOff()");
+			impl.setReceiverCode((const char *)m_currentRecvCode);
+			changeBossStatus(Management::MNG_FAILURE);
+			throw impl;			
+		}	
 	}
 	else {
 		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::calOff()");
