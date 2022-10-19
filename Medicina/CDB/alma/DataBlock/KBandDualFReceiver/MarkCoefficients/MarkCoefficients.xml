@@ -5,9 +5,9 @@
                 xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-                <MarkEntry><Feed>0</Feed><Polarization>LEFT</Polarization><Coefficients>-0.002043493,0.2691379,-14.67779,424.5092,-6873.623,59156.21,-211726.7</Coefficients></MarkEntry>
-                <MarkEntry><Feed>0</Feed><Polarization>RIGHT</Polarization><Coefficients>-0.001613087,0.2081852,-11.10797,313.8077,-4955.943,41554.51,-144823.5</Coefficients></MarkEntry>
-                <MarkEntry><Feed>1</Feed><Polarization>LEFT</Polarization><Coefficients>-0.001590069,0.2223032,-12.87727,395.8157,-6813.837,62339.11,-236985.5 </Coefficients></MarkEntry>
-                <MarkEntry><Feed>1</Feed><Polarization>RIGHT</Polarization><Coefficients>0.002984398,-0.4071563,23.03512,-691.3777,11603.30,-103172.9,379469.3</Coefficients></MarkEntry>
+                <MarkEntry><Feed>0</Feed><Polarization>LEFT</Polarization><Coefficients>0.000010797940,-0.001499705077,0.080693319373,-1.858855738537,0.616204785200,938.285589922976,-21304.020219147478,205577.878291058645,-767632.321784631000</Coefficients></MarkEntry>
+                <MarkEntry><Feed>0</Feed><Polarization>RIGHT</Polarization><Coefficients>0.001277828387,-0.202848149534,13.748184328888,-515.663985871572,11559.581110696865,-154872.736582372658,1148337.822190287523,-3635571.271634934936</Coefficients></MarkEntry>
+                <MarkEntry><Feed>1</Feed><Polarization>LEFT</Polarization><Coefficients>0.001305341000,-0.207157100979,14.053724918483,-528.290968944343,11883.547905525520,-159955.611443605070,1192927.271775321336,-3802800.123390153982</Coefficients></MarkEntry>
+                <MarkEntry><Feed>1</Feed><Polarization>RIGHT</Polarization><Coefficients>0.000828376292,-0.127477958831,8.371477564495,-304.113187268016,6600.709047753480,-85613.235456662384,614588.330093347351,-1884462.880632662913</Coefficients></MarkEntry>
 
 </MarkCoefficientsKBandLookUpTable>
