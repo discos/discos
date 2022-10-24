@@ -402,6 +402,9 @@ else if (primary.type==Antenna::ANT_SUN) {
 		// moon has nothing to do...no configuration
 		Antenna::SolarSystemBody_var tracker;
 		tracker=Antenna::SolarSystemBody::_narrow(currentGenerator);
+      tracker->setBodyName(primary.targetName);  //
+
+
 		//copy the current track and store it
 		copyTrack(lastPar,primary);
 		lastPar.applyOffsets=false;

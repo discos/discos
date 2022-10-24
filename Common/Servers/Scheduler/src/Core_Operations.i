@@ -184,6 +184,23 @@ void CCore::_moon() throw (ManagementErrors::TelescopeSubScanErrorExImpl,Managem
 	m_subScanEpoch=startTime;
 }
 
+void CCore::_sun() throw (ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
+		ManagementErrors::CloseTelescopeScanErrorExImpl)
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
+	ACS::Time startTime=0; // start asap
+	Antenna::TTrackingParameters primary,secondary;
+	MinorServo::MinorServoScan servo;
+	Receivers::TReceiversParameters receievers;
+	Management::TSubScanConfiguration subConf;
+	Schedule::CSubScanBinder binder(&primary,&secondary,&servo,&receievers,&subConf);
+	binder.sun();
+	startTime=0; // it means start as soon as possible
+	startScan(startTime,&primary,&secondary,&servo,&receievers,subConf); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
+	m_subScanEpoch=startTime;
+}
+
+
 void CCore::_sidereal(const char * targetName,const double& ra,const double& dec,const Antenna::TSystemEquinox& eq,const Antenna::TSections& section) throw (
 	ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,ManagementErrors::CloseTelescopeScanErrorExImpl)
 {

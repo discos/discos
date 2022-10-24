@@ -474,6 +474,21 @@ void SchedulerImpl::moon() throw (ComponentErrors::ComponentErrorsEx,ManagementE
 	}
 }
 
+void SchedulerImpl::sun() throw (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException)
+{
+	try {
+		m_core->_sun();
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (ManagementErrors::ManagementErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getManagementErrorsEx();
+	}
+}
+
 void SchedulerImpl::sidereal(const char * targetName,CORBA::Double ra,CORBA::Double dec,Antenna::TSystemEquinox eq,Antenna::TSections section) throw (
 			ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException)
 {
