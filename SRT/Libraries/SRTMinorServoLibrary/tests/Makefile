@@ -16,7 +16,7 @@ USER_INC=-I$(GTEST_HOME) -I$(GMOCK_HOME)
 
 EXECUTABLES_L = unittest
 unittest_OBJECTS = unittest
-unittest_CFLAGS = -std=c++0x
+unittest_CFLAGS = -std=c++17
 unittest_LIBS = $(GTEST_LIBS) SRTMinorServoCommandLibrary IRALibrary
 unittest_LDFLAGS = -lstdc++ -lpthread
 

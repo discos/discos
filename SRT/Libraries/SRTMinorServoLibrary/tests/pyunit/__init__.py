@@ -56,6 +56,48 @@ class TestPySRTMinorServoCommandLibrary(unittest.TestCase):
         expected_command = 'OFFSET=PFP,0.1,1.1,2.1\r\n'
         self.assertEqual(command, expected_command)
 
+    def test_parseAnswer(self):
+        answer = "OUTPUT:GOOD,1665743366.123456,CURRENT_CONFIG=21|SIMULATION_ENABLED=34|PLC_TIME=78|PLC_VERSION=69|CONTROL=14|POWER=38|EMERGENCY=69|ENABLED=51|OPERATIVE_MODE=94"
+        args = {
+            'OUTPUT': 'GOOD',
+            'TIMESTAMP': 1665743366.123456,
+            'CURRENT_CONFIG': 21,
+            'SIMULATION_ENABLED': 34,
+            'PLC_TIME': 78,
+            'PLC_VERSION': 69,
+            'CONTROL': 14,
+            'POWER': 38,
+            'EMERGENCY': 69,
+            'ENABLED': 51,
+            'OPERATIVE_MODE': 94
+        }
+        self.assertEqual(
+            SRTMinorServoCommandLibrary.parseAnswer(answer),
+            args
+        )
+
+        answer = "OUTPUT:GOOD,1665743366.654321"
+        args = {
+            "OUTPUT": "GOOD",
+            "TIMESTAMP": 1665743366.654321
+        }
+        self.assertEqual(
+            SRTMinorServoCommandLibrary.parseAnswer(answer),
+            args
+        )
+
+        answer = "OUTPUT:GOOD,CURRENT_CONFIG=21|SIMULATION_ENABLED=34|PLC_TIME=78|PLC_VERSION=69|CONTROL=14|POWER=38|EMERGENCY=69|ENABLED=51|OPERATIVE_MODE=94"
+        self.assertEqual(SRTMinorServoCommandLibrary.parseAnswer(answer), {})
+
+        answer = "OUTPUT:123456"
+        self.assertEqual(SRTMinorServoCommandLibrary.parseAnswer(answer), {})
+
+        answer = "OUTPUT:GOOD,12345,67890"
+        self.assertEqual(SRTMinorServoCommandLibrary.parseAnswer(answer), {})
+
+        answer = "OUTPUT:GOOD,12345.ABCD"
+        self.assertEqual(SRTMinorServoCommandLibrary.parseAnswer(answer), {})
+
 
 if __name__ == '__main__':
     unittest.main()

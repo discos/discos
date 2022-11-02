@@ -52,6 +52,15 @@ public:
      */
     static std::string offset(std::string servo_id, boost::python::list& coordinates);
 
+    /*
+     * Parses the received answer by splitting it and synamically populating a std::map
+     * This is an overload of the original SRTMinorServoCommandLibrary::parseAnswer function
+     * An overload was needed in order to replace the original std::map object with a boost::python::dict
+     * @param answer the string containing the answer received from the VBrain proxy
+     * @return a Python dictionary containing the answer splitted into keys and values. The keys are always strings, the values can either be int, double or strings.
+     */
+    static boost::python::dict parseAnswer(std::string answer);
+
 private:
     /*
      * Converts the given Python list into a C++ std::vector object
@@ -81,5 +90,6 @@ BOOST_PYTHON_MODULE(libPySRTMinorServoCommandLibrary)
     def("preset", &PySRTMinorServoCommandLibrary::preset);
     def("programTrack", &PySRTMinorServoCommandLibrary::programTrack, programTrack(arg("start_time") = -1));
     def("offset", &PySRTMinorServoCommandLibrary::offset);
+    def("parseAnswer", &PySRTMinorServoCommandLibrary::parseAnswer);
 }
 #endif
