@@ -9,6 +9,8 @@
 
 #include <sstream>
 #include <vector>
+#include <map>
+#include <variant>
 
 /**
  * SRT Minor Servo Command Library
@@ -73,6 +75,13 @@ public:
      * @return the composed message
      */
     static std::string offset(std::string servo_id, std::vector<double> coordinates);
+
+    /*
+     * Parses the received answer by splitting it and synamically populating a std::map
+     * @param answer the string containing the answer received from the VBrain proxy
+     * @return a std::map (dictionary) containing the answer splitted into keys and values. The keys are always std::string, the values can either be int, double or std::string.
+     */
+    static std::map<std::string, std::variant<int, double, std::string> > parseAnswer(std::string answer);
 };
 
 #endif

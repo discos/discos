@@ -64,9 +64,11 @@ LIBRARIES_L     =
 SRTMinorServoLibrary_OBJECTS = hexlib
 SRTMinorServoLibrary_LIBS = gsl gslcblas m
 SRTMinorServoCommandLibrary_OBJECTS = SRTMinorServoCommandLibrary
+SRTMinorServoCommandLibrary_CFLAGS = -std=c++17
 SRTMinorServoCommandLibrary_LIBS =
 PySRTMinorServoCommandLibrary_OBJECTS = PySRTMinorServoCommandLibrary
-PySRTMinorServoCommandLibrary_LIBS = SRTMinorServoCommandLibrary boost_python
+PySRTMinorServoCommandLibrary_CFLAGS = -std=c++17
+PySRTMinorServoCommandLibrary_LIBS = SRTMinorServoCommandLibrary boost_python3
 
 #
 # <brief description of lllll library>

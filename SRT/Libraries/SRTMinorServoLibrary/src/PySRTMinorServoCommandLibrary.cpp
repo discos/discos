@@ -24,3 +24,19 @@ std::vector<double> PySRTMinorServoCommandLibrary::pylist2cppvector(boost::pytho
     }
     return cpp_vector;
 }
+
+boost::python::dict PySRTMinorServoCommandLibrary::parseAnswer(std::string answer)
+{
+    auto args = SRTMinorServoCommandLibrary::parseAnswer(answer);
+
+    boost::python::dict dictionary;
+
+    typename std::map<std::string, std::variant<int, double, std::string> >::iterator iter;
+
+    for(iter = args.begin(); iter != args.end(); ++iter)
+    {
+        std::visit([dictionary, iter](const auto& var) mutable { dictionary[iter->first] = var; }, iter->second);
+    }
+
+    return dictionary;
+}
