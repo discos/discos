@@ -1202,11 +1202,11 @@ void CCommandLine::setEnabled(const ACS::longSeq& en) throw (BackendsErrors::Bac
 		m_feedNumber[i] = m_en[i];
 	}
     /* qui una chiamata al frontend di Sardara per comunicare quali feed e quindi quali roach utilizzare */
-    Message request = Command::setNodding(m_en[0],m_en[2]);
+    Message request = Command::setEnable(m_en[0],m_en[2]);
     Message reply = sendBackendCommand(request);
     if (reply.is_success_reply()) {
         // TBD
-        ACS_LOG(LM_FULL_INFO,"CCommandLine::setNodding()",(LM_NOTICE,"NODDING enabled"));
+        ACS_LOG(LM_FULL_INFO,"CCommandLine::setEnabled()",(LM_NOTICE,"NODDING enabled"));
     }
 }
 

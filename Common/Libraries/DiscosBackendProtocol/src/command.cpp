@@ -70,9 +70,9 @@ Command::setFilename(string filename)
 }
 
 Message
-Command::setNodding(int feed1, int feed2)
+Command::setEnable(int feed1, int feed2)
 {
-    Message command(REQUEST, "set-nodding");
+    Message command(REQUEST, "set-enable");
     command.add_argument<int>(feed1);
     command.add_argument<int>(feed2);
     return command;

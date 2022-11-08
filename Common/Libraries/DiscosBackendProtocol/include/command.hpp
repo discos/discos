@@ -27,7 +27,7 @@ namespace DiscosBackend{
             static Message setFilename(string filename);
             static Message convertData(){return Message(REQUEST, "convert-data");};
             static Message getRms(){return Message(REQUEST, "get-rms");};
-	    static Message setNodding(int feed1, int feed2);
+            static Message setEnable(int feed1, int feed2);
     }; //class Command
 }; //namespace DiscosBackend
 
