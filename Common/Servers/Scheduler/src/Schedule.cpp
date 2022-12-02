@@ -83,7 +83,8 @@ bool CParser::parse(CBaseSchedule* unit,DWORD& line,IRA::CString& errorMsg)
 		IRA::CString inputLine(inLine);
 		inputLine.Replace('\r',' ',0);
 		inputLine.RTrim();
-		if ((inLine[0]!=COMMENT_CHAR) && (inLine[0]!=0) && (strlen(inLine)!=0)) {
+		inputLine.LTrim();
+		if ((inputLine[0]!=COMMENT_CHAR) && (inputLine[0]!=0) && (inputLine.GetLength()!=0)) {
 			if (!unit->parseLine(inputLine,line,errorMsg)) {
 				return false;
 			}
@@ -167,7 +168,14 @@ bool CBackendList::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA:
 	workLine.RTrim();
 	workLine.LTrim();
 	if (m_started) { // if the procedure is started
-		if (workLine.Find(PROCEDURE_STOP)>=0) { // if the end bracket is found...close the procedure parsing
+		if (workLine.Find(PROCEDURE_STOP)>=0) { // if the end bracket is found....
+			IRA::CString token;
+			int start=0;
+			if (IRA::CIRATools::getNextToken(workLine,start,PROCEDURE_STOP,token)) { // if there is a command in the same line of the end proc				
+				 // push command before closing the procedure.....
+				if (token.GetLength()>0) m_currentRecord->proc.push_back(token);
+			}
+			//... then close the procedure
 			m_backend.push_back(m_currentRecord);
 			m_started=false;
 			m_currentRecord=NULL;
