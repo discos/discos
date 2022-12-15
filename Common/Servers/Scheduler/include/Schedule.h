@@ -155,6 +155,10 @@ protected:
 	*/
 	DWORD m_lines;
 	/**
+	 * schedule file name (i.e: myschedule.scd)
+	 */
+	IRA::CString m_scheduleName;
+	/**
 	 * file name
 	 */
 	IRA::CString m_fileName;

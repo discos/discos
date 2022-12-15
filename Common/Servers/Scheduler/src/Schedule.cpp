@@ -96,9 +96,10 @@ bool CParser::parse(CBaseSchedule* unit,DWORD& line,IRA::CString& errorMsg)
 //CBaseSchedule
 
 CBaseSchedule::CBaseSchedule(const IRA::CString& path,const IRA::CString& fileName) : m_lines(0), m_fileName(""),
-		m_filePath(path), m_baseName(""),m_lastError(""),m_config(NULL)
+		m_scheduleName(""),m_filePath(path), m_baseName(""),m_lastError(""),m_config(NULL)
 {
 	m_parser=new CParser;
+	m_scheduleName=fileName;
 	m_fileName=m_filePath+fileName;
 	int pos=fileName.Find('.');
 	m_baseName=fileName.Mid(0,pos);
@@ -112,7 +113,7 @@ CBaseSchedule::~CBaseSchedule()
 bool CBaseSchedule::readAll(bool check)
 {
 	IRA::CString err;
-	if (m_fileName.GetLength()>MAX_SCHED_NAME_LEN) {
+	if (m_scheduleName.GetLength()>MAX_SCHED_NAME_LEN) {
 		m_lastError.Format("Schedule name exceeds the maximum allowed characters of %d",MAX_SCHED_NAME_LEN);
 		return false;
 	}
