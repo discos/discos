@@ -387,6 +387,17 @@ public:
      */
     virtual void setTargetFileName (const char * fileName) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
 
+   /**
+     * This method is used to set a range in the bandwith of the backend where calculate the Tsys.
+     * Here is just a place holder for this implementation of the genericBackend interface
+     * @throw CORBA::SystemException
+     * @throw ComponentErrors::ComponentErrorsEx
+     * @throw BackendsErrors::BackendsErrorsEx
+     * @param freq starting frequency.
+     * @param bw bandwidth interval.
+     */
+    virtual void setTsysRange(CORBA::Double freq,CORBA::Double bw) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx) {return 0;};
+
 	/** 
 	 * Returns a reference to the time  property Implementation of IDL interface.
 	 * @return pointer to read-only unsigned long long  property time
