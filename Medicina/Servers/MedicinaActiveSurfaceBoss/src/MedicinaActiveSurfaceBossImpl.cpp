@@ -163,7 +163,6 @@ void MedicinaActiveSurfaceBossImpl::execute() throw (ACSErr::ACSbaseExImpl)
         m_sectorThread[i]->setSleepTime(SECTORTIME);
         m_sectorThread[i]->resume();
     }
-
     ACS_LOG(LM_FULL_INFO,"MedicinaActiveSurfaceBossImpl::execute()",(LM_INFO,"MedicinaActiveSurfaceBossImpl::COMPSTATE_OPERATIONAL"));
 }
 

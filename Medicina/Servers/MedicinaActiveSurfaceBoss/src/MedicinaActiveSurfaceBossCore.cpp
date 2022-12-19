@@ -2,7 +2,7 @@
 #include <Definitions.h>
 #include <cstdio>
 
-int actuatorsInCircle[] = {0,24,48,48,48,48,48,4};
+int actuatorsInCircle[] = {0,24,48,48,48,48,48};
 
 CMedicinaActiveSurfaceBossCore::CMedicinaActiveSurfaceBossCore(ContainerServices *service, acscomponent::ACSComponentImpl *me) :
     m_services(service),
@@ -171,7 +171,6 @@ void CMedicinaActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGe
         throw Impl;
     }
 */
-
     m_enable = true;
     ACS_LOG(LM_FULL_INFO, "CMedicinaActiveSurfaceBossCore::execute()", (LM_INFO,"CMedicinaActiveSurfaceBossCore::MedicinaActiveSurfaceBoss_LOCATED"));
 }
@@ -1175,7 +1174,7 @@ void CMedicinaActiveSurfaceBossCore::onewayAction(ActiveSurface::TASOneWayAction
 {
     if(action == ActiveSurface::AS_UPDATE && !m_profileSetted)
     {
-        printf("you must set the profile first\n");
+		ACS_LOG(LM_FULL_INFO,"MedicinaActiveSurfaceBossCore::onewayAction()",(LM_NOTICE,"SET THE PROFILE FIRST!"));
         return;
     }
 
@@ -1316,7 +1315,7 @@ void CMedicinaActiveSurfaceBossCore::workingActiveSurface() throw (ComponentErro
             try
             {
                 m_antennaBoss->getRawCoordinates(now.value().value, azimuth, elevation);
-                onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, elevation*DR2D, 0, 0, m_profile);
+                onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, elevation*DR2D, 0, 0, ActiveSurface::AS_PARABOLIC);
             }
             catch (CORBA::SystemException& ex)
             {
@@ -1425,7 +1424,7 @@ void CMedicinaActiveSurfaceBossCore::asOn()
 {
     if(m_profileSetted == true)
     {
-        if((m_profile != ActiveSurface::AS_PARABOLIC_FIXED) && (m_profile != ActiveSurface::AS_PARK))
+        if((m_profile != ActiveSurface::AS_PARABOLIC_FIXED) && (m_profile != ActiveSurface::AS_PARK))	
         {
             enableAutoUpdate();
             m_tracking = true;
@@ -1448,7 +1447,7 @@ void CMedicinaActiveSurfaceBossCore::asOn()
     }
     else
     {
-        printf("you must set the profile first\n");
+		ACS_LOG(LM_FULL_INFO,"MedicinaActiveSurfaceBossCore::asOn()",(LM_NOTICE,"SET THE PROFILE FIRST!"));
     }
 }
 
@@ -1473,7 +1472,7 @@ void CMedicinaActiveSurfaceBossCore::asPark() throw (ComponentErrors::ComponentE
     }
     else
     {
-        printf("you must set the profile first\n");
+		ACS_LOG(LM_FULL_INFO,"MedicinaActiveSurfaceBossCore::asPark()",(LM_NOTICE,"SET THE PROFILE FIRST!"));
     }
 }
 
@@ -1494,7 +1493,7 @@ void CMedicinaActiveSurfaceBossCore::asOff() throw (ComponentErrors::ComponentEr
     }
     else
     {
-        printf("you must set the profile first\n");
+		ACS_LOG(LM_FULL_INFO,"MedicinaActiveSurfaceBossCore::asOff()",(LM_NOTICE,"SET THE PROFILE FIRST!"));
     }
 }
 
