@@ -10,7 +10,7 @@
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"   
 				HPIBIPAddress="192.167.187.201"
 				HPIBPort="1234"
-				LocalOscillatorInstance="RECEIVERS/LocalOscillator"
+				LocalOscillatorInstance=""
 				LocalOscillatorEnabledReceivers="KKC QQC CCC MMC"
 				FocusSelectorInterface="IDL:alma/Backends/TotalPower:1.0"
 >

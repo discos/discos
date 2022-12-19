@@ -119,6 +119,15 @@
             <remoteAccount>discos</remoteAccount>
         </container>
         <container>
+            <name>PyCalmuxContainer</name>
+            <type>py</type>
+            <heapSizeMB></heapSizeMB>
+            <useDedicatedSettings>true</useDedicatedSettings>
+            <scriptBase>0</scriptBase>
+            <remoteHost>MASTERHOST</remoteHost>
+            <remoteAccount>discos</remoteAccount>
+        </container>
+        <container>
             <name>PointContainer</name>
             <type>cpp</type>
             <heapSizeMB></heapSizeMB>
@@ -136,6 +145,15 @@
             <remoteHost>MASTERHOST</remoteHost>
             <remoteAccount>discos</remoteAccount>
         </container>
+        <container>
+            <name>SardaraContainer</name>
+            <type>cpp</type>
+            <heapSizeMB></heapSizeMB>
+            <useDedicatedSettings>true</useDedicatedSettings>
+            <scriptBase>0</scriptBase>
+            <remoteHost>MASTERHOST</remoteHost>
+            <remoteAccount>discos</remoteAccount>
+        </container>        
         <container>
             <name>XContainer</name>
             <type>cpp</type>
