@@ -22,6 +22,7 @@
 #include "Common.h"
 //#include "Protocol.h"
 #include "Configuration.h"
+#include <ReceiversBossC.h>
 
 using namespace maci;
 using namespace DiscosBackend;
@@ -230,7 +231,7 @@ public:
 	 * @param en new values sequence for the <i>m_enabled</i> elements. A value grater than zero correspond to a true,
 	 *                a zero match to a false, while a negative will keep the things unchanged.
 	 */ 
-	void setEnabled(const ACS::longSeq& en) throw (BackendsErrors::BackendBusyExImpl);
+	void setEnabled(const ACS::longSeq& en) throw (BackendsErrors::BackendBusyExImpl,  BackendsErrors::ConfigurationErrorExImpl, ComponentErrors::ValueOutofRangeExImpl);
 	
 	/**
 	 * This function can be called in order to load an initial setup for the backend. Some parameter are fixed and cannot be changed during normal
@@ -501,6 +502,7 @@ private:
 
     ContainerServices* m_services;
     Backends::TotalPower_var m_totalPower;
+    Receivers::ReceiversBoss_var m_receiversBoss;
     //Receivers::GenericIFDistributor_var m_ifDistributor;
 
 	/**
@@ -690,7 +692,7 @@ private:
 	 * @throw BackendsErrors::NakExImpl
 	 */
 	void setDefaultConfiguration(const IRA::CString & config) throw (ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
-			ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,BackendsErrors::MalformedAnswerExImpl,BackendsErrors::ReplyNotValidExImpl,BackendsErrors::BackendFailExImpl);
+ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,BackendsErrors::MalformedAnswerExImpl,BackendsErrors::ReplyNotValidExImpl,BackendsErrors::BackendFailExImpl);
 	
 	/**
 	 * This method is called to set up the component in order to get the desired configuration. Defaults  and
@@ -719,7 +721,7 @@ private:
 	inline const TLineStatus& getStatus() const { return m_status; }
 
 	/**
-    * This member function is called to send a command to the backend
+    	* This member function is called to send a command to the backend
 	 * @param Msg ponter to the byte buffer that contains the message
 	 * @param Len length of the buffer
 	 * @return SUCCESS if the buffer was sent correctly, WOULDBLOCK if the send would block, FAIL and the <i>m_Error</i> member is set accordingly.
@@ -727,7 +729,7 @@ private:
 	OperationResult sendBuffer(char *Msg,WORD Len);
 	
 	/**
-    * This member function is called to receive a buffer. if it realizes that the remote side disconnected it sets the member <i>m_Status</i> 
+    	* This member function is called to receive a buffer. if it realizes that the remote side disconnected it sets the member <i>m_Status</i> 
 	 * to NOTCNTD.
 	 * @param Msg ponter to the byte buffer that will contain the answer
 	 * @param Len length of the buffer, that means the exact number of bytes that can be read
@@ -745,11 +747,11 @@ private:
 	*/
 	int sendCommand(char *inBuff,const WORD& inLen,char *outBuff);
 
-    /**
-     * Sends a message to the backend and return the message reply.
-     * @throws BackendProtocolError
-    */
-    Message sendBackendCommand(Message request);
+    	/**
+     	* Sends a message to the backend and return the message reply.
+     	* @throws BackendProtocolError
+    	*/
+    	Message sendBackendCommand(Message request);
 	
 	/**
 	 * This function is used to keep update the properties. At every request it checks if the last update is enough recent (update time not expired), 
@@ -769,28 +771,29 @@ private:
 	 */
 	inline void clearStatusField(TstatusFields field) { m_backendStatus &= ~(1 << field); }
 
-    bool m_SK77;
-    bool m_SK00;
-    bool m_SK01;
-    bool m_SK77S;
-    bool m_SK00S;
-    bool m_SK01S;
-    bool m_SC00;
-    bool m_SL00;
-    bool m_SP00;
-    bool m_SC00S;
-    bool m_SL00S;
-    bool m_SP00S;
-    bool m_SCC00;
-    bool m_SCH00;
-    bool m_SCC00S;
-    bool m_SCH00S;
+    	bool m_SK77;
+    	bool m_SK00;
+    	bool m_SK01;
+    	bool m_SK77S;
+    	bool m_SK00S;
+    	bool m_SK01S;
+    	bool m_SC00;
+    	bool m_SL00;
+    	bool m_SP00;
+    	bool m_SC00S;
+    	bool m_SL00S;
+    	bool m_SP00S;
+    	bool m_SCC00;
+    	bool m_SCH00;
+    	bool m_SCC00S;
+    	bool m_SCH00S;
 
-    bool m_stationSRT;
-    bool m_stationMED;
+    	bool m_stationSRT;
+    	bool m_stationMEDNT;
 
-    bool m_stokes;
-    bool m_CK;
+    	bool m_stokes;
+    	bool m_CK;
+	bool m_SardaraInitialized;
 	
 };
 
