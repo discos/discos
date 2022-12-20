@@ -60,63 +60,63 @@
             <!-- LNA Drain voltage: stage number 1, right channel (ROdoubleSeq) -->
 			<xs:element name="vdR1" type="baci:ROdouble"/>
             <!-- LNA Drain voltage: stage number 2, left channel (ROdoubleSeq) -->
-			<xs:element name="vdL2" type="baci:ROdouble"/>
+			<!--<xs:element name="vdL2" type="baci:ROdouble"/> -->
             <!-- LNA Drain voltage: stage number 2, right channel (ROdoubleSeq) -->
-			<xs:element name="vdR2" type="baci:ROdouble"/>
+			<!--<xs:element name="vdR2" type="baci:ROdouble"/> -->
             <!-- LNA Drain voltage: stage number 3, left channel (ROdoubleSeq) -->
-			<xs:element name="vdL3" type="baci:ROdouble"/>
+			<!--<xs:element name="vdL3" type="baci:ROdouble"/> -->
             <!-- LNA Drain voltage: stage number 3, right channel (ROdoubleSeq) -->
-			<xs:element name="vdR3" type="baci:ROdouble"/>
+			<!--<xs:element name="vdR3" type="baci:ROdouble"/> -->
             <!-- LNA Drain voltage: stage number 4, left channel (ROdoubleSeq) -->
-			<xs:element name="vdL4" type="baci:ROdouble"/>
+			<!--<xs:element name="vdL4" type="baci:ROdouble"/> -->
             <!-- LNA Drain voltage: stage number 4, right channel (ROdoubleSeq) -->
-			<xs:element name="vdR4" type="baci:ROdouble"/>
+			<!--<xs:element name="vdR4" type="baci:ROdouble"/> -->
             <!-- LNA Drain voltage: stage number 5, left channel (ROdoubleSeq) -->
-			<xs:element name="vdL5" type="baci:ROdouble"/>
+			<!--<xs:element name="vdL5" type="baci:ROdouble"/> -->
             <!-- LNA Drain voltage: stage number 5, right channel (ROdoubleSeq) -->
-			<xs:element name="vdR5" type="baci:ROdouble"/>
+			<!--<xs:element name="vdR5" type="baci:ROdouble"/> -->
 
             <!-- LNA Drain current: stage number 1, left channel (ROdoubleSeq) -->
 			<xs:element name="idL1" type="baci:ROdouble"/>
             <!-- LNA Drain current: stage number 1, right channel (ROdoubleSeq) -->
 			<xs:element name="idR1" type="baci:ROdouble"/>
             <!-- LNA Drain current: stage number 2, left channel (ROdoubleSeq) -->
-			<xs:element name="idL2" type="baci:ROdouble"/>
+			<!--<xs:element name="idL2" type="baci:ROdouble"/> -->
             <!-- LNA Drain current: stage number 2, right channel (ROdoubleSeq) -->
-			<xs:element name="idR2" type="baci:ROdouble"/>
+			<!--<xs:element name="idR2" type="baci:ROdouble"/> -->
             <!-- LNA Drain current: stage number 3, left channel (ROdoubleSeq) -->
-			<xs:element name="idL3" type="baci:ROdouble"/>
+			<!--<xs:element name="idL3" type="baci:ROdouble"/> -->
             <!-- LNA Drain current: stage number 3, right channel (ROdoubleSeq) -->
-			<xs:element name="idR3" type="baci:ROdouble"/>
+			<!--<xs:element name="idR3" type="baci:ROdouble"/> -->
             <!-- LNA Drain current: stage number 4, left channel (ROdoubleSeq) -->
-			<xs:element name="idL4" type="baci:ROdouble"/>
+			<!--<xs:element name="idL4" type="baci:ROdouble"/> -->
             <!-- LNA Drain current: stage number 4, right channel (ROdoubleSeq) -->
-			<xs:element name="idR4" type="baci:ROdouble"/>
+			<!--<xs:element name="idR4" type="baci:ROdouble"/> -->
             <!-- LNA Drain current: stage number 5, left channel (ROdoubleSeq) -->
-			<xs:element name="idL5" type="baci:ROdouble"/>
+			<!--<xs:element name="idL5" type="baci:ROdouble"/> -->
             <!-- LNA Drain current: stage number 5, right channel (ROdoubleSeq) -->
-			<xs:element name="idR5" type="baci:ROdouble"/>
+			<!--<xs:element name="idR5" type="baci:ROdouble"/> -->
 
             <!-- LNA Gate voltage: stage number 1, left channel (ROdoubleSeq) -->
 			<xs:element name="vgL1" type="baci:ROdouble"/>
             <!-- LNA Gate voltage: stage number 1, right channel (ROdoubleSeq) -->
 			<xs:element name="vgR1" type="baci:ROdouble"/>
             <!-- LNA Gate voltage: stage number 2, left channel (ROdoubleSeq) -->
-			<xs:element name="vgL2" type="baci:ROdouble"/>
+			<!--<xs:element name="vgL2" type="baci:ROdouble"/> -->
             <!-- LNA Gate voltage: stage number 2, right channel (ROdoubleSeq) -->
-			<xs:element name="vgR2" type="baci:ROdouble"/>
+			<!--<xs:element name="vgR2" type="baci:ROdouble"/> -->
             <!-- LNA Gate voltage: stage number 3, left channel (ROdoubleSeq) -->
-			<xs:element name="vgL3" type="baci:ROdouble"/>
+			<!--<xs:element name="vgL3" type="baci:ROdouble"/> -->
             <!-- LNA Gate voltage: stage number 3, right channel (ROdoubleSeq) -->
-			<xs:element name="vgR3" type="baci:ROdouble"/>
+			<!--<xs:element name="vgR3" type="baci:ROdouble"/> -->
             <!-- LNA Gate voltage: stage number 4, left channel (ROdoubleSeq) -->
-			<xs:element name="vgL4" type="baci:ROdouble"/>
+			<!--<xs:element name="vgL4" type="baci:ROdouble"/> -->
             <!-- LNA Gate voltage: stage number 4, right channel (ROdoubleSeq) -->
-			<xs:element name="vgR4" type="baci:ROdouble"/>
+			<!--<xs:element name="vgR4" type="baci:ROdouble"/> -->
             <!-- LNA Gate voltage: stage number 5, left channel (ROdoubleSeq) -->
-			<xs:element name="vgL5" type="baci:ROdouble"/>
+			<!--<xs:element name="vgL5" type="baci:ROdouble"/> -->
             <!-- LNA Gate voltage: stage number 5, right channel (ROdoubleSeq) -->
-			<xs:element name="vgR5" type="baci:ROdouble"/>
+			<!--<xs:element name="vgR5" type="baci:ROdouble"/> -->
 
 
 			<!-- cryogenic temp (K) (ROdouble) -->

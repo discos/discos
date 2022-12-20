@@ -28,6 +28,7 @@
 #include <acsncSimpleSupplier.h>
 #include <ParserConnector.h>
 #include "Configuration.h"
+#include <BackendsProxy.h>
 #define _RECVBOSSCORE_MAX_IFS 4
 
 #elif COMPILE_TARGET_NT
@@ -350,6 +351,7 @@ private:
 	ACS::Time m_feedsEpoch;
 	ACS::Time m_IFsEpoch;
 	ACS::Time m_modeEpoch;
+	Backends::CalMux_proxy m_calMux_proxy;
 
 #elif COMPILE_TARGET_NT
 

@@ -154,7 +154,6 @@ public:
 			return false;
 		}
 	};
-
 	static const char *map(const TVradDefinition& frame) {
 		if (frame==Antenna::ANT_RADIO) {
 			return "RD";
@@ -169,8 +168,22 @@ public:
 			return "NULL";
 		}
 	};
-};
+	static const char *map(const TGeneratorType& gen) {
+		if (gen==Antenna::ANT_SIDEREAL) {
+			return "SIDEREAL";
+		}
+		else if (gen==Antenna::ANT_MOON) {
+			return "MOON";
+		}
+		else if (gen==Antenna::ANT_OTF) {
+			return "OTF";
+		}
+		else { // All other cases.....should be completed when further generators are supported.
+			return "UNKNOWN";
+		}
+	};
 
+};
 };
 
 

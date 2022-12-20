@@ -53,7 +53,7 @@ pppppp_MODULES	   =
 
 # new bootup scripts (discos):
 SCRIPTS=discosup discosdown discosConsole
-SCRIPTS_L         = escs escsConsole
+SCRIPTS_L         = med-vnc med-copy
 
 
 #INSTALL_FILES      = ../app-defaults/escsStartup.xml
