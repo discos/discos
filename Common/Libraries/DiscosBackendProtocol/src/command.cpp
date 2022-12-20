@@ -19,6 +19,15 @@ Command::setIntegration(int integration)
 }
 
 Message
+Command::getTpi(double frequency, double bandwidth)
+{
+    Message command(REQUEST, "get-tpi");
+    command.add_argument<double>(frequency);
+    command.add_argument<double>(bandwidth);
+    return command;
+}
+
+Message
 Command::start(unsigned long long utctimestamp)
 {
     Message command(REQUEST, "start");

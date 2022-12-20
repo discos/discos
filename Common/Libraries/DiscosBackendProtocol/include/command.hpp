@@ -17,7 +17,7 @@ namespace DiscosBackend{
             static Message setConfiguration(string conf);
             static Message getIntegration(){return Message(REQUEST, "get-integration");};
             static Message setIntegration(int integration);
-            static Message getTpi(double, double){return Message(REQUEST, "get-tpi");};
+            static Message getTpi(double frequency = 0, double bandwidth = 0);
             static Message getTp0(){return Message(REQUEST, "get-tp0");};
             static Message time(){return Message(REQUEST, "time");};
             static Message start(unsigned long long utctimestamp = 0);
