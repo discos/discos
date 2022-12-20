@@ -69,3 +69,11 @@ Command::setFilename(string filename)
     return command;
 }
 
+Message
+Command::setEnable(int feed1, int feed2)
+{
+    Message command(REQUEST, "set-enable");
+    command.add_argument<int>(feed1);
+    command.add_argument<int>(feed2);
+    return command;
+}
