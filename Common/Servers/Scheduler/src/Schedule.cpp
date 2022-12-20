@@ -112,7 +112,7 @@ CBaseSchedule::~CBaseSchedule()
 bool CBaseSchedule::readAll(bool check)
 {
 	IRA::CString err;
-	if (m_fileName.GetLength()>MAX_SCHED_NAME_LEN) {
+	if (m_baseName.GetLength()>MAX_SCHED_NAME_LEN) {
 		m_lastError.Format("Schedule name exceeds the maximum allowed characters of %d",MAX_SCHED_NAME_LEN);
 		return false;
 	}
