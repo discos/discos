@@ -1,0 +1,71 @@
+#ifndef __MISTRAL_IDL__
+#define __MISTRAL_IDL__
+
+#include <baci.idl>
+#include <enumpropMACRO.idl>
+#include "GenericBackend.idl"
+
+#pragma prefix "alma"
+
+
+module Backends {
+ 
+    struct MistralDataBlock {
+        ACS::Time timeMark;    // timestamp
+        boolean initializing;  // system performing 'setup'
+        boolean ready;         // setup done, system ready
+        boolean acquiring;     // system performing 'acquisition'
+        boolean sweeping;      // system performing 'sweeping'
+        boolean nop;           // system ready, no operation in execution
+        string error_message;  // in case of error
+        Management::TSystemStatus status;
+    };
+
+    const string MISTRAL_DATA_CHANNEL = "MistralData";
+ 
+    interface SRTMistral: GenericBackend {
+
+        /** Return the status published to the notification channel */
+        Management::TSystemStatus getManagementStatus();
+
+   
+		/**
+		 * Setup the instrument.
+         *
+		 * @throw CORBA::SystemException
+		 * @throw BackendsErrors::BackendsErrorsEx 
+		 * @thorw ComponentErrors::ComponentErrorsEx
+		 */
+		void setup() raises (
+            BackendsErrors::BackendsErrorsEx,
+            ComponentErrors::ComponentErrorsEx);
+   
+
+		/**
+		 * Execute the vna-sweep command (calibration).
+         *
+		 * @throw CORBA::SystemException
+		 * @throw BackendsErrors::BackendsErrorsEx 
+		 * @thorw ComponentErrors::ComponentErrorsEx
+		 */
+		void vnaSweep() raises (
+            BackendsErrors::BackendsErrorsEx,
+            ComponentErrors::ComponentErrorsEx);
+ 
+
+		/**
+		 * Execute the target-sweep command (calibration).
+         *
+		 * @throw CORBA::SystemException
+		 * @throw BackendsErrors::BackendsErrorsEx 
+		 * @thorw ComponentErrors::ComponentErrorsEx
+		 */
+		void targetSweep() raises (
+            BackendsErrors::BackendsErrorsEx,
+            ComponentErrors::ComponentErrorsEx);
+	
+	};
+	
+};
+
+#endif

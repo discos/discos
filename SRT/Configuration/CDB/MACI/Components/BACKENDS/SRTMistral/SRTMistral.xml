@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!-- Marco Buttu <marco.buttu@inaf.it> -->
+
+<Component xmlns="urn:schemas-cosylab-com:Component:1.0" 
+           xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+           xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              
+	Name="SRTMistral"
+	Code="SRTMistral.SRTMistralImpl"
+	Type="IDL:alma/Backends/SRTMistral:1.0"
+	Container="SRTMistralContainer"
+	KeepAliveTime="-1"
+	ImplLang="py"
+/>

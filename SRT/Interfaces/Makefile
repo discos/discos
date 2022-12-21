@@ -31,6 +31,7 @@ SUBSYSTEM = Interfaces
 
 MODULES = 	SRTActiveSurfaceInterface \
 		SRTAntennaInterface \
+		SRTBackendsInterface \
 		SRTReceiversInterface \
 		SRTWeatherStationInterface
 
