@@ -29,7 +29,7 @@ We want to:
 * resume the schedule
 * get a final FITS (merged by MISTRAL)
 
-Her are the steps::
+Here are the steps::
 
 1) Start the simulator by executing::
 
