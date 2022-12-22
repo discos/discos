@@ -7,6 +7,7 @@
     Port="12802"
     IPAddress="127.0.0.1"
     SocketTimeout="1.0"
+    StatusFrequency="0.2"
 >
 	<time/>
 	<backendName/>

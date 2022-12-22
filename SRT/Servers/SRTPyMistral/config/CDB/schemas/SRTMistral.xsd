@@ -39,6 +39,7 @@
         <xs:attribute name="Port" type="xs:double" use="required" />
         <xs:attribute name="IPAddress" type="xs:string" use="required" />
         <xs:attribute name="SocketTimeout" type="xs:double" use="required" />
+        <xs:attribute name="StatusFrequency" type="xs:double" use="required" />
       </xs:extension>
      </xs:complexContent>
     </xs:complexType>

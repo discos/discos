@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<EventChannel xmlns="urn:schemas-cosylab-com:EventChannel:1.0"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	IntegrationLogs="false"
+	MaxQueueLength="40"
+	MaxSuppliers="50"
+	RejectNewEvents="false"
+	DiscardPolicy="FifoOrder"
+	EventReliability="BestEffort"
+	ConnectionReliability="Persistent">
+   <Events>
+     <e Name="MistralData" MaxProcessTime="0.1"/>
+   </Events>
+</EventChannel>
+

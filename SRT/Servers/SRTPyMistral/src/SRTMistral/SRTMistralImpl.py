@@ -57,8 +57,6 @@ class SRTMistralImpl(POA, cc, services, lcycle, BulkDataSender):
         'test_no_method': ('no_method', ()), 
     }
 
-    sthread_sleep_time = 2  # status thread sleep time (seconds)
-
     def __init__(self):
         services.__init__(self)
         cc.__init__(self)
@@ -72,21 +70,26 @@ class SRTMistralImpl(POA, cc, services, lcycle, BulkDataSender):
         self.supplier = None
 
         # Get attributes from CDB
+        attributes = (
+            ('IPAddress', str),
+            ('Port', int),
+            ('SocketTimeout', float),
+            ('StatusFrequency', float),
+        )
         try:
-            path = 'alma/BACKENDS/SRTMistral'
             dal = ACSCorba.cdb()
-            dao = dal.get_DAO_Servant(path)
-            port = dao.get_field_data('Port')
-            for attribute in ('IPAddress', 'Port', 'SocketTimeout'):
-                setattr(self, attribute, dao.get_field_data(attribute))
+            dao = dal.get_DAO_Servant('alma/BACKENDS/SRTMistral')
+            for (name, type_) in attributes:
+                value = type_(dao.get_field_data(name))
+                setattr(self, name, value)
         except cdbErrType.CDBRecordDoesNotExistEx:
-            raeson = "CDB record {path} does not exists"
+            raeson = f"CDB record {path} does not exists"
             logger.logError(raeson)
             exc = ComponentErrorsImpl.ValidationErrorExImpl()
             exc.setReason(raeson)
             raise exc
         except cdbErrType.CDBFieldDoesNotExistEx:
-            raeson = "CDB field {attribute} does not exist"
+            raeson = f"CDB field {attribute} does not exist"
             logger.logWarning(raeson)
             exc = ComponentErrorsImpl.ValidationErrorExImpl()
             exc.setReason(raeson)
@@ -111,6 +114,7 @@ class SRTMistralImpl(POA, cc, services, lcycle, BulkDataSender):
                         self.update_status,
                         self.supplier,
                         self.status_data,
+                        self.StatusFrequency,
                     )
             )
             self._status_thread.start()
@@ -147,7 +151,7 @@ class SRTMistralImpl(POA, cc, services, lcycle, BulkDataSender):
             self._startID.cancel()
             self._startID.join()
         self.status_data.stop_thread = True
-        time.sleep(SRTMistralImpl.sthread_sleep_time*2)
+        time.sleep(self.StatusFrequency*2)
         if self._status_thread and self._status_thread.is_alive():
             self._status_thread.join()
 
@@ -159,8 +163,8 @@ class SRTMistralImpl(POA, cc, services, lcycle, BulkDataSender):
             if not self.socket_lock.acquire(timeout=2):
                 raise TimeoutError('cannot acquire socket lock')
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(float(self.SocketTimeout))
-            sock.connect((self.IPAddress, int(self.Port)))
+            sock.settimeout(self.SocketTimeout)
+            sock.connect((self.IPAddress, self.Port))
             # Look for the response tail (grammar.TAIL)
             stream = response = b''
             for i in range(256):  # Maximum number of bytes to discard
@@ -391,7 +395,7 @@ class SRTMistralImpl(POA, cc, services, lcycle, BulkDataSender):
         return (success, answer)
 
     @staticmethod
-    def publisher(update_status, supplier, status_data):
+    def publisher(update_status, supplier, status_data, StatusFrequency):
         error = False
         while not status_data.stop_thread:
             try:
@@ -415,7 +419,7 @@ class SRTMistralImpl(POA, cc, services, lcycle, BulkDataSender):
                     logger.logError('cannot publish the status: {reason}')
                     error = True
             finally:
-                time.sleep(SRTMistralImpl.sthread_sleep_time)
+                time.sleep(StatusFrequency)
 
     def _test(self, x, y):
         pass

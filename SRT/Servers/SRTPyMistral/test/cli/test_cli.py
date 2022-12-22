@@ -7,7 +7,10 @@ from simulators import backend
 from simulators.server import Simulator
 from simulators.utils import ACS_TO_UNIX_TIME
 
-from SRTMistral.SRTMistralImpl import SRTMistralImpl
+from Acspy.Clients.SimpleClient import PySimpleClient
+from Acspy.Util import ACSCorba
+
+component_name = 'BACKENDS/SRTMistral'
 
 
 class TestCommands(unittest.TestCase):
@@ -19,27 +22,23 @@ class TestCommands(unittest.TestCase):
         simulators.backend.mistral.System.sweep_time = cls.task_time
         cls.server = Simulator(backend, system_type='mistral')
         cls.server.start(daemon=True)
-        SRTMistralImpl.sthread_sleep_time = 0.2  # seconds
+        dao = ACSCorba.cdb().get_DAO_Servant(f'alma/{component_name}')
+        cls.status_frequency = float(dao.get_field_data('StatusFrequency'))
 
     @classmethod
     def tearDownClass(cls):
         cls.server.stop()
 
     def setUp(self):
-        self.component = SRTMistralImpl()
-        time.sleep(SRTMistralImpl.sthread_sleep_time*5)
+        self.client = PySimpleClient()
+        self.component = self.client.getComponent(component_name)
+        time.sleep(self.status_frequency*5)
 
     def tearDown(self):
-        self.component.cleanUp()
-        time.sleep(SRTMistralImpl.sthread_sleep_time*5)
+        self.client.releaseComponent(component_name)
+        time.sleep(self.status_frequency*5)
+        self.client.disconnect()
         server_reset()
-
-    def test_connection_refused(self):
-        try:
-            self.server.stop()
-            self.check_status('STATUS: FAIL -- connection refused')
-        finally:
-            self.server.start(daemon=True)
 
     def test_status_not_initialized(self):
         self.check_status('STATUS: OK -- system not initialized')
@@ -155,7 +154,7 @@ class TestCommands(unittest.TestCase):
  
     def check_status(self, message):
         # Wait for the status to be updated by the thread
-        time.sleep(SRTMistralImpl.sthread_sleep_time*3)
+        time.sleep(self.status_frequency*3)
         success, answer = self.component.command('mistralStatus')
         self.assertEqual(success, True)
         self.assertRegex(answer, message)
