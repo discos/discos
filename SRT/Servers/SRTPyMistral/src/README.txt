@@ -48,7 +48,7 @@ Here are the steps::
 
 2) Startup ACS and all containers.
 
-3) Startup the MISTAL operatorInput shell::
+3) Startup the MISTRAL operatorInput shell::
 
       $ operatorInput BACKENDS/SRTMistral
 
