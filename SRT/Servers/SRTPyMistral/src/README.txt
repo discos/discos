@@ -1,8 +1,19 @@
+Compile the branch
+==================
+Get the branch::
+
+   $ discos-get -b fix-issue-760 -s srt
+
+Compile and install::
+
+   $ cd fix-issue-760-srt/SystemMake/
+   $ make all install
+
 How to run the component
 ========================
 Using simulators::
 
-  $ discos-set centos_7_compatibility-srt --cdb test
+  $ discos-set fix-issue-760-srt --cdb test
   $ discos-simulator -s backend -t mistral start
   $ acsStart
   $ acsStartContainer -py SRTMistralContainer
@@ -14,7 +25,7 @@ before every test and stopped right after the test.  To run the tests
 move to ``SRT/Servers/SRTPyMistral/test/cli/`` and execute the following
 commands::
 
-  $ discos-set centos_7_compatibility-srt --cdb test
+  $ discos-set fix-issue-760-srt --cdb test
   $ acsStart
   $ acsStartContainer -py SRTMistralContainer
   $ python test_cli.py
