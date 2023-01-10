@@ -97,7 +97,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/
 	              
 ## [Next Release] - 
 ## Added
-    issue #791 - Nodding added for TotalPower and Sardara components via the `enable` command. This command can only be issued from a schedule and not via the operatorInput CLI
+    issue #791 - Nodding added for TotalPower and Sardara components via the `enable` command. This command can only be issued from a schedule and not via the operatorInput CLI.
+                 The syntax for the command is the following: `enable=X;Y` with X and Y representing the 2 feeds the user would like to use for the Nodding observation.
+                 This command must be placed in the <schedule_name>.bck file in order to work properly.
 ## Fixed
 ## Changed
 	issue #689 - The dataset provided by weather station has been enlarged by the wind direction. The correctponding RAL 'wx' command will noe provided wind direction readout, as well
