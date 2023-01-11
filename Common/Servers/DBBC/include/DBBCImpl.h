@@ -69,6 +69,17 @@ virtual ACS::doubleSeq * getTpi () throw(CORBA::SystemException, ComponentErrors
 
 virtual ACS::doubleSeq * getRms () throw(CORBA::SystemException, ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx){return 0;};
 
+/**
+     * This method is used to set a range in the bandwith of the backend where calculate the Tsys.
+     * Here is just a place holder for this implementation of the genericBackend interface
+     * @throw CORBA::SystemException
+     * @throw ComponentErrors::ComponentErrorsEx
+     * @throw BackendsErrors::BackendsErrorsEx
+     * @param freq starting frequency.
+     * @param bw bandwidth interval.
+     */
+    virtual void setTsysRange(CORBA::Double freq,CORBA::Double bw) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx) {return 0;};
+
 virtual ACS::doubleSeq * getZero () throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx){return 0;};
 
 virtual void setKelvinCountsRatio (const ACS::doubleSeq & ratio,
