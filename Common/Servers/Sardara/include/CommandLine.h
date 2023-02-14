@@ -776,6 +776,8 @@ private:
     bool m_SCH00;
     bool m_SCC00S;
     bool m_SCH00S;
+    bool m_SX00;
+    bool m_SX00S;
 
     bool m_stationSRT;
     bool m_stationMED;
