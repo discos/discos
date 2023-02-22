@@ -3,6 +3,7 @@
 # This is a python test program that refresh the Noto minor servo system
 #who                                   when           what
 #Andrea Orlati(a.orlati@ira.inaf.it)   02/12/2016     Creation
+from __future__ import print_function
 
 import getopt, sys
 import Acspy.Common.Err
@@ -27,32 +28,32 @@ offsets=[0.0,0.0,0.0,0.0,0.0]
 exitFlag=False
 
 def readPipe(pipeName):
-	print "Opening pipe......"
+	print("Opening pipe......")
 	pipeIn=os.open(pipeName,os.O_RDONLY|os.O_NONBLOCK)
-	print "Pipe opened for reading......"
+	print("Pipe opened for reading......")
 	while not exitFlag:
 		try:
 			pipeString=os.read(pipeIn,64)
 			if len(pipeString)>0:
-				print "received offsets %s"%pipeString
+				print("received offsets %s"%pipeString)
 				info=pipeString.split(',')
-				print info
+				print(info)
 				offsets[0]=float(info[0])
 				offsets[1]=float(info[1])
 				offsets[2]=float(info[2])
 				offsets[3]=float(info[2])
 				offsets[4]=float(info[2])
 				time.sleep(1)
-		except Exception, ex:
+		except Exception as ex:
 			pass
-			#print ex
+			#print(ex)
 	os.close(pipeIn)
         
 def usage():
-	print "subr [-h|--help] [-c|--code=]"
-	print ""
-	print "[-h|--help]      displays this help"
-	print "[-c|--code=]     select the setup code"
+	print("subr [-h|--help] [-c|--code=]")
+	print("")
+	print("[-h|--help]      displays this help")
+	print("[-c|--code=]     select the setup code")
 
 def sendData(socket,msg):
 	length=len(msg)	
@@ -63,8 +64,8 @@ def main():
     
 	try:
 		opts, args = getopt.getopt(sys.argv[1:],"hc:",["help","code="])
-	except getopt.GetoptError, err:
-		print str(err)
+	except getopt.GetoptError as err:
+		print(str(err))
 		usage()
 		sys.exit(1)
         
@@ -83,7 +84,7 @@ def main():
 		elif o in ("-c", "--code"):
 			code = a
 
-	print "The code is %s" % code
+	print("The code is %s" % code)
 
 	if code=="QQC":
 		polX[0]=0.0
@@ -148,21 +149,21 @@ def main():
 		minZ3=-85
 
 	else:
-		print "Unknown code"
+		print("Unknown code")
 		sys.exit(1);
 
-	print "Preparing pipe....."
+	print("Preparing pipe.....")
 	if not os.path.exists(pipeName):
-		print "Creating pipe"
+		print("Creating pipe")
 		os.mkfifo(pipeName,0777)
-		print "Created"
+		print("Created")
 	else:
-		print "pipe already exists"
+		print("pipe already exists")
 
 	try:
 		pipeThread=thread.start_new_thread(readPipe,(pipeName, ) )
-	except Exception,ex:
-		print ex
+	except Exception as ex:
+		print(ex)
 		sys.exit(1)
 
 	#get the link to the SRTmountcomponent
@@ -172,18 +173,18 @@ def main():
 	try:
 		component=simpleClient.getDefaultComponent(compType)
 		compName=component._get_name()
-	except Exception , ex:
+	except Exception as ex:
 		newEx = ClientErrorsImpl.CouldntAccessComponentExImpl( exception=ex, create=1 )
 		newEx.setComponentName(compType)
 		newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR)
 		sys.exit(1)  
 		
-	print "Antenna boss retrieved"
+	print("Antenna boss retrieved")
 
 	client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	client_socket.connect(('192.167.187.92', 5003))
 
-	print "socket connected"
+	print("socket connected")
 	time.sleep(2)
 
 	try:
@@ -191,10 +192,10 @@ def main():
 			ctime=getTimeStamp().value
 			try:
 				az,el=component.getRawCoordinates(ctime)
-			except Exception , ex:
-				print "Errore nella lettura della posizione"
+			except Exception as ex:
+				print("Errore nella lettura della posizione")
 			delev=degrees(el)
-			print el,delev
+			print(el,delev)
 			posX=polX[0]*delev*delev+polX[1]*delev+polX[2]
 			posY=polY[0]*delev*delev+polY[1]*delev+polY[2]
 			posZ1=polZ1[0]*delev*delev+polZ1[1]*delev+polZ1[2]
@@ -226,13 +227,13 @@ def main():
 			if posZ3<minZ3:
 				posZ3=minZ3
 
-			print "comando %6.2lf %6.2lf %6.2lf %6.2lf %6.2lf" % (posX,posY,posZ1,posZ2,posZ3)	
+			print("comando %6.2lf %6.2lf %6.2lf %6.2lf %6.2lf" % (posX,posY,posZ1,posZ2,posZ3))
 			buffer="0,1,7,%6.2lf,%6.2lf,%6.2lf,%6.2lf,%6.2lf" % (posX,posY,posZ1,posZ2,posZ3)
-			#print buffer
+			#print(buffer)
 			sendData(client_socket,buffer)
 			time.sleep(5)
 			data=client_socket.recv(128)
-			#print "risposta ", data
+			#print("risposta ", data)
 			time.sleep(1)
 	finally:
 		exitFlag=True
@@ -245,7 +246,3 @@ def main():
 
 if __name__=="__main__":
    main()
-    
-
-
-

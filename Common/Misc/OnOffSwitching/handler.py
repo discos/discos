@@ -1,4 +1,4 @@
-from __future__ import division
+from __future__ import division, print_function
 
 __credits__ = """Author: Marco Buttu <mbuttu@oa-cagliari.inaf.it>
 Licence: GPL 2.0 <http://www.gnu.org/licenses/gpl-2.0.html>"""
@@ -64,9 +64,9 @@ class Positioner(object):
         if not conf.simulate:
             try:
                 from devices import antenna, ANT_J2000, ACU_NEUTRAL
-            except Exception, e:
+            except Exception as e:
                 logging.exception('Cannot get the antenna component')
-                print 'ERROR: Cannot get the antenna component'
+                print('ERROR: Cannot get the antenna component')
                 terminate.value = True
                 sys.exit(1)
 
@@ -105,10 +105,10 @@ class Positioner(object):
                                 map(lambda x, y: x + y, conf.target.getRaDec(), (ra_offset, 0))
                         # if abs(ra - ra_py) > 2e-4:
                         #     logging.warning('Mismatch between horizons and pyephem RAs: (%.4f, %.4f)', ra, ra_py)
-                        #     print '@ WARNING: Mismatch between horizons and pyephem RAs: (%.4f, %.4f)' %(ra, ra_py)
+                        #     print('@ WARNING: Mismatch between horizons and pyephem RAs: (%.4f, %.4f)' %(ra, ra_py))
                         # if abs(dec - dec_py) > 2e-4:
                         #     logging.warning('@ Mismatch between horizons and pyephem DECs: (%.4f, %.4f)', dec, dec_py)
-                        #     print '@ WARNING: Mismatch between horizons and pyephem DECs: (%.4f, %.4f)' %(dec, dec_py)
+                        #     print('@ WARNING: Mismatch between horizons and pyephem DECs: (%.4f, %.4f)' %(dec, dec_py))
                         del positions[:idx]
                     else:
                         raise Exception('Cannot get a proper date in the horizons file')
@@ -118,9 +118,9 @@ class Positioner(object):
                         try:
                             # antenna.sidereal(conf.target.name, ra, dec, ANT_J2000, ACU_NEUTRAL)
                             antenna.sidereal(conf.target.name, ra_py, dec_py, ANT_J2000, ACU_NEUTRAL)
-                        except Exception, e:
+                        except Exception as e:
                             logging.exception('Cannot set the antenna position')
-                            print 'ERROR: Cannot set the antenna position'
+                            print('ERROR: Cannot set the antenna position')
                             terminate.value = True
                             sys.exit(1)
 
@@ -131,9 +131,9 @@ class Positioner(object):
                     break
                 time.sleep(conf.positioning_time)
         except KeyboardInterrupt:
-            print 'Stopping the positioning...'
-        except Exception, e:
-            print 'UNEXPECTED ERROR in updatePosition(): \n\t%s' %e
+            print('Stopping the positioning...')
+        except Exception as e:
+            print('UNEXPECTED ERROR in updatePosition(): \n\t%s' %e)
             logging.exception('Got exception on updatePoition()')
         finally:
             if terminate.value:
@@ -162,16 +162,16 @@ class Handler(object):
                     if not name.startswith('_') and not name in ignored:
                         value = getattr(conf, name)
                         f.write('%s = %s\n' %(name, value))
-            except Exception, e:
+            except Exception as e:
                 logging.exception('Cannot get the devices')
-                print 'ERROR: Cannot get the devices'
+                print('ERROR: Cannot get the devices')
                 raise
             finally:
                 try:
                     f.close()
-                except Exception, e:
+                except Exception as e:
                     logging.warning('Cannot create the conf.txt file in the observation directory')
-                    print 'WARNING: Cannot create the conf.txt file in the observation directory'
+                    print('WARNING: Cannot create the conf.txt file in the observation directory')
 
 
         if conf.positioning_time < 0:
@@ -211,9 +211,9 @@ class Handler(object):
                     duration += slice_time
                     if duration > timeout:
                         break
-                except Exception, e:
+                except Exception as e:
                     logging.exception('Cannot get the tracking value')
-                    print 'Cannot get the tracking value'
+                    print('Cannot get the tracking value')
                 if duration > timeout:
                     break
             if not track:
@@ -249,7 +249,7 @@ class Handler(object):
                 else:
                     continue
         if found:
-            print radialSpeed
+            print(radialSpeed)
             vobs = self.conf.lab_freq * (1 - radialSpeed/(ephem.c/1000))
             lo = vobs - ((self.conf.upper_freq + self.conf.lower_freq)/2)
             del self._horizons_lo[:idx]
@@ -259,13 +259,13 @@ class Handler(object):
         if not self.conf.simulate:
             try:
                 self.receiver.setLO([lo])
-            except Exception, e:
+            except Exception as e:
                 logging.exception('Cannot get the receiver')
-                print 'ERROR: Cannot get the receiver'
+                print('ERROR: Cannot get the receiver')
                 raise
         now = datetime.datetime.utcnow()
         logging.info('At %s: LO value -> %s', now, lo)
-        print '+> LO(now + %s seconds) -> %.1f MHz' %(delta, lo)
+        print('+> LO(now + %s seconds) -> %.1f MHz' %(delta, lo))
 
     def acquire(self, cycle, which):
         """Start and stop the backend acquisition."""
@@ -279,23 +279,23 @@ class Handler(object):
                 if which == 'calibration':
                     try:
                         self.receiver.calOn()
-                    except Exception, e:
+                    except Exception as e:
                         logging.exception('Cannot turn the mark ON')
-                        print '+> ERROR: Cannot turn the mark ON'
+                        print('+> ERROR: Cannot turn the mark ON')
                         sys.exit(1)
                     logging.info('Calibration mark ON')
-                    print '+> Calibration mark ON'
+                    print('+> Calibration mark ON')
                     time.sleep(1)
-                print '+> Starting acquisition %s' %which
+                print('+> Starting acquisition %s' %which)
                 logging.info('Starting acquisition at %s', datetime.datetime.utcnow())
                 self.recorder.start(cycle, which)
             else:
                 if which == 'calibration':
                     logging.info('Calibration mark ON')
-                    print '+> Calibration mark ON (simulation mode)'
+                    print('+> Calibration mark ON (simulation mode)')
                 logging.info('Starting acquisition at %s', datetime.datetime.utcnow())
-                print '+> Starting acquisition %s' %which
-        except Exception, e:
+                print('+> Starting acquisition %s' %which)
+        except Exception as e:
             logging.exception('Some problems recording')
             print('Some problems recording')
             raise
@@ -305,22 +305,22 @@ class Handler(object):
             if not self.conf.simulate:
                 self.recorder.stop()
                 logging.info('Acquisition done at %s', datetime.datetime.utcnow())
-                print '+> Acquisition done!'
+                print('+> Acquisition done!')
                 if which == 'calibration':
                     try:
                         self.receiver.calOff()
                         logging.info('Calibration mark OFF')
-                        print '+> Calibration mark OFF'
-                    except Exception, e:
+                        print('+> Calibration mark OFF')
+                    except Exception as e:
                         logging.exception('Cannot turn the mark OFF')
-                        print '+> ERROR: Cannot turn the mark OFF'
+                        print('+> ERROR: Cannot turn the mark OFF')
                         sys.exit(1)
             else:
                 logging.info('Acquisition done at %s', datetime.datetime.utcnow())
-                print '+> Acquisition done!'
+                print('+> Acquisition done!')
                 if which == 'calibration':
                     logging.info('Calibration mark OFF (simulation mode)')
-                    print '+> Calibration mark OFF'
+                    print('+> Calibration mark OFF')
 
     def getObservationTitle(self):
         from_ = self.conf.target.from_
@@ -373,7 +373,7 @@ class Handler(object):
                     if date >= datetime.datetime.utcnow() - datetime.timedelta(minutes=20):
                         self._horizons_lo.append((date, radialSpeed))
                         self._horizons_radec.append((date, ra, dec))
-        except Exception, e:
+        except Exception as e:
             logging.exception('Cannot get the radial speeds and ra_dec position from the horizons file')
             print('Cannot get the radial speeds and ra_dec position from the horizons file')
             sys.exit(1)
@@ -389,7 +389,7 @@ class Handler(object):
             try:
                 mkdir(statsdir)
             except Exception:
-                print 'Cannot create the %s dir.' %statsdir
+                print('Cannot create the %s dir.' %statsdir)
                 logging.warning('Cannot create the %s dir', statsdir)
                 self._enablestats(False)
                 return
@@ -399,15 +399,15 @@ class Handler(object):
             self.statsfile = open(statsfile, 'a')
             title = self.getObservationTitle()
             self.statsfile.write(title)
-        except Exception, e:
-            print 'Warning: cannot open or write the statitstics file'
+        except Exception as e:
+            print('Warning: cannot open or write the statitstics file')
             logging.exception('Cannot open or write the statistics file')
             self._enablestats(False)
 
     def run(self):
         """Run the jobs in loop for cycles times."""
         if not self.calibrations:
-            print 'WARNING: Observation without calibration'
+            print('WARNING: Observation without calibration')
             logging.warning('Observation withoud calibration')
             user_input = raw_input('Are you sure you want to continue? (y/n): ')
             if user_input.strip() != 'y':
@@ -419,7 +419,7 @@ class Handler(object):
         cal_idx = 0 if not self.calibrations else self.conf.cycles/self.calibrations
         try:
             for i in range(self.conf.cycles):
-                print '>> CYCLE N.%02d' %(i+1)
+                print('>> CYCLE N.%02d' %(i+1))
                 if positioner.terminated():
                     raise Exception('Antenna positioning process terminated. See the log file.')
                 positioner.goOnSource()
@@ -431,14 +431,14 @@ class Handler(object):
                 self.acquire(i+1, 'off_source')
                 if cal_idx and not i % cal_idx:
                     cal_counter += 1
-                    print '+> Starting calibration number %d.....' %cal_counter
+                    print('+> Starting calibration number %d.....' %cal_counter)
                     self.acquire(i+1, 'calibration')
-                print
+                print()
         except KeyboardInterrupt:
-            print 'Program stopped at at %s' %datetime.datetime.utcnow()
+            print('Program stopped at at %s' %datetime.datetime.utcnow())
             logging.info('Program stopped at at %s' %datetime.datetime.utcnow())
-        except Exception, e: 
-            print 'UNEXPECTED ERROR: %s' %e
+        except Exception as e:
+            print('UNEXPECTED ERROR: %s' %e)
             logging.exception('Got exception on main handler')
         finally:
             positioner.terminate()
@@ -446,11 +446,11 @@ class Handler(object):
             try:
                 logging.info('Observation terminated (%s)', datestr)
                 logging.info('# of cycles: %d | # of calibrations: %d', (i+1), cal_counter)
-                print '\nObservation terminated (%s)' %datestr
-                print '# of cycles: %d | # of calibrations: %d' %(i+1, cal_counter)
-            except Exception, e:
+                print('\nObservation terminated (%s)' %datestr)
+                print('# of cycles: %d | # of calibrations: %d' %(i+1, cal_counter))
+            except Exception as e:
                 logging.exception('Cannot get the number of cycles and calibrations')
-                print 'Cannot get the number of cycles and calibrations'
+                print('Cannot get the number of cycles and calibrations')
 
 if __name__ == '__main__':
     import doctest

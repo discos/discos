@@ -217,7 +217,7 @@ class CDBConf(object):
             exc = ComponentErrorsImpl.ValidationErrorExImpl()
             exc.setReason(raeson)
             raise exc
-        except Exception, ex:
+        except Exception as ex:
             children = () 
 
         setattr(self, dictName, {})

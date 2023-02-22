@@ -39,10 +39,10 @@ def DATE(DAY, YEAR):
 
 
     if Y == 0 and (DAY > 365 or DAY < 1):
-        raise RuntimeError, str(int(YEAR))+" Number of day less then 1 or more then 365"
+        raise RuntimeError(str(int(YEAR))+" Number of day less then 1 or more then 365")
 
     if Y == 1 and (DAY > 366 or DAY < 1):
-        raise RuntimeError, str(int(YEAR))+" Number of day less then 1 or more then 366"
+        raise RuntimeError(str(int(YEAR))+" Number of day less then 1 or more then 366")
 
     for N, M in enumerate(MONTH_LEN):
         if DAY > M:

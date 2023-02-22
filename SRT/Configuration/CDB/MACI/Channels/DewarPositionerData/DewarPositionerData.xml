@@ -9,7 +9,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	EventReliability="BestEffort"
 	ConnectionReliability="Persistent">
    <Events>
-     <_ Name="DewarPositionerDataBlock" MaxProcessTime="2.0"/>
+     <e Name="DewarPositionerDataBlock" MaxProcessTime="2.0"/>
    </Events>
 </EventChannel>
 
