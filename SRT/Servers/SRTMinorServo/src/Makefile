@@ -20,7 +20,7 @@ LIBRARIES = SRTMinorServoSocket
 
 SRTMinorServoSocket_OBJECTS = SRTMinorServoSocket
 SRTMinorServoSocket_CFLAGS = -std=c++17
-SRTMinorServoSocket_LIBS = IRALibrary SRTMinorServoCommandLibrary
+SRTMinorServoSocket_LIBS = IRALibrary ComponentErrors SRTMinorServoCommandLibrary
 
 
 # ----------------------------------------------------------------------

@@ -7,8 +7,11 @@
 #include "SRTMinorServoSocket.h"
 #include "SRTMinorServoCommandLibrary.h"
 
-#define ADDRESS "192.168.10.201"
-#define PORT    20000
+// This address and port are the ones set in the simulator
+// In order for the test to properly be executed, the simulator should be launched with the following command:
+// discos-simulator -s minor_servo start &
+#define ADDRESS std::string("127.0.0.1")
+#define PORT    12800
 
 class SRTMinorServoSocketTest : public ::testing::Test
 {
@@ -38,9 +41,12 @@ protected:
         {
             t.join();
         });
+
+        SRTMinorServoSocket::destroyInstance();
     }
 };
 
+// This test passes the already created instance to some threads
 TEST_F(SRTMinorServoSocketTest, instance_passed_to_threads)
 {
     SRTMinorServoSocket& socket = SRTMinorServoSocket::getInstance(ADDRESS, PORT);
@@ -57,6 +63,7 @@ TEST_F(SRTMinorServoSocketTest, instance_passed_to_threads)
     }
 }
 
+// This test spawns some threads, each one retrieves the instance. The first thread which tries to retrieve the instance will also generate it
 TEST_F(SRTMinorServoSocketTest, instance_retrieved_in_threads)
 {
     for(auto command : this->commands)
@@ -68,5 +75,52 @@ TEST_F(SRTMinorServoSocketTest, instance_retrieved_in_threads)
             // and if the answer was received correctly without being interleaved with the answer from another thread
             EXPECT_EQ(std::get<std::string>(args["OUTPUT"]), "GOOD");
         }));
+    }
+}
+
+// This test generates an instance on the given address and port, then tries to generate another instance with different address and port and fails
+TEST_F(SRTMinorServoSocketTest, open_with_args_retrieve_without)
+{
+    // First let's open the socket with the chosen ADDRESS and PORT
+    SRTMinorServoSocket::getInstance(ADDRESS, PORT);
+
+    try
+    {
+        // Let's try to instance another socket on a different port
+        SRTMinorServoSocket::getInstance(ADDRESS, PORT + 1);
+    }
+    catch(ComponentErrors::SocketErrorExImpl& ex)
+    {
+        // Check if we got the correct exception
+        EXPECT_EQ(ex.getData("Reason"), std::string("Socket already open on '" + ADDRESS + ":" + std::to_string(PORT) + "' . Use getInstance() (no arguments) to retrieve the object.").c_str());
+    }
+}
+
+// This test tries to retrieve an instance which has not been generated yet, failing
+TEST_F(SRTMinorServoSocketTest, try_open_without_args)
+{
+    try
+    {
+        SRTMinorServoSocket::getInstance();
+    }
+    catch(ComponentErrors::SocketErrorExImpl& ex)
+    {
+        // Check if we got the correct exception
+        EXPECT_EQ(ex.getData("Reason"), std::string("Socket not yet initialized. Use getInstance(std::string ip_address, int port) to initialize it and retrieve the object.").c_str());
+    }
+}
+
+// This test tries to generate an instance using a pair of address and port on which the socket fails to open
+TEST_F(SRTMinorServoSocketTest, try_open_on_wrong_address)
+{
+    try
+    {
+        // The exception is raised only if the given port is wrong
+        SRTMinorServoSocket::getInstance(ADDRESS, 0);
+    }
+    catch(ComponentErrors::SocketErrorExImpl& ex)
+    {
+        // Check if we got the correct exception
+        EXPECT_EQ(ex.getData("Reason"), std::string("Cannot connect the socket.").c_str());
     }
 }
