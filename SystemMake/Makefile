@@ -51,7 +51,7 @@ SRT_ERRORS:=
 SRT_INTERFACES:=SRTAntennaInterface SRTActiveSurfaceInterface \
                 SRTReceiversInterface
 SRT_LIBRARIES:=SRTMinorServoLibrary
-SRT_SERVERS:=SRTMount SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver \
+SRT_SERVERS:=SRTMount SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver SRTQBandReceiver\
              SRT7GHzReceiver SRTLPBandReceiver SRTPyIFDistributor WeatherStation
 SRT_CLIENTS:=SRTActiveSurfaceGUIClient SRTMountTextClient \
              MinorServoBossTextClient
@@ -83,7 +83,7 @@ ifeq ($(STATION),SRT)
 		SRTAntennaInterface SRTActiveSurfaceInterface SRTWeatherStationInterface SRTReceiversInterface \
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary XarcosLibrary SRTMinorServoLibrary ComponentProxy ModbusChannel PyTestingLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool TotalPower NoiseGenerator DBBC CustomLogger XBackend \
-		SRTMount SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver PyDewarPositioner \
+		SRTMount SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver SRTQBandReceiver SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver PyDewarPositioner \
 		SRTPyIFDistributor AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient CustomLoggingClient SchedulerTextClient \
 		SRTActiveSurfaceGUIClient SRTMountTextClient MinorServoBossTextClient \
 		Plotter KStars SRTScripts 
@@ -102,7 +102,7 @@ ifeq ($(STATION),SRT)
 	AntennaImplementation_MODULES:=Observatory SkySource OTF Moon PointingModel Refraction AntennaBoss SRTMount
 	ManagementImplementation_MODULES:=Scheduler CalibrationTool FitsWriter ExternalClients
 	BackendsImplementation_MODULES:=TotalPower NoiseGenerator XBackend
-	ReceiversImplementation_MODULES:=ReceiversBoss SRTKBandMFReceiver SRT7GHzReceiver SRTLPBandReceiver
+	ReceiversImplementation_MODULES:=ReceiversBoss SRTKBandMFReceiver SRTQBandReceiver SRT7GHzReceiver SRTLPBandReceiver
 	WeatherStationImplementation_MODULES:=SRTWeatherStation
 	SRTActiveSurfaceImplementation_MODULES:=SRTActiveSurfaceBoss
 	MinorServoImplementation_MODULES:=SRTMinorServo
