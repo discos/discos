@@ -4,10 +4,9 @@
  * Giuseppe Carboni (giuseppe.carboni@inaf.it)
  */
 
-#include "SRTMinorServoCommandLibrary.h"
-
 #include <iostream>
 #include <algorithm>
+#include "SRTMinorServoCommandLibrary.h"
 
 std::string SRTMinorServoCommandLibrary::status(std::string servo_id)
 {
@@ -17,28 +16,28 @@ std::string SRTMinorServoCommandLibrary::status(std::string servo_id)
     {
         command << "=" << servo_id;
     }
-    command << "\r\n";
+    command << CLOSER;
     return command.str();
 }
 
 std::string SRTMinorServoCommandLibrary::setup(std::string configuration)
 {
     std::stringstream command;
-    command << "SETUP=" << configuration << "\r\n";
+    command << "SETUP=" << configuration << CLOSER;
     return command.str();
 }
 
 std::string SRTMinorServoCommandLibrary::stow(std::string servo_id, unsigned int stow_position)
 {
     std::stringstream command;
-    command << "STOW=" << servo_id << "," << stow_position << "\r\n";
+    command << "STOW=" << servo_id << "," << stow_position << CLOSER;
     return command.str();
 }
 
 std::string SRTMinorServoCommandLibrary::stop(std::string servo_id)
 {
     std::stringstream command;
-    command << "STOP=" << servo_id << "\r\n";
+    command << "STOP=" << servo_id << CLOSER;
     return command.str();
 }
 
@@ -50,7 +49,7 @@ std::string SRTMinorServoCommandLibrary::preset(std::string servo_id, std::vecto
     {
         command << "," << coordinates[coordinate];
     }
-    command << "\r\n";
+    command << CLOSER;
     return command.str();
 }
 
@@ -72,7 +71,7 @@ std::string SRTMinorServoCommandLibrary::programTrack(std::string servo_id, long
     {
         command << "," << coordinates[coordinate];
     }
-    command << "\r\n";
+    command << CLOSER;
     return command.str();
 }
 
@@ -84,7 +83,7 @@ std::string SRTMinorServoCommandLibrary::offset(std::string servo_id, std::vecto
     {
         command << "," << coordinates[coordinate];
     }
-    command << "\r\n";
+    command << CLOSER;
     return command.str();
 }
 

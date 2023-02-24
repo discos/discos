@@ -12,6 +12,8 @@
 #include <map>
 #include <variant>
 
+#define CLOSER std::string("\r\n")
+
 /**
  * SRT Minor Servo Command Library
  *
