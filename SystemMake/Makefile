@@ -32,7 +32,7 @@ COMMON_INTERFACES:=CommonInterface ManagmentInterface AntennaInterface Receivers
 COMMON_LIBRARIES:=SlaLibrary IRALibrary DiscosVersion TextWindowLibrary ParserLibrary \
                   XarcosLibrary ModbusChannel ComponentProxy DiscosLocals XEphemAstroLib \
 				  DiscosBackendProtocol PyTestingLibrary \
-COMMON_SERVERS:=AntennaBoss Observatory OTF PointingModel Refraction SkySource \
+COMMON_SERVERS:=AntennaBoss Observatory OTF PointingModel Refraction SkySource SolarSystem \
                 Moon FitsWriter Scheduler ReceiversBoss ExternalClients \
                 CalibrationTool TotalPower NoiseGenerator CustomLogger \
                 XBackend PyDewarPositioner Sardara PyLocalOscillator MFKBandBaseReceiver PyCalmux \
