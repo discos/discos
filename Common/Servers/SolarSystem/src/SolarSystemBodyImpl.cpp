@@ -254,7 +254,7 @@ bool SolarSystemBodyImpl::checkTracking(ACS::Time time,CORBA::Double az,CORBA::D
 }
 
 
-void SolarSystemBodyImpl::setBodyName(const char* bodyName) throw (CORBA::SystemException)
+void SolarSystemBodyImpl::setBodyName(const char* bodyName) throw (CORBA::SystemException,AntennaErrors::AntennaErrorsEx)
 {
 
 /*
@@ -282,13 +282,21 @@ typedef enum {
         PLCode  code;
         
         code=xephemlib::SolarSystemBody::getPlanetCodeFromName(bodyName);
-        m_body_xephem =   new xephemlib::SolarSystemBody(code);
-         
+        if (code !=0){
+             m_body_xephem =   new xephemlib::SolarSystemBody(code);
+             std::cout << "name:" << bodyName <<std::endl;
+             std::cout << "code:" << code <<std::endl;
+        
+        } else
+        
+        {
+      //    THROW_EX(AntennaErrors, SourceNotFound, "WPServoImpl::initialize(): 'new' failure", false);
+         	
+        	_EXCPT(AntennaErrors::SourceNotFoundExImpl,impl,"SolarSystemBodyImpl::setOffsets()");
+		throw impl.getAntennaErrorsEx();	
+        }
         
         
-        
-        std::cout << "name:" << bodyName <<std::endl;
-        std::cout << "code:" << code <<std::endl;
         
 
 }

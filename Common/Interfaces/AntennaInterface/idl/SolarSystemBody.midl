@@ -67,7 +67,7 @@ module Antenna {
                      
                 */
        
-                void setBodyName(in string bodyName);
+                void setBodyName(in string bodyName)  raises (AntennaErrors::AntennaErrorsEx);
 
             /**
 		 * This method is only for control software internal use. It used, given a timestamp, to retrive the distance of the body

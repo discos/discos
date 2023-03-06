@@ -15,7 +15,7 @@ int main(int argc, char** argv)
    p->compute(site);
    p->report();
    std::cout <<xephemlib::SolarSystemBody::getPlanetNameFromCode(JUPITER)<<std::endl;
-   std::cout << xephemlib::SolarSystemBody::getPlanetCodeFromName("saTurn")<<std::endl;
+   std::cout << xephemlib::SolarSystemBody::getPlanetCodeFromName("gsgsddsgdsg")<<std::endl;
    return 0;
 
 }

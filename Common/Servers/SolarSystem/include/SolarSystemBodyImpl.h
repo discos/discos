@@ -30,12 +30,25 @@
 
 #include <IRA>
 #include <ComponentErrors.h>
-#include <acscomponentImpl.h>
 #include <AntennaErrors.h>
+#include <acscomponentImpl.h>
+ 
 #include  <EphemGeneratorS.h>
 #include <AntennaDefinitionsS.h>
 #include <map>
 #include <cctype>
+
+// If THROUGH_GET is true get the exception by an exImpl method
+#define THROW_EX(TYPE, NAME, MESSAGE, THROUGH_GET) \
+{ \
+    string msg(MESSAGE); \
+    ACS_SHORT_LOG((LM_ERROR, msg.c_str())); \
+    TYPE::NAME##Impl exImpl(__FILE__, __LINE__, msg.c_str()); \
+    if(THROUGH_GET) \
+        throw exImpl.get##NAME(); \
+    else \
+        throw exImpl; \
+}
 
 #include "libastrowrapper.h"
 
@@ -83,7 +96,7 @@ public:
         void getAttributes(Antenna::SolarSystemBodyAttributes_out att) throw (CORBA::SystemException);     
         
         
-        void setBodyName(const char* bodyName) throw (CORBA::SystemException) ;
+        void setBodyName(const char* bodyName) throw (CORBA::SystemException,AntennaErrors::AntennaErrorsEx) ;
 
         /*
          * This method is used to apply new offsets to a givrn frame. Longitude is corrected for latitude cosine before use.

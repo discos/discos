@@ -48,10 +48,12 @@ from sys import argv
 
 # Import the SimpleClient class
 from Acspy.Clients.SimpleClient import PySimpleClient
-
+import AntennaErrorsImpl
+import AntennaErrors
+import sys
 import Antenna
 from math import radians,degrees
-
+from IRAPy import logger
 import Acspy.Common.TimeHelper
 import time
 '''
@@ -89,7 +91,26 @@ hwRef = simpleClient.getDynamicComponent(None,
 if hwRef != None:
     simpleClient.getLogger().logInfo("Retrieved valid reference from manager.")
     #Do something useful with the reference.
-    hwRef.setBodyName('Jupiter')
+     
+    try:
+    	name='Neptuune'
+        hwRef.setBodyName(name)
+     
+    except AntennaErrors.SourceNotFoundEx,  ex:
+    	
+   
+        newex=AntennaErrorsImpl.SourceNotFoundExImpl(ex)
+        
+        logger.logError('source %s not found' % ex)
+        logger.logError(newex.log())
+        #ACS_LOG_ERROR
+  #   newEx.log() 
+        simpleClient.disconnect()
+        sys.exit(-1)   
+    except ValueError:
+    	print('zzz')
+    	sys.exit(-1)    
+    
     sourceID = J2000RightAscension=  J2000Declination= rightAscension= declination= julianEpoch= gLongitude= gLatitude= azimuth= elevation= parallacticAngle=0.
     
     userAzimuthOffset=userElevationOffset= userRightAscensionOffset= userDeclinationOffset= userLongitudeOffset= userLatitudeOffset=axis=angularSize=0.
