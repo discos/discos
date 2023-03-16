@@ -473,62 +473,6 @@ public:
 
 
     /**
-     * Returns a reference to the vdL2 property implementation of the IDL interface.
-     * @return pointer to read-only double property
-     */
-    virtual ACS::ROdoubleSeq_ptr vdL2() throw (CORBA::SystemException);
-
-
-    /**
-     * Returns a reference to the vdR2 property implementation of the IDL interface.
-     * @return pointer to read-only double property
-     */
-    virtual ACS::ROdoubleSeq_ptr vdR2() throw (CORBA::SystemException);
-
-
-    /**
-     * Returns a reference to the vdL3 property implementation of the IDL interface.
-     * @return pointer to read-only double property
-     */
-    virtual ACS::ROdoubleSeq_ptr vdL3() throw (CORBA::SystemException);
-
-
-    /**
-     * Returns a reference to the vdR3 property implementation of the IDL interface.
-     * @return pointer to read-only double property
-     */
-    virtual ACS::ROdoubleSeq_ptr vdR3() throw (CORBA::SystemException);
-
-
-    /**
-     * Returns a reference to the vdL4 property implementation of the IDL interface.
-     * @return pointer to read-only double property
-     */
-    virtual ACS::ROdoubleSeq_ptr vdL4() throw (CORBA::SystemException);
-
-
-    /**
-     * Returns a reference to the vdR4 property implementation of the IDL interface.
-     * @return pointer to read-only double property
-     */
-    virtual ACS::ROdoubleSeq_ptr vdR4() throw (CORBA::SystemException);
-
-
-    /**
-     * Returns a reference to the vdL5 property implementation of the IDL interface.
-     * @return pointer to read-only double property
-     */
-    virtual ACS::ROdoubleSeq_ptr vdL5() throw (CORBA::SystemException);
-
-
-    /**
-     * Returns a reference to the vdR5 property implementation of the IDL interface.
-     * @return pointer to read-only double property
-     */
-    virtual ACS::ROdoubleSeq_ptr vdR5() throw (CORBA::SystemException);
-
-
-    /**
      * Returns a reference to the idL1 property implementation of the IDL interface.
      * @return pointer to read-only double property
      */
@@ -543,62 +487,6 @@ public:
 
 
     /**
-     * Returns a reference to the idL2 property implementation of the IDL interface.
-     * @return pointer to read-only double property
-     */
-    virtual ACS::ROdoubleSeq_ptr idL2() throw (CORBA::SystemException);
-
-
-    /**
-     * Returns a reference to the idR2 property implementation of the IDL interface.
-     * @return pointer to read-only double property
-     */
-    virtual ACS::ROdoubleSeq_ptr idR2() throw (CORBA::SystemException);
-
-
-    /**
-     * Returns a reference to the idL3 property implementation of the IDL interface.
-     * @return pointer to read-only double property
-     */
-    virtual ACS::ROdoubleSeq_ptr idL3() throw (CORBA::SystemException);
-
-
-    /**
-     * Returns a reference to the idR3 property implementation of the IDL interface.
-     * @return pointer to read-only double property
-     */
-    virtual ACS::ROdoubleSeq_ptr idR3() throw (CORBA::SystemException);
-
-
-    /**
-     * Returns a reference to the idL4 property implementation of the IDL interface.
-     * @return pointer to read-only double property
-     */
-    virtual ACS::ROdoubleSeq_ptr idL4() throw (CORBA::SystemException);
-
-
-    /**
-     * Returns a reference to the idR4 property implementation of the IDL interface.
-     * @return pointer to read-only double property
-     */
-    virtual ACS::ROdoubleSeq_ptr idR4() throw (CORBA::SystemException);
-
-
-    /**
-     * Returns a reference to the idL5 property implementation of the IDL interface.
-     * @return pointer to read-only double property
-     */
-    virtual ACS::ROdoubleSeq_ptr idL5() throw (CORBA::SystemException);
-
-
-    /**
-     * Returns a reference to the idR5 property implementation of the IDL interface.
-     * @return pointer to read-only double property
-     */
-    virtual ACS::ROdoubleSeq_ptr idR5() throw (CORBA::SystemException);
-
-
-    /**
      * Returns a reference to the vgL1 property implementation of the IDL interface.
      * @return pointer to read-only double property
      */
@@ -610,62 +498,6 @@ public:
      * @return pointer to read-only double property
      */
     virtual ACS::ROdoubleSeq_ptr vgR1() throw (CORBA::SystemException);
-
-
-    /**
-     * Returns a reference to the vgL2 property implementation of the IDL interface.
-     * @return pointer to read-only double property
-     */
-    virtual ACS::ROdoubleSeq_ptr vgL2() throw (CORBA::SystemException);
-
-
-    /**
-     * Returns a reference to the vgR2 property implementation of the IDL interface.
-     * @return pointer to read-only double property
-     */
-    virtual ACS::ROdoubleSeq_ptr vgR2() throw (CORBA::SystemException);
-
-
-    /**
-     * Returns a reference to the vgL3 property implementation of the IDL interface.
-     * @return pointer to read-only double property
-     */
-    virtual ACS::ROdoubleSeq_ptr vgL3() throw (CORBA::SystemException);
-
-
-    /**
-     * Returns a reference to the vgR3 property implementation of the IDL interface.
-     * @return pointer to read-only double property
-     */
-    virtual ACS::ROdoubleSeq_ptr vgR3() throw (CORBA::SystemException);
-
-
-    /**
-     * Returns a reference to the vgL4 property implementation of the IDL interface.
-     * @return pointer to read-only double property
-     */
-    virtual ACS::ROdoubleSeq_ptr vgL4() throw (CORBA::SystemException);
-
-
-    /**
-     * Returns a reference to the vgR4 property implementation of the IDL interface.
-     * @return pointer to read-only double property
-     */
-    virtual ACS::ROdoubleSeq_ptr vgR4() throw (CORBA::SystemException);
-
-
-    /**
-     * Returns a reference to the vgL5 property implementation of the IDL interface.
-     * @return pointer to read-only double property
-     */
-    virtual ACS::ROdoubleSeq_ptr vgL5() throw (CORBA::SystemException);
-
-
-    /**
-     * Returns a reference to the vgR5 property implementation of the IDL interface.
-     * @return pointer to read-only double property
-     */
-    virtual ACS::ROdoubleSeq_ptr vgR5() throw (CORBA::SystemException);
 
 
     /// Return a reference to receiverName property (ROstring) 
@@ -727,34 +559,10 @@ private:
 
     baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvdL1;
     baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvdR1;
-    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvdL2;
-    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvdR2;
-    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvdL3;
-    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvdR3;
-    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvdL4;
-    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvdR4;
-    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvdL5;
-    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvdR5;
     baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pidL1;
     baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pidR1;
-    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pidL2;
-    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pidR2;
-    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pidL3;
-    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pidR3;
-    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pidL4;
-    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pidR4;
-    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pidL5;
-    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pidR5;
     baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvgL1;
     baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvgR1;
-    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvgL2;
-    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvgR2;
-    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvgL3;
-    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvgR3;
-    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvgL4;
-    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvgR4;
-    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvgL5;
-    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_pvgR5;
 
     baci::SmartPropertyPointer<baci::ROdouble> m_pcryoTemperatureCoolHead;
     baci::SmartPropertyPointer<baci::ROdouble> m_pcryoTemperatureCoolHeadWindow;

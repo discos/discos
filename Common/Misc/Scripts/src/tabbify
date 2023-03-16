@@ -39,7 +39,7 @@ def console_app():
     else:
         logging.basicConfig(level=logging.INFO)
     if not args:
-        print usage
+        print(usage)
         sys.exit(0)
     else:
         filenames = [os.path.abspath(filename) for filename in args]

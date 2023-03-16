@@ -30,9 +30,9 @@ class PosGenerator(object):
         """Return the parallactic angle"""
         try:
             latitude = siteInfo['latitude']
-        except (KeyError, TypeError), ex:
+        except (KeyError, TypeError) as ex:
             raise PosGeneratorError('cannot get the latitude: %s' %ex.message)
-        except Exception, ex:
+        except Exception as ex:
             raeson = 'unexpected exception getting the site latitude' 
             logger.logNotice(raeson)
             raise PosGeneratorError(raeson)
@@ -59,7 +59,7 @@ class PosGenerator(object):
             except GeneratorExit: # Required in Python 2.5:
                 # http://www.algorithm.co.il/blogs/programming/generatorexit-another-reason-to-upgrade-to-python-2-6/
                 raise 
-            except Exception, ex:
+            except Exception as ex:
                 raeson = 'cannot get the %s (az, el)  values' %source._get_name()
                 logger.logNotice('%s: %s' %(raeson, ex.message))
                 raise PosGeneratorError(raeson)
@@ -68,9 +68,9 @@ class PosGenerator(object):
         """Return the galactic parallactic angle"""
         try:
             latitude = siteInfo['latitude']
-        except (KeyError, TypeError), ex:
+        except (KeyError, TypeError) as ex:
             raise PosGeneratorError('cannot get the latitude: %s' %ex.message)
-        except Exception, ex:
+        except Exception as ex:
             raeson = 'unexpected exception getting the site latitude' 
             logger.logNotice(raeson)
             raise PosGeneratorError(raeson)
@@ -97,7 +97,7 @@ class PosGenerator(object):
             except GeneratorExit: # Required in Python 2.5:
                 # http://www.algorithm.co.il/blogs/programming/generatorexit-another-reason-to-upgrade-to-python-2-6/
                 raise 
-            except Exception, ex:
+            except Exception as ex:
                 raeson = 'cannot get the %s (az, el)  values' %source._get_name()
                 logger.logNotice('%s: %s' %(raeson, ex.message))
                 raise PosGeneratorError(raeson)

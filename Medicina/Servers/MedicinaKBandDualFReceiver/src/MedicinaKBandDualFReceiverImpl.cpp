@@ -31,34 +31,10 @@ MedicinaKBandDualFReceiverImpl::MedicinaKBandDualFReceiverImpl(const ACE_CString
     m_pvacuum(this),
     m_pvdL1(this),
     m_pvdR1(this),
-    m_pvdL2(this),
-    m_pvdR2(this),
-    m_pvdL3(this),
-    m_pvdR3(this),
-    m_pvdL4(this),
-    m_pvdR4(this),
-    m_pvdL5(this),
-    m_pvdR5(this),
     m_pidL1(this),
     m_pidR1(this),
-    m_pidL2(this),
-    m_pidR2(this),
-    m_pidL3(this),
-    m_pidR3(this),
-    m_pidL4(this),
-    m_pidR4(this),
-    m_pidL5(this),
-    m_pidR5(this),
     m_pvgL1(this),
     m_pvgR1(this),
-    m_pvgL2(this),
-    m_pvgR2(this),
-    m_pvgL3(this),
-    m_pvgR3(this),
-    m_pvgL4(this),
-    m_pvgR4(this),
-    m_pvgL5(this),
-    m_pvgR5(this),
     m_pcryoTemperatureCoolHead(this),
     m_pcryoTemperatureCoolHeadWindow(this),
     m_pcryoTemperatureLNA(this),
@@ -118,66 +94,18 @@ void MedicinaKBandDualFReceiverImpl::execute() throw (ACSErr::ACSbaseExImpl, Com
                 new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_VOLTAGE, 0, 1), true);
         m_pvdR1=new baci::ROdoubleSeq(getContainerServices()->getName() + ":vdR1", getComponent(),
                 new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_VOLTAGE, 1, 1), true);
-        m_pvdL2=new baci::ROdoubleSeq(getContainerServices()->getName() + ":vdL2", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_VOLTAGE, 0, 2), true);
-        m_pvdR2=new baci::ROdoubleSeq(getContainerServices()->getName() + ":vdR2", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_VOLTAGE, 1, 2), true);
-        m_pvdL3=new baci::ROdoubleSeq(getContainerServices()->getName() + ":vdL3", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_VOLTAGE, 0, 3), true);
-        m_pvdR3=new baci::ROdoubleSeq(getContainerServices()->getName() + ":vdR3", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_VOLTAGE, 1, 3), true);
-        m_pvdL4=new baci::ROdoubleSeq(getContainerServices()->getName() + ":vdL4", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_VOLTAGE, 0, 4), true);
-        m_pvdR4=new baci::ROdoubleSeq(getContainerServices()->getName() + ":vdR4", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_VOLTAGE, 1, 4), true);
-        m_pvdL5=new baci::ROdoubleSeq(getContainerServices()->getName() + ":vdL5", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_VOLTAGE, 0, 5), true);
-        m_pvdR5=new baci::ROdoubleSeq(getContainerServices()->getName() + ":vdR5", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_VOLTAGE, 1, 5), true);
 
         // Drain Current
         m_pidL1=new baci::ROdoubleSeq(getContainerServices()->getName() + ":idL1", getComponent(),
                 new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_CURRENT, 0, 1), true);
         m_pidR1=new baci::ROdoubleSeq(getContainerServices()->getName() + ":idR1", getComponent(),
                 new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_CURRENT, 1, 1), true);
-        m_pidL2=new baci::ROdoubleSeq(getContainerServices()->getName() + ":idL2", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_CURRENT, 0, 2), true);
-        m_pidR2=new baci::ROdoubleSeq(getContainerServices()->getName() + ":idR2", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_CURRENT, 1, 2), true);
-        m_pidL3=new baci::ROdoubleSeq(getContainerServices()->getName() + ":idL3", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_CURRENT, 0, 3), true);
-        m_pidR3=new baci::ROdoubleSeq(getContainerServices()->getName() + ":idR3", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_CURRENT, 1, 3), true);
-        m_pidL4=new baci::ROdoubleSeq(getContainerServices()->getName() + ":idL4", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_CURRENT, 0, 4), true);
-        m_pidR4=new baci::ROdoubleSeq(getContainerServices()->getName() + ":idR4", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_CURRENT, 1, 4), true);
-        m_pidL5=new baci::ROdoubleSeq(getContainerServices()->getName() + ":idL5", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_CURRENT, 0, 5), true);
-        m_pidR5=new baci::ROdoubleSeq(getContainerServices()->getName() + ":idR5", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_CURRENT, 1, 5), true);
 
         // Gate Voltage
         m_pvgL1=new baci::ROdoubleSeq(getContainerServices()->getName() + ":vgL1", getComponent(),
                 new DevIOLNAControls(&m_core, IRA::ReceiverControl::GATE_VOLTAGE, 0, 1), true);
         m_pvgR1=new baci::ROdoubleSeq(getContainerServices()->getName() + ":vgR1", getComponent(),
                 new DevIOLNAControls(&m_core, IRA::ReceiverControl::GATE_VOLTAGE, 1, 1), true);
-        m_pvgL2=new baci::ROdoubleSeq(getContainerServices()->getName() + ":vgL2", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::GATE_VOLTAGE, 0, 2), true);
-        m_pvgR2=new baci::ROdoubleSeq(getContainerServices()->getName() + ":vgR2", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::GATE_VOLTAGE, 1, 2), true);
-        m_pvgL3=new baci::ROdoubleSeq(getContainerServices()->getName() + ":vgL3", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::GATE_VOLTAGE, 0, 3), true);
-        m_pvgR3=new baci::ROdoubleSeq(getContainerServices()->getName() + ":vgR3", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::GATE_VOLTAGE, 1, 3), true);
-        m_pvgL4=new baci::ROdoubleSeq(getContainerServices()->getName() + ":vgL4", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::GATE_VOLTAGE, 0, 4), true);
-        m_pvgR4=new baci::ROdoubleSeq(getContainerServices()->getName() + ":vgR4", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::GATE_VOLTAGE, 1, 4), true);
-        m_pvgL5=new baci::ROdoubleSeq(getContainerServices()->getName() + ":vgL5", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::GATE_VOLTAGE, 0, 5), true);
-        m_pvgR5=new baci::ROdoubleSeq(getContainerServices()->getName() + ":vgR5", getComponent(),
-               new DevIOLNAControls(&m_core, IRA::ReceiverControl::GATE_VOLTAGE, 1, 5), true);
 
         m_pcryoTemperatureCoolHead = new baci::ROdouble(getContainerServices()->getName() + ":cryoTemperatureCoolHead", \
                 getComponent(), new DevIOCryoTemperatureCoolHead(&m_core),true);
@@ -726,34 +654,10 @@ _PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pini
 _PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdouble, m_pvacuum, vacuum);
 _PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvdL1, vdL1);
 _PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvdR1, vdR1);
-_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvdL2, vdL2);
-_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvdR2, vdR2);
-_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvdL3, vdL3);
-_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvdR3, vdR3);
-_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvdL4, vdL4);
-_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvdR4, vdR4);
-_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvdL5, vdL5);
-_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvdR5, vdR5);
 _PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pidL1, idL1);
 _PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pidR1, idR1);
-_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pidL2, idL2);
-_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pidR2, idR2);
-_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pidL3, idL3);
-_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pidR3, idR3);
-_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pidL4, idL4);
-_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pidR4, idR4);
-_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pidL5, idL5);
-_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pidR5, idR5);
 _PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvgL1, vgL1);
 _PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvgR1, vgR1);
-_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvgL2, vgL2);
-_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvgR2, vgR2);
-_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvgL3, vgL3);
-_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvgR3, vgR3);
-_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvgL4, vgL4);
-_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvgR4, vgR4);
-_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvgL5, vgL5);
-_PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdoubleSeq, m_pvgR5, vgR5);
 _PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdouble, m_pcryoTemperatureCoolHead, cryoTemperatureCoolHead);
 _PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdouble, m_pcryoTemperatureCoolHeadWindow, cryoTemperatureCoolHeadWindow);
 _PROPERTY_REFERENCE_CPP(MedicinaKBandDualFReceiverImpl, ACS::ROdouble, m_pcryoTemperatureLNA, cryoTemperatureLNA);

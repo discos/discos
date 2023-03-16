@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+from __future__ import print_function
 
 import logging
 import time
@@ -12,8 +13,8 @@ from Acspy.Util.ACSCorba import getManager
 process = os.path.basename(__file__)
 # Exit in case the user try to run the script on nuraghe-mng
 #if 'nuraghe-mng' in os.getenv('HOST'):
-#    print 'ERROR: you can not execute %s on this machine.' % process
-#    print 'Please, read the SD manual!'
+#    print('ERROR: you can not execute %s on this machine.' % process)
+#    print('Please, read the SD manual!')
 #    sys.exit(0)
 
 # Exit in case the process is already running
@@ -26,7 +27,7 @@ for line in running_processes.split('\n'):
 #        else:
         counter += 1
     if counter > 1:
-        print '%s already running, everything is OK' % process
+        print('%s already running, everything is OK' % process)
         sys.exit(0)
 
 #LOGDIR = os.path.join('service','receivers')
@@ -34,7 +35,7 @@ LOGDIR ='/service/receivers'
 FILENAME = os.path.join(LOGDIR,'receivers.log')
 dirname=os.path.dirname(LOGDIR)
 if not os.path.exists(dirname):
-	print 'ERROR: target folder does not exists, check %s' % LOGDIR
+	print('ERROR: target folder does not exists, check %s' % LOGDIR)
 	sys.exit(-1)
 	
 logging.basicConfig(
@@ -89,7 +90,7 @@ while True:
         except KeyboardInterrupt:
             logging.info('program closed by the user')
             raise
-        except Exception, ex:
+        except Exception as ex:
             pass
         finally:
             try:

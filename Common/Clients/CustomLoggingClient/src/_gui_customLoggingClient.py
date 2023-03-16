@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 """
 CustomLoggingClient implements a Tkinter interface that monitors in realtime the ACS custom
 logging events generated runtime.
@@ -13,7 +14,10 @@ import sys
 import logging
 import bisect
 import functools
-import Tkinter as tk
+try:
+    import Tkinter as tk
+except:
+    import tkinter as tk
 from IRAPy.bsqueue import BoundedSortedQueue
 
 #DEFINE LOGGING RECORDS TOTAL ORDERING RULES
@@ -56,11 +60,11 @@ class App:
         self.yscrollbar.config(command=self.list_box.yview)
   
     def handler(self, event):
-	"""
-	Handle a log_event adding it to a BoundedSortedQueue in memory and to the 
-	corresponding GUI representation (in Tkinter this sould be a Listbox).
-	@param event: the logging event.
-	"""
+        """
+        Handle a log_event adding it to a BoundedSortedQueue in memory and to the 
+        corresponding GUI representation (in Tkinter this sould be a Listbox).
+        @param event: the logging event.
+        """
         index, popped = self.record_list.push(event)
         if popped:
             self.list_box.delete(0)
@@ -83,22 +87,22 @@ if __name__ == '__main__':
         consumer = Consumer(Management.CUSTOM_LOGGING_CHANNEL_NAME)
         consumer.addSubscription(Management.CustomLoggingData, app.handler)
         consumer.consumerReady()
-    except Exception, ex:
-        print "exception caught: ", ex #TODO: throw excep
+    except Exception as ex:
+        print("exception caught: ", ex) #TODO: throw excep
         logger.logError(ex.message)
     #try:
 
     def handle_signal(num, trace):
         #trace.f_locals['app'].clear()
         #trace.f_locals['consumer'].disconnect()
-        print "Exiting"
+        print("Exiting")
         sys.exit(0)
 
     signal.signal(signal.SIGINT, handle_signal)     
     signal.signal(signal.SIGUSR1, handle_signal)     
     root.mainloop()    
-    #except KeyboardInterrupt, ki:
+    #except KeyboardInterrupt as ki:
     #    pass
     #finally:
     #    consumer.disconnect()
-    #    print "Exiting"
+    #    print("Exiting")

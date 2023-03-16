@@ -47,6 +47,7 @@
 #
 #------------------------------------------------------------------------
 #
+from __future__ import print_function
 
 import time
 from math import radians
@@ -118,7 +119,7 @@ class LocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComponent, C
         logger.logNotice('SYNT FREQ  set to %f ' %self.freq)
         logger.logNotice('SYNT POWER set to %f ' %self.power)
 
-     except CommandLine.CommandLineError,ex :
+     except CommandLine.CommandLineError as ex :
           
         logger.logError(ex,message)
 
@@ -134,8 +135,8 @@ class LocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComponent, C
      
        msg,power=self.cl.getPower()
        msg,freq= self.cl.getFrequency()
-       print power
-       print freq
+       print(power)
+       print(freq)
        return (power,freq)
   
    def rfon(self):

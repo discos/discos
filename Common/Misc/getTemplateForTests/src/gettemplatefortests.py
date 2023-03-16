@@ -32,12 +32,12 @@ def command_line_util(args):
     if len(args) == 1:
         arg = args.pop()
         if arg in ('--help', '-h'):
-            print usage
+            print(usage)
             sys.exit(0)
         else:
             target_dir = arg
     elif len(args) > 1:
-        print usage
+        print(usage)
         sys.exit(0)
     else:
         target_dir = 'tests' # Default target directory

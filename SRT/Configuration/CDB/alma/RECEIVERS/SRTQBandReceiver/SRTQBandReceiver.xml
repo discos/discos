@@ -18,13 +18,13 @@
     DewarIPAddress="192.168.3.115"
     DewarPort="5002"
     LNAIPAddress="192.168.3.114"
-    LNAPort="5002"
+    LNAPort="5002"   
     WatchDogResponseTime="10000000"
     WatchDogSleepTime="10000000"
     LNASamplingTime="250000"
     RepetitionCacheTime="7000000"
     RepetitionExpireTime="10000000"
-    LocalOscillatorInstance="RECEIVERS/LO_KBAND"
+    LocalOscillatorInstance="RECEIVERS/LO_CBAND"
     ReceiverName="SRTQBand"
 >
     <LO description="Sequence of local oscillator values for each IF chain" />

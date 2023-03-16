@@ -3,6 +3,7 @@
 # This is a python test program that rchanges the current offsets of Noto SCU
 #who                                   when           what
 #Andrea Orlati(a.orlati@ira.inaf.it)   24/01/2017     Creation
+from __future__ import print_function
 
 import getopt, sys
 
@@ -15,19 +16,19 @@ from math import *
 import os
         
 def usage():
-	print "subrOff [-h|--help] [-x val] [-y val] [-z val]"
-	print ""
-	print "[-h|--help]      displays this help"
-	print "[-x val]         offset for x axis"
-	print "[-y val]         offset for y axis"
-	print "[-z val]         offset for z axis"
+	print("subrOff [-h|--help] [-x val] [-y val] [-z val]")
+	print("")
+	print("[-h|--help]      displays this help")
+	print("[-x val]         offset for x axis")
+	print("[-y val]         offset for y axis")
+	print("[-z val]         offset for z axis")
 
 def main():
     
 	try:
 		opts, args = getopt.getopt(sys.argv[1:],"hx:y:z:",["help"])
-	except getopt.GetoptError, err:
-		print str(err)
+	except getopt.GetoptError as err:
+		print(str(err))
 		usage()
 		sys.exit(1)
         
@@ -48,30 +49,26 @@ def main():
 		elif o in ("-z"):
 			Z = float(a)
 
-	print "The offsets are X: %lf, Y: %lf, Z, %lf" % (X,Y,Z)
+	print("The offsets are X: %lf, Y: %lf, Z, %lf" % (X,Y,Z))
 
-	print "Preparing pipe....."
+	print("Preparing pipe.....")
 	if not os.path.exists(pipeName):
-		print "Creating pipe"
+		print("Creating pipe")
 		os.mkfifo(pipeName,0777)
-		print "Created"
+		print("Created")
 	else:
-		print "pipe already exists"
+		print("pipe already exists")
 
-	print "Opening pipe......"
+	print("Opening pipe......")
 	pipeOut=open(pipeName,'w', 0)
-	print "Pipe openened for writing......"
+	print("Pipe openened for writing......")
 	try:
 		pipeString="%lf,%lf,%lf"%(X,Y,Z)
 		pipeOut.write(pipeString)
-		print "command sent!"
+		print("command sent!")
 		pipeOut.close()
-	except Exception, ex:
-		print ex
+	except Exception as ex:
+		print(ex)
 
 if __name__=="__main__":
    main()
-    
-
-
-

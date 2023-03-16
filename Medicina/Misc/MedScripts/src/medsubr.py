@@ -29,7 +29,7 @@ def main():
     #get the antennaBoss component
     try:
         antennaBoss=simpleClient.getComponent(antennaBossInstance)
-    except Exception , ex:
+    except Exception as ex:
         simpleClient.getLogger().logError("Error in retriving antennaBoss component");
         simpleClient.disconnect()
         sys.exit(-1)
@@ -38,7 +38,7 @@ def main():
     try: 
         mySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         mySocket.connect((Address,Port))
-    except socket.error, (value,message):
+    except socket.error as (value,message):
         simpleClient.getLogger().logError("socket error: %s" % message)
         simpleClient.releaseComponent(antennaBossInstance)
         simpleClient.disconnect()
@@ -47,7 +47,7 @@ def main():
     try:
         elProp=antennaBoss._get_rawElevation()
         azProp=antennaBoss._get_rawAzimuth()
-    except Exception, ex:
+    except Exception as ex:
         simpleClient.getLogger().logError("Can't read antennaBoss properties")
         simpleClient.releaseComponent(antennaBossInstance)
         mySlocket.close()
@@ -70,7 +70,7 @@ def main():
             sendBuffer="current=0,0,%lf,%lf\n" % (az,el)
             try:
                 mySocket.send(sendBuffer)
-            except socket.error, (value,message):
+            except socket.error as (value,message):
                 simpleClient.getLogger().logError("Send error: %s" % message)
                 simpleClient.releaseComponent(antennaBossInstance)
                 mySocket.close()

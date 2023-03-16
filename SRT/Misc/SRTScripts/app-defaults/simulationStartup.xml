@@ -101,6 +101,15 @@
             <remoteAccount>discos</remoteAccount>
         </container>
         <container>
+            <name>LocalOscillatorQContainer</name>
+            <type>py</type>
+            <heapSizeMB></heapSizeMB>
+            <useDedicatedSettings>true</useDedicatedSettings>
+            <scriptBase>0</scriptBase>
+            <remoteHost>MASTERHOST</remoteHost>
+            <remoteAccount>discos</remoteAccount>
+        </container>
+        <container>
             <name>LoggerContainer</name>
             <type>cpp</type>
             <heapSizeMB></heapSizeMB>
