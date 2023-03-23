@@ -14,6 +14,8 @@
 
 #define CLOSER std::string("\r\n")
 
+using SRTMinorServoAnswerMap = std::map<std::string, std::variant<int, double, std::string> >;
+
 /**
  * SRT Minor Servo Command Library
  *
@@ -83,7 +85,7 @@ public:
      * @param answer the string containing the answer received from the VBrain proxy
      * @return a std::map (dictionary) containing the answer splitted into keys and values. The keys are always std::string, the values can either be int, double or std::string.
      */
-    static std::map<std::string, std::variant<int, double, std::string> > parseAnswer(std::string answer);
+    static SRTMinorServoAnswerMap parseAnswer(std::string answer);
 };
 
 #endif

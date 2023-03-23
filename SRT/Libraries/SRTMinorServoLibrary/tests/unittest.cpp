@@ -55,14 +55,14 @@ TEST(SRTMinorServoCommandLibraryTest, offset)
 TEST(SRTMinorServoCommandLibraryTest, parseAnswer)
 {
     // Minimal correct answer
-    std::string answer = "OUTPUT:GOOD,1665743366.654321";
-    std::map<std::string, std::variant<int, double, std::string> > args;
+    std::string answer = "OUTPUT:GOOD,1665743366.654321\r\n";
+    SRTMinorServoAnswerMap args;
     args["OUTPUT"] = "GOOD";
     args["TIMESTAMP"] = 1665743366.654321;
     EXPECT_EQ(SRTMinorServoCommandLibrary::parseAnswer(answer), args);
 
     // Complete correct answer
-    answer = "OUTPUT:GOOD,1665743366.123456,CURRENT_CONFIG=21|SIMULATION_ENABLED=34|PLC_TIME=78|PLC_VERSION=69|CONTROL=14|POWER=38|EMERGENCY=69|ENABLED=51|OPERATIVE_MODE=94";
+    answer = "OUTPUT:GOOD,1665743366.123456,CURRENT_CONFIG=21|SIMULATION_ENABLED=34|PLC_TIME=78|PLC_VERSION=69|CONTROL=14|POWER=38|EMERGENCY=69|ENABLED=51|OPERATIVE_MODE=94\r\n";
     args.clear();
     args["OUTPUT"] = "GOOD";
     args["TIMESTAMP"] = 1665743366.123456;
@@ -78,22 +78,22 @@ TEST(SRTMinorServoCommandLibraryTest, parseAnswer)
     EXPECT_EQ(SRTMinorServoCommandLibrary::parseAnswer(answer), args);
 
     // Missing timestamp
-    answer = "OUTPUT:GOOD,CURRENT_CONFIG=21|SIMULATION_ENABLED=34|PLC_TIME=78|PLC_VERSION=69|CONTROL=14|POWER=38|EMERGENCY=69|ENABLED=51|OPERATIVE_MODE=94";
+    answer = "OUTPUT:GOOD,CURRENT_CONFIG=21|SIMULATION_ENABLED=34|PLC_TIME=78|PLC_VERSION=69|CONTROL=14|POWER=38|EMERGENCY=69|ENABLED=51|OPERATIVE_MODE=94\r\n";
     args.clear();
     EXPECT_EQ(SRTMinorServoCommandLibrary::parseAnswer(answer), args);
 
     // Wrong OUTPUT field
-    answer = "OUTPUT:123456";
+    answer = "OUTPUT:123456\r\n";
     args.clear();
     EXPECT_EQ(SRTMinorServoCommandLibrary::parseAnswer(answer), args);
 
     // Multiple values without key, cannot find the correct timestamp
-    answer = "OUTPUT:GOOD,12345,67890";
+    answer = "OUTPUT:GOOD,12345,67890\r\n";
     args.clear();
     EXPECT_EQ(SRTMinorServoCommandLibrary::parseAnswer(answer), args);
 
     // Wrong timestamp format
-    answer = "OUTPUT:GOOD,12345.ABCD";
+    answer = "OUTPUT:GOOD,12345.ABCD\r\n";
     args.clear();
     EXPECT_EQ(SRTMinorServoCommandLibrary::parseAnswer(answer), args);
 }

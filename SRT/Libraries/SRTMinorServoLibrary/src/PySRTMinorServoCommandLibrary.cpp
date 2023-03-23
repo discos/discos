@@ -31,7 +31,7 @@ boost::python::dict PySRTMinorServoCommandLibrary::parseAnswer(std::string answe
 
     boost::python::dict dictionary;
 
-    typename std::map<std::string, std::variant<int, double, std::string> >::iterator iter;
+    SRTMinorServoAnswerMap::iterator iter;
 
     for(iter = args.begin(); iter != args.end(); ++iter)
     {

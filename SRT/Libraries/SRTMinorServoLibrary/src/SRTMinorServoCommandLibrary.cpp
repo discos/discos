@@ -87,14 +87,16 @@ std::string SRTMinorServoCommandLibrary::offset(std::string servo_id, std::vecto
     return command.str();
 }
 
-std::map<std::string, std::variant<int, double, std::string> > SRTMinorServoCommandLibrary::parseAnswer(std::string answer)
+SRTMinorServoAnswerMap SRTMinorServoCommandLibrary::parseAnswer(std::string answer)
 {
-    // First thing first, standardize the separators
+    // First thing first, standardize the separators and remove the newline/carriage return characters
     std::replace(answer.begin(), answer.end(), ':', '=');
     std::replace(answer.begin(), answer.end(), '|', ',');
+    answer.erase(std::remove(answer.begin(), answer.end(), '\n'), answer.end());
+    answer.erase(std::remove(answer.begin(), answer.end(), '\r'), answer.end());
 
     // Create the dictionary
-    std::map<std::string, std::variant<int, double, std::string> > args;
+    SRTMinorServoAnswerMap args;
 
     std::stringstream ss(answer);
     std::string token;
