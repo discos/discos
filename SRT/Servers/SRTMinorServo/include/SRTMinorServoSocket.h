@@ -2,7 +2,7 @@
 #define __SRTMINORSERVOSOCKET_H__
 
 /**
- * SRTMinorServoSocketLibrary.h
+ * SRTMinorServoSocket.h
  * 2023/02/23
  * Giuseppe Carboni (giuseppe.carboni@inaf.it)
  */
@@ -16,23 +16,22 @@
 
 using namespace IRA;
 
-// Definition of test class. It is re-defined in the unittest.cpp file.
-class SRTMinorServoSocketTest;
-
 class SRTMinorServoSocket: public IRA::CSocket
 {
 // Declare the SRTMinorServoSocketTest class as friend in order for it to have access to destroyInstance for testing purposes
 friend class SRTMinorServoSocketTest;
+friend class SRPProgramTrackTest;
 
 public:
     /**
      * Calls the constructor and returns the singleton socket instance
      * @param ip_address the IP address to which the socket will connect
      * @param port the port to which the socket will connect
+     * @param timeout the timeout, in seconds, for the communication to be considered failed
      * @return the singleton socket instance, connected to the given IP address and port, by reference
      * @throw ComponentErrors::SocketErrorExImpl when the user calls this method a second time with different IP address and port arguments
      */
-    static SRTMinorServoSocket& getInstance(std::string ip_address, int port);
+    static SRTMinorServoSocket& getInstance(std::string ip_address, int port, double timeout=TIMEOUT);
 
     /**
      * Returns the previously generated singleton socket instance
@@ -46,7 +45,7 @@ public:
      * @param command the command to be sent over the socket
      * @return the received answer to the given command
      */
-    std::string sendCommand(std::string command);
+    SRTMinorServoAnswerMap sendCommand(std::string command);
 
     /**
      * Copy constructor operator disabled by default
@@ -69,8 +68,9 @@ private:
      * Constructor method. Generates the singleton socket instance
      * @param ip_address the IP address to which the socket will connect
      * @param port the port to which the socket will connect
+     * @param timeout the timeout, in seconds, for the communication to be considered failed
      */
-    SRTMinorServoSocket(std::string ip_address, int port);
+    SRTMinorServoSocket(std::string ip_address, int port, double timeout);
 
     /*
      * Destructor method. Closes the socket upon destruction
@@ -89,9 +89,19 @@ private:
     int m_port;
 
     /*
+     * Timeout for communication operations
+     */
+    double m_timeout;
+
+    /*
      * Mutex object used to syncronize communications and prevent collisions between multiple threads
      */
     std::mutex m_mutex;
+
+    /*
+     * Library mutex, used only to synchronize the getInstance methods
+     */
+    static std::mutex c_mutex;
 
     /*
      * Socket status enumerator

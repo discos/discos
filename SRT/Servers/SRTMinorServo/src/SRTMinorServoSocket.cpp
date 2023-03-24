@@ -1,7 +1,11 @@
 #include "SRTMinorServoSocket.h"
 
-SRTMinorServoSocket& SRTMinorServoSocket::getInstance(std::string ip_address, int port)
+std::mutex SRTMinorServoSocket::c_mutex;
+
+SRTMinorServoSocket& SRTMinorServoSocket::getInstance(std::string ip_address, int port, double timeout)
 {
+    std::lock_guard<std::mutex> guard(SRTMinorServoSocket::c_mutex);
+
     if(m_instance != nullptr)
     {
         if(m_instance->m_address != ip_address && m_instance->m_port != port)
@@ -13,13 +17,15 @@ SRTMinorServoSocket& SRTMinorServoSocket::getInstance(std::string ip_address, in
     }
     else
     {
-        m_instance = new SRTMinorServoSocket(ip_address, port);
+        m_instance = new SRTMinorServoSocket(ip_address, port, timeout);
     }
     return *m_instance;
 }
 
 SRTMinorServoSocket& SRTMinorServoSocket::getInstance()
 {
+    std::lock_guard<std::mutex> guard(SRTMinorServoSocket::c_mutex);
+
     if(m_instance == nullptr)
     {
         ComponentErrors::SocketErrorExImpl exImpl(__FILE__, __LINE__, "SRTMinorServoSocket::getInstance()");
@@ -38,7 +44,7 @@ void SRTMinorServoSocket::destroyInstance()
     }
 }
 
-SRTMinorServoSocket::SRTMinorServoSocket(std::string ip_address, int port)
+SRTMinorServoSocket::SRTMinorServoSocket(std::string ip_address, int port, double timeout)
 {
     if(Create(m_error, STREAM) == FAIL)
     {
@@ -68,6 +74,7 @@ SRTMinorServoSocket::SRTMinorServoSocket(std::string ip_address, int port)
 
     m_address = ip_address;
     m_port = port;
+    m_timeout = timeout;
 }
 
 SRTMinorServoSocket::~SRTMinorServoSocket()
@@ -76,7 +83,7 @@ SRTMinorServoSocket::~SRTMinorServoSocket()
     Close(m_error);
 }
 
-std::string SRTMinorServoSocket::sendCommand(std::string command)
+SRTMinorServoAnswerMap SRTMinorServoSocket::sendCommand(std::string command)
 {
     std::lock_guard<std::mutex> guard(m_mutex);
 
@@ -93,7 +100,7 @@ std::string SRTMinorServoSocket::sendCommand(std::string command)
             // Reset the timer
             start_time = CIRATools::getUNIXEpoch();
         }
-        else if(CIRATools::getUNIXEpoch() - start_time >= TIMEOUT)
+        else if(CIRATools::getUNIXEpoch() - start_time >= m_timeout)
         {
             m_socket_status = TOUT;
             Close(m_error);
@@ -116,7 +123,7 @@ std::string SRTMinorServoSocket::sendCommand(std::string command)
             // Reset the timer
             start_time = CIRATools::getUNIXEpoch();
         }
-        else if(CIRATools::getUNIXEpoch() - start_time >= TIMEOUT)
+        else if(CIRATools::getUNIXEpoch() - start_time >= m_timeout)
         {
             m_socket_status = TOUT;
             Close(m_error);
@@ -126,5 +133,5 @@ std::string SRTMinorServoSocket::sendCommand(std::string command)
         }
     }
 
-    return answer;
+    return SRTMinorServoCommandLibrary::parseAnswer(answer);
 }

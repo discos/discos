@@ -14,11 +14,17 @@ USER_INC=-I$(GTEST_HOME) -I$(GMOCK_HOME)
 # unittest_OBJECTS = unittest
 # unittest_LIBS = $(GTEST_LIBS) <ComponentNameImpl>
 
-EXECUTABLES_L = unittest
-unittest_OBJECTS = unittest
-unittest_CFLAGS = -std=c++17
-unittest_LIBS = $(GTEST_LIBS) SRTMinorServoSocket SRTMinorServoCommandLibrary
-unittest_LDFLAGS = -lstdc++ -lpthread
+EXECUTABLES_L = SRTMinorServoSocketTest SRPProgramTrackTest
+
+SRTMinorServoSocketTest_OBJECTS = SRTMinorServoSocketTest
+SRTMinorServoSocketTest_CFLAGS = -std=c++17
+SRTMinorServoSocketTest_LIBS = $(GTEST_LIBS) SRTMinorServoSocket SRTMinorServoCommandLibrary IRALibrary ComponentErrors
+SRTMinorServoSocketTest_LDFLAGS = -lstdc++ -lpthread
+
+SRPProgramTrackTest_OBJECTS = SRPProgramTrackTest
+SRPProgramTrackTest_CFLAGS = -std=c++17
+SRPProgramTrackTest_LIBS = $(GTEST_LIBS) SRTMinorServoSocket SRTMinorServoCommandLibrary IRALibrary ComponentErrors
+SRPProgramTrackTest_LDFLAGS = -lstdc++ -lpthread
 
 # END OF CUSTOMIZATION
 # do not edit below this line
@@ -40,7 +46,8 @@ endif
 
 do_unit: all
 	@echo "running cpp unit tests"
-	../bin/unittest --gtest_output=xml:results/cppunittest.xml
+	../bin/SRTMinorServoSocketTest --gtest_output=xml:results/cppSRTMinorServoSocketTest.xml
+	../bin/SRPProgramTrackTest --gtest_output=xml:results/cppSRPProgramTrackTest.xml
 
 do_pyunit:
 	@echo "running python unit tests"
