@@ -111,14 +111,18 @@ SRTMinorServoAnswerMap SRTMinorServoCommandLibrary::parseAnswer(std::string answ
             std::getline(sss, key, '=');
             std::getline(sss, value);
 
-            // No value, should be the timestamp
+            // No value, could be the timestamp
             if(value.empty())
             {
-                if(args.find("TIMESTAMP") != args.end())    // Timestamp already found, some other value is missing its key
-                    throw std::invalid_argument(std::string("Missing key for value " + value));
-
-                value = key;
-                key = "TIMESTAMP";
+                if(args.find("TIMESTAMP") != args.end())    // Timestamp already found, some other value is missing
+                {
+                    value = "0";
+                }
+                else
+                {
+                    value = key;
+                    key = "TIMESTAMP";
+                }
             }
 
             if(key == "OUTPUT")
@@ -138,7 +142,7 @@ SRTMinorServoAnswerMap SRTMinorServoCommandLibrary::parseAnswer(std::string answ
             else
             {
                 size_t last_char;
-                args[key] = std::stoi(value, &last_char);
+                args[key] = std::stol(value, &last_char);
                 if(last_char != value.size())
                     args[key] = std::stod(value);
             }

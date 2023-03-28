@@ -14,7 +14,7 @@
 
 #define CLOSER std::string("\r\n")
 
-using SRTMinorServoAnswerMap = std::map<std::string, std::variant<int, double, std::string> >;
+using SRTMinorServoAnswerMap = std::map<std::string, std::variant<long, double, std::string> >;
 
 /**
  * SRT Minor Servo Command Library
