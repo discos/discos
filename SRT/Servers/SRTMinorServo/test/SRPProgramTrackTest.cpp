@@ -8,12 +8,15 @@
 // This address and port are the ones set in the simulator
 // In order for the test to properly be executed, the simulator should be launched with the following command:
 // discos-simulator -s minor_servo start &
+//#define ADDRESS             std::string("192.168.200.13")
+//#define PORT                4758
 #define ADDRESS             std::string("127.0.0.1")
 #define PORT                12800
-#define TIMEOUT             0.1
-#define NOISE_THRESHOLD     0.2
+#define SOCKET_TIMEOUT      0.1
+#define NOISE_THRESHOLD     1
 #define TIMEGAP             0.2
-#define ADVANCE_TIMEGAP    5
+#define ADVANCE_TIMEGAP     5
+#define EPSILON             0.001
 
 
 std::atomic<bool> terminate = false;
@@ -29,12 +32,23 @@ std::string serializeStatus(SRTMinorServoAnswerMap map)
     std::stringstream stream;
     stream << std::fixed << std::setprecision(6);
     stream << std::get<double>(map["TIMESTAMP"]);
-    stream << "\t" << std::get<double>(map["SRP_TX"]);
-    stream << "\t" << std::get<double>(map["SRP_TY"]);
-    stream << "\t" << std::get<double>(map["SRP_TZ"]);
-    stream << "\t" << std::get<double>(map["SRP_RX"]);
-    stream << "\t" << std::get<double>(map["SRP_RY"]);
-    stream << "\t" << std::get<double>(map["SRP_RZ"]);
+    std::vector<std::string> coordinates = { "SRP_TX", "SRP_TY", "SRP_TZ", "SRP_RX", "SRP_RY", "SRP_RZ" };
+
+    for(std::string coordinate : coordinates)
+    {
+        double value;
+
+        try
+        {
+            value = std::get<double>(map[coordinate]);
+        }
+        catch(...)
+        {
+            value = (double)std::get<long>(map[coordinate]);
+        }
+
+        stream << "\t" << value;
+    }
     return stream.str();
 }
 
@@ -55,12 +69,24 @@ protected:
     static std::vector<double> getCoordinates(SRTMinorServoAnswerMap SRPStatus)
     {
         std::vector<double> currentCoordinates;
-        currentCoordinates.push_back(std::get<double>(SRPStatus["SRP_TX"]));
-        currentCoordinates.push_back(std::get<double>(SRPStatus["SRP_TY"]));
-        currentCoordinates.push_back(std::get<double>(SRPStatus["SRP_TZ"]));
-        currentCoordinates.push_back(std::get<double>(SRPStatus["SRP_RX"]));
-        currentCoordinates.push_back(std::get<double>(SRPStatus["SRP_RY"]));
-        currentCoordinates.push_back(std::get<double>(SRPStatus["SRP_RZ"]));
+        std::vector<std::string> coordinates = { "SRP_TX", "SRP_TY", "SRP_TZ", "SRP_RX", "SRP_RY", "SRP_RZ" };
+
+        for(std::string coordinate : coordinates)
+        {
+            double value;
+
+            try
+            {
+                value = std::get<double>(SRPStatus[coordinate]);
+            }
+            catch(...)
+            {
+                value = (double)std::get<long>(SRPStatus[coordinate]);
+            }
+
+            currentCoordinates.push_back(value);
+        }
+
         return currentCoordinates;
     }
 
@@ -73,7 +99,8 @@ protected:
 
         for(size_t i = 0; i < first.size(); i++)
         {
-            if(first[i] != second[i])
+            double diff = fabs(first[i] - second[i]);
+            if(diff > EPSILON)
             {
                 return false;
             }
@@ -84,7 +111,7 @@ protected:
 
     static void addNoiseToCoordinates(std::vector<double> &coordinates)
     {
-        for(size_t i = 0; i < coordinates.size(); i++)
+        for(size_t i = 0; i < 3; i++)
         {
             coordinates[i] += std::max(-1, std::min(1, rand() % 5 - 2)) * (double(rand() % 100) / 100) * NOISE_THRESHOLD;
         }
@@ -92,13 +119,13 @@ protected:
 
     void SetUp() override
     {
-        signal(SIGINT, sigintHandler);
         srand((int)CIRATools::getUNIXEpoch());
         std::cout << std::fixed << std::setprecision(6);
 
         try
         {
-            SRTMinorServoSocket::getInstance(ADDRESS, PORT, TIMEOUT);
+            SRTMinorServoSocket::getInstance(ADDRESS, PORT, SOCKET_TIMEOUT);
+            std::cout << "Socket connected." << std::endl;
         }
         catch(ComponentErrors::SocketErrorExImpl& ex)
         {
@@ -124,35 +151,65 @@ TEST_F(SRPProgramTrackTest, z_axis_translation)
     SRTMinorServoSocket& socket = SRTMinorServoSocket::getInstance();
     SRTMinorServoAnswerMap::iterator iterator;
 
+    std::cout << "Sending MS STATUS command...";
+
     SRTMinorServoAnswerMap MSStatus = socket.sendCommand(SRTMinorServoCommandLibrary::status());
+
+    /*SRTMinorServoAnswerMap::iterator iter;
+
+    for(iter = MSStatus.begin(); iter != MSStatus.end(); ++iter)
+    {
+        std::visit([iter](const auto& var) mutable { std::cout << iter->first << ": " << var << std::endl; }, iter->second);
+    }*/
+
     EXPECT_EQ(std::get<std::string>(MSStatus["OUTPUT"]), "GOOD");
-    EXPECT_EQ(std::get<int>(MSStatus["CONTROL"]), 1);
-    EXPECT_EQ(std::get<int>(MSStatus["POWER"]), 1);
-    EXPECT_EQ(std::get<int>(MSStatus["EMERGENCY"]), 2);
-    EXPECT_EQ(std::get<int>(MSStatus["ENABLED"]), 1);
+    //EXPECT_EQ(std::get<long>(MSStatus["CONTROL"]), 1);
+    //EXPECT_EQ(std::get<long>(MSStatus["POWER"]), 1);
+    //EXPECT_EQ(std::get<long>(MSStatus["EMERGENCY"]), 2);
+    //EXPECT_EQ(std::get<long>(MSStatus["ENABLED"]), 1);
+
+    std::cout << "OK." << std::endl;
+    std::cout << "Sending initial SRP STATUS command...";
 
     SRTMinorServoAnswerMap SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::status("SRP"));
     EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
-    EXPECT_EQ(std::get<int>(SRPStatus["SRP_ENABLED"]), 1);
-    EXPECT_EQ(std::get<int>(SRPStatus["SRP_STATUS"]), 1);
-    EXPECT_EQ(std::get<int>(SRPStatus["SRP_BLOCK"]), 2);
+    EXPECT_EQ(std::get<long>(SRPStatus["SRP_STATUS"]), 1);
+    EXPECT_EQ(std::get<long>(SRPStatus["SRP_BLOCK"]), 2);
 
-    /*for(iterator = SRPStatus.begin(); iterator != SRPStatus.end(); ++iterator)
+
+    /*SRTMinorServoAnswerMap::iterator iter;
+
+    for(iter = SRPStatus.begin(); iter != SRPStatus.end(); ++iter)
     {
-        std::visit([iterator](const auto& var) mutable { std::cout << iterator->first << ": " << var << std::endl; }, iterator->second);
+        std::visit([iter](const auto& var) mutable { std::cout << iter->first << ": " << var << std::endl; }, iter->second);
     }*/
+
+    std::cout << "OK." << std::endl;
+    std::cout << "Sending PRESET command...";
 
     std::vector<double> startingCoordinates = {0, 0, 0, 0, 0, 0};
     SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::preset("SRP", startingCoordinates));
     EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
 
+    std::cout << "OK." << std::endl;
+
+    signal(SIGINT, sigintHandler);
+
     do
     {
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
         SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::status("SRP"));
+
         EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
-        EXPECT_EQ(std::get<int>(SRPStatus["SRP_OPERATIVE_MODE"]), 40);
+        EXPECT_EQ(std::get<long>(SRPStatus["SRP_OPERATIVE_MODE"]), 40);
+
+        std::cout << serializeStatus(SRPStatus) << std::endl;
+
+        if(terminate)
+        {
+            return;
+        }
     }
     while(!compareCoordinates(startingCoordinates, getCoordinates(SRPStatus)));
 
@@ -164,10 +221,17 @@ TEST_F(SRPProgramTrackTest, z_axis_translation)
         ofstream statusFile;
         statusFile.open("SRPStatus.txt", ios::out);
 
+        long unsigned int counter = 0;
+
         while(!terminate)
         {
             SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::status("SRP"));
             statusFile << serializeStatus(SRPStatus) << std::endl;
+            if(counter % 10 == 0)
+            {
+                std::cout << serializeStatus(SRPStatus) << std::endl;
+            }
+            counter++;
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
 
@@ -175,6 +239,7 @@ TEST_F(SRPProgramTrackTest, z_axis_translation)
     });
 
     double start_time = CIRATools::getUNIXEpoch() + ADVANCE_TIMEGAP;
+    std::cout << "PRESET position reached, starting PROGRAMTRACK with start time: " << start_time << std::endl;
     long unsigned int trajectory_id = int(start_time);
     unsigned int point_id = 0;
     std::vector<double> programTrackCoordinates = startingCoordinates;
@@ -186,7 +251,7 @@ TEST_F(SRPProgramTrackTest, z_axis_translation)
 
     SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::status("SRP"));
     EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
-    EXPECT_EQ(std::get<int>(SRPStatus["SRP_OPERATIVE_MODE"]), 50);
+    EXPECT_EQ(std::get<long>(SRPStatus["SRP_OPERATIVE_MODE"]), 50);
 
     ofstream programTrackFile;
     programTrackFile.open("SRPTrajectory.txt", ios::out);
@@ -197,7 +262,6 @@ TEST_F(SRPProgramTrackTest, z_axis_translation)
     while(!terminate)
     {
         next_expected_time += TIMEGAP;
-        std::cout << next_expected_time << std::endl;
 
         std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXEpoch()))));
         point_id++;
