@@ -23,7 +23,7 @@ SRTMinorServoSocketTest_LDFLAGS = -lstdc++ -lpthread
 
 SRPProgramTrackTest_OBJECTS = SRPProgramTrackTest
 SRPProgramTrackTest_CFLAGS = -std=c++17
-SRPProgramTrackTest_LIBS = $(GTEST_LIBS) SRTMinorServoSocket SRTMinorServoCommandLibrary IRALibrary ComponentErrors
+SRPProgramTrackTest_LIBS = $(GTEST_LIBS) SRTMinorServoSocket SRTMinorServoCommandLibrary IRALibrary ComponentErrors boost_filesystem
 SRPProgramTrackTest_LDFLAGS = -lstdc++ -lpthread
 
 # END OF CUSTOMIZATION
