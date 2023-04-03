@@ -145,6 +145,7 @@ protected:
     void TearDown() override
     {
         SRTMinorServoSocket::destroyInstance();
+        terminate = false;
     }
 };
 
@@ -374,8 +375,10 @@ TEST_F(SRPProgramTrackTest, cycle_movement)
     programTrackFile << serializeProgramTrack(start_time, programTrackCoordinates) << std::endl;
 
     double next_expected_time = start_time;
-    unsigned int axis_to_move = 3;
+    unsigned int axis_to_move = 0;
     int sign = 1;
+    unsigned int idle_count = 0;
+    bool idle = false;
 
     while(!terminate)
     {
@@ -386,8 +389,20 @@ TEST_F(SRPProgramTrackTest, cycle_movement)
             std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXEpoch()))));
             point_id++;
 
-            if(moveAxis(programTrackCoordinates, axis_to_move, sign))
+            if(idle)
+            {
+                idle_count++;
+                if(idle_count == 5)
+                {
+                    idle_count = 0;
+                    idle = false;
+                }
+            }
+            else if(moveAxis(programTrackCoordinates, axis_to_move, sign))
+            {
                 sign = sign * -1;
+                idle = true;
+            }
 
             SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::programTrack("SRP", trajectory_id, point_id, programTrackCoordinates));
             EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
