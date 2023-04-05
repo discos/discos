@@ -29,6 +29,8 @@ class SRPProgramTrackTest : public ::testing::Test
 {
 protected:
     std::vector<double> startingCoordinates = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+    std::string directory;
+    std::thread statusThread;
 
     static void printStatus(std::string filename)
     {
@@ -227,6 +229,23 @@ protected:
         }
 
         std::cout << "OK." << std::endl;
+
+        std::time_t tn = std::time(0);
+        std::tm* now = std::localtime(&tn);
+        std::stringstream directory_ss;
+        directory_ss << ::testing::UnitTest::GetInstance()->current_test_info()->name();
+        directory_ss << "-";
+        directory_ss << 1900 + now->tm_year;
+        directory_ss << std::setfill('0') << std::setw(2) << now->tm_mon + 1;
+        directory_ss << std::setfill('0') << std::setw(2) << now->tm_mday;
+        directory_ss << "-";
+        directory_ss << std::setfill('0') << std::setw(2) << now->tm_hour;
+        directory_ss << std::setfill('0') << std::setw(2) << now->tm_min;
+        directory_ss << std::setfill('0') << std::setw(2) << now->tm_sec;
+        directory = directory_ss.str();
+        boost::filesystem::create_directory(directory);
+
+        statusThread = std::thread(&SRPProgramTrackTest::printStatus, directory + "/status.txt");
     }
 
     void TearDown() override
@@ -236,17 +255,8 @@ protected:
     }
 };
 
-TEST_F(SRPProgramTrackTest, noise_translation)
+TEST_F(SRPProgramTrackTest, NoiseTranslationTest)
 {
-    std::time_t tn = std::time(0);
-    std::tm* now = std::localtime(&tn);
-    std::stringstream directory_ss;
-    directory_ss << "NoiseTranslationTest-" << 1900 + now->tm_year << std::setfill('0') << std::setw(2) << now->tm_mon + 1 << now->tm_mday << "-" << now->tm_hour << now->tm_min << now->tm_sec;
-    std::string directory = directory_ss.str();
-    boost::filesystem::create_directory(directory);
-
-    std::thread t(&SRPProgramTrackTest::printStatus, directory + "/status.txt");
-
     double start_time = CIRATools::getUNIXEpoch() + ADVANCE_TIMEGAP;
     std::cout << "PRESET position reached, starting PROGRAMTRACK with start time: " << start_time << std::endl;
     long unsigned int trajectory_id = int(start_time);
@@ -284,20 +294,11 @@ TEST_F(SRPProgramTrackTest, noise_translation)
     }
 
     programTrackFile.close();
-    t.join();
+    statusThread.join();
 }
 
-TEST_F(SRPProgramTrackTest, cycle_movement)
+TEST_F(SRPProgramTrackTest, ContinuousMovementTest)
 {
-    std::time_t tn = std::time(0);
-    std::tm* now = std::localtime(&tn);
-    std::stringstream directory_ss;
-    directory_ss << "CycleMovementTest-" << 1900 + now->tm_year << std::setfill('0') << std::setw(2) << now->tm_mon + 1 << now->tm_mday << "-" << now->tm_hour << now->tm_min << now->tm_sec;
-    std::string directory = directory_ss.str();
-    boost::filesystem::create_directory(directory);
-
-    std::thread t(&SRPProgramTrackTest::printStatus, directory + "/status.txt");
-
     double start_time = CIRATools::getUNIXEpoch() + ADVANCE_TIMEGAP;
     std::cout << "PRESET position reached, starting PROGRAMTRACK with start time: " << start_time << std::endl;
     long unsigned int trajectory_id = int(start_time);
@@ -345,7 +346,7 @@ TEST_F(SRPProgramTrackTest, cycle_movement)
             }
             else if(moveAxis(programTrackCoordinates, axis_to_move, sign))
             {
-                sign = sign * -1;
+                sign *= -1;
                 idle = true;
             }
 
@@ -365,5 +366,82 @@ TEST_F(SRPProgramTrackTest, cycle_movement)
     }
 
     programTrackFile.close();
-    t.join();
+    statusThread.join();
+}
+
+TEST_F(SRPProgramTrackTest, SeparateMovementTest)
+{
+    SRTMinorServoSocket& socket = SRTMinorServoSocket::getInstance();
+    SRTMinorServoAnswerMap SRPStatus;
+
+    ofstream programTrackFile;
+    programTrackFile.open(directory + "/trajectory.txt", ios::out);
+
+    unsigned int axis_to_move = 0;
+    int sign = 1;
+    unsigned int idle_count = 0;
+    bool idle = false;
+
+    std::cout << "PRESET position reached, starting PROGRAMTRACK" << std::endl;
+    std::vector<double> programTrackCoordinates = startingCoordinates;
+
+    while(!terminate)
+    {
+        double start_time = CIRATools::getUNIXEpoch() + ADVANCE_TIMEGAP;
+        long unsigned int trajectory_id = int(start_time);
+        double next_expected_time = start_time;
+        unsigned int point_id = 0;
+
+        SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::programTrack("SRP", trajectory_id, point_id, programTrackCoordinates, start_time));
+        EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
+        programTrackFile << SRPProgramTrackTest::serializeProgramTrack(start_time, programTrackCoordinates) << std::endl;
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+
+        SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::status("SRP"));
+        EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
+        EXPECT_EQ(std::get<long>(SRPStatus["SRP_OPERATIVE_MODE"]), 50);
+
+        while(!terminate)
+        {
+            next_expected_time += TIMEGAP;
+
+            std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXEpoch()))));
+            point_id++;
+
+            if(idle)
+            {
+                idle_count++;
+                if(idle_count == 25)
+                {
+                    idle_count = 0;
+                    idle = false;
+                    break;
+                }
+            }
+            else
+            {
+                if(moveAxis(programTrackCoordinates, axis_to_move, sign))
+                {
+                    sign *= -1;
+                    idle = true;
+                }
+                else if(round(programTrackCoordinates[axis_to_move] * 100) == 0 && sign == 1)
+                {
+                    programTrackCoordinates[axis_to_move] = 0.0;
+                    axis_to_move == 5 ? axis_to_move = 0 : axis_to_move++;
+                    idle = true;
+                }
+
+                SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::programTrack("SRP", trajectory_id, point_id, programTrackCoordinates));
+                EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
+            }
+
+            //std::cout << SRPProgramTrackTest::serializeProgramTrack(next_expected_time, programTrackCoordinates) << std::endl;
+            programTrackFile << SRPProgramTrackTest::serializeProgramTrack(next_expected_time, programTrackCoordinates) << std::endl;
+        }
+    }
+
+    programTrackFile.close();
+    statusThread.join();
 }
