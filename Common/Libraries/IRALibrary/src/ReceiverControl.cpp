@@ -1148,10 +1148,7 @@ ReceiverControl::FetValues ReceiverControl::fetValues(
     size_t FEED_LIDX, FEED_RIDX;           // Indexes of the feed channels in the AD24 port, for a given column
     
     FetValues values;
-	 
-	 cout << "feed number " << feed_number << endl;
-	 cout << "m_number_of_feeds " << m_number_of_feeds << endl;
-	 cout << "stage_number " << stage_number << endl;
+	
     if(feed_number >= m_number_of_feeds)
         throw ReceiverControlEx("ReceiverControl error: invalid feed number.");
 
@@ -1376,10 +1373,6 @@ ReceiverControl::StageValues ReceiverControl::stageValues(
     std::string vg_selector;               // A03: it allows to select the value requested for a given stadium
     std::string quantity_selector;         // A03: it allows to select the value requested for a given stadium
     
-    cout << "m_number_of_feeds " << m_number_of_feeds << endl;
-    //cout << "stage_number " << stage_number << endl;
-    //cout << "quantity" << quantity << endl;
-    
     if(m_number_of_feeds == 1)
         column_selectors.push_back("0001");
     else if(m_number_of_feeds <= 8)  {
@@ -1397,10 +1390,6 @@ ReceiverControl::StageValues ReceiverControl::stageValues(
         column_selectors.push_back("0011");
         column_selectors.push_back("0100");
     }
-    
-    for (std::size_t x = 0; x < column_selectors.size(); x++){
-	   cout << "column_sel " << column_selectors[x] << endl;	
-	 }
 	
     switch(stage_number) {
         case 1:
@@ -1431,11 +1420,6 @@ ReceiverControl::StageValues ReceiverControl::stageValues(
         default:
             throw ReceiverControlEx("ReceiverControl error: invalid stage number.");
     }
-    
-    cout << "vd_selector " << vd_selector << endl;
-    cout << "id_selector " << id_selector << endl;
-    cout << "vg_selector " << vg_selector << endl;
-    cout << "quantity " << quantity << endl;
     
     switch(quantity) {
         case DRAIN_VOLTAGE:
@@ -1485,7 +1469,6 @@ ReceiverControl::StageValues ReceiverControl::stageValues(
                     MCB_PORT_NUMBER_00_07   // Port Number from 08 to 15
             );
             pthread_mutex_unlock(&m_lna_mutex); 
-				//cout << "parameters.size() " << parameters.size() << endl;
             if(parameters.size() != AD24_LEN * AD24_TYPE_LEN)
                 throw MicroControllerBoardEx("Error: wrong number of parameters received.");
 
@@ -1537,14 +1520,6 @@ ReceiverControl::StageValues ReceiverControl::stageValues(
                 rvalues.push_back(rdvalues[offset+idx+4]); // Add the item of the fourth column
             }
         }
-    cout << "lvalues.size() " << lvalues.size() << endl;
-	 cout << "rvalues.size() " << rvalues.size() << endl;
-	 cout << "m_number_of_feeds " << m_number_of_feeds << endl;
-    
-    for(std::size_t i = 0; i < lvalues.size(); i++)
-    	cout << i << " lvalues " << lvalues[i] << endl;
-    for(std::size_t j = 0; j < rvalues.size(); j++)
-    	cout  << j << "rvalues " << rvalues[j] << endl;
 
     if(lvalues.size() < m_number_of_feeds || rvalues.size() < m_number_of_feeds)
         throw ReceiverControlEx("Error: the vector size doesn't match the number of feeds.");
@@ -1570,7 +1545,7 @@ ReceiverControl::FeedValues ReceiverControl::feedValues(
         double (*converter)(double voltage)
         ) throw (ReceiverControlEx)
 {
-	 IRA::CString quant;
+	IRA::CString quant;
     // Each item is a EN03 value: the signal that addresses the column multiplexing of AD24
     std::vector<std::string> column_selectors;  
     std::string vd_selector;               // A03: it allows to select the value requested for a given stadium
@@ -1578,13 +1553,9 @@ ReceiverControl::FeedValues ReceiverControl::feedValues(
     std::string vg_selector;               // A03: it allows to select the value requested for a given stadium
     std::string quantity_selector;         // A03: it allows to select the value requested for a given stadium
     
-    const unsigned short feeds_per_pcb = ceil(m_number_of_feeds/5.0f); 
+    const unsigned short feeds_per_pcb = ceil(m_number_of_feeds/5.0f);
     
-    //cout << "m_number_of_feeds " << m_number_of_feeds << endl;
-    //cout << "stage_number " << stage_number << endl;
-    //cout << "quantity" << quantity << endl;
-    
-	 if(m_number_of_feeds <= 5)
+	if(m_number_of_feeds <= 5)
         column_selectors.push_back("0001");
     else if(m_number_of_feeds <= 40)  {
         column_selectors.push_back("0001");
@@ -1601,10 +1572,6 @@ ReceiverControl::FeedValues ReceiverControl::feedValues(
         column_selectors.push_back("0011");
         column_selectors.push_back("0100");
     }
-    
-   /* for (std::size_t x = 0; x < column_selectors.size(); x++){
-	   cout << "column_sel " << column_selectors[x] << endl;	
-	 }*/
 	
     switch(feed_number) {
         case 1:
@@ -1636,11 +1603,6 @@ ReceiverControl::FeedValues ReceiverControl::feedValues(
             throw ReceiverControlEx("ReceiverControl error: invalid stage number.");
     }
     
-    /*cout << "vd_selector " << vd_selector << endl;
-    cout << "id_selector " << id_selector << endl;
-    cout << "vg_selector " << vg_selector << endl;
-    cout << "quantity " << quantity << endl;*/
-    
     switch(quantity) {
         case DRAIN_VOLTAGE:
             quantity_selector = vd_selector;
@@ -1657,8 +1619,6 @@ ReceiverControl::FeedValues ReceiverControl::feedValues(
         default:
             throw ReceiverControlEx("ReceiverControl::stageValues(): the quantity requested does not exist.");
     }
-    
-    cout << quant << " " << quantity_selector << endl;
 
     // Left channel values, right channel values, left channel disorderly values, right channel disorderly values
     std::vector<double> lvalues, rvalues, ldvalues, rdvalues;
@@ -1690,7 +1650,6 @@ ReceiverControl::FeedValues ReceiverControl::feedValues(
                     MCB_PORT_NUMBER_00_07   // Port Number from 08 to 15
             );
             pthread_mutex_unlock(&m_lna_mutex); 
-				//cout << "parameters.size() " << parameters.size() << endl;
             if(parameters.size() != AD24_LEN * AD24_TYPE_LEN)
                 throw MicroControllerBoardEx("Error: wrong number of parameters received.");
 
@@ -1711,9 +1670,6 @@ ReceiverControl::FeedValues ReceiverControl::feedValues(
     }	 
 	 
     if(m_number_of_feeds <= 5) { // just one column (BRD Selection 0)
-    	  cout << "feeds <=10" << endl;
-        cout << "ldvalues.size()" << ldvalues.size() << endl;
-        cout << "rdvalues.size()" << rdvalues.size() << endl;
         if(ldvalues.size() != 4 || rdvalues.size() != 4)  // Just five feeds means just one column 
             throw ReceiverControlEx("Error: mismatch between number of feeds and number of parameters");
         lvalues.push_back(ldvalues.front());
@@ -1728,9 +1684,6 @@ ReceiverControl::FeedValues ReceiverControl::feedValues(
         }
 
     if(m_number_of_feeds >= 41 && m_number_of_feeds <= 50) { // third column if we have from 41 to 50 feeds
-        cout << "feeds >=41 to <=50" << endl;
-        cout << "ldvalues.size()" << ldvalues.size() << endl;
-        cout << "rdvalues.size()" << rdvalues.size() << endl;
         if(ldvalues.size() != 12 || rdvalues.size() != 12)  // Nine feeds means three columns
             throw ReceiverControlEx("Error: mismatch between number of feeds and number of parameters");
         lvalues.push_back(ldvalues[8]);
@@ -1738,9 +1691,6 @@ ReceiverControl::FeedValues ReceiverControl::feedValues(
     }
     else 
         if(m_number_of_feeds > 50) {
-        	   cout << "feeds > 50" << endl;
-            cout << "ldvalues.size()" << ldvalues.size() << endl;
-            cout << "rdvalues.size()" << rdvalues.size() << endl;
             if(ldvalues.size() != 16 || rdvalues.size() != 16)  // More than nine feeds means four columns
                 throw ReceiverControlEx("Error: mismatch between number of feeds and number of parameters");
             std::vector<BYTE>::size_type offset=8;
@@ -1751,33 +1701,17 @@ ReceiverControl::FeedValues ReceiverControl::feedValues(
                 rvalues.push_back(rdvalues[offset+idx+4]); // Add the item of the fourth column
             }
         }
-    
-	     
-    cout << "lvalues.size() " << lvalues.size() << endl;
-	 cout << "rvalues.size() " << rvalues.size() << endl;
-	 cout << "m_number_of_feeds " << m_number_of_feeds << endl;
-    
-    /*for(std::size_t i = 0; i < lvalues.size(); i++)
-       cout << i << " lvalues " << lvalues[i] << endl;
-    for(std::size_t j = 0; j < rvalues.size(); j++)
-       cout  << j << "rvalues " << rvalues[j] << endl;*/
-
 
     if(lvalues.size() < feeds_per_pcb || rvalues.size() < feeds_per_pcb)
-        throw ReceiverControlEx("Error: the vector size doesn't match the number of feeds.");
+        throw ReceiverControlEx("Error: the vector size doesn't match the number of feeds per pcb.");
 	
     // Add the first "feeds_per_pcb" converted items of lvalues and rvalues
     FeedValues values;
     try {
-        for(size_t idx=0; idx<feeds_per_pcb; idx++) {
+        for(size_t idx=0; idx<m_number_of_feeds; idx++) {
             (values.left_channel).push_back(converter != NULL ? converter(lvalues[idx]) : lvalues[idx]);
             (values.right_channel).push_back(converter != NULL ? converter(rvalues[idx]) : rvalues[idx]);                   
-        }
-        
-        
-        cout << "values.left_channel " << values.left_channel.size() << endl;
-        cout << "values.right_channel " << values.right_channel.size() << endl;
-        
+        }        
     }
     catch(...) {
         throw ReceiverControlEx("ReceiverControl error: unexpected exception occurs performing the conversion.");
