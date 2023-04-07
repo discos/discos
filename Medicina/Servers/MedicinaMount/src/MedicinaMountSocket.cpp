@@ -569,7 +569,8 @@ void CMedicinaMountSocket::timeTransfer(TIMEVALUE& now) throw (ConnectionExImpl,
 void CMedicinaMountSocket::Stop() throw (TimeoutExImpl,AntennaErrors::NakExImpl,ConnectionExImpl,SocketErrorExImpl,AntennaBusyExImpl)
 {
 	if (isBusy()) setStopped(true);
-	Mode(CACUInterface::STOP,CACUInterface::STOP,true);	
+	Mode(CACUInterface::STOP,CACUInterface::STOP,true);
+	CUSTOM_LOG(LM_FULL_INFO,"CMedicinaMountSocket::stop()",(LM_NOTICE,"ANTENNA_STOPPED"));
 }
 
 void CMedicinaMountSocket::Mode(CACUInterface::TAxeModes azMode,CACUInterface::TAxeModes elMode,bool force) 
@@ -855,6 +856,7 @@ void CMedicinaMountSocket::checkPowerFailure() throw (ComponentErrors::TimeoutEx
 {
 	//_IRA_LOGDIKE_COMPLETION(m_logDike,__dummy,LM_DEBUG);
 	if (!m_configuration->checkForMode()) return;
+	if (getStatus()!=Antenna::ACU_CNTD) return;
 	TIMEVALUE now;
 	IRA::CIRATools::getTime(now);
 	if (m_Data.getDrivePower()) {  //in case of a power outage of failure.....
@@ -883,6 +885,7 @@ void CMedicinaMountSocket::checkCommandedMode() throw (ConnectionExImpl,SocketEr
 {
 	CACUInterface::TAxeModes commandedMode, mode;
 	if (!m_configuration->checkForMode()) return;
+	if (getStatus()!=Antenna::ACU_CNTD) return;
 	if (m_powerFailTime!=0) return; // no need to try to recover from mode discrepancy if the cause is a power failure
 	commandedMode=m_Data.getLastCommandedMode();
 	if ((commandedMode!=CACUInterface::STANDBY)  && (commandedMode!=CACUInterface::UNSTOW) &&
@@ -911,6 +914,7 @@ void CMedicinaMountSocket::detectOscillation() throw (ConnectionExImpl,SocketErr
 	TIMEVALUE now;
 	// if oscillation is not to be checked then exit immediately 
 	if (!m_configuration->checkForOscillation()) return;
+	if (getStatus()!=Antenna::ACU_CNTD) return;
 	double azError=getAzimuthError(); // throw (ConnectionExImpl,SocketErrorExImpl,TimeoutExImpl)
 	IRA::CIRATools::getTime(now);
 	CACUInterface::TAxeModes mode=m_Data.getLastCommandedMode();
