@@ -132,6 +132,7 @@ void CMedicinaMountSocket::Init(CConfiguration *config,maci::ContainerServices *
 	m_lastScanEpoch=0;
 	m_modeCheckRecover=false;
 	m_powerFailDetected=false;
+	m_powerFailTime=0;
 }
 
 CACUInterface::TAxeModes CMedicinaMountSocket::getAzimuthMode() throw (ConnectionExImpl,SocketErrorExImpl,TimeoutExImpl)
@@ -854,21 +855,26 @@ void CMedicinaMountSocket::checkPowerFailure() throw (ComponentErrors::TimeoutEx
 {
 	//_IRA_LOGDIKE_COMPLETION(m_logDike,__dummy,LM_DEBUG);
 	if (!m_configuration->checkForMode()) return;
+	TIMEVALUE now;
+	IRA::CIRATools::getTime(now);
 	if (m_Data.getDrivePower()) {  //in case of a power outage of failure.....
 		if (!m_powerFailDetected) { //first detection
 			CUSTOM_LOG(LM_FULL_INFO,"CMedicinaMountSocket::checkPowerFailure()",(LM_CRITICAL,
 			  "Servo system power failure detected"));
 		}
-		m_powerFailDetected=true;	
+		m_powerFailTime=now.value().value;
 	}
 	else {  // no power error
-		if (m_powerFailDetected) { //first detection
-		   CUSTOM_LOG(LM_FULL_INFO,"CMedicinaMountSocket::checkPowerFailure()",(LM_NOTICE,
-			  "Trying a servo system reset"));
- 			failureReset();// throw (TimeoutExImpl,AntennaErrors::NakExImpl,ConnectionExImpl,SocketErrorExImpl)  
-			m_powerFailDetected=false;	
-			CUSTOM_LOG(LM_FULL_INFO,"CMedicinaMountSocket::checkPowerFailure()",(LM_CRITICAL,
-			  "Servo system power failure cleared"));				
+		if (m_powerFailTime!=0) {
+			if (now.value().value-m_powerFailTime>20000000) {
+		   	CUSTOM_LOG(LM_FULL_INFO,"CMedicinaMountSocket::checkPowerFailure()",
+		        (LM_NOTICE,"Trying a servo system reset"));
+ 				failureReset();// throw (TimeoutExImpl,AntennaErrors::NakExImpl,ConnectionExImpl,SocketErrorExImpl)  
+				m_powerFailDetected=true; // signal a power fail has been detected and fixed..need to recover from error	
+				m_powerFailTime=0;
+				CUSTOM_LOG(LM_FULL_INFO,"CMedicinaMountSocket::checkPowerFailure()",
+			     (LM_NOTICE,"Servo system power failure cleared"));
+			}				
 		}	
 	}
 }
@@ -877,7 +883,7 @@ void CMedicinaMountSocket::checkCommandedMode() throw (ConnectionExImpl,SocketEr
 {
 	CACUInterface::TAxeModes commandedMode, mode;
 	if (!m_configuration->checkForMode()) return;
-	if (m_powerFailDetected) return; // no need to try to recover from mode discrepancy if the cause is a power failure
+	if (m_powerFailTime!=0) return; // no need to try to recover from mode discrepancy if the cause is a power failure
 	commandedMode=m_Data.getLastCommandedMode();
 	if ((commandedMode!=CACUInterface::STANDBY)  && (commandedMode!=CACUInterface::UNSTOW) &&
 	  (commandedMode!=CACUInterface::STOW) && (commandedMode!=CACUInterface::STOP)) {
@@ -887,6 +893,13 @@ void CMedicinaMountSocket::checkCommandedMode() throw (ConnectionExImpl,SocketEr
 	  			CUSTOM_LOG(LM_FULL_INFO,"CMedicinaMountSocket::checkCommandedMode()",
 	  			  (LM_WARNING,"ACU operation mode differs from commanded one, trying to recover..."));
 	  			m_modeCheckRecover=true;
+	  			Mode(commandedMode,commandedMode);
+	  		}
+	  		else if (m_powerFailDetected) {
+	  			CUSTOM_LOG(LM_FULL_INFO,"CMedicinaMountSocket::checkCommandedMode()",
+	  			  (LM_NOTICE,"Trying to activate drive power after a power failure....."));
+	  			m_modeCheckRecover=true;
+	  			m_powerFailDetected=false;
 	  			Mode(commandedMode,commandedMode);
 	  		}
 	  	}
