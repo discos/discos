@@ -25,6 +25,7 @@
 
 #define _SCHED_NULLTARGET "NULL"
 #define SEPARATOR '\t'
+#define MAX_SCHED_NAME_LEN 37
 
 /**
  * This namespace contains all the classes and symbol that are needed to parse and execute the schedules

@@ -217,7 +217,7 @@ void _logMessage(const char *message);
  * @throw ManagementErrors::WeatherStationErrorExImpl
  * @throw ComponentErrors::CORBAProblemExImpl
  */
-void _getWeatherStationParameters(double &temp,double& hum,double& pres, double& wind)  throw (ComponentErrors::CouldntGetComponentExImpl,ManagementErrors::WeatherStationErrorExImpl,ComponentErrors::CORBAProblemExImpl);
+void _getWeatherStationParameters(double &temp,double& hum,double& pres,double& wind,double& windDir)  throw (ComponentErrors::CouldntGetComponentExImpl,ManagementErrors::WeatherStationErrorExImpl,ComponentErrors::CORBAProblemExImpl);
 
 /**
  * initialize the writing of the data
