@@ -47,9 +47,11 @@ protected:
         while(!terminate)
         {
             SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::status("SRP"));
-            statusFile << SRPProgramTrackTest::serializeStatus(SRPStatus) << std::endl;
+            std::string status = serializeStatus(SRPStatus);
+
+            statusFile << status << std::endl;
             if(counter % 10 == 0)
-                std::cout << SRPProgramTrackTest::serializeStatus(SRPStatus) << std::endl;
+                std::cout << status << std::endl;
             counter++;
 
             tn += STATUS_PERIOD;
@@ -67,30 +69,10 @@ protected:
 
     static std::string serializeStatus(SRTMinorServoAnswerMap map)
     {
-        std::stringstream stream;
-        stream << std::fixed << std::setprecision(6);
-        stream << std::get<double>(map["TIMESTAMP"]);
-        std::vector<std::string> coordinates = { "SRP_TX", "SRP_TY", "SRP_TZ", "SRP_RX", "SRP_RY", "SRP_RZ" };
-
-        for(std::string coordinate : coordinates)
-        {
-            double value;
-
-            try
-            {
-                value = std::get<double>(map[coordinate]);
-            }
-            catch(...)
-            {
-                value = (double)std::get<long>(map[coordinate]);
-            }
-
-            stream << "\t" << value;
-        }
-        return stream.str();
+        return serializeCoordinates(std::get<double>(map["TIMESTAMP"]), getCoordinates(map));
     }
 
-    static std::string serializeProgramTrack(double timestamp, std::vector<double> coordinates)
+    static std::string serializeCoordinates(double timestamp, std::vector<double> coordinates)
     {
         std::stringstream stream;
         stream << std::fixed << std::setprecision(6) << timestamp;
@@ -106,18 +88,17 @@ protected:
 
         for(std::string coordinate : coordinates)
         {
-            double value;
+            auto value = SRPStatus[coordinate];
 
             try
             {
-                value = std::get<double>(SRPStatus[coordinate]);
+                currentCoordinates.push_back(std::get<double>(value));
             }
-            catch(...)
+            catch(std::bad_variant_access const& ex)
             {
-                value = (double)std::get<long>(SRPStatus[coordinate]);
+                std::cout << ex.what() << ", variant index: " << value.index() << std::endl;
+                currentCoordinates.push_back(200.0);
             }
-
-            currentCoordinates.push_back(value);
         }
 
         return currentCoordinates;
@@ -220,7 +201,7 @@ protected:
             EXPECT_EQ(std::get<long>(SRPStatus["SRP_OPERATIVE_MODE"]), 40);
 
             if(!compareCoordinates(startingCoordinates, getCoordinates(SRPStatus)))
-                std::cout << SRPProgramTrackTest::serializeStatus(SRPStatus) << std::endl;
+                std::cout << serializeStatus(SRPStatus) << std::endl;
             else
                 break;
 
@@ -276,7 +257,7 @@ TEST_F(SRPProgramTrackTest, NoiseTranslationTest)
 
     ofstream programTrackFile;
     programTrackFile.open(directory + "/trajectory.txt", ios::out);
-    programTrackFile << SRPProgramTrackTest::serializeProgramTrack(start_time, programTrackCoordinates) << std::endl;
+    programTrackFile << SRPProgramTrackTest::serializeCoordinates(start_time, programTrackCoordinates) << std::endl;
 
     double next_expected_time = start_time;
 
@@ -290,7 +271,7 @@ TEST_F(SRPProgramTrackTest, NoiseTranslationTest)
         addNoiseToCoordinates(programTrackCoordinates);
         SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::programTrack("SRP", trajectory_id, point_id, programTrackCoordinates));
         EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
-        programTrackFile << SRPProgramTrackTest::serializeProgramTrack(next_expected_time, programTrackCoordinates) << std::endl;
+        programTrackFile << SRPProgramTrackTest::serializeCoordinates(next_expected_time, programTrackCoordinates) << std::endl;
     }
 
     programTrackFile.close();
@@ -318,7 +299,7 @@ TEST_F(SRPProgramTrackTest, ContinuousMovementTest)
 
     ofstream programTrackFile;
     programTrackFile.open(directory + "/trajectory.txt", ios::out);
-    programTrackFile << SRPProgramTrackTest::serializeProgramTrack(start_time, programTrackCoordinates) << std::endl;
+    programTrackFile << SRPProgramTrackTest::serializeCoordinates(start_time, programTrackCoordinates) << std::endl;
 
     double next_expected_time = start_time;
     unsigned int axis_to_move = 0;
@@ -352,8 +333,8 @@ TEST_F(SRPProgramTrackTest, ContinuousMovementTest)
 
             SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::programTrack("SRP", trajectory_id, point_id, programTrackCoordinates));
             EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
-            //std::cout << SRPProgramTrackTest::serializeProgramTrack(next_expected_time, programTrackCoordinates) << std::endl;
-            programTrackFile << SRPProgramTrackTest::serializeProgramTrack(next_expected_time, programTrackCoordinates) << std::endl;
+            //std::cout << SRPProgramTrackTest::serializeCoordinates(next_expected_time, programTrackCoordinates) << std::endl;
+            programTrackFile << SRPProgramTrackTest::serializeCoordinates(next_expected_time, programTrackCoordinates) << std::endl;
 
             if(round(programTrackCoordinates[axis_to_move] * 100) == 0 && sign == 1)
             {
@@ -394,7 +375,7 @@ TEST_F(SRPProgramTrackTest, SeparateMovementTest)
 
         SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::programTrack("SRP", trajectory_id, point_id, programTrackCoordinates, start_time));
         EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
-        programTrackFile << SRPProgramTrackTest::serializeProgramTrack(start_time, programTrackCoordinates) << std::endl;
+        programTrackFile << SRPProgramTrackTest::serializeCoordinates(start_time, programTrackCoordinates) << std::endl;
 
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
 
@@ -437,8 +418,80 @@ TEST_F(SRPProgramTrackTest, SeparateMovementTest)
                 EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
             }
 
-            //std::cout << SRPProgramTrackTest::serializeProgramTrack(next_expected_time, programTrackCoordinates) << std::endl;
-            programTrackFile << SRPProgramTrackTest::serializeProgramTrack(next_expected_time, programTrackCoordinates) << std::endl;
+            //std::cout << SRPProgramTrackTest::serializeCoordinates(next_expected_time, programTrackCoordinates) << std::endl;
+            programTrackFile << SRPProgramTrackTest::serializeCoordinates(next_expected_time, programTrackCoordinates) << std::endl;
+        }
+    }
+
+    programTrackFile.close();
+    statusThread.join();
+}
+
+TEST_F(SRPProgramTrackTest, RapidTrajectoryTest)
+{
+    SRTMinorServoSocket& socket = SRTMinorServoSocket::getInstance();
+    SRTMinorServoAnswerMap SRPStatus;
+
+    ofstream programTrackFile;
+    programTrackFile.open(directory + "/trajectory.txt", ios::out);
+
+    unsigned int axis_to_move = 2;  //Always Z
+    int sign = -1;
+    unsigned int idle_count = 0;
+    bool idle = false;
+
+    std::cout << "PRESET position reached, starting PROGRAMTRACK" << std::endl;
+
+    while(!terminate)
+    {
+        std::vector<double> programTrackCoordinates = startingCoordinates;
+        programTrackCoordinates[axis_to_move] = MAX_RANGES[axis_to_move];
+
+        double start_time = CIRATools::getUNIXEpoch() + ADVANCE_TIMEGAP;
+        long unsigned int trajectory_id = int(start_time);
+        double next_expected_time = start_time;
+        unsigned int point_id = 0;
+
+        SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::programTrack("SRP", trajectory_id, point_id, programTrackCoordinates, start_time));
+        EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
+        programTrackFile << SRPProgramTrackTest::serializeCoordinates(start_time, programTrackCoordinates) << std::endl;
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+
+        SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::status("SRP"));
+        EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
+        EXPECT_EQ(std::get<long>(SRPStatus["SRP_OPERATIVE_MODE"]), 50);
+
+        while(!terminate)
+        {
+            next_expected_time += TIMEGAP;
+
+            std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXEpoch()))));
+            point_id++;
+
+            if(idle)
+            {
+                idle_count++;
+                if(idle_count == 25)
+                {
+                    idle_count = 0;
+                    idle = false;
+                    break;
+                }
+            }
+            else
+            {
+                if(moveAxis(programTrackCoordinates, axis_to_move, sign))
+                {
+                    idle = true;
+                }
+
+                SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::programTrack("SRP", trajectory_id, point_id, programTrackCoordinates));
+                EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
+            }
+
+            //std::cout << SRPProgramTrackTest::serializeCoordinates(next_expected_time, programTrackCoordinates) << std::endl;
+            programTrackFile << SRPProgramTrackTest::serializeCoordinates(next_expected_time, programTrackCoordinates) << std::endl;
         }
     }
 
