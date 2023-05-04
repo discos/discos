@@ -210,7 +210,9 @@ install : install_all
 gui:
 	pyuic4 calibrationToolClient.ui -o calibrationtool_ui.py
 	
-	@sed  -ie 's/Qwt5.QwtPlot/PlotProperty/g' calibrationtool_ui.py
+	@sed  -ie 's/from qwt_plot import QwtPlot//g' calibrationtool_ui.py
+	
+	@sed  -ie 's/QwtPlot/PlotProperty/g' calibrationtool_ui.py
 	
 	@sed -ie '9 i\from customwidgets import *' calibrationtool_ui.py
 
