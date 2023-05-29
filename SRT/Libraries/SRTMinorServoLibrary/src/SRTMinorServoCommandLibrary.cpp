@@ -5,6 +5,7 @@
  */
 
 #include <iostream>
+#include <iomanip>
 #include <algorithm>
 #include "SRTMinorServoCommandLibrary.h"
 
@@ -47,7 +48,7 @@ std::string SRTMinorServoCommandLibrary::preset(std::string servo_id, std::vecto
     command << "PRESET=" << servo_id;
     for(unsigned int coordinate = 0; coordinate < coordinates.size(); coordinate++)
     {
-        command << "," << coordinates[coordinate];
+        command << "," << std::fixed << std::setprecision(6) << coordinates[coordinate];
     }
     command << CLOSER;
     return command.str();
@@ -59,8 +60,7 @@ std::string SRTMinorServoCommandLibrary::programTrack(std::string servo_id, long
     command << "PROGRAMTRACK=" << servo_id << "," << trajectory_id << "," << point_id << ",";
     if(start_time > 0)
     {
-        long unsigned int start_time_int = (long unsigned int)(start_time * 1000);
-        command << start_time_int;
+        command << std::fixed << std::setprecision(6) << start_time;
     }
     else
     {
@@ -69,7 +69,7 @@ std::string SRTMinorServoCommandLibrary::programTrack(std::string servo_id, long
     
     for(unsigned int coordinate = 0; coordinate < coordinates.size(); coordinate++)
     {
-        command << "," << coordinates[coordinate];
+        command << "," << std::fixed << std::setprecision(6) << coordinates[coordinate];
     }
     command << CLOSER;
     return command.str();
@@ -81,7 +81,7 @@ std::string SRTMinorServoCommandLibrary::offset(std::string servo_id, std::vecto
     command << "OFFSET=" << servo_id;
     for(unsigned int coordinate = 0; coordinate < coordinates.size(); coordinate++)
     {
-        command << "," << coordinates[coordinate];
+        command << "," << std::fixed << std::setprecision(6) << coordinates[coordinate];
     }
     command << CLOSER;
     return command.str();
