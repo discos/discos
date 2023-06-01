@@ -7,9 +7,9 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               
 	Name="SRTMistral"
-	Code="SRTMistral.SRTMistralImpl"
+	Code="SRTMistralImpl"
 	Type="IDL:alma/Backends/SRTMistral:1.0"
 	Container="SRTMistralContainer"
 	KeepAliveTime="-1"
-	ImplLang="py"
+	ImplLang="cpp"
 />

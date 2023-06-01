@@ -25,5 +25,6 @@
 	<AvailableBackend alias="Sardara" backend="BACKENDS/Sardara" noData="true" dataPath="" />
 	<AvailableBackend alias="Holograpy" backend="BACKENDS/Holography" noData="true" dataPath="" />
 	<AvailableBackend alias="Mistral" backend="BACKENDS/SRTMistral" noData="true" dataPath="" />
+	<AvailableBackend alias="Skarab" backend="BACKENDS/Skarab" noData="true" dataPath="" />
 	
 </TelescopeEquipment>

@@ -1,5 +1,5 @@
-#ifndef __MISTRAL_IDL__
-#define __MISTRAL_IDL__
+#ifndef __SRTMISTRAL_IDL__
+#define __SRTMISTRAL_IDL__
 
 #include <baci.idl>
 #include <enumpropMACRO.idl>

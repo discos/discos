@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<SRTMistralSetup xmlns="urn:schemas-cosylab-com:SRTMistralSetup:1.0"
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<Configuration>
+	<configurationID>MISTRAL</configurationID>
+    <sections>2</sections>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<inputPort>GREGORIAN</inputPort>
+	<beams>1</beams>
+ 	<bandWidth>0.0</bandWidth>
+ 	<attenuation>0.0</attenuation>		
+	<section_boards>0 1</section_boards>
+	<polarizations>N N</polarizations>
+	<feed>0 0</feed>
+	<IF>0 1</IF>
+	<bins>0</bins>
+</Configuration>
+
+</SRTMistralSetup>

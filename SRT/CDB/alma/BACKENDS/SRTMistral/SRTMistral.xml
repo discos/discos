@@ -4,11 +4,27 @@
     xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" 
     xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" 
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    Port="12802"
     IPAddress="127.0.0.1"
+    Port="12802"
     SocketTimeout="1.0"
     StatusFrequency="0.2"
->
+    CommandLineTimeout="100000000"
+    ConnectTimeout="300000000"
+    PropertyRefreshTime="1000000"
+    Configuration="MISTRAL"
+    TimeTollerance="250000"
+    RepetitionCacheTime="200000000"
+    RepetitionExpireTime="500000000"
+    DataPort="6001"
+    DataIPAddress="192.168.200.200"            	   
+    DataLatency="3000000"
+    SenderSleepTime="30000000"
+    SenderResponseTime="10000000"
+    ControlSleepTime="90000000"
+    ControlResponseTime="100000000"
+    BoardsNumber="14"
+    DataBufferSize="64">
+    
 	<time/>
 	<backendName/>
 	<bandWidth/>
@@ -23,4 +39,6 @@
 	<inputsNumber/>
 	<sectionsNumber/>
 	<integration/>
+	<status/>
+	<busy/>
 </SRTMistral>
