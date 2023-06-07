@@ -117,4 +117,7 @@ ex1.set_xlabel('time (s)')
 
 
 plt.get_current_fig_manager().window.attributes('-zoomed', True)
-plt.show()
+try:
+    plt.show()
+except KeyboardInterrupt:
+    pass

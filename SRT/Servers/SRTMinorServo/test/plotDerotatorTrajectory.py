@@ -41,4 +41,7 @@ plt.ylabel('rot (deg)')
 plt.xlabel('time (sec)')
 
 plt.get_current_fig_manager().window.attributes('-zoomed', True)
-plt.show()
+try:
+    plt.show()
+except KeyboardInterrupt:
+    pass
