@@ -21,6 +21,7 @@ class SRTMinorServoSocket: public IRA::CSocket
 // Declare the SRTMinorServoSocketTest class as friend in order for it to have access to destroyInstance for testing purposes
 friend class SRTMinorServoSocketTest;
 friend class SRPProgramTrackTest;
+friend class DerotatorProgramTrackTest;
 
 public:
     /**
