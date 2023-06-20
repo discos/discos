@@ -25,7 +25,7 @@
  	<calSwitchingEnabled>FALSE</calSwitchingEnabled>
  	<inputPort>GREGORIAN</inputPort>
 	<inputPortDB>10</inputPortDB>
-	<inputPortBW>300</inputPortBW> 	
+	<inputPortBW>730</inputPortBW> 	
  	<beams>1</beams>
  	<section_boards>0 1</section_boards>
  	<polarizations>L R</polarizations>
