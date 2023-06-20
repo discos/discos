@@ -793,8 +793,7 @@ ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,BackendsErrors::Mal
 
     	bool m_stokes;
     	bool m_CK;
-	bool m_SardaraInitialized;
-	
+      bool m_SardaraInitialized;
 };
 
 #endif /*_COMMANDLINE_H_*/

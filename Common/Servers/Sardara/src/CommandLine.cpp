@@ -536,6 +536,7 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
                 ACS_LOG(LM_FULL_INFO,"CCommandLine::setSection()",(LM_NOTICE,"BACKEND_SARDARA_SET_SECTION ERROR")); 
             }
         }
+
         if (m_stationMEDNT == true) {
 	        try {
                 Message request = Command::setSection(inputId, newFreq, newBW, newFeed, newPol, newSR, newBins);

@@ -640,6 +640,8 @@ private:
 	 */		
 	bool m_powerFailDetected;
 	
+	ACS::Time m_powerFailTime;
+	
 	/**
 	 * Stores the epoch of the last scan. Used in oscillation prevention
 	 */
