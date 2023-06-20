@@ -1,3 +1,2 @@
-NoiseTranslationTest*
-ContinuousMovementTest*
-SeparateMovementTest*
+SRP/*
+Derotator/*

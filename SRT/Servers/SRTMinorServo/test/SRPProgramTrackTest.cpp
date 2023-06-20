@@ -280,7 +280,7 @@ TEST_F(SRPProgramTrackTest, ContinuousMovementTest)
     SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::programTrack("SRP", trajectory_id, point_id, programTrackCoordinates, start_time));
     EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
     SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::status("SRP"));
     EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
@@ -366,7 +366,7 @@ TEST_F(SRPProgramTrackTest, SeparateMovementTest)
         EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
         programTrackFile << SRPProgramTrackTest::serializeCoordinates(start_time, programTrackCoordinates) << std::endl;
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
         SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::status("SRP"));
         EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
@@ -382,7 +382,7 @@ TEST_F(SRPProgramTrackTest, SeparateMovementTest)
             if(idle)
             {
                 idle_count++;
-                if(idle_count == 25)
+                if(idle_count == ADVANCE_TIMEGAP / TIMEGAP)
                 {
                     idle_count = 0;
                     idle = false;
@@ -445,7 +445,7 @@ TEST_F(SRPProgramTrackTest, RapidTrajectoryTest)
         EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
         programTrackFile << SRPProgramTrackTest::serializeCoordinates(start_time, programTrackCoordinates) << std::endl;
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
         SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::status("SRP"));
         EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
@@ -461,7 +461,7 @@ TEST_F(SRPProgramTrackTest, RapidTrajectoryTest)
             if(idle)
             {
                 idle_count++;
-                if(idle_count == 25)
+                if(idle_count == ADVANCE_TIMEGAP / TIMEGAP)
                 {
                     idle_count = 0;
                     idle = false;
