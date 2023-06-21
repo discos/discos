@@ -139,6 +139,7 @@ void MedicinaActiveSurfaceBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
     m_parser->add("asOn",new function0<CMedicinaActiveSurfaceBossCore,non_constant,void_type >(boss,&CMedicinaActiveSurfaceBossCore::asOn),0);
     m_parser->add("asOff",new function0<CMedicinaActiveSurfaceBossCore,non_constant,void_type >(boss,&CMedicinaActiveSurfaceBossCore::asOff),0);
     m_parser->add("asPark",new function0<CMedicinaActiveSurfaceBossCore,non_constant,void_type >(boss,&CMedicinaActiveSurfaceBossCore::asPark),0);
+	m_parser->add("asSetLUT",new function1<CMedicinaActiveSurfaceBossCore,non_constant,void_type,I<string_type> >(boss,&CMedicinaActiveSurfaceBossCore::asSetLUT),1 );
 
     ACS_LOG(LM_FULL_INFO, "MedicinaActiveSurfaceBossImpl::initialize()", (LM_INFO,"COMPSTATE_INITIALIZED"));
 }
