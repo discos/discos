@@ -11,6 +11,7 @@
 #include <AntennaModule.h>
 #include "CommonTools.h"
 #include <DiscosVersion.h>
+#include "FitsTools.h"
 
 using namespace IRA;
 using namespace FitsWriter_private;
@@ -407,18 +408,62 @@ void CEngineThread::runLoop()
 {
 	TIMEVALUE nowEpoch;
 	IRA::CString filePath,fileName;
-	unsigned totalDumps=0;
 	//CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
 	IRA::CIRATools::getTime(nowEpoch); // it marks the start of the activity job
 	//cout << "inizio : " << nowEpoch.value().value << endl;
 	if (m_summaryOpened && m_data->isWriteSummary()) {
 		double exptime=0.0;
-		std::list<double> va;
-		ACS::doubleSeq rf;
+		long sectionNumber;
+		std::list<long> bins;
+		std::list<double> va, bWidth, freq, fRes;
+		std::list<IRA::CString> sPols;
+		ACS::doubleSeq rf,skyF,sectionSkyF;
+		ACS::longSeq pols;
+		
+		sectionNumber=m_data->getSectionsNumber();
+		m_summary->getFilePointer()->setKeyword("NUSEBAND",sectionNumber);
+		m_info.getSkyFrequency(skyF);	
+		m_data->getSectionSkyFrequency(sectionSkyF,skyF);
 		m_info.getRestFreq(rf);
+		m_info.getReceiverPolarization(pols);
+		sPols.clear();
+		m_data->getSectionTypeAndPols(sPols,pols);		
+		bins.clear();
+		bWidth.clear();		
+		freq.clear();
+		fRes.clear();
 		va.clear();
-		CCommonTools::map(rf,va);
+		for(long j=0;j<sectionNumber;j++) {
+			double bw,bb;
+			bb=m_data->getSectionBins(j);
+			bins.push_back(bb);
+			bw=m_data->getSectionBandWidth(j);
+			bWidth.push_back(bw);
+			freq.push_back(sectionSkyF[j]);
+			fRes.push_back(bw/(double)bb);
+		}
+		if (rf.length()==1) {
+			for (long j=0;j<sectionNumber;j++) {
+				if (rf[0]>0.0) va.push_back(rf[0]);
+				else va.push_back(DOUBLE_DUMMY_VALUE);
+			}
+		}
+		else {
+			for (long j=0;j<rf.length();j++) {
+				if (rf[j]>0.0) va.push_back(rf[j]);
+				else va.push_back(DOUBLE_DUMMY_VALUE);
+			}	
+		}
+		m_summary->getFilePointer()->setKeyword("BWID",bWidth);
+		m_summary->getFilePointer()->setKeyword("FREQBINS",bins);
+		m_summary->getFilePointer()->setKeyword("FREQ",freq);
+		m_summary->getFilePointer()->setKeyword("FREQRESOL",fRes);
+
 		m_summary->getFilePointer()->setKeyword("RESTFREQ",va);
+		m_summary->getFilePointer()->setKeyword("POLATYPE",sPols);
+
+		//Backends::TSectionHeader const *sectHeader=m_data->getSectionHeader();	
+		
 		if (m_data->getBackendName()!="") {
 			m_summary->getFilePointer()->setKeyword("BackendName",m_data->getBackendName());
 		}
@@ -430,11 +475,12 @@ void CEngineThread::runLoop()
 		}
 		m_summary->getFilePointer()->setKeyword("CREATOR",DiscosVersion::CurrentVersion::getVersion());
 		m_summary->getFilePointer()->setKeyword("TELESCOP",DiscosVersion::CurrentVersion::station);
-		m_summary->getFilePointer()->setKeyword("NUSEBANDS",m_data->getSectionsNumber());
+		
 		m_summary->getFilePointer()->setKeyword("ScheduleName",m_data->getScheduleName());
 		m_summary->getFilePointer()->setKeyword("LogFileName",m_data->getLogName());
+		m_summary->getFilePointer()->setKeyword("WOBUSED","F");
 
-		exptime=(totalDumps*m_data->getIntegrationTime())/1000.0;
+		exptime=(m_info.getTotalDumps()*m_data->getIntegrationTime())/1000.0;
 		m_summary->getFilePointer()->setKeyword("EXPTIME",exptime);
 	
 
@@ -494,8 +540,9 @@ void CEngineThread::runLoop()
 			if (!m_summaryOpened) {
 			 	TIMEVALUE currentUT;
 				IRA::CDateTime now;
-				TIMEDIFFERENCE currentLST;
+				//TIMEDIFFERENCE currentLST;
 				IRA::CString lstStr;
+				double currentLST;
 
 				// now let's create the summary file.
 				m_summary=new CSummaryWriter();
@@ -512,14 +559,16 @@ void CEngineThread::runLoop()
 				// compute the LST time for the scan
 			 	IRA::CIRATools::getTime(currentUT); // get the current time
 			 	now.setDateTime(currentUT,m_data->getDut1());  // transform the current time in a CDateTime object
-			 	now.LST(m_data->getSite()).getDateTime(currentLST);  // get the current LST time
-			 	currentLST.day(0);
-			 	IRA::CIRATools::intervalToStr(currentLST.value().value,lstStr);
-			 	m_summary->getFilePointer()->setKeyword("LST",lstStr);
+			 	//now.LST(m_data->getSite()).getDateTime(currentLST);  // get the current LST time
+			 	//currentLST.day(0);
+			 	//IRA::CIRATools::intervalToStr(currentLST.value().value,lstStr);
+			 	currentLST=(double)now.LST(m_data->getSite()).getDayMilliSeconds()/1000.0;
+			 	m_summary->getFilePointer()->setKeyword("LST",currentLST);
+			 	//m_summary->getFilePointer()->setKeyword("LST",lstStr);
 			 	IRA::CIRATools::timeToStrExtended(currentUT.value().value,lstStr);
 			 	m_summary->getFilePointer()->setKeyword("DATE-OBS",lstStr);
 				m_summaryOpened=true;
-				totalDumps=0;
+				m_info.resetTotalDumps();
 				ACS_LOG(LM_FULL_INFO, "CEngineThread::runLoop()",(LM_NOTICE,"SUMMARY_OPENED"));
 			}
 			m_file = new CFitsWriter();
@@ -566,8 +615,8 @@ void CEngineThread::runLoop()
 				IRA::CString sourceName;
 				double sourceRa,sourceDec,sourceVlsr;
 				double azOff,elOff,raOff,decOff,lonOff,latOff;
-				double lonScanOff,latScanOff;
-				Antenna::TCoordinateFrame frameScanOff;
+				double lonUserOff,latUserOff;
+				Antenna::TCoordinateFrame frameUserOff;
 				double dut1;
 				long scanTag;
 				long scanID,subScanID;
@@ -586,19 +635,22 @@ void CEngineThread::runLoop()
 
 				m_data->getSite(site,dut1,siteName);			
 				
+				/** The multiplicity of these arrays is the total number of inputs */
 				m_info.getLocalOscillator(LocalOscillator);
 				m_info.getSectionsID(sectionsID);
 				m_info.getBackendAttenuations(atts);
 				m_info.getFeedsID(feedsID);
 				m_info.getIFsID(ifsID);
-				m_info.getSkyBandwidth(skyBw);
+				// useful bandwidth, resulting from the matching of backend and frontend settings 
+				m_info.getSkyBandwidth(skyBw); 
 				m_info.getSkyFrequency(skyFreq);
 				m_info.getCalibrationMarks(calib);
 				m_info.getSourceFlux(fluxes);
 				m_info.getReceiverPolarization(polarizations);
+				/********************************************************************/
 				m_info.getSource(sourceName,sourceRa,sourceDec,sourceVlsr);
 				m_info.getAntennaOffsets(azOff,elOff,raOff,decOff,lonOff,latOff);
-				m_info.getAntennaScanOffsets(lonScanOff,latScanOff,frameScanOff);
+				m_info.getAntennaUserOffsets(lonUserOff,latUserOff,frameUserOff);
 				scanTag=m_data->getScanTag();
 				scanID=m_data->getScanID();
 				subScanID=m_data->getSubScanID();
@@ -751,21 +803,21 @@ void CEngineThread::runLoop()
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
 					m_data->setStatus(Management::MNG_FAILURE);
 				}
-				else if(!m_file->setPrimaryHeaderKey("SubScan LatOffset",latScanOff,"SubScan Latitude Offset")) {
+				else if(!m_file->setPrimaryHeaderKey("UserLatOffset",latUserOff,"User Latitude Offset")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
 					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
 					m_data->setStatus(Management::MNG_FAILURE);
 				}
-				else if(!m_file->setPrimaryHeaderKey("SubScan LonOffset",lonScanOff,"SubScan Longitude Offset")) {
+				else if(!m_file->setPrimaryHeaderKey("UserLonOffset",lonUserOff,"User Longitude Offset")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
 					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
 					m_data->setStatus(Management::MNG_FAILURE);
 				}			
-				else if(!m_file->setPrimaryHeaderKey("SubScan OffsetFrame",Antenna::Definitions::map(frameScanOff),"SubScan Offset frame")) {
+				else if(!m_file->setPrimaryHeaderKey("UserOffsetFrame",Antenna::Definitions::map(frameUserOff),"User Offset frame")) {
 					_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
 					impl.setFileName((const char *)m_data->getFileName());
 					impl.setError(m_file->getLastError());
@@ -903,7 +955,7 @@ void CEngineThread::runLoop()
 		if (m_fileOpened) {
 			//cout << "Stopping, cached  dumps: " << m_data->getDumpCollectionSize() << endl;
 			while (processData()) {
-				totalDumps++;
+				m_info.incTotalDumps();
 			};
 
 #ifdef FW_DEBUG
@@ -937,7 +989,7 @@ void CEngineThread::runLoop()
 		if (m_fileOpened) {
 			//cout << "cached before dumps: " << m_data->getDumpCollectionSize() << endl;
 			while (checkTime(nowEpoch.value().value) && checkTimeSlot(nowEpoch.value().value) && processData()) {
-				totalDumps++;
+				m_info.incTotalDumps();
 			}
 			//cout << "cached after  dumps: " << m_data->getDumpCollectionSize() << endl;
 			//IRA::CIRATools::getTime(nowEpoch);
@@ -1002,14 +1054,14 @@ void CEngineThread::collectAntennaData(FitsWriter_private::CFile* summaryFile)
 		ACSErr::Completion_var comp;
 		CORBA::Double ra=0.0,dec=0.0,vrad=0.0;
 		CORBA::Double raOff=0.0,decOff=0.0,azOff=0.0,elOff=0.0,lonOff=0.0,latOff=0.0;
-		CORBA::Double scanLonOff=0.0,scanLatOff=0.0;
+		CORBA::Double userLonOff=0.0,userLatOff=0.0;
 		IRA::CString sourceName="";
 		Antenna::TReferenceFrame VFrame=Antenna::ANT_UNDEF_FRAME;
 		Antenna::TVradDefinition VDefinition=Antenna::ANT_UNDEF_DEF;
-		Antenna::TCoordinateFrame scanFrameOff=Antenna::ANT_HORIZONTAL;
+		Antenna::TCoordinateFrame userFrameOff=Antenna::ANT_HORIZONTAL;
 		
 		try {
-			m_antennaBoss->getScanOffsets(scanLonOff,scanLatOff,scanFrameOff);
+			m_antennaBoss->getUserOffsets(userLonOff,userLatOff,userFrameOff);
 		}
 		catch (CORBA::SystemException& ex) {
 			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CEngineThread::collectAntennaData()");
@@ -1019,7 +1071,7 @@ void CEngineThread::collectAntennaData(FitsWriter_private::CFile* summaryFile)
 			m_data->setStatus(Management::MNG_WARNING);
 			antennaBossError=true;
 		}
-		m_info.setAntennaScanOffsets(scanLonOff,scanLatOff,scanFrameOff);
+		m_info.setAntennaUserOffsets(userLonOff,userLatOff,userFrameOff);
 
 		try { //get the target name and parameters
 			ACS::ROstring_var targetRef;
@@ -1187,6 +1239,9 @@ void CEngineThread::collectAntennaData(FitsWriter_private::CFile* summaryFile)
 			summaryFile->setKeyword("OBJECT",sourceName);
 			summaryFile->setKeyword("RightAscension",ra);
 			summaryFile->setKeyword("Declination",dec);
+			//The Object coordinates are taken from Antenna Boss interface which always expose J2000 coordinates
+			summaryFile->setKeyword("EQUINOX",2000.0);
+			//**************************************************************************************************
 			summaryFile->setKeyword("VRAD",vrad);
 		}
 		try { //get the estimated source fluxes
@@ -1375,8 +1430,11 @@ void CEngineThread::collectReceiversData(FitsWriter_private::CFile* summaryFile)
 			ACS::doubleSeq_var IFBw;
 			double scale;
 			bool onoff;
+			/** Get the configuration of the IF inputs out of the sections configuration */
 			m_data->getInputsConfiguration(sectionsID,feeds,ifs,freqs,bws,atts);
+			/** Get value of noise cal diode from the receiver */
 			calMarks=m_receiversBoss->getCalibrationMark(freqs,bws,feeds,ifs,skyFreq.out(),skyBw.out(),onoff,scale);
+			/** Get the receiver IF configuration from the RX component (One record for each of the total inputs) */
 			m_receiversBoss->getIFOutput(feeds,ifs,IFFreq.out(),IFBw.out(),rcvPol.out(),LO.out());
 			m_info.setInputsTable(sectionsID,feeds,ifs,rcvPol.in(),skyFreq.in(),skyBw.in(),LO.in(),atts,calMarks.in());
 			m_info.setCalDiode(onoff);

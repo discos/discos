@@ -9,8 +9,8 @@
 	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
 	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	maxAzimuth="457.7"
-	minAzimuth="-70.7"
+	maxAzimuth="452.9"
+	minAzimuth="-66.9"
 	maxElevation="90.0"
 	minElevation="5.0"
 	diameter="32.0"
@@ -22,6 +22,6 @@
 	maxElevationAcceleration="0.5"
 	accScaleFactor="15.0"
 	cw_ccw_limit="180.0"
-	MinElevationAvoidance="10"
+	MinElevationAvoidance="6"
 	MaxElevationAvoidance="87"
 />

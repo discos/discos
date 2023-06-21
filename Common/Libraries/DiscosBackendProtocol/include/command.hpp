@@ -17,7 +17,7 @@ namespace DiscosBackend{
             static Message setConfiguration(string conf);
             static Message getIntegration(){return Message(REQUEST, "get-integration");};
             static Message setIntegration(int integration);
-            static Message getTpi(){return Message(REQUEST, "get-tpi");};
+            static Message getTpi(double frequency = 0, double bandwidth = 0);
             static Message getTp0(){return Message(REQUEST, "get-tp0");};
             static Message time(){return Message(REQUEST, "time");};
             static Message start(unsigned long long utctimestamp = 0);
@@ -27,6 +27,7 @@ namespace DiscosBackend{
             static Message setFilename(string filename);
             static Message convertData(){return Message(REQUEST, "convert-data");};
             static Message getRms(){return Message(REQUEST, "get-rms");};
+            static Message setEnable(int feed1, int feed2);
     }; //class Command
 }; //namespace DiscosBackend
 

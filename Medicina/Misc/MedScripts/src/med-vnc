@@ -1,0 +1,174 @@
+#!/usr/bin/env bash
+
+print_help() {
+    echo " "
+    echo "`basename $0` v1.0"
+    echo " "
+    echo "Start a new session toward DISCOS control software"
+    echo "Usage: '`basename $0` [OPTIONS] [-p|--port portnumber] <role>@<gatein>'"
+    echo "       '`basename $0` -r|--roles'"
+    echo "       '`basename $0` -h|--help'"
+    echo "<role> indicates the role (observer or administrative privileges) for which the connection is done"
+    echo "<gatein> access point into the observatory LAN. This information is provided by local staff." 
+    echo "         Use 'local' if already inside the local area network."
+    echo "-h | --help prints this help message and exit"
+    echo "-r | --roles shows all the available roles"
+    echo "-p | --port ssh port if different from the default one" 
+    echo "Options:"
+    echo "    -v | --viewonly           start the vncviewer in view only mode"
+    exit 1
+}
+
+vnc_avail="TRUE"
+local_connection="FALSE"
+ssh_port="22"
+viewonly=""
+role=""
+gatein=""
+remote_port=0
+current_system="LINUX"
+
+remote_sessions=( "discos:9901:15001" "observer:9902:15002" )
+
+
+while [[ $# -gt 0 ]]
+do
+key="$1"
+
+case $key in
+    -h|--help)
+    print_help
+    ;;
+    -r|--roles)
+    echo "Available roles are: "
+    for session in "${remote_sessions[@]}" ; do
+    	echo "${session%%:*}"
+    done
+    exit 0
+    ;;
+    -p|--port)
+    ssh_port=$2
+    shift
+    shift
+    ;;
+    -v|--viewonly)
+    viewonly="-ViewOnly"
+    shift
+    ;;
+    *)
+    if [[ $1 == *"@"* ]]; then
+        while IFS='@' read -ra ARG; do
+            if [[ "${#ARG[@]}" -ne 2 ]]; then
+                echo "Please provide a correct <role>@<gatein> pair, retry!"
+                print_help
+            fi
+            role=${ARG[0]}
+            gatein=${ARG[1]}
+        done <<< "$1"
+    else
+        echo "Unrecognized option: '$1'!"
+        print_help
+    fi
+    shift
+    ;;
+esac
+done
+
+if [[ "$gatein" == "local" ]]; then
+    local_connection="TRUE"
+fi
+
+if [[ "$OSTYPE" == *"linux-gnu"* ]]
+then
+   echo -e "Linux OS is detected..."
+   current_system="LINUX"
+elif [[ "$OSTYPE" == *"darwin"* ]]
+then
+   echo -e "Mac OS is detected..."
+   current_system="MACOS"
+else
+   echo -e "Not supported OS, some unpredictable results may happen!"	
+fi
+
+if ! hash vncviewer &>/dev/null; then
+    echo -e "'vncviewer' is not available, this script is setting up the connection but won't automatically start vnc.\nA custom vnc client will have to be manually started after the connection."
+    vnc_avail="FALSE"
+fi
+
+if hash netstat &>/dev/null; then
+    if [[ "$current_system" == "LINUX" ]]; then
+        PORTCOMMAND="netstat -tulpn"
+    else
+        PORTCOMMAND="netstat -avnp tcp"
+    fi
+else
+    echo -e "This program requires 'netstat' to be installed.\nThe package to install may vary depending on your operating system.\n"
+    print_help
+fi
+
+for session in "${remote_sessions[@]}" ; do
+    role_name="${session%%:*}"
+    ports="${session#*:}"
+    rport="${ports%:*}"
+    lport="${ports#*:}"
+    if [[ "$role" == "$role_name" ]]; then
+        if [ "$local_connection" = "TRUE" ]; then
+        		#this is for local area connection when it will enabled
+            remote_port=$lport
+            #remote_port=$rport
+            ssh_port=22 
+        else
+            remote_port=$rport
+        fi
+        break
+    fi
+done
+
+if [[ $remote_port -eq 0 ]]; then
+    echo "Please, provide a correct role, use the switch '--roles' for a complete list of available roles"
+    print_help
+fi
+
+for i in {0..50}
+do
+    local_port_attempt=$((9000 + i))
+    if ! $PORTCOMMAND | grep 127.0.0.1[.:]$local_port_attempt &>/dev/null; then
+        local_port=$local_port_attempt
+        break
+    fi
+done
+
+if [[ -z "$local_port" ]]; then
+    echo "Could not find an available port in range 9000-9050"
+    exit 1
+fi
+
+#echo $local_connection
+#echo $role
+#echo $remote_port
+#echo $local_port
+#echo $gatein
+#echo $ssh_port
+#echo $viewonly
+#echo $vnc_avail
+
+if [[ "$local_connection" = "TRUE" ]]; then
+    echo "Connecting from local area...."
+    ssh -N -f -L $local_port:192.168.1.99:$remote_port $role@192.167.189.98
+else
+    echo "Connecting from wide area....."
+    ssh -N -f -p $ssh_port -L $local_port:192.167.189.98:$remote_port $role@$gatein
+fi
+if [[ "$vnc_avail" == "TRUE" ]]; then
+    echo "Starting vncviewer...."
+    vncviewer localhost:$local_port $viewonly &>/dev/null
+else
+    echo "Connection is set, please use your preferred vnc client to connect to 'localhost', port "$local_port
+fi
+
+
+
+
+
+
+

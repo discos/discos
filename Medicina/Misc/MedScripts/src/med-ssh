@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+
+print_help() {
+    echo " "
+    echo "`basename $0` v1.0"
+    echo " "
+    echo "Log project into the DISCOS system homes."
+    echo "Usage: '`basename $0` [-p|--port portnumber] <projectid>@<gatein>'" 
+    echo "       '`basename $0` -h|--help'"
+    echo "-h | --help prints this help message and exit"
+    echo "-p | --port ssh port, if different from the default one"
+    echo "       <projectid> indicates the project you wanto to log in."
+    echo "       <gatein> access point into the observatory lan. This information is provided by local staff."
+    echo "                Use 'local' if already inside the local area network."	     
+    exit 1
+}
+
+current_system="LINUX"
+ssh_port="22"
+project=""
+gatein=""
+local="FALSE"
+
+while [[ $# -gt 0 ]]
+do
+key="$1"
+case $key in
+    -h|--help)
+    print_help
+    ;;
+    -p|--port)
+    ssh_port=$2
+    shift
+    shift
+    ;;
+    *)
+    if [[ $1 == *"@"* ]]; then
+        while IFS='@' read -ra ARG; do
+            if [[ "${#ARG[@]}" -ne 2 ]]; then
+                echo "Please provide a correct <projectid>@<gatein> pair, retry!"
+                print_help
+            fi
+            project=${ARG[0]}
+            gatein=${ARG[1]}
+        done <<< "$1"
+    else
+        echo "Unrecognized option: '$1'!"
+        print_help
+    fi
+    shift
+    ;;    
+esac
+done
+
+if [[ "$gatein" == "local" ]]; then
+    local="TRUE"
+fi
+
+if [[ "$OSTYPE" == *"linux-gnu"* ]]
+then
+   echo -e "Linux OS is detected..."
+   current_system="LINUX"
+elif [[ "$OSTYPE" == *"darwin"* ]]
+then
+   echo -e "Mac OS is detected..."
+   current_system="MACOS"
+else
+   echo -e "Not supported OS, some unpredictable results may happen!"	
+fi
+
+proxy="ProxyCommand=ssh -p ""$ssh_port"" -W %h:%p observer@""$gatein"
+#echo $proxy
+
+if [[ "$local" == "FALSE" ]]; then 
+	ssh -Y -p 9922 -o "$proxy" "$project"@192.167.189.98
+else
+	ssh -Y -p 9922 "$project"@192.167.189.98
+fi
+

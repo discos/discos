@@ -64,7 +64,7 @@ LIBRARIES_L     =
 SardaraImpl_OBJECTS = SardaraImpl Configuration CommandLine SenderThread ControlThread
 SardaraImpl_LIBS = IRALibrary GenericBackendStubs SardaraStubs TotalPowerStubs ManagmentDefinitionsStubs ReceiversDefinitionsStubs BackendsDefinitionsStubs bulkDataStubs bulkDataSenderStubs GenericIFDistributorStubs\
   bulkDataReceiverStubs ACSBulkDataError ComponentErrors BackendsErrors ParserErrors ManagementErrors \
-  DiscosBackendProtocolLib DiscosVersion
+  DiscosBackendProtocolLib DiscosVersion CommonReceiverInterfaceStubs ReceiversBossStubs
 
 #
 # <brief description of lllll library>

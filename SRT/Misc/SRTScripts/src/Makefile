@@ -172,7 +172,7 @@ ASCII_TO_MIF =
 # other files to be installed
 #----------------------------
 #INSTALL_FILES = ../app-defaults/nuragheStartup.xml
-INSTALL_FILES = ../app-defaults/discosStartup.xml
+INSTALL_FILES = ../app-defaults/discosStartup.xml ../app-defaults/simulationStartup.xml
 
 #
 # list of all possible C-sources (used to create automatic dependencies)
@@ -210,6 +210,7 @@ all:	do_all
 
 clean : clean_all 
 	@rm -f $(INTROOT)/app-defaults/discosStartup.xml
+	@rm -f $(INTROOT)/app-defaults/simulationStartup.xml
 	@echo " . . . clean done"
 
 clean_dist : clean_all clean_dist_all 
@@ -222,7 +223,9 @@ install : install_all
 #	@chmod 764 $(INTROOT)/bin/nuraghe
 #	@chmod 764 $(INTROOT)/app-defaults/nuragheStartup.xml
 	@sed -i 's/MASTERHOST/$(MASTER)/g' $(INTROOT)/app-defaults/discosStartup.xml
-	@chmod 700 $(INTROOT)/app-defaults/discosStartup.xml 
+	@chmod 700 $(INTROOT)/app-defaults/discosStartup.xml
+	@sed -i 's/MASTERHOST/$(MASTER)/g' $(INTROOT)/app-defaults/simulationStartup.xml
+	@chmod 700 $(INTROOT)/app-defaults/simulationStartup.xml
 	@chmod 700 $(INTROOT)/bin/discosdown 
 	@chmod 700 $(INTROOT)/bin/discosup 
 	@chmod 700 $(INTROOT)/bin/receiversmonitor.py

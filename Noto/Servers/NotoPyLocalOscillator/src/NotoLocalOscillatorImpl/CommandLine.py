@@ -2,6 +2,7 @@ import socket
 import time
 import decimal
 from NotoLocalOscillatorImpl import CommandLineError
+import ReceiversErrorsImpl
 
 QUERYERROR="SYST:ERR? \n"
 
@@ -47,9 +48,9 @@ class CommandLine:
 			if self.sock==None:
 				self.sock=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		except socket.error,msg:
-			exc=CommandLineError(msg);
 			self.sock=None
-			raise exc
+			return False
+		return True
 			
 	def close(self):
 		if self.connected:
@@ -62,67 +63,84 @@ class CommandLine:
 		try:
 			if self.connected==False:
 				self.sock.connect((self.ip,self.port))
+				self.connected=True
 				self.sock.sendall('*CLS\n;SYST:ERR?\n++read\n')
 				msg=self.sock.recv(1024)
-				self.connected=True
 		except socket.error, msg:
-			exc=CommandLineError(msg);
-			raise exc
+			self.close()
+			return False
+		return True
 			   
 	def check(self):
-		try:
-			self.create()
-			self.connect()
+		if (self.create() and self.connect()):
 			return True
-		except Exception:
+		else:
 			return False
 			
 	def setPower(self,power):
-		cmd="POW "+str(power)+"DBM;SYST:ERR?\n"
+		cmd="POW:LEV "+str(power)+"\n"
 		#can raise an error......
-		msg=self.query(cmd)   
-		return msg
+		res,msg=self.command(cmd)   
+		return res,msg
 
 	def getPower(self):
-		QUERYPOWER="POW?;SYST:ERR?\n"
-		cmd=QUERYPOWER
+		cmd="POW:LEV?\n"
 		now=time.time()
-		if now<self.powerTime:
-			return "Read from internal memory",self.power
+		if now-30<self.powerTime:
+			return True,"Read from internal memory",self.power
 		#can raise an error.....
-		msg=self.query(cmd)
-		commands=msg.split(';')
-		if len(commands)>1:
-			self.power=int(decimal.Decimal(commands[0]))# unit is MHZ
-			self.powerTime=time.time()+30
-			err_msg=commands[1]
-		else:
-			self.power=-1.0
-			err_msg='Communication Error with synth'  
-		return err_msg,self.power
-   
-	def setFrequency(self,freq):
-		cmd='FREQ '+str(freq)+ 'MHZ;SYST:ERR?'
-		#can raise an error......
-		msg=self.query(cmd)
-		return msg   
-   
-	def getFrequency(self):       
-		cmd='FREQ?;SYST:ERR?'
-		now=time.time()
-		if now<self.freqTime:
-			return "Read from internal memory",self.freq
-		#can raise an error.....
-		msg=self.query(cmd)
-		commands=msg.split(';')
-		if len(commands)>1:
-			self.freq=int(decimal.Decimal(commands[0]))/1e6
-			self.freqTime=time.time()+30
-			err_msg=commands[1]
+		res,msg=self.query(cmd)
+		if res:
+			self.power=float(msg)
+			self.powerTime=time.time()
+			return True,"Read from device",self.power
+#			commands=msg.split(';')
+#			if len(commands)>1:
+#				self.power=int(decimal.Decimal(commands[0]))
+#				self.powerTime=time.time()
+#				err_msg=commands[1]
+#				return True,err_msg,self.power
+#			else:
+#				self.power=-1.0
+#				err_msg='Communication Error with synth'  
+#				return False,err_msg,self.power
 		else:
 			self.freq=-1.0
-			err_msg='Communication Error with synth'
-		return err_msg,self.freq
+			err_msg=msg
+			return False,err_msg,self.power
+   
+	def setFrequency(self,freq):
+		cmd='FREQ '+str(freq)+ 'MHZ\n'
+		#can raise an error......
+		res,msg=self.command(cmd)
+		return res,msg   
+   
+	def getFrequency(self):       
+		cmd='FREQ?'
+		now=time.time()
+		if now-30<self.freqTime:
+			return True,"Read from internal memory",self.freq
+		#can raise an error.....
+		res,msg=self.query(cmd)
+		if res:
+			self.freq=float(msg)/1e6
+			self.powerTime=time.time()
+			return True,"Read from device",self.freq
+#			commands=msg.split(';')
+#			if len(commands)>1:
+#				self.freq=int(decimal.Decimal(commands[0]))/1e6
+#				self.freqTime=time.time()
+#				err_msg=commands[1]
+#				return True,err_msg,self.freq
+#			else:	
+#				self.freq=-1.0
+#				err_msg='Communication Error with synth'
+#				return False,err_msg,self.freq
+		else:
+			self.freq=-1.0
+			err_msg=msg
+			return False,err_msg,self.freq
+			
    
 	def readStatus(self):
 		''' 
@@ -145,6 +163,18 @@ class CommandLine:
    
 	def rfOff(self):
 		pass
+	
+	def command(self,cmd):
+		msg=""
+		if self.check():			
+			try:
+				self.sock.sendall(cmd)
+			except socket.error,msg:
+				self.close()
+				return False,msg
+			return True,msg				        
+		else:
+			return False,"connection is not available"
 
 	def query(self,cmd):
 		msg=""
@@ -153,21 +183,18 @@ class CommandLine:
 				self.sock.sendall(cmd+'\n++read\n')
 			except socket.error,msg:
 				self.close()
-				exc=CommandLineError(msg);
-				raise exc
+				return False,msg
 			try:
 				msg=self.sock.recv(1024)
 			except socket.error,msg:
 				self.close()
-				exc=CommandLineError(msg);
-				raise exc
+				return False,msg
 			if	len(msg)==0:
-				self.sock.close()
-				raise CommandLineError("disconnection from remote side"); 					        
-			return msg
+				self.close()
+				return False,"disconnection from remote side"
+			return True,msg				        
 		else:
-			exc=CommandLineError("connection is not available");
-			raise exc   
+			return False,"connection is not available"
        
        
       

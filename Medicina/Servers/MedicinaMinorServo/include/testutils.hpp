@@ -8,6 +8,7 @@
 #include "MedMinorServoProtocol.hpp"
 #include "MedMinorServoTime.hpp"
 #include "MedMinorServoGeometry.hpp"
+#include "MedMinorServoConstants.hpp"
 
 MedMinorServoPosition get_random_position();
 MedMinorServoPosition random_offset_position(MedMinorServoPosition);

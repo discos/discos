@@ -34,15 +34,7 @@ MedMinorServoScan::init(const MedMinorServoPosition central_position,
     m_start_position = central_position;
     m_stop_position = central_position;
     m_was_tracking = was_tracking;
-    if(starting_time == 0){
-        TIMEVALUE now;
-        IRA::CIRATools::getTime(now);
-        m_starting_time = now.value().value + START_SCAN_TOLERANCE;
-        m_asap = true;
-    }else{
-        m_starting_time = starting_time;
-        m_asap = false;
-    }
+ 
     m_range = range;
     m_total_time = total_time;
     m_axis_code = axis_code;
@@ -82,6 +74,31 @@ MedMinorServoScan::init(const MedMinorServoPosition central_position,
             m_stop_position.theta_y += range/2;
         }
     }
+    /**
+     * Try to compute min and max times for the scan, errors if positions are
+     * not valid or not within permissible ranges but we just checked for this
+     */
+    m_min_time = MedMinorServoGeometry::min_time(m_start_position,
+                                                 m_stop_position);
+    m_max_time = MedMinorServoGeometry::max_time(m_start_position,
+                                                 m_stop_position);
+    /**
+     * check that we can reach start position in time
+     */
+    m_min_start_time = MedMinorServoGeometry::min_time(m_central_position,
+                                                       m_start_position);
+    CUSTOM_LOG(LM_FULL_INFO, "MedMinorServoControl::MedMinorServoScan::check()",(LM_DEBUG, "min start time: %f", m_min_start_time));          
+    m_interval_to_start_pos = MedMinorServoTime::deltaToACSTimeInterval(m_min_start_time);   
+
+   if(starting_time == 0){
+      TIMEVALUE now;
+		IRA::CIRATools::getTime(now);  
+		m_starting_time = now.value().value + START_SCAN_TOLERANCE +  m_interval_to_start_pos;
+				m_asap = true;
+    }else{
+        m_starting_time = starting_time;
+        m_asap = false;
+    }                                          
     m_initialized = true;
 }
 
@@ -114,29 +131,15 @@ throw (MinorServoErrors::ScanErrorEx)
               (LM_NOTICE, "Central position out of limits"));
         return false;
     }
-    /**
-     * Try to compute min and max times for the scan, errors if positions are
-     * not valid or not within permissible ranges but we just checked for this
-     */
-    m_min_time = MedMinorServoGeometry::min_time(m_start_position,
-                                                 m_stop_position);
-    m_max_time = MedMinorServoGeometry::max_time(m_start_position,
-                                                 m_stop_position);
-    /**
-     * check that we can reach start position in time
-     */
-    m_min_start_time = MedMinorServoGeometry::min_time(m_central_position,
-                                                       m_start_position);
-            CUSTOM_LOG(LM_FULL_INFO, "MedMinorServoControl::MedMinorServoScan::check()",
-                  (LM_DEBUG, "min start time: %f", m_min_start_time));
+
+
+	
     if(!m_asap)
     {
         TIMEVALUE now;
         IRA::CIRATools::getTime(now);
-        ACS::TimeInterval interval =
-        MedMinorServoTime::deltaToACSTimeInterval(m_min_start_time);
-        if(m_starting_time <= (now.value().value + interval +
-                               START_SCAN_TOLERANCE))
+
+        if(m_starting_time <= (now.value().value + m_interval_to_start_pos ))
         //if(m_starting_time <= (now.value().value + m_min_start_time * 10000000))
         {
             CUSTOM_LOG(LM_FULL_INFO, "MedMinorServoControl::MedMinorServoScan::check()",
@@ -144,7 +147,7 @@ throw (MinorServoErrors::ScanErrorEx)
             return false;
         }else{
             CUSTOM_LOG(LM_FULL_INFO, "MedMinorServoControl::MedMinorServoScan::check()",
-                  (LM_DEBUG, "Can reach start position in time: %llu", interval));
+                  (LM_DEBUG, "Can reach start position in time: %llu", m_interval_to_start_pos));
         }
     }
     /**

@@ -13,13 +13,24 @@ struct MedMinorServoAxis_tag
     double speed_max;
 } MedMinorServoAxis;
 
-const MedMinorServoAxis MINOR_SERVO_X = { "X", -80, 70, 0.0, 0.05, 0.01, 14.0 };
-const MedMinorServoAxis MINOR_SERVO_YP = { "YP", -365, 0, 0.0, 0.05, 0.01, 8.0 };
-const MedMinorServoAxis MINOR_SERVO_Y = { "Y", -80, 80, 0.0, 0.05, 0.01, 14.0 };
-const MedMinorServoAxis MINOR_SERVO_ZP = { "ZP", -340, 5, 0.0, 0.05, 0.01, 8.0 };
-const MedMinorServoAxis MINOR_SERVO_Z1 = { "Z1", -115, 115, 0.0, 0.05, 0.01, 14.0 };
-const MedMinorServoAxis MINOR_SERVO_Z2 = { "Z2", -115, 115, 0.0, 0.05, 0.01, 14.0 };
-const MedMinorServoAxis MINOR_SERVO_Z3 = { "Z3", -115, 115, 0.0, 0.05, 0.01, 14.0 };
+using namespace std;
+
+class MedMinorServoConstants {
+public:
+    static MedMinorServoConstants *getInstance();
+    MedMinorServoAxis MINOR_SERVO_X ;
+    MedMinorServoAxis MINOR_SERVO_YP ;
+    MedMinorServoAxis MINOR_SERVO_Y ;
+    MedMinorServoAxis MINOR_SERVO_ZP ;
+    MedMinorServoAxis MINOR_SERVO_Z1 ;
+    MedMinorServoAxis MINOR_SERVO_Z2 ;
+    MedMinorServoAxis MINOR_SERVO_Z3 ;
+
+private:
+    MedMinorServoConstants();
+    static MedMinorServoConstants *instance;
+
+};
+
 
 #endif
-

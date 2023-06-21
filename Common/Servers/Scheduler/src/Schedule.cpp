@@ -83,7 +83,8 @@ bool CParser::parse(CBaseSchedule* unit,DWORD& line,IRA::CString& errorMsg)
 		IRA::CString inputLine(inLine);
 		inputLine.Replace('\r',' ',0);
 		inputLine.RTrim();
-		if ((inLine[0]!=COMMENT_CHAR) && (inLine[0]!=0) && (strlen(inLine)!=0)) {
+		inputLine.LTrim();
+		if ((inputLine[0]!=COMMENT_CHAR) && (inputLine[0]!=0) && (inputLine.GetLength()!=0)) {
 			if (!unit->parseLine(inputLine,line,errorMsg)) {
 				return false;
 			}
@@ -111,6 +112,10 @@ CBaseSchedule::~CBaseSchedule()
 bool CBaseSchedule::readAll(bool check)
 {
 	IRA::CString err;
+	if (m_baseName.GetLength()>MAX_SCHED_NAME_LEN) {
+		m_lastError.Format("Schedule name exceeds the maximum allowed characters of %d",MAX_SCHED_NAME_LEN);
+		return false;
+	}
 	if (!m_parser->open(m_fileName)) {
 		m_lastError.Format("Cannot open file %s",(const char *)m_fileName);
 		return false;
@@ -163,7 +168,14 @@ bool CBackendList::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA:
 	workLine.RTrim();
 	workLine.LTrim();
 	if (m_started) { // if the procedure is started
-		if (workLine.Find(PROCEDURE_STOP)>=0) { // if the end bracket is found...close the procedure parsing
+		if (workLine.Find(PROCEDURE_STOP)>=0) { // if the end bracket is found....
+			IRA::CString token;
+			int start=0;
+			if (IRA::CIRATools::getNextToken(workLine,start,PROCEDURE_STOP,token)) { // if there is a command in the same line of the end proc				
+				 // push command before closing the procedure.....
+				if (token.GetLength()>0) m_currentRecord->proc.push_back(token);
+			}
+			//... then close the procedure
 			m_backend.push_back(m_currentRecord);
 			m_started=false;
 			m_currentRecord=NULL;
@@ -624,6 +636,31 @@ bool CSchedule::getSubScan(const DWORD& counter,TRecord& rec)
 		rec.lst=0;
 		return getSubScan_LST(rec);
 	}
+}
+
+bool CSchedule::printAll() {
+	TIterator p;
+	for (p=m_schedule.begin();p<m_schedule.end();p++) {
+		if (!printSubScan(*(*p))) {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool CSchedule::printSubScan(const TRecord& rec) {
+	cout << "subscan: " << rec.scanid << "_" << rec.subscanid;	
+	cout << " duration: " << rec.duration;
+	cout << " suffix: " << rec.suffix;		
+	cout << " pre: " << rec.preScan << "(" << rec.preScanArgs << ")";
+	cout << " post: " << rec.postScan << "(" << rec.postScanArgs << ")";
+	cout << " bck: " << rec.backendProc << " writer : " << rec.writerInstance;
+	cout << endl;
+	if (!m_scanListUnit->printScan(rec.scan)) {
+		return false;
+	}
+	cout << endl;
+	return true;
 }
 
 DWORD CSchedule::getSubScanCounter(const DWORD& scanid,const DWORD& subscanid)

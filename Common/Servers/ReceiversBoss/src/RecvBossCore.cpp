@@ -385,13 +385,15 @@ double CRecvBossCore::getDerotatorPosition(const ACS::Time& epoch) throw (Compon
 		ReceiversErrors::DewarPositionerCommandErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl)
 {
 #ifdef COMPILE_TARGET_MED
-	_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::getDerotatorPosition()");
-	m_status=Management::MNG_WARNING;
-	throw impl;
+	//_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::getDerotatorPosition()");
+	//m_status=Management::MNG_WARNING;
+	//throw impl;
+	return -9999.99;
 #elif COMPILE_TARGET_NT
-	_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::getDerotatorPosition()");
-	m_status=Management::MNG_WARNING;
-	throw impl;
+	//_EXCPT(ReceiversErrors::NoDewarPositioningExImpl,impl,"CRecvBossCore::getDerotatorPosition()");
+	//m_status=Management::MNG_WARNING;
+	//throw impl;
+	return -9999.99;
 #else		
 	IRA::CString component;
 	bool derotator;

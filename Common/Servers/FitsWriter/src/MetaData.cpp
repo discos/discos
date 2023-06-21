@@ -26,12 +26,13 @@ CMetaData::CMetaData()
 	m_servoAxisNames.length(0);
 	m_restFreq.length(0);
 	m_azOff=m_elOff=m_raOff=m_decOff=m_lonOff=m_latOff=0.0;
-	m_lonScanOff=m_latScanOff=0.0;
-	m_frameScanOff=Antenna::ANT_HORIZONTAL;
+	m_lonUserOff=m_latUserOff=0.0;
+	m_frameUserOff=Antenna::ANT_HORIZONTAL;
 	m_subScanConf.signal=Management::MNG_SIGNAL_NONE;
 	m_calDiode=false;
+	m_totalDumps=0;
 }
-	
+
 CMetaData::~CMetaData()
 {
 	if (m_feeds!=NULL) {

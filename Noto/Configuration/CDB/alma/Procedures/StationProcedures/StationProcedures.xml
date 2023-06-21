@@ -8,12 +8,17 @@
 	antennaSetup=SEC
 	initialize=CCC
 	receiversSetup=CCC
+	servoSetup=SEC
 	asOn
 	device=0
 	calmux=TotalPower
 	calOff
 	setAttenuation=0,15
 	setAttenuation=1,5
+    ifdist=1,1,-1
+    ifdist=2,1,-1
+    ifdist=1,-1,16
+	ifdist=2,-1,32
 </body>	
 </Procedure>
 
@@ -22,11 +27,17 @@
 	antennaSetup=SEC
 	initialize=MMC
 	receiversSetup=MMC
+	servoSetup=SEC
+    asOn
 	device=0
 	calmux=TotalPower
 	calOff
 	setAttenuation=0,0
-	setAttenuation=1,4	
+	setAttenuation=1,4
+	ifdist=1,1,-1
+    ifdist=2,1,-1
+    ifdist=1,-1,44
+	ifdist=2,-1,32
 </body>
 </Procedure>
 
@@ -35,9 +46,15 @@
 	antennaSetup=SEC
 	initialize=KKC
 	receiversSetup=KKC
+	servoSetup=SEC
+    asOn
 	device=0
 	calmux=TotalPower
 	calOff
+	ifdist=1,1,-1
+	ifdist=2,1,-1
+	ifdist=2,-1,34
+	ifdist=1,-1,36
 </body>
 </Procedure>
 
@@ -45,10 +62,16 @@
 <body>
 	antennaSetup=SEC
 	initialize=QQC
-	receiversSetup=QQC
+    receiversSetup=QQC
+	servoSetup=SEC
+    asOn
 	device=0
 	calmux=TotalPower
 	calOff
+	ifdist=1,1,-1
+    ifdist=2,1,-1
+    ifdist=1,-1,44
+	ifdist=2,-1,32
 </body>
 </Procedure>
 
@@ -56,10 +79,33 @@
 <body>
 	antennaSetup=PRIM
 	initialize=XXP
-	receiversSetup=XXP
+    receiversSetup=XXP
+	servoSetup=SXP
+    asOn
 	device=0
 	calmux=TotalPower
-	calOff
+    calOff
+    ifdist=1,3,-1
+    ifdist=2,3,-1
+	ifdist=1,-1,10
+	ifdist=2,-1,10
+</body>
+</Procedure>
+
+<Procedure name="setupXSP" args="0">
+<body>
+	antennaSetup=PRIM
+	initialize=XXP
+    receiversSetup=XXP
+	servoSetup=SXP
+    asOff
+	device=0
+	calmux=TotalPower
+    calOff
+    ifdist=1,5,-1
+    ifdist=2,3,-1
+	ifdist=1,-1,8
+	ifdist=2,-1,10
 </body>
 </Procedure>
 
@@ -67,10 +113,16 @@
 <body>
 	antennaSetup=LL
 	initialize=LLP
-	receiversSetup=LLP
+    receiversSetup=LLP
+	servoSetup=LLP
+    asOff
 	device=0
 	calmux=TotalPower
-	calOff
+    calOff
+    ifdist=1,2,-1
+    ifdist=2,2,-1
+	ifdist=1,-1,44
+	ifdist=2,-1,44
 </body>
 </Procedure>
 
@@ -79,17 +131,40 @@
 	antennaSetup=PRIM
 	initialize=SSP
 	receiversSetup=SSP
+    asOff
+	servoSetup=SXP
 	device=0
 	calmux=TotalPower
-	calOff
+    calOff
+    ifdist=1,4,-1
+    ifdist=2,4,-1
+	ifdist=1,-1,8
+	ifdist=2,-1,8
+</body>
+</Procedure>
+
+<Procedure name="setupSXP" args="0">
+<body>
+	antennaSetup=PRIM
+	initialize=SSP
+    receiversSetup=SSP
+	servoSetup=SXP
+    asOff
+	device=0
+	calmux=TotalPower
+    calOff
+    ifdist=1,5,-1
+    ifdist=2,3,-1
+	ifdist=1,-1,8
+	ifdist=2,-1,10
 </body>
 </Procedure>
 
 <Procedure name="telescopePark" args="0">
 <body>
-	goTo=180d,90d
-	receiversPark
+	antennaPark
 	asPark
+	servoPark
 </body>
 </Procedure>
 

@@ -189,7 +189,8 @@ int main(int argc, char *argv[])
 	parser.add("answer",new function2<CTest,constant,void_type,I<string_type>, O<longString_type> >(&test,&CTest::answer),1);
 
 
-	parser.add("naviga","firefox",1);
+	parser.add("naviga","firefox",0);
+	parser.add("terminale","xterm -title",2);
 
 	parser.add("remoteok","extern",0,&CTest::remoteCall);
 	parser.add("remotefail","extern",1,&CTest::remoteCall);

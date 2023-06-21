@@ -66,7 +66,7 @@ using namespace ComponentErrors;
 using namespace std;
 
 class SRTActiveSurfaceBossImpl;
-class CSRTActiveSurfaceBossWatchingThread;
+//class CSRTActiveSurfaceBossWatchingThread;
 class CSRTActiveSurfaceBossWorkingThread;
 
 /**
@@ -77,8 +77,9 @@ class CSRTActiveSurfaceBossWorkingThread;
  */
 class CSRTActiveSurfaceBossCore {
     friend class SRTActiveSurfaceBossImpl;
-    friend class CSRTActiveSurfaceBossWatchingThread;
+    //friend class CSRTActiveSurfaceBossWatchingThread;
     friend class CSRTActiveSurfaceBossWorkingThread;
+    friend class CSRTActiveSurfaceBossSectorThread;
 public:
     /**
      * Constructor. Default Constructor.
@@ -109,21 +110,19 @@ public:
     */
     virtual void cleanUp();
 
-    void reset(int circle, int actuator, int radius) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentNotActiveExImpl);
-
     void calibrate(int circle, int actuator, int radius) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl);
 
     void calVer(int circle, int actuator, int radius) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl);
 
-    void onewayAction(ActiveSurface::TASOneWayAction onewayAction, int circle, int actuator, int radius, double elevation, double correction, long incr, ActiveSurface::TASProfile profile) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentNotActiveExImpl);
+    void onewayAction(ActiveSurface::TASOneWayAction action, int circle, int actuator, int radius, double elevation, double correction, long incr, ActiveSurface::TASProfile profile);
 
     void workingActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx);
 
-    void sectorActiveSurface(int sector) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx);
-
-    void watchingActiveSurfaceStatus() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl);
+    //void watchingActiveSurfaceStatus() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl);
 
     void usdStatus4GUIClient(int circle, int actuator, CORBA::Long_out status) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl);
+
+    void asStatus4GUIClient(ACS::longSeq& status) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl);
 
     void setActuator(int circle, int actuator, long int& actPos, long int& cmdPos, long int& Fmin, long int& Fmax, long int& acc, long int& delay) throw (ComponentErrors::PropertyErrorExImpl, ComponentErrors::ComponentNotActiveExImpl);
 
@@ -157,12 +156,12 @@ public:
     void enableAutoUpdate();
 
     void checkASerrors(const char* str, int circle, int actuator, ASErrors::ASErrorsEx Ex);
-
-    void checkAScompletionerrors (char *str, int circle, int actuator, CompletionImpl comp);
+    void checkASerrors(const char *str, int circle, int actuator, CompletionImpl comp);
+    void checkASerrors(const char *str, int circle, int actuator, int code);
 
     void asSetup() throw (ComponentErrors::ComponentErrorsEx);
 
-       void asOn();
+    void asOn();
 
     void asOff() throw (ComponentErrors::ComponentErrorsEx);
 
@@ -171,6 +170,7 @@ public:
     void setProfile (const ActiveSurface::TASProfile& profile) throw (ComponentErrors::ComponentErrorsExImpl);
 
 private:
+    std::map<int, std::string> m_error_strings;
     ContainerServices* m_services;
 
     ActiveSurface::USD_var usd[CIRCLES+1][ACTUATORS+1];
@@ -181,11 +181,8 @@ private:
 
     IRA::CString lanCobName;
 
-    int usdCounter, lanIndex, circleIndex, usdCircleIndex;
+    int usdCounter;
     std::vector<int> usdCounters;
-    std::vector<int> lanIndexes;
-    std::vector<int> circleIndexes;
-    std::vector<int> usdCircleIndexes;
     int actuatorcounter, circlecounter, totacts;
     ACS::doubleSeq actuatorsCorrections;
 
@@ -209,6 +206,8 @@ private:
 
     void setserial (int circle, int actuator, int &lanIndex, char *serial_usd);
 
+    void singleUSDonewayAction(ActiveSurface::TASOneWayAction action, ActiveSurface::USD_var usd, double elevation, double correction, long incr, ActiveSurface::TASProfile profile);
+
     Antenna::AntennaBoss_var m_antennaBoss;
 
     ActiveSurface::TASProfile m_profile;
@@ -224,6 +223,10 @@ private:
     bool m_profileSetted;
 
     bool m_ASup;
+    
+    bool m_newlut;
+
+    const char* m_lut;
 };
 
 #endif /*SRTACTIVESURFACEBOSSCORE_H_*/

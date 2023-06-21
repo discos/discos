@@ -288,7 +288,7 @@ void CCore::_logMessage(const char *message) {
     CUSTOM_LOG(LM_FULL_INFO,"CCore::_logMessage",(LM_NOTICE, message));
 }
 
-void CCore::_getWeatherStationParameters(double &temp,double& hum,double& pres, double& wind) throw (ComponentErrors::CouldntGetComponentExImpl,
+void CCore::_getWeatherStationParameters(double &temp,double& hum,double& pres, double& wind,double& windDir) throw (ComponentErrors::CouldntGetComponentExImpl,
 		ManagementErrors::WeatherStationErrorExImpl,ComponentErrors::CORBAProblemExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
@@ -315,6 +315,7 @@ void CCore::_getWeatherStationParameters(double &temp,double& hum,double& pres, 
 	hum=m_weatherPar.humidity;
 	pres=m_weatherPar.pressure;
 	wind=m_weatherPar.windspeed;
+	windDir=m_weatherPar.winddir;
 }
 
 void CCore::_initRecording(const long& scanid) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,
@@ -1100,11 +1101,17 @@ void CCore::_callTSys(ACS::doubleSeq& tsys) throw (ComponentErrors::CouldntGetCo
 	ratio.length(inputs);
 	tsys.length(inputs);
 	for (int i=0;i<inputs;i++) {
-		if ((mark[i]>0.0) && (tpiCal[i]>tpi[i])) {
-			//ratio[i]=(tpiCal[i]-tpi[i])/mark[i];
-			ratio[i]=mark[i]/(tpiCal[i]-tpi[i]);
-			ratio[i]*=scaleFactor;
-			tsys[i]=(tpi[i]-zero[i])*ratio[i];
+		if ((i<(int)tpiCal->length()) && (i<(int)tpi->length()) && (i<(int)zero->length()) && (i<(int)mark->length())) {
+			if ((mark[i]>0.0) && (tpiCal[i]>tpi[i])) {
+				//ratio[i]=(tpiCal[i]-tpi[i])/mark[i];
+				ratio[i]=mark[i]/(tpiCal[i]-tpi[i]);
+				ratio[i]*=scaleFactor;
+				tsys[i]=(tpi[i]-zero[i])*ratio[i];
+			}
+			else {
+				ratio[i]=1.0;
+				tsys[i]=-1.0;
+			}
 		}
 		else {
 			ratio[i]=1.0;
@@ -1125,13 +1132,17 @@ void CCore::_callTSys(ACS::doubleSeq& tsys) throw (ComponentErrors::CouldntGetCo
 	for (int i=0;i<inputs;i++) {
 		outLog.Format("DEVICE/%d Feed: %d, IF: %d, Freq: %lf, Bw: %lf/",i,feed[i],IFs[i],freq[i],bandWidth[i]);
 		ACS_LOG(LM_FULL_INFO,"CCore::callTSys()",(LM_NOTICE,(const char *)outLog));
-		outLog.Format("CALTEMP/%d %lf(%lf)",i,mark[i],scaleFactor);
+		if (i<(int)mark->length()) outLog.Format("CALTEMP/%d %lf(%lf)",i,mark[i],scaleFactor);
+		else outLog.Format("CALTEMP/%d %lf(%lf)",i,-1.0,scaleFactor);
 		ACS_LOG(LM_FULL_INFO,"CCore::callTSys()",(LM_NOTICE,(const char *)outLog));
-		outLog.Format("TPICAL/%d %lf",i,tpiCal[i]);
+		if (i<(int)tpiCal->length()) outLog.Format("TPICAL/%d %lf",i,tpiCal[i]);
+		else outLog.Format("TPICAL/%d %lf",i,-1.0);
 		ACS_LOG(LM_FULL_INFO,"CCore::callTSys()",(LM_NOTICE,(const char *)outLog));
-		outLog.Format("TPIZERO/%d %lf",i,zero[i]);
+		if (i<(int)zero->length()) outLog.Format("TPIZERO/%d %lf",i,zero[i]);
+		else outLog.Format("TPIZERO/%d %lf",i,-1.0);
 		ACS_LOG(LM_FULL_INFO,"CCore::callTSys()",(LM_NOTICE,(const char *)outLog));
-		outLog.Format("TPI/%d %lf",i,tpi[i]);
+		if (i<(int)tpi->length()) outLog.Format("TPI/%d %lf",i,tpi[i]);
+		else outLog.Format("TPI/%d %lf",i,-1.0);
 		ACS_LOG(LM_FULL_INFO,"CCore::callTSys()",(LM_NOTICE,(const char *)outLog));
 		outLog.Format("TSYS/%d %lf",i,tsys[i]);
 		ACS_LOG(LM_FULL_INFO,"CCore::callTSys()",(LM_NOTICE,(const char *)outLog));
@@ -1156,12 +1167,11 @@ void CCore::_haltSchedule()
 
 void CCore::_startSchedule(const char* scheduleFile,const char * startSubScan) throw (ManagementErrors::ScheduleErrorExImpl,ManagementErrors::AlreadyRunningExImpl,
 		ComponentErrors::MemoryAllocationExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
-		ManagementErrors::LogFileErrorExImpl,ManagementErrors::ScheduleNotExistExImpl,ManagementErrors::CannotClosePendingTaskExImpl)
+		ManagementErrors::LogFileErrorExImpl,ManagementErrors::ScheduleNotExistExImpl,ManagementErrors::CannotClosePendingTaskExImpl,
+		ManagementErrors::ScheduleProjectNotMatchExImpl)
 {
 	//no need to get the mutex, because it is already done inside the Schedule Executor thread
 	if (m_schedExecuter) {
- 		//ManagementErrors::ScheduleErrorExImpl, ManagementErrors::AlreadyRunningExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::CouldntGetComponentExImpl,
- 		//ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl,ManagementErrors::ScheduleNotExistExImpl
 		m_schedExecuter->startSchedule(scheduleFile,startSubScan);
 	}
 }

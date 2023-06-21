@@ -72,11 +72,12 @@ public:
  	 * @throw ComponentErrors::CORBAProblemExImpl
  	 * @throw ManagementErrors::LogFileErrorExImpl
  	 * @thorw ManagementErrors::CannotClosePendingTaskExImpl
+ 	 * @throw ManagementErrors::ScheduleProjectNotMatchExImpl
  	*/
      void startSchedule(const char* scheduleFile,const char * subScanidentifier) throw (ManagementErrors::ScheduleErrorExImpl,
     		 ManagementErrors::AlreadyRunningExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
     		 ManagementErrors::LogFileErrorExImpl,ManagementErrors::ScheduleNotExistExImpl,
-    		 ManagementErrors::CannotClosePendingTaskExImpl);
+    		 ManagementErrors::CannotClosePendingTaskExImpl,ManagementErrors::ScheduleProjectNotMatchExImpl);
      
      /**
       * initialize the schedule executor.
@@ -350,6 +351,11 @@ private:
 	void stopRecording();
 	
 	/**
+	 * Stops the data dry recording.
+	 */	
+	void stopDryRecording();
+	
+	/**
 	 * get the reference to the current writer
 	 */
 	//void openWriter(const IRA::CString& wrt) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl);
@@ -399,6 +405,11 @@ private:
 	 * This is the timer handler that reacts to the stop recording event
 	 */
 	static void stopRecordingEventHandler(const ACS::Time& time,const void *par);
+	
+	/**
+	 * This is the timer handler that reacts to the stop dry recording event
+	 */
+	static void stopDryRecordingEventHandler(const ACS::Time& time,const void *par);
 	
 	/**
 	 * This is the timer handler that reacts to the re-try schedule event

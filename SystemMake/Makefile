@@ -24,19 +24,19 @@ COMMON_DOC:=
 COMMON_ERRORS:=ClientErrors ComponentErrors AntennaErrors ParserErrors \
                BackendsErrors ManagementErrors ReceiversErrors \
                MetrologyErrors MinorServoErrors XBackendErrors \
-			   ActiveSurfaceErrors
+               ActiveSurfaceErrors
 COMMON_INTERFACES:=CommonInterface ManagmentInterface AntennaInterface ReceiversInterface \
                    BackendsInterface MinorServoInterface \
                    WeatherStationInterface ActiveSurfaceInterface \
                    XBackendInterface
 COMMON_LIBRARIES:=SlaLibrary IRALibrary DiscosVersion TextWindowLibrary ParserLibrary \
                   XarcosLibrary ModbusChannel ComponentProxy DiscosLocals \
-				  DiscosBackendProtocol PyTestingLibrary \
+                  DiscosBackendProtocol PyTestingLibrary \
 COMMON_SERVERS:=AntennaBoss Observatory OTF PointingModel Refraction SkySource \
                 Moon FitsWriter Scheduler ReceiversBoss ExternalClients \
                 CalibrationTool TotalPower NoiseGenerator CustomLogger \
                 XBackend PyDewarPositioner Sardara PyLocalOscillator MFKBandBaseReceiver PyCalmux \
-				ActiveSurfaceLan
+                ActiveSurfaceLan ActiveSurfaceUSD
 COMMON_CLIENTS:=AntennaBossTextClient ObservatoryTextClient \
                 GenericBackendTextClient ReceiversBossTextClient \
                 SystemTerminal CaltoolClient CustomLoggingClient \
@@ -59,14 +59,14 @@ SRT_MISC:=SRTScripts
 
 MED_DOC:=MEDDox
 MED_ERRORS:=
-MED_INTERFACES:=MedicinaAntennaInterface MedicinaReceiversInterface
+MED_INTERFACES:=MedicinaAntennaInterface MedicinaReceiversInterface MedicinaActiveSurfaceInterface
 MED_LIBRARIES:=MedicinaVertexLibrary
-MED_SERVERS:=MedicinaMount MedicinaMinorServo WeatherStation MedicinaPyDMed MedicinaKBandDualFReceiver
-MED_CLIENTS:=MedicinaMountTextClient
+MED_SERVERS:=MedicinaMount MedicinaMinorServo WeatherStation MedicinaPyDMed MedicinaKBandDualFReceiver MedicinaActiveSurfaceBoss
+MED_CLIENTS:=MedicinaMountTextClient MedicinaActiveSurfaceGUIClient
 MED_MISC:=MedScripts
 
 NT_DOC:=NTDox
-NT_ERRORS:=NotoActiveSurfaceErrors
+NT_ERRORS:= #ActiveSurfaceErrors NotoActiveSurfaceErrors
 NT_INTERFACES:=NotoAntennaInterface NotoReceiversInterface NotoWeatherStationInterface NotoActiveSurfaceInterface \
 NT_LIBRARIES:=
 NT_SERVERS:= NotoReceivers NotoMount NotoWeatherStation NotoActiveSurface NotoMinorServo NotoPyLocalOscillator NotoPyIfDistributor
@@ -104,7 +104,7 @@ ifeq ($(STATION),SRT)
 	BackendsImplementation_MODULES:=TotalPower NoiseGenerator XBackend
 	ReceiversImplementation_MODULES:=ReceiversBoss SRTKBandMFReceiver SRT7GHzReceiver SRTLPBandReceiver
 	WeatherStationImplementation_MODULES:=SRTWeatherStation
-	SRTActiveSurfaceImplementation_MODULES:=ActiveSurfaceUSDServer SRTActiveSurfaceBoss
+	SRTActiveSurfaceImplementation_MODULES:=SRTActiveSurfaceBoss
 	MinorServoImplementation_MODULES:=SRTMinorServo
 	
 	CDB_SVN_LOCATION="SRT/Configuration/CDB"
@@ -120,9 +120,9 @@ ifeq ($(STATION),Medicina)
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary ComponentProxy ModbusChannel XarcosLibrary \
 	    PyTestingLibrary MedicinaVertexLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
-		TotalPower NoiseGenerator MedicinaMount MedicinaPyLocalOscillator MedicinaPyDMed CustomLogger XBackend MedicinaMinorServo\
+		TotalPower NoiseGenerator MedicinaMount MedicinaPyLocalOscillator MedicinaPyDMed CustomLogger XBackend MedicinaMinorServo MedicinaActiveSurfaceBoss \
 		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient SchedulerTextClient MinorServoBossTextClient\
-		MedicinaMountTextClient CustomLoggingClient\
+		MedicinaActiveSurfaceGUIClient MedicinaMountTextClient CustomLoggingClient\
 		Plotter KStars Scripts MedScripts
 
 	IDL_DOC:=Managment Antenna Backends WeatherStation Receivers
@@ -146,7 +146,7 @@ else
 ifeq ($(STATION),Noto)
 	#Add all modules included in the Noto system in this sequence
 	#Doc, (Errors, Interfacies, Libraries, Servers, Clients, Misc)
-	MODULES:= ClientErrors ComponentErrors AntennaErrors ParserErrors BackendsErrors ManagementErrors ReceiversErrors MetrologyErrors MinorServoErrors \
+	MODULES:= ActiveSurfaceErrors ClientErrors ComponentErrors AntennaErrors ParserErrors BackendsErrors ManagementErrors ReceiversErrors MetrologyErrors MinorServoErrors \
 		ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface \
 		NotoAntennaInterface \
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary PyTestingLibrary \

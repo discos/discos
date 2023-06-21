@@ -97,19 +97,20 @@ public:
 
 	/*
 	 * allows to read the sequence of IFs polarization
-	 * @param pol used to return back the the array
+	 * @param pol used to return back the array
 	 */
 	void getReceiverPolarization(ACS::longSeq& pol) const { pol=m_receiverPolarization; }
 
 	/**
-	 * @param freq used to return the number of frequencies, one value for each section
+	 * @param freq used to return the number of frequencies, one value for each inputs
 	 */
 	void getSkyFrequency(ACS::doubleSeq& freq) const { freq=m_skyFrequency; }
 
 	/**
-	 * @param freq used to return the number of bandwidths, one value for each section
+	 * @param freq used to return the number of bandwidths, one value for each inputs
 	 */
 	void getSkyBandwidth(ACS::doubleSeq& freq) const { freq=m_skyBandwidth; }
+	
 
 	/**
 	 * allows to store the information about each of the backend inputs. The dimension of the sequences should be exactly the number returned by the method <i>getInputsNumber()</i>-
@@ -170,8 +171,8 @@ public:
 	/**
 	 * It allows to set the antenna scan offsets as directly returned by the Antenna subsystem
 	*/	
-	void setAntennaScanOffsets(const double& lon,const double& lat, const Antenna::TCoordinateFrame& frame) {
-		m_lonScanOff=lon;m_latScanOff=lat;m_frameScanOff=frame;	
+	void setAntennaUserOffsets(const double& lon,const double& lat, const Antenna::TCoordinateFrame& frame) {
+		m_lonUserOff=lon;m_latUserOff=lat;m_frameUserOff=frame;	
 	}
 
 	/**
@@ -182,15 +183,15 @@ public:
 	}
 
 	/**
-	 * @return the antenna scan offsets
+	 * @return the antenna user offsets
 	*/	
-	void getAntennaScanOffsets(double& lon,double& lat,Antenna::TCoordinateFrame& frame) {
-		lon=m_lonScanOff;lat=m_latScanOff;frame=m_frameScanOff;	
+	void getAntennaUserOffsets(double& lon,double& lat,Antenna::TCoordinateFrame& frame) {
+		lon=m_lonUserOff;lat=m_latUserOff;frame=m_frameUserOff;	
 	}
 
 	/**
-	 * Stores the list of values corresponding to the estimated source flux of the source,
-	 * @param fl list of fluxes, one value is  given corresponding to each input, but just one for each section is taken
+	 * Stores the list of values corresponding to the estimated source flux of the source for each input
+	 * @param fl list of fluxes, one value is  given corresponding to each input
 	 */
 	void setSourceFlux(const ACS::doubleSeq& fl) { m_sourceFlux=fl; }
 	void setSourceFlux() { m_sourceFlux.length(0); }
@@ -249,6 +250,10 @@ public:
 		m_restFreq.length(0);
 	}
 	void getRestFreq(ACS::doubleSeq& rf) const { rf=m_restFreq; }
+	
+	WORD getTotalDumps() const { return m_totalDumps; }
+	void resetTotalDumps() { m_totalDumps=0; }
+	void incTotalDumps() { m_totalDumps++; }
 
 private:
 
@@ -314,8 +319,8 @@ private:
 	 * antenna position offsets
 	 */
 	double m_azOff,m_elOff,m_raOff,m_decOff,m_lonOff,m_latOff;
-	double m_lonScanOff,m_latScanOff;
-	Antenna::TCoordinateFrame m_frameScanOff;
+	double m_lonUserOff,m_latUserOff;
+	Antenna::TCoordinateFrame m_frameUserOff;
 	/**
 	 * stores the  estimated source fluxes, one for each section.
 	 */
@@ -344,6 +349,10 @@ private:
 	 * It reports if the calibration diode has been fired on subscan basis
 	*/
 	bool m_calDiode;
+	/*
+	* Reports how many dumps have been taken in the observation (scan)
+	*/
+	WORD m_totalDumps;
 };
 
 };

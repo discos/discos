@@ -1,0 +1,91 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+    Noto MINOR SERVO PARAMETERS
+-->
+<MinorServoParameters 
+    xmlns="urn:schemas-cosylab-com:MinorServoParameters:1.0"
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <!--
+        for each axis we specify name and characteristics as:
+        <NAME>position_min,position_max,position_zero,position_error,speed_min,speed_max</NAME>
+    -->
+    <MinorServoLimits>
+        <MINOR_SERVO_X>-80,80,0.0,0.05,0.01,14</MINOR_SERVO_X>
+        <MINOR_SERVO_YP>-5,395,0.0,0.05,0.01,8</MINOR_SERVO_YP>
+        <MINOR_SERVO_Y>-80,80,0.0,0.05,0.01,14</MINOR_SERVO_Y>
+        <MINOR_SERVO_ZP>-5,345,0.0,0.05,0.01,8</MINOR_SERVO_ZP>
+        <MINOR_SERVO_Z1>-125,125,0.0,0.05,0.01,14</MINOR_SERVO_Z1>
+        <MINOR_SERVO_Z2>-125,125,0.0,0.05,0.01,14</MINOR_SERVO_Z2>
+        <MINOR_SERVO_Z3>-125,125,0.0,0.05,0.01,14</MINOR_SERVO_Z3>
+    </MinorServoLimits>
+
+    <MinorServo>
+        <code>SEC</code>
+        <primary>0</primary>
+        <trackel>1</trackel>
+        <!--
+        for each axis we specify name and characteristics as:
+
+        <NAME>unit,min,max,pol0,pol1,pol2,pol3,pol4</NAME>
+
+        where:
+        * NAME can be one of Xaxis, Yaxis, Zaxis, THETAXaxis, THETAYaxis,
+        or YPaxis, ZPaxis for primary focus
+        * unit is the the unit measure for the axis
+        * min and max are the maximum and minimum values the axis can get
+        * pol0-4 are the coefficients of the 5th grade polynomial which describes
+        elevation tracking corrections
+        -->
+        <Xaxis>mm,-80.0,80.0,-5.79,0,0,0,0</Xaxis>
+        <Yaxis>mm,-80.0,80.0,-25.93241232,-0.29785599,0.00689783,0,0</Yaxis>
+        <Zaxis>mm,-125.0,125.0,-33.5544632,-0.22953518,0.00071664,0,0</Zaxis>
+        <THETAXaxis>deg,-5,5.0,-0.00435231,0,0,0,0</THETAXaxis>
+        <THETAYaxis>deg,-5,5.0,0.00367988,0,0,0,0</THETAYaxis>
+    </MinorServo>
+
+    <MinorServo>
+        <code>SXP</code>
+        <primary>1</primary>
+        <trackel>0</trackel>
+        <!--
+        for each axis we sepcify name an scharacteristics as:
+
+        <NAME>unit,min,max,pol0,pol1,pol2,pol3,pol4</NAME>
+
+        where:
+        * NAME can be one of Xaxis, Yaxis, Zaxis, THETAXaxis, THETAYaxis,
+        or YPaxis, ZPaxis for primary focus
+        * unit is the the unit measure for the axis
+        * min and max are the maximum and minimum values the axis can get
+        * pol0-4 are the coefficients of the 5th grade polynomial which describes
+        elevation tracking corrections
+        -->
+        <YPaxis>mm,-5.0,365,107,0,0,0,0</YPaxis>
+        <ZPaxis>mm,-5.0,345,206,0,0,0,0</ZPaxis>
+    </MinorServo>
+
+    <MinorServo>
+        <code>LLP</code>
+        <primary>1</primary>
+        <trackel>0</trackel>
+        <!--
+        for each axis we sepcify name an scharacteristics as:
+
+        <NAME>unit,min,max,pol0,pol1,pol2,pol3,pol4</NAME>
+
+        where:
+        * NAME can be one of Xaxis, Yaxis, Zaxis, THETAXaxis, THETAYaxis,
+        or YPaxis, ZPaxis for primary focus
+        * unit is the the unit measure for the axis
+        * min and max are the maximum and minimum values the axis can get
+        * pol0-4 are the coefficients of the 5th grade polynomial which describes
+        elevation tracking corrections
+        -->
+        <YPaxis>mm,-5.0,365.0,355,0,0,0,0</YPaxis>
+        <ZPaxis>mm,-5.0,345.0,196,0,0,0,0</ZPaxis>
+    </MinorServo>
+
+</MinorServoParameters>

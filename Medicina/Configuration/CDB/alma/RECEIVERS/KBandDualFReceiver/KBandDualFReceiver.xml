@@ -16,10 +16,13 @@
     DewarIPAddress="192.168.51.2"
     DewarPort="10000"
     LNAIPAddress="192.168.51.2"
-    LNAPort="10001"      
+    LNAPort="10001"   
+    VertexIPAddress="192.168.51.2"
+    VertexPort="2096"
+    VertexCommand="proc kkc"   
     WatchDogResponseTime="10000000"
     WatchDogSleepTime="10000000"
-    LNASamplingTime="250000"
+    LNASamplingTime="25000000"
     RepetitionCacheTime="7000000"
     RepetitionExpireTime="10000000"
     LocalOscillatorInstance="RECEIVERS/LO"
@@ -94,6 +97,7 @@
           units="Volts"
           format="%5.2f"
     />
+    <!--
     <vdL2 description="drain voltage for the LNA left channel, stage 2"
           alarm_high_on="1.40"
           alarm_low_on="1.00"
@@ -229,7 +233,7 @@
           units="Volts"
           format="%5.2f"
     />
-
+    -->
     <idL1 description="drain current for the LNA left channel, stage 1"
           alarm_high_on="2.83"
           alarm_low_on="2.03"
@@ -263,7 +267,7 @@
           units="Volts"
           format="%5.2f"
     />
-
+	 <!--
     <idL2 description="drain current for the LNA left channel, stage 2"
           alarm_high_on="3.0"
           alarm_low_on="2.3"
@@ -399,7 +403,7 @@
           units="Volts"
           format="%5.2f"
     />
-
+    -->
     <vgL1 description="gate voltage for the LNA left channel, stage 1"
           alarm_high_on="0.1"
           alarm_low_on="-0.045"
@@ -433,7 +437,7 @@
           units="Volts"
           format="%5.2f"
     />
-
+    <!--
     <vgL2 description="gate voltage for the LNA left channel, stage 2"
           alarm_high_on="0.05"
           alarm_low_on="-0.2"
@@ -567,7 +571,7 @@
           units="Volts"
           format="%5.2f"
     />
-
+    -->
     <cryoTemperatureCoolHead description="Cryogenic temperature measured near the cool head"
           alarm_high_on="10.0"
           alarm_high_off="-10.0"

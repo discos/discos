@@ -28,6 +28,7 @@
 #include <acsncSimpleSupplier.h>
 #include <ParserConnector.h>
 #include "Configuration.h"
+#include <BackendsProxy.h>
 #define _RECVBOSSCORE_MAX_IFS 4
 
 #elif COMPILE_TARGET_NT
@@ -350,6 +351,7 @@ private:
 	ACS::Time m_feedsEpoch;
 	ACS::Time m_IFsEpoch;
 	ACS::Time m_modeEpoch;
+	Backends::CalMux_proxy m_calMux_proxy;
 
 #elif COMPILE_TARGET_NT
 
@@ -415,7 +417,9 @@ private:
 	void unloadReceiver();
 
 #ifdef COMPILE_TARGET_MED
-	void setup(const char * code) throw(ComponentErrors::SocketErrorExImpl,ComponentErrors::ValidationErrorExImpl);
+	void setup(const char * code) throw (ComponentErrors::SocketErrorExImpl,ComponentErrors::ValidationErrorExImpl,
+  ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,
+  ComponentErrors::OperationErrorExImpl);
 	bool sendToRecvControl(const void *buffer,int size);
 	bool sendToFS(const void *buffer,int size);
 

@@ -331,7 +331,7 @@ MinorServoBossImpl::setup(const char *config) throw (
     catch (MinorServoErrors::SetupErrorExImpl& ex) {
         ex.log(LM_WARNING);
         throw ex.getSetupErrorEx();     
-    }
+    }    
 }
 
 void 
@@ -354,7 +354,7 @@ throw (MinorServoErrors::SetupErrorExImpl)
         THROW_EX(MinorServoErrors, SetupErrorEx, 
                  "Cannot find requested configuration", false);
     try {
-        setElevationTrackingImpl(IRA::CString("OFF"));
+            setElevationTrackingImpl(IRA::CString("OFF"));
     }catch(...) {
         THROW_EX(MinorServoErrors, SetupErrorEx, "cannot turn the tracking off",
         false);
@@ -372,6 +372,7 @@ throw (MinorServoErrors::SetupErrorExImpl)
     }catch(const ServoConnectionError& sce){
         THROW_EX(MinorServoErrors, SetupErrorEx, sce.what(), false);
     }catch(...){
+        m_servo_status.starting = false;
         THROW_EX(MinorServoErrors, SetupErrorEx, "Cannot conclude setup", false);
     }
     /**
@@ -396,17 +397,25 @@ throw (MinorServoErrors::SetupErrorExImpl)
         m_setup_thread_ptr = getContainerServices()->getThreadManager()->
                                 create<SetupThread, SetupThreadParameters>
                                  (SETUP_THREAD_NAME, thread_params);
+
         if(m_setup_thread_ptr->isSuspended())
             m_setup_thread_ptr->resume();
+
         CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::setupImpl",
                    (LM_DEBUG, "Started setup positioning thread"));
+        
+        if(isElevationTrackingEn())
+            turnTrackingOn();
+
     }catch(const ServoTimeoutError& ste){
         THROW_EX(MinorServoErrors, SetupErrorEx, ste.what(), false);
     }catch(const ServoConnectionError& sce){
         THROW_EX(MinorServoErrors, SetupErrorEx, sce.what(), false);
     }catch(...){
-        THROW_EX(MinorServoErrors, SetupErrorEx, "Cannot conclude setup", false);
+        m_servo_status.starting = false;
+        THROW_EX(MinorServoErrors, SetupErrorEx, "Cannot conclude setup >> "+boost::current_exception_diagnostic_information(), false);
     }
+
 }
 
 void 
@@ -626,7 +635,7 @@ MinorServoBossImpl::checkScanImpl(
     minor_servo_parameters = new TRunTimeParameters;
     double center = 0;
     MedMinorServoPosition central_position = 
-        m_actual_config->get_position(antenna_parameters.elevation);
+        m_actual_config->get_position(antenna_parameters.elevation,&m_offset);
 
     MedMinorServoScan scan(central_position, 
                            starting_time, 
@@ -719,7 +728,7 @@ MinorServoBossImpl::startScanImpl(
     bool was_elevation_tracking = isElevationTracking();
     turnTrackingOff();
     MedMinorServoPosition central_position = 
-        m_actual_config->get_position(antenna_parameters.elevation);
+        m_actual_config->get_position(antenna_parameters.elevation,&m_offset);
     MedMinorServoScan scan(central_position, 
                            starting_time, 
                            scan_parameters.range,
@@ -790,7 +799,9 @@ throw (MinorServoErrors::MinorServoErrorsEx,
         m_servo_status.scan_active = false;
     }else{
         timeToStop = 0;
-        THROW_MINORSERVO_EX(StatusErrorEx, "no scan active", true);
+	CUSTOM_LOG(LM_FULL_INFO, "MinorServo::MinorServoBossImpl::closeScan",
+               (LM_DEBUG, "No scan presently active"));
+        //THROW_MINORSERVO_EX(StatusErrorEx, "no scan active", true);
     }
 }
 
@@ -832,12 +843,12 @@ throw (MinorServoErrors::MinorServoErrorsEx)
     if(!(m_control))
         THROW_MINORSERVO_EX(CommunicationErrorEx, 
                  "Minor Servo Server is not connected", false);
-    if(isStarting())
-        THROW_MINORSERVO_EX(TrackingErrorEx, "turnTrackingOn: the system is starting.", true);
+    //if(isStarting())
+    //    THROW_MINORSERVO_EX(TrackingErrorEx, "turnTrackingOn: the system is starting.", true);
     if(isParking())
         THROW_MINORSERVO_EX(TrackingErrorEx, "turnTrackingOn: the system is parking.", true);
-    if(!isReady())
-        THROW_MINORSERVO_EX(TrackingErrorEx, "turnTrackingOn: the system is not ready.", true);
+    //if(!isReady())
+    //    THROW_MINORSERVO_EX(TrackingErrorEx, "turnTrackingOn: the system is not ready.", true);
 
     if(m_tracking_thread_ptr != NULL) {
         m_tracking_thread_ptr->suspend();
@@ -845,7 +856,7 @@ throw (MinorServoErrors::MinorServoErrorsEx)
         m_tracking_thread_ptr = NULL;
     }
 
-    m_servo_status.elevation_tracking = true;
+    //m_servo_status.elevation_tracking = true;
     try {
         TrackerThreadParameters params(&m_servo_status,
                                         m_control,

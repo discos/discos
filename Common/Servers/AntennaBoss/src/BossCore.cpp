@@ -666,6 +666,13 @@ void CBossCore::getScanOffsets(double& lonOff,double& latOff,Antenna::TCoordinat
 	frame=m_scanOffset.frame;
 }
 
+void CBossCore::getUserOffsets(double& lonOff,double& latOff,Antenna::TCoordinateFrame& frame)
+{
+	lonOff=m_userOffset.lon;
+	latOff=m_userOffset.lat;
+	frame=m_userOffset.frame;
+}
+
 void CBossCore::getAllOffsets(double& azOff,double& elOff,double& raOff,double& decOff,double& lonOff,double& latOff) const
 {
 	if (m_offsetFrame==Antenna::ANT_HORIZONTAL) {
