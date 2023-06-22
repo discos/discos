@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<SRTDBESM xmlns="urn:schemas-cosylab-com:SRT_DBESM:1.0" xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" DBESM_IPAddress="192.168.60.107" DBESM_Port="5002">
+	<addr_1>15</addr_1>
+	<addr_2>14</addr_2>
+   <addr_3>13</addr_3>
+	<addr_4>12</addr_4> 
+   	<regs_1 description="values of the 5 double port registers on board 1" />	
+		<regs_2 description="values of the 5 double port registers on board 2" />
+  		<regs_3 description="values of the 5 double port registers on board 3" />	
+		<regs_4 description="values of the 5 double port registers on board 4" />
+	<atts_1 description="values of the 16 attenuators on board 1" />
+	<atts_2 description="values of the 16 attenuators on board 2" />
+	<atts_3 description="values of the 16 attenuators on board 3" />
+	<atts_4 description="values of the 16 attenuators on board 4" />
+		<amps_1 description="values of the 10 amplifiers on board 1" />
+		<amps_2 description="values of the 10 amplifiers on board 2" />
+		<amps_3 description="values of the 10 amplifiers on board 3" />
+		<amps_4 description="values of the 10 amplifiers on board 4" />
+	<eqs_1 description="values of the 10 equalizers on board 1" />
+	<eqs_2 description="values of the 10 equalizers on board 2" />
+	<eqs_3 description="values of the 10 equalizers on board 3" />
+	<eqs_4 description="values of the 10 equalizers on board 4" />
+		<bpfs_1 description="values of the 11 band-pass filters on board 1" />
+		<bpfs_2 description="values of the 11 band-pass filters on board 2" />
+		<bpfs_3 description="values of the 11 band-pass filters on board 3" />
+		<bpfs_4 description="values of the 11 band-pass filters on board 4" />
+	<volts_1 description="values of the 5V and 3V3 voltages on board 1" />
+	<volts_2 description="values of the 5V and 3V3 voltages on board 2" />
+	<volts_3 description="values of the 5V and 3V3 voltages on board 3" />
+	<volts_4 description="values of the 5V and 3V3 voltages on board 4" />
+		<temps_1 description="temperature on board 1" />
+		<temps_2 description="temperature on board 2" />
+		<temps_3 description="temperature on board 3" />
+		<temps_4 description="temperature on board 4" />
+
+</SRTDBESM>
