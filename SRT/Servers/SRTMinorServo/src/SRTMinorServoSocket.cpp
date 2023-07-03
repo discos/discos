@@ -1,4 +1,5 @@
 #include "SRTMinorServoSocket.h"
+#include <iostream>
 
 std::mutex SRTMinorServoSocket::c_mutex;
 
@@ -106,6 +107,7 @@ SRTMinorServoAnswerMap SRTMinorServoSocket::sendCommand(std::string command)
             Close(m_error);
             ComponentErrors::SocketErrorExImpl exImpl(__FILE__, __LINE__, "SRTMinorServoSocket::sendCommand()");
             exImpl.addData("Reason", "Timeout when sending command.");
+            std::cout << "Timeout sending command" << std::endl;
             throw exImpl;
         }
     }
@@ -129,6 +131,7 @@ SRTMinorServoAnswerMap SRTMinorServoSocket::sendCommand(std::string command)
             Close(m_error);
             ComponentErrors::SocketErrorExImpl exImpl(__FILE__, __LINE__, "SRTMinorServoSocket::sendCommand()");
             exImpl.addData("Reason", "Timeout when receiving answer.");
+            std::cout << "Timeout receiving answer" << std::endl;
             throw exImpl;
         }
     }

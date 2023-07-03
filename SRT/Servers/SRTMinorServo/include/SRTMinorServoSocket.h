@@ -22,6 +22,7 @@ class SRTMinorServoSocket: public IRA::CSocket
 friend class SRTMinorServoSocketTest;
 friend class SRPProgramTrackTest;
 friend class DerotatorProgramTrackTest;
+friend class CombinedProgramTrackTest;
 
 public:
     /**

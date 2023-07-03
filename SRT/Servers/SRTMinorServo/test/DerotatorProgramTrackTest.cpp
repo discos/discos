@@ -211,7 +211,7 @@ protected:
         std::time_t tn = std::time(0);
         std::tm* now = std::localtime(&tn);
         std::stringstream directory_ss;
-        directory_ss << "Derotator";
+        directory_ss << "TESTS/DEROTATOR";
         boost::filesystem::create_directory(directory_ss.str());
         directory_ss << "/";
         directory_ss << ::testing::UnitTest::GetInstance()->current_test_info()->name();

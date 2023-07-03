@@ -14,7 +14,7 @@ USER_INC=-I$(GTEST_HOME) -I$(GMOCK_HOME)
 # unittest_OBJECTS = unittest
 # unittest_LIBS = $(GTEST_LIBS) <ComponentNameImpl>
 
-EXECUTABLES_L = SRTMinorServoSocketTest SRPProgramTrackTest DerotatorProgramTrackTest
+EXECUTABLES_L = SRTMinorServoSocketTest SRPProgramTrackTest DerotatorProgramTrackTest CombinedProgramTrackTest
 
 SRTMinorServoSocketTest_OBJECTS = SRTMinorServoSocketTest
 SRTMinorServoSocketTest_CFLAGS = -std=c++17
@@ -30,6 +30,11 @@ DerotatorProgramTrackTest_OBJECTS = DerotatorProgramTrackTest
 DerotatorProgramTrackTest_CFLAGS = -std=c++17
 DerotatorProgramTrackTest_LIBS = $(GTEST_LIBS) SRTMinorServoSocket SRTMinorServoCommandLibrary IRALibrary ComponentErrors boost_filesystem
 DerotatorProgramTrackTest_LDFLAGS = -lstdc++ -lpthread
+
+CombinedProgramTrackTest_OBJECTS = CombinedProgramTrackTest
+CombinedProgramTrackTest_CFLAGS = -std=c++17
+CombinedProgramTrackTest_LIBS = $(GTEST_LIBS) SRTMinorServoSocket SRTMinorServoCommandLibrary IRALibrary ComponentErrors boost_filesystem
+CombinedProgramTrackTest_LDFLAGS = -lstdc++ -lpthread
 
 # END OF CUSTOMIZATION
 # do not edit below this line
@@ -54,6 +59,7 @@ do_unit: all
 	../bin/SRTMinorServoSocketTest --gtest_output=xml:results/cppSRTMinorServoSocketTest.xml
 	../bin/SRPProgramTrackTest --gtest_output=xml:results/cppSRPProgramTrackTest.xml
 	../bin/DerotatorProgramTrackTest --gtest_output=xml:results/cppDerotatorProgramTrackTest.xml
+	../bin/CombinedProgramTrackTest --gtest_output=xml:results/cppCombinedProgramTrackTest.xml
 
 do_pyunit:
 	@echo "running python unit tests"
