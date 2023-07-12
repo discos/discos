@@ -10,16 +10,20 @@
 // This address and port are the ones set in the simulator
 // In order for the test to properly be executed, the simulator should be launched with the following command:
 // discos-simulator -s minor_servo start &
-#define ADDRESS             std::string("127.0.0.1")
-#define PORT                12800
-//#define ADDRESS             std::string("192.168.200.13")
-//#define PORT                4758
+#define SIMULATION
+#ifdef SIMULATION
+    #define ADDRESS             std::string("127.0.0.1")
+    #define PORT                12800
+#else
+    #define ADDRESS             std::string("192.168.200.13")
+    #define PORT                4758
+#endif
 #define SOCKET_TIMEOUT      0.5
 #define TIMEGAP             0.2
 #define ADVANCE_TIMEGAP     5
 #define EPSILON             0.00001
-#define MAX_RANGES          std::vector<double>{ 220 }
 #define STATUS_PERIOD       0.01
+#define RANGES              std::vector<double>{ 10.0, 50.0 }
 #define DEROTATOR           std::string("GFR1")
 
 std::atomic<bool> terminate = false;
@@ -28,7 +32,7 @@ std::atomic<bool> terminate = false;
 class DerotatorProgramTrackTest : public ::testing::Test
 {
 protected:
-    std::vector<double> startingCoordinates = { 0.0 };
+    std::vector<double> startingCoordinates = { RANGES[0] };
     std::string directory;
     std::thread statusThread;
 
@@ -104,32 +108,21 @@ protected:
         return currentCoordinates;
     }
 
-    static bool compareCoordinates(std::vector<double> first, std::vector<double> second)
-    {
-        if(first.size() != second.size())
-            return false;
-
-        for(size_t i = 0; i < first.size(); i++)
-        {
-            double diff = fabs(first[i] - second[i]);
-            if(diff > EPSILON)
-                return false;
-        }
-
-        return true;
-    }
-
     static bool moveAxis(std::vector<double> &coordinates, int axis_to_move, int sign)
     {
         sign = sign / abs(sign);
         double offset_to_add = 3.3 / 5;
         coordinates[axis_to_move] += sign * offset_to_add;
-        if(fabs(coordinates[axis_to_move]) >= MAX_RANGES[axis_to_move])
+        if(sign > 0)
         {
-            sign = coordinates[axis_to_move] / fabs(coordinates[axis_to_move]);
-            coordinates[axis_to_move] = MAX_RANGES[axis_to_move] * sign;
-            return true;
+            coordinates[axis_to_move] = std::min(RANGES[1], coordinates[axis_to_move]);
         }
+        else
+        {
+            coordinates[axis_to_move] = std::max(RANGES[0], coordinates[axis_to_move]);
+        }
+        if(coordinates[axis_to_move] == RANGES[0] || coordinates[axis_to_move] == RANGES[1])
+            return true;
         return false;
     }
 
@@ -189,22 +182,20 @@ protected:
 
         signal(SIGINT, DerotatorProgramTrackTest::sigintHandler);
 
-        while(true)
+
+        do
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
             DerotatorStatus = socket.sendCommand(SRTMinorServoCommandLibrary::status("Derotatore" + DEROTATOR));
             EXPECT_EQ(std::get<std::string>(DerotatorStatus["OUTPUT"]), "GOOD");
-            EXPECT_EQ(std::get<long>(DerotatorStatus[DEROTATOR + "_OPERATIVE_MODE"]), 40);
 
-            if(!compareCoordinates(startingCoordinates, getCoordinates(DerotatorStatus)))
-                std::cout << serializeStatus(DerotatorStatus) << std::endl;
-            else
-                break;
+            std::cout << serializeStatus(DerotatorStatus) << std::endl;
 
             if(terminate)
                 FAIL() << "Aborting test..." << std::endl;
         }
+        while(std::get<long>(DerotatorStatus[DEROTATOR + "_OPERATIVE_MODE"]) != 40);
+        EXPECT_EQ(std::get<long>(DerotatorStatus[DEROTATOR + "_OPERATIVE_MODE"]), 40);
 
         std::cout << "OK." << std::endl;
 
@@ -262,7 +253,6 @@ TEST_F(DerotatorProgramTrackTest, ContinuousMovementTest)
     programTrackFile << DerotatorProgramTrackTest::serializeCoordinates(start_time, programTrackCoordinates) << std::endl;
 
     double next_expected_time = start_time;
-    unsigned int axis_to_move = 0;
     int sign = 1;
     unsigned int idle_count = 0;
     bool idle = false;
@@ -285,7 +275,7 @@ TEST_F(DerotatorProgramTrackTest, ContinuousMovementTest)
                     idle = false;
                 }
             }
-            else if(moveAxis(programTrackCoordinates, axis_to_move, sign))
+            else if(moveAxis(programTrackCoordinates, 0, sign))
             {
                 sign *= -1;
                 idle = true;
@@ -296,12 +286,62 @@ TEST_F(DerotatorProgramTrackTest, ContinuousMovementTest)
             //std::cout << DerotatorProgramTrackTest::serializeCoordinates(next_expected_time, programTrackCoordinates) << std::endl;
             programTrackFile << DerotatorProgramTrackTest::serializeCoordinates(next_expected_time, programTrackCoordinates) << std::endl;
 
-            if(round(programTrackCoordinates[axis_to_move] * 100) == 0 && sign == 1)
+            if(round(programTrackCoordinates[0] * 100) == 10 && sign == 1)
             {
-                programTrackCoordinates[axis_to_move] = 0.0;
+                programTrackCoordinates[0] = RANGES[0];
                 break;
             }
         }
+    }
+
+    programTrackFile.close();
+    statusThread.join();
+}
+
+TEST_F(DerotatorProgramTrackTest, SineWaveMovementTest)
+{
+    double start_time = CIRATools::getUNIXEpoch() + ADVANCE_TIMEGAP;
+    std::cout << "PRESET position reached, starting PROGRAMTRACK with start time: " << start_time << std::endl;
+    long unsigned int trajectory_id = int(start_time);
+    unsigned int point_id = 0;
+    std::vector<double> programTrackCoordinates = startingCoordinates;
+
+    double phase_shift = (double)std::rand() / RAND_MAX * 60;
+    double amplitude = (RANGES[1] - RANGES[0]) / 2;
+    double center = (RANGES[0] + RANGES[1]) / 2;
+    programTrackCoordinates[0] = center + amplitude * sin(phase_shift * 2 * M_PI / 60);
+
+    SRTMinorServoSocket& socket = SRTMinorServoSocket::getInstance();
+    SRTMinorServoAnswerMap DerotatorStatus;
+    DerotatorStatus = socket.sendCommand(SRTMinorServoCommandLibrary::programTrack("Derotatore" + DEROTATOR, trajectory_id, point_id, programTrackCoordinates, start_time));
+    EXPECT_EQ(std::get<std::string>(DerotatorStatus["OUTPUT"]), "GOOD");
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+    DerotatorStatus = socket.sendCommand(SRTMinorServoCommandLibrary::status("Derotatore" + DEROTATOR));
+    EXPECT_EQ(std::get<std::string>(DerotatorStatus["OUTPUT"]), "GOOD");
+    EXPECT_EQ(std::get<long>(DerotatorStatus[DEROTATOR + "_OPERATIVE_MODE"]), 50);
+
+    ofstream programTrackFile;
+    programTrackFile.open(directory + "/trajectory.txt", ios::out);
+    programTrackFile << DerotatorProgramTrackTest::serializeCoordinates(start_time, programTrackCoordinates) << std::endl;
+
+    double next_expected_time = start_time;
+
+    while(!terminate)
+    {
+        next_expected_time += TIMEGAP;
+        double time_delta = next_expected_time - start_time;
+
+        std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXEpoch()))));
+        point_id++;
+
+        programTrackCoordinates[0] = center + amplitude * sin((time_delta + phase_shift) * 2 * M_PI / 60);
+
+        DerotatorStatus = socket.sendCommand(SRTMinorServoCommandLibrary::programTrack("Derotatore" + DEROTATOR, trajectory_id, point_id, programTrackCoordinates));
+        EXPECT_EQ(std::get<std::string>(DerotatorStatus["OUTPUT"]), "GOOD");
+        //std::cout << DerotatorProgramTrackTest::serializeCoordinates(next_expected_time, programTrackCoordinates) << std::endl;
+        programTrackFile << DerotatorProgramTrackTest::serializeCoordinates(next_expected_time, programTrackCoordinates) << std::endl;
     }
 
     programTrackFile.close();
@@ -316,7 +356,6 @@ TEST_F(DerotatorProgramTrackTest, SeparateMovementTest)
     ofstream programTrackFile;
     programTrackFile.open(directory + "/trajectory.txt", ios::out);
 
-    unsigned int axis_to_move = 0;
     int sign = 1;
     unsigned int idle_count = 0;
     bool idle = false;
@@ -360,7 +399,7 @@ TEST_F(DerotatorProgramTrackTest, SeparateMovementTest)
             }
             else
             {
-                if(moveAxis(programTrackCoordinates, axis_to_move, sign))
+                if(moveAxis(programTrackCoordinates, 0, sign))
                 {
                     sign *= -1;
                     idle = true;
@@ -387,7 +426,6 @@ TEST_F(DerotatorProgramTrackTest, RapidTrajectoryTest)
     ofstream programTrackFile;
     programTrackFile.open(directory + "/trajectory.txt", ios::out);
 
-    unsigned int axis_to_move = 0;  //Always Rotation
     int sign = -1;
     unsigned int idle_count = 0;
     bool idle = false;
@@ -397,7 +435,7 @@ TEST_F(DerotatorProgramTrackTest, RapidTrajectoryTest)
     while(!terminate)
     {
         std::vector<double> programTrackCoordinates = startingCoordinates;
-        programTrackCoordinates[axis_to_move] = MAX_RANGES[axis_to_move];
+        programTrackCoordinates[0] = 25.0;
 
         double start_time = CIRATools::getUNIXEpoch() + ADVANCE_TIMEGAP;
         long unsigned int trajectory_id = int(start_time);
@@ -433,7 +471,7 @@ TEST_F(DerotatorProgramTrackTest, RapidTrajectoryTest)
             }
             else
             {
-                if(moveAxis(programTrackCoordinates, axis_to_move, sign))
+                if(moveAxis(programTrackCoordinates, 0, sign))
                 {
                     idle = true;
                 }

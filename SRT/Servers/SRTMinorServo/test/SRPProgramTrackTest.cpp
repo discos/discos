@@ -10,16 +10,19 @@
 // This address and port are the ones set in the simulator
 // In order for the test to properly be executed, the simulator should be launched with the following command:
 // discos-simulator -s minor_servo start &
-#define ADDRESS             std::string("127.0.0.1")
-#define PORT                12800
-//#define ADDRESS             std::string("192.168.200.13")
-//#define PORT                4758
+#define SIMULATION
+#ifdef SIMULATION
+    #define ADDRESS             std::string("127.0.0.1")
+    #define PORT                12800
+#else
+    #define ADDRESS             std::string("192.168.200.13")
+    #define PORT                4758
+#endif
 #define SOCKET_TIMEOUT      0.5
 #define NOISE_THRESHOLD     1
 #define TIMEGAP             0.2
 #define ADVANCE_TIMEGAP     5
-#define EPSILON             0.00001
-#define MAX_RANGES          std::vector<double>{ 40, 100, 40, 0.2, 0.2, 0.2 }
+#define MAX_RANGES          std::vector<double>{ 40, 40, 40, 0.2, 0.2, 0.2 }
 #define STATUS_PERIOD       0.01
 
 std::atomic<bool> terminate = false;
@@ -138,29 +141,17 @@ protected:
         return currentElongations;
     }
 
-    static bool compareCoordinates(std::vector<double> first, std::vector<double> second)
-    {
-        if(first.size() != second.size())
-            return false;
-
-        for(size_t i = 0; i < first.size(); i++)
-        {
-            double diff = fabs(first[i] - second[i]);
-            if(diff > EPSILON)
-                return false;
-        }
-
-        return true;
-    }
-
     static bool moveAxis(std::vector<double> &coordinates, int axis_to_move, int sign)
     {
         sign = sign / abs(sign);
         double offset_to_add;
-        axis_to_move >= 3 ? offset_to_add = 0.05 : offset_to_add = 0.8;
+        axis_to_move >= 3 ? offset_to_add = 0.076 : offset_to_add = 0.8;
         coordinates[axis_to_move] += sign * offset_to_add;
         if(fabs(coordinates[axis_to_move]) >= MAX_RANGES[axis_to_move])
+        {
+            coordinates[axis_to_move] = sign * MAX_RANGES[axis_to_move];
             return true;
+        }
         return false;
     }
 
@@ -213,31 +204,29 @@ protected:
             std::visit([iterator](const auto& var) mutable { std::cout << iterator->first << ": " << var << std::endl; }, iterator->second);
         }
 
-        std::cout << "Sending all axes to 0...";
+        std::cout << "Sending all axes to the starting position..." << std::endl;
 
         SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::preset("SRP", startingCoordinates));
         EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
 
         signal(SIGINT, SRPProgramTrackTest::sigintHandler);
 
-        while(true)
+        do
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
             SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::status("SRP"));
             EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
-            EXPECT_EQ(std::get<long>(SRPStatus["SRP_OPERATIVE_MODE"]), 40);
-
-            if(!compareCoordinates(startingCoordinates, getCoordinates(SRPStatus)))
-                std::cout << serializeStatus(SRPStatus) << std::endl;
-            else
-                break;
+            std::cout << serializeStatus(SRPStatus) << std::endl;
 
             if(terminate)
                 FAIL() << "Aborting test..." << std::endl;
         }
+        while(std::get<long>(SRPStatus["SRP_OPERATIVE_MODE"]) != 40);
+        EXPECT_EQ(std::get<long>(SRPStatus["SRP_OPERATIVE_MODE"]), 40);
 
         std::cout << "OK." << std::endl;
+
+        startingCoordinates = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
         std::time_t tn = std::time(0);
         std::tm* now = std::localtime(&tn);
@@ -333,6 +322,135 @@ TEST_F(SRPProgramTrackTest, ContinuousMovementTest)
         }
 
         axis_to_move == 5 ? axis_to_move = 0 : axis_to_move++;
+    }
+
+    programTrackFile.close();
+    statusThread.join();
+}
+
+TEST_F(SRPProgramTrackTest, AllAxesMovementTest)
+{
+    double start_time = CIRATools::getUNIXEpoch() + ADVANCE_TIMEGAP;
+    std::cout << "PRESET position reached, starting PROGRAMTRACK with start time: " << start_time << std::endl;
+    long unsigned int trajectory_id = int(start_time);
+    unsigned int point_id = 0;
+    std::vector<double> programTrackCoordinates = startingCoordinates;
+
+    SRTMinorServoSocket& socket = SRTMinorServoSocket::getInstance();
+    SRTMinorServoAnswerMap SRPStatus;
+    SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::programTrack("SRP", trajectory_id, point_id, programTrackCoordinates, start_time));
+    EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+    SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::status("SRP"));
+    EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
+    EXPECT_EQ(std::get<long>(SRPStatus["SRP_OPERATIVE_MODE"]), 50);
+
+    ofstream programTrackFile;
+    programTrackFile.open(directory + "/trajectory.txt", ios::out);
+    programTrackFile << SRPProgramTrackTest::serializeCoordinates(start_time, programTrackCoordinates) << std::endl;
+
+    double next_expected_time = start_time;
+    std::vector<int> sign = { 1, 1, 1 };
+    std::vector<unsigned int> idle_count = { 0, 0, 0 };
+    std::vector<bool> idle = { false, false, false };
+
+    while(!terminate)
+    {
+        next_expected_time += TIMEGAP;
+
+        std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXEpoch()))));
+        point_id++;
+
+        for(size_t axis = 0; axis < 3; axis++)
+        {
+            if(!idle[axis])
+            {
+                if(moveAxis(programTrackCoordinates, axis, sign[axis]))
+                {
+                    sign[axis] *= -1;
+                    idle[axis] = true;
+                }
+            }
+            else
+            {
+                idle_count[axis]++;
+                if(idle_count[axis] == 5)
+                {
+                    idle_count[axis] = 0;
+                    idle[axis] = false;
+                }
+            }
+        }
+
+        SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::programTrack("SRP", trajectory_id, point_id, programTrackCoordinates));
+        EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
+        //std::cout << SRPProgramTrackTest::serializeCoordinates(next_expected_time, programTrackCoordinates) << std::endl;
+        programTrackFile << SRPProgramTrackTest::serializeCoordinates(next_expected_time, programTrackCoordinates) << std::endl;
+
+        for(size_t axis = 0; axis < 3; axis++)
+        {
+            if(round(programTrackCoordinates[axis] * 100) == 0 && sign[axis] == 1)
+            {
+                programTrackCoordinates[axis] = 0.0;
+            }
+        }
+    }
+
+    programTrackFile.close();
+    statusThread.join();
+}
+
+TEST_F(SRPProgramTrackTest, SineWaveMovementTest)
+{
+    double start_time = CIRATools::getUNIXEpoch() + ADVANCE_TIMEGAP;
+    std::cout << "PRESET position reached, starting PROGRAMTRACK with start time: " << start_time << std::endl;
+    long unsigned int trajectory_id = int(start_time);
+    unsigned int point_id = 0;
+    std::vector<double> programTrackCoordinates = startingCoordinates;
+
+    std::vector<double> phase_shift;
+    for(size_t axis = 0; axis < 3; axis++)
+    {
+        phase_shift.push_back((double)std::rand() / RAND_MAX * 60);
+        programTrackCoordinates[axis] = MAX_RANGES[axis] * sin(phase_shift[axis] * 2 * M_PI / 60);
+    }
+
+    SRTMinorServoSocket& socket = SRTMinorServoSocket::getInstance();
+    SRTMinorServoAnswerMap SRPStatus;
+    SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::programTrack("SRP", trajectory_id, point_id, programTrackCoordinates, start_time));
+    EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+    SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::status("SRP"));
+    EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
+    EXPECT_EQ(std::get<long>(SRPStatus["SRP_OPERATIVE_MODE"]), 50);
+
+    ofstream programTrackFile;
+    programTrackFile.open(directory + "/trajectory.txt", ios::out);
+    programTrackFile << SRPProgramTrackTest::serializeCoordinates(start_time, programTrackCoordinates) << std::endl;
+
+    double next_expected_time = start_time;
+
+    while(!terminate)
+    {
+        next_expected_time += TIMEGAP;
+        double time_delta = next_expected_time - start_time;
+
+        std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXEpoch()))));
+        point_id++;
+
+        for(size_t axis = 0; axis < 3; axis++)
+        {
+            programTrackCoordinates[axis] = MAX_RANGES[axis] * sin((time_delta + phase_shift[axis]) * 2 * M_PI / 60);
+        }
+
+        SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::programTrack("SRP", trajectory_id, point_id, programTrackCoordinates));
+        EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
+        //std::cout << SRPProgramTrackTest::serializeCoordinates(next_expected_time, programTrackCoordinates) << std::endl;
+        programTrackFile << SRPProgramTrackTest::serializeCoordinates(next_expected_time, programTrackCoordinates) << std::endl;
     }
 
     programTrackFile.close();
