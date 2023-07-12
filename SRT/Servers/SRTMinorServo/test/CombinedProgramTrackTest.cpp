@@ -355,7 +355,7 @@ TEST_F(CombinedProgramTrackTest, SineWaveMovementTest)
     std::vector<double> DerotatorCoordinates = DerotatorStartingCoordinates;
 
     std::vector<double> phase_shift;
-    for(size_t axis = 0; axis < 3; axis++)
+    for(size_t axis = 0; axis < 6; axis++)
     {
         phase_shift.push_back((double)std::rand() / RAND_MAX * 60);
         SRPCoordinates[axis] = SRP_MAX_RANGES[axis] * sin(phase_shift[axis] * 2 * M_PI / 60);
@@ -399,7 +399,7 @@ TEST_F(CombinedProgramTrackTest, SineWaveMovementTest)
         std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXEpoch()))));
         point_id++;
 
-        for(size_t axis = 0; axis < 3; axis++)
+        for(size_t axis = 0; axis < 6; axis++)
         {
             SRPCoordinates[axis] = SRP_MAX_RANGES[axis] * sin((time_delta + phase_shift[axis]) * 2 * M_PI / 60);
         }
@@ -418,78 +418,4 @@ TEST_F(CombinedProgramTrackTest, SineWaveMovementTest)
     DerotatorProgramTrackFile.close();
     SRPStatusThread.join();
     DerotatorStatusThread.join();
-
-    /*
-    SRTMinorServoAnswerMap SRPStatus;
-
-    ofstream programTrackFile;
-    programTrackFile.open(directory + "/trajectory.txt", ios::out);
-
-    unsigned int axis_to_move = 0;
-    int sign = 1;
-    unsigned int idle_count = 0;
-    bool idle = false;
-
-    std::cout << "PRESET position reached, starting PROGRAMTRACK" << std::endl;
-    std::vector<double> programTrackCoordinates = startingCoordinates;
-
-    while(!terminate)
-    {
-        double start_time = CIRATools::getUNIXEpoch() + ADVANCE_TIMEGAP;
-        long unsigned int trajectory_id = int(start_time);
-        double next_expected_time = start_time;
-        unsigned int point_id = 0;
-
-        SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::programTrack("SRP", trajectory_id, point_id, programTrackCoordinates, start_time));
-        EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
-        programTrackFile << CombinedProgramTrackTest::serializeCoordinates(start_time, programTrackCoordinates) << std::endl;
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
-
-        SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::status("SRP"));
-        EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
-        EXPECT_EQ(std::get<long>(SRPStatus["SRP_OPERATIVE_MODE"]), 50);
-
-        while(!terminate)
-        {
-            next_expected_time += TIMEGAP;
-
-            std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXEpoch()))));
-            point_id++;
-
-            if(idle)
-            {
-                idle_count++;
-                if(idle_count == ADVANCE_TIMEGAP / TIMEGAP)
-                {
-                    idle_count = 0;
-                    idle = false;
-                    break;
-                }
-            }
-            else
-            {
-                if(moveAxis(programTrackCoordinates, axis_to_move, sign))
-                {
-                    sign *= -1;
-                    idle = true;
-                }
-                else if(round(programTrackCoordinates[axis_to_move] * 100) == 0 && sign == 1)
-                {
-                    programTrackCoordinates[axis_to_move] = 0.0;
-                    axis_to_move == 5 ? axis_to_move = 0 : axis_to_move++;
-                    idle = true;
-                }
-
-                SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::programTrack("SRP", trajectory_id, point_id, programTrackCoordinates));
-                EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
-            }
-
-            //std::cout << CombinedProgramTrackTest::serializeCoordinates(next_expected_time, programTrackCoordinates) << std::endl;
-            programTrackFile << CombinedProgramTrackTest::serializeCoordinates(next_expected_time, programTrackCoordinates) << std::endl;
-        }
-    }
-
-    programTrackFile.close();
-    statusThread.join();*/
 }

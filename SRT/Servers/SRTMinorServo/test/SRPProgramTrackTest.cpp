@@ -411,7 +411,7 @@ TEST_F(SRPProgramTrackTest, SineWaveMovementTest)
     std::vector<double> programTrackCoordinates = startingCoordinates;
 
     std::vector<double> phase_shift;
-    for(size_t axis = 0; axis < 3; axis++)
+    for(size_t axis = 0; axis < 6; axis++)
     {
         phase_shift.push_back((double)std::rand() / RAND_MAX * 60);
         programTrackCoordinates[axis] = MAX_RANGES[axis] * sin(phase_shift[axis] * 2 * M_PI / 60);
@@ -442,14 +442,13 @@ TEST_F(SRPProgramTrackTest, SineWaveMovementTest)
         std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXEpoch()))));
         point_id++;
 
-        for(size_t axis = 0; axis < 3; axis++)
+        for(size_t axis = 0; axis < 6; axis++)
         {
             programTrackCoordinates[axis] = MAX_RANGES[axis] * sin((time_delta + phase_shift[axis]) * 2 * M_PI / 60);
         }
 
         SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::programTrack("SRP", trajectory_id, point_id, programTrackCoordinates));
         EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
-        //std::cout << SRPProgramTrackTest::serializeCoordinates(next_expected_time, programTrackCoordinates) << std::endl;
         programTrackFile << SRPProgramTrackTest::serializeCoordinates(next_expected_time, programTrackCoordinates) << std::endl;
     }
 
