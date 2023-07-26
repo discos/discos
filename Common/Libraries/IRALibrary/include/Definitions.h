@@ -50,6 +50,7 @@
 #define ABS(X,Y) (X>=Y)?X-Y:Y-X
 
 #define LIGHTSPEED_MS 299792458.0
+#define ACSTIME2UNIXEPOCHOFFSET 122192928000000000
 
 /** 
  * Creates an exception

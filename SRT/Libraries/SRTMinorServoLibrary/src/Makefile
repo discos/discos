@@ -50,15 +50,17 @@ xxxxx_LIBS      =
 #
 # Includes (.h) files (public only)
 # ---------------------------------
-INCLUDES        = hexlib.h
+INCLUDES        = hexlib.h SRTMinorServoCommandLibrary.h
 
 #
 # Libraries (public and local)
 # ----------------------------
-LIBRARIES       = SRTMinorServoLibrary
+LIBRARIES       = SRTMinorServoLibrary SRTMinorServoCommandLibrary
 LIBRARIES_L     =
 SRTMinorServoLibrary_OBJECTS = hexlib
-SRTMinorServoLibrary_LIBS = 
+SRTMinorServoLibrary_LIBS =
+SRTMinorServoCommandLibrary_OBJECTS = SRTMinorServoCommandLibrary
+SRTMinorServoCommandLibrary_LIBS = IRALibrary
 
 #
 # <brief description of lllll library>
