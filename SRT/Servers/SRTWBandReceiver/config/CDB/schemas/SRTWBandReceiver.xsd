@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+	- $Id: SRTWBandReceiver.xsd,v 1.7 2023-07-04 17:24 lorenzo.monti Exp $
+	- Author: Lorenzo Monti
+	-
+	- History:
+	-   04-07-2023  Created 
+-->
+<xs:schema
+    targetNamespace="urn:schemas-cosylab-com:SRTWBandReceiver:1.0"
+    xmlns="urn:schemas-cosylab-com:SRTWBandReceiver:1.0"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	elementFormDefault="qualified"
+	attributeFormDefault="unqualified">
+
+	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+
+	 
+    <xs:complexType name="SRTWBandReceiverType">
+     <xs:complexContent>
+      <xs:extension base="baci:CharacteristicComponent">
+        <!-- IP Address of Local Oscillator -->
+		<xs:attribute name="WLOAddress" type="xs:string" use="required"/>
+		<!-- Port of Local Oscillator -->
+        <xs:attribute name="WLOPort" type="xs:unsignedShort" use="required" />
+		<!-- IP Address of Switch Matrix-->
+        <xs:attribute name="WSwitchMatrixAddress" type="xs:string" use="required" />
+        <!-- Port of Switch Matrix-->
+        <xs:attribute name="SwitchMatrixPort" type="xs:unsignedShort" use="required" />
+        <!-- IP Address of CAL-->
+        <xs:attribute name="WCALAddress" type="xs:string" use="required" />
+        <!-- Port of CAL-->
+        <xs:attribute name="WCALPort" type="xs:unsignedShort" use="required" />
+		<!-- This time is the maximum allowed time to the control socket to respond (microseconds)-->
+		<xs:attribute name="ControlSocketResponseTime" type="xs:unsignedLong" use="required" />
+        <!-- -->
+		<xs:attribute name="WatchDogResponseTime" type="xs:unsignedLong" />
+        <!-- -->
+		<xs:attribute name="WatchDogSleepTime" type="xs:unsignedLong" />
+        <!-- -->
+		<xs:attribute name="RepetitionCacheTime" type="xs:unsignedLong" />
+        <!-- -->
+		<xs:attribute name="RepetitionExpireTime" type="xs:unsignedLong" />
+        <!-- -->
+		<xs:attribute name="ReceiverName" type="xs:string" />
+      </xs:extension>
+     </xs:complexContent>
+	</xs:complexType>
+
+	<xs:element name="SRTWBandReceiver" type="SRTWBandReceiverType"/>
+</xs:schema>
