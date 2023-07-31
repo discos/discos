@@ -335,7 +335,7 @@ int main(long argc,char **argv)
 				
 				std::string outBuff;
 				std::string msg = input + TAIL;
-				SwMatrix_socket.sendCommand(msg, outBuff, config);
+				CAL_socket.sendCommand(msg, outBuff, config);
 				cout << "Done" << endl;
 			}
 			catch (ACSErr::ACSbaseExImpl& E) {
@@ -349,7 +349,7 @@ int main(long argc,char **argv)
 				
 				std::string outBuff;
 				std::string msg = input + TAIL;
-				SwMatrix_socket.sendCommand(msg, outBuff, config);
+				CAL_socket.sendCommand(msg, outBuff, config);
 				cout << "Done" << endl;
 			}
 			catch (ACSErr::ACSbaseExImpl& E) {
@@ -363,7 +363,7 @@ int main(long argc,char **argv)
 				
 				std::string outBuff;
 				std::string msg = input + TAIL;
-				SwMatrix_socket.sendCommand(msg, outBuff, config);
+				CAL_socket.sendCommand(msg, outBuff, config);
 				cout << "Done" << endl;
 			}
 			catch (ACSErr::ACSbaseExImpl& E) {
@@ -377,7 +377,7 @@ int main(long argc,char **argv)
 				
 				std::string outBuff;
 				std::string msg = input + TAIL;
-				SwMatrix_socket.sendCommand(msg, outBuff, config);
+				CAL_socket.sendCommand(msg, outBuff, config);
 				cout << "Done" << endl;
 			}
 			catch (ACSErr::ACSbaseExImpl& E) {
@@ -390,7 +390,7 @@ int main(long argc,char **argv)
 			try {
 				std::string outBuff;
 				std::string msg = input + TAIL;
-				SwMatrix_socket.sendCommand(msg, outBuff, config);
+				CAL_socket.sendCommand(msg, outBuff, config);
 				cout << "Done" << endl;
 			}
 			catch (ACSErr::ACSbaseExImpl& E) {
