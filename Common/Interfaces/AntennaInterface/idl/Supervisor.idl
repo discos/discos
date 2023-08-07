@@ -1,0 +1,147 @@
+#ifndef __SUPERVISOR__IDL__ 
+#define __SUPERVISOR__IDL__ 
+
+#include <baci.idl>
+#include <maciErrType.idl>
+#include <ComponentErrors.idl>
+#include <ManagmentDefinitions.idl>
+#include <AntennaDefinitions.idl>
+
+#pragma prefix "alma"
+
+
+module Antenna {
+ 
+    struct SupervisorDataBlock {
+        ACS::Time timeMark;
+        boolean tracking;
+        double sunAvoidanceOffset;
+    };
+
+    const string SUPERVISOR_DATA_CHANNEL = "SupervisorData";
+
+    interface Supervisor: 
+        ACS::CharacteristicComponent,
+        Management::CommandInterpreter
+    {
+   
+        /** Take a configuration code and configure the component
+         * 
+         * This method takes a configuration code, gets the corresponding
+         * sun avoidance configuration depending of the receiver setup. 
+         *
+         * @param code the setup mode (for instance: LLP, KKG, CCB, ecc.)
+         * @throw ComponentErrors::ComponentErrorsEx
+         */
+        void setup(in string code) raises (ComponentErrors::ComponentErrorsEx);
+ 
+
+        /** Return the actual setup configuration (KKG, CCB, unknown, etc.)
+         *
+         * In case no setup is given, getSetup() returns "unknown" and a
+         * default value for the sun avoidance limit is applied.
+         */
+        string getSetup();
+
+
+        /** Set wind avoidance to "ON" or "OFF"
+         *
+         * In case the wind avoidance is "ON", the Supervisor component parks
+         * the antenna in case the average wind is above a safety limit.
+         * The default value is "ON".
+         *
+         * @param mode the activation/deactivation of wind avoidance
+         * @throw ComponentErrors::ComponentErrorsEx
+         */
+        void setWindAvoidance(in string mode) raises (ComponentErrors::ComponentErrorsEx);
+
+
+        /** Get wind avoidance mode
+         *
+         * It returns "ON" or "OFF", depending of the current wind avoidance mode.
+         *
+         * @throw ComponentErrors::ComponentErrorsEx
+         */
+        string getWindAvoidance() raises (ComponentErrors::ComponentErrorsEx);
+
+ 
+        /** Set the wind safe limit and override the value read from CDB.
+         * 
+         * @param limit
+         * @throw ComponentErrors::ComponentErrorsEx
+         */
+        void setWindSafeLimit(in double limit) raises (ComponentErrors::ComponentErrorsEx);
+ 
+
+        /** Get the wind safe limit.
+         * 
+         * @throw ComponentErrors::ComponentErrorsEx
+         */
+        double getWindSafeLimit() raises (ComponentErrors::ComponentErrorsEx);
+
+
+        /** Set Sun avoidance to "ON" or "OFF"
+         *
+         * In case the Sun avoidance is "ON", the Supervisor component sets
+         * an offset to the pointing every time the distance from the Sun is
+         * less than a given safe limit that we read from the CDB.  That limit
+         * can also be set by mean of the method setSunSafeLimit().
+         * The default value for setSunAvoidance() is "ON".
+         *
+         * @param mode the activation/deactivation of Sun avoidance
+         * @throw ComponentErrors::ComponentErrorsEx
+         */
+        void setSunAvoidance(in string mode) raises (ComponentErrors::ComponentErrorsEx);
+
+
+        /** Get Sun avoidance mode
+         *
+         * It returns "ON" or "OFF", depending of the current Sun avoidance mode.
+         *
+         * @throw ComponentErrors::ComponentErrorsEx
+         */
+        string getSunAvoidance() raises (ComponentErrors::ComponentErrorsEx);
+
+ 
+        /** Set the Sun safe limit and override the value read from CDB.
+         * 
+         * @param limit
+         * @throw ComponentErrors::ComponentErrorsEx
+         */
+        void setSunSafeLimit(in double limit) raises (ComponentErrors::ComponentErrorsEx);
+ 
+
+        /** Get the Sun safe limit.
+         * 
+         * @throw ComponentErrors::ComponentErrorsEx
+         */
+        double getSunSafeLimit() raises (ComponentErrors::ComponentErrorsEx);
+
+         
+        /** Get the current offset applied to the antenna coordinates
+         *
+         * @throw ComponentErrors::ComponentErrorsEx
+         */
+        double getSunOffset() raises (ComponentErrors::ComponentErrorsEx);
+
+
+        /** Return true when the Supervisor is not setting any offset related
+         * to the Sun avoidance
+         *
+         * @throw ComponentErrors::ComponentErrorsEx
+         */
+        boolean isTracking() raises (ComponentErrors::ComponentErrorsEx);
+
+
+        /** This property reports the status of the Supervisor.
+         *  The returned pattern is a 3 bits field with the following meaning:
+         *
+         *  @arg \c 0 tracking: value 1 means Supervisor is applying an offset
+         *  #arg \c 1 failure: value 1 means the Supervisor is in failure
+         */
+         readonly attribute ACS::ROpattern status;
+ 
+    };
+};
+
+#endif
