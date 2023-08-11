@@ -132,7 +132,8 @@ void wait(const long& sec) const
 	IRA::CIRATools::Wait(sec,0);
 }
 
-bool remoteCall(const IRA::CString& command,const IRA::CString& package,const long& par,IRA::CString& out) throw (ParserErrors::PackageErrorExImpl)
+//throw (ParserErrors::PackageErrorExImpl)
+bool remoteCall(const IRA::CString& command,const IRA::CString& package,const long& par,IRA::CString& out)
 {
 	if (par==0) {
 		out.Format("%s/ eseguito con successo nel package %s \n",(const char *)command,(const char *)package);

@@ -11,8 +11,15 @@
 /* Andrea Orlati(aorlati@ira.inaf.it) 07/06/2006      Creation                                          */
 /* Andrea Orlati(aorlati@ira.inaf.it) 26/01/2018      Rewritten in order to bypass an issue with 64bit ACS2017 */
 
+#include <Cplusplus11Helper.h>
+
 #include <vector>
+C11_IGNORE_WARNING_PUSH
+C11_IGNORE_WARNING("-Wdeprecated-declarations")
+C11_IGNORE_WARNING("-Wmisleading-indentation")
+C11_IGNORE_WARNING("-Wcatch-value=")
 #include <baciValue.h>
+C11_IGNORE_WARNING_POP
 #include "Definitions.h"
 #include "String.h"
 

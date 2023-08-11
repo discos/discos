@@ -10,8 +10,13 @@
 /* Who                                when            What                                              */
 /* Andrea Orlati(aorlati@ira.inaf.it) 05/1/2010      Creation                                          */
 
-
+#include <Cplusplus11Helper.h>
+C11_IGNORE_WARNING_PUSH
+C11_IGNORE_WARNING("-Wdeprecated-declarations")
+C11_IGNORE_WARNING("-Wmisleading-indentation")
+C11_IGNORE_WARNING("-Wcatch-value=")
 #include <acstimeEpochHelper.h>
+C11_IGNORE_WARNING_POP
 #include "Definitions.h"
 
 namespace IRA {

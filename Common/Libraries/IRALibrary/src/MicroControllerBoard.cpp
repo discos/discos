@@ -5,7 +5,7 @@ using namespace IRA;
 MicroControllerBoard::MicroControllerBoard(
         const std::string IP, const unsigned short port,
         const BYTE master_address, const BYTE slave_address, 
-        const DWORD timeout) throw (MicroControllerBoardEx) : 
+        const DWORD timeout) : 
                 m_IP(IP), m_port(port), m_timeout(timeout), m_master_address(master_address), 
                 m_slave_address(slave_address),
                 m_socket(NULL), m_id(0), m_command_type(0x00)
@@ -30,7 +30,7 @@ MicroControllerBoard::~MicroControllerBoard() {
 }
 
 
-void MicroControllerBoard::openConnection(void) throw (MicroControllerBoardEx) {
+void MicroControllerBoard::openConnection(void) {
 
     if (m_socket->Connect(m_Error, m_IP.c_str(), m_port) == CSocket::FAIL) {
         closeConnection();
@@ -59,7 +59,7 @@ void MicroControllerBoard::closeConnection(void) {
     pthread_mutex_unlock(&m_socket_mutex); 
 }
 
-std::vector<BYTE> MicroControllerBoard::receive(void) throw (MicroControllerBoardEx) { 
+std::vector<BYTE> MicroControllerBoard::receive(void) { 
     pthread_mutex_lock(&m_socket_mutex); 
     BYTE msg[MCB_BUFF_LIMIT] = {0x00};
     bool is_short_cmd = false, has_data_cmd = false;
@@ -230,7 +230,7 @@ std::vector<BYTE> MicroControllerBoard::receive(void) throw (MicroControllerBoar
     return(clean_data); // Return just the answer parameters
 }
 
-void MicroControllerBoard::send(const BYTE command, std::vector<BYTE> parameters) throw (MicroControllerBoardEx) {
+void MicroControllerBoard::send(const BYTE command, std::vector<BYTE> parameters) {
     pthread_mutex_lock(&m_socket_mutex); 
     try {
         if(command >= MCB_CMD_TYPE_MIN_EXT && command <= MCB_CMD_TYPE_MAX_ABB) {
@@ -284,7 +284,7 @@ void MicroControllerBoard::send(const BYTE command, std::vector<BYTE> parameters
 }
 
 
-BYTE MicroControllerBoard::computeChecksum(std::vector<BYTE> message) throw (MicroControllerBoardEx) {
+BYTE MicroControllerBoard::computeChecksum(std::vector<BYTE> message) {
     if(message.empty())
         throw MicroControllerBoardEx("Checksum error: no bytes to check");
 
