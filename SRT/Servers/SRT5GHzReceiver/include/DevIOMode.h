@@ -35,13 +35,19 @@ public:
 		return false;
 	}
 
-	ACE_CString read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
+	/*
+	 * @throw ACSErr::ACSbaseExImpl
+   */
+	ACE_CString read(ACS::Time& timestamp) {
 		AUTO_TRACE("DevIOMode::read()");
 		timestamp=getTimeStamp();
 		return (const char *)m_core->getSetupMode();
     }
 
-    void write(const ACE_CString& value, ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
+	/*
+	 * @throw ACSErr::ACSbaseExImpl
+   */
+    void write(const ACE_CString& value, ACS::Time& timestamp) {
     	AUTO_TRACE("DevIOMode::write()");
 	}
 

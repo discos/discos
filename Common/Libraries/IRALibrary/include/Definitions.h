@@ -252,6 +252,24 @@
 	COMPL.getErrorTraceHelper()->top(); \
 }
 
+#ifdef _CPLUSPLUS11_PORTING_
+/**
+ * This macro is a shortcut. This is the implementation of the function that will returns the reference of a component
+ * property.
+ * @param IMPLCLASS the name of the c++ class that implements the IDL interface of the component.
+ * @param TYPE the type of the ACS property that will be returned as a reference
+ * @param PROPERTY the c++ object that implmemnts the ACS property
+ * @param PROPERTYNAME the name of the property as reported in the idl file that defines the interface
+ * @throw CORBA::SystemException
+*/
+#define _PROPERTY_REFERENCE_CPP(IMPLCLASS,TYPE,PROPERTY,PROPERTYNAME) TYPE##_ptr IMPLCLASS::PROPERTYNAME() \
+{ \
+	if (PROPERTY==0) return TYPE::_nil(); \
+	TYPE##_var tmp=TYPE::_narrow(PROPERTY->getCORBAReference()); \
+	return tmp._retn(); \
+}
+
+#else 
 /**
  * This macro is a shortcut. This is the implementation of the function that will returns the reference of a component
  * property.
@@ -266,5 +284,6 @@
 	TYPE##_var tmp=TYPE::_narrow(PROPERTY->getCORBAReference()); \
 	return tmp._retn(); \
 }
+#endif
 
 #endif

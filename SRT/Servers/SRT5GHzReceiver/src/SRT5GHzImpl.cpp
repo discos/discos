@@ -50,16 +50,18 @@ SRT5GHzImpl::~SRT5GHzImpl()
 	AUTO_TRACE("SRT5GHzImpl::~SRT5GHzImpl()");
 }
 
-void SRT5GHzImpl::initialize() throw (ACSErr::ACSbaseExImpl)
+//throw (ACSErr::ACSbaseExImpl) 
+void SRT5GHzImpl::initialize()
 {
 	AUTO_TRACE("SRT5GHzImpl::initialize()");
-	ACS_LOG(LM_FULL_INFO,"SRT5GHzImpl::initialize()",(LM_INFO,"SRT5GHzImpl::COMPSTATE_INITIALIZING"));
+	ACS_LOG(LM_FULL_INFO,"SRT5GHzImpl::initialize()",(LM_INFO,"COMPSTATE_INITIALIZING"));
 	m_core.initialize(getContainerServices());
 	m_monitor=NULL;
 	ACS_LOG(LM_FULL_INFO,"SRT5GHzImpl::initialize()",(LM_INFO,"COMPSTATE_INITIALIZED"));
 }
 
-void SRT5GHzImpl::execute() throw (ACSErr::ACSbaseExImpl)
+//throw (ACSErr::ACSbaseExImpl)
+void SRT5GHzImpl::execute()
 {
 	AUTO_TRACE("SRT5GHzImpl::execute()");
 	ACS::Time timestamp;
@@ -167,7 +169,8 @@ void SRT5GHzImpl::aboutToAbort()
 	m_core.cleanup();
 }
 
-void SRT5GHzImpl::activate(const char * setup_mode) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+//throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void SRT5GHzImpl::activate(const char * setup_mode)
 {
 	try {
 		m_core.activate();
@@ -187,7 +190,8 @@ void SRT5GHzImpl::activate(const char * setup_mode) throw (CORBA::SystemExceptio
 	}
 }
 
-void SRT5GHzImpl::deactivate() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+// throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void SRT5GHzImpl::deactivate()
 {
 	try {
 		m_core.deactivate();
@@ -207,7 +211,8 @@ void SRT5GHzImpl::deactivate() throw (CORBA::SystemException,ComponentErrors::Co
 	}
 }
 
-void SRT5GHzImpl::calOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+// throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void SRT5GHzImpl::calOn()
 {	
 	try {
 		m_core.calOn();
@@ -227,7 +232,8 @@ void SRT5GHzImpl::calOn() throw (CORBA::SystemException,ComponentErrors::Compone
 	}
 }
 
-void SRT5GHzImpl::calOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+//throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void SRT5GHzImpl::calOff() 
 {
 	try {
 		m_core.calOff();
@@ -247,12 +253,8 @@ void SRT5GHzImpl::calOff() throw (CORBA::SystemException,ComponentErrors::Compon
 	}
 }
 
-
-void SRT5GHzImpl::externalCalOn() throw (
-        CORBA::SystemException,
-        ComponentErrors::ComponentErrorsEx,
-        ReceiversErrors::ReceiversErrorsEx
-        )
+// throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void SRT5GHzImpl::externalCalOn()
 {   
     try {
         m_core.externalCalOn();
@@ -272,12 +274,8 @@ void SRT5GHzImpl::externalCalOn() throw (
     }
 }
 
-
-void SRT5GHzImpl::externalCalOff() throw (
-        CORBA::SystemException,
-        ComponentErrors::ComponentErrorsEx,
-        ReceiversErrors::ReceiversErrorsEx
-        )
+//throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void SRT5GHzImpl::externalCalOff()
 {   
     try {
         m_core.externalCalOff();
@@ -296,9 +294,8 @@ void SRT5GHzImpl::externalCalOff() throw (
         throw impl.getComponentErrorsEx();
     }
 }
-
-
-void SRT5GHzImpl::setLO(const ACS::doubleSeq& lo) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+// throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void SRT5GHzImpl::setLO(const ACS::doubleSeq& lo)
 {
 	try {
 		m_core.setLO(lo);
@@ -318,7 +315,8 @@ void SRT5GHzImpl::setLO(const ACS::doubleSeq& lo) throw (CORBA::SystemException,
 	}
 }
 
-void SRT5GHzImpl::setMode(const char * mode) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+// throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void SRT5GHzImpl::setMode(const char * mode)
 {
 	try {
 		m_core.setMode(mode);
@@ -338,8 +336,9 @@ void SRT5GHzImpl::setMode(const char * mode) throw (CORBA::SystemException,Compo
 	}
 }
 
+//throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 ACS::doubleSeq *SRT5GHzImpl::getCalibrationMark(const ACS::doubleSeq& freqs, const ACS::doubleSeq& bandwidths, const ACS::longSeq& feeds,const ACS::longSeq& ifs,
-		ACS::doubleSeq_out skyFreq,ACS::doubleSeq_out skyBw,CORBA::Boolean_out onoff,CORBA::Double_out scaleFactor) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+		ACS::doubleSeq_out skyFreq,ACS::doubleSeq_out skyBw,CORBA::Boolean_out onoff,CORBA::Double_out scaleFactor)
 {
 	ACS::doubleSeq_var result=new ACS::doubleSeq;
 	ACS::doubleSeq_var resFreq=new ACS::doubleSeq;
@@ -365,8 +364,8 @@ ACS::doubleSeq *SRT5GHzImpl::getCalibrationMark(const ACS::doubleSeq& freqs, con
 	return result._retn();
 }
 
-CORBA::Long SRT5GHzImpl::getFeeds(ACS::doubleSeq_out X,ACS::doubleSeq_out Y,ACS::doubleSeq_out power) throw (CORBA::SystemException,
-		ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+// throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+CORBA::Long SRT5GHzImpl::getFeeds(ACS::doubleSeq_out X,ACS::doubleSeq_out Y,ACS::doubleSeq_out power)
 {
 	ACS::doubleSeq_var tempX=new ACS::doubleSeq;
 	ACS::doubleSeq_var tempY=new ACS::doubleSeq;
@@ -394,6 +393,7 @@ CORBA::Long SRT5GHzImpl::getFeeds(ACS::doubleSeq_out X,ACS::doubleSeq_out Y,ACS:
 	return res;
 }
 
+// throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
 void SRT5GHzImpl::getIFOutput(
 		const ACS::longSeq& feeds,
         const ACS::longSeq& ifs,
@@ -401,7 +401,7 @@ void SRT5GHzImpl::getIFOutput(
         ACS::doubleSeq_out bw,
         ACS::longSeq_out pols,
         ACS::doubleSeq_out LO
-) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, ReceiversErrors::ReceiversErrorsEx)
+)
 {
     ACS::doubleSeq_var freqs_res = new ACS::doubleSeq;
     ACS::doubleSeq_var bw_res = new ACS::doubleSeq;
@@ -430,8 +430,8 @@ void SRT5GHzImpl::getIFOutput(
     LO = LO_res._retn();
 }
 
-CORBA::Double SRT5GHzImpl::getTaper(CORBA::Double freq,CORBA::Double bandWidth,CORBA::Long feed,CORBA::Long ifNumber,CORBA::Double_out waveLen) throw (
-		CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+//throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+CORBA::Double SRT5GHzImpl::getTaper(CORBA::Double freq,CORBA::Double bandWidth,CORBA::Long feed,CORBA::Long ifNumber,CORBA::Double_out waveLen)
 {
 	CORBA::Double res;
 	double wL;
@@ -455,7 +455,8 @@ CORBA::Double SRT5GHzImpl::getTaper(CORBA::Double freq,CORBA::Double bandWidth,C
 	}	
 }
 
-void SRT5GHzImpl::turnLNAsOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+//throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void SRT5GHzImpl::turnLNAsOn()
 {
 	try {
 		m_core.lnaOn();
@@ -475,7 +476,8 @@ void SRT5GHzImpl::turnLNAsOn() throw (CORBA::SystemException,ComponentErrors::Co
 	}
 }
 
-void SRT5GHzImpl::turnLNAsOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+//throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void SRT5GHzImpl::turnLNAsOff()
 {
 	try {
 		m_core.lnaOff();
@@ -495,7 +497,8 @@ void SRT5GHzImpl::turnLNAsOff() throw (CORBA::SystemException,ComponentErrors::C
 	}
 }
 
-void SRT5GHzImpl::turnVacuumSensorOn() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+//throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void SRT5GHzImpl::turnVacuumSensorOn()
 {
 	try {
 		m_core.vacuumSensorOn();
@@ -515,7 +518,8 @@ void SRT5GHzImpl::turnVacuumSensorOn() throw  (CORBA::SystemException,ComponentE
 	}
 }
 
-void SRT5GHzImpl::turnVacuumSensorOff() throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+//throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void SRT5GHzImpl::turnVacuumSensorOff()
 {
 	try {
 		m_core.vacuumSensorOff();
@@ -535,16 +539,18 @@ void SRT5GHzImpl::turnVacuumSensorOff() throw  (CORBA::SystemException,Component
 	}
 }
 
-void SRT5GHzImpl::turnAntennaUnitOn() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+//throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void SRT5GHzImpl::turnAntennaUnitOn()
 {
 	//has it to be implemented?
-	ACS_LOG(LM_FULL_INFO,"SRT5GHzImpl::turnAntennaUnitOn()",(LM_NOTICE,"CBAND_ANTENNA_UNIT_ON"));
+	ACS_LOG(LM_FULL_INFO,"SRT5GHzImpl::turnAntennaUnitOn()",(LM_WARNING,"Antenna Unit not supported"));
 }
 
-void SRT5GHzImpl::turnAntennaUnitOff() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+//throw  (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx)
+void SRT5GHzImpl::turnAntennaUnitOff()
 {
 	//has it to be implemented?
-	ACS_LOG(LM_FULL_INFO,"SRT5GHzImpl::turnAntennaUnitOff()",(LM_NOTICE,"CBAND_ANTENNA_UNIT_OFF"));
+	ACS_LOG(LM_FULL_INFO,"SRT5GHzImpl::turnAntennaUnitOff()",(LM_NOTICE,"Antenna Unit not supported"));
 }
 
 _PROPERTY_REFERENCE_CPP(SRT5GHzImpl,ACS::ROdoubleSeq,m_plocalOscillator,LO);

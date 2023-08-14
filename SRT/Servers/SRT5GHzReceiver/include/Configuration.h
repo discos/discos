@@ -223,7 +223,7 @@ public:
 	/**
     * This member function is used to configure component by reading the configuration parameter from the CDB.
 	 * This must be the first call before using any other function of this class.
-	 * @throw ComponentErrors::CDBAccess
+	 * @throw ComponentErrors::CDBAccess. ComponentErrors::MemoryAllocationExImpl
 	 * @param Services pointer to the container services object
 	*/
 	//throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl);

@@ -52,7 +52,7 @@ SRT_INTERFACES:=SRTAntennaInterface SRTActiveSurfaceInterface \
                 SRTReceiversInterface
 SRT_LIBRARIES:=SRTMinorServoLibrary
 SRT_SERVERS:=SRTMount SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver \
-             SRT7GHzReceiver SRTLPBandReceiver SRTPyIFDistributor WeatherStation
+             SRT7GHzReceiver SRT5GHzReceiver SRTLPBandReceiver SRTPyIFDistributor WeatherStation
 SRT_CLIENTS:=SRTActiveSurfaceGUIClient SRTMountTextClient \
              MinorServoBossTextClient
 SRT_MISC:=SRTScripts
@@ -83,7 +83,8 @@ ifeq ($(STATION),SRT)
 		SRTAntennaInterface SRTActiveSurfaceInterface SRTWeatherStationInterface SRTReceiversInterface \
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary XarcosLibrary SRTMinorServoLibrary ComponentProxy ModbusChannel PyTestingLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool TotalPower NoiseGenerator DBBC CustomLogger XBackend \
-		SRTMount SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver PyDewarPositioner \
+		SRTMount SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver  \ 
+		SRT5GHzReceiver PyDewarPositioner \
 		SRTPyIFDistributor AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient CustomLoggingClient SchedulerTextClient \
 		SRTActiveSurfaceGUIClient SRTMountTextClient MinorServoBossTextClient \
 		Plotter KStars SRTScripts 

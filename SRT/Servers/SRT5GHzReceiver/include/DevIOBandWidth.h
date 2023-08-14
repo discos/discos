@@ -51,17 +51,20 @@ public:
 	/**
 	 * Used to read the property value.
 	 * @param timestamp epoch when the operation completes
+	 * @throw ACSErr::ACSbaseExImpl
 	*/
-	ACS::doubleSeq read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
+	ACS::doubleSeq read(ACS::Time& timestamp)
 	{
 		m_pCore->getBandwidth(m_val);
 		timestamp=getTimeStamp();  //Completion time
 		return m_val;
 	}
+	
 	/**
 	 * It writes values into controller. Unused because the properties are read-only.
+	 * @throw ACSErr::ACSbaseExImpl
 	*/
-	void write(const ACS::doubleSeq& value, ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
+	void write(const ACS::doubleSeq& value, ACS::Time& timestamp)
 	{
 		timestamp=getTimeStamp();
 		return;

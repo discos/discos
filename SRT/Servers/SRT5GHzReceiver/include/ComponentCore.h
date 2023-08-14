@@ -37,14 +37,15 @@ public:
      * This method initializes the object
      * @param service pointer to container services object provided by the container
      */
-    virtual void initialize(maci::ContainerServices* services);
+    virtual void initialize(maci::ContainerServices* services) noexcept;
 
     /**
      * This method prepares the object for execution.
      * @return the pointer to the configuration class
-     */
-    virtual CConfiguration const * const execute() throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::SocketErrorExImpl);
+     * @throw ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::SocketErrorExImpl
 
+     */
+    virtual CConfiguration const * const execute(); 
     /**
      * This function is responsible to free all allocated resources
      */
@@ -60,27 +61,39 @@ public:
      * @throw ComponentErrors::CORBAProblemExImpl
      * @thorw ReceiversErrors::LocalOscillatorErrorExImpl
      */
-    void setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,ComponentErrors::CouldntGetComponentExImpl,
-            ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl);
+    void setLO(const ACS::doubleSeq& lo);
 
     /**
      * It allows to change the operating mode of the receiver. If the mode does not correspond to a valid mode an error is thrown.
      * @param  mode mode code as a string
+     * @throw ReceiversErrors::ModeErrorExImpl
+     * @throw ComponentErrors::ValidationErrorExImpl
+     * @throw ComponentErrors::ValueOutofRangeExImpl,
+     * @throw ComponentErrors::CouldntGetComponentExImpl
+     * @throw ComponentErrors::CORBAProblemExImpl
+     * @throw ReceiversErrors::LocalOscillatorErrorExImpl)
      */
-    void setMode(const char * mode) throw  (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
-            ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl);
+    void setMode(const char * mode); 
 
     /**
      * It activate the receiver, in other words it allows to setup the default configuration and to make sure the LNA are turned on.
-     */
-    void activate() throw (ReceiversErrors::ModeErrorExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
-            ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ReceiversErrors::LocalOscillatorErrorExImpl,ReceiversErrors::NoRemoteControlErrorExImpl,
-            ReceiversErrors::ReceiverControlBoardErrorExImpl);
+     * @throw ReceiversErrors::ModeErrorExImpl
+     * @throw ComponentErrors::ValidationErrorExImpl
+     * @throw ComponentErrors::ValueOutofRangeExImpl,
+     * @throw ComponentErrors::CouldntGetComponentExImpl
+     * @throw ComponentErrors::CORBAProblemExImpl
+     * @throw ReceiversErrors::LocalOscillatorErrorExImpl
+     * @throw ReceiversErrors::NoRemoteControlErrorExImpl
+     * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl   
+    */
+    void activate();
 
     /**
      * It deactivates the receiver.
+     * @throw ReceiversErrors::NoRemoteControlErrorExImpl
+     * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
-    void deactivate() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    void deactivate();
 
     /**
      * It allows to compute the value of the calibration mark for any given sub bands in the IF space.
@@ -92,9 +105,11 @@ public:
      * @param feeds list of feed identifier, it allows to specifies form which feed the sub band comes from. In that case it is neglected since the receiver is a single feed
      * @param ifs list of IF identifier, it allows to specifies from which receiver IF the sub band comes from.
      * @param true if the calibration diode is turned on.
+     * @throw ComponentErrors::ValidationErrorExImpl
+     * @throw ComponentErrors::ValueOutofRangeExImpl
      */
     void getCalibrationMark(ACS::doubleSeq& result,ACS::doubleSeq& resFreq,ACS::doubleSeq& resBw,const ACS::doubleSeq& freqs,const ACS::doubleSeq& bandwidths,const ACS::longSeq& feeds,
-            const ACS::longSeq& ifs,bool& onoff,double& scaleFactor) throw (ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl);
+            const ACS::longSeq& ifs,bool& onoff,double& scaleFactor);
 
     /**
      * It is called to get the all the receiver output information in one call.
@@ -108,7 +123,7 @@ public:
      * sequences the correct value must be matched against the <i>Receivers::TPolarization</i> enumeration.
      * @param LO it gives (if present) the value of the local oscillator (MHz).
      * @throw ComponentErrors::ValidationErrorExImpl
-     * @thorw ComponentErrors::ValueOutofRangeExImpl
+     * @throw ComponentErrors::ValueOutofRangeExImpl
      */
      void getIFOutput(
              const ACS::longSeq& feeds,
@@ -117,7 +132,7 @@ public:
              ACS::doubleSeq& bw,
              ACS::longSeq& pols,
              ACS::doubleSeq& LO
-     ) throw (ComponentErrors::ValidationErrorExImpl, ComponentErrors::ValueOutofRangeExImpl);
+     );
 
     /**
      * It computes the taper given a reference band.
@@ -125,128 +140,140 @@ public:
      * @param bw width of the reference band
      * @param feed feed number
      * @param ifNumber IF chain identifier
-     * @param waveLen wave length of the reference band, the band is transformed in a real sky observed band and the the central frequency is taken
+     * @param waveLen wave length of the reference band, the band is transformed in a real sky observed band and 
+     *        the the central frequency is taken
+     * @throw ComponentErrors::ValidationErrorExImpl
+     * @throw ComponentErrors::ValueOutofRangeExImpl
      */
-    double getTaper(const double& freq,const double& bw,const long& feed,const long& ifNumber,double& waveLen) throw (
-            ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl);
+    double getTaper(const double& freq,const double& bw,const long& feed,const long& ifNumber,double& waveLen);
 
     /**
      * It turns the calibration diode on.
+     * @throw ReceiversErrors::NoRemoteControlErrorExImpl
+     * @throw ComponentErrors::ValidationErrorExImpl
+     * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
-    void calOn() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ComponentErrors::ValidationErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl);
-
+    void calOn();
     /**
      * It turns the calibration diode off
+     * @throw ReceiversErrors::NoRemoteControlErrorExImpl
+     * @throw ComponentErrors::ValidationErrorExImpl
+     * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
-    void calOff() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ComponentErrors::ValidationErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    void calOff();
 
-    /** It turns the external calibration diode on. */
-    void externalCalOn() throw (
-            ReceiversErrors::NoRemoteControlErrorExImpl,
-            ComponentErrors::ValidationErrorExImpl,
-            ReceiversErrors::ReceiverControlBoardErrorExImpl
-    );
+    /** It turns the external calibration diode on. 
+    * @throw ReceiversErrors::NoRemoteControlErrorExImpl,ComponentErrors::ValidationErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl
+	 */
+    void externalCalOn();
 
-
-    /** It turns the external calibration diode off. */
-    void externalCalOff() throw (
-            ReceiversErrors::NoRemoteControlErrorExImpl,
-            ComponentErrors::ValidationErrorExImpl,
-            ReceiversErrors::ReceiverControlBoardErrorExImpl
-    );
-
+    /** It turns the external calibration diode off. 
+     * @throw ReceiversErrors::NoRemoteControlErrorExImpl,
+     * @throw ComponentErrors::ValidationErrorExImpl
+     * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
+    */
+    void externalCalOff();
 
     /**
      * It turns on the sensor for vacuum measurement.
+     * @throw ReceiversErrors::NoRemoteControlErrorExImpl
+     * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
-    void vacuumSensorOn() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    void vacuumSensorOn();
 
     /**
      * It turns off the sensor for vacuum measurement.
+     * @throw ReceiversErrors::NoRemoteControlErrorExImpl
+     * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
-    void vacuumSensorOff() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    void vacuumSensorOff();
 
     /**
      * It allows to turn LNA on
+     * @throw ReceiversErrors::NoRemoteControlErrorExImpl
+     * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
-    void lnaOn() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    void lnaOn();
 
     /**
      * It allows to turn LNA off
+     * @throw ReceiversErrors::NoRemoteControlErrorExImpl
+     * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
-    void lnaOff() throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    void lnaOff();
 
     /**
      * It reads and updates from the control board the current value of the vacuum
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
-    void updateVacuum() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    void updateVacuum();
 
     /**
      * It check if the vacuum pump is on and check is the status is fault or not (<i>VACUUMPUMPFAULT</i>)
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
-    void updateVacuumPump() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    void updateVacuumPump();
 
     /**
      * It checks if the vacuum valve is opened or not
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
-    void updateVacuumValve() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    void updateVacuumValve();
 
     /**
      * It reads and updates from the control board the current cryo temperature measured near the cool head
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
-    void updateCryoCoolHead() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    void updateCryoCoolHead();
 
     /**
      * It reads and updates from the control board the current cryo temperature measured near the cool head window
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
-    void updateCryoCoolHeadWin() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    void updateCryoCoolHeadWin();
 
     /**
      * It reads and updates from the control board the current cryo temperature measured near the LNA
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
-    void updateCryoLNA() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    void updateCryoLNA();
 
     /**
      * It reads and updates from the LNA control board the current values of current and voltage of gate and drain of the transistors
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
-    void updateLNAControls() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    void updateLNAControls();
 
     /**
      * It reads and updates from the control board the current cryo temperature measured near the LNA window
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
-    void updateCryoLNAWin() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    void updateCryoLNAWin();
 
     /**
      * It reads and updates from the control board the current vertex temperature
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
-    void updateEnvironmentTemperature() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    void updateEnvironmentTemperature();
 
     /**
      * It checks if the Dewar power box is in remote or not
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
-    void updateIsRemote() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    void updateIsRemote();
 
     /**
      * It checks if the cool head is turned on or not
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
-    void updateCoolHead() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    void updateCoolHead();
 
     /**
      * It checks is the status of the noise mark correspond to the commanded status, otherwise it sets the <i>NOISEMARKERROR</i> bit. It also check if the
      * external control of the noise mark has been enabled or not
+     * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
-    void updateNoiseMark() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
+    void updateNoiseMark();
 
     /**
      * This method resumes the whole status of the component. It set the <i>componentStatus</i> member variable.
@@ -255,50 +282,52 @@ public:
 
     /**
      * I checks if the local oscillator is locked properly
+     * @throw ComponentErrors::CORBAProblemExImpl
+     * @throw ComponentErrors::CouldntGetAttributeExImpl 
      */
-    void checkLocalOscillator() throw (ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntGetAttributeExImpl);
+    void checkLocalOscillator();
 
     /**
      * This is getter method. No need to make it thread safe......
      * @return the current value of the vacuum in mbar
      */
-    double  getVacuum() const { return m_vacuum; }
+    double getVacuum() const { return m_vacuum; }
 
     /**
      * This is getter method. No need to make it thread safe......
      * @return the current value of the cryogenic temperature at cool head in °K
      */
-    CConfiguration::BoardValue getCryoCoolHead() const { return m_cryoCoolHead; }
+    CConfiguration::BoardValue getCryoCoolHead() const noexcept { return m_cryoCoolHead; }
 
     /**
      * This is getter method. No need to make it thread safe......
       * @return the current value of the cryogenic temperature at cool head window in °K
      */
-    CConfiguration::BoardValue getCryoCoolHeadWin() const { return m_cryoCoolHeadWin; }
+    CConfiguration::BoardValue getCryoCoolHeadWin() const noexcept { return m_cryoCoolHeadWin; }
 
     /**
      * This is getter method. No need to make it thread safe......
       * @return the current value of the cryogenic temperature at LNA in °K
      */
-    CConfiguration::BoardValue getCryoLNA() const { return m_cryoLNA; }
+    CConfiguration::BoardValue getCryoLNA() const noexcept { return m_cryoLNA; }
 
     /**
      * This is getter method. No need to make it thread safe......
      * @return the current value of the cryogenic temperature at LNA  window in °K
      */
-    CConfiguration::BoardValue getCryoLNAWin() const { return m_cryoLNAWin; }
+    CConfiguration::BoardValue getCryoLNAWin() const noexcept { return m_cryoLNAWin; }
 
     /**
      * This is getter method. No need to make it thread safe......
      * @return the current value of the vertex temperature
      */
-    CConfiguration::BoardValue getEnvironmentTemperature() const { return m_environmentTemperature; }
+    CConfiguration::BoardValue getEnvironmentTemperature() const noexcept { return m_environmentTemperature; }
 
     /**
      * This is getter method. No need to make it thread safe......
      * @return the current status word
      */
-    DWORD getStatusWord() const  { return  m_statusWord; }
+    DWORD getStatusWord() const noexcept { return  m_statusWord; }
 
     /**
      * This is getter method. In this case, since it makes use of some class members that could be changed by other methods it is advisable to protect this method with the class mutex.
@@ -306,12 +335,12 @@ public:
      * @param ifs Intermediate frequency identifier, it permits to select which amplification chain we are interested in
      * @return a specific value of from the transistor control parameters
      */
-    double getFetValue(const IRA::ReceiverControl::FetValue& control,const DWORD& ifs);
+    double getFetValue(const IRA::ReceiverControl::FetValue& control,const DWORD& ifs) noexcept;
 
     /**
      * It returns the feed geometry of the receiver with respect to the central one. For this implementation it is just a placeholder since there is just one feed.
      */
-    long getFeeds(ACS::doubleSeq& X,ACS::doubleSeq& Y,ACS::doubleSeq& power);
+    long getFeeds(ACS::doubleSeq& X,ACS::doubleSeq& Y,ACS::doubleSeq& power) noexcept;
 
     /**
      * It returns back the current local oscillator frequency settings.
@@ -364,18 +393,19 @@ public:
      * Allows to set the "default_value" for the vacuum characteristic. In principle it is possible to read it directly from CDB, but I found it more
      * comfortable to get it directly from the characteristic itself.
      */
-    inline void setVacuumDefault(const double& val) { m_vacuumDefault=val; }
+    inline void setVacuumDefault(const double& val) noexcept { m_vacuumDefault=val; }
 
 protected:
     /**
      * Obtain a valid reference to the local oscillator device
-     */
-    void loadLocalOscillator()  throw (ComponentErrors::CouldntGetComponentExImpl);
+     * @throw ComponentErrors::CouldntGetComponentExImpl
+    */
+    void loadLocalOscillator();
 
     /**
      * used to free the reference to the local oscillator device
      */
-    void unloadLocalOscillator();
+    void unloadLocalOscillator() noexcept;
 private:
 
     enum TStatusBit {
@@ -436,7 +466,7 @@ private:
      */
     inline bool checkStatusBit(TStatusBit bit) { return m_statusWord & (1 << bit); }
 
-    double linearFit(double *X,double *Y,const WORD& size,double x);
+    double linearFit(double *X,double *Y,const WORD& size,double x) noexcept;
     /************************ CONVERSION FUNCTIONS **************************/
     // Convert the voltage value of the vacuum to mbar
     static double voltage2mbar(double voltage) { return(pow(10, 1.5 * voltage - 12)); }

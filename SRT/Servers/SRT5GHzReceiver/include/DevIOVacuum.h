@@ -51,8 +51,9 @@ public:
 	/**
 	 * Used to read the property value.
 	 * @param timestamp epoch when the operation completes
+	 * @throw ACSErr::ACSbaseExImpl	 
 	*/
-	CORBA::Double read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
+	CORBA::Double read(ACS::Time& timestamp)
 	{
 		m_val=m_pCore->getVacuum();
 		timestamp=getTimeStamp();  //Completion time
@@ -60,8 +61,9 @@ public:
 	}
 	/**
 	 * It writes values into controller. Unused because the properties are read-only.
+	 * @throw ACSErr::ACSbaseExImpl	 
 	*/
-	void write(const CORBA::Double& value, ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
+	void write(const CORBA::Double& value, ACS::Time& timestamp)
 	{
 		timestamp=getTimeStamp();
 		return;

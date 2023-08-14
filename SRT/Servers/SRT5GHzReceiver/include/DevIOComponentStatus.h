@@ -35,14 +35,20 @@ public:
 	bool initializeValue(){
 		return false;
 	}
-
-	Management::TSystemStatus  read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
+	
+	/*
+	 * @throw ACSErr::ACSbaseExImpl
+   */
+	Management::TSystemStatus read(ACS::Time& timestamp) {
 		m_val=m_pCore->getComponentStatus();
 		timestamp=getTimeStamp();  //Completion time
 		return m_val;
     }
-
-    void write(const CORBA::Long& value, ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
+    
+	/*
+	 * @throw ACSErr::ACSbaseExImpl
+   */
+    void write(const CORBA::Long& value, ACS::Time& timestamp) {
 		timestamp=getTimeStamp();
 		return;
 	}

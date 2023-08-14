@@ -9,7 +9,15 @@
 /* Who                                   when             What                                                   */
 /* Andrea Orlati(andrea.orlati@inaf.it)  10/08/2023       Creation                                               */
 
+#include <Cplusplus11Helper.h>
+
+#define _CPLUSPLUS11_PORTING_
+
+C11_IGNORE_WARNING_PUSH
+C11_IGNORE_WARNING("-Wdeprecated-declarations")
 #include <acsThread.h>
+C11_IGNORE_WARNING_PUSH
+
 #include <ComponentCore.h>
 
 /**
