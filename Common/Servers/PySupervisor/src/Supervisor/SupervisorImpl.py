@@ -1,8 +1,11 @@
 # Marco Buttu <marco.buttu@inaf.it> | Jul 2023
 import time
 from datetime import datetime as dt
-from math import radians
+from math import radians, sqrt
 from multiprocessing import Queue
+
+import ephem
+
 from Antenna__POA import Supervisor as POA
 from Acspy.Servants.CharacteristicComponent import CharacteristicComponent as cc
 from Acspy.Servants.ContainerServices import ContainerServices as services
@@ -22,7 +25,6 @@ import ComponentErrors
 
 from IRAPy import logger
 
-import ephem
 
 class SupervisorEx(Exception):
     pass
@@ -123,6 +125,47 @@ class SupervisorImpl(POA, cc, services, lcycle):
     def isTracking(self):
         return True
 
+    @staticmethod
+    def sunCheck():
+        antenna_name = "ANTENNA/Boss"
+        observatory_name = "ANTENNA/Observatory"
+        lat, lon = None, None
+        obs = ephem.Observer()
+        sun = ephem.Sun()
+        while True:
+            time.sleep(1)
+            client = PySimpleClient()
+            if not (lat and lon):
+                try:
+                    observatory = client.getComponent(observatory_name)
+                    lat, compl = discos_obs.latitude.get_sync()
+                    lon, compl = discos_obs.longitude.get_sync()
+                except CannotGetComponentEx as ex:
+                    print(f"Can not get component {observatory_name}")
+                    continue
+            try:
+                antenna = client.getComponent(antenna_name)
+            except CannotGetComponentEx as ex:
+                print(f"Can not get component {antenna_name}")
+                continue
+
+            t = getTimeStamp().value
+            az, el = antenna_boss.getApparentCoordinates(t)[:2]
+            # TODO: manage exception above, in case the component is no more
+            # active
+    
+            obs.lat, obs.lon, obs.date = str(lat), str(lon), dt.utcnow()
+            sun.compute(obs)
+            distance = sqrt((sun.az - az)**2 + (sun.el - el)**2)
+            if distance < value:
+                antenna.stop()
+                # Communicate with log and tracking and all possibile ways
+    
+            if client.isLoggedIn():
+                client.releaseComponent(antenna_name)
+                client.releaseComponent(observatory_name)
+                client.disconnect()
+
     def command(self, cmd):
         """Execute the command `cmd`
         
@@ -198,10 +241,3 @@ class SupervisorImpl(POA, cc, services, lcycle):
 
         logger.logInfo(f"command '{command}' executed")
         return (success, answer)
-
-def getSunAzEl():
-    srt = ephem.Observer()
-    sun = ephem.Sun()
-    srt.lat, srt.lon, srt.date = '39.493156', '9.2451556', dt.utcnow()
-    sun.compute(srt)
-    return sun.az, sun.alt
