@@ -16,10 +16,6 @@
    <xs:complexContent>
     <xs:extension base="baci:CharacteristicComponent">
       <xs:sequence>
-	    <xs:element name="addr_1" type="xs:short" />
-	    <xs:element name="addr_2" type="xs:short" />
-	    <xs:element name="addr_3" type="xs:short" />
-	    <xs:element name="addr_4" type="xs:short" />
 	    	 <xs:element name="regs_1" type="baci:ROuLongSeq" />
 	   	 <xs:element name="regs_2" type="baci:ROuLongSeq" />
 	   	 <xs:element name="regs_3" type="baci:ROuLongSeq" />
@@ -49,6 +45,10 @@
 	   	 <xs:element name="temps_3" type="baci:ROdoubleSeq" />
 	   	 <xs:element name="temps_4" type="baci:ROdoubleSeq" />
       </xs:sequence>
+       <xs:element name="addr_1" type="xs:short" use="required"/>
+	    <xs:element name="addr_2" type="xs:short" use="required"/>
+	    <xs:element name="addr_3" type="xs:short" use="required"/>
+	    <xs:element name="addr_4" type="xs:short" use="required"/>
       <xs:attribute name="DBESM_IPAddress" type="xs:string" use="required"/>
 	  <xs:attribute name="DBESM_Port" type="xs:unsignedInt" use="required"/>
     </xs:extension>
