@@ -1,9 +1,9 @@
 # Marco Buttu <marco.buttu@inaf.it> | Jul 2023
 import time
+import concurrent.futures
 from datetime import datetime as dt
-from math import radians, sqrt
-from multiprocessing import Queue
-
+from math import sqrt, degrees
+from threading import Thread
 import ephem
 
 from Antenna__POA import Supervisor as POA
@@ -22,8 +22,6 @@ from Acspy.Util import ACSCorba
 import Management
 import ComponentErrorsImpl
 import ComponentErrors
-
-from IRAPy import logger
 
 
 class SupervisorEx(Exception):
@@ -54,18 +52,21 @@ class SupervisorImpl(POA, cc, services, lcycle):
         services.__init__(self)
         self.dao_path = 'alma/ANTENNA/Supervisor'
         self.setup("default")
-        # TODO: the publisher?
+        self.stop_threads = False
+        for thread in (self.sunCheck, self.windCheck):
+            t = Thread(target=thread, daemon=True)
+            t.start()
 
     def initialize(self):
         # addProperty(self, 'status', devio_ref=StatusDevIO())
         pass
 
     def cleanUp(self):
+        self.stop_threads = True
         # self.supplier.disconnect()
-        pass
 
     def setup(self, code):
-        logger.logNotice(f"Supervisor.setup({code})")
+        self.log(f"Supervisor.setup({code})", Management.C_INFO)
         self.receiverSetup = "unknown"
         self.windAvoidance = "ON"
         self.sunAvoidance = "ON"
@@ -80,7 +81,10 @@ class SupervisorImpl(POA, cc, services, lcycle):
             self.sunLimit = float(dao.get_field_data("SunLimitDEFAULT"))
             self.receiverSetup = "DEFAULT"
             if code != "DEFAULT":
-                logger.logWarning(f"Configuration '{code}' not found")
+                self.log(
+                    f"Configuration '{code}' not found",
+                    Management.C_ERROR,
+                )
 
     def getSetup(self):
         return self.receiverSetup
@@ -97,7 +101,7 @@ class SupervisorImpl(POA, cc, services, lcycle):
             setattr(self, f"{target}Avoidance", mode)
         else:
             msg = f"mode '{mode}' not in {allowed_modes}"
-            logger.logError(msg)
+            self.log(msg, Management.C_ERROR)
             exc = ComponentErrorsImpl.NotAllowedExImpl(msg)
             raise exc.getComponentErrorsEx()
 
@@ -125,46 +129,146 @@ class SupervisorImpl(POA, cc, services, lcycle):
     def isTracking(self):
         return True
 
-    @staticmethod
-    def sunCheck():
+    # TODO: fare un metodo/funzione che ottiene il component, passandole
+    # il nome del component. Questo serve per il logging e per ogni volta
+    # che ci occorre un client
+
+    def windCheck(self):
+        while True:
+            if self.stop_threads:
+                print("Stopping windCheck")
+                break
+            time.sleep(10)
+            print("WIND: windAvoidance: ", self.windAvoidance)
+        print("windCheck() stopped")
+
+    def disconnect(self, client):
+        try:
+            if client.isLoggedIn():
+                client.disconnect()
+        except Exception as ex:
+            self.log(
+                "Cannot disconnect the client",
+                Management.C_WARNING,
+            )
+
+    def log(self, message, level=Management.C_WARNING):
+        try:
+            print(message)
+            logger_name = "MANAGEMENT/CustomLogger"
+            client = PySimpleClient()
+            logger = client.getComponent(logger_name)
+            logger.emitLog(message, level)
+        except CannotGetComponentEx as ex:
+            print(f"Cannot get {logger_name}")
+        except Exception as ex:
+            print(f"Unexpected exception in log(): {ex}")
+        finally:
+            self.disconnect(client)
+
+    def sunCheck(self):
+        print("sunCheck() thread started")
         antenna_name = "ANTENNA/Boss"
+        mount_name = "ANTENNA/Mount"
         observatory_name = "ANTENNA/Observatory"
         lat, lon = None, None
         obs = ephem.Observer()
         sun = ephem.Sun()
+        stop_notified = False
         while True:
             time.sleep(1)
+            if self.stop_threads:
+                print("Stopping sunCheck() thread")
+                break
+            if self.sunAvoidance == "OFF":
+                continue  # Sleep again
+
             client = PySimpleClient()
             if not (lat and lon):
                 try:
                     observatory = client.getComponent(observatory_name)
-                    lat, compl = discos_obs.latitude.get_sync()
-                    lon, compl = discos_obs.longitude.get_sync()
+                    lat, compl = observatory.latitude.get_sync()
+                    lon, compl = observatory.longitude.get_sync()
                 except CannotGetComponentEx as ex:
-                    print(f"Can not get component {observatory_name}")
-                    continue
+                    self.log(f"Supervisor can not get {observatory_name}")
+                except Exception as ex:
+                    print(f"Unexpected exception: {ex}")
+                finally:
+                    self.disconnect(client)
+                    continue  # Sleep again
+
             try:
                 antenna = client.getComponent(antenna_name)
             except CannotGetComponentEx as ex:
-                print(f"Can not get component {antenna_name}")
-                continue
+                self.log(
+                    f"Can not get component {antenna_name}",
+                    Management.C_ERROR,
+                )
+                self.disconnect(client)
+                continue  # Sleep again
 
             t = getTimeStamp().value
-            az, el = antenna_boss.getApparentCoordinates(t)[:2]
-            # TODO: manage exception above, in case the component is no more
-            # active
+            try:
+                az, compl = antenna.observedAzimuth.get_sync()
+                el, compl = antenna.observedElevation.get_sync()
+                az, el = degrees(az), degrees(el)
+            except Exception as ex:
+                self.log(
+                    f"Cannot get antenna coordinates: {ex}",
+                    Management.C_ERROR,
+                )
+                self.disconnect(client)
+                continue  # Sleep again
     
             obs.lat, obs.lon, obs.date = str(lat), str(lon), dt.utcnow()
             sun.compute(obs)
-            distance = sqrt((sun.az - az)**2 + (sun.el - el)**2)
-            if distance < value:
-                antenna.stop()
-                # Communicate with log and tracking and all possibile ways
-    
-            if client.isLoggedIn():
-                client.releaseComponent(antenna_name)
-                client.releaseComponent(observatory_name)
-                client.disconnect()
+            sun_az, sun_el = degrees(sun.az), degrees(sun.alt)
+
+            if (diff := abs(sun_az - az)) <= 180:
+                delta_az = diff
+            else:
+                delta_az = 360 - diff
+
+            distance = sqrt(delta_az**2 + (sun_el - el)**2)
+            if distance < self.sunLimit:
+                try:
+                    mount = client.getComponent(mount_name)
+                    az_mode, compl = mount.azimuthMode.get_sync()
+                    el_mode, compl = mount.elevationMode.get_sync()
+                    if str(az_mode) == str(el_mode) == "ACU_STOP":
+                        if not stop_notified:
+                            self.log(
+                                f"Antenna stopped, pointing close to the Sun",
+                                Management.C_WARNING,
+                            )
+                            stop_notified = True
+                        continue
+                except CannotGetComponentEx as ex:
+                    self.log(
+                        f"Can not get component {mount_name}",
+                        Management.C_WARNING,
+                    )
+                except Exception:
+                    pass
+
+                self.log(f"Supervisor: stopping antenna, pointing close to the Sun")
+                self.log(f"Sun(az, el) -> ({sun_az:.2f}, {sun_el:.2f})", Management.C_INFO)
+                self.log(f"Ant(az, el) -> ({az:.2f}, {el:.2f})", Management.C_INFO)
+                self.log(f"Safe Limit -> {self.sunLimit:.2f}", Management.C_INFO)
+                self.log(f"Distance from Sun -> {distance:.2f}", Management.C_INFO)
+                try:
+                    antenna.stop()
+                except Exception as ex:
+                    self.log(f"Cannot stop the antenna: {ex}")
+                    self.disconnect(client)
+                    continue  # Sleep again
+
+            if stop_notified:
+                self.log(f"Antenna is now pointing at safe distance from the Sun")
+            stop_notified = False
+            self.disconnect(client)
+        print("sunCheck() thread stopped")
+
 
     def command(self, cmd):
         """Execute the command `cmd`
@@ -189,12 +293,12 @@ class SupervisorImpl(POA, cc, services, lcycle):
             success = True
 
         if not success:
-            logger.logError(answer)
+            self.log(answer, Management.C_ERROR)
             return (success, answer)
 
         if command not in SupervisorImpl.commands:
             answer = f"Error - command '{command}' does not exist"
-            logger.logError(answer)
+            self.log(answer, Management.C_ERROR)
             return (False, answer)
         else:
             method_name, types = SupervisorImpl.commands[command]
@@ -203,14 +307,14 @@ class SupervisorImpl(POA, cc, services, lcycle):
                     f"Error - expecting {len(types)} arguments, {len(args)} given\n" 
                     f"type help({command}) for details"
                 )
-                logger.logError(answer)
+                self.log(answer, Management.C_ERROR)
                 return (False, answer)
 
             try:
                 method = getattr(self, method_name)
             except AttributeError as ex:
                 answer = f"Error - Supervisor.{method_name}() does not exist"
-                logger.logError(answer)
+                self.log(answer, Management.C_ERROR)
                 return (False, answer)
             try:
                 result = method(*[type_(arg) for (arg, type_) in zip(args, types)])
@@ -228,16 +332,16 @@ class SupervisorImpl(POA, cc, services, lcycle):
                 success = True
             except (ValueError, TypeError) as ex:
                 answer = f"Error - wrong syntax.\nType help({command}) for details"
-                logger.logError(f"{ex.message}\n{answer}")
+                self.log(f"{ex.message}\n{answer}", Management.C_ERROR)
                 return (False, answer)
             except ComponentErrors.ComponentErrorsEx as ex:
                 answer = f"Error - {ex.errorTrace.data}"
-                logger.logError(answer)
+                self.log(answer, Management.C_ERROR)
                 return (False, answer)
             except Exception as ex:
                 answer = "Error - {unexpected exception}"
-                logger.logError(answer)
+                self.log(answer, Management.C_ERROR)
                 return (False, answer)
 
-        logger.logInfo(f"command '{command}' executed")
+        self.log(f"command '{command}' executed", Management.C_INFO)
         return (success, answer)
