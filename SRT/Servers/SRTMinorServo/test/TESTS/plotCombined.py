@@ -67,7 +67,7 @@ with open(os.path.join(arguments.directory, 'DEROTATOR', 'trajectory.txt'), 'r')
         args = line.strip().split()
         trajectory_rotation.append(float(args[1]))
 
-fig, axs = plt.subplots(7)
+fig, axs = plt.subplots(7, sharex=True)
 fig.canvas.manager.set_window_title('Program Track Positions')
 fig.suptitle('Program Track Positions')
 

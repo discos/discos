@@ -27,11 +27,13 @@
 #define EPSILON                 0.00001
 
 #define SRP_COORDINATES         std::vector<std::string>{ "SRP_TX", "SRP_TY", "SRP_TZ", "SRP_RX", "SRP_RY", "SRP_RZ" }
-#define SRP_MAX_RANGES          std::vector<double>{ 40, 40, 40, 0.2, 0.2, 0.2 }
+#define SRP_MAX_RANGES          std::vector<double>{ 50, 110, 50, 0.25, 0.25, 0.25 }
+#define SRP_MAX_SPEED           std::vector<double>{ 4.0, 4.0, 4.0, 0.04, 0.04, 0.04 }
 
 #define DEROTATOR               std::string("GFR1")
 #define DEROTATOR_COORDINATES   std::vector<std::string>{ DEROTATOR + "_ROTATION" }
-#define DEROTATOR_RANGES        std::vector<double>{ 10.0, 50.0 }
+#define DEROTATOR_RANGES        std::vector<double>{ 10.0, 100.0 }
+#define DEROTATOR_MAX_SPEED     std::vector<double>{ 3.3 }
 
 
 std::atomic<bool> terminate = false;
@@ -41,10 +43,46 @@ class CombinedProgramTrackTest : public ::testing::Test
 {
 protected:
     std::vector<double> SRPStartingCoordinates = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-    std::vector<double> DerotatorStartingCoordinates = { 0.0 };
+    std::vector<double> DerotatorStartingCoordinates = { 10.0 };
     std::string directory;
-    std::thread SRPStatusThread;
-    std::thread DerotatorStatusThread;
+    std::thread statusThread;
+
+    static void printStatus(std::string directory)
+    {
+        SRTMinorServoSocket& socket = SRTMinorServoSocket::getInstance();
+        SRTMinorServoAnswerMap SRPStatus, DerotatorStatus;
+
+        ofstream SRPStatusFile, DerotatorStatusFile;
+        SRPStatusFile.open(directory + "/SRP/status.txt", ios::out);
+        DerotatorStatusFile.open(directory + "/DEROTATOR/status.txt", ios::out);
+
+        long unsigned int counter = 0;
+
+        double tn = CIRATools::getUNIXEpoch();
+
+        while(!terminate)
+        {
+            SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::status("SRP"));
+            DerotatorStatus = socket.sendCommand(SRTMinorServoCommandLibrary::status("Derotatore" + DEROTATOR));
+            std::string SRPStringStatus = serializeSRPStatus(SRPStatus);
+            std::string DerotatorStringStatus = serializeDerotatorStatus(DerotatorStatus);
+
+            SRPStatusFile << SRPStringStatus << std::endl;
+            DerotatorStatusFile << DerotatorStringStatus << std::endl;
+            if(counter % 10 == 0)
+            {
+                std::cout << SRPStringStatus << std::endl;
+                std::cout << DerotatorStringStatus << std::endl;
+            }
+            counter++;
+
+            tn += STATUS_PERIOD;
+            std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, tn - CIRATools::getUNIXEpoch()))));
+        }
+
+        SRPStatusFile.close();
+        DerotatorStatusFile.close();
+    }
 
     static void printSRPStatus(std::string filename)
     {
@@ -200,17 +238,6 @@ protected:
         return true;
     }
 
-    /*static bool moveAxis(std::vector<double> &coordinates, int axis_to_move, int sign)
-    {
-        sign = sign / abs(sign);
-        double offset_to_add;
-        axis_to_move >= 3 ? offset_to_add = 0.05 : offset_to_add = 0.8;
-        coordinates[axis_to_move] += sign * offset_to_add;
-        if(fabs(coordinates[axis_to_move]) >= MAX_RANGES[axis_to_move])
-            return true;
-        return false;
-    }*/
-
     void SetUp() override
     {
         srand((int)CIRATools::getUNIXEpoch());
@@ -282,32 +309,26 @@ protected:
 
         bool SRPReady = false, DerotatorReady = false;
 
-        while(true)
+        do
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
             SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::status("SRP"));
             EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
-            EXPECT_EQ(std::get<long>(SRPStatus["SRP_OPERATIVE_MODE"]), 40);
             std::cout << serializeSRPStatus(SRPStatus) << std::endl;
-
-            if(compareCoordinates(SRPStartingCoordinates, getCoordinates(SRPStatus, SRP_COORDINATES)))
-                SRPReady = true;
+            SRPReady = std::get<long>(SRPStatus["SRP_OPERATIVE_MODE"]) == 40 ? true : false;
 
             DerotatorStatus = socket.sendCommand(SRTMinorServoCommandLibrary::status("Derotatore" + DEROTATOR));
             EXPECT_EQ(std::get<std::string>(DerotatorStatus["OUTPUT"]), "GOOD");
-            EXPECT_EQ(std::get<long>(DerotatorStatus[DEROTATOR + "_OPERATIVE_MODE"]), 40);
             std::cout << serializeDerotatorStatus(DerotatorStatus) << std::endl;
-
-            if(compareCoordinates(DerotatorStartingCoordinates, getCoordinates(DerotatorStatus, DEROTATOR_COORDINATES)))
-                DerotatorReady = true;
-
-            if(SRPReady && DerotatorReady)
-                break;
+            DerotatorReady = std::get<long>(DerotatorStatus[DEROTATOR + "_OPERATIVE_MODE"]) == 40 ? true : false;
 
             if(terminate)
                 FAIL() << "Aborting test..." << std::endl;
         }
+        while(!SRPReady || !DerotatorReady);
+        EXPECT_EQ(std::get<long>(SRPStatus["SRP_OPERATIVE_MODE"]), 40);
+        EXPECT_EQ(std::get<long>(DerotatorStatus[DEROTATOR + "_OPERATIVE_MODE"]), 40);
 
         std::cout << "OK." << std::endl;
 
@@ -331,8 +352,7 @@ protected:
         boost::filesystem::create_directory(directory + "/SRP");
         boost::filesystem::create_directory(directory + "/DEROTATOR");
 
-        SRPStatusThread = std::thread(&CombinedProgramTrackTest::printSRPStatus, directory + "/SRP/status.txt");
-        DerotatorStatusThread = std::thread(&CombinedProgramTrackTest::printDerotatorStatus, directory + "/DEROTATOR/status.txt");
+        statusThread = std::thread(&CombinedProgramTrackTest::printStatus, directory);
     }
 
     void TearDown() override
@@ -355,16 +375,20 @@ TEST_F(CombinedProgramTrackTest, SineWaveMovementTest)
     std::vector<double> DerotatorCoordinates = DerotatorStartingCoordinates;
 
     std::vector<double> phase_shift;
+    std::vector<double> period;
     for(size_t axis = 0; axis < 6; axis++)
     {
-        phase_shift.push_back((double)std::rand() / RAND_MAX * 60);
-        SRPCoordinates[axis] = SRP_MAX_RANGES[axis] * sin(phase_shift[axis] * 2 * M_PI / 60);
+        period.push_back(SRP_MAX_RANGES[axis] / SRP_MAX_SPEED[axis] * 4);
+        phase_shift.push_back((double)std::rand() / RAND_MAX * period[axis]);
+        SRPCoordinates[axis] = SRP_MAX_RANGES[axis] * sin(phase_shift[axis] * 2 * M_PI / period[axis]);
     }
 
-    phase_shift.push_back((double)std::rand() / RAND_MAX * 60);
     double derotator_amplitude = (DEROTATOR_RANGES[1] - DEROTATOR_RANGES[0]) / 2;
     double derotator_center = (DEROTATOR_RANGES[0] + DEROTATOR_RANGES[1]) / 2;
-    DerotatorCoordinates[0] = derotator_center + derotator_amplitude * sin(phase_shift[3] * 2 * M_PI / 60);
+    // Derotator period
+    period.push_back(80);
+    phase_shift.push_back((double)std::rand() / RAND_MAX * period[6]);
+    DerotatorCoordinates[0] = derotator_center + derotator_amplitude * sin(phase_shift[6] * 2 * M_PI / period[6]);
 
     SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::programTrack("SRP", trajectory_id, point_id, SRPCoordinates, start_time));
     EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
@@ -401,9 +425,9 @@ TEST_F(CombinedProgramTrackTest, SineWaveMovementTest)
 
         for(size_t axis = 0; axis < 6; axis++)
         {
-            SRPCoordinates[axis] = SRP_MAX_RANGES[axis] * sin((time_delta + phase_shift[axis]) * 2 * M_PI / 60);
+            SRPCoordinates[axis] = SRP_MAX_RANGES[axis] * sin((time_delta + phase_shift[axis]) * 2 * M_PI / period[axis]);
         }
-        DerotatorCoordinates[0] = derotator_center + derotator_amplitude * sin((time_delta + phase_shift[3]) * 2 * M_PI / 60);
+        DerotatorCoordinates[0] = derotator_center + derotator_amplitude * sin((time_delta + phase_shift[6]) * 2 * M_PI / period[6]);
 
         SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::programTrack("SRP", trajectory_id, point_id, SRPCoordinates));
         EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
@@ -416,6 +440,93 @@ TEST_F(CombinedProgramTrackTest, SineWaveMovementTest)
 
     SRPProgramTrackFile.close();
     DerotatorProgramTrackFile.close();
-    SRPStatusThread.join();
-    DerotatorStatusThread.join();
+    statusThread.join();
+}
+
+TEST_F(CombinedProgramTrackTest, SineWaveSeparateMovementTest)
+{
+    SRTMinorServoSocket& socket = SRTMinorServoSocket::getInstance();
+    SRTMinorServoAnswerMap SRPStatus, DerotatorStatus;
+
+    ofstream SRPProgramTrackFile;
+    SRPProgramTrackFile.open(directory + "/SRP/trajectory.txt", ios::out);
+
+    ofstream DerotatorProgramTrackFile;
+    DerotatorProgramTrackFile.open(directory + "/DEROTATOR/trajectory.txt", ios::out);
+
+    while(!terminate)
+    {
+        double start_time = CIRATools::getUNIXEpoch() + ADVANCE_TIMEGAP;
+        std::cout << "Starting new trajectory with start time: " << start_time << std::endl;
+        long unsigned int trajectory_id = int(start_time);
+        unsigned int point_id = 0;
+        std::vector<double> SRPCoordinates = SRPStartingCoordinates;
+        std::vector<double> DerotatorCoordinates = DerotatorStartingCoordinates;
+
+        std::vector<double> phase_shift;
+        std::vector<double> period;
+        for(size_t axis = 0; axis < 6; axis++)
+        {
+            period.push_back(SRP_MAX_RANGES[axis] / SRP_MAX_SPEED[axis] * 4);
+            phase_shift.push_back((double)std::rand() / RAND_MAX * period[axis]);
+            SRPCoordinates[axis] = SRP_MAX_RANGES[axis] * sin(phase_shift[axis] * 2 * M_PI / period[axis]);
+        }
+
+        double derotator_amplitude = (DEROTATOR_RANGES[1] - DEROTATOR_RANGES[0]) / 2;
+        double derotator_center = (DEROTATOR_RANGES[0] + DEROTATOR_RANGES[1]) / 2;
+        // Derotator period
+        period.push_back(80);
+        phase_shift.push_back((double)std::rand() / RAND_MAX * period[6]);
+        DerotatorCoordinates[0] = derotator_center + derotator_amplitude * sin(phase_shift[6] * 2 * M_PI / period[6]);
+
+        SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::programTrack("SRP", trajectory_id, point_id, SRPCoordinates, start_time));
+        EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
+        DerotatorStatus = socket.sendCommand(SRTMinorServoCommandLibrary::programTrack("Derotatore" + DEROTATOR, trajectory_id, point_id, DerotatorCoordinates, start_time));
+        EXPECT_EQ(std::get<std::string>(DerotatorStatus["OUTPUT"]), "GOOD");
+
+        SRPProgramTrackFile << CombinedProgramTrackTest::serializeCoordinates(start_time, SRPCoordinates) << std::endl;
+        DerotatorProgramTrackFile << CombinedProgramTrackTest::serializeCoordinates(start_time, DerotatorCoordinates) << std::endl;
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+        SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::status("SRP"));
+        EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
+        EXPECT_EQ(std::get<long>(SRPStatus["SRP_OPERATIVE_MODE"]), 50);
+
+        DerotatorStatus = socket.sendCommand(SRTMinorServoCommandLibrary::status("Derotatore" + DEROTATOR));
+        EXPECT_EQ(std::get<std::string>(DerotatorStatus["OUTPUT"]), "GOOD");
+        EXPECT_EQ(std::get<long>(DerotatorStatus[DEROTATOR + "_OPERATIVE_MODE"]), 50);
+
+        double next_expected_time = start_time;
+
+        while(!terminate)
+        {
+            next_expected_time += TIMEGAP;
+            double time_delta = next_expected_time - start_time;
+
+            std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXEpoch()))));
+            point_id++;
+
+            for(size_t axis = 0; axis < 6; axis++)
+            {
+                SRPCoordinates[axis] = SRP_MAX_RANGES[axis] * sin((time_delta + phase_shift[axis]) * 2 * M_PI / period[axis]);
+            }
+            DerotatorCoordinates[0] = derotator_center + derotator_amplitude * sin((time_delta + phase_shift[6]) * 2 * M_PI / period[6]);
+
+            SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::programTrack("SRP", trajectory_id, point_id, SRPCoordinates));
+            EXPECT_EQ(std::get<std::string>(SRPStatus["OUTPUT"]), "GOOD");
+            SRPProgramTrackFile << CombinedProgramTrackTest::serializeCoordinates(next_expected_time, SRPCoordinates) << std::endl;
+
+            DerotatorStatus = socket.sendCommand(SRTMinorServoCommandLibrary::programTrack("Derotatore" + DEROTATOR, trajectory_id, point_id, DerotatorCoordinates));
+            EXPECT_EQ(std::get<std::string>(DerotatorStatus["OUTPUT"]), "GOOD");
+            DerotatorProgramTrackFile << CombinedProgramTrackTest::serializeCoordinates(next_expected_time, DerotatorCoordinates) << std::endl;
+
+            if(point_id == 1000)
+                break;
+        }
+    }
+
+    SRPProgramTrackFile.close();
+    DerotatorProgramTrackFile.close();
+    statusThread.join();
 }

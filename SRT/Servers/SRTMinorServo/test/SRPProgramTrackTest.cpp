@@ -22,7 +22,9 @@
 #define NOISE_THRESHOLD     1
 #define TIMEGAP             0.2
 #define ADVANCE_TIMEGAP     5
-#define MAX_RANGES          std::vector<double>{ 40, 40, 40, 0.2, 0.2, 0.2 }
+//#define MAX_RANGES          std::vector<double>{ 40, 40, 40, 0.2, 0.2, 0.2 }
+#define MAX_RANGES          std::vector<double>{ 50, 110, 50, 0.25, 0.25, 0.25 }
+#define MAX_SPEED           std::vector<double>{ 4, 4, 4, 0.04, 0.04, 0.04 }
 #define STATUS_PERIOD       0.01
 
 std::atomic<bool> terminate = false;
@@ -72,7 +74,21 @@ protected:
 
     static std::string serializeStatus(SRTMinorServoAnswerMap map)
     {
-        std::string status = serializeCoordinates(std::get<double>(map["TIMESTAMP"]), getCoordinates(map));
+        std::string status;
+        try
+        {
+            status = serializeCoordinates(std::get<double>(map["TIMESTAMP"]), getCoordinates(map));
+        }
+        catch(std::bad_variant_access const& ex)
+        {
+            std::cout << "Bad timestamp!" << std::endl;
+
+            SRTMinorServoAnswerMap::iterator iterator;
+            for(iterator = map.begin(); iterator != map.end(); ++iterator)
+            {
+                std::visit([iterator](const auto& var) mutable { std::cout << iterator->first << ": " << var << std::endl; }, iterator->second);
+            }
+        }
         status += serializeElongations(getElongations(map));
         return status;
     }
@@ -110,8 +126,8 @@ protected:
             }
             catch(std::bad_variant_access const& ex)
             {
-                std::cout << ex.what() << ", variant index: " << value.index() << std::endl;
-                currentCoordinates.push_back(200.0);
+                std::cout << "Bad floating point coordinate:" << std::get<long>(value) << std::endl;
+                currentCoordinates.push_back(double(std::get<long>(value)));
             }
         }
 
@@ -133,8 +149,8 @@ protected:
             }
             catch(std::bad_variant_access const& ex)
             {
-                std::cout << ex.what() << ", variant index: " << value.index() << std::endl;
-                currentElongations.push_back(10000.0);
+                std::cout << "Bad floating point elongation:" << std::get<long>(value) << std::endl;
+                currentElongations.push_back(double(std::get<long>(value)));
             }
         }
 
@@ -143,10 +159,16 @@ protected:
 
     static bool moveAxis(std::vector<double> &coordinates, int axis_to_move, int sign)
     {
-        sign = sign / abs(sign);
-        double offset_to_add;
-        axis_to_move >= 3 ? offset_to_add = 0.076 : offset_to_add = 0.8;
+        double starting_sign = coordinates[axis_to_move] > 0 ? 1 : (coordinates[axis_to_move] < 0 ? -1 : 0);
+        double offset_to_add = MAX_SPEED[axis_to_move] / 5;
         coordinates[axis_to_move] += sign * offset_to_add;
+        double ending_sign = coordinates[axis_to_move] > 0 ? 1 : (coordinates[axis_to_move] < 0 ? -1 : 0);
+        if(starting_sign == -1 && ending_sign >= 0)
+        {
+            // Zero crossed
+            coordinates[axis_to_move] = 0.0;
+            return false;
+        }
         if(fabs(coordinates[axis_to_move]) >= MAX_RANGES[axis_to_move])
         {
             coordinates[axis_to_move] = sign * MAX_RANGES[axis_to_move];
@@ -411,10 +433,13 @@ TEST_F(SRPProgramTrackTest, SineWaveMovementTest)
     std::vector<double> programTrackCoordinates = startingCoordinates;
 
     std::vector<double> phase_shift;
+    std::vector<double> period;
     for(size_t axis = 0; axis < 6; axis++)
     {
-        phase_shift.push_back((double)std::rand() / RAND_MAX * 60);
-        programTrackCoordinates[axis] = MAX_RANGES[axis] * sin(phase_shift[axis] * 2 * M_PI / 60);
+        double period_multiplier = axis < 3 ? 4 : 4;
+        period.push_back(MAX_RANGES[axis] / MAX_SPEED[axis] * period_multiplier);
+        phase_shift.push_back((double)std::rand() / RAND_MAX * period[axis]);
+        programTrackCoordinates[axis] = MAX_RANGES[axis] * sin(phase_shift[axis] * 2 * M_PI / period[axis]);
     }
 
     SRTMinorServoSocket& socket = SRTMinorServoSocket::getInstance();
@@ -444,7 +469,7 @@ TEST_F(SRPProgramTrackTest, SineWaveMovementTest)
 
         for(size_t axis = 0; axis < 6; axis++)
         {
-            programTrackCoordinates[axis] = MAX_RANGES[axis] * sin((time_delta + phase_shift[axis]) * 2 * M_PI / 60);
+            programTrackCoordinates[axis] = MAX_RANGES[axis] * sin((time_delta + phase_shift[axis]) * 2 * M_PI / period[axis]);
         }
 
         SRPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::programTrack("SRP", trajectory_id, point_id, programTrackCoordinates));
@@ -471,6 +496,8 @@ TEST_F(SRPProgramTrackTest, SeparateMovementTest)
 
     std::cout << "PRESET position reached, starting PROGRAMTRACK" << std::endl;
     std::vector<double> programTrackCoordinates = startingCoordinates;
+
+    bool immediate = true;
 
     while(!terminate)
     {
@@ -499,7 +526,7 @@ TEST_F(SRPProgramTrackTest, SeparateMovementTest)
             if(idle)
             {
                 idle_count++;
-                if(idle_count == ADVANCE_TIMEGAP / TIMEGAP)
+                if(idle_count == (ADVANCE_TIMEGAP / TIMEGAP) || immediate)
                 {
                     idle_count = 0;
                     idle = false;
@@ -513,9 +540,8 @@ TEST_F(SRPProgramTrackTest, SeparateMovementTest)
                     sign *= -1;
                     idle = true;
                 }
-                else if(round(programTrackCoordinates[axis_to_move] * 100) == 0 && sign == 1)
+                else if(programTrackCoordinates[axis_to_move] == 0.0 && sign == 1)
                 {
-                    programTrackCoordinates[axis_to_move] = 0.0;
                     axis_to_move == 5 ? axis_to_move = 0 : axis_to_move++;
                     idle = true;
                 }
@@ -527,6 +553,8 @@ TEST_F(SRPProgramTrackTest, SeparateMovementTest)
             //std::cout << SRPProgramTrackTest::serializeCoordinates(next_expected_time, programTrackCoordinates) << std::endl;
             programTrackFile << SRPProgramTrackTest::serializeCoordinates(next_expected_time, programTrackCoordinates) << std::endl;
         }
+
+        //immediate = immediate ? false : true;
     }
 
     programTrackFile.close();

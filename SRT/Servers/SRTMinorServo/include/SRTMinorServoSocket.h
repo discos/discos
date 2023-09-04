@@ -23,6 +23,7 @@ friend class SRTMinorServoSocketTest;
 friend class SRPProgramTrackTest;
 friend class DerotatorProgramTrackTest;
 friend class CombinedProgramTrackTest;
+friend class ReadStatusOnlyTest;
 
 public:
     /**

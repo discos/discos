@@ -54,7 +54,7 @@ protected:
             std::string status = serializeStatus(DerotatorStatus);
 
             statusFile << status << std::endl;
-            if(counter % 10 == 0)
+            if(counter % (long unsigned int)(0.1 / STATUS_PERIOD) == 0)
                 std::cout << status << std::endl;
             counter++;
 
@@ -111,7 +111,7 @@ protected:
     static bool moveAxis(std::vector<double> &coordinates, int axis_to_move, int sign)
     {
         sign = sign / abs(sign);
-        double offset_to_add = 3.3 / 5;
+        double offset_to_add = 3.3 * TIMEGAP;
         coordinates[axis_to_move] += sign * offset_to_add;
         if(sign > 0)
         {
@@ -175,13 +175,12 @@ protected:
             std::visit([iterator](const auto& var) mutable { std::cout << iterator->first << ": " << var << std::endl; }, iterator->second);
         }
 
-        std::cout << "Sending derotator to 0...";
+        std::cout << "Sending derotator to the initial position..." << std::endl;
 
         DerotatorStatus = socket.sendCommand(SRTMinorServoCommandLibrary::preset("Derotatore" + DEROTATOR, startingCoordinates));
         EXPECT_EQ(std::get<std::string>(DerotatorStatus["OUTPUT"]), "GOOD");
 
         signal(SIGINT, DerotatorProgramTrackTest::sigintHandler);
-
 
         do
         {
@@ -242,7 +241,7 @@ TEST_F(DerotatorProgramTrackTest, ContinuousMovementTest)
     DerotatorStatus = socket.sendCommand(command);
     EXPECT_EQ(std::get<std::string>(DerotatorStatus["OUTPUT"]), "GOOD");
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
     DerotatorStatus = socket.sendCommand(SRTMinorServoCommandLibrary::status("Derotatore" + DEROTATOR));
     EXPECT_EQ(std::get<std::string>(DerotatorStatus["OUTPUT"]), "GOOD");
@@ -309,7 +308,8 @@ TEST_F(DerotatorProgramTrackTest, SineWaveMovementTest)
     double phase_shift = (double)std::rand() / RAND_MAX * 60;
     double amplitude = (RANGES[1] - RANGES[0]) / 2;
     double center = (RANGES[0] + RANGES[1]) / 2;
-    programTrackCoordinates[0] = center + amplitude * sin(phase_shift * 2 * M_PI / 60);
+    double period = 80;
+    programTrackCoordinates[0] = center + amplitude * sin(phase_shift * 2 * M_PI / period);
 
     SRTMinorServoSocket& socket = SRTMinorServoSocket::getInstance();
     SRTMinorServoAnswerMap DerotatorStatus;
@@ -336,7 +336,7 @@ TEST_F(DerotatorProgramTrackTest, SineWaveMovementTest)
         std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXEpoch()))));
         point_id++;
 
-        programTrackCoordinates[0] = center + amplitude * sin((time_delta + phase_shift) * 2 * M_PI / 60);
+        programTrackCoordinates[0] = center + amplitude * sin((time_delta + phase_shift) * 2 * M_PI / period);
 
         DerotatorStatus = socket.sendCommand(SRTMinorServoCommandLibrary::programTrack("Derotatore" + DEROTATOR, trajectory_id, point_id, programTrackCoordinates));
         EXPECT_EQ(std::get<std::string>(DerotatorStatus["OUTPUT"]), "GOOD");
@@ -363,6 +363,8 @@ TEST_F(DerotatorProgramTrackTest, SeparateMovementTest)
     std::cout << "PRESET position reached, starting PROGRAMTRACK" << std::endl;
     std::vector<double> programTrackCoordinates = startingCoordinates;
 
+    bool immediate = true;
+
     while(!terminate)
     {
         double start_time = CIRATools::getUNIXEpoch() + ADVANCE_TIMEGAP;
@@ -374,7 +376,7 @@ TEST_F(DerotatorProgramTrackTest, SeparateMovementTest)
         EXPECT_EQ(std::get<std::string>(DerotatorStatus["OUTPUT"]), "GOOD");
         programTrackFile << DerotatorProgramTrackTest::serializeCoordinates(start_time, programTrackCoordinates) << std::endl;
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
         DerotatorStatus = socket.sendCommand(SRTMinorServoCommandLibrary::status("Derotatore" + DEROTATOR));
         EXPECT_EQ(std::get<std::string>(DerotatorStatus["OUTPUT"]), "GOOD");
@@ -390,7 +392,8 @@ TEST_F(DerotatorProgramTrackTest, SeparateMovementTest)
             if(idle)
             {
                 idle_count++;
-                if(idle_count == 25)
+                //if(idle_count == ADVANCE_TIMEGAP / TIMEGAP)
+                if(idle_count == ADVANCE_TIMEGAP / TIMEGAP || immediate)
                 {
                     idle_count = 0;
                     idle = false;
@@ -412,6 +415,8 @@ TEST_F(DerotatorProgramTrackTest, SeparateMovementTest)
             //std::cout << DerotatorProgramTrackTest::serializeCoordinates(next_expected_time, programTrackCoordinates) << std::endl;
             programTrackFile << DerotatorProgramTrackTest::serializeCoordinates(next_expected_time, programTrackCoordinates) << std::endl;
         }
+
+        //immediate = immediate ? false : true;
     }
 
     programTrackFile.close();
@@ -435,7 +440,7 @@ TEST_F(DerotatorProgramTrackTest, RapidTrajectoryTest)
     while(!terminate)
     {
         std::vector<double> programTrackCoordinates = startingCoordinates;
-        programTrackCoordinates[0] = 25.0;
+        programTrackCoordinates[0] = RANGES[1];
 
         double start_time = CIRATools::getUNIXEpoch() + ADVANCE_TIMEGAP;
         long unsigned int trajectory_id = int(start_time);
@@ -446,7 +451,7 @@ TEST_F(DerotatorProgramTrackTest, RapidTrajectoryTest)
         EXPECT_EQ(std::get<std::string>(DerotatorStatus["OUTPUT"]), "GOOD");
         programTrackFile << DerotatorProgramTrackTest::serializeCoordinates(start_time, programTrackCoordinates) << std::endl;
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
         DerotatorStatus = socket.sendCommand(SRTMinorServoCommandLibrary::status("Derotatore" + DEROTATOR));
         EXPECT_EQ(std::get<std::string>(DerotatorStatus["OUTPUT"]), "GOOD");
@@ -462,7 +467,7 @@ TEST_F(DerotatorProgramTrackTest, RapidTrajectoryTest)
             if(idle)
             {
                 idle_count++;
-                if(idle_count == 25)
+                if(idle_count == (ADVANCE_TIMEGAP * 2) / TIMEGAP)
                 {
                     idle_count = 0;
                     idle = false;
