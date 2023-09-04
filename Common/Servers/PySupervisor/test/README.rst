@@ -39,8 +39,9 @@ To manually test the antenna stop:
 * AntennaBoss.setup(CCB)
 * Mount.changeMode(PRESET, PRESET)
 
-Now, to point close to the Sun, get the current azimuth
-and elevation of the Sun (in UTC time), from here:
+Sun avoidance test
+------------------
+Get the current azimuth and elevation of the Sun (in UTC time), from here:
    
    https://aa.usno.navy.mil/data/index
 
@@ -55,3 +56,8 @@ At some point you should get a message informing that Supervisor is
 going to stop the antenna, because it is pointing close to the Sun.
 When the pointing is again at safe distance from the Sun, you get
 another message.
+
+Wind avoidance test
+-------------------
+The wind value from the simulator is 6.4.  Just set the windLimit to
+5, the windCheck() thread should stow the antenna after the sleep time.
