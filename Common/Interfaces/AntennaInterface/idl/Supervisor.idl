@@ -15,7 +15,6 @@ module Antenna {
     struct SupervisorDataBlock {
         ACS::Time timeMark;
         boolean tracking;
-        double sunAvoidanceOffset;
     };
 
     const string SUPERVISOR_DATA_CHANNEL = "SupervisorData";
@@ -80,6 +79,20 @@ module Antenna {
         double getWindSafeLimit() raises (ComponentErrors::ComponentErrorsEx);
 
 
+        /** Get the average wind value.
+         * 
+         * @throw ComponentErrors::ComponentErrorsEx
+         */
+        double getAverageWind() raises (ComponentErrors::ComponentErrorsEx);
+
+
+        /** Distance from the Sun: sqrt(delta_az**2 + delta_el**2)
+         * 
+         * @throw ComponentErrors::ComponentErrorsEx
+         */
+        double getSunDistance() raises (ComponentErrors::ComponentErrorsEx);
+
+
         /** Set Sun avoidance to "ON" or "OFF"
          *
          * In case the Sun avoidance is "ON", the Supervisor component sets
@@ -118,13 +131,6 @@ module Antenna {
         double getSunSafeLimit() raises (ComponentErrors::ComponentErrorsEx);
 
          
-        /** Get the current offset applied to the antenna coordinates
-         *
-         * @throw ComponentErrors::ComponentErrorsEx
-         */
-        double getSunOffset() raises (ComponentErrors::ComponentErrorsEx);
-
-
         /** Return true when the Supervisor is not setting any offset related
          * to the Sun avoidance
          *
