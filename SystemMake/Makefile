@@ -83,7 +83,7 @@ ifeq ($(STATION),SRT)
 		SRTAntennaInterface SRTActiveSurfaceInterface SRTWeatherStationInterface SRTReceiversInterface \
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary XarcosLibrary SRTMinorServoLibrary ComponentProxy ModbusChannel PyTestingLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool TotalPower NoiseGenerator DBBC CustomLogger XBackend \
-		SRTMount SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver  \ 
+		SRTMount SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver \
 		SRT5GHzReceiver PyDewarPositioner \
 		SRTPyIFDistributor AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient CustomLoggingClient SchedulerTextClient \
 		SRTActiveSurfaceGUIClient SRTMountTextClient MinorServoBossTextClient \

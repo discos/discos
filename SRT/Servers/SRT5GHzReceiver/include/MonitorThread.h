@@ -16,7 +16,7 @@
 C11_IGNORE_WARNING_PUSH
 C11_IGNORE_WARNING("-Wdeprecated-declarations")
 #include <acsThread.h>
-C11_IGNORE_WARNING_PUSH
+C11_IGNORE_WARNING_POP
 
 #include <ComponentCore.h>
 
