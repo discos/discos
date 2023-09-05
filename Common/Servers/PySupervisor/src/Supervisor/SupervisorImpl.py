@@ -54,6 +54,9 @@ class SupervisorImpl(POA, cc, services, lcycle):
         self.dao_path = 'alma/ANTENNA/Supervisor'
         self.setup("default")
         self.stop_threads = False
+        self.sunClient = self.windClient = None
+        self.loadSunClient()
+        self.loadWindClient()
         for thread in (self.sunCheck, self.windCheck):
             t = Thread(target=thread, daemon=True)
             t.start()
@@ -133,13 +136,47 @@ class SupervisorImpl(POA, cc, services, lcycle):
     def isTracking(self):
         return True
 
-    def disconnect(self, client):
+    def loadWindClient(self):
         try:
-            if client.isLoggedIn():
-                client.disconnect()
+            if self.windClient and self.windClient.isLoggedIn():
+                pass
+            else:
+                self.disconnectWindClient()
+                self.windClient = PySimpleClient()
         except Exception as ex:
             self.log(
-                "Cannot disconnect the client",
+                f"loadWindClient: {ex}",
+                Management.C_ERROR,
+            )
+
+    def loadSunClient(self):
+        try:
+            if self.sunClient and self.sunClient.isLoggedIn():
+                pass
+            else:
+                self.disconnectSunClient()
+                self.sunClient = PySimpleClient()
+        except Exception as ex:
+            self.log(
+                f"loadSunClient: {ex}",
+                Management.C_ERROR,
+            )
+
+    def disconnectSunClient(self):
+        try:
+            self.sunClient.disconnect()
+        except Exception as ex:
+            self.log(
+                "Cannot disconnect sunClient",
+                Management.C_WARNING,
+            )
+
+    def disconnectWindClient(self):
+        try:
+            self.windClient.disconnect()
+        except Exception as ex:
+            self.log(
+                "Cannot disconnect windClient",
                 Management.C_WARNING,
             )
 
@@ -155,7 +192,10 @@ class SupervisorImpl(POA, cc, services, lcycle):
         except Exception as ex:
             print(f"Unexpected exception in log(): {ex}")
         finally:
-            self.disconnect(client)
+            try:
+                client.disconnect()
+            except Exception:
+                print(f"Error disconnecting the log client")
 
     def windCheck(self):
         print("windCheck() thread started")
@@ -166,98 +206,105 @@ class SupervisorImpl(POA, cc, services, lcycle):
         antenna_name = "ANTENNA/Boss"
         wind_values = []
         while True:
-            for i in range(5):  # Sleep for 5 seconds, check stop signal
+            try:
+                for i in range(5):  # Sleep for 5 seconds, check stop signal
+                    if self.stop_threads:
+                        break
+                    else:
+                        time.sleep(1)
+
                 if self.stop_threads:
+                    print("Stopping windCheck() thread")
                     break
-                else:
-                    time.sleep(1)
 
-            if self.stop_threads:
-                print("Stopping windCheck() thread")
-                break
+                if self.windAvoidance == "OFF":
+                    continue  # Sleep again
 
-            if self.windAvoidance == "OFF":
-                continue  # Sleep again
-
-            client = PySimpleClient()
-            try:
-                el_mode = ""
-                mount = client.getComponent(mount_name)
-                el_mode, compl = mount.elevationMode.get_sync()
-            except CannotGetComponentEx as ex:
-                self.log(
-                    f"Can not get component {mount_name}",
-                    Management.C_WARNING,
-                )
-            except Exception as ex:
-                self.log(f"Can not get component {mount_name}: {ex}")
-
-            try:
-                ws = client.getComponent(weather_name)
-                value = ws.getWindSpeedAverage()
-            except CannotGetComponentEx as ex:
-                self.log(
-                    f"Can not get component {weather_name}",
-                    Management.C_ERROR,
-                )
-            except Exception as ex:
-                self.log(f"Unexpected exception: {ex}")
-                self.disconnect(client)
-                continue  # Sleep again
-
-            if len(wind_values) < 30:
-                wind_values.append(value)
-            else:
-                wind_values.pop()
-                wind_values.insert(0, value)
-
-            self.wind = sum(wind_values)/len(wind_values) if wind_values else 0
-            if self.wind >= self.windLimit:
-                if str(el_mode) == "ACU_STOW":
-                    if not stow_notified:
-                        self.log(
-                            f"Antenna parked, too much wind",
-                            Management.C_WARNING,
-                        )
-                        stow_notified = True
-                    self.disconnect(client)
-                    continue
-
-                self.log(f"Supervisor: stopping antenna, windy")
-                self.log(f"Safe limit -> {self.windLimit:.2f}", Management.C_INFO)
-                self.log(f"Average wind -> {self.wind:.2f}", Management.C_INFO)
+                self.loadWindClient()
                 try:
-                    scheduler = client.getDefaultComponent(scheduler_name)
-                    scheduler.stopSchedule()
+                    el_mode = ""
+                    el = 0
+                    mount = self.windClient.getComponent(mount_name)
+                    el_mode = str(mount.elevationMode.get_sync()[0])
+                    el = mount.elevation.get_sync()[0]
                 except CannotGetComponentEx as ex:
                     self.log(
-                        f"Supervisor can not get {scheduler_name}",
+                        f"Can not get component {mount_name}",
                         Management.C_WARNING,
                     )
                 except Exception as ex:
-                    self.log(f"Can not get {scheduler_name}: {ex}")
+                    self.log(f"Can not get component {mount_name}: {ex}")
 
                 try:
-                    antenna = client.getComponent(antenna_name)
+                    ws = self.windClient.getComponent(weather_name)
+                    value = ws.getWindSpeedAverage()
                 except CannotGetComponentEx as ex:
                     self.log(
-                        f"Can not get component {antenna_name}",
+                        f"Can not get component {weather_name}",
                         Management.C_ERROR,
                     )
                 except Exception as ex:
-                    self.log(f"Can not get {antenna_name}: {ex}")
-                    self.disconnect(client)
+                    self.log(f"Unexpected exception: {ex}")
                     continue  # Sleep again
 
-                try:
-                    antenna.park()  # Finally park the antenna
-                except Exception as ex:
-                    self.log(f"Can not park the antenna: {ex}")
-                    self.disconnect(client)
-                    continue  # Sleep again
+                if len(wind_values) < 30:
+                    wind_values.append(value)
+                else:
+                    wind_values.pop()
+                    wind_values.insert(0, value)
 
-            stow_notified = False
-            self.disconnect(client)
+                self.wind = sum(wind_values)/len(wind_values) if wind_values else 0
+                if self.wind >= self.windLimit:
+                    if el_mode == "ACU_STOW":
+                        if not stow_notified:
+                            self.log(
+                                f"Parking antenna, too much wind",
+                                Management.C_WARNING,
+                            )
+                            stow_notified = True
+                        continue
+
+                    try:
+                        scheduler = self.windClient.getDefaultComponent(scheduler_name)
+                        scheduler.stopSchedule()
+                    except CannotGetComponentEx as ex:
+                        self.log(
+                            f"Supervisor can not get {scheduler_name}",
+                            Management.C_WARNING,
+                        )
+                    except Exception as ex:
+                        self.log(f"Can not get {scheduler_name}: {ex}")
+
+                    try:
+                        antenna = self.windClient.getComponent(antenna_name)
+                    except CannotGetComponentEx as ex:
+                        self.log(
+                            f"Can not get component {antenna_name}",
+                            Management.C_ERROR,
+                        )
+                    except Exception as ex:
+                        self.log(f"Can not get {antenna_name}: {ex}")
+                        continue  # Sleep again
+
+                    if el_mode == "ACU_STANDBY" and abs(90-el) < 0.5:
+                        continue  # Antenna parked
+
+                    try:
+                        self.log("Too much wind", Management.C_WARNING)
+                        self.log(f"Safe limit -> {self.windLimit:.2f}", Management.C_INFO)
+                        self.log(f"Average wind -> {self.wind:.2f}", Management.C_INFO)
+                        self.log(f"Supervisor: parking antenna, windy")
+                        antenna.stop()
+                        antenna.park()  # Finally park the antenna
+                        self.log("Parking antenna", Management.C_INFO)
+                        stow_notified = True
+                    except Exception as ex:
+                        self.log(f"Can not park the antenna: {ex}")
+                        continue  # Sleep again
+
+                stow_notified = False
+            except Exception as ex:
+                self.log(f"Unexpected exception in windCheck(): {ex}")
 
         print("sunCheck() thread stopped")
 
@@ -272,102 +319,111 @@ class SupervisorImpl(POA, cc, services, lcycle):
         sun = ephem.Sun()
         stop_notified = False
         while True:
-            time.sleep(1)
-            if self.stop_threads:
-                print("Stopping sunCheck() thread")
-                break
-            if self.sunAvoidance == "OFF":
-                continue  # Sleep again
-
-            client = PySimpleClient()
-            if not (lat and lon):
-                try:
-                    observatory = client.getComponent(observatory_name)
-                    lat, compl = observatory.latitude.get_sync()
-                    lon, compl = observatory.longitude.get_sync()
-                except CannotGetComponentEx as ex:
-                    self.log(f"Supervisor can not get {observatory_name}")
-                except Exception as ex:
-                    self.log(f"Can not get component {observatory_name}: {ex}")
-                finally:
-                    self.disconnect(client)
+            try:
+                time.sleep(1)
+                if self.stop_threads:
+                    print("Stopping sunCheck() thread")
+                    break
+                if self.sunAvoidance == "OFF":
                     continue  # Sleep again
 
-            try:
-                antenna = client.getComponent(antenna_name)
-            except CannotGetComponentEx as ex:
-                self.log(
-                    f"Can not get component {antenna_name}",
-                    Management.C_ERROR,
-                )
-                self.disconnect(client)
-                continue  # Sleep again
+                self.loadSunClient()
+                if not (lat and lon):
+                    try:
+                        observatory = self.sunClient.getComponent(observatory_name)
+                        lat, compl = observatory.latitude.get_sync()
+                        lon, compl = observatory.longitude.get_sync()
+                    except CannotGetComponentEx as ex:
+                        self.log(f"Supervisor can not get {observatory_name}")
+                    except Exception as ex:
+                        self.log(f"Can not get component {observatory_name}: {ex}")
+                    finally:
+                        continue  # Sleep again
 
-            t = getTimeStamp().value
-            try:
-                az, compl = antenna.observedAzimuth.get_sync()
-                el, compl = antenna.observedElevation.get_sync()
-                az, el = degrees(az), degrees(el)
-            except Exception as ex:
-                self.log(
-                    f"Cannot get antenna coordinates: {ex}",
-                    Management.C_ERROR,
-                )
-                self.disconnect(client)
-                continue  # Sleep again
+                try:
+                    antenna = self.sunClient.getComponent(antenna_name)
+                except CannotGetComponentEx as ex:
+                    self.log(
+                        f"Can not get component {antenna_name}",
+                        Management.C_ERROR,
+                    )
+                    continue  # Sleep again
 
-            limit = self.sunLimit
-            az_mode = el_mode = ""
-            try:
-                mount = client.getComponent(mount_name)
-                az_mode, compl = mount.azimuthMode.get_sync()
-                el_mode, compl = mount.elevationMode.get_sync()
-                if str(az_mode) == str(el_mode) == "ACU_PRESET":
-                    limit = self.sunLimit * 3
-            except CannotGetComponentEx as ex:
-                self.log(
-                    f"Can not get component {mount_name}",
-                    Management.C_WARNING,
-                )
-            except Exception as ex:
-                self.log(f"Can not get component {mount_name}: {ex}")
+                t = getTimeStamp().value
+                try:
+                    az, compl = antenna.observedAzimuth.get_sync()
+                    el, compl = antenna.observedElevation.get_sync()
+                    az, el = degrees(az), degrees(el)
+                except Exception as ex:
+                    self.log(
+                        f"Cannot get antenna coordinates: {ex}",
+                        Management.C_ERROR,
+                    )
+                    continue  # Sleep again
+
+                limit = self.sunLimit
+                az_mode = el_mode = ""
+                try:
+                    mount = self.sunClient.getComponent(mount_name)
+                    az_mode = str(mount.azimuthMode.get_sync()[0])
+                    el_mode = str(mount.elevationMode.get_sync()[0])
+                except CannotGetComponentEx as ex:
+                    self.log(
+                        f"Can not get component {mount_name}",
+                        Management.C_WARNING,
+                    )
+                except Exception as ex:
+                    self.log(f"Can not get component {mount_name}: {ex}")
  
-            obs.lat, obs.lon, obs.date = str(lat), str(lon), dt.utcnow()
-            sun.compute(obs)
-            sun_az, sun_el = degrees(sun.az), degrees(sun.alt)
-            if (diff := abs(sun_az - az)) <= 180:
-                delta_az = diff
-            else:
-                delta_az = 360 - diff
+                obs.lat, obs.lon, obs.date = str(lat), str(lon), dt.utcnow()
+                sun.compute(obs)
+                sun_az, sun_el = degrees(sun.az), degrees(sun.alt)
+                if (diff := abs(sun_az - az)) <= 180:
+                    delta_az = diff
+                else:
+                    delta_az = 360 - diff
 
-            self.sunDistance = sqrt(delta_az**2 + (sun_el - el)**2)
-            if self.sunDistance < limit:
-                if str(az_mode) == str(el_mode) == "ACU_STOP":
-                    if not stop_notified:
+                self.sunDistance = sqrt(delta_az**2 + (sun_el - el)**2)
+                if self.sunDistance < limit:
+                    if az_mode == el_mode == "ACU_STOP":
+                        time.sleep(5)
+                        self.log(
+                            f"Distance from Sun -> {self.sunDistance:.2f}",
+                            Management.C_INFO
+                        )
+                        self.log(
+                            f"Sun safe limit -> {limit:.2f}",
+                            Management.C_INFO
+                        )
+                        if not stop_notified:
+                            self.log(
+                                "Antenna stopped, pointing close to the Sun",
+                                Management.C_WARNING,
+                            )
+                            stop_notified = True
+                        continue  # Sleep again
+
+                    self.log(f"Supervisor: stopping antenna, pointing close to the Sun")
+                    self.log(f"Sun(az, el) -> ({sun_az:.2f}, {sun_el:.2f})", Management.C_INFO)
+                    self.log(f"Ant(az, el) -> ({az:.2f}, {el:.2f})", Management.C_INFO)
+                    self.log(f"Safe Limit -> {limit:.2f}", Management.C_INFO)
+                    self.log(f"Distance from Sun -> {self.sunDistance:.2f}", Management.C_INFO)
+                    try:
+                        antenna.stop()
                         self.log(
                             f"Antenna stopped, pointing close to the Sun",
                             Management.C_WARNING,
                         )
                         stop_notified = True
-                    self.disconnect(client)
-                    continue  # Sleep again
+                    except Exception as ex:
+                        self.log(f"Cannot stop the antenna: {ex}")
+                    finally:
+                        continue  # Sleep again
 
-                self.log(f"Supervisor: stopping antenna, pointing close to the Sun")
-                self.log(f"Sun(az, el) -> ({sun_az:.2f}, {sun_el:.2f})", Management.C_INFO)
-                self.log(f"Ant(az, el) -> ({az:.2f}, {el:.2f})", Management.C_INFO)
-                self.log(f"Safe Limit -> {limit:.2f}", Management.C_INFO)
-                self.log(f"Distance from Sun -> {self.sunDistance:.2f}", Management.C_INFO)
-                try:
-                    antenna.stop()
-                except Exception as ex:
-                    self.log(f"Cannot stop the antenna: {ex}")
-                    self.disconnect(client)
-                    continue  # Sleep again
+                stop_notified = False
+            except Exception as ex:
+                self.log(f"Unexpected exception in sunCheck(): {ex}")
 
-            if stop_notified:
-                self.log(f"Antenna is now pointing at safe distance from the Sun")
-            stop_notified = False
-            self.disconnect(client)
         print("sunCheck() thread stopped")
 
 
