@@ -5,8 +5,8 @@
     xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" 
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     WindLimit="30.0"
-    SunLimitDEFAULT="2.0"
-    SunLimitLLP="3.0"
+    SunLimitDEFAULT="3.0"
+    SunLimitLLP="4.0"
 >
     <status
         description="integer that represents the Supervisor status" 
