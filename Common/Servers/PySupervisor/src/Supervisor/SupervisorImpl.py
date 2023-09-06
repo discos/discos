@@ -44,9 +44,7 @@ class SupervisorImpl(POA, cc, services, lcycle):
         'supervisorGetSunSafeLimit': ('getSunSafeLimit', ()), 
         'supervisorGetSunDistance': ('getSunDistance', ()),
         'supervisorGetWind': ('getAverageWind', ()),
-        'supervisorIsTracking': ('isTracking', ()), 
     }
-
 
     def __init__(self):
         cc.__init__(self)
@@ -60,10 +58,6 @@ class SupervisorImpl(POA, cc, services, lcycle):
         for thread in (self.sunCheck, self.windCheck):
             t = Thread(target=thread, daemon=True)
             t.start()
-
-    def initialize(self):
-        # addProperty(self, 'status', devio_ref=StatusDevIO())
-        pass
 
     def cleanUp(self):
         self.stop_threads = True
@@ -132,9 +126,6 @@ class SupervisorImpl(POA, cc, services, lcycle):
 
     def getAverageWind(self):
         return self.wind
-
-    def isTracking(self):
-        return True
 
     def loadWindClient(self):
         try:

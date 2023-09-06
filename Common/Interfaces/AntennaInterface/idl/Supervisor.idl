@@ -12,13 +12,6 @@
 
 module Antenna {
  
-    struct SupervisorDataBlock {
-        ACS::Time timeMark;
-        boolean tracking;
-    };
-
-    const string SUPERVISOR_DATA_CHANNEL = "SupervisorData";
-
     interface Supervisor: 
         ACS::CharacteristicComponent,
         Management::CommandInterpreter
@@ -131,14 +124,6 @@ module Antenna {
         double getSunSafeLimit() raises (ComponentErrors::ComponentErrorsEx);
 
          
-        /** Return true when the Supervisor is not setting any offset related
-         * to the Sun avoidance
-         *
-         * @throw ComponentErrors::ComponentErrorsEx
-         */
-        boolean isTracking() raises (ComponentErrors::ComponentErrorsEx);
-
-
         /** This property reports the status of the Supervisor.
          *  The returned pattern is a 3 bits field with the following meaning:
          *
