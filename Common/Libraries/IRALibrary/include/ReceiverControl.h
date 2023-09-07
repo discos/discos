@@ -179,7 +179,7 @@ public:
             const BYTE switch_madd=0x7C,   // Switch board master address
             const BYTE switch_sadd=0x7F,   // Switch board slave address - We use broadcast address
             bool reliable_comm=false
-    ) throw (ReceiverControlEx);
+    );
 
     
     /** Destructor */
@@ -201,7 +201,7 @@ public:
             const BYTE port_type=MCB_PORT_TYPE_DIO, 
             const BYTE port_number=MCB_PORT_NUMBER_11, 
             const BYTE value=0x01
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Set the noise mark generator to OFF
@@ -216,7 +216,7 @@ public:
             const BYTE port_type=MCB_PORT_TYPE_DIO, 
             const BYTE port_number=MCB_PORT_NUMBER_11, 
             const BYTE value=0x00
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Is the noise mark generator set to ON?
@@ -230,7 +230,7 @@ public:
             const BYTE data_type=MCB_CMD_DATA_TYPE_B01, 
             const BYTE port_type=MCB_PORT_TYPE_DIO, 
             const BYTE port_number=MCB_PORT_NUMBER_11
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Enable the external noise mark generator synchronous command
@@ -245,7 +245,7 @@ public:
             const BYTE port_type=MCB_PORT_TYPE_DIO, 
             const BYTE port_number=MCB_PORT_NUMBER_12, 
             const BYTE value=0x01
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Disable the external noise mark generator synchronous command
@@ -260,7 +260,7 @@ public:
             const BYTE port_type=MCB_PORT_TYPE_DIO, 
             const BYTE port_number=MCB_PORT_NUMBER_12, 
             const BYTE value=0x00
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Is the external noise mark generator command enabled?
@@ -274,7 +274,7 @@ public:
             const BYTE data_type=MCB_CMD_DATA_TYPE_B01, 
             const BYTE port_type=MCB_PORT_TYPE_DIO, 
             const BYTE port_number=MCB_PORT_NUMBER_12
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Set the reliable communication to/from the board to ON */
@@ -310,7 +310,7 @@ public:
             const BYTE port_type=MCB_PORT_TYPE_AD24,       
             const BYTE port_number=MCB_PORT_NUMBER_00_07,  
             const size_t raw_index=2                      
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Return the vertex temperature
@@ -334,7 +334,7 @@ public:
             const BYTE port_type=MCB_PORT_TYPE_AD24,       
             const BYTE port_number=MCB_PORT_NUMBER_00_07,  
             const size_t raw_index=6                      
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Return the cryogenic temperature
@@ -357,7 +357,7 @@ public:
             const BYTE data_type=MCB_CMD_DATA_TYPE_F32,
             const BYTE port_type=MCB_PORT_TYPE_AD24,  
             const BYTE port_number=MCB_PORT_NUMBER_00_07
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Set to ON the cool head 
@@ -372,7 +372,7 @@ public:
             const BYTE port_type=MCB_PORT_TYPE_DIO,   
             const BYTE port_number=MCB_PORT_NUMBER_08,
             const BYTE value=0x01
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Set to OFF the cool head
@@ -387,7 +387,7 @@ public:
             const BYTE port_type=MCB_PORT_TYPE_DIO,   
             const BYTE port_number=MCB_PORT_NUMBER_08,
             const BYTE value=0x00
-    ) throw (ReceiverControlEx);
+    );
 
     /** Is the cool head set ON?
      *  @param data_type the type of the data; the default type is 1 bit
@@ -400,7 +400,7 @@ public:
             const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
             const BYTE port_type=MCB_PORT_TYPE_DIO,   
             const BYTE port_number=MCB_PORT_NUMBER_08
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Is the cool head status ON?
@@ -414,7 +414,7 @@ public:
             const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
             const BYTE port_type=MCB_PORT_TYPE_DIO,   
             const BYTE port_number=MCB_PORT_NUMBER_24
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Set to ON the vacuum sensor
@@ -429,7 +429,7 @@ public:
             const BYTE port_type=MCB_PORT_TYPE_DIO,
             const BYTE port_number=MCB_PORT_NUMBER_04,
             const BYTE value=0x01
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Set to OFF the vacuum sensor
@@ -444,7 +444,7 @@ public:
             const BYTE port_type=MCB_PORT_TYPE_DIO,
             const BYTE port_number=MCB_PORT_NUMBER_04,
             const BYTE value=0x00
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Is the vacuum sensor ON?
@@ -458,7 +458,7 @@ public:
             const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
             const BYTE port_type=MCB_PORT_TYPE_DIO,
             const BYTE port_number=MCB_PORT_NUMBER_04
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Set to ON the vacuum pump
@@ -473,7 +473,7 @@ public:
             const BYTE port_type=MCB_PORT_TYPE_DIO,
             const BYTE port_number=MCB_PORT_NUMBER_05,
             const BYTE value=0x01
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Set to OFF the vacuum pump
@@ -488,7 +488,7 @@ public:
             const BYTE port_type=MCB_PORT_TYPE_DIO,
             const BYTE port_number=MCB_PORT_NUMBER_05,
             const BYTE value=0x00
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Is the vacuum pump ON?
@@ -502,7 +502,7 @@ public:
             const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
             const BYTE port_type=MCB_PORT_TYPE_DIO,
             const BYTE port_number=MCB_PORT_NUMBER_05
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Has the vacuum pump a fault?
@@ -516,7 +516,7 @@ public:
             const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
             const BYTE port_type=MCB_PORT_TYPE_DIO,
             const BYTE port_number=MCB_PORT_NUMBER_06
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Set to ON the vacuum valve
@@ -531,7 +531,7 @@ public:
             const BYTE port_type=MCB_PORT_TYPE_DIO,
             const BYTE port_number=MCB_PORT_NUMBER_07,
             const BYTE value=0x01
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Set to OFF the vacuum valve
@@ -546,7 +546,7 @@ public:
             const BYTE port_type=MCB_PORT_TYPE_DIO,
             const BYTE port_number=MCB_PORT_NUMBER_07,
             const BYTE value=0x00
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Is the vacuum valve ON?
@@ -560,7 +560,7 @@ public:
             const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
             const BYTE port_type=MCB_PORT_TYPE_DIO,
             const BYTE port_number=MCB_PORT_NUMBER_07
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Is the remote command enable?
@@ -574,7 +574,7 @@ public:
             const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
             const BYTE port_type=MCB_PORT_TYPE_DIO,
             const BYTE port_number=MCB_PORT_NUMBER_26
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Select the first local oscillator (LO1)
@@ -589,7 +589,7 @@ public:
             const BYTE port_type=MCB_PORT_TYPE_DIO,
             const BYTE port_number=MCB_PORT_NUMBER_00,
             const BYTE value=0x00
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Is LO1 selected?
@@ -603,7 +603,7 @@ public:
             const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
             const BYTE port_type=MCB_PORT_TYPE_DIO,   
             const BYTE port_number=MCB_PORT_NUMBER_16
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Select the second local oscillator (LO2)
@@ -618,7 +618,7 @@ public:
             const BYTE port_type=MCB_PORT_TYPE_DIO,
             const BYTE port_number=MCB_PORT_NUMBER_00,
             const BYTE value=0x01
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Is LO2 selected?
@@ -632,7 +632,7 @@ public:
             const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
             const BYTE port_type=MCB_PORT_TYPE_DIO, 
             const BYTE port_number=MCB_PORT_NUMBER_17
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Is LO2 locked?
@@ -646,7 +646,7 @@ public:
             const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
             const BYTE port_type=MCB_PORT_TYPE_DIO, 
             const BYTE port_number=MCB_PORT_NUMBER_18
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Set the single dish mode to ON. The VLBI mode will be turn OFF
@@ -669,7 +669,7 @@ public:
             const BYTE port_number_vlbi=MCB_PORT_NUMBER_14,
             const BYTE value_sd=0x00,
             const BYTE value_vlbi=0x01
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Is the single dish mode set to ON?
@@ -683,7 +683,7 @@ public:
             const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
             const BYTE port_type=MCB_PORT_TYPE_DIO, 
             const BYTE port_number=MCB_PORT_NUMBER_29
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Set the VLBI mode to ON. The SD mode will be turn OFF
@@ -706,7 +706,7 @@ public:
             const BYTE port_number_sd=MCB_PORT_NUMBER_13,
             const BYTE value_vlbi=0x00,
             const BYTE value_sd=0x01
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Is the VLBI mode set to ON?
@@ -720,7 +720,7 @@ public:
             const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
             const BYTE port_type=MCB_PORT_TYPE_DIO,
             const BYTE port_number=MCB_PORT_NUMBER_30
-    ) throw (ReceiverControlEx);
+    );
 
     
     /** return the FetValues (VDL, IDL, VGR, VDR, IDR and VGR) 
@@ -746,7 +746,7 @@ public:
             unsigned short stage_number,
             double (*currentConverter)(double voltage) = NULL,
             double (*voltageConverter)(double voltage) = NULL
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Return for each feed and channel the fet quantity value of a given stage. For
@@ -768,7 +768,7 @@ public:
              FetValue quantity, 
              unsigned short stage_number, 
              double (*converter)(double voltage)=NULL
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Turn the LNAs of the left channels ON
@@ -783,7 +783,7 @@ public:
             const BYTE port_type=MCB_PORT_TYPE_DIO,
             const BYTE port_number=MCB_PORT_NUMBER_08,
             const BYTE value=0x00
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Turn the LNAs of the left channels OFF
@@ -798,7 +798,7 @@ public:
             const BYTE port_type=MCB_PORT_TYPE_DIO,
             const BYTE port_number=MCB_PORT_NUMBER_08,
             const BYTE value=0x01
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Turn the LNAs of the right channels ON
@@ -813,7 +813,7 @@ public:
             const BYTE port_type=MCB_PORT_TYPE_DIO,
             const BYTE port_number=MCB_PORT_NUMBER_09,
             const BYTE value=0x00 
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Turn the LNAs of the right channels OFF
@@ -828,13 +828,13 @@ public:
             const BYTE port_type=MCB_PORT_TYPE_DIO,
             const BYTE port_number=MCB_PORT_NUMBER_09,
             const BYTE value=0x01
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Perform a TCP connection socket to the boards
      *  @throw ReceiverControlEx
      */
-    void openConnection(void) throw (ReceiverControlEx);
+    void openConnection(void);
 
 
     /** Close the TCP connection sockets to the boards */
@@ -876,7 +876,7 @@ public:
             const BYTE port_number, 
             const size_t width,
             const std::vector<BYTE> parameters
-    ) throw (ReceiverControlEx);
+    );
 
 
     /** Set the RF path to the cold load
@@ -891,7 +891,7 @@ public:
             const BYTE data_type=MCB_CMD_DATA_TYPE_U16, 
             const BYTE port_type=MCB_PORT_TYPE_DIO, 
             const BYTE port_number=MCB_PORT_NUMBER_00_15
-    ) throw (ReceiverControlEx);
+    ) ;
 
 
     /** Set the RF path to the sky
@@ -906,7 +906,7 @@ public:
             const BYTE data_type=MCB_CMD_DATA_TYPE_U16, 
             const BYTE port_type=MCB_PORT_TYPE_DIO, 
             const BYTE port_number=MCB_PORT_NUMBER_00_15
-    ) throw (ReceiverControlEx);
+    );
 
 
 private:
@@ -922,7 +922,7 @@ private:
     std::vector<BYTE> makeRequest(
             MicroControllerBoard *board_ptr, 
             const BYTE command, size_t len, ...
-    ) throw(MicroControllerBoardEx);
+    );
 
     
 	/** Return the requested value computed from a vector<BYTE> of parameters

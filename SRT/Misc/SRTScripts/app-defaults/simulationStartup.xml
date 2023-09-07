@@ -14,7 +14,7 @@
     <toolAgainstInterfaceRepository></toolAgainstInterfaceRepository>
     <toolAgainstNameService></toolAgainstNameService>
     <containers>
-        <select>34</select>
+        <select>35</select>
         <againstManagerHost></againstManagerHost>
         <againstManagerPort></againstManagerPort>
         <againstCDB></againstCDB>
@@ -183,6 +183,15 @@
         </container>
         <container>
             <name>SRT7GHzContainer</name>
+            <type>cpp</type>
+            <heapSizeMB></heapSizeMB>
+            <useDedicatedSettings>true</useDedicatedSettings>
+            <scriptBase>0</scriptBase>
+            <remoteHost>MASTERHOST</remoteHost>
+            <remoteAccount>discos</remoteAccount>
+        </container>
+        <container>
+            <name>SRT5GHzContainer</name>
             <type>cpp</type>
             <heapSizeMB></heapSizeMB>
             <useDedicatedSettings>true</useDedicatedSettings>

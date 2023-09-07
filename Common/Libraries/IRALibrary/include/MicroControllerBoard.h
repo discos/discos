@@ -52,7 +52,7 @@ public:
     MicroControllerBoard(std::string IP, unsigned short port=8000,
             BYTE master_address=0x7C, BYTE slave_address=0x7F, 
             DWORD timeout=MCB_TOUT
-    ) throw (MicroControllerBoardEx);
+    );
      
 
 	/** Destructor */
@@ -62,7 +62,7 @@ public:
     /** Perform a TCP connection socket to the board
      *  @throw MicroControllerBoardEx
      */
-    void openConnection(void) throw (MicroControllerBoardEx);
+    void openConnection(void);
 
 
     /** Return the status of TCP socket connection to the board
@@ -93,7 +93,7 @@ public:
      *  @throw MicroControllerBoardEx
      *  @return a vector<BYTE> storing the requested parameters
      */
-    std::vector<BYTE> receive(void) throw (MicroControllerBoardEx);
+    std::vector<BYTE> receive(void);
 
 
     /** Send a command to the board.
@@ -101,7 +101,7 @@ public:
      *  @param parameters a vector<BYTE> of parameters to send (it could be empty)
      *  @throw MicroControllerBoardEx
      */
-    void send(const BYTE command, std::vector<BYTE> parameters=std::vector<BYTE>()) throw (MicroControllerBoardEx);
+    void send(const BYTE command, std::vector<BYTE> parameters=std::vector<BYTE>());
 
     /** Return the IP address of the board */
     std::string getIP() const { return(m_IP); }
@@ -116,7 +116,7 @@ private:
      *  @param message the vector<BYTE> on which to compute the checksum
      *  @throw MicroControllerBoardEx
      */
-    BYTE computeChecksum(std::vector<BYTE> message) throw (MicroControllerBoardEx);
+    BYTE computeChecksum(std::vector<BYTE> message);
 
 
     const std::string m_IP;

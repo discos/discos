@@ -32,12 +32,20 @@
 /* Andrea Orlati(aorlati@ira.inaf.it)  12/01/2016	  reviewed the function skyFrequency in order to address also lower side band during down conversion */
 /* Giuseppe Carboni (giuseppe.carboni@inaf.it) 07/12/2021 added the getUNIXEpoch, ACSTime2UNIXEpoch and UNIXEpoch2ACSTime functions */
 
+#include <Cplusplus11Helper.h>
+
 #include <time.h>
 #include <sys/time.h>
+C11_IGNORE_WARNING_PUSH
+C11_IGNORE_WARNING("-Wdeprecated-declarations")
+C11_IGNORE_WARNING("-Wmisleading-indentation")
+C11_IGNORE_WARNING("-Wcatch-value=")
 #include <baciDB.h>
 #include <maciContainerServices.h>
 #include <acstimeEpochHelper.h>
 #include <acstimeDurationHelper.h>
+C11_IGNORE_WARNING_POP
+
 #include <maciSimpleClient.h>
 #include <AntennaDefinitionsC.h>
 

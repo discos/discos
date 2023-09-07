@@ -4,6 +4,12 @@
 // $Id: IRA,v 1.3 2007-09-11 14:58:09 a.orlati Exp $
 
 #include "Definitions.h"
+//#include <Cplusplus11Helper.h>
+
+//C11_IGNORE_WARNING_PUSH
+//C11_IGNORE_WARNING("-Wdeprecated-declarations")
+//C11_IGNORE_WARNING("-Wmisleading-indentation")
+//C11_IGNORE_WARNING("-Wcatch-value=")
 #include "String.h"
 #include "IRATools.h"
 #include "Error.h"
@@ -17,5 +23,6 @@
 #include "TimeTaggedCircularArray.h"
 #include "CustomLoggerUtils.h"
 #include "Timer.h"
+//C11_IGNORE_WARNING_POP
 
 #endif

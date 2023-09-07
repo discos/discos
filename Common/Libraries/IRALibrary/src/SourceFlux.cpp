@@ -31,7 +31,7 @@ double CSourceFlux::computeSourceFlux(const double&frequency, const double& FWHM
 {
     double logfreq,logflux,fluxv;
     double fac0,fac1,fac2,fac4,fac5,fac;
-    double corr, size;
+    double corr;
     double fMin=0.0, fMax=0.0;
     double fMinRange[3], fMaxRange[3];
     double fluxCoeff1[3], fluxCoeff2[3], fluxCoeff3[3];
@@ -39,7 +39,6 @@ double CSourceFlux::computeSourceFlux(const double&frequency, const double& FWHM
 
     fluxv=1.0;
     corr=1.0;
-    size=0.0;
 
     if (m_flux.nFreqRange == 1) {
         sscanf(m_flux.freqRange,"%lf-%lf",&fMinRange[0],&fMaxRange[0]);
