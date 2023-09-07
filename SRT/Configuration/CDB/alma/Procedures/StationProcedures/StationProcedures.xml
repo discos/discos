@@ -17,6 +17,14 @@
 </body>
 </Procedure>
 
+<Procedure name="setupCCG" args="0">
+<body>
+	receiversSetup=CCG
+	chooseBackend=TotalPower
+	calOff
+</body>
+</Procedure>
+
 <Procedure name="setupKKG" args="0">
 <body>
 	antennaSetup=KKG

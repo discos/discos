@@ -97,6 +97,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/
 	              
 ## [Next Release] - 
 ## Added
+    issue #806   Added supprto for the C-band receiver at the SRT
 ## Fixed
 ## Changed
 	 issue #689 - The dataset provided by wether station has been enlarged by the wind direction. The correctponding RAL 'wx' command will noe provided wind direction readout, as well

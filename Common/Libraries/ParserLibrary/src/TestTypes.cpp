@@ -14,7 +14,8 @@ typedef enum {
 class Disney_converter
 {
 public:
-	Disney strToVal(const char * str) throw (ParserErrors::BadTypeFormatExImpl) {
+	//throw (ParserErrors::BadTypeFormatExImpl)
+	Disney strToVal(const char * str) {
 		if (strcmp(str,"PIPPO")==0) {
 			return PIPPO;
 		}

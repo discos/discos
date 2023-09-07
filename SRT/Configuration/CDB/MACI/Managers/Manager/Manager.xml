@@ -41,7 +41,7 @@
   	    minLogLevelLocal="5"
   	    dispatchPacketSize="10"
   	    immediateDispatchLevel="8">
-        <log:_ Name="jacorb@Manager" minLogLevel="5" minLogLevelLocal="5" />
+        <log:e Name="jacorb@Manager" minLogLevel="5" minLogLevelLocal="5" />
     </LoggingConfig>
 
 </Manager>

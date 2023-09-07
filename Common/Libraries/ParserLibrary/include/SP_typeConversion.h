@@ -27,7 +27,10 @@ enum _sp_symbols {
 class int_converter
 {
 public:
-	int strToVal(const char * str) throw (ParserErrors::BadTypeFormatExImpl) {
+   /*    
+    * @throw ParserErrors::BadTypeFormatExImpl
+   */ 
+	int strToVal(const char * str) {
 		int ret;
 		if (sscanf(str,"%d",&ret)!=1) {
 			_EXCPT(ParserErrors::BadTypeFormatExImpl,ex,"int_converter::strToVal()");
@@ -55,7 +58,10 @@ public:
 class long_converter
 {
 public:
-	long strToVal(const char * str) throw (ParserErrors::BadTypeFormatExImpl) {
+	/*    
+    * @throw ParserErrors::BadTypeFormatExImpl
+   */ 
+	long strToVal(const char * str) {
 		long ret;
 		if (sscanf(str,"%ld",&ret)!=1) {
 			_EXCPT(ParserErrors::BadTypeFormatExImpl,ex,"long_converter::strToVal()");
@@ -76,7 +82,10 @@ public:
 class double_converter
 {
 public:
-	double strToVal(const char * str) throw (ParserErrors::BadTypeFormatExImpl) {
+   /*    
+    * @throw ParserErrors::BadTypeFormatExImpl
+   */ 
+	double strToVal(const char * str) {
 		double ret;
 		if (sscanf(str,"%lf",&ret)!=1) {
 			_EXCPT(ParserErrors::BadTypeFormatExImpl,ex,"double_converter::strToVal()");
@@ -97,7 +106,10 @@ public:
 class string_converter
 {
 public:
-	char *strToVal(const char * str) throw (ParserErrors::BadTypeFormatExImpl) {
+   /*    
+    * @throw ParserErrors::BadTypeFormatExImpl
+   */ 
+	char *strToVal(const char * str) {
 		return const_cast<char *>(str) ;
 	}
 	char *valToStr(char * const & val) {
@@ -110,7 +122,10 @@ public:
 class longString_converter
 {
 public:
-	IRA::CString strToVal(const char * str) throw (ParserErrors::BadTypeFormatExImpl) {
+   /*    
+    * @throw ParserErrors::BadTypeFormatExImpl
+   */ 
+	IRA::CString strToVal(const char * str) {
 		return IRA::CString(str);
 	}
 	char *valToStr(const IRA::CString& val) {
@@ -133,7 +148,10 @@ public:
 		strcpy(c,(const char *)out);
 		return c;
 	}
-	double strToVal(const char*str) throw (ParserErrors::BadTypeFormatExImpl) {
+	/*    
+    * @throw ParserErrors::BadTypeFormatExImpl
+   */ 
+	double strToVal(const char*str) {
 		double radians;
 		if (!IRA::CIRATools::angleToRad(str,radians)) {
 			_EXCPT(ParserErrors::BadTypeFormatExImpl,ex,"angle_converter::strToVal()");
@@ -157,7 +175,10 @@ public:
 		strcpy(c,(const char *)out);
 		return c;
 	}
-	double strToVal(const char*str) throw (ParserErrors::BadTypeFormatExImpl) {
+	/*    
+    * @throw ParserErrors::BadTypeFormatExImpl
+   */ 
+	double strToVal(const char*str) {
 		double radians;
 		if (!IRA::CIRATools::offsetToRad(str,radians)) {
 			_EXCPT(ParserErrors::BadTypeFormatExImpl,ex,"angleOffset_converter::strToVal()");
@@ -181,7 +202,10 @@ public:
 		strcpy(c,(const char *)out);
 		return c;
 	}
-	double strToVal(const char*str) throw (ParserErrors::BadTypeFormatExImpl) {
+	/*    
+    * @throw ParserErrors::BadTypeFormatExImpl
+   */ 
+	double strToVal(const char*str) {
 		double radians;
 		if (!IRA::CIRATools::declinationToRad(str,radians,RANGECHECK)) {
 			_EXCPT(ParserErrors::BadTypeFormatExImpl,ex,"declination_converter::strToVal()");
@@ -205,7 +229,10 @@ public:
 		strcpy(c,(const char *)out);
 		return c;
 	}
-	double strToVal(const char*str) throw (ParserErrors::BadTypeFormatExImpl) {
+	/*    
+    * @throw ParserErrors::BadTypeFormatExImpl
+   */ 
+	double strToVal(const char*str) {
 		double radians;
 		if (!IRA::CIRATools::rightAscensionToRad(str,radians,RANGECHECK)) {
 			_EXCPT(ParserErrors::BadTypeFormatExImpl,ex,"rightAscension_type::strToVal()");
@@ -229,7 +256,10 @@ public:
 		strcpy(c,(const char *)out);
 		return c;
 	}
-	double strToVal(const char*str) throw (ParserErrors::BadTypeFormatExImpl) {
+	/*    
+    * @throw ParserErrors::BadTypeFormatExImpl
+   */ 
+	double strToVal(const char*str) {
 		double radians;
 		if (!IRA::CIRATools::azimuthToRad(str,radians,RANGECHECK)) {
 			_EXCPT(ParserErrors::BadTypeFormatExImpl,ex,"azimuth_converter::strToVal()");
@@ -253,7 +283,10 @@ public:
 		strcpy(c,(const char *)out);
 		return c;
 	}
-	double strToVal(const char*str) throw (ParserErrors::BadTypeFormatExImpl) {
+	/*    
+    * @throw ParserErrors::BadTypeFormatExImpl
+   */ 
+	double strToVal(const char*str) {
 		double radians;
 		if (!IRA::CIRATools::elevationToRad(str,radians,RANGECHECK)) {
 			_EXCPT(ParserErrors::BadTypeFormatExImpl,ex,"elevation_converter::strToVal()");
@@ -277,7 +310,10 @@ public:
 		strcpy(c,(const char *)out);
 		return c;
 	}
-	double strToVal(const char*str) throw (ParserErrors::BadTypeFormatExImpl) {
+	/*    
+    * @throw ParserErrors::BadTypeFormatExImpl
+   */ 
+	double strToVal(const char*str) {
 		double radians;
 		if (!IRA::CIRATools::galLatitudeToRad(str,radians,RANGECHECK)) {
 			_EXCPT(ParserErrors::BadTypeFormatExImpl,ex,"galacticLatitude_converter::strToVal()");
@@ -301,7 +337,10 @@ public:
 		strcpy(c,(const char *)out);
 		return c;
 	}
-	double strToVal(const char*str) throw (ParserErrors::BadTypeFormatExImpl) {
+	/*    
+    * @throw ParserErrors::BadTypeFormatExImpl
+   */ 
+	double strToVal(const char*str) {
 		double radians;
 		if (!IRA::CIRATools::galLongitudeToRad(str,radians,RANGECHECK)) {
 			_EXCPT(ParserErrors::BadTypeFormatExImpl,ex,"galacticLongitude_converter::strToVal()");
@@ -322,7 +361,10 @@ public:
 		strcpy(c,(const char *)out);
 		return c;
 	}
-	ACS::Time strToVal(const char*str) throw (ParserErrors::BadTypeFormatExImpl) {
+	/*    
+    * @throw ParserErrors::BadTypeFormatExImpl
+   */ 
+	ACS::Time strToVal(const char*str) {
 		ACS::Time ret;
 		if (!IRA::CIRATools::strToTime(str,ret)) {
 			_EXCPT(ParserErrors::BadTypeFormatExImpl,ex,"time_converter::strToVal()");
@@ -342,7 +384,10 @@ public:
 		strcpy(c,(const char *)out);
 		return c;
 	}
-	ACS::TimeInterval strToVal(const char*str) throw (ParserErrors::BadTypeFormatExImpl) {
+	/*    
+    * @throw ParserErrors::BadTypeFormatExImpl
+   */ 
+	ACS::TimeInterval strToVal(const char*str) {
 		ACS::TimeInterval ret;
 		if (!IRA::CIRATools::strToInterval(str,ret)) {
 			_EXCPT(ParserErrors::BadTypeFormatExImpl,ex,"interval_converter::strToVal()");
@@ -370,7 +415,10 @@ public:
 		strcpy(c,tmp);
 		return c;
 	}
-	ACS::longSeq strToVal(const char*str) throw (ParserErrors::BadTypeFormatExImpl) {
+	/*    
+    * @throw ParserErrors::BadTypeFormatExImpl
+   */ 
+	ACS::longSeq strToVal(const char*str) {
 		ACS::longSeq out;
 		IRA::CString param(str);
 		IRA::CString ret;
@@ -429,7 +477,10 @@ public:
 		strcpy(c,tmp);
 		return c;
 	}
-	ACS::doubleSeq strToVal(const char*str) throw (ParserErrors::BadTypeFormatExImpl) {
+	/*    
+    * @throw ParserErrors::BadTypeFormatExImpl
+   */ 
+	ACS::doubleSeq strToVal(const char*str) {
 		ACS::doubleSeq out;
 		IRA::CString param(str);
 		IRA::CString ret;
@@ -485,7 +536,10 @@ public:
 		}
 		return c;
 	}
-	Antenna::TSections strToVal(const char* str) throw (ParserErrors::BadTypeFormatExImpl) {
+	/*    
+    * @throw ParserErrors::BadTypeFormatExImpl
+   */ 
+	Antenna::TSections strToVal(const char* str) {
 		IRA::CString strVal(str);
 		strVal.MakeUpper();
 		if (strVal=="CW") {
@@ -516,7 +570,10 @@ public:
 		strcpy(c,(const char *)out);		
 		return c;
 	}
-	Antenna::TSystemEquinox strToVal(const char* str) throw (ParserErrors::BadTypeFormatExImpl) {
+	/*    
+    * @throw ParserErrors::BadTypeFormatExImpl
+   */ 
+	Antenna::TSystemEquinox strToVal(const char* str) {
 		Antenna::TSystemEquinox eq;
 		if (!IRA::CIRATools::strToEquinox(str,eq)) {		
 			_EXCPT(ParserErrors::BadTypeFormatExImpl,ex,"AntennaEquinox2String::strToVal()");
@@ -537,7 +594,10 @@ public:
 		strcpy(c,(const char *)out);		
 		return c;		
 	}
-	Antenna::TCoordinateFrame strToVal(const char* str) throw (ParserErrors::BadTypeFormatExImpl) {
+	/*    
+    * @throw ParserErrors::BadTypeFormatExImpl
+   */ 
+	Antenna::TCoordinateFrame strToVal(const char* str) {
 		Antenna::TCoordinateFrame frame;
 		if (!IRA::CIRATools::strToCoordinateFrame(str,frame)) {		
 			_EXCPT(ParserErrors::BadTypeFormatExImpl,ex,"AntennaFrame2String::strToVal()");
