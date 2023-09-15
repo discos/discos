@@ -1,11 +1,9 @@
-#ifndef _CONFIGURATION_H_
-#define _CONFIGURATION_H_
+#ifndef CCONFIGURATION_H
+#define CCONFIGURATION_H
 
 #include <IRA>
 #include <maciContainerServices.h>
 #include <ComponentErrors.h>
-
-//#include <baci.idl>
 
 using namespace IRA;
 
@@ -38,14 +36,21 @@ public:
 	inline CString DBESMAddress() const { return m_DBESM_IPAddress; }
 		
 	/** Gets the socket port to which the LO is listening to commands */
-	inline long DBESMPort() const { return m_DBESM_Port; }/** Gets W band LO ip address */
-
+	inline WORD DBESMPort() const { return m_DBESM_Port; }
+	
+	/*inline ACS::ROlong addr_1() const { return m_addr_1; }
+	inline long addr_2() const { return m_addr_2; }
+	inline long addr_3() const { return m_addr_3; }
+	inline long addr_4() const { return m_addr_4; } */
+	
 private:
 
-	short m_addr_1;
-	short m_addr_2;
-	short m_addr_3;
-	short m_addr_4;
+	long m_addr_1;
+	long m_addr_2;
+	long m_addr_3;
+	long m_addr_4;
+   CString m_DBESM_IPAddress;
+	WORD m_DBESM_Port;
 	unsigned long m_regs_1[10];
 	unsigned long m_regs_2[10];
 	unsigned long m_regs_3[10];
@@ -74,8 +79,7 @@ private:
    double m_temps_2[2];
    double m_temps_3[2];
    double m_temps_4[2];
-	CString m_DBESM_IPAddress;
-	long m_DBESM_Port;
+
 };
 
 #endif /*CONFIGURATION_H_*/

@@ -12,17 +12,15 @@
 */
 
 module Backends { 
-	/**
+	/*
 	<h2>DBE Switch Matrix Interface </h2>
 	@
 	*/
 	interface SRTDBESM: ACS::CharacteristicComponent {
-	/**
+	/*
 
 	 DBESM boards addresses and components values
-
-	*/
-        attribute short addr_1, addr_2, addr_3, addr_4;
+        addr_2, addr_3, addr_4;
 	attribute ACS::ROuLongSeq regs_1, regs_2, regs_3, regs_4;
 	attribute ACS::ROdoubleSeq atts_1, atts_2, atts_3, atts_4;
 	attribute ACS::ROuLongSeq amps_1, amps_2, amps_3, amps_4;
@@ -31,47 +29,40 @@ module Backends {
 	attribute ACS::ROdoubleSeq volts_1, volts_2, volts_3, volts_4;
 	attribute ACS::ROdoubleSeq temps_1, temps_2, temps_3, temps_4;
 	
-        
-	/**
-	 set whole DBESM configuration 
-	 
-    * @throw ReceiversErrors::ReceiversErrorsEx
-    * @throw CORBA::SystemExcpetion 
-	*/
-	
+        */
+        readonly attribute ACS::ROlong addr_1; 
+
 	void set_all(in string cfg_name) raises (BackendsErrors::BackendsErrorsEx);
-	
-	/**
-	 set single DBESM board configuration 
 
-	*/
-	
 	void set_mode(in short b_addr, in string cfg_name) raises (BackendsErrors::BackendsErrorsEx);
-	
-	/**
-	 set a single DBESM attenuator based on which output to attenuate
 
-	*/
-	
 	void set_att(in short b_addr, in short out_ch, in double att_val) raises (BackendsErrors::BackendsErrorsEx);
 
-	/**
-	 store whole DBESM configuration
-
-	*/
-	
 	void store_allmode(in string cfg_name) raises (BackendsErrors::BackendsErrorsEx);
+
+	void clr_mode(in string cfg_name) raises (BackendsErrors::BackendsErrorsEx);
+
+
+	/**
+	 set whole DBESM configuration 
+	*/     
+   	
+	/**
+	 set single DBESM board configuration 
+        */
 	
 	/**
 	 delete DBESM configuration
+        */
+	/**
+	 set a single DBESM attenuator based on which output to attenuate
+        */
 
+	/**
+	 store whole DBESM configuration	
 	*/
-	
-	void clr_mode(in string cfg_name) raises (BackendsErrors::BackendsErrorsEx);
-	
 	/**
 	 set the DBESM amplifliers 
-
 	
 	void set_amp(in short b_addr, in short amp_ch, in double amp_val) raises (BackendsErrors::BackendsErrorsEx);
 	
@@ -96,48 +87,41 @@ module Backends {
 	 
     * @throw ReceiversErrors::ReceiversErrorsEx
     * @throw CORBA::SystemExcpetion 
-	*/
+	
 
-	ACS::uLongSeq get_reg_val(in short b_addr, in short reg_val) raises (BackendsErrors::BackendsErrorsEx);
+	ACS::uLongSeq get_reg_val(in short b_addr, out long reg_val) raises (BackendsErrors::BackendsErrorsEx);
 	
 	/**
 	 get single DBESM board attenuators values 
 
-	*/
 	
 	ACS::doubleSeq get_att(in short b_addr) raises (BackendsErrors::BackendsErrorsEx);
 	
 	/**
 	 get single DBESM board amps values 
 
-	*/
 	
 	ACS::uLongSeq get_amp(in short b_addr) raises (BackendsErrors::BackendsErrorsEx);
 	/**
 	 get single DBESM board eqs values 
 
-	*/
 	
 	ACS::uLongSeq get_eq(in short b_addr) raises (BackendsErrors::BackendsErrorsEx);
 	/**
 	 get single DBESM board bpfs values 
 
-	*/
 	
 	ACS::uLongSeq get_bpf(in short b_addr) raises (BackendsErrors::BackendsErrorsEx);
 
 	/**
 	 get single DBESM board voltages 
 
-	*/
 	
 	ACS::doubleSeq get_voltage(in short b_addr) raises (BackendsErrors::BackendsErrorsEx);
 
 	/**
 	 get single DBESM board temperature 
 
-	*/
-	
 	ACS::doubleSeq get_temp(in short b_addr) raises (BackendsErrors::BackendsErrorsEx);
 
 
@@ -149,32 +133,31 @@ module Backends {
 	/**
 	 get single DBESM board status: registers and attenuators values
 
-	*/
+	
 	
 	string get_status(in short b_addr) raises (BackendsErrors::BackendsErrorsEx);
 
 	/**
 	 get single DBESM board amps, eqs and bpfs values 
 
-	*/
 	
 	string get_comp(in short b_addr) raises (BackendsErrors::BackendsErrorsEx);
 	
 	/**
 	 get single DBESM board voltages and temperatures 
 
-	*/
+
 	
 	string get_diag(in short b_addr) raises (BackendsErrors::BackendsErrorsEx);
 	
 	/**
 	 get whole DBESM voltages and temperatures 
 
-	*/
+
 	
 	string get_diag_all() raises (BackendsErrors::BackendsErrorsEx);
 	
-
+*/
 	
 };
 

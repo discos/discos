@@ -4,9 +4,9 @@
 -->
 
 <xs:schema 
-  targetNamespace="urn:schemas-cosylab-com:SRT_DBESM:1.0"
+  targetNamespace="urn:schemas-cosylab-com:SRTDBESM:1.0"
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
-  xmlns="urn:schemas-cosylab-com:SRT_DBESM:1.0"
+  xmlns="urn:schemas-cosylab-com:SRTDBESM:1.0"
   xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" 
   xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" elementFormDefault="qualified" attributeFormDefault="unqualified">
   <xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
@@ -16,6 +16,7 @@
    <xs:complexContent>
     <xs:extension base="baci:CharacteristicComponent">
       <xs:sequence>
+      <xs:element name="addr_1" type="baci:ROlong" />
 	    	 <xs:element name="regs_1" type="baci:ROuLongSeq" />
 	   	 <xs:element name="regs_2" type="baci:ROuLongSeq" />
 	   	 <xs:element name="regs_3" type="baci:ROuLongSeq" />
@@ -45,10 +46,10 @@
 	   	 <xs:element name="temps_3" type="baci:ROdoubleSeq" />
 	   	 <xs:element name="temps_4" type="baci:ROdoubleSeq" />
       </xs:sequence>
-       <xs:element name="addr_1" type="xs:short" use="required"/>
-	    <xs:element name="addr_2" type="xs:short" use="required"/>
-	    <xs:element name="addr_3" type="xs:short" use="required"/>
-	    <xs:element name="addr_4" type="xs:short" use="required"/>
+       <xs:attribute name="addr_1" type="xs:long" use="required"/>
+	    <xs:attribute name="addr_2" type="xs:long" use="required"/>
+	    <xs:attribute name="addr_3" type="xs:long" use="required"/>
+	    <xs:attribute name="addr_4" type="xs:long" use="required"/>
       <xs:attribute name="DBESM_IPAddress" type="xs:string" use="required"/>
 	  <xs:attribute name="DBESM_Port" type="xs:unsignedInt" use="required"/>
     </xs:extension>

@@ -57,13 +57,13 @@
 # C programs (public and local)
 # -----------------------------
 EXECUTABLES     =
-EXECUTABLES_L   = testDBESM
+EXECUTABLES_L   = #testDBESM
 
 #
 # <brief description of xxxxx program>
-testDBESM_OBJECTS   =	testDBESM CommandSocket DBESMprotocol Configuration
+testDBESM_OBJECTS   =	#testDBESM CommandSocket DBESMprotocol Configuration
 #xxxxx_LDFLAGS   =
-testDBESM_LIBS      = IRALibrary ComponentErrors BackendsErrors
+testDBESM_LIBS      = #IRALibrary ComponentErrors BackendsErrors
 
 #
 # special compilation flags for single c sources
@@ -77,8 +77,10 @@ INCLUDES        =
 #
 # Libraries (public and local)
 # ----------------------------
-LIBRARIES       =
+LIBRARIES       =   SRTDBESMImpl
 LIBRARIES_L     =
+SRTDBESMImpl_OBJECTS = DBESMprotocol CommandSocket Configuration SRTDBESMImpl
+SRTDBESMImpl_LIBS = SRTDBESMStubs IRALibrary BackendsDefinitionsStubs ComponentErrors BackendsErrors ManagementErrors ManagmentDefinitionsStubs
 
 #
 # <brief description of lllll library>
@@ -128,7 +130,7 @@ tttlll_OBJECTS  =
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS =
+CDB_SCHEMAS =  SRTDBESM
 
 # 
 # IDL Files and flags

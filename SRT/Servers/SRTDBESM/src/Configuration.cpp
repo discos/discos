@@ -23,27 +23,8 @@
 		throw dummy; \
 	} \
 	else { \
+	   FIELD=tmps; \
 		ACS_DEBUG_PARAM("CConfiguration::Init()",DESCR" %s",(const char*)tmps); \
-	} \
-}
-
-#define _GET_STRING_ATTRIBUTE_FROM_DOUBLESEQ(ATTRIB,DESCR,FIELD) { \
-	CString tmp_str; \
-	if (CIRATools::doubleSeqToStr(FIELD,tmp_str," ")) { \
-		_GET_STRING_ATTRIBUTE(ATTRIB,DESCR,FIELD); \
-	} \
-	else { \
-		ACS_DEBUG_PARAM("CConfiguration::Init()",DESCR" %s",(const char*)tmp_str); \
-	} \
-}
-
-#define _GET_STRING_ATTRIBUTE_FROM_LONGSEQ(ATTRIB,DESCR,FIELD) { \
-	CString tmp_str; \
-	if (CIRATools::longSeqToStr(FIELD,tmp_str," ")) { \
-		_GET_STRING_ATTRIBUTE(ATTRIB,DESCR,FIELD); \
-	} \
-	else { \
-		ACS_DEBUG_PARAM("CConfiguration::Init()",DESCR" %s",(const char*)tmp_str); \
 	} \
 }
 
@@ -96,11 +77,13 @@ CConfiguration::~CConfiguration()
 
 void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErrors::CDBAccessExImpl)
 {
-	IRA::CString temp;
-	_GET_LONG_ATTRIBUTE("addr_1","Board 1 address is ",m_addr_1);   //addresses are in fact of short type
+	_GET_LONG_ATTRIBUTE("addr_1","Board 1 address is ",m_addr_1);
 	_GET_LONG_ATTRIBUTE("addr_2","Board 2 address is ",m_addr_2);
 	_GET_LONG_ATTRIBUTE("addr_3","Board 3 address is ",m_addr_3);
 	_GET_LONG_ATTRIBUTE("addr_4","Board 4 address is ",m_addr_4);
+	_GET_STRING_ATTRIBUTE("DBESM_IPAddress","DBESM IP Address is",m_DBESM_IPAddress);
+	_GET_DWORD_ATTRIBUTE("DBESM_Port","DBESM TCP Port is",m_DBESM_Port);
+   
 /*	
 	_GET_STRING_ATTRIBUTE_FROM_LONGSEQ("regs_1","Board 1 registers values are ",m_regs_1);
 	_GET_STRING_ATTRIBUTE_FROM_LONGSEQ("regs_2","Board 2 registers values are ",m_regs_2);
@@ -139,12 +122,8 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	_GET_STRING_ATTRIBUTE_FROM_DOUBLESEQ("temps_2","Board 2 temperatures are ",m_temps_2);
 	_GET_STRING_ATTRIBUTE_FROM_DOUBLESEQ("temps_3","Board 3 temperatures are ",m_temps_3);
 	_GET_STRING_ATTRIBUTE_FROM_DOUBLESEQ("temps_4","Board 4 temperatures are ",m_temps_4);
-	
-	_GET_STRING_ATTRIBUTE("DBESM IP Address","DBESM IP Address is",m_DBESM_IPAddress);
-	_GET_DWORD_ATTRIBUTE("DBESM TCP Port","DBESM TCP Port is",m_DBESM_Port);
-*/	
+	*/	
 
-// no other attributes to add at the moment
 }
 
 void CConfiguration::init() throw (ComponentErrors::CDBAccessExImpl)
@@ -153,6 +132,8 @@ void CConfiguration::init() throw (ComponentErrors::CDBAccessExImpl)
 	m_addr_2 = 14;
 	m_addr_3 = 13;
 	m_addr_4 = 12;
+   m_DBESM_IPAddress = "127.0.0.1";
+	m_DBESM_Port = 11111;
 	for (int i = 0; i < 10; ++i)
     {
         m_regs_1[i] = 0;
@@ -220,6 +201,4 @@ void CConfiguration::init() throw (ComponentErrors::CDBAccessExImpl)
    m_temps_3 = {0.0, 0.0};
    m_temps_4 = {0.0, 0.0};
    */
-   m_DBESM_IPAddress = "127.0.0.1";
-	m_DBESM_Port = 11111;
 }
