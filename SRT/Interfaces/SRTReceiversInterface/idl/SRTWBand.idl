@@ -31,11 +31,38 @@ module Receivers {
     * @arg \c 11 UNLOCKED, set if at least one of the local oscillator is not locked, error
     * @copybrief Receivers::CommonReceiverInterface::setLO 
     */
-    interface SRTWBand : ACS::CharacteristicComponent, Receiver {
+    interface SRTWBand : ACS::CharacteristicComponent {
 
         /***************************************************\
          *           COMMON_RECEIVER_INTERFACE             *
         \***************************************************/
+        // string enable_USB_devs();
+        // string disable_USB_devs();
+        // string set_w_LO_freq_PolH();
+        // string set_w_LO_freq_PolV();
+        // string get_w_LO_PolH();
+        // string get_w_LO_PolV();
+        // string get_w_LO_Pols();
+        // string get_w_LO_Synths_Temp();
+        // string get_w_LO_HKP_Temp();
+        // string set_W_LO_RefH();
+        // string set_W_LO_RefV();
+        // string get_W_LO_RefH();
+        // string get_W_LO_RefV();
+        // string get_w_LO_status();
+        // string set_LO_att_PolH();
+        // string set_LO_att_PolV();
+        // string get_LO_att_PolH();
+        // string get_LO_att_PolV();
+        // string get_LO_atts();
+        // string set_w_home();
+        // string set_w_solar_attn();
+        // string set_w_cal();
+        // string set_w_passthrough();
+        // string get_w_mod();
+        // string set_IF_switch_config();
+        // string get_IF_switch_config();
+
         // void setMode(in string mode) raises (ReceiversErrors::ConfigurationEx);
         // readonly attribute ACS::ROdoubleSeq LO;
         // readonly attribute ACS::ROlong feeds;

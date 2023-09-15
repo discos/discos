@@ -45,17 +45,19 @@ using namespace IRA;
 
 void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErrors::CDBAccessExImpl)
 {
-	_GET_STRING_ATTRIBUTE("WLOIPAddress","W LO IP address:",m_WLOAddress,"");
+	cout << "prova" << endl;
+	_GET_STRING_ATTRIBUTE("WLOAddress","W LO IP address:",m_WLOAddress,"");
 	_GET_DWORD_ATTRIBUTE("WLOPort","W LO port:",m_WLOPort,"");
-	_GET_STRING_ATTRIBUTE("WSwMatrixAddress","W Band Switch Matrix address:",m_WSwMatrixAddress,"");
-	_GET_DWORD_ATTRIBUTE("WSwMatrixPort","W Band Switch Matrix port:",m_WSwMatrixPort,"");
-	_GET_STRING_ATTRIBUTE("m_WCALAddress","W Band Solar Attenuator address:",m_WCALAddress,"");
+	_GET_STRING_ATTRIBUTE("WSwitchMatrixAddress","W Band Switch Matrix address:",m_WSwMatrixAddress,"");
+	_GET_DWORD_ATTRIBUTE("SwitchMatrixPort","W Band Switch Matrix port:",m_WSwMatrixPort,"");
+	_GET_STRING_ATTRIBUTE("WCALAddress","W Band Solar Attenuator address:",m_WCALAddress,"");
 	_GET_DWORD_ATTRIBUTE("WCALPort","W Band Solar Attenuator port:",m_WCALPort,"");
-	_GET_DWORD_ATTRIBUTE("SocketResponseTime","Socket Response Time:",m_socketResponseTime,"");
-	_GET_DWORD_ATTRIBUTE("SocketSleepTime","Socket Sleep Time:",m_socketSleepTime,"");
-
-
-
+	_GET_DWORD_ATTRIBUTE("ControlSocketResponseTime","Socket Response Time:",m_socketResponseTime,"");
+	_GET_DWORD_ATTRIBUTE("WatchDogSleepTime","Socket Sleep Time:",m_socketSleepTime,"");
+	_GET_DWORD_ATTRIBUTE("RepetitionCacheTime","RepetitionCacheTime (uSec):",m_repetitionCacheTime,"");
+	_GET_DWORD_ATTRIBUTE("RepetitionExpireTime","RepetitionExpireTime (uSec):",m_expireCacheTime,"");
+	_GET_DWORD_ATTRIBUTE("WatchDogThreadPeriod","Watch dog thread execution period (uSec):",m_watchDogThreadPeriod,"");
+	_GET_DWORD_ATTRIBUTE("WatchDogResponseTime","Watch dog thread response time (uSec):",m_watchDogResponseTime,"");
 }
 
 void CConfiguration::init() throw (ComponentErrors::CDBAccessExImpl)
@@ -66,6 +68,11 @@ void CConfiguration::init() throw (ComponentErrors::CDBAccessExImpl)
 	m_WSwMatrixPort=13200;
 	m_WCALAddress="127.0.0.1"; //"192.168.200.62";
 	m_WCALPort=13100;
-	m_socketResponseTime=1000000; //one second
-	m_socketSleepTime=1000000; // one second
+	m_socketResponseTime=1000000; // 1 second
+	m_socketSleepTime=1000000; // 1 second
+	m_repetitionCacheTime=7000000; // 7 seconds
+	m_expireCacheTime=10000000; // 10 seconds
+	m_watchDogThreadPeriod=500000; // 1/2 a second
+	m_watchDogResponseTime=500000; // 1/2 a second
+
 }

@@ -44,6 +44,15 @@ public:
 	/** Gets the time for the control socket to respond (microseconds) */
 	inline DDWORD getSocketResponseTime() const { return m_socketResponseTime; }
 	
+	/** Gets the control thread watch dog) period between two executions (microseconds) */
+	inline DWORD watchDogThreadPeriod() const { return m_watchDogThreadPeriod; }
+
+	/** Gets the cache time for the logging repetition filter (microseconds) */
+	inline DDWORD repetitionCacheTime() const { return m_repetitionCacheTime; }
+
+	/** Gets the expire time for the logging repetition filter (microseconds) */
+	inline DDWORD expireCacheTime() const { return m_expireCacheTime; }	
+
 	/**
 	 * @return the sleep time of the sender thread in microseconds 
 	 */
@@ -78,6 +87,14 @@ private:
 	DDWORD m_socketResponseTime;
 	/***/
 	DWORD m_socketSleepTime;
+	/***/
+	DDWORD m_repetitionCacheTime;
+	/***/
+	DDWORD m_expireCacheTime;
+
+	DDWORD m_watchDogThreadPeriod;
+	
+	DDWORD m_watchDogResponseTime;
 };
 
 

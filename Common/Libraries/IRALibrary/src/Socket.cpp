@@ -328,6 +328,7 @@ CSocket::OperationResult CSocket::getSockOption(CError& Err,int Opt,void *OptVal
 int CSocket::Send(CError& Err,const void *Buff,WORD BuffLen,WORD Port,CString *Addr)
 {
 	int Res;
+
 	struct sockaddr_in their_addr;
 	if (!Err.isNoError()) return FAIL;
 	if (getStatus()==NOTCREATED) {
@@ -378,6 +379,7 @@ int CSocket::Receive(CError& Err,void *Buff,WORD BuffLen,WORD* Port,CString* Add
 {
 	int Res,addr_len;
 	struct sockaddr_in their_addr;
+
 	if (!Err.isNoError()) return FAIL;
 	if (getStatus()==NOTCREATED) {
 		_SET_ERROR(Err,CError::SocketType,CError::SocketNCreated,"CSocket::Receive()");

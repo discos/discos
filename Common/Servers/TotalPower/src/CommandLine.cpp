@@ -1517,7 +1517,7 @@ void CCommandLine::onTimeout(WORD EventMask)
 
 // private methods
 
-IRA::CSocket::OperationResult CCommandLine::sendBuffer(char *Msg,WORD Len)
+int CCommandLine::sendBuffer(char *Msg,WORD Len)
 {
 	int NWrite;
 	int BytesSent;

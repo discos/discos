@@ -13,15 +13,34 @@
     xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
     xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
 	elementFormDefault="qualified"
-	attributeFormDefault="unqualified">
+	attributeFormDefault="unqualified"
+>
 
 	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
 	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
 
-	 
     <xs:complexType name="SRTWBandReceiverType">
      <xs:complexContent>
       <xs:extension base="baci:CharacteristicComponent">
+       <xs:sequence>
+			<!-- Local Oscillator (ROdoubleSeq) -->
+			<xs:element name="LO" type="baci:ROdoubleSeq"/>
+			<!-- Number of receiver feeds -->
+			<xs:element name="feeds" type="baci:ROlong"/>
+			<!-- Intermediate Frequencies (ROlong) -->
+			<xs:element name="IFs" type="baci:ROlong"/>
+			<!-- Polarization (ROlongSeq) -->
+			<xs:element name="polarization" type="baci:ROlongSeq"/>	
+			<!-- initialFrequency (ROdoubleSeq) -->
+			<xs:element name="initialFrequency" type="baci:ROdoubleSeq"/>	
+			<!-- bandWidth (ROdoubleSeq) -->
+			<xs:element name="bandWidth" type="baci:ROdoubleSeq"/>
+			<!-- currently configured mode (ROstring) -->
+			<xs:element name="mode" type="baci:ROstring"/>
+			<!-- vacuum (ROdouble) -->
+			<xs:element name="vacuum" type="baci:ROdouble"/>
+       </xs:sequence>
+
         <!-- IP Address of Local Oscillator -->
 		<xs:attribute name="WLOAddress" type="xs:string" use="required"/>
 		<!-- Port of Local Oscillator -->
@@ -36,13 +55,15 @@
         <xs:attribute name="WCALPort" type="xs:unsignedShort" use="required" />
 		<!-- This time is the maximum allowed time to the control socket to respond (microseconds)-->
 		<xs:attribute name="ControlSocketResponseTime" type="xs:unsignedLong" use="required" />
+        <!-- WatchDog duty cycle(microseconds) -->
+		<xs:attribute name="WatchDogThreadPeriod" type="xs:unsignedLong" use="required" />
         <!-- -->
 		<xs:attribute name="WatchDogResponseTime" type="xs:unsignedLong" />
         <!-- -->
 		<xs:attribute name="WatchDogSleepTime" type="xs:unsignedLong" />
-        <!-- -->
+        <!-- the cache time (microseconds) for logging repetition filter -->
 		<xs:attribute name="RepetitionCacheTime" type="xs:unsignedLong" />
-        <!-- -->
+        <!-- the expire time (microseconds) for logging repetition filter -->
 		<xs:attribute name="RepetitionExpireTime" type="xs:unsignedLong" />
         <!-- -->
 		<xs:attribute name="ReceiverName" type="xs:string" />

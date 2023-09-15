@@ -2,7 +2,6 @@
 #include "CALSocket.h"
 #include "SwMatrixSocket.h"
 #include "WBandCommand.h"
-#include "StatusSocket.h"
 #include <LogFilter.h>
 #include <typeinfo>
 

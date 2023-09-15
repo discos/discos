@@ -7,19 +7,18 @@
 -->
 
 <SRTWBandReceiver
-    xmlns="urn:schemas-cosylab-com:SRTWBandReceiver:1.0" 
-    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" 
-    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" 
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-    actionThreadStackSize="2048"
-    monitoringThreadStackSize="4096"
+    xmlns="urn:schemas-cosylab-com:SRTWBandReceiver:1.0"
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     WLOAddress="127.0.0.1"
     WLOPort="12703"
     WSwitchMatrixAddress="127.0.0.1"
-    SwitchMatrixPort="13200"      
+    SwitchMatrixPort="13200"
     WCALAddress="127.0.0.1"
     WCALPort="13100"
     ControlSocketResponseTime="1000000"
+    WatchDogThreadPeriod="10000000"
     WatchDogResponseTime="10000000"
     WatchDogSleepTime="10000000"
     RepetitionCacheTime="7000000"
@@ -27,20 +26,31 @@
     ReceiverName="SRTWBand"
 >
 
-    <WLOAddress description="IP Address of Local Oscillator" />
-    <WLOPort description="Port of Local Oscillator" />
-
-    <WSwitchMatrixAddress description="IP Address of Switch Matrix" />
-    <SwitchMatrixPort description="Port of Switch Matrix" />
-
-    <WCALAddress description="IP Address of Solar Attenuator" />
-    <WCALPort description="Port of Solar Attenuator" />
-
-    <ControlSocketResponseTime description="This time is the maximum allowed time to the control socket to respond" />
-    <WatchDogResponseTime description="Overall status of the receiver"/>
-    <WatchDogSleepTime description="Overall status of the receiver"/>
-    <RepetitionCacheTime description="Overall status of the receiver"/>
-    <RepetitionExpireTime description="Overall status of the receiver"/>
-    <receiverName description="ReceiverName"/>
-
+        <LO description="Sequence of local oscillator values for each IF chain" />
+        <feeds description="Number of feeds of the receiver" />
+        <IFs description="Number of Intermediate Frequencies chains coming from each feed" />
+        <polarization description="Sequence of values that identifies the polarization of each IF chains" />
+        <initialFrequency description="Sequence of the start frequencies for each IF chain (MHz)" 
+                        units="MHz"
+                        format="%6.2f"
+        />
+        <bandWidth description="Sequence of the band width values for each IF chain (MHz)" 
+                units="MHz"
+                format="%6.2f"
+        />
+        <mode description="Mnemonic code that defines a special working mode of the receiver (MHz)" />
+        <vacuum description="measure of the vacuum"
+                alarm_high_on="5e-3"
+                default_value="5e-7"
+                alarm_high_off="5e-6"
+                alarm_timer_trig="0"
+                alarm_fault_family="BACIProperty"
+                alarm_fault_member="SRTWBandReceiver"
+                alarm_level="0"
+                default_timer_trig="10"
+                min_timer_trig="1"
+                min_delta_trig="1e-7"
+                units="mBar"
+                format="%e"
+        />
 </SRTWBandReceiver>

@@ -211,7 +211,7 @@ int CCALSocket::receiveBuffer(std::string Msg, CError& error)
             // Reset the timer
             start_time = CIRATools::getUNIXEpoch();
 
-			if(int(buf) == 10){ // if return /n char
+			if(int(buf) == 10){ // if return "/n" char
 				return SUCCESS;
 			}
 

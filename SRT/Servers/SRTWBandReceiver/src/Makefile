@@ -59,7 +59,7 @@
 EXECUTABLES     =
 EXECUTABLES_L   = testWBand
 
-testWBand_OBJECTS = testWBand LOSocket CALSocket SwMatrixSocket Configuration WBandCommand #SocketThread
+testWBand_OBJECTS = testWBand LOSocket CALSocket SwMatrixSocket Configuration WBandCommand
 testWBand_LIBS = IRALibrary ComponentErrors AntennaErrors
 
 #WBand_OBJECTS   = CommandSocket testWBand
@@ -78,11 +78,11 @@ INCLUDES        =
 #
 # Libraries (public and local)
 # ----------------------------
-LIBRARIES       =
-LIBRARIES_L     =
+LIBRARIES       = SRTWBandReceiverImpl
+#LIBRARIES_L     =
+SRTWBandReceiverImpl_OBJECTS   = LOSocket CALSocket SwMatrixSocket Configuration WBandCommand SRTWBandReceiverImpl WatchDog
+SRTWBandReceiverImpl_LIBS   = baciStubs ComponentErrors ComponentErrorsStubs ReceiversErrors ReceiversErrorsStubs ReceiversDefinitionsStubs GenericReceiverStubs SRTWBandStubs IRALibrary ManagementErrors ManagmentDefinitionsStubs
 
-#SRTWBandReceiver_OBJECTS   = CommandSocket
-#SRTWBandReceiver_LIBS   = IRALibrary ComponentErrors AntennaErrors
 
 #
 # Scripts (public and local)
