@@ -32,7 +32,7 @@
 #define CIRCLES 7
 #define ACTUATORS 48
 #define firstUSD 1
-#define lastUSD 264
+#define lastUSD 268
 #define LOOPTIME 100000 // 0,10 sec
 #define CDBPATH std::string(getenv("ACS_CDB")) + "/CDB/"
 #define USDTABLE (CDBPATH + "alma/AS/tab_convUSD.txt").c_str()

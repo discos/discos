@@ -2,7 +2,7 @@
 #include <Definitions.h>
 #include <cstdio>
 
-int actuatorsInCircle[] = {0,24,48,48,48,48,48};
+int actuatorsInCircle[] = {0,24,48,48,48,48,48,4};
 
 CMedicinaActiveSurfaceBossCore::CMedicinaActiveSurfaceBossCore(ContainerServices *service, acscomponent::ACSComponentImpl *me) :
     m_services(service),
