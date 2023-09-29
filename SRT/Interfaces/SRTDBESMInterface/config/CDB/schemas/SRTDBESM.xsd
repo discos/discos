@@ -17,34 +17,37 @@
     <xs:extension base="baci:CharacteristicComponent">
       <xs:sequence>
       <xs:element name="addr_1" type="baci:ROlong" />
-	    	 <xs:element name="regs_1" type="baci:ROuLongSeq" />
-	   	 <xs:element name="regs_2" type="baci:ROuLongSeq" />
-	   	 <xs:element name="regs_3" type="baci:ROuLongSeq" />
-	   	 <xs:element name="regs_4" type="baci:ROuLongSeq" />
+      <xs:element name="addr_2" type="baci:ROlong" />
+      <xs:element name="addr_3" type="baci:ROlong" />
+      <xs:element name="addr_4" type="baci:ROlong" />
+	    	 <xs:element name="regs_1" type="baci:ROlongSeq" />
+	   	 <xs:element name="regs_2" type="baci:ROlongSeq" />
+	   	 <xs:element name="regs_3" type="baci:ROlongSeq" />
+	   	 <xs:element name="regs_4" type="baci:ROlongSeq" />
 	    <xs:element name="atts_1" type="baci:ROdoubleSeq" />
 	    <xs:element name="atts_2" type="baci:ROdoubleSeq" />
 	    <xs:element name="atts_3" type="baci:ROdoubleSeq" />
 	    <xs:element name="atts_4" type="baci:ROdoubleSeq" />
-	    	 <xs:element name="amps_1" type="baci:ROuLongSeq" />
-	   	 <xs:element name="amps_2" type="baci:ROuLongSeq" />
-	   	 <xs:element name="amps_3" type="baci:ROuLongSeq" />
-	   	 <xs:element name="amps_4" type="baci:ROuLongSeq" />
-	    <xs:element name="eqs_1" type="baci:ROuLongSeq" />
-	    <xs:element name="eqs_2" type="baci:ROuLongSeq" />
-	    <xs:element name="eqs_3" type="baci:ROuLongSeq" />
-	    <xs:element name="eqs_4" type="baci:ROuLongSeq" />
-	    	 <xs:element name="bpfs_1" type="baci:ROuLongSeq" />
-	   	 <xs:element name="bpfs_2" type="baci:ROuLongSeq" />
-	   	 <xs:element name="bpfs_3" type="baci:ROuLongSeq" />
-	   	 <xs:element name="bpfs_4" type="baci:ROuLongSeq" />
+	    	 <xs:element name="amps_1" type="baci:ROlongSeq" />
+	   	 <xs:element name="amps_2" type="baci:ROlongSeq" />
+	   	 <xs:element name="amps_3" type="baci:ROlongSeq" />
+	   	 <xs:element name="amps_4" type="baci:ROlongSeq" />
+	    <xs:element name="eqs_1" type="baci:ROlongSeq" />
+	    <xs:element name="eqs_2" type="baci:ROlongSeq" />
+	    <xs:element name="eqs_3" type="baci:ROlongSeq" />
+	    <xs:element name="eqs_4" type="baci:ROlongSeq" />
+	    	 <xs:element name="bpfs_1" type="baci:ROlongSeq" />
+	   	 <xs:element name="bpfs_2" type="baci:ROlongSeq" />
+	   	 <xs:element name="bpfs_3" type="baci:ROlongSeq" />
+	   	 <xs:element name="bpfs_4" type="baci:ROlongSeq" />
 	    <xs:element name="volts_1" type="baci:ROdoubleSeq" />
 	    <xs:element name="volts_2" type="baci:ROdoubleSeq" />
 	    <xs:element name="volts_3" type="baci:ROdoubleSeq" />
 	    <xs:element name="volts_4" type="baci:ROdoubleSeq" />
-	    	 <xs:element name="temps_1" type="baci:ROdoubleSeq" />
-	   	 <xs:element name="temps_2" type="baci:ROdoubleSeq" />
-	   	 <xs:element name="temps_3" type="baci:ROdoubleSeq" />
-	   	 <xs:element name="temps_4" type="baci:ROdoubleSeq" />
+	    	 <xs:element name="temps_1" type="baci:ROdouble" />
+	   	 <xs:element name="temps_2" type="baci:ROdouble" />
+	   	 <xs:element name="temps_3" type="baci:ROdouble" />
+	   	 <xs:element name="temps_4" type="baci:ROdouble" />
       </xs:sequence>
        <xs:attribute name="addr_1" type="xs:long" use="required"/>
 	    <xs:attribute name="addr_2" type="xs:long" use="required"/>

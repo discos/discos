@@ -6,8 +6,6 @@
 
 using namespace std;
 
-
-
 #define TAIL std::string("\r\n");
 
 class CDBESMCommand
@@ -28,11 +26,11 @@ class CDBESMCommand
         inline static string comm_set_mode(string b_addr, string cfg_name){return Commands::m_set_mode + " " + "BOARD" + " " + b_addr + " " + cfg_name + TAIL;}
         inline static string comm_store_allmode(string cfg_name){return Commands::m_store_allmode + " " + cfg_name + TAIL;}
         inline static string comm_clr_mode(string cfg_name){return Commands::m_clr_mode + " " + cfg_name + TAIL;}
-        inline static string comm_get_status(string b_addr){return Commands::m_get_status + " " + "BOARD" + " " + b_addr;}
+        inline static string comm_get_status(string b_addr){return Commands::m_get_status + " BOARD " + b_addr + TAIL;}
         inline static string comm_set_att(string b_addr, string out_ch, string att_val){return Commands::m_set_att + " " + out_ch + " BOARD " + b_addr + " VALUE " + att_val + TAIL;}
-        inline static string comm_get_diag_all(){return Commands::m_get_diag_all + TAIL;}
-        inline static string comm_get_diag(string b_addr){return Commands::m_get_diag + " " + "BOARD" + " " + b_addr;}
-        inline static string comm_get_comp(string b_addr){return Commands::m_get_comp + " " + "BOARD" + " " + b_addr;}
+       // inline static string comm_get_diag_all(){return Commands::m_get_diag_all + TAIL;}
+        inline static string comm_get_diag(string b_addr){return Commands::m_get_diag + " BOARD " + b_addr + TAIL;}
+        inline static string comm_get_comp(string b_addr){return Commands::m_get_comp + " BOARD " + b_addr + TAIL;}
         
     private:
         /*
@@ -45,7 +43,7 @@ class CDBESMCommand
             inline static const string m_clr_mode { "DBE CLRMODE" };
             inline static const string m_get_status { "DBE GETSTATUS" };
             inline static const string m_set_att { "DBE SETATT" };
-            inline static const string m_get_diag_all { "DBE ALLDIAG" };
+            //inline static const string m_get_diag_all { "DBE ALLDIAG" };
             inline static const string m_get_diag { "DBE DIAG" };
             inline static const string m_get_comp { "DBE GETCOMP" };
     };    

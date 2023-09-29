@@ -20,131 +20,186 @@ CCommandSocket::~CCommandSocket()
 
 void CCommandSocket::cleanUp()
 {
-	//before closing we have to make sure there is no one waiting for services of this object...so we acquire the mutex in blocking mode
-	DDWORD timeo=0;
-	IRA::CTimeoutSync guard(&m_syncMutex,timeo);
-	guard.acquire();
 	CError err;
 	Close(err);
-	guard.release();
-//	CSecAreaResourceWrapper<CDBESMCommand> data=m_pData->Get();
-        //commonData->setControlLineState(Antenna::ACU_NOTCNTD);
 }
 
 void CCommandSocket::init(CConfiguration *config) throw (SocketErrorExImpl)
 {
 	m_pConfiguration=config;
-	//m_pData=data;
-	//CSecAreaResourceWrapper<CDBESMCommand> data=m_pData->Get();
-	//commonData->setControlLineState(Antenna::ACU_NOTCNTD);
+	
 	connectSocket(); // throw (SocketErrorExImpl)
-	/*m_ptSize=0;
-	m_lastScanEpoch=0;
-	m_currentScanStartEpoch=0; */
 }
 
 
 void CCommandSocket::connectSocket() throw (SocketErrorExImpl)
 {
-	IRA::CError error;	
-	//CSecAreaResourceWrapper<CDBESMCommand> data=m_pData->Get();
-    //	if (data->getControlLineState()==Antenna::ACU_NOTCNTD) {
-		ACS_LOG(LM_FULL_INFO,"CCommandSocket::connectSocket()",(LM_NOTICE,"COMMAND_SOCKET_CREATING"));	
-		createSocket(); // throw (SocketErrorExImpl)
-		ACS_LOG(LM_FULL_INFO,"CCommandSocket::connectSocket()",(LM_NOTICE,"COMMAND_SOCKET_CONNECTING"));
-		CSocket::OperationResult res=Connect(error,m_pConfiguration->DBESMAddress(),m_pConfiguration->DBESMPort());
+	IRA::CError error;
+	ACS_LOG(LM_FULL_INFO,"CCommandSocket::connectSocket()",(LM_NOTICE,"COMMAND_SOCKET_CREATING"));	
+	
+	createSocket(); // throw (SocketErrorExImpl)
+	
+	ACS_LOG(LM_FULL_INFO,"CCommandSocket::connectSocket()",(LM_NOTICE,"COMMAND_SOCKET_CONNECTING"));
+   CSocket::OperationResult res=Connect(error,m_pConfiguration->DBESMAddress(),m_pConfiguration->DBESMPort());
+   
 		if (res==FAIL) {
 			ACS_LOG(LM_FULL_INFO,"CCommandSocket::connectSocket()",(LM_NOTICE,"COMMAND_SOCKET_FAIL"));
-			printf("res==FAIL");
 			_EXCPT_FROM_ERROR(IRALibraryResourceExImpl,dummy,error);
 			dummy.setCode(error.getErrorCode());
 			dummy.setDescription((const char*)error.getDescription());
-		//	data->setControlLineState(Antenna::ACU_NOTCNTD);
 			_THROW_EXCPT_FROM_EXCPT(SocketErrorExImpl,dummy,"CCommandSocket::connectSocket()");
 		}	
 		else if (res==WOULDBLOCK) {
 			ACS_LOG(LM_FULL_INFO,"CCommandSocket::connectSocket()",(LM_NOTICE,"COMMAND_SOCKET_WOULDBLOCK"));
-			printf("res==WOULDBLOCK\n");
-		//	data->setControlLineState(Antenna::ACU_CNTDING);
 		}
 		else {
 			ACS_LOG(LM_FULL_INFO,"CCommandSocket::connectSocket()",(LM_NOTICE,"COMMAND_SOCKET_SUCCESS"));
-			printf("res==SUCCESS");
-		//	data->setControlLineState(Antenna::ACU_CNTD);
 		}
-    //	}
 }
 
-void CCommandSocket::sendCommand(std::string cmd,std::string outBuff, int all = 0) throw (TimeoutExImpl,SocketErrorExImpl)
+void CCommandSocket::sendCommand(std::string cmd,std::string* outBuff, int all = 0) throw (TimeoutExImpl,SocketErrorExImpl)
 {
 	OperationResult res;
 	CError err;
-	//CSecAreaResourceWrapper<CDBESMCommand> data=m_pData->Get();
-	
-	res=sendBuffer(cmd,err);
+	res = sendBuffer(cmd,err);
 	
 	if (res==FAIL) {
-	    //	data->setStatusWord(CCommonData::CONTROL_LINE_ERROR);
 		_EXCPT_FROM_ERROR(SocketErrorExImpl,dummy,err);
 		throw dummy;
 	} 
 	else if (res==WOULDBLOCK) {
 		if (m_bTimedout) { // this is at least the second time the socket times out
-		//	data->setControlLineState(Antenna::ACU_NOTCNTD);  //declare the connection fell down
-			ACS_LOG(LM_FULL_INFO,"CCommandSocket::sendCommand()",(LM_CRITICAL,"COMMAND_SOCKET_DISCONNECTED_ON_TIMEOUT")); // logs it
+			ACS_LOG(LM_FULL_INFO,"CCommandSocket::sendCommand()",(LM_CRITICAL,"COMMAND_SOCKET_DISCONNECTED_ON_TIMEOUT"));
 		}
 		m_bTimedout=true;
 		_THROW_EXCPT(TimeoutExImpl,"CCommandSocket::sendCommand()");
 	}
-	else if (res==SUCCESS) {
-      printf("command sent\n");		
+	else if (res==SUCCESS) {	
 		m_bTimedout=false;
-		int bytes=receiveBuffer(outBuff, err, all);
-		printf("receiveBuffer returns %d\n", bytes);
-	   //	data->clearStatusWord(CCommonData::CONTROL_LINE_ERROR);
+		receiveBuffer(outBuff, err, all);
 	}
 }
 
-void CCommandSocket::set_all(const char * cfg_name) throw (BackendsErrors::BackendsErrorsEx)
+void CCommandSocket::set_all(const char * cfg_name) //throw (BackendsErrors::BackendsErrorsEx)
 {
       set_all_command(cfg_name);
 }
 
-void CCommandSocket::set_mode(short b_addr, const char * cfg_name) throw (BackendsErrors::BackendsErrorsEx)
+
+void CCommandSocket::set_mode(short b_addr, const char * cfg_name) //throw (BackendsErrors::BackendsErrorsEx)
 {
       set_mode_command(b_addr, cfg_name);
 }
 
-void CCommandSocket::set_att(short b_addr, short out_ch, double att_val) throw (BackendsErrors::BackendsErrorsEx)
+
+void CCommandSocket::set_att(short b_addr, short out_ch, double att_val) //throw (BackendsErrors::BackendsErrorsEx)
 {
       set_att_command(b_addr, out_ch, att_val);
 }
 
-void CCommandSocket::store_allmode(const char * cfg_name) throw (BackendsErrors::BackendsErrorsEx)
+
+void CCommandSocket::store_allmode(const char * cfg_name) //throw (BackendsErrors::BackendsErrorsEx)
 {
       store_allmode_command(cfg_name);
 }
 
-void CCommandSocket::clr_mode(const char * cfg_name) throw (BackendsErrors::BackendsErrorsEx)
+
+void CCommandSocket::clr_mode(const char * cfg_name) //throw (BackendsErrors::BackendsErrorsEx)
 {
       clr_mode_command(cfg_name);
 }
+
+
+string CCommandSocket::get_status(short b_addr) //throw (BackendsErrors::BackendsErrorsEx)
+{
+    return get_status_command(b_addr);
+}
+
+string CCommandSocket::get_comp(short b_addr) //throw (BackendsErrors::BackendsErrorsEx)
+{
+    return get_comp_command(b_addr);
+}
+
+
+string CCommandSocket::get_diag(short b_addr) //throw (BackendsErrors::BackendsErrorsEx)
+{
+    return get_diag_command(b_addr);
+}
+
+
+void CCommandSocket::parse_longSeq_response(string status_str, string start, string end, ACS::longSeq* vals) //throw (BackendsErrors::BackendsErrorsEx)
+{
+   unsigned start_pos = status_str.find(start);
+   unsigned end_pos = status_str.find(end);
+   
+   try{
+   	stringstream in(status_str.substr(start_pos + start.length(), end_pos - (start_pos + start.length())));
+   	long temp;   
+      for (int i=0; i<vals->length(); i++)
+        {
+    	   if (in >> temp)
+    	     {
+             (*vals)[i]=temp;
+           }
+        }
+   }
+    catch (std::out_of_range outofrange) { //if the index is out of range
+       std::cout << "OUT OF RANGE\n" << outofrange.what(); //throw this exception
+    }
+
+}
+
+void CCommandSocket::parse_doubleSeq_response(string status_str, string start, string end, ACS::doubleSeq* vals) //throw (BackendsErrors::BackendsErrorsEx)
+{
+   unsigned start_pos = status_str.find(start);
+   unsigned end_pos = status_str.find(end);
+
+   try {
+   std::stringstream in(status_str.substr(start_pos + start.length(), end_pos - (start_pos + start.length())));
+   
+   double temp;   
+   for (int i=0; i<vals->length(); i++)
+        {
+    	   if (in >> temp)
+    	     {
+             (*vals)[i]=temp;
+           }
+        }
+    }    
+    catch (std::out_of_range outofrange) { //if the index is out of range
+    std::cout << "OUT OF RANGE\n" << outofrange.what(); //throw this exception
+    }     
+}
+
+void CCommandSocket::parse_double_response(string status_str, string start, string end, double* val) //throw (BackendsErrors::BackendsErrorsEx)
+{
+   unsigned start_pos = status_str.find(start);
+   unsigned end_pos = status_str.find(end);
+
+   try {
+   stringstream in(status_str.substr(start_pos + start.length(), end_pos - (start_pos + start.length())));
+   double temp;
+      in >> temp;
+      *val=temp;
+   }    
+   catch (std::out_of_range outofrange) { //if the index is out of range
+   std::cout << "OUT OF RANGE\n" << outofrange.what(); //throw this exception
+   }
+
+}
+
 // ********************* PROTECTED  **************************************/
 
 void CCommandSocket::onConnect(int ErrorCode)
 {
 	CError Tmp;
-	//CSecAreaResourceWrapper<CDBESMCommand> data=m_pData->Get();
-    //	if (data->getControlLineState()==Antenna::ACU_CNTDING) {
-		if (ErrorCode==0) {
-			if (EventSelect(Tmp,E_CONNECT,false)==SUCCESS) {
-			    //	if (data->isBusy()) data->setControlLineState(Antenna::ACU_BSY);
-			    //	else data->setControlLineState(Antenna::ACU_CNTD);
+	
+	if (ErrorCode==0) {
+		if (EventSelect(Tmp,E_CONNECT,false)==SUCCESS) {
 				ACS_LOG(LM_FULL_INFO,"CCommandSocket::onConnect()",(LM_NOTICE,"COMMAND_SOCKET_CONNECTED"));			
 			}
 		}
 		else {
-		//	data->setControlLineState(Antenna::ACU_NOTCNTD);
 			ACS_DEBUG_PARAM("CStatusSocket::onConnect()","Reconnection failed, exit code is %d",ErrorCode);
 			ACS_LOG(LM_FULL_INFO,"CStatusSocket::onConnect()",(LM_NOTICE,"Reconnection failed, exit code is %d",ErrorCode));
 		}
@@ -197,10 +252,9 @@ void CCommandSocket::createSocket() throw (SocketErrorExImpl)
 CSocket::OperationResult CCommandSocket::sendBuffer(std::string Msg,CError& error)
 {
 
-	CSocket::OperationResult res;	
-	//double start_time = CIRATools::getUNIXEpoch();
+	CSocket::OperationResult res;
    size_t sent_bytes = 0;
-
+   
 	while(sent_bytes < Msg.size())
     {
       size_t sent_now = Send(error, Msg.substr(sent_bytes, Msg.size() - sent_bytes).c_str(), Msg.size() - sent_bytes);
@@ -211,41 +265,38 @@ CSocket::OperationResult CCommandSocket::sendBuffer(std::string Msg,CError& erro
 		else {res=CSocket::FAIL;}
 		
 	   return res;
-   }
+    }
 
 }
 
-int CCommandSocket::receiveBuffer(std::string Msg,CError& error, int all)
+int CCommandSocket::receiveBuffer(std::string* Msg,CError& error, int all)
 {
 
-	//double start_time = CIRATools::getUNIXEpoch();
 	 int i = 0;
     TIMEVALUE Now;
 	 TIMEVALUE Start;
 	 CIRATools::getTime(Start);
-	 printf("function receiveBuffer called\n");
 	 
     while(true)
     { 
         char buf;
         CIRATools::getTime(Now);
         if(Receive(error, &buf, 1) == 1)
-        {
-            Msg += buf;
-			cout << "buf " << buf << endl;
+         {
+            (*Msg) += buf;
+			   cout << "buf " << buf << endl;
             // Reset the timer
-            //start_time = CIRATools::getUNIXEpoch();
             CIRATools::getTime(Start);
                                  }
-			if( Msg.back() == '\n' && Msg[Msg.size()-2] == '\r') { // if return \r\n (=CRLF))
+			if( (*Msg).back() == '\n' && (*Msg)[(*Msg).size()-2] == '\r') { // if return \r\n (=CRLF))
 			   i++;
 			   if (all == 0) {
-                  cout << Msg << endl;				
+                  cout << *Msg << endl;				
 				      return SUCCESS;
 				        }
 				else {
 					if (i == 4) {
-                  cout << Msg << endl;				
+                  cout << *Msg << endl;				
 				      return SUCCESS;
 				      i = 0;
 				        }
@@ -256,56 +307,81 @@ int CCommandSocket::receiveBuffer(std::string Msg,CError& error, int all)
         {
         	   m_bTimedout=true;
             Close(error);
-            ComponentErrors::SocketErrorExImpl exImpl(__FILE__, __LINE__, "CLOSocket::sendCommand()");
+            ComponentErrors::SocketErrorExImpl exImpl(__FILE__, __LINE__, "CCommandSocketSocket::sendCommand()");
             exImpl.addData("Reason", "Timeout when receiving answer.");
             std::cout << "Timeout receiving answer" << std::endl;
             throw exImpl;
 			return FAIL;
         }
-    }
+     }        
 }
 
-void CCommandSocket::set_all_command(const char * cfg_name) throw (BackendsErrors::BackendsErrorsEx)
+void CCommandSocket::set_all_command(const char * cfg_name) //throw (BackendsErrors::BackendsErrorsEx)
 {
 	 string outBuff;
     string msg = CDBESMCommand::comm_set_allmode(cfg_name);
     cout << "Message to send is: " << msg << endl;
-    sendCommand(msg, outBuff, 1);
-    cout << "\nfunction sendCommand called from CommandSocket.cpp\n" << endl;
+    sendCommand(msg, &outBuff, 1);
 }
 
-void CCommandSocket::set_mode_command(short b_addr, const char * cfg_name) throw (BackendsErrors::BackendsErrorsEx)
+void CCommandSocket::set_mode_command(short b_addr, const char * cfg_name) //throw (BackendsErrors::BackendsErrorsEx)
 {
 	 string outBuff;
     string msg = CDBESMCommand::comm_set_mode(to_string(b_addr), cfg_name);
     cout << "Message to send is: " << msg << endl;
-    sendCommand(msg, outBuff, 0);
-    cout << "\nfunction sendCommand called from CommandSocket.cpp\n" << endl;
+    sendCommand(msg, &outBuff, 0);
 }
 
-void CCommandSocket::set_att_command(short b_addr, short out_ch, double att_val) throw (BackendsErrors::BackendsErrorsEx)
+void CCommandSocket::set_att_command(short b_addr, short out_ch, double att_val) //throw (BackendsErrors::BackendsErrorsEx)
 {
     string outBuff;
     string msg = CDBESMCommand::comm_set_att(to_string(b_addr), to_string(out_ch), to_string(att_val));
     cout << "Message to send is: " << msg << endl;
-    sendCommand(msg, outBuff, 0);
-    cout << "\nfunction sendCommand called from CommandSocket.cpp\n" << endl;
+    sendCommand(msg, &outBuff, 0);
 } 
 
-void CCommandSocket::store_allmode_command(const char * cfg_name) throw (BackendsErrors::BackendsErrorsEx)
+void CCommandSocket::store_allmode_command(const char * cfg_name) //throw (BackendsErrors::BackendsErrorsEx)
 {
     string outBuff;
     string msg = CDBESMCommand::comm_store_allmode(cfg_name);
     cout << "Message to send is: " << msg << endl;
-    sendCommand(msg, outBuff, 0);
-    cout << "\nfunction sendCommand called from CommandSocket.cpp\n" << endl;
+    sendCommand(msg, &outBuff, 0);
 } 
 
-void CCommandSocket::clr_mode_command(const char * cfg_name) throw (BackendsErrors::BackendsErrorsEx)
+void CCommandSocket::clr_mode_command(const char * cfg_name) //throw (BackendsErrors::BackendsErrorsEx)
 {
 	 string outBuff;
     string msg = CDBESMCommand::comm_clr_mode(cfg_name);
     cout << "Message to send is: " << msg << endl;
-    sendCommand(msg, outBuff, 0);
-    cout << "\nfunction sendCommand called from CommandSocket.cpp\n" << endl;
+    sendCommand(msg, &outBuff, 0);
+}
+
+string CCommandSocket::get_status_command(short b_addr) //throw (BackendsErrors::BackendsErrorsEx)
+{
+    string response;
+    string msg = CDBESMCommand::comm_get_status(to_string(b_addr));
+    cout << "Message to send is: " << msg << endl;
+    sendCommand(msg, &response, 0);
+    
+    return response;
+}
+
+string CCommandSocket::get_comp_command(short b_addr) //throw (BackendsErrors::BackendsErrorsEx)
+{
+    string response;
+    string msg = CDBESMCommand::comm_get_comp(to_string(b_addr));
+    cout << "Message to send is: " << msg << endl;
+    sendCommand(msg, &response, 0);
+
+    return response;
+}
+
+string CCommandSocket::get_diag_command(short b_addr) //throw (BackendsErrors::BackendsErrorsEx)
+{
+    string response;
+    string msg = CDBESMCommand::comm_get_diag(to_string(b_addr));
+    cout << "Message to send is: " << msg << endl;
+    sendCommand(msg, &response, 0);
+
+    return response;
 }

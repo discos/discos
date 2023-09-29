@@ -20,17 +20,23 @@ module Backends {
 	/*
 
 	 DBESM boards addresses and components values
-        addr_2, addr_3, addr_4;
-	attribute ACS::ROuLongSeq regs_1, regs_2, regs_3, regs_4;
-	attribute ACS::ROdoubleSeq atts_1, atts_2, atts_3, atts_4;
-	attribute ACS::ROuLongSeq amps_1, amps_2, amps_3, amps_4;
-	attribute ACS::ROuLongSeq eqs_1, eqs_2, eqs_3, eqs_4;
-	attribute ACS::ROuLongSeq bpfs_1, bpfs_2, bpfs_3, bpfs_4;
-	attribute ACS::ROdoubleSeq volts_1, volts_2, volts_3, volts_4;
-	attribute ACS::ROdoubleSeq temps_1, temps_2, temps_3, temps_4;
 	
         */
-        readonly attribute ACS::ROlong addr_1; 
+        readonly attribute ACS::ROlong addr_1, addr_2, addr_3, addr_4;
+	
+        readonly attribute ACS::ROlongSeq regs_1, regs_2, regs_3, regs_4;
+	
+	readonly attribute ACS::ROdoubleSeq atts_1, atts_2, atts_3, atts_4;
+
+	readonly attribute ACS::ROlongSeq amps_1, amps_2, amps_3, amps_4;
+
+	readonly attribute ACS::ROlongSeq eqs_1, eqs_2, eqs_3, eqs_4;
+
+	readonly attribute ACS::ROlongSeq bpfs_1, bpfs_2, bpfs_3, bpfs_4;
+
+	readonly attribute ACS::ROdoubleSeq volts_1, volts_2, volts_3, volts_4;
+
+	readonly attribute ACS::ROdouble temps_1, temps_2, temps_3, temps_4;
 
 	void set_all(in string cfg_name) raises (BackendsErrors::BackendsErrorsEx);
 
@@ -42,6 +48,13 @@ module Backends {
 
 	void clr_mode(in string cfg_name) raises (BackendsErrors::BackendsErrorsEx);
 
+	string get_status(in short b_addr) raises (BackendsErrors::BackendsErrorsEx);
+
+	string get_comp(in short b_addr) raises (BackendsErrors::BackendsErrorsEx);
+
+	string get_diag(in short b_addr) raises (BackendsErrors::BackendsErrorsEx);
+
+//	string get_diag_all() raises (BackendsErrors::BackendsErrorsEx);
 
 	/**
 	 set whole DBESM configuration 
@@ -135,27 +148,27 @@ module Backends {
 
 	
 	
-	string get_status(in short b_addr) raises (BackendsErrors::BackendsErrorsEx);
+	
 
 	/**
 	 get single DBESM board amps, eqs and bpfs values 
 
 	
-	string get_comp(in short b_addr) raises (BackendsErrors::BackendsErrorsEx);
+
 	
 	/**
 	 get single DBESM board voltages and temperatures 
 
 
 	
-	string get_diag(in short b_addr) raises (BackendsErrors::BackendsErrorsEx);
+
 	
 	/**
 	 get whole DBESM voltages and temperatures 
 
 
 	
-	string get_diag_all() raises (BackendsErrors::BackendsErrorsEx);
+
 	
 */
 	

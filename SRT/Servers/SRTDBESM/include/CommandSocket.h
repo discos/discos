@@ -56,18 +56,30 @@ public:
 	 * @throw TimeoutExImpl if the operation timeout before completing. 
 	 * @thorw SocketErrorExImpl if the connection fails before completing. In that case the status is set to <i>Antenna::ACU_NOTCNTD</i>
 	 */
-	void sendCommand(std::string cmd,std::string outBuff, int all) throw (ComponentErrors::TimeoutExImpl,ComponentErrors::SocketErrorExImpl);
+	void sendCommand(std::string cmd,std::string* outBuff, int all) throw (ComponentErrors::TimeoutExImpl,ComponentErrors::SocketErrorExImpl);
 		
-	void set_all(const char * cfg_name) throw (BackendsErrors::BackendsErrorsEx);
+	void set_all(const char * cfg_name); //throw (BackendsErrors::BackendsErrorsEx);
 	
-	void set_mode(short b_addr, const char * cfg_name) throw (BackendsErrors::BackendsErrorsEx);	
+	void set_mode(short b_addr, const char * cfg_name); //throw (BackendsErrors::BackendsErrorsEx);	
 		
-	void set_att(short b_addr, short out_ch, double att_val) throw (BackendsErrors::BackendsErrorsEx);
+	void set_att(short b_addr, short out_ch, double att_val); //throw (BackendsErrors::BackendsErrorsEx);
 
-	void store_allmode(const char * cfg_name) throw (BackendsErrors::BackendsErrorsEx);
+	void store_allmode(const char * cfg_name); //throw (BackendsErrors::BackendsErrorsEx);
 	
-	void clr_mode(const char * cfg_name) throw (BackendsErrors::BackendsErrorsEx);
+	void clr_mode(const char * cfg_name); //throw (BackendsErrors::BackendsErrorsEx);
+	
+	string get_status(short b_addr); //throw (BackendsErrors::BackendsErrorsEx);
+	
+	string get_comp(short b_addr); //throw (BackendsErrors::BackendsErrorsEx);
+	
+   string get_diag(short b_addr); //throw (BackendsErrors::BackendsErrorsEx);
 			
+	void parse_longSeq_response(string status_str, string start, string end, ACS::longSeq* vals); //throw (BackendsErrors::BackendsErrorsEx);
+   
+   void parse_doubleSeq_response(string status_str, string start, string end, ACS::doubleSeq* vals); //throw (BackendsErrors::BackendsErrorsEx);
+   
+   void parse_double_response(string status_str, string start, string end, double* val); //throw (BackendsErrors::BackendsErrorsEx);
+      
 protected:
 	/**
 	 * Automatically called by the framework as a result of a connection request. See super-class for more details.
@@ -77,18 +89,6 @@ protected:
 	
 
 private:
-	
-	template <class X> class autoArray {
-	public:
-		autoArray(): m_message(NULL) {}
-		~autoArray() { if (m_message!=NULL) delete [] m_message; }
-		operator X *&() { return m_message; }
-		operator const X *() const { return m_message; }
-		X operator[](WORD pos) const { return m_message[pos]; }
-		X& operator[](WORD pos) { return m_message[pos]; }
-	private:
-		X* m_message;
-	};
 
 	CConfiguration * m_pConfiguration;
 	
@@ -105,45 +105,26 @@ private:
 	*/
 	OperationResult sendBuffer(std::string Msg,CError& error);
 
-   int receiveBuffer(std::string Msg,CError& error, int all=0);
+   int receiveBuffer(std::string *Msg,CError& error, int all=0);
 	
 	void createSocket() throw (ComponentErrors::SocketErrorExImpl);
 	
-	ACE_Recursive_Thread_Mutex m_syncMutex;
    
-	void set_all_command(const char * cfg_name) throw (BackendsErrors::BackendsErrorsEx);
+	void set_all_command(const char * cfg_name); //throw (BackendsErrors::BackendsErrorsEx);
 	
-	void set_mode_command(short b_addr, const char * cfg_name) throw (BackendsErrors::BackendsErrorsEx);
+	void set_mode_command(short b_addr, const char * cfg_name); //throw (BackendsErrors::BackendsErrorsEx);
 	
-   void set_att_command(short b_addr, short out_ch, double att_val) throw (BackendsErrors::BackendsErrorsEx);
+   void set_att_command(short b_addr, short out_ch, double att_val); //throw (BackendsErrors::BackendsErrorsEx);
 	
-	void store_allmode_command(const char * cfg_name) throw (BackendsErrors::BackendsErrorsEx);
+	void store_allmode_command(const char * cfg_name); //throw (BackendsErrors::BackendsErrorsEx);
 	
-	void clr_mode_command(const char * cfg_name) throw (BackendsErrors::BackendsErrorsEx);
+	void clr_mode_command(const char * cfg_name); //throw (BackendsErrors::BackendsErrorsEx);
 	
-   /*
-	ACS::uLongSeq get_reg_val(short b_addr, short reg_val) throw (BackendsErrors::BackendsErrorsEx);
+	string get_status_command(short b_addr); //throw (BackendsErrors::BackendsErrorsEx);
 	
-	ACS::doubleSeq get_att(short b_addr) throw (BackendsErrors::BackendsErrorsEx);
+   string get_comp_command(short b_addr); //throw (BackendsErrors::BackendsErrorsEx);	
 	
-	ACS::uLongSeq get_amp(short b_addr) throw (BackendsErrors::BackendsErrorsEx);
-	
-	ACS::uLongSeq get_eq(short b_addr) throw (BackendsErrors::BackendsErrorsEx);
-
-	ACS::uLongSeq get_bpf(short b_addr) throw (BackendsErrors::BackendsErrorsEx);
-
-	ACS::doubleSeq get_voltage(short b_addr) throw (BackendsErrors::BackendsErrorsEx);
-
-	ACS::doubleSeq get_temp(short b_addr) throw (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
-
-	string get_status(short b_addr) throw (BackendsErrors::BackendsErrorsEx);
-
-	string get_comp(short b_addr) throw (BackendsErrors::BackendsErrorsEx);
-
-	string get_diag(short b_addr) throw (BackendsErrors::BackendsErrorsEx);
-
-	string get_diag_all() throw (BackendsErrors::BackendsErrorsEx);
-	*/
+	string get_diag_command(short b_addr); //throw (BackendsErrors::BackendsErrorsEx);
 	
 };
 
