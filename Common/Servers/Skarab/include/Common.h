@@ -19,7 +19,7 @@
 // some hard coded, hardware dependant constants
 #define STARTFREQUENCY 0.0 // this is the start frequency of all IF inputs
 #define MIN_FREQUENCY 0.0 // min frequency of all IF inputs
-#define MAX_FREQUENCY 150.0 // max frequency of all IF inputs
+#define MAX_FREQUENCY 1500.0 // max frequency of all IF inputs
 #define BINSNUMBER 1000
 #define SAMPLETYPE float
 #define SAMPLESIZE sizeof(SAMPLETYPE)  //
@@ -43,7 +43,7 @@
 #define MAX_ATTENUATION 15.0
 #define MIN_ATTENUATION 0.0
 
-#define MAX_BINS 16384
+#define MAX_BINS 65536
 #define MIN_BINS 1024
 
 #define MAX_SAMPLE_RATE 4600.0 // MHz
