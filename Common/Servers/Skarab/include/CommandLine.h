@@ -426,6 +426,22 @@ public:
 	void setAttenuation(const long&inputId, const double& attenuation)  throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,BackendsErrors::NakExImpl,
 			ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl);
 	
+    /**
+	 * Called to configure a range where compute a Tsys.
+	 * @throw BackendsErrors::BackendBusyExImpl
+	 * @throw ComponentErrors::ValidationErrorExImpl
+	 * @throw ComponentErrors::ValueOutofRangeExImpl
+	 * @throw BackendsErrors::NakExImpl,
+	 * @throw ComponentErrors::SocketErrorExImpl
+	 * @arg \c ComponentErrors::IRALibraryResource
+	 * @throw ComponentErrors::TimeoutExImpl
+	 * @throw BackendsErrors::ConnectionExImpl
+	 * @param starting frequency
+	 * @param bandwidth range;
+	 */
+	void setTsysRange(const double& freq, const double& bw)  throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,BackendsErrors::NakExImpl,
+			ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl);
+
 	/**
 	 * Called by the component to fill the <i>Backends::TMainHeader</i> with the proper informations.
 	 * @param bkd the stucture that contains the required information.
@@ -655,7 +671,10 @@ private:
     long m_inputsNumber;
 
     double m_filter;
-	
+
+	double m_TsysRange_freq;
+    double m_TsysRange_bw;
+
 	/**
 	 * Pointer to the configuration table, every record of the table stores a possible backend setup.
 	 */
@@ -751,35 +770,23 @@ private:
 	 */
 	inline void clearStatusField(TstatusFields field) { m_backendStatus &= ~(1 << field); }
 
-    bool m_SK77;
-    bool m_SK00;
-    bool m_SK01;
-    bool m_SK02;
-    bool m_SK03;
-    bool m_SK04;
-    bool m_SK05;
-    bool m_SK06;
-    bool m_SC00;
-    bool m_SL00;
-    bool m_SP00;
-    bool m_SK77S;
-    bool m_SK00S;
-    bool m_SK01S;
-    bool m_SK02S;
-    bool m_SK03S;
-    bool m_SK04S;
-    bool m_SK05S;
-    bool m_SK06S;
-    bool m_SC00S;
-    bool m_SL00S;
-    bool m_SP00S;
-    bool m_SCC00;
-    bool m_SCH00;
-    bool m_SCC00S;
-    bool m_SCH00S;
+    bool m_SKARAB_1;
+    bool m_SKARAB_1S;
+    bool m_SKARAB_2;
+    bool m_SKARAB_2S;
+    bool m_SKARAB_3;
+    bool m_SKARAB_3S;
+    bool m_SKARAB_4;
+    bool m_SKARAB_4S;
+    bool m_SKARAB_5;
+    bool m_SKARAB_5S;
 
     bool m_stationSRT;
     bool m_stationMED;
+
+    bool m_SkarabInitialized;
+
+    bool m_stokes;
 	
 };
 
