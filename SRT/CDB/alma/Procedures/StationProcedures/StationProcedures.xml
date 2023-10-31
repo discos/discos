@@ -20,10 +20,17 @@
 <Procedure name="setupCCG" args="0">
 <body>
 	receiversSetup=CCG
+	antennaSetup=CCG
 	chooseBackend=TotalPower
+	initialize=PPP
+	device=0
 	calOff
+	restFrequency=0
+	azelOffsets=0d,0d	
 </body>
 </Procedure>
+
+
 
 <Procedure name="setupKKG" args="0">
 <body>
