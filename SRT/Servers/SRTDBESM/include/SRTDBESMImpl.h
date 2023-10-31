@@ -78,6 +78,10 @@ public:
  	virtual char * get_comp(short b_addr); //throw (BackendsErrors::BackendsErrorsEx);
  	
  	virtual char * get_diag(short b_addr); //throw (BackendsErrors::BackendsErrorsEx);
+ 	
+ 	virtual char * get_cfg();
+ 	
+ 	virtual char * dbe_att(const char * out_dbe, const char * att_val); //throw (BackendsErrors::BackendsErrorsEx);
 
 	/** 
 	 * Returns a reference to addr_1.

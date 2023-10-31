@@ -54,6 +54,10 @@ module Backends {
 
 	string get_diag(in short b_addr) raises (BackendsErrors::BackendsErrorsEx);
 
+	string get_cfg() raises (BackendsErrors::BackendsErrorsEx);
+
+        string dbe_att(in string out_dbe, in string att_val) raises (BackendsErrors::BackendsErrorsEx);
+
 //	string get_diag_all() raises (BackendsErrors::BackendsErrorsEx);
 
 	/**

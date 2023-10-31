@@ -31,6 +31,8 @@ class CDBESMCommand
        // inline static string comm_get_diag_all(){return Commands::m_get_diag_all + TAIL;}
         inline static string comm_get_diag(string b_addr){return Commands::m_get_diag + " BOARD " + b_addr + TAIL;}
         inline static string comm_get_comp(string b_addr){return Commands::m_get_comp + " BOARD " + b_addr + TAIL;}
+        inline static string comm_get_cfg(){return Commands::m_get_cfg + TAIL;}
+        inline static string comm_dbe_att(string out_dbe, string att_val){return Commands::m_dbe_att + " " + out_dbe + " " + att_val + TAIL;}
         
     private:
         /*
@@ -46,6 +48,8 @@ class CDBESMCommand
             //inline static const string m_get_diag_all { "DBE ALLDIAG" };
             inline static const string m_get_diag { "DBE DIAG" };
             inline static const string m_get_comp { "DBE GETCOMP" };
+            inline static const string m_get_cfg { "DBE GETCFG" };
+            inline static const string m_dbe_att { "DBE DBEATT" };
     };    
 }; //class CDBESMCommand
 

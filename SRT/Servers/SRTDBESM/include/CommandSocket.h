@@ -73,6 +73,10 @@ public:
 	string get_comp(short b_addr); //throw (BackendsErrors::BackendsErrorsEx);
 	
    string get_diag(short b_addr); //throw (BackendsErrors::BackendsErrorsEx);
+   
+   string get_cfg();
+   
+   string dbe_att(const char * out_dbe, const char * att_val);
 			
 	void parse_longSeq_response(string status_str, string start, string end, ACS::longSeq* vals); //throw (BackendsErrors::BackendsErrorsEx);
    
@@ -125,6 +129,10 @@ private:
    string get_comp_command(short b_addr); //throw (BackendsErrors::BackendsErrorsEx);	
 	
 	string get_diag_command(short b_addr); //throw (BackendsErrors::BackendsErrorsEx);
+	
+	string get_cfg_command();
+	
+	string dbe_att_command(const char * out_dbe, const char * att_val);
 	
 };
 
