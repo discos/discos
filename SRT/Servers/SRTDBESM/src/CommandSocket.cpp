@@ -126,6 +126,15 @@ string CCommandSocket::get_diag(short b_addr) //throw (BackendsErrors::BackendsE
     return get_diag_command(b_addr);
 }
 
+string CCommandSocket::get_cfg() //throw (BackendsErrors::BackendsErrorsEx)
+{
+    return get_cfg_command();
+}
+
+string CCommandSocket::dbe_att(const char * out_dbe, const char * att_val) //throw (BackendsErrors::BackendsErrorsEx)
+{
+    return dbe_att_command(out_dbe, att_val);
+}
 
 void CCommandSocket::parse_longSeq_response(string status_str, string start, string end, ACS::longSeq* vals) //throw (BackendsErrors::BackendsErrorsEx)
 {
@@ -144,7 +153,7 @@ void CCommandSocket::parse_longSeq_response(string status_str, string start, str
         }
    }
     catch (std::out_of_range outofrange) { //if the index is out of range
-       std::cout << "OUT OF RANGE\n" << outofrange.what(); //throw this exception
+       throw outofrange;            //throw this exception
     }
 
 }
@@ -167,7 +176,7 @@ void CCommandSocket::parse_doubleSeq_response(string status_str, string start, s
         }
     }    
     catch (std::out_of_range outofrange) { //if the index is out of range
-    std::cout << "OUT OF RANGE\n" << outofrange.what(); //throw this exception
+    throw outofrange;                      //throw this exception
     }     
 }
 
@@ -183,7 +192,7 @@ void CCommandSocket::parse_double_response(string status_str, string start, stri
       *val=temp;
    }    
    catch (std::out_of_range outofrange) { //if the index is out of range
-   std::cout << "OUT OF RANGE\n" << outofrange.what(); //throw this exception
+   throw outofrange;                      //throw this exception
    }
 
 }
@@ -284,7 +293,7 @@ int CCommandSocket::receiveBuffer(std::string* Msg,CError& error, int all)
         if(Receive(error, &buf, 1) == 1)
          {
             (*Msg) += buf;
-			   cout << "buf " << buf << endl;
+			  //cout << "buf " << buf << endl;
             // Reset the timer
             CIRATools::getTime(Start);
                                  }
@@ -320,49 +329,116 @@ void CCommandSocket::set_all_command(const char * cfg_name) //throw (BackendsErr
 {
 	 string outBuff;
     string msg = CDBESMCommand::comm_set_allmode(cfg_name);
-    cout << "Message to send is: " << msg << endl;
+    //cout << "Message to send is: " << msg << endl;
+    //ACS_LOG(LM_FULL_INFO,"CCommandSocket::set_all_command()",(LM_INFO,msg));	
+    
     sendCommand(msg, &outBuff, 1);
+
+    if (outBuff.find("unreachable") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::set_all_command()");
+		impl.setReason("DBESM board unreachable, timeout error");
+		throw impl;
+	   }       
+	 else if (outBuff.find("ERR") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::set_all_command()");
+		impl.setReason("Error in setting whole dbesm configuration, check parameters");
+		throw impl;
+	}     
 }
 
 void CCommandSocket::set_mode_command(short b_addr, const char * cfg_name) //throw (BackendsErrors::BackendsErrorsEx)
 {
 	 string outBuff;
     string msg = CDBESMCommand::comm_set_mode(to_string(b_addr), cfg_name);
-    cout << "Message to send is: " << msg << endl;
+    //cout << "Message to send is: " << msg << endl;
     sendCommand(msg, &outBuff, 0);
+
+    if (outBuff.find("unreachable") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::set_mode_command()");
+		impl.setReason("DBESM board unreachable, timeout error");
+		throw impl;
+	   }   
+	 else if (outBuff.find("ERR") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::set_mode_command()");
+		impl.setReason("Error in setting single dbesm board configuration, check parameters");
+		throw impl;
+	}    
 }
 
 void CCommandSocket::set_att_command(short b_addr, short out_ch, double att_val) //throw (BackendsErrors::BackendsErrorsEx)
 {
     string outBuff;
     string msg = CDBESMCommand::comm_set_att(to_string(b_addr), to_string(out_ch), to_string(att_val));
-    cout << "Message to send is: " << msg << endl;
+    //cout << "Message to send is: " << msg << endl;
     sendCommand(msg, &outBuff, 0);
+
+    if (outBuff.find("unreachable") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::set_att_command()");
+		impl.setReason("DBESM board unreachable, timeout error");
+		throw impl;
+	   }       
+	 else if (outBuff.find("ERR") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::set_att_command()");
+		impl.setReason("Error in setting dbesm attenuator, check parameters");
+		throw impl;
+	}    
 } 
 
 void CCommandSocket::store_allmode_command(const char * cfg_name) //throw (BackendsErrors::BackendsErrorsEx)
 {
     string outBuff;
     string msg = CDBESMCommand::comm_store_allmode(cfg_name);
-    cout << "Message to send is: " << msg << endl;
+    //cout << "Message to send is: " << msg << endl;
     sendCommand(msg, &outBuff, 0);
+
+    if (outBuff.find("unreachable") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::store_allmode_command()");
+		impl.setReason("DBESM board unreachable, timeout error");
+		throw impl;
+	   }   
+	 else if (outBuff.find("ERR") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::store_allmode_command()");
+		impl.setReason("Error in storing dbesm configuration file, check parameters");
+		throw impl;
+	}    
 } 
 
 void CCommandSocket::clr_mode_command(const char * cfg_name) //throw (BackendsErrors::BackendsErrorsEx)
 {
 	 string outBuff;
     string msg = CDBESMCommand::comm_clr_mode(cfg_name);
-    cout << "Message to send is: " << msg << endl;
+    //cout << "Message to send is: " << msg << endl;
     sendCommand(msg, &outBuff, 0);
+
+    if (outBuff.find("unreachable") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::clr_mode_command()");
+		impl.setReason("DBESM board unreachable, timeout error");
+		throw impl;
+	   }       
+	 else if (outBuff.find("ERR") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::clr_mode_command()");
+		impl.setReason("Error in deleting dbesm configuration file, check parameters");
+		throw impl;
+	}    
 }
 
 string CCommandSocket::get_status_command(short b_addr) //throw (BackendsErrors::BackendsErrorsEx)
 {
     string response;
     string msg = CDBESMCommand::comm_get_status(to_string(b_addr));
-    cout << "Message to send is: " << msg << endl;
+    //cout << "Message to send is: " << msg << endl;
     sendCommand(msg, &response, 0);
-    
+
+    if (response.find("unreachable") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::get_status_command()");
+		impl.setReason("DBESM board unreachable, timeout error");
+		throw impl;
+	   }   
+	 else if (response.find("ERR") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::get_status_command()");
+		impl.setReason("Error in getting dbesm status info, check parameters");
+		throw impl;
+	}
     return response;
 }
 
@@ -370,9 +446,19 @@ string CCommandSocket::get_comp_command(short b_addr) //throw (BackendsErrors::B
 {
     string response;
     string msg = CDBESMCommand::comm_get_comp(to_string(b_addr));
-    cout << "Message to send is: " << msg << endl;
+    //cout << "Message to send is: " << msg << endl;
     sendCommand(msg, &response, 0);
 
+    if (response.find("unreachable") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::get_comp_command()");
+		impl.setReason("DBESM board unreachable, timeout error");
+		throw impl;
+	   }   
+	 else if (response.find("ERR") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::get_comp_command()");
+		impl.setReason("Error in getting dbesm components values, check parameters");
+		throw impl;
+	}
     return response;
 }
 
@@ -380,8 +466,58 @@ string CCommandSocket::get_diag_command(short b_addr) //throw (BackendsErrors::B
 {
     string response;
     string msg = CDBESMCommand::comm_get_diag(to_string(b_addr));
-    cout << "Message to send is: " << msg << endl;
+    //cout << "Message to send is: " << msg << endl;
     sendCommand(msg, &response, 0);
 
+    if (response.find("unreachable") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::get_diag_command()");
+		impl.setReason("DBESM board unreachable, timeout error");
+		throw impl;
+	   }   
+	 else if (response.find("ERR") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::get_diag_command()");
+		impl.setReason("Error in getting dbesm diagnostic info, check parameters");
+		throw impl;
+	}
+    return response;
+}
+
+string CCommandSocket::get_cfg_command() //throw (BackendsErrors::BackendsErrorsEx)
+{
+    string response;
+    string msg = CDBESMCommand::comm_get_cfg();
+    //cout << "Message to send is: " << msg << endl;
+    sendCommand(msg, &response, 0);
+    
+    if (response.find("unreachable") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::get_cfg_command()");
+		impl.setReason("DBESM board unreachable, timeout error");
+		throw impl;
+	   }    
+	 else if (response.find("ERR") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::get_cfg_command()");
+		impl.setReason("Error in getting dbesm configuration, check parameters");
+		throw impl;
+	   }
+    return response;
+}
+
+string CCommandSocket::dbe_att_command(const char * out_dbe, const char * att_val) //throw (BackendsErrors::BackendsErrorsEx)
+{
+    string response;
+    string msg = CDBESMCommand::comm_dbe_att(out_dbe, att_val);
+    //cout << "Message to send is: " << msg << endl;
+    sendCommand(msg, &response, 0);
+
+    if (response.find("unreachable") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::dbe_att_command()");
+		impl.setReason("DBESM board unreachable, timeout error");
+		throw impl;
+	   }
+	 else if (response.find("ERR") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::dbe_att_command()");
+		impl.setReason("Error in setting dbesm output attenuation, check parameters");
+		throw impl;
+	  }
     return response;
 }
