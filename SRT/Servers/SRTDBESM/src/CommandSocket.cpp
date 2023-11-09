@@ -131,9 +131,14 @@ string CCommandSocket::get_cfg() //throw (BackendsErrors::BackendsErrorsEx)
     return get_cfg_command();
 }
 
-string CCommandSocket::dbe_att(const char * out_dbe, const char * att_val) //throw (BackendsErrors::BackendsErrorsEx)
+string CCommandSocket::set_dbeatt(const char * out_dbe, const char * att_val) //throw (BackendsErrors::BackendsErrorsEx)
 {
-    return dbe_att_command(out_dbe, att_val);
+    return set_dbeatt_command(out_dbe, att_val);
+}
+
+string CCommandSocket::get_dbeatt(const char * out_dbe) //throw (BackendsErrors::BackendsErrorsEx)
+{
+       return get_dbeatt_command(out_dbe);
 }
 
 void CCommandSocket::parse_longSeq_response(string status_str, string start, string end, ACS::longSeq* vals) //throw (BackendsErrors::BackendsErrorsEx)
@@ -197,6 +202,18 @@ void CCommandSocket::parse_double_response(string status_str, string start, stri
 
 }
 
+void CCommandSocket::parse_string_response(string status_str, string start, string end, string* val) //throw (BackendsErrors::BackendsErrorsEx)
+{
+   unsigned start_pos = status_str.find(start);
+   unsigned end_pos = status_str.find(end);
+
+   try {
+   *val = status_str.substr(start_pos + start.length(), end_pos - (start_pos + start.length()));
+   }    
+   catch (std::out_of_range outofrange) { //if the index is out of range
+   throw outofrange;                      //throw this exception
+   }
+}
 // ********************* PROTECTED  **************************************/
 
 void CCommandSocket::onConnect(int ErrorCode)
@@ -502,22 +519,42 @@ string CCommandSocket::get_cfg_command() //throw (BackendsErrors::BackendsErrors
     return response;
 }
 
-string CCommandSocket::dbe_att_command(const char * out_dbe, const char * att_val) //throw (BackendsErrors::BackendsErrorsEx)
+string CCommandSocket::set_dbeatt_command(const char * out_dbe, const char * att_val) //throw (BackendsErrors::BackendsErrorsEx)
 {
     string response;
-    string msg = CDBESMCommand::comm_dbe_att(out_dbe, att_val);
+    string msg = CDBESMCommand::comm_set_dbeatt(out_dbe, att_val);
     //cout << "Message to send is: " << msg << endl;
     sendCommand(msg, &response, 0);
 
     if (response.find("unreachable") != string::npos) {
-		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::dbe_att_command()");
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::set_dbeatt_command()");
 		impl.setReason("DBESM board unreachable, timeout error");
 		throw impl;
 	   }
 	 else if (response.find("ERR") != string::npos) {
-		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::dbe_att_command()");
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::set_dbeatt_command()");
 		impl.setReason("Error in setting dbesm output attenuation, check parameters");
 		throw impl;
 	  }
     return response;
+}
+
+string CCommandSocket::get_dbeatt_command(const char * out_dbe) //throw (BackendsErrors::BackendsErrorsEx)
+{
+    string response;
+    string msg = CDBESMCommand::comm_get_dbeatt(out_dbe);
+    //cout << "Message to send is: " << msg << endl;
+    sendCommand(msg, &response, 0);
+
+    if (response.find("unreachable") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::get_dbeatt_command()");
+		impl.setReason("DBESM board unreachable, timeout error");
+		throw impl;
+	   }
+	 else if (response.find("ERR") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::get_dbeatt_command()");
+		impl.setReason("Error in setting dbesm output attenuation, check parameters");
+		throw impl;
+	  }
+	return response;  
 }

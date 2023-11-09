@@ -76,13 +76,17 @@ public:
    
    string get_cfg();
    
-   string dbe_att(const char * out_dbe, const char * att_val);
+   string set_dbeatt(const char * out_dbe, const char * att_val);
+   
+   string get_dbeatt(const char * out_dbe);
 			
 	void parse_longSeq_response(string status_str, string start, string end, ACS::longSeq* vals); //throw (BackendsErrors::BackendsErrorsEx);
    
    void parse_doubleSeq_response(string status_str, string start, string end, ACS::doubleSeq* vals); //throw (BackendsErrors::BackendsErrorsEx);
    
    void parse_double_response(string status_str, string start, string end, double* val); //throw (BackendsErrors::BackendsErrorsEx);
+   
+   void CCommandSocket::parse_string_response(string status_str, string start, string end, string* val);
       
 protected:
 	/**
@@ -132,7 +136,9 @@ private:
 	
 	string get_cfg_command();
 	
-	string dbe_att_command(const char * out_dbe, const char * att_val);
+	string set_dbeatt_command(const char * out_dbe, const char * att_val);
+	
+	string get_dbeatt_command(const char * out_dbe);
 	
 };
 

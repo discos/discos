@@ -78,6 +78,11 @@ public:
 	inline double temps_3() const { return m_temps_3; }
 	inline double temps_4() const { return m_temps_4; }
 	                    
+	inline char * cfg_1() const { return m_cfg_1; }
+	inline char * cfg_2() const { return m_cfg_2; } 
+	inline char * cfg_3() const { return m_cfg_3; } 
+   inline char * cfg_4() const { return m_cfg_4; } 
+                    
 private:
 
 	long m_addr_1;
@@ -122,6 +127,11 @@ private:
    double m_temps_3;
    double m_temps_4;
 
+   char * m_cfg_1 = new char[20];
+   char * m_cfg_2= new char[20];
+   char * m_cfg_3= new char[20];
+   char * m_cfg_4= new char[20];
+   
 };
 
 #endif /*CONFIGURATION_H_*/

@@ -120,8 +120,17 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
    m_temps_1 = 0.0;
    m_temps_2 = 0.0;
    m_temps_3 = 0.0;
-   m_temps_4 = 0.0;                          
+   m_temps_4 = 0.0;   
 
+	for (int i=0; i<19; i++){
+        m_cfg_1[i] = '0';
+        m_cfg_2[i] = '0';
+        m_cfg_3[i] = '0';
+        m_cfg_4[i] = '0';}
+   m_cfg_1[19] = '\0';
+   m_cfg_2[19] = '\0';
+   m_cfg_3[19] = '\0';
+   m_cfg_4[19] = '\0';
 }
 
 void CConfiguration::init() throw (ComponentErrors::CDBAccessExImpl)
@@ -177,4 +186,13 @@ void CConfiguration::init() throw (ComponentErrors::CDBAccessExImpl)
     m_temps_3 = 0.0;
     m_temps_4 = 0.0;  
     
+    for (int i=0; i<19; i++){
+        m_cfg_1[i] = '0';
+        m_cfg_2[i] = '0';
+        m_cfg_3[i] = '0';
+        m_cfg_4[i] = '0';}
+   m_cfg_1[19] = '\0';
+   m_cfg_2[19] = '\0';
+   m_cfg_3[19] = '\0';
+   m_cfg_4[19] = '\0';
 }

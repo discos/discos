@@ -32,7 +32,8 @@ class CDBESMCommand
         inline static string comm_get_diag(string b_addr){return Commands::m_get_diag + " BOARD " + b_addr + TAIL;}
         inline static string comm_get_comp(string b_addr){return Commands::m_get_comp + " BOARD " + b_addr + TAIL;}
         inline static string comm_get_cfg(){return Commands::m_get_cfg + TAIL;}
-        inline static string comm_dbe_att(string out_dbe, string att_val){return Commands::m_dbe_att + " " + out_dbe + " " + att_val + TAIL;}
+        inline static string comm_set_dbeatt(string out_dbe, string att_val){return Commands::m_set_dbeatt + " " + out_dbe + " " + att_val + TAIL;}
+        inline static string comm_get_dbeatt(string out_dbe){return Commands::m_get_dbeatt + " " + out_dbe + TAIL;}
         
     private:
         /*
@@ -49,7 +50,8 @@ class CDBESMCommand
             inline static const string m_get_diag { "DBE DIAG" };
             inline static const string m_get_comp { "DBE GETCOMP" };
             inline static const string m_get_cfg { "DBE GETCFG" };
-            inline static const string m_dbe_att { "DBE DBEATT" };
+            inline static const string m_set_dbeatt { "DBE SETDBEATT" };
+            inline static const string m_get_dbeatt { "DBE GETDBEATT" };
     };    
 }; //class CDBESMCommand
 

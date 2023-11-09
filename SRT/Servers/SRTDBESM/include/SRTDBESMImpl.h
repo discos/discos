@@ -12,6 +12,7 @@
 #include <baciROlong.h>
 #include <baciROdoubleSeq.h>
 #include <baciROlongSeq.h>
+#include <baciROstring.h>
 #include "CommandSocket.h"
 #include <SRTDBESMS.h>
 #include <IRA>
@@ -73,15 +74,17 @@ public:
    
    virtual void clr_mode(const char * cfg_name); //throw (BackendsErrors::BackendsErrorsEx);
  	
- 	virtual char * get_status(short b_addr); //throw (BackendsErrors::BackendsErrorsEx);
+ 	virtual void get_status(short b_addr); //throw (BackendsErrors::BackendsErrorsEx);
  	
- 	virtual char * get_comp(short b_addr); //throw (BackendsErrors::BackendsErrorsEx);
+ 	virtual void get_comp(short b_addr); //throw (BackendsErrors::BackendsErrorsEx);
  	
- 	virtual char * get_diag(short b_addr); //throw (BackendsErrors::BackendsErrorsEx);
+ 	virtual void get_diag(short b_addr); //throw (BackendsErrors::BackendsErrorsEx);
  	
- 	virtual char * get_cfg();
+ 	virtual void get_cfg();
  	
- 	virtual char * dbe_att(const char * out_dbe, const char * att_val); //throw (BackendsErrors::BackendsErrorsEx);
+ 	virtual void set_dbeatt(const char * out_dbe, const char * att_val); //throw (BackendsErrors::BackendsErrorsEx);
+ 	
+ 	virtual void get_dbeatt(const char * out_dbe); //throw (BackendsErrors::BackendsErrorsEx);
 
 	/** 
 	 * Returns a reference to addr_1.
@@ -96,7 +99,10 @@ public:
 	virtual ACS::ROlongSeq_ptr bpfs_1(), bpfs_2(), bpfs_3(), bpfs_4();
    virtual ACS::ROdoubleSeq_ptr volts_1(), volts_2(), volts_3(), volts_4();
    virtual ACS::ROdouble_ptr temps_1(), temps_2(), temps_3(), temps_4();
-
+   virtual ACS::ROstring_ptr cfg_1();
+   virtual ACS::ROstring_ptr cfg_2();
+   virtual ACS::ROstring_ptr cfg_3();
+   virtual ACS::ROstring_ptr cfg_4();
 
 private:
 		
@@ -115,6 +121,8 @@ private:
 	SmartPropertyPointer<ROlongSeq> m_pbpfs_1, m_pbpfs_2, m_pbpfs_3, m_pbpfs_4;
 	SmartPropertyPointer<ROdoubleSeq> m_pvolts_1, m_pvolts_2, m_pvolts_3, m_pvolts_4;
 	SmartPropertyPointer<ROdouble> m_ptemps_1, m_ptemps_2, m_ptemps_3, m_ptemps_4;
+	SmartPropertyPointer<ROstring> m_pcfg_1;
+	SmartPropertyPointer<ROstring> m_pcfg_2, m_pcfg_3, m_pcfg_4;
 	
 };
 

@@ -33,5 +33,8 @@
 		<temps_2 description="temperature on board 2" />
 		<temps_3 description="temperature on board 3" />
 		<temps_4 description="temperature on board 4" />
-
+   <cfg_1 description="configuration on board 1" />
+	<cfg_2 description="configuration on board 2" />
+	<cfg_3 description="configuration on board 3" />
+	<cfg_4 description="configuration on board 4" />
 </SRTDBESM>
