@@ -7,12 +7,19 @@
  * Giuseppe Carboni (giuseppe.carboni@inaf.it)
  */
 
-#include <mutex>
+#include "SuppressWarnings.h"
 #include <IRA>
+#include <mutex>
 #include <ComponentErrors.h>
+#include <optional>
+#include <functional>
 #include "SRTMinorServoCommandLibrary.h"
 
+
 #define TIMEOUT 0.1
+#define CONFIG_DOMAIN   "alma/"
+#define CONFIG_DIRNAME  "/MINORSERVO/Socket"
+
 
 using namespace IRA;
 
@@ -48,7 +55,7 @@ public:
      * @param command the command to be sent over the socket
      * @return the received answer to the given command
      */
-    SRTMinorServoAnswerMap sendCommand(std::string command);
+    SRTMinorServoAnswerMap sendCommand(std::string command, std::optional<std::reference_wrapper<SRTMinorServoAnswerMap>> map = {});
 
     /**
      * Copy constructor operator disabled by default
@@ -115,6 +122,26 @@ private:
      * Socket error variable. This stores an error condition in case it arises
      */
     IRA::CError m_error;
+};
+
+
+class SRTMinorServoSocketConfiguration
+{
+public:
+    static SRTMinorServoSocketConfiguration& getInstance(maci::ContainerServices* containerServices);
+
+    SRTMinorServoSocketConfiguration(SRTMinorServoSocketConfiguration const&) = delete;
+    void operator=(SRTMinorServoSocketConfiguration const&) = delete;
+
+    std::string m_ip_address;
+    int m_port;
+    double m_timeout;
+
+private:
+    SRTMinorServoSocketConfiguration(maci::ContainerServices* containerServices);
+    ~SRTMinorServoSocketConfiguration();
+
+    inline static SRTMinorServoSocketConfiguration* m_instance = nullptr;
 };
 
 #endif

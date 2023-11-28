@@ -1,0 +1,106 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+   - Author: Giuseppe Carboni
+   - History:
+ 	- 14-03-23 Created
+-->
+
+<SRTMinorServoLookupTable xmlns="urn:schemas-cosylab-com:SRTMinorServoLookupTable:1.0" 
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <Primario><axis>TX</axis>       <coefficients>0                                                                                 </coefficients></Primario>
+    <Primario><axis>TY</axis>       <coefficients>0                                                                                 </coefficients></Primario>
+    <Primario><axis>TZ</axis>       <coefficients>0                                                                                 </coefficients></Primario>
+    <Primario><axis>RX</axis>       <coefficients>0                                                                                 </coefficients></Primario>
+    <Primario><axis>RY</axis>       <coefficients>0                                                                                 </coefficients></Primario>
+    <Primario><axis>RZ</axis>       <coefficients>0                                                                                 </coefficients></Primario>
+
+    <!-- Gregoriano1 == CCB (initialized with KKG) -->
+    <Gregoriano1><axis>TX</axis>    <coefficients>-1.5                                                                              </coefficients></Gregoriano1>
+    <Gregoriano1><axis>TY</axis>    <coefficients>28.256852219272844,-0.002707044952,-0.009870218853,0.000031617958                 </coefficients></Gregoriano1>
+    <Gregoriano1><axis>TZ</axis>    <coefficients>9.530113849340003,-0.169826241752,0.000419997047,0.000003985237                   </coefficients></Gregoriano1>
+    <Gregoriano1><axis>RX</axis>    <coefficients>-0.011392527142374848,-0.0001426193499425,0.000039508844799,-0.000000131010010    </coefficients></Gregoriano1>
+    <Gregoriano1><axis>RY</axis>    <coefficients>-0.03611111111111111                                                              </coefficients></Gregoriano1>
+    <Gregoriano1><axis>RZ</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano1>
+
+    <!-- Gregoriano2 == KKG -->
+    <Gregoriano2><axis>TX</axis>    <coefficients>-1.5                                                                              </coefficients></Gregoriano2>
+    <Gregoriano2><axis>TY</axis>    <coefficients>28.256852219272844,-0.002707044952,-0.009870218853,0.000031617958                 </coefficients></Gregoriano2>
+    <Gregoriano2><axis>TZ</axis>    <coefficients>9.530113849340003,-0.169826241752,0.000419997047,0.000003985237                   </coefficients></Gregoriano2>
+    <Gregoriano2><axis>RX</axis>    <coefficients>-0.011392527142374848,-0.0001426193499425,0.000039508844799,-0.000000131010010    </coefficients></Gregoriano2>
+    <Gregoriano2><axis>RY</axis>    <coefficients>-0.03611111111111111                                                              </coefficients></Gregoriano2>
+    <Gregoriano2><axis>RZ</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano2>
+
+    <Gregoriano3><axis>TX</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano3>
+    <Gregoriano3><axis>TY</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano3>
+    <Gregoriano3><axis>TZ</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano3>
+    <Gregoriano3><axis>RX</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano3>
+    <Gregoriano3><axis>RY</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano3>
+    <Gregoriano3><axis>RZ</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano3>
+
+    <Gregoriano4><axis>TX</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano4>
+    <Gregoriano4><axis>TY</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano4>
+    <Gregoriano4><axis>TZ</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano4>
+    <Gregoriano4><axis>RX</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano4>
+    <Gregoriano4><axis>RY</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano4>
+    <Gregoriano4><axis>RZ</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano4>
+
+    <Gregoriano5><axis>TX</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano5>
+    <Gregoriano5><axis>TY</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano5>
+    <Gregoriano5><axis>TZ</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano5>
+    <Gregoriano5><axis>RX</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano5>
+    <Gregoriano5><axis>RY</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano5>
+    <Gregoriano5><axis>RZ</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano5>
+
+    <Gregoriano6><axis>TX</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano6>
+    <Gregoriano6><axis>TY</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano6>
+    <Gregoriano6><axis>TZ</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano6>
+    <Gregoriano6><axis>RX</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano6>
+    <Gregoriano6><axis>RY</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano6>
+    <Gregoriano6><axis>RZ</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano6>
+
+    <Gregoriano7><axis>TX</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano7>
+    <Gregoriano7><axis>TY</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano7>
+    <Gregoriano7><axis>TZ</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano7>
+    <Gregoriano7><axis>RX</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano7>
+    <Gregoriano7><axis>RY</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano7>
+    <Gregoriano7><axis>RZ</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano7>
+
+    <Gregoriano8><axis>TX</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano8>
+    <Gregoriano8><axis>TY</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano8>
+    <Gregoriano8><axis>TZ</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano8>
+    <Gregoriano8><axis>RX</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano8>
+    <Gregoriano8><axis>RY</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano8>
+    <Gregoriano8><axis>RZ</axis>    <coefficients>0                                                                                 </coefficients></Gregoriano8>
+
+    <BWG1><axis>TX</axis>           <coefficients>0                                                                                 </coefficients></BWG1>
+    <BWG1><axis>TY</axis>           <coefficients>0                                                                                 </coefficients></BWG1>
+    <BWG1><axis>TZ</axis>           <coefficients>0                                                                                 </coefficients></BWG1>
+    <BWG1><axis>RX</axis>           <coefficients>0                                                                                 </coefficients></BWG1>
+    <BWG1><axis>RY</axis>           <coefficients>0                                                                                 </coefficients></BWG1>
+    <BWG1><axis>RZ</axis>           <coefficients>0                                                                                 </coefficients></BWG1>
+
+    <BWG2><axis>TX</axis>           <coefficients>0                                                                                 </coefficients></BWG2>
+    <BWG2><axis>TY</axis>           <coefficients>0                                                                                 </coefficients></BWG2>
+    <BWG2><axis>TZ</axis>           <coefficients>0                                                                                 </coefficients></BWG2>
+    <BWG2><axis>RX</axis>           <coefficients>0                                                                                 </coefficients></BWG2>
+    <BWG2><axis>RY</axis>           <coefficients>0                                                                                 </coefficients></BWG2>
+    <BWG2><axis>RZ</axis>           <coefficients>0                                                                                 </coefficients></BWG2>
+    <BWG3><axis>TX</axis>           <coefficients>0                                                                                 </coefficients></BWG3>
+
+    <BWG3><axis>TY</axis>           <coefficients>0                                                                                 </coefficients></BWG3>
+    <BWG3><axis>TZ</axis>           <coefficients>0                                                                                 </coefficients></BWG3>
+    <BWG3><axis>RX</axis>           <coefficients>0                                                                                 </coefficients></BWG3>
+    <BWG3><axis>RY</axis>           <coefficients>0                                                                                 </coefficients></BWG3>
+    <BWG3><axis>RZ</axis>           <coefficients>0                                                                                 </coefficients></BWG3>
+
+    <BWG4><axis>TX</axis>           <coefficients>0                                                                                 </coefficients></BWG4>
+    <BWG4><axis>TY</axis>           <coefficients>0                                                                                 </coefficients></BWG4>
+    <BWG4><axis>TZ</axis>           <coefficients>0                                                                                 </coefficients></BWG4>
+    <BWG4><axis>RX</axis>           <coefficients>0                                                                                 </coefficients></BWG4>
+    <BWG4><axis>RY</axis>           <coefficients>0                                                                                 </coefficients></BWG4>
+    <BWG4><axis>RZ</axis>           <coefficients>0                                                                                 </coefficients></BWG4>
+
+</SRTMinorServoLookupTable>

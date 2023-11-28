@@ -11,16 +11,34 @@ EXECUTABLES_L   =
 
 # On-Line Database Files
 # ----------------------
-CDB_SCHEMAS =
+CDB_SCHEMAS = SRTMinorServoBoss SRTMinorServo SRTMinorServoSocket SRTMinorServoProperties SRTMinorServoLookupTable
 
 # ----------------------------
 # Libraries (public and local)
 # ----------------------------
-LIBRARIES = SRTMinorServoSocket
+LIBRARIES = SRTMinorServoSocket SRTGenericMinorServoImpl SRTProgramTrackMinorServoImpl SRTMinorServoBossImpl
 
 SRTMinorServoSocket_OBJECTS = SRTMinorServoSocket
-SRTMinorServoSocket_CFLAGS = -std=c++17
 SRTMinorServoSocket_LIBS = IRALibrary ComponentErrors SRTMinorServoCommandLibrary
+SRTMinorServoSocket_CFLAGS = -std=c++17
+
+SRTMinorServoBossImpl_OBJECTS = SRTMinorServoStatusThread SRTMinorServoSetupThread SRTMinorServoParkThread SRTMinorServoBossCore SRTMinorServoBossImpl
+SRTMinorServoBossImpl_LIBS = IRALibrary SRTMinorServoBossStubs SRTMinorServoStubs ComponentErrors MinorServoErrors ManagementErrors MinorServoDefinitionsStubs SRTMinorServoCommandLibrary SRTMinorServoSocket ParserErrors DiscosVersion
+SRTMinorServoBossImpl_CFLAGS = -std=c++17
+SRTMinorServoBossCore_CFLAGS = -std=c++17
+SRTMinorServoStatusThread_CFLAGS = -std=c++17
+SRTMinorServoSetupThread_CFLAGS = -std=c++17
+SRTMinorServoParkThread_CFLAGS = -std=c++17
+
+SRTGenericMinorServoImpl_OBJECTS = SRTGenericMinorServoImpl SRTBaseMinorServoImpl
+SRTGenericMinorServoImpl_LIBS = SRTBaseMinorServoImpl IRALibrary SRTMinorServoStubs MinorServoErrors MinorServoDefinitionsStubs SRTMinorServoCommandLibrary SRTMinorServoSocket DiscosVersion
+SRTGenericMinorServoImpl_CFLAGS = -std=c++17
+
+SRTProgramTrackMinorServoImpl_OBJECTS = SRTProgramTrackMinorServoImpl SRTBaseMinorServoImpl
+SRTProgramTrackMinorServoImpl_LIBS = SRTBaseMinorServoImpl IRALibrary SRTMinorServoStubs MinorServoErrors MinorServoDefinitionsStubs SRTMinorServoCommandLibrary SRTMinorServoSocket DiscosVersion
+SRTProgramTrackMinorServoImpl_CFLAGS = -std=c++17
+
+SRTBaseMinorServoImpl_CFLAGS = -std=c++17
 
 
 # ----------------------------------------------------------------------

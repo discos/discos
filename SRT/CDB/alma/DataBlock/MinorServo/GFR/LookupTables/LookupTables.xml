@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+   - Author: Giuseppe Carboni
+   - History:
+ 	- 14-03-23 Created
+-->
+
+<SRTMinorServoLookupTable xmlns="urn:schemas-cosylab-com:SRTMinorServoLookupTable:1.0" 
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <!-- Primario - GFR not used -->
+    <Primario><axis>ROTATION</axis> <coefficients></coefficients></Primario>
+
+    <!-- Gregoriano1 == CCG (initialized with KKG) -->
+    <Gregoriano1><axis>ROTATION</axis> <coefficients>0</coefficients></Gregoriano1>
+    <!-- Gregoriano2 == KKG -->
+    <Gregoriano2><axis>ROTATION</axis> <coefficients>0</coefficients></Gregoriano2>
+    <!-- Gregoriano3 -->
+    <Gregoriano3><axis>ROTATION</axis> <coefficients>0</coefficients></Gregoriano3>
+    <!-- Gregoriano4 -->
+    <Gregoriano4><axis>ROTATION</axis> <coefficients>0</coefficients></Gregoriano4>
+    <!-- Gregoriano5 -->
+    <Gregoriano5><axis>ROTATION</axis> <coefficients>0</coefficients></Gregoriano5>
+    <!-- Gregoriano6 -->
+    <Gregoriano6><axis>ROTATION</axis> <coefficients>0</coefficients></Gregoriano6>
+    <!-- Gregoriano7 -->
+    <Gregoriano7><axis>ROTATION</axis> <coefficients>0</coefficients></Gregoriano7>
+    <!-- Gregoriano8 -->
+    <Gregoriano8><axis>ROTATION</axis> <coefficients>0</coefficients></Gregoriano8>
+
+    <!-- BWG1 - GFR open -->
+    <BWG1><axis>ROTATION</axis> <coefficients>0</coefficients></BWG1>
+    <!-- BWG2 - GFR open -->
+    <BWG2><axis>ROTATION</axis> <coefficients>0</coefficients></BWG2>
+    <!-- BWG3 - GFR open -->
+    <BWG3><axis>ROTATION</axis> <coefficients>0</coefficients></BWG3>
+    <!-- BWG4 - GFR open -->
+    <BWG4><axis>ROTATION</axis> <coefficients>0</coefficients></BWG4>
+
+</SRTMinorServoLookupTable>

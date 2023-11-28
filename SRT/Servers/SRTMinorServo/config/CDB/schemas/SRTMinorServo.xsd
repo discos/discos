@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+    Author: Giuseppe Carboni, giuseppe.carboni@inaf.it
+-->
+<xs:schema
+    targetNamespace="urn:schemas-cosylab-com:SRTMinorServo:1.0"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns="urn:schemas-cosylab-com:SRTMinorServo:1.0"
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+	xmlns:mng="urn:schemas-cosylab-com:Managment:1.0"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+
+    <xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd" />
+    <xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd" />
+    <xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
+
+    <xs:complexType name="SRTMinorServoCabinetStatusType">
+     <xs:complexContent>
+      <xs:restriction base="baci:ROEnum">
+       <xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
+       <xs:attribute name="graph_max" type="xs:int" use="optional" default="2" />
+       <xs:attribute name="statesDescription" type="xs:string" use="optional" default="OK,WARNING,OFF" />
+      </xs:restriction>
+     </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="SRTMinorServoOperativeModeType">
+     <xs:complexContent>
+      <xs:restriction base="baci:ROEnum">
+       <xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
+       <xs:attribute name="graph_max" type="xs:int" use="optional" default="5" />
+       <xs:attribute name="statesDescription" type="xs:string" use="optional" default="UNKNOWN_MODE,SETUP,STOW,STOP,PRESET,PROGRAMTRACK" />
+      </xs:restriction>
+     </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="SRTMinorServoType">
+     <xs:complexContent>
+      <xs:extension base="baci:CharacteristicComponent">
+       <xs:sequence>
+        <xs:element name="enabled" type="baci:ROboolean" />
+        <xs:element name="drive_cabinet_status" type="SRTMinorServoCabinetStatusType" />
+        <xs:element name="block" type="baci:ROboolean" />
+        <xs:element name="operative_mode" type="SRTMinorServoOperativeModeType" />
+        <xs:element name="axes_enabled" type="baci:RObooleanSeq" /> 
+        <xs:element name="physical_positions" type="baci:ROdoubleSeq" /> 
+        <xs:element name="virtual_positions" type="baci:ROdoubleSeq" /> 
+        <xs:element name="virtual_offsets" type="baci:ROdoubleSeq" /> 
+       </xs:sequence>
+       <xs:attribute name="physical_axes" type="xs:unsignedShort" use="required" />
+       <xs:attribute name="virtual_axes" type="xs:unsignedShort" use="required" />
+      </xs:extension>
+     </xs:complexContent>
+    </xs:complexType>
+
+    <xs:element name="SRTMinorServo" type="SRTMinorServoType"/>
+
+</xs:schema>

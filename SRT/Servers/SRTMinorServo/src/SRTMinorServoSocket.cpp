@@ -1,5 +1,4 @@
 #include "SRTMinorServoSocket.h"
-#include <iostream>
 
 std::mutex SRTMinorServoSocket::c_mutex;
 
@@ -84,7 +83,7 @@ SRTMinorServoSocket::~SRTMinorServoSocket()
     Close(m_error);
 }
 
-SRTMinorServoAnswerMap SRTMinorServoSocket::sendCommand(std::string command)
+SRTMinorServoAnswerMap SRTMinorServoSocket::sendCommand(std::string command, std::optional<std::reference_wrapper<SRTMinorServoAnswerMap>> map)
 {
     std::lock_guard<std::mutex> guard(m_mutex);
 
@@ -107,7 +106,6 @@ SRTMinorServoAnswerMap SRTMinorServoSocket::sendCommand(std::string command)
             Close(m_error);
             ComponentErrors::SocketErrorExImpl exImpl(__FILE__, __LINE__, "SRTMinorServoSocket::sendCommand()");
             exImpl.addData("Reason", "Timeout when sending command.");
-            std::cout << "Timeout sending command" << std::endl;
             throw exImpl;
         }
     }
@@ -131,10 +129,64 @@ SRTMinorServoAnswerMap SRTMinorServoSocket::sendCommand(std::string command)
             Close(m_error);
             ComponentErrors::SocketErrorExImpl exImpl(__FILE__, __LINE__, "SRTMinorServoSocket::sendCommand()");
             exImpl.addData("Reason", "Timeout when receiving answer.");
-            std::cout << "Timeout receiving answer" << std::endl;
             throw exImpl;
         }
     }
+    SRTMinorServoAnswerMap map_answer = SRTMinorServoCommandLibrary::parseAnswer(answer);
+    if(map)
+    {
+        map->get() = map_answer;
+    }
 
-    return SRTMinorServoCommandLibrary::parseAnswer(answer);
+    return map_answer;
+}
+
+SRTMinorServoSocketConfiguration& SRTMinorServoSocketConfiguration::getInstance(maci::ContainerServices* containerServices)
+{
+    if(m_instance == nullptr)
+    {
+        m_instance = new SRTMinorServoSocketConfiguration(containerServices);
+    }
+
+    return *m_instance;
+}
+
+SRTMinorServoSocketConfiguration::SRTMinorServoSocketConfiguration(maci::ContainerServices* containerServices)
+{
+    AUTO_TRACE("SRTMinorServoSocketConfiguration::SRTMinorServoSocketConfiguration()");
+
+    IRA::CString _ip_address;
+    if(!IRA::CIRATools::getDBValue(containerServices, "IPAddress", _ip_address, CONFIG_DOMAIN, CONFIG_DIRNAME))
+    {
+        ComponentErrors::CDBAccessExImpl exImpl(__FILE__, __LINE__, "SRTMinorServoSocketConfiguration()");
+        exImpl.setFieldName("IPAddress");
+        throw exImpl;
+    }
+    m_ip_address = (std::string)_ip_address;
+
+    DWORD port;
+    if(!IRA::CIRATools::getDBValue(containerServices, "Port", port, CONFIG_DOMAIN, CONFIG_DIRNAME))
+    {
+        ComponentErrors::CDBAccessExImpl exImpl(__FILE__, __LINE__, "SRTMinorServoSocketConfiguration()");
+        exImpl.setFieldName("Port");
+        throw exImpl;
+    }
+    else
+    {
+        m_port = port;
+    }
+
+    if(!IRA::CIRATools::getDBValue(containerServices, "SocketTimeout", m_timeout, CONFIG_DOMAIN, CONFIG_DIRNAME))
+    {
+        ComponentErrors::CDBAccessExImpl exImpl(__FILE__, __LINE__, "SRTMinorServoSocketConfiguration()");
+        exImpl.setFieldName("SocketTimeout");
+        throw exImpl;
+    }
+}
+
+SRTMinorServoSocketConfiguration::~SRTMinorServoSocketConfiguration()
+{
+    AUTO_TRACE("SRTMinorServoSocketConfiguration::~SRTMinorServoSocketConfiguration()");
+
+    delete m_instance;
 }

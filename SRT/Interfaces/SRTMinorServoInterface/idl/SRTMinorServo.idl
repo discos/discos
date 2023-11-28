@@ -1,0 +1,60 @@
+/***************************************************************\
+ *  Authors: 
+ *      Giuseppe Carboni <giuseppe.carboni@inaf.it>
+ *
+ *  Created: Mon Mar 06 12:30:00 CEST 2023
+ *  Last Modified: Mon Mar 06 12:30:00 CEST 2023
+\***************************************************************/
+
+#ifndef __SRTMINORSERVO_IDL__
+#define __SRTMINORSERVO_IDL__
+
+#include <baci.idl>
+#include "SRTMinorServoCommon.idl"
+
+#pragma prefix "alma"
+
+module MinorServo
+{
+    interface SRTBaseMinorServo : ACS::CharacteristicComponent
+    {
+		readonly attribute ACS::ROboolean enabled;
+
+        readonly attribute ROSRTMinorServoCabinetStatus drive_cabinet_status;
+
+        readonly attribute ACS::ROboolean block;
+
+        readonly attribute ROSRTMinorServoOperativeMode operative_mode;
+
+        readonly attribute ACS::RObooleanSeq axes_enabled;
+
+        readonly attribute ACS::ROdoubleSeq physical_positions;
+
+        readonly attribute ACS::ROdoubleSeq virtual_positions;
+
+        readonly attribute ACS::ROdoubleSeq virtual_offsets;
+
+        void status();
+
+        void stow(in long stow_position);
+
+        void stop();
+
+        void preset(in ACS::doubleSeq coordinates);
+
+        void offset(in ACS::doubleSeq offsets);
+
+        void setup(in string configuration);
+    };
+
+    interface SRTGenericMinorServo : SRTBaseMinorServo
+    {
+    };
+
+    interface SRTProgramTrackMinorServo : SRTBaseMinorServo
+    {
+        void programTrack(in long trajectory_id, in long point_id, in double start_time, in ACS::doubleSeq coordinates);
+    };
+};
+
+#endif

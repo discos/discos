@@ -146,7 +146,7 @@ SRTMinorServoAnswerMap SRTMinorServoCommandLibrary::parseAnswer(std::string answ
 
         if(args.find("OUTPUT") == args.end())
             throw std::invalid_argument(std::string("Missing OUTPUT value!"));
-        else if(args.find("TIMESTAMP") == args.end())
+        else if(std::get<std::string>(args["OUTPUT"]) == "GOOD" && args.find("TIMESTAMP") == args.end())
             throw std::invalid_argument(std::string("Missing TIMESTAMP value!"));
     }
     catch(const std::invalid_argument& e)

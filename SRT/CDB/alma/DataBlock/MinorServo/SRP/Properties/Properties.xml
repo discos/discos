@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+   - Author: Giuseppe Carboni
+   - History:
+ 	- 14-03-23 Created
+-->
+
+<SRTMinorServoProperties xmlns="urn:schemas-cosylab-com:SRTMinorServoProperties:1.0" 
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <axes_enabled><property_name>Z1_ENABLED</property_name></axes_enabled>
+    <axes_enabled><property_name>Z2_ENABLED</property_name></axes_enabled>
+    <axes_enabled><property_name>Z3_ENABLED</property_name></axes_enabled>
+    <axes_enabled><property_name>Y1_ENABLED</property_name></axes_enabled>
+    <axes_enabled><property_name>Y2_ENABLED</property_name></axes_enabled>
+    <axes_enabled><property_name>X1_ENABLED</property_name></axes_enabled>
+
+    <physical_positions><property_name>ELONG_Z1</property_name></physical_positions>
+    <physical_positions><property_name>ELONG_Z2</property_name></physical_positions>
+    <physical_positions><property_name>ELONG_Z3</property_name></physical_positions>
+    <physical_positions><property_name>ELONG_Y1</property_name></physical_positions>
+    <physical_positions><property_name>ELONG_Y2</property_name></physical_positions>
+    <physical_positions><property_name>ELONG_X1</property_name></physical_positions>
+
+    <virtual_positions><property_name>TX</property_name></virtual_positions>
+    <virtual_positions><property_name>TY</property_name></virtual_positions>
+    <virtual_positions><property_name>TZ</property_name></virtual_positions>
+    <virtual_positions><property_name>RX</property_name></virtual_positions>
+    <virtual_positions><property_name>RY</property_name></virtual_positions>
+    <virtual_positions><property_name>RZ</property_name></virtual_positions>
+
+    <virtual_offsets><property_name>OFFSET_TX</property_name></virtual_offsets>
+    <virtual_offsets><property_name>OFFSET_TY</property_name></virtual_offsets>
+    <virtual_offsets><property_name>OFFSET_TZ</property_name></virtual_offsets>
+    <virtual_offsets><property_name>OFFSET_RX</property_name></virtual_offsets>
+    <virtual_offsets><property_name>OFFSET_RY</property_name></virtual_offsets>
+    <virtual_offsets><property_name>OFFSET_RZ</property_name></virtual_offsets>
+</SRTMinorServoProperties>

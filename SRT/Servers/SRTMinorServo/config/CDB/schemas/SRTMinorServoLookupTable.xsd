@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+    Author: Giuseppe Carboni, giuseppe.carboni@inaf.it
+-->
+<xs:schema
+    targetNamespace="urn:schemas-cosylab-com:SRTMinorServoLookupTable:1.0"
+    xmlns="urn:schemas-cosylab-com:SRTMinorServoLookupTable:1.0"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+
+    <xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd" />
+    <xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd" />
+
+    <xs:complexType name="SRTMinorServoCoefficientsType">
+     <xs:sequence>
+      <xs:element name="axis" type="xs:string" />
+      <xs:element name="coefficients" type="xs:string" />
+     </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="SRTMinorServoLookupTableType">
+     <xs:sequence>
+      <xs:element name="Primario"       type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="Gregoriano1"    type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="Gregoriano2"    type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="Gregoriano3"    type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="Gregoriano4"    type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="Gregoriano5"    type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="Gregoriano6"    type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="Gregoriano7"    type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="Gregoriano8"    type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="BWG1"           type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="BWG2"           type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="BWG3"           type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="BWG4"           type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+     </xs:sequence>
+    </xs:complexType>
+
+    <xs:element name="SRTMinorServoLookupTable" type="SRTMinorServoLookupTableType" />
+
+</xs:schema>
