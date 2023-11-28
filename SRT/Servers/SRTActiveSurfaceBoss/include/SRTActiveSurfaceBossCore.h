@@ -223,6 +223,10 @@ private:
     bool m_profileSetted;
 
     bool m_ASup;
+    
+    bool m_newlut;
+
+    const char* m_lut;
 };
 
 #endif /*SRTACTIVESURFACEBOSSCORE_H_*/

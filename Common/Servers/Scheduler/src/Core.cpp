@@ -208,6 +208,7 @@ void CCore::execute() throw(ComponentErrors::TimerErrorExImpl, ComponentErrors::
 	m_parser->add("initialize", "backend", 3, &CCore::remoteCall);
 	m_parser->add("calSwitch", "backend", 3, &CCore::remoteCall);
 	m_parser->add("getRms", "backend", 3, &CCore::remoteCall);
+	m_parser->add("setTsysRange","backend",3,&CCore::remoteCall);
 
 	// minor servo
 	m_parser->add("servoSetup", "minorservo", 4, &CCore::remoteCall);
@@ -222,6 +223,7 @@ void CCore::execute() throw(ComponentErrors::TimerErrorExImpl, ComponentErrors::
 	m_parser->add("asPark", "activesurface", 5, &CCore::remoteCall);
 	m_parser->add("asOn", "activesurface", 5, &CCore::remoteCall);
 	m_parser->add("asOff", "activesurface", 5, &CCore::remoteCall);
+	m_parser->add("asSetLUT", "activesurface", 5, &CCore::remoteCall);
 
 	// procedures
 	loadProcedures(m_config->getDefaultProceduresFile()); // throws ManagementErrors::ProcedureFileLoadingErrorExImpl

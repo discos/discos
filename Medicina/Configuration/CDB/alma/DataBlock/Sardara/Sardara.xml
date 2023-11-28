@@ -7,7 +7,22 @@
 
 <Configuration>
 	<configurationID>SK00</configurationID>
-    <sections>2</sections>
+        <sections>2</sections>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<inputPort>GREGORIAN</inputPort>
+	<beams>1</beams>
+ 	<bandWidth>1500.0</bandWidth>
+ 	<attenuation>7.0</attenuation>		
+	<section_boards>0 1</section_boards>
+	<polarizations>L R</polarizations>
+	<feed>0 0</feed>
+	<IF>0 1</IF>
+	<bins>1024</bins>
+</Configuration>
+
+<Configuration>
+	<configurationID>SX00</configurationID>
+        <sections>2</sections>
 	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
 	<inputPort>GREGORIAN</inputPort>
 	<beams>1</beams>
@@ -97,6 +112,21 @@
 
 <Configuration>
 	<configurationID>SK00S</configurationID>
+	<sections>2</sections>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<inputPort>GREGORIAN</inputPort>
+	<beams>1</beams>
+ 	<bandWidth>1500.0</bandWidth>
+ 	<attenuation>7.0</attenuation>		
+	<section_boards>0 1 2 3</section_boards>
+	<polarizations>S S</polarizations>
+	<feed>0 0</feed>
+	<IF>0 1</IF>
+	<bins>1024</bins>
+</Configuration>
+
+<Configuration>
+	<configurationID>SX00S</configurationID>
 	<sections>2</sections>
 	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
 	<inputPort>GREGORIAN</inputPort>

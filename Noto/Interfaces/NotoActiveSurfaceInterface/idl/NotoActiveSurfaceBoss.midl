@@ -3,8 +3,8 @@
 /*                                                                   */
 /* This code is under GNU General Public Licence (GPL).              */
 /*                                                                   */
-/* Who                                when        what               */
-/* Carlo Migoni (migoni.ca.astro.it)  24/02/2009  Creation           */
+/* Who                                  when        what             */
+/* Carlo Migoni (carlo.migoni@inaf.it)  19/09/2023  Creation         */
 /*********************************************************************/
 
 #ifndef _NOTOACTIVESURFACEBOSS_IDL_
@@ -22,7 +22,6 @@
 #pragma prefix "alma"
 
 module ActiveSurface {
-	
 	/**
 	 * This component is the supervisor of the Noto Active Surface subsystem.
      * It will be used to control the entire active surface, i. e. during an
@@ -115,6 +114,8 @@ module ActiveSurface {
         void setProfile (in ActiveSurface::TASProfile profile) raises (ComponentErrors::ComponentErrorsEx);
 
         void usdStatus4GUIClient (in long circle, in long actuator, out long status) raises (ComponentErrors::ComponentErrorsEx);
+
+	void asStatus4GUIClient (out ACS::longSeq status) raises (ComponentErrors::ComponentErrorsEx);
 
         void setActuator (in long circle, in long actuator, out long actPos, out long cmdPos, out long Fmin, out long Fmax, out long acc, out long delay) raises (ComponentErrors::ComponentErrorsEx);
 
