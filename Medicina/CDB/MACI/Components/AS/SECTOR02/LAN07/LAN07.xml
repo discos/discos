@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<HierarchicalComponent  xmlns="urn:schemas-cosylab-com:HierarchicalComponent:1.0"
+       xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" 
+       xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" 
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       Name="LAN07"    Code="lanImpl"  Type="IDL:alma/ActiveSurface/lan:1.0"	Container="MedicinaActiveSurfaceContainer02" ImplLang="cpp">
+      <_ Name="USD01"  Code="ActiveSurfaceUSDImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="MedicinaActiveSurfaceContainer02" ImplLang="cpp"/>
+      <_ Name="USD02"  Code="ActiveSurfaceUSDImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="MedicinaActiveSurfaceContainer02" ImplLang="cpp"/>
+      <_ Name="USD03"  Code="ActiveSurfaceUSDImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="MedicinaActiveSurfaceContainer02" ImplLang="cpp"/>
+      <_ Name="USD04"  Code="ActiveSurfaceUSDImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="MedicinaActiveSurfaceContainer02" ImplLang="cpp"/>
+      <_ Name="USD05"  Code="ActiveSurfaceUSDImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="MedicinaActiveSurfaceContainer02" ImplLang="cpp"/>
+      <_ Name="USD06"  Code="ActiveSurfaceUSDImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="MedicinaActiveSurfaceContainer02" ImplLang="cpp"/>
+      <_ Name="USD07"  Code="ActiveSurfaceUSDImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="MedicinaActiveSurfaceContainer02" ImplLang="cpp"/>
+
+</HierarchicalComponent>

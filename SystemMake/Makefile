@@ -59,10 +59,10 @@ SRT_MISC:=SRTScripts
 
 MED_DOC:=MEDDox
 MED_ERRORS:=
-MED_INTERFACES:=MedicinaAntennaInterface MedicinaReceiversInterface
+MED_INTERFACES:=MedicinaAntennaInterface MedicinaReceiversInterface MedicinaActiveSurfaceInterface
 MED_LIBRARIES:=MedicinaVertexLibrary
-MED_SERVERS:=MedicinaMount MedicinaMinorServo WeatherStation MedicinaPyDMed MedicinaKBandDualFReceiver
-MED_CLIENTS:=MedicinaMountTextClient
+MED_SERVERS:=MedicinaMount MedicinaMinorServo WeatherStation MedicinaPyDMed MedicinaKBandDualFReceiver MedicinaActiveSurfaceBoss
+MED_CLIENTS:=MedicinaMountTextClient MedicinaActiveSurfaceGUIClient
 MED_MISC:=MedScripts
 
 NT_DOC:=NTDox
@@ -121,9 +121,9 @@ ifeq ($(STATION),Medicina)
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary ComponentProxy ModbusChannel XarcosLibrary \
 	    PyTestingLibrary MedicinaVertexLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
-		TotalPower NoiseGenerator MedicinaMount MedicinaPyLocalOscillator MedicinaPyDMed CustomLogger XBackend MedicinaMinorServo\
+		TotalPower NoiseGenerator MedicinaMount MedicinaPyLocalOscillator MedicinaPyDMed CustomLogger XBackend MedicinaMinorServo MedicinaActiveSurfaceBoss \
 		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient SchedulerTextClient MinorServoBossTextClient\
-		MedicinaMountTextClient CustomLoggingClient\
+		MedicinaActiveSurfaceGUIClient MedicinaMountTextClient CustomLoggingClient\
 		Plotter KStars Scripts MedScripts
 
 	IDL_DOC:=Managment Antenna Backends WeatherStation Receivers

@@ -49,10 +49,7 @@ void CMedicinaMountControlThread::runLoop()
 	currentJobID=currentJob->jobID;
 	currentJob.Release(); // this is important in order to avoid possible deadlock.
 	CSecAreaResourceWrapper<CMedicinaMountSocket> socket=m_pACUControl->Get();
-	socket->updateComponent();  // before commenting out or deleting consider that inside this method the flushing of pending event of the log dike object is called
-	socket->detectOscillation();
-	socket->checkPowerFailure();
-	socket->checkCommandedMode();
+
 	if (currentJobID!=0) {
 		ACSErr::Completion_var comp;
 		if (socket->updateLongJobs(currentJobID,comp.out())) {
@@ -65,5 +62,15 @@ void CMedicinaMountControlThread::runLoop()
 			//m_pACUControl->changeAntennaStatus(Antenna::ACU_CNTD);
 			socket->setStatus(Antenna::ACU_CNTD);
 		}
+	}
+	else {
+		socket->updateComponent();  // before commenting out or deleting consider that inside this method the flushing of pending event of the log dike object is called
+		try {		
+			socket->detectOscillation();
+		}
+		catch (...) {
+		}
+		socket->checkPowerFailure();
+		socket->checkCommandedMode();
 	}
 }

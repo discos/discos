@@ -55,6 +55,7 @@ void CSRTActiveSurfaceBossCore::initialize()
     }
     m_profileSetted = false;
     m_ASup = false;
+    m_newlut = false;
 }
 
 void CSRTActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetComponentExImpl)
@@ -1357,6 +1358,12 @@ void CSRTActiveSurfaceBossCore::workingActiveSurface() throw (ComponentErrors::C
     }
 }
 
+void CSRTActiveSurfaceBossCore::asSetLUT(const char *newlut)
+{
+    m_lut= (CDBPATH + "alma/AS/" + newlut).c_str();
+    m_newlut = true;
+}
+
 void CSRTActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newProfile) throw (ComponentErrors::ComponentErrorsExImpl)
 {
     bool all_sectors = true;
@@ -1365,12 +1372,17 @@ void CSRTActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newP
         if(!m_sector[i]) all_sectors = false;
     }
 
+    if (m_newlut == false)
+        m_lut = USDTABLECORRECTIONS;
+
     if(all_sectors) // USD tables has not been loaded yet
     {
-        ifstream usdCorrections (USDTABLECORRECTIONS);
+        ifstream usdCorrections (m_lut);
+        //ifstream usdCorrections (USDTABLECORRECTIONS);
         if(!usdCorrections)
         {
-            ACS_SHORT_LOG ((LM_INFO, "File %s not found", USDTABLECORRECTIONS));
+            ACS_SHORT_LOG ((LM_INFO, "File %s not found", m_lut));
+            //ACS_SHORT_LOG ((LM_INFO, "File %s not found", USDTABLECORRECTIONS));
             exit(-1);
         }
         actuatorsCorrections.length(NPOSITIONS);
