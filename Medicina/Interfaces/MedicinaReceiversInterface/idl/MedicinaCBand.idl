@@ -1,0 +1,162 @@
+#ifndef ___MED_C_IDL__
+#define ___MED_C_IDL__
+
+
+#include <baci.idl>
+#include <ComponentErrors.idl>
+#include "GenericReceiver.idl"
+
+
+#pragma prefix "alma"
+
+module Receivers {
+
+	/**
+	* This module defines the interface of the 5-7GHz Medicina C Band Receiver
+	* @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
+	* @author <a href=mailto:matteo.debiaggi@inaf.it>Matteo De Biaggi</a>
+    * <br>	
+	*
+	* @todo 
+	*/
+	
+    interface MedicinaCBand : ACS::CharacteristicComponent, Receiver {		
+												
+			/* **** LNAs **** */			
+			
+        /**
+         * Drain voltage of LNA, IF 1
+         */
+        readonly attribute ACS::ROdouble Vd_1;
+
+        /**
+         * Drain voltage of LNA, IF 2
+         */
+        readonly attribute ACS::ROdouble Vd_2;
+
+        /**
+         * Drain current of LNA, IF 1
+         */
+        readonly attribute ACS::ROdouble Id_1;
+
+        /**
+         * Drain current of LNA, IF 2
+         */
+        readonly attribute ACS::ROdouble Id_2;
+
+        /**
+         * Gate voltage of LNA, IF 1
+          */
+        readonly attribute ACS::ROdouble Vg_1;
+
+        /**
+         * Gate voltage of LNA, IF 2
+         */
+        readonly attribute ACS::ROdouble Vg_2;
+        
+			/* **** CRYO **** */        
+        
+		  /** 
+         *  The returned pattern is a X bits field with a meaning depending on the implementation.
+         *  Bits are referring to control flags ( remote or local control ) and cold head status 
+         */
+        //readonly attribute ACS::ROpattern cryoStatus;                 
+        
+        /**
+         * Cryogenic temperature of the Low Noise Amplifier. Approximately 20K
+         */
+        readonly attribute ACS::ROdouble cryoTemperatureLNA;
+        
+        /**
+         * Cryogenic temperature of the Shield.
+         */
+        readonly attribute ACS::ROdouble cryoTemperatureShield;
+                
+        /**
+         * Value of the environment temperature in °C.
+         */
+        readonly attribute ACS::ROdouble environmentTemperature;
+
+         /* *** SELECT RECEIVER *** */
+
+         /**
+          * @brief select receiver C HIGH
+          * 
+          */
+         void setReceiverHigh() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+         /**
+          * @brief select receiver C LOW
+          * 
+          */
+         void setReceiverLow() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+         /* *** COLD HEAD *** */
+
+			/**
+			* Turns cold head on bringing down C Low receiver stage temperature.						 
+			*/
+			void turnColdHeadOn() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+			/**
+			* Turns cold head off on C Low receiver stage.						 
+			*/
+			void turnColdHeadOff() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+									
+			
+			/* **** VACUUM **** */
+
+			/** 
+         *  The returned pattern is a X bits field with a meaning depending on the implementation.
+         *  Bits are referring to vacuum status (working, failure ...)
+         */
+        //readonly attribute ACS::ROpattern vacuumStatus;
+
+        /** 
+         * It allows to turn the vacuum sensor on. The vacuum sensor is necessary to have a correct measurment of the vacuum characteristic. 
+         * If the vacuum sensor is not working the dafult_value for the  vacuum characteristic is always reported.  
+         */
+         void turnVacuumSensorOn() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+         /** 
+          * It allows to turn the vacuum sensor off. The vacuum sensor is necessary to have a correct measurment of the vacuum characteristic. 
+          * If the vacuum sensor is not working the dafult_value for the  vacuum characteristic is always reported.  
+          */
+          void turnVacuumSensorOff() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+			/**
+			* Vacuum pump start request.
+			* Mode allows normal mode and soft start mode (not used at the moment )
+			* param[in] mode Start mode
+		   */
+			void turnVacuumPumpOn(in string mode) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx); 
+			
+    		/**
+			* Vacuum pump stop request.
+		   */
+			void turnVacuumPumpOff() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx); 
+				
+			/**
+			* Vacuum valve opening, it can act in two different ways:
+			*   * Applying delay starting from pump activation
+			*   * Applying delay starting from when pump is up to speed
+			* @param[in] p_mode DELAY string requests delayed start	
+			*/
+          void openVacuumValve(in string p_mode) raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+          
+          /**
+          * Heating resistor turn on request, helping dewar to raise temperature quickly 
+          */
+          void turnDewarHeatResistorsOn() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+          
+			/**
+          * Heating resistor turn on request, helping dewar to raise temperature quickly 
+          */
+          void turnDewarHeatResistorsOff() raises (ComponentErrors::ComponentErrorsEx,ReceiversErrors::ReceiversErrorsEx);
+
+	};
+
+
+};
+
+#endif

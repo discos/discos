@@ -29,6 +29,7 @@ To stop the server::
 import socket, traceback, os, sys
 import binhex
 from multiprocessing import Value
+import argparse
 
 
 # Index of the byte that stores che command code
@@ -242,5 +243,8 @@ class BoardServer:
 
 
 if __name__ == "__main__":
-    bs = BoardServer()
+    parser= argparse.ArgumentParser(description= 'Listen to localhost at port p')
+    parser.add_argument('--port', '-p', type=int, default= 5002, help= 'Localhost server port')
+    args= parser.parse_args()    
+    bs = BoardServer(port= args.port)
     bs.run()

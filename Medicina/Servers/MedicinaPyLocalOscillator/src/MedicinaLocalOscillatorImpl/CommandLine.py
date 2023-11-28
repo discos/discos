@@ -2,23 +2,18 @@ import socket
 import time
 from MedicinaLocalOscillatorImpl import CommandLineError
 
-
-FREQ_CMD="set LOFREQ %f\n"
-FREQ_ANS_OK="ACK\n"
-AMP_CMD="set LOAMP %f\n"
-AMP_ANS_OK="ACK\n"
-RF_ON_CMD="set LORF ON\n"
-RF_ON_ANS_OK="ACK\n"
-RF_OFF_CMD="set LORF OFF\n"
-RF_OFF_ANS_OK="ACK\n"
-
-FREQ_QUERY="get LOFREQ\n"
-FREQ_QUERY_NOK="NAK"
-AMP_QUERY="get LOAMP\n"
-AMP_QUERY_NOK="NAK"
-
 class CommandLine:
-	def __init__(self):
+	def __init__(self, p_cmd_dict):
+		"""
+		Init Command line comm interface
+		It needs command strings to be sent to 
+		the translator server ( it routes commands to synths )
+
+		Some assumptions on command strings are done, 
+		no protocol string checks are provided, hence with a 
+		malformed command string synth drive may fail!
+		"""
+		self.m_cmd_dict= p_cmd_dict
 		self.sock=None
 		self.connected=False;
 		self.ip=""
@@ -27,6 +22,7 @@ class CommandLine:
 		self.freq=0.0
 		self.powerTime=0
 		self.freqTime=0
+		self.last_answer=""
 		
 	def initialize(self):
 		#raises an error.....
@@ -42,12 +38,13 @@ class CommandLine:
 		self.connect()
 
 	def setPower(self,power):
-		cmd=AMP_CMD%power
+		cmd=self.m_cmd_dict['AMP_CMD']%power
 		#can rise an error....
 		answer=self.sendCmd(cmd)
-		if answer!=AMP_ANS_OK:
+		self.last_answer= answer
+		if answer!=self.m_cmd_dict['AMP_ANS_OK']:
 			nak,err=answer.split()
-			message="cannot set the power, the error code is %d"%err
+			message="cannot set the power, the error code is %s" % err
 			exc=CommandLineError(message);
 			raise exc
 		else:
@@ -55,15 +52,16 @@ class CommandLine:
 			self.powerTime=0
 
 	def getPower(self):
-		cmd=AMP_QUERY
-		now=time.time()
+		cmd=self.m_cmd_dict['AMP_QUERY']
+		now=time.time()		
 		if now<self.powerTime:
 			return self.power		
 		#can rise an error....
 		answer=self.sendCmd(cmd)
-		if AMP_QUERY_NOK in answer:
+		self.last_answer= answer
+		if self.m_cmd_dict['AMP_QUERY_NOK'] in answer:
 			nak,err=answer.split()
-			message="cannot read power, the error code is %d"%err
+			message="cannot read power, the error code is %s" % err
 			exc=CommandLineError(message);
 			raise exc
 		else:
@@ -73,12 +71,13 @@ class CommandLine:
 			return self.power
 
 	def setFrequency(self,freq):
-		cmd=FREQ_CMD%freq
+		cmd=self.m_cmd_dict['FREQ_CMD']%freq
 		#can rise an error....
 		answer=self.sendCmd(cmd)
-		if answer!=FREQ_ANS_OK:
+		self.last_answer= answer
+		if answer!=self.m_cmd_dict['FREQ_ANS_OK']:
 			nak,err=answer.split()
-			message="cannot set frequency, the error code is %d"%err
+			message="cannot set frequency, the error code is %s" % err
 			exc=CommandLineError(message);
 			raise exc
 		else:
@@ -86,15 +85,16 @@ class CommandLine:
 			self.freqTime=0
 		
 	def getFrequency(self):
-		cmd=FREQ_QUERY
+		cmd=self.m_cmd_dict['FREQ_QUERY']
 		now=time.time()
 		if now<self.freqTime:
 			return self.freq
 		#can rise an error....
 		answer=self.sendCmd(cmd)
-		if FREQ_QUERY_NOK in answer:
+		self.last_answer= answer
+		if self.m_cmd_dict['FREQ_QUERY_NOK'] in answer:
 			nak,err=answer.split()
-			message="cannot read frequency, the error code is %d"%err
+			message="cannot read frequency, the error code is %s" % err
 			exc=CommandLineError(message);
 			raise exc
 		else:
@@ -104,23 +104,24 @@ class CommandLine:
 			return self.freq
        
 	def rfOn(self):
-		cmd=RF_ON_CMD
+		cmd=self.m_cmd_dict['RF_ON_CMD']
 		#can rise an error....
 		answer=self.sendCmd(cmd)
-		print answer
-		if answer!=RF_ON_ANS_OK:
+		self.last_answer= answer
+		if answer!= self.m_cmd_dict['RF_ON_ANS_OK']:
 			nak,err=answer.split()
-			message="an error occurred, the code is %d"%err
+			message="an error occurred, the code is %s" % err
 			exc=CommandLineError(message);
 			raise exc
   
 	def rfOff(self):
-		cmd=RF_OFF_CMD
+		cmd= self.m_cmd_dict['RF_OFF_CMD']
 		#can rise an error....
 		answer=self.sendCmd(cmd)
-		if answer!=RF_OFF_ANS_OK:
+		self.last_answer= answer
+		if answer!= self.m_cmd_dict['RF_OFF_ANS_OK']:
 			nak,err=answer.split()
-			message="an error occurred, the code is %d"%err
+			message="an error occurred, the code is %s " % err
 			exc=CommandLineError(message);
 			raise exc
    

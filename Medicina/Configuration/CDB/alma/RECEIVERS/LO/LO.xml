@@ -1,11 +1,22 @@
-<LocalOscillatorEthernet xmlns="urn:schemas-cosylab-com:LocalOscillatorEthernet:1.0" 
+<LocalOscillatorEthernetCommand xmlns="urn:schemas-cosylab-com:LocalOscillatorEthernetCommand:1.0" 
           xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
-               xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
-               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-               IP="192.168.51.2" PORT="2096">
-                
-   
+          xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          IP="192.168.51.2" PORT="2096"
+          FREQ_CMD="set LOFREQ %f\n"          
+          FREQ_ANS_OK="ACK\n"
+          AMP_CMD="set LOAMP %f\n"
+          AMP_ANS_OK="ACK\n"
+          RF_ON_CMD="set LORF ON\n"
+          RF_ON_ANS_OK="ACK\n"
+          RF_OFF_CMD="set LORF OFF\n"
+          RF_OFF_ANS_OK="ACK\n"
+          FREQ_QUERY="get LOFREQ\n"
+          FREQ_QUERY_NOK="NAK\n"
+          AMP_QUERY="get LOAMP\n"
+          AMP_QUERY_NOK="NAK\n"
+          >                
 	<frequency units="MHz"/>
 	<amplitude units="dBm"/>
 	<isLocked/>
-</LocalOscillatorEthernet>
+</LocalOscillatorEthernetCommand>

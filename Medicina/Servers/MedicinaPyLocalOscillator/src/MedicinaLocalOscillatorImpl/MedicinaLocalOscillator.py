@@ -31,7 +31,8 @@ from MedicinaLocalOscillatorImpl import CommandLine
 from MedicinaLocalOscillatorImpl import CommandLineError
 from IRAPy import userLogger
 
- 
+import SYNTHsCmd
+
 class MedicinaLocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComponent, ContainerServices, ComponentLifecycle):
 
 	def __init__(self):
@@ -39,6 +40,7 @@ class MedicinaLocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComp
 		ContainerServices.__init__(self)
 		self.freq=0.0
 		self.power=0.0
+		
       
 # ___oOo___
 	def cleanUp(self):
@@ -47,14 +49,26 @@ class MedicinaLocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComp
 	def initialize(self):
 		name=self.getName()
 		try:
+			# Configuration param readings for LO specific instance
+			# IP / PORT			
 			dal=Acspy.Util.ACSCorba.cdb()
 			dao=dal.get_DAO_Servant("alma/"+name)
 			IP=dao.get_string("IP")
 			PORT=int(dao.get_double("PORT"))
-		except Exception:
+			# LO SYNTHs dedicated commands ( to use on component impl. with more
+			# than one SYNTHs, e.g. 1st, 2nd stage mixers )			
+			l_synt_cmd= SYNTHsCmd.SYNTHsCmd()
+			l_synt_cmd_list= l_synt_cmd.getCmdList()
+			for l_cmd_key in l_synt_cmd_list:
+				l_cmd_string= dao.get_string(l_cmd_key)
+				l_synt_cmd.setCmd(l_cmd_key, l_cmd_string.decode('string_escape'))							
+		except Exception:			
 			exc=ComponentErrorsImpl.CDBAccessExImpl()
+			msg= "Init error reading configuration from alma/"+ name
+			exc.setData('Reason',msg)
 			raise exc
-		self.cl=CommandLine.CommandLine()
+		# CommandLine instance with given LO Synth commands
+		self.cl=CommandLine.CommandLine(l_synt_cmd.getCmdDict())
 		try:
 			self.cl.initialize()
 		except CommandLineError as ex:
@@ -75,15 +89,15 @@ class MedicinaLocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComp
 	def set(self,rf_power,rf_freq):
 		try:
 			self.cl.setFrequency(rf_freq)
-		except CommandLineError as ex:
-			msg="cannot set frequency with message %s" % (ex.__str__)
+		except Exception as ex:						
+			msg="cannot set frequency" + str(ex)
 			exc=ReceiversErrorsImpl.SynthetiserErrorExImpl()
 			exc.setData('Details',msg);
-			raise exc.getReceiversErrorsEx()
+			raise exc.getReceiversErrorsEx()		
 		try:
 			self.cl.setPower(rf_power)
-		except CommandLineError as ex:
-			msg="cannot set power with message %s" % (ex.__str__)
+		except Exception as ex:				
+			msg="cannot set power " + str(ex)
 			exc=ReceiversErrorsImpl.SynthetiserErrorExImpl()
 			exc.setData('Details',msg);
 			raise exc.getReceiversErrorsEx()     
