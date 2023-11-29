@@ -8,16 +8,16 @@
 				xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
 				xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"   
-				DewarIPAddress="192.168.60.51"
+				DewarIPAddress="192.168.200.188"
 				DewarPort="5002"
-				LNAIPAddress="192.168.60.50"
+				LNAIPAddress="192.168.200.189"
 				LNAPort="5002"		
 				WatchDogResponseTime="400000"
 				WatchDogSleepTime="500000"
 				LNASamplingTime="250000"
 				RepetitionCacheTime="7000000"
 				RepetitionExpireTime="10000000"
-				LocalOscillatorInstance="RECEIVERS/LO_CBAND"
+				LocalOscillatorInstance="RECEIVERS/LO_KBAND"
 >
 			<LO description="Sequence of local oscillator values for each IF chain"/>
 			<feeds description="Number of feeds of the receiver"/>
