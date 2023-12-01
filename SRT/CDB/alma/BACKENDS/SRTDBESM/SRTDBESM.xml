@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
 
-<SRTDBESM xmlns="urn:schemas-cosylab-com:SRTDBESM:1.0" xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" addr_1="15" addr_2="14" addr_3="13" addr_4="12" DBESM_IPAddress="127.0.0.1" DBESM_Port="11111">
+<SRTDBESM xmlns="urn:schemas-cosylab-com:SRTDBESM:1.0" xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" addr_1="0" addr_2="1" addr_3="2" addr_4="3" DBESM_IPAddress="127.0.0.1" DBESM_Port="11111">
     <addr_1 description="address of board 1" />	
     <addr_2 description="address of board 2" />
     <addr_3 description="address of board 3" />	

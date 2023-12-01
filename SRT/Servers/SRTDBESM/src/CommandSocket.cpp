@@ -104,9 +104,9 @@ void CCommandSocket::store_allmode(const char * cfg_name) //throw (BackendsError
 }
 
 
-void CCommandSocket::clr_mode(const char * cfg_name) //throw (BackendsErrors::BackendsErrorsEx)
+void CCommandSocket::delete_file(const char * cfg_name) //throw (BackendsErrors::BackendsErrorsEx)
 {
-      clr_mode_command(cfg_name);
+      delete_file_command(cfg_name);
 }
 
 
@@ -139,6 +139,11 @@ string CCommandSocket::set_dbeatt(const char * out_dbe, const char * att_val) //
 string CCommandSocket::get_dbeatt(const char * out_dbe) //throw (BackendsErrors::BackendsErrorsEx)
 {
        return get_dbeatt_command(out_dbe);
+}
+
+string CCommandSocket::get_firm(short b_addr) //throw (BackendsErrors::BackendsErrorsEx)
+{
+    return get_firm_command(b_addr);
 }
 
 void CCommandSocket::parse_longSeq_response(string status_str, string start, string end, ACS::longSeq* vals) //throw (BackendsErrors::BackendsErrorsEx)
@@ -420,20 +425,20 @@ void CCommandSocket::store_allmode_command(const char * cfg_name) //throw (Backe
 	}    
 } 
 
-void CCommandSocket::clr_mode_command(const char * cfg_name) //throw (BackendsErrors::BackendsErrorsEx)
+void CCommandSocket::delete_file_command(const char * cfg_name) //throw (BackendsErrors::BackendsErrorsEx)
 {
 	 string outBuff;
-    string msg = CDBESMCommand::comm_clr_mode(cfg_name);
+    string msg = CDBESMCommand::comm_delete_file(cfg_name);
     //cout << "Message to send is: " << msg << endl;
     sendCommand(msg, &outBuff, 0);
 
     if (outBuff.find("unreachable") != string::npos) {
-		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::clr_mode_command()");
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::delete_file_command()");
 		impl.setReason("DBESM board unreachable, timeout error");
 		throw impl;
 	   }       
 	 else if (outBuff.find("ERR") != string::npos) {
-		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::clr_mode_command()");
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::delete_file_command()");
 		impl.setReason("Error in deleting dbesm configuration file, check parameters");
 		throw impl;
 	}    
@@ -557,4 +562,24 @@ string CCommandSocket::get_dbeatt_command(const char * out_dbe) //throw (Backend
 		throw impl;
 	  }
 	return response;  
+}
+
+string CCommandSocket::get_firm_command(short b_addr) //throw (BackendsErrors::BackendsErrorsEx)
+{
+    string response;
+    string msg = CDBESMCommand::comm_get_firm(to_string(b_addr));
+    //cout << "Message to send is: " << msg << endl;
+    sendCommand(msg, &response, 0);
+
+    if (response.find("unreachable") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::get_firm_command()");
+		impl.setReason("DBESM board unreachable, timeout error");
+		throw impl;
+	   }   
+	 else if (response.find("ERR") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::get_firm_command()");
+		impl.setReason("Error in getting dbesm firmware info, check parameters");
+		throw impl;
+	}
+    return response;
 }

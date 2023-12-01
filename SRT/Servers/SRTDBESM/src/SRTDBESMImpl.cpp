@@ -337,12 +337,12 @@ void SRTDBESMImpl::store_allmode(const char * cfg_name) //throw (BackendsErrors:
 	CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::store_allmode()",(LM_INFO,"Configuration file written"));			 
 }
 
-void SRTDBESMImpl::clr_mode(const char * cfg_name) //throw (BackendsErrors::BackendsErrorsEx)
+void SRTDBESMImpl::delete_file(const char * cfg_name) //throw (BackendsErrors::BackendsErrorsEx)
 {
-	AUTO_TRACE("SRTDBESMImpl::clr_mode()");
+	AUTO_TRACE("SRTDBESMImpl::delete_file()");
 	try {
 		
-    	m_commandSocket.clr_mode(cfg_name);
+    	m_commandSocket.delete_file(cfg_name);
     	
     	 }
 		 catch (ComponentErrors::ComponentErrorsExImpl& ex) {
@@ -354,11 +354,11 @@ void SRTDBESMImpl::clr_mode(const char * cfg_name) //throw (BackendsErrors::Back
 			throw ex.getBackendsErrorsEx();		
 		}	
 		catch (...) {
-			_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"SRTDBESMImpl::clr_mode()");
+			_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"SRTDBESMImpl::delete_file()");
 			dummy.log(LM_DEBUG);
 			throw dummy.getComponentErrorsEx();
 			}
-	CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::clr_mode()",(LM_INFO,"Configuration file deleted"));		
+	CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::delete_file()",(LM_INFO,"Configuration file deleted"));		
 }
 
 void SRTDBESMImpl::get_status(short b_addr)// throw (BackendsErrors::BackendsErrorsEx)
@@ -820,6 +820,41 @@ void SRTDBESMImpl::get_dbeatt(const char * out_dbe)
 		
     CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::get_dbeatt()",(LM_INFO,c));
 }
+
+void SRTDBESMImpl::get_firm(short b_addr) //throw (BackendsErrors::BackendsErrorsEx)
+{
+	 AUTO_TRACE("SRTDBESMImpl::get_firm()");
+	 string output;
+	 
+	 try {
+	 	
+    	 output = m_commandSocket.get_firm(b_addr);
+    	 
+        }
+		 catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+			ex.log(LM_DEBUG);
+			throw ex.getComponentErrorsEx();
+	 	 }
+ 		 catch (BackendsErrors::BackendsErrorsExImpl& ex) {
+			ex.log(LM_DEBUG);
+			throw ex.getBackendsErrorsEx();		
+		 }	
+		 catch (...) {
+			_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"SRTDBESMImpl::get_diag()");
+			dummy.log(LM_DEBUG);
+			throw dummy.getComponentErrorsEx();
+	 	 }
+    
+    char *c = new char[output.length()-2 + 1];  // discard \r\n
+    std::copy(output.begin(), (output.end()-2), c);
+    c[output.length()-2] = '\0';
+
+	 CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::get_firm()",(LM_INFO,c));
+	 
+	 return c;
+}
+
+
 GET_PROPERTY_REFERENCE(ACS::ROlong,m_paddr_1,addr_1);
 GET_PROPERTY_REFERENCE(ACS::ROlong,m_paddr_2,addr_2);
 GET_PROPERTY_REFERENCE(ACS::ROlong,m_paddr_3,addr_3);

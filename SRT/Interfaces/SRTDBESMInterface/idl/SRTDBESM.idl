@@ -86,7 +86,7 @@ module Backends {
         /*
 	 delete DBESM configuration
         */
-	void clr_mode(in string cfg_name) raises (BackendsErrors::BackendsErrorsEx);
+	void delete_file(in string cfg_name) raises (BackendsErrors::BackendsErrorsEx);
 
         /*
 	 get single DBESM board status: registers and attenuators values
@@ -117,6 +117,11 @@ module Backends {
 	 get one or more attenuator values depending on which output is requested
         */
         void get_dbeatt(in string out_dbe) raises (BackendsErrors::BackendsErrorsEx);
+
+        /*
+	 get single DBESM board firmware version info 
+        */
+	void get_firm(in short b_addr) raises (BackendsErrors::BackendsErrorsEx);
 	
 };
 

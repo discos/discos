@@ -72,7 +72,7 @@ public:
    
    virtual void store_allmode(const char * cfg_name); //throw (BackendsErrors::BackendsErrorsEx);
    
-   virtual void clr_mode(const char * cfg_name); //throw (BackendsErrors::BackendsErrorsEx);
+   virtual void delete_file(const char * cfg_name); //throw (BackendsErrors::BackendsErrorsEx);
  	
  	virtual void get_status(short b_addr); //throw (BackendsErrors::BackendsErrorsEx);
  	
@@ -85,6 +85,8 @@ public:
  	virtual void set_dbeatt(const char * out_dbe, const char * att_val); //throw (BackendsErrors::BackendsErrorsEx);
  	
  	virtual void get_dbeatt(const char * out_dbe); //throw (BackendsErrors::BackendsErrorsEx);
+ 	
+ 	virtual void get_firm(short b_addr);
 
 	/** 
 	 * Returns a reference to addr_1.
