@@ -7,7 +7,7 @@ MicroControllerBoard::MicroControllerBoard(
         const BYTE master_address, const BYTE slave_address, 
         const DWORD timeout) : 
                 m_IP(IP), m_port(port), m_timeout(timeout), m_master_address(master_address), 
-                m_slave_address(slave_address),
+                m_slave_address(slave_address), m_connected(false),
                 m_socket(NULL), m_id(0), m_command_type(0x00)
 {
     try {
@@ -17,9 +17,11 @@ MicroControllerBoard::MicroControllerBoard(
     catch (std::bad_alloc& ex) {
         throw MicroControllerBoardEx("Memory allocation error");
     }
-
-    if(m_socket->Create(m_Error, CSocket::STREAM) == CSocket::FAIL)
-        throw MicroControllerBoardEx("Error creating socket");
+	 if (strcmp(m_IP.c_str(),"")!=0) {
+    	if(m_socket->Create(m_Error, CSocket::STREAM) == CSocket::FAIL) throw MicroControllerBoardEx("Error creating socket");
+    } else {
+    	m_connected=false;
+    }
 }
 
 MicroControllerBoard::~MicroControllerBoard() {
@@ -31,12 +33,13 @@ MicroControllerBoard::~MicroControllerBoard() {
 
 
 void MicroControllerBoard::openConnection(void) {
-
+	 if (strcmp(m_IP.c_str(),"")==0) return;
     if (m_socket->Connect(m_Error, m_IP.c_str(), m_port) == CSocket::FAIL) {
         closeConnection();
         throw MicroControllerBoardEx(std::string("Error connecting to ") + m_IP + ":" + any2string(m_port));
     }
     else {
+    	  m_connected=true;
         if(m_socket->setSockMode(m_Error, CSocket::BLOCKINGTIMEO, m_timeout) != CSocket::SUCCESS) {
             closeConnection();
             throw MicroControllerBoardEx("Error configuring socket");
@@ -48,8 +51,9 @@ CSocket::SocketStatus MicroControllerBoard::getConnectionStatus(void) { return(m
 
 void MicroControllerBoard::closeConnection(void) { 
     pthread_mutex_lock(&m_socket_mutex); 
-    if(m_socket != NULL && m_socket->getStatus()) {
+    if(m_socket != NULL && m_socket->getStatus() && m_connected) {
         m_socket->Close(m_Error);
+        m_connected=false;
 
         if(!m_Error.isNoError()) 
             std::cerr << "An error occured closing the socket" << endl;
@@ -60,13 +64,15 @@ void MicroControllerBoard::closeConnection(void) {
 }
 
 std::vector<BYTE> MicroControllerBoard::receive(void) { 
-    pthread_mutex_lock(&m_socket_mutex); 
+
     BYTE msg[MCB_BUFF_LIMIT] = {0x00};
     bool is_short_cmd = false, has_data_cmd = false;
     BYTE sh_command = 0x00; // Shifted command (command_type - MCB_CMD_TYPE_EXTENDED)
     std::vector<BYTE> data, clean_data;
     
-    std::ostringstream msg_stream;
+    std::ostringstream msg_stream;    
+    if (!m_connected) throw MicroControllerBoardEx("Board connection disabled");
+    pthread_mutex_lock(&m_socket_mutex); 
     // Receive the response one byte at once 
     try {
         for(size_t j = 0; j < MCB_HT_COUNTER; j++) {
@@ -77,8 +83,10 @@ std::vector<BYTE> MicroControllerBoard::receive(void) {
                     continue;
             }
         }
-        if(msg[0] != MCB_CMD_STX)
-            throw MicroControllerBoardEx("No answer header received");
+        if(msg[0] != MCB_CMD_STX) {
+        	throw MicroControllerBoardEx("No answer header received");
+        }
+            
         else {
             m_answer.clear();
             m_answer.push_back(msg[0]);
@@ -125,8 +133,9 @@ std::vector<BYTE> MicroControllerBoard::receive(void) {
                     has_data_cmd = false;
             }
 
-            if(msg[MCB_BASE_ANSWER_LENGTH])
-                throw MicroControllerBoardEx("An error occurs. Error code: " + any2string(int(msg[MCB_BASE_ANSWER_LENGTH])));
+            if(msg[MCB_BASE_ANSWER_LENGTH]) {
+               throw MicroControllerBoardEx("An error occurs. Error code: " + any2string(int(msg[MCB_BASE_ANSWER_LENGTH])));
+            }
 
             // If the answer should have data and there aren't any errors, then continue the reception
             if(has_data_cmd) {
@@ -138,8 +147,10 @@ std::vector<BYTE> MicroControllerBoard::receive(void) {
                     msg_stream << msg[MCB_BASE_ANSWER_LENGTH];
                     m_answer.push_back(msg[MCB_BASE_ANSWER_LENGTH]);
                 }
-                else
-                    throw MicroControllerBoardEx("Error: data length not received.");
+                else {
+                	pthread_mutex_unlock(&m_socket_mutex);
+                	throw MicroControllerBoardEx("Error: data length not received.");
+                }
 
                 // Get the parameters
                 for(int i=MCB_BASE_ANSWER_LENGTH + 1; i < MCB_BASE_ANSWER_LENGTH + 1 + int(msg[MCB_BASE_ANSWER_LENGTH]); i++) {
@@ -173,8 +184,9 @@ std::vector<BYTE> MicroControllerBoard::receive(void) {
                         break;
                 } while(counter < MCB_HT_COUNTER);
 
-                if(msg[idx] != MCB_CMD_ETX)
-                    throw MicroControllerBoardEx("Answer terminator not found.");
+                if(msg[idx] != MCB_CMD_ETX) {
+                  throw MicroControllerBoardEx("Answer terminator not found.");
+                }
             }
             pthread_mutex_unlock(&m_socket_mutex); 
             
@@ -231,6 +243,7 @@ std::vector<BYTE> MicroControllerBoard::receive(void) {
 }
 
 void MicroControllerBoard::send(const BYTE command, std::vector<BYTE> parameters) {
+	if (!m_connected) throw MicroControllerBoardEx("Board connection disabled");
     pthread_mutex_lock(&m_socket_mutex); 
     try {
         if(command >= MCB_CMD_TYPE_MIN_EXT && command <= MCB_CMD_TYPE_MAX_ABB) {

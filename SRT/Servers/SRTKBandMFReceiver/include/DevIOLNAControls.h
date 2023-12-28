@@ -61,8 +61,10 @@ public:
 	*/
 	ACS::doubleSeq read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
 	{
-        // In pCore I need a method to get the vector of values (An extension, so I can ereditate from ComponentCore)
-		m_val=m_pCore->getStageValues(m_control, m_ifs, m_stage);
+      // In pCore I need a method to get the vector of values (An extension, so I can ereditate from ComponentCore)
+	   /* commented out in order to cope with the LNA control board substitution */
+	   // under this configuration the default value should be used so no alarms are triggered	
+		//m_val=m_pCore->getStageValues(m_control, m_ifs, m_stage);
 		timestamp=getTimeStamp();  // Completion time
 		return m_val;
 	}
@@ -71,6 +73,7 @@ public:
 	*/
 	void write(const ACS::doubleSeq& value, ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
 	{
+		m_val=value;
 		timestamp=getTimeStamp();
 		return;
 	}

@@ -17,7 +17,7 @@
     monitoringThreadStackSize="4096"
     DewarIPAddress="127.0.0.1"
     DewarPort="12902"
-    LNAIPAddress="127.0.0.1"
+    LNAIPAddress=""
     LNAPort="12903"      
     WatchDogResponseTime="10000000"
     WatchDogSleepTime="10000000"
