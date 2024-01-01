@@ -169,6 +169,8 @@ public:
 
     void setProfile (const ActiveSurface::TASProfile& profile) throw (ComponentErrors::ComponentErrorsExImpl);
 
+    void asSetLUT(const char* newlut);
+
 private:
     std::map<int, std::string> m_error_strings;
     ContainerServices* m_services;
