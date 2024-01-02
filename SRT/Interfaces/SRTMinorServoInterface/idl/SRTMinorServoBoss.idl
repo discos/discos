@@ -8,66 +8,26 @@
 #ifndef __SRTMINORSERVOBOSS_IDL__
 #define __SRTMINORSERVOBOSS_IDL__
 
-#include <baci.idl>
-#include <ComponentErrors.idl>
-#include <MinorServoErrors.idl>
-#include <AntennaDefinitions.idl>
-#include "MinorServoDefinitions.idl"
+#include <MinorServoBoss.idl>
 #include "SRTMinorServoCommon.idl"
 
 #pragma prefix "alma"
 
 module MinorServo
 {
-    interface SRTMinorServoBoss: ACS::CharacteristicComponent
+    interface SRTMinorServoBoss: MinorServoBoss
     {
         readonly attribute ROSRTMinorServoFocalConfiguration current_configuration;
-        readonly attribute ACS::ROboolean simulation_enabled;
+        readonly attribute Management::ROTBoolean simulation_enabled;
         readonly attribute ACS::ROdouble plc_time;
         readonly attribute ACS::ROstring plc_version;
         readonly attribute ROSRTMinorServoControlStatus control;
-        readonly attribute ACS::ROboolean power;
-        readonly attribute ACS::ROboolean emergency;
+        readonly attribute Management::ROTBoolean power;
+        readonly attribute Management::ROTBoolean emergency;
         readonly attribute ROSRTMinorServoGregorianCoverStatus gregorian_cover;
         readonly attribute ACS::ROdouble last_executed_command;
 
-        void setElevationTracking(in string value) raises (MinorServoErrors::MinorServoErrorsEx, ComponentErrors::ComponentErrorsEx);
-        void setASConfiguration(in string value) raises (MinorServoErrors::MinorServoErrorsEx, ComponentErrors::ComponentErrorsEx);
-
-        /**
-         * Starts the scan of one axis of the MinorServo target.
-         *
-         * @param starting_time the time the scan will start or 0 if the scan is required to start immediately
-         * @param scan structure containing the description of the scan to be executed
-         * @param antennaInfo auxiliary information from the antenna
-         *
-         */
-        void startScan(inout ACS::Time starting_time, in MinorServoScan scan, in Antenna::TRunTimeParameters antennaInfo) raises (MinorServoErrors::MinorServoErrorsEx, ComponentErrors::ComponentErrorsEx);
-
-        /**
-         * Closes the current scan and force the minor servo system to its normal behaviour
-         * @param timeToStop stores the expected epoch in which the scan will be stopped (closed). It could be zero meaning the
-         *         scan will be closed immediately
-         * @throw ComponentErrors::ComponentErrorsEx
-         * @throw ReceiversErrors::ReceiversErrorsEx
-         */
-        void closeScan(out ACS::Time timeToStop) raises (MinorServoErrors::MinorServoErrorsEx, ComponentErrors::ComponentErrorsEx);
-    
-        /**
-         * Checks if it is possible to execute a scan along a given axis
-         *
-         * @param starting_time the time the scan will start or 0 if the scan is required to start immediately
-         * @param scan structure containing the description of the scan to be executed
-         * @param antennaInfo auxiliary information from the antenna
-         * @param runTime auxiliary information computed at run time by the subsystem
-         */
-        boolean checkScan(in ACS::Time starting_time, in MinorServoScan scan, in Antenna::TRunTimeParameters antennaInfo, out TRunTimeParameters runtime) raises (MinorServoErrors::MinorServoErrorsEx, ComponentErrors::ComponentErrorsEx);
-
-        /**
-         * Setup all the minor servos to the given configuration
-         * @param configuration a string representing the given configuration
-         */
-        void setup(in string configuration) raises (MinorServoErrors::MinorServoErrorsEx);
+        void preset(in double elevation) raises (MinorServoErrors::MinorServoErrorsEx, ComponentErrors::ComponentErrorsEx);
     };
 };
 

@@ -10,11 +10,11 @@
 	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-    <axes_enabled><property_name>X_ENABLED</property_name></axes_enabled>
-    <axes_enabled><property_name>Z_MASTER_ENABLED</property_name></axes_enabled>
-    <axes_enabled><property_name>Z_SLAVE_ENABLED</property_name></axes_enabled>
-    <axes_enabled><property_name>THETA_MASTER_ENABLED</property_name></axes_enabled>
-    <axes_enabled><property_name>THETA_SLAVE_ENABLED</property_name></axes_enabled>
+    <physical_axes_enabled><property_name>X_ENABLED</property_name></physical_axes_enabled>
+    <physical_axes_enabled><property_name>Z_MASTER_ENABLED</property_name></physical_axes_enabled>
+    <physical_axes_enabled><property_name>Z_SLAVE_ENABLED</property_name></physical_axes_enabled>
+    <physical_axes_enabled><property_name>THETA_MASTER_ENABLED</property_name></physical_axes_enabled>
+    <physical_axes_enabled><property_name>THETA_SLAVE_ENABLED</property_name></physical_axes_enabled>
 
     <physical_positions><property_name>ELONG_X</property_name></physical_positions>
     <physical_positions><property_name>ELONG_Z_MASTER</property_name></physical_positions>

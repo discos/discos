@@ -9,7 +9,6 @@
 #ifndef __SRTMINORSERVO_IDL__
 #define __SRTMINORSERVO_IDL__
 
-#include <baci.idl>
 #include "SRTMinorServoCommon.idl"
 
 #pragma prefix "alma"
@@ -18,33 +17,36 @@ module MinorServo
 {
     interface SRTBaseMinorServo : ACS::CharacteristicComponent
     {
-		readonly attribute ACS::ROboolean enabled;
-
+        readonly attribute Management::ROTBoolean enabled;
         readonly attribute ROSRTMinorServoCabinetStatus drive_cabinet_status;
-
-        readonly attribute ACS::ROboolean block;
-
+        readonly attribute Management::ROTBoolean block;
         readonly attribute ROSRTMinorServoOperativeMode operative_mode;
-
-        readonly attribute ACS::RObooleanSeq axes_enabled;
-
+        readonly attribute ACS::RObooleanSeq physical_axes_enabled;
         readonly attribute ACS::ROdoubleSeq physical_positions;
-
+        readonly attribute ACS::ROlong virtual_axes;
         readonly attribute ACS::ROdoubleSeq virtual_positions;
-
         readonly attribute ACS::ROdoubleSeq virtual_offsets;
+        readonly attribute ACS::ROdoubleSeq virtual_user_offsets;
+        readonly attribute ACS::ROdoubleSeq virtual_system_offsets;
+        readonly attribute Management::ROTBoolean in_use;
+        readonly attribute ACS::ROstring current_setup;
 
-        void status();
+        void status() raises (ComponentErrors::ComponentErrorsEx);
+        void stow(in long stow_position) raises (ComponentErrors::ComponentErrorsEx, MinorServoErrors::MinorServoErrorsEx);
+        void stop() raises (ComponentErrors::ComponentErrorsEx, MinorServoErrors::MinorServoErrorsEx);
+        void preset(in ACS::doubleSeq coordinates) raises (ComponentErrors::ComponentErrorsEx, MinorServoErrors::MinorServoErrorsEx);
+        void offset(in ACS::doubleSeq offsets) raises (ComponentErrors::ComponentErrorsEx, MinorServoErrors::MinorServoErrorsEx);
+        ACS::doubleSeq getUserOffsets();
+        void setUserOffset(in string axis_name, in double offset) raises (ComponentErrors::ComponentErrorsEx, MinorServoErrors::MinorServoErrorsEx);
+        void clearUserOffsets() raises (ComponentErrors::ComponentErrorsEx, MinorServoErrors::MinorServoErrorsEx);
+        ACS::doubleSeq getSystemOffsets();
+        void setSystemOffset(in string axis_name, in double offset) raises (ComponentErrors::ComponentErrorsEx, MinorServoErrors::MinorServoErrorsEx);
+        void clearSystemOffsets() raises (ComponentErrors::ComponentErrorsEx, MinorServoErrors::MinorServoErrorsEx);
 
-        void stow(in long stow_position);
+        void setup(in string configuration) raises (ComponentErrors::ComponentErrorsEx, MinorServoErrors::MinorServoErrorsEx);
+        void getAxesInfo(out ACS::stringSeq axes_names, out ACS::stringSeq axes_units) raises (ComponentErrors::ComponentErrorsEx);
+        ACS::doubleSeq calcCoordinates(in double elevation);
 
-        void stop();
-
-        void preset(in ACS::doubleSeq coordinates);
-
-        void offset(in ACS::doubleSeq offsets);
-
-        void setup(in string configuration);
     };
 
     interface SRTGenericMinorServo : SRTBaseMinorServo
@@ -53,7 +55,7 @@ module MinorServo
 
     interface SRTProgramTrackMinorServo : SRTBaseMinorServo
     {
-        void programTrack(in long trajectory_id, in long point_id, in double start_time, in ACS::doubleSeq coordinates);
+        void programTrack(in long trajectory_id, in long point_id, in double start_time, in ACS::doubleSeq coordinates) raises (ComponentErrors::ComponentErrorsEx);
     };
 };
 

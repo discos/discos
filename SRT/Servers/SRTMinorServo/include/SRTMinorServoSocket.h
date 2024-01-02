@@ -7,7 +7,7 @@
  * Giuseppe Carboni (giuseppe.carboni@inaf.it)
  */
 
-#include "SuppressWarnings.h"
+#include "Common.h"
 #include <IRA>
 #include <mutex>
 #include <ComponentErrors.h>

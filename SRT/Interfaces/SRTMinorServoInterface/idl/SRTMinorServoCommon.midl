@@ -6,6 +6,10 @@
 
 #include <baci.idl>
 #include <enumpropMACRO.idl>
+#include <ManagmentDefinitions.idl>
+#include <MinorServoDefinitions.idl>
+#include <ComponentErrors.idl>
+#include <MinorServoErrors.idl>
 
 #pragma prefix "alma"
 
@@ -70,15 +74,16 @@ module MinorServo
 
     ACS_ENUM(SRTMinorServoOperativeMode);
 
-    enum SRTMinorServoBossStatus
+    enum SRTMinorServoMotionStatus
     {
-        BOSS_STATUS_UNCONFIGURED,
-        BOSS_STATUS_SETUP_IN_PROGRESS,
-        BOSS_STATUS_PARK_IN_PROGRESS,
-        BOSS_STATUS_ERROR,
-        BOSS_STATUS_CONFIGURED
+        MOTION_STATUS_UNCONFIGURED,
+        MOTION_STATUS_CONFIGURING,
+        MOTION_STATUS_PARK,
+        MOTION_STATUS_ERROR,
+        MOTION_STATUS_CONFIGURED,
+        MOTION_STATUS_TRACKING
     };
 
-    ACS_ENUM(SRTMinorServoBossStatus);
+    ACS_ENUM(SRTMinorServoMotionStatus);
 };
 #endif

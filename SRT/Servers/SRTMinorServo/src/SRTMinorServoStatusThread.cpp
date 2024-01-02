@@ -35,7 +35,7 @@ void SRTMinorServoStatusThread::runLoop()
 
     m_core->status();
 
-    for(auto& servo : m_core->m_servos)
+    for(const auto& [name, servo] : m_core->m_servos)
     {
         servo->status();
     }

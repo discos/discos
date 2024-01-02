@@ -11,7 +11,7 @@
 /* Giuseppe Carboni (giuseppe.carboni@inaf.it)    14/09/2023    Creation             */
 /*************************************************************************************/
 
-#include "SuppressWarnings.h"
+#include "Common.h"
 #include <IRA>
 #include <acsThread.h>
 #include <ComponentErrors.h>

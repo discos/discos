@@ -11,13 +11,10 @@
 /* Giuseppe Carboni (giuseppe.carboni@inaf.it)    14/09/2023    Creation             */
 /*************************************************************************************/
 
-#include "SuppressWarnings.h"
+#include "Common.h"
 #include <IRA>
-#include <thread>
-#include <chrono>
 #include <acsThread.h>
 #include <ComponentErrors.h>
-#include "SRTMinorServoSocket.h"
 #include "SRTMinorServoBossCore.h"
 
 #define SETUP_TIMEOUT 60
@@ -58,11 +55,16 @@ public:
       * This method overrides the thread implementation class.
       * The thread can be exited by calling ACS::ThreadBase::stop or ACS::ThreadBase::exit command.
      */
-    virtual void run();
+    virtual void runLoop();
 
 private:
     std::string m_thread_name;
     SRTMinorServoBossCore* m_core;
+
+    unsigned int m_status;
+    double m_start_time;
+    std::string m_LDO_configuration;
+    MinorServo::SRTMinorServoGregorianCoverStatus m_gregorian_cover_position;
 };
 
 #endif /*_SRTMINORSERVOSETUPTHREAD_H_*/

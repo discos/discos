@@ -9,7 +9,7 @@
     xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
     xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-	xmlns:mng="urn:schemas-cosylab-com:Managment:1.0"
+    xmlns:mng="urn:schemas-cosylab-com:Managment:1.0"
     elementFormDefault="qualified"
     attributeFormDefault="unqualified">
 
@@ -22,7 +22,7 @@
       <xs:restriction base="baci:ROEnum">
        <xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
        <xs:attribute name="graph_max" type="xs:int" use="optional" default="2" />
-       <xs:attribute name="statesDescription" type="xs:string" use="optional" default="OK,WARNING,OFF" />
+       <xs:attribute name="statesDescription" type="xs:string" use="optional" default="DRIVE_CABINET_OK" />
       </xs:restriction>
      </xs:complexContent>
     </xs:complexType>
@@ -32,7 +32,7 @@
       <xs:restriction base="baci:ROEnum">
        <xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
        <xs:attribute name="graph_max" type="xs:int" use="optional" default="5" />
-       <xs:attribute name="statesDescription" type="xs:string" use="optional" default="UNKNOWN_MODE,SETUP,STOW,STOP,PRESET,PROGRAMTRACK" />
+       <xs:attribute name="statesDescription" type="xs:string" use="optional" default="OPERATIVE_MODE_UNKNOWN" />
       </xs:restriction>
      </xs:complexContent>
     </xs:complexType>
@@ -41,14 +41,19 @@
      <xs:complexContent>
       <xs:extension base="baci:CharacteristicComponent">
        <xs:sequence>
-        <xs:element name="enabled" type="baci:ROboolean" />
+        <xs:element name="enabled" type="mng:BooleanType" />
         <xs:element name="drive_cabinet_status" type="SRTMinorServoCabinetStatusType" />
-        <xs:element name="block" type="baci:ROboolean" />
+        <xs:element name="block" type="mng:BooleanType" />
         <xs:element name="operative_mode" type="SRTMinorServoOperativeModeType" />
-        <xs:element name="axes_enabled" type="baci:RObooleanSeq" /> 
+        <xs:element name="physical_axes_enabled" type="baci:RObooleanSeq" /> 
         <xs:element name="physical_positions" type="baci:ROdoubleSeq" /> 
+        <xs:element name="virtual_axes" type="baci:ROlong" /> 
         <xs:element name="virtual_positions" type="baci:ROdoubleSeq" /> 
         <xs:element name="virtual_offsets" type="baci:ROdoubleSeq" /> 
+        <xs:element name="virtual_user_offsets" type="baci:ROdoubleSeq" /> 
+        <xs:element name="virtual_system_offsets" type="baci:ROdoubleSeq" /> 
+        <xs:element name="in_use" type="mng:BooleanType" />
+        <xs:element name="current_setup" type="baci:ROstring" />
        </xs:sequence>
        <xs:attribute name="physical_axes" type="xs:unsignedShort" use="required" />
        <xs:attribute name="virtual_axes" type="xs:unsignedShort" use="required" />

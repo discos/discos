@@ -18,16 +18,20 @@ void SRTProgramTrackMinorServoImpl::programTrack(CORBA::Long trajectory_id, CORB
 
     if(virtual_coordinates.length() != m_virtual_axes)
     {
-        //Wrong number of virtual_coordinates
+        _EXCPT(MinorServoErrors::TrackingErrorExImpl, impl, (m_servo_name + "::programTrack()").c_str());
+        impl.addData("Reason", "Wrong number of values for this servo system!");
+        throw impl;
     }
 
-    std::vector<double> coords(virtual_coordinates.get_buffer(), virtual_coordinates.get_buffer() + virtual_coordinates.length());
+    std::vector<double> coordinates(virtual_coordinates.get_buffer(), virtual_coordinates.get_buffer() + virtual_coordinates.length());
 
-    SRTMinorServoAnswerMap answer = m_socket->sendCommand(SRTMinorServoCommandLibrary::programTrack(m_servo_name, trajectory_id, point_id, coords, start_time));
+    SRTMinorServoAnswerMap answer = m_socket->sendCommand(SRTMinorServoCommandLibrary::programTrack(m_servo_name, trajectory_id, point_id, coordinates, start_time));
 
     if(std::get<std::string>(answer["OUTPUT"]) != "GOOD")
     {
-        std::cout << "Cannot execute programTrack" << std::endl;
+        _EXCPT(MinorServoErrors::CommunicationErrorExImpl, impl, (m_servo_name + "::programTrack()").c_str());
+        impl.setReason("Received NAK in response to a PRESET command!");
+        throw impl;
     }
 }
 

@@ -8,7 +8,7 @@
     xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
     xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-	xmlns:mng="urn:schemas-cosylab-com:Managment:1.0"
+    xmlns:mng="urn:schemas-cosylab-com:Managment:1.0"
     elementFormDefault="qualified"
     attributeFormDefault="unqualified">
 
@@ -21,8 +21,7 @@
       <xs:restriction base="baci:ROEnum">
        <xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
        <xs:attribute name="graph_max" type="xs:int" use="optional" default="13" />
-       <xs:attribute name="statesDescription" type="xs:string" use="optional"
-           default="UNKNOWN_CONFIGURATION,PRIMARY,GREGORIAN_1,GREGORIAN_2,GREGORIAN_3,GREGORIAN_4,GREGORIAN_5,GREGORIAN_6,GREGORIAN_7,GREGORIAN_8,BWG_1,BWG_2,BWG_3,BWG_4" />
+       <xs:attribute name="statesDescription" type="xs:string" use="optional" default="CONFIGURATION_UNKNOWN" />
       </xs:restriction>
      </xs:complexContent>
     </xs:complexType>
@@ -32,7 +31,7 @@
       <xs:restriction base="baci:ROEnum">
        <xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
        <xs:attribute name="graph_max" type="xs:int" use="optional" default="2" />
-       <xs:attribute name="statesDescription" type="xs:string" use="optional" default="UNKNOWN_STATUS,OPEN,CLOSED" />
+       <xs:attribute name="statesDescription" type="xs:string" use="optional" default="COVER_STATUS_UNKNOWN" />
       </xs:restriction>
      </xs:complexContent>
     </xs:complexType>
@@ -42,7 +41,7 @@
       <xs:restriction base="baci:ROEnum">
        <xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
        <xs:attribute name="graph_max" type="xs:int" use="optional" default="1" />
-       <xs:attribute name="statesDescription" type="xs:string" use="optional" default="DISCOS,VBRAIN" />
+       <xs:attribute name="statesDescription" type="xs:string" use="optional" default="CONTROL_DISCOS" />
       </xs:restriction>
      </xs:complexContent>
     </xs:complexType>
@@ -51,17 +50,30 @@
      <xs:complexContent>
       <xs:extension base="baci:CharacteristicComponent">
        <xs:sequence>
+        <xs:element name="status" type="mng:SystemStatusType" />
+        <xs:element name="actualSetup" type="baci:ROstring" />
+        <xs:element name="motionInfo" type="baci:ROstring" />
+        <xs:element name="ready" type="mng:BooleanType" />
+        <xs:element name="starting" type="mng:BooleanType" />
+        <xs:element name="asConfiguration" type="mng:BooleanType" />
+        <xs:element name="elevationTrack" type="mng:BooleanType" />
+        <xs:element name="scanActive" type="mng:BooleanType" />
+        <xs:element name="scanning" type="mng:BooleanType" />
+        <xs:element name="tracking" type="mng:BooleanType" />
+
         <xs:element name="current_configuration" type="SRTMinorServoFocalConfigurationType" />
-        <xs:element name="simulation_enabled" type="baci:ROboolean" />
+        <xs:element name="simulation_enabled" type="mng:BooleanType" />
         <xs:element name="plc_time" type="baci:ROdouble" />
         <xs:element name="plc_version" type="baci:ROstring" />
         <xs:element name="control" type="SRTMinorServoControlStatusType" />
-        <xs:element name="power" type="baci:ROboolean" />
-        <xs:element name="emergency" type="baci:ROboolean" />
+        <xs:element name="power" type="mng:BooleanType" />
+        <xs:element name="emergency" type="mng:BooleanType" />
         <xs:element name="gregorian_cover" type="SRTMinorServoGregorianCoverStatusType" />
         <xs:element name="last_executed_command" type="baci:ROdouble" />
        </xs:sequence>
-       <xs:attribute name="status_thread_period" type="xs:double" use="required"/>
+       <xs:attribute name="status_thread_period" type="xs:double" use="required" />
+       <xs:attribute name="active_surface_configuration" type="xs:string" use="required" />
+       <xs:attribute name="elevation_tracking_enabled" type="xs:string" use="required" />
       </xs:extension>
      </xs:complexContent>
     </xs:complexType>

@@ -26,10 +26,9 @@ CSOURCENAMES = \
 #
 IDL_FILES = SRTMinorServoBoss SRTMinorServo SRTMinorServoCommon
 
-SRTMinorServoCommonStubs_LIBS = baciStubs
-SRTMinorServoStubs_LIBS = baciStubs SRTMinorServoCommonStubs
-SRTMinorServoBossStubs_LIBS = baciStubs SRTMinorServoCommonStubs ComponentErrorsStubs \
-    MinorServoErrorsStubs AntennaDefinitionsStubs MinorServoDefinitionsStubs
+SRTMinorServoCommonStubs_LIBS = baciStubs ManagmentDefinitionsStubs MinorServoDefinitionsStubs ComponentErrorsStubs MinorServoErrorsStubs
+SRTMinorServoStubs_LIBS = SRTMinorServoCommonStubs
+SRTMinorServoBossStubs_LIBS = SRTMinorServoCommonStubs MinorServoBossStubs
 
 #
 # INCLUDE STANDARDS

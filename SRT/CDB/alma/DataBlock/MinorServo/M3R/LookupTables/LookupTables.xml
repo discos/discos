@@ -10,24 +10,9 @@
 	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-    <!-- Primary and gregorian configurations - M3R not used -->
-    <Primario><axis>ROTATION</axis>     <coefficients>0</coefficients></Primario>
-    <Gregoriano1><axis>ROTATION</axis>  <coefficients>0</coefficients></Gregoriano1>
-    <Gregoriano2><axis>ROTATION</axis>  <coefficients>0</coefficients></Gregoriano2>
-    <Gregoriano3><axis>ROTATION</axis>  <coefficients>0</coefficients></Gregoriano3>
-    <Gregoriano4><axis>ROTATION</axis>  <coefficients>0</coefficients></Gregoriano4>
-    <Gregoriano5><axis>ROTATION</axis>  <coefficients>0</coefficients></Gregoriano5>
-    <Gregoriano6><axis>ROTATION</axis>  <coefficients>0</coefficients></Gregoriano6>
-    <Gregoriano7><axis>ROTATION</axis>  <coefficients>0</coefficients></Gregoriano7>
-    <Gregoriano8><axis>ROTATION</axis>  <coefficients>0</coefficients></Gregoriano8>
-
-    <!-- BWG1 -->
-    <BWG1><axis>ROTATION</axis> <coefficients>0</coefficients></BWG1>
-    <!-- BWG2 -->
-    <BWG2><axis>ROTATION</axis> <coefficients>0</coefficients></BWG2>
-    <!-- BWG3 -->
-    <BWG3><axis>ROTATION</axis> <coefficients>0</coefficients></BWG3>
-    <!-- BWG4 -->
-    <BWG4><axis>ROTATION</axis> <coefficients>0</coefficients></BWG4>
+    <CCB>           <axis>ROTATION</axis> <coefficients>0</coefficients></CCB>
+    <CCB_ASACTIVE>  <axis>ROTATION</axis> <coefficients>0</coefficients></CCB_ASACTIVE>
+    <XB>            <axis>ROTATION</axis> <coefficients>0</coefficients></XB>
+    <XB_ASACTIVE>   <axis>ROTATION</axis> <coefficients>0</coefficients></XB_ASACTIVE>
 
 </SRTMinorServoLookupTable>

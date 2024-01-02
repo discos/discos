@@ -23,19 +23,27 @@
 
     <xs:complexType name="SRTMinorServoLookupTableType">
      <xs:sequence>
-      <xs:element name="Primario"       type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
-      <xs:element name="Gregoriano1"    type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
-      <xs:element name="Gregoriano2"    type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
-      <xs:element name="Gregoriano3"    type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
-      <xs:element name="Gregoriano4"    type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
-      <xs:element name="Gregoriano5"    type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
-      <xs:element name="Gregoriano6"    type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
-      <xs:element name="Gregoriano7"    type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
-      <xs:element name="Gregoriano8"    type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
-      <xs:element name="BWG1"           type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
-      <xs:element name="BWG2"           type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
-      <xs:element name="BWG3"           type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
-      <xs:element name="BWG4"           type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="LLP"                type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="PPP"                type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="PLP"                type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="HHP"                type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="XKP"                type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="CCG"                type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="CCG_ASACTIVE"       type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="KKG"                type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="KKG_ASACTIVE"       type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="WWG"                type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="WWG_ASACTIVE"       type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="QQG"                type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="QQG_ASACTIVE"       type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="TRI"                type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="TRI_ASACTIVE"       type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="MISTRAL"            type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="MISTRAL_ASACTIVE"   type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="CCB"                type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="CCB_ASACTIVE"       type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="XB"                 type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="XB_ASACTIVE"        type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
      </xs:sequence>
     </xs:complexType>
 

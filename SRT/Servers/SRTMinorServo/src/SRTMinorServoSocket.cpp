@@ -10,9 +10,9 @@ SRTMinorServoSocket& SRTMinorServoSocket::getInstance(std::string ip_address, in
     {
         if(m_instance->m_address != ip_address && m_instance->m_port != port)
         {
-            ComponentErrors::SocketErrorExImpl exImpl(__FILE__, __LINE__, "SRTMinorServoSocket::getInstance(std::string, int)");
-            exImpl.addData("Reason", "Socket already open on '" + m_instance->m_address + ":" + std::to_string(m_instance->m_port) + "' . Use getInstance() (no arguments) to retrieve the object.");
-            throw exImpl;
+            _EXCPT(ComponentErrors::SocketErrorExImpl, impl, "SRTMinorServoSocket::getInstance(std::string, int)");
+            impl.addData("Reason", "Socket already open on '" + m_instance->m_address + ":" + std::to_string(m_instance->m_port) + "' . Use getInstance() (no arguments) to retrieve the object.");
+            throw impl;
         }
     }
     else
@@ -28,9 +28,9 @@ SRTMinorServoSocket& SRTMinorServoSocket::getInstance()
 
     if(m_instance == nullptr)
     {
-        ComponentErrors::SocketErrorExImpl exImpl(__FILE__, __LINE__, "SRTMinorServoSocket::getInstance()");
-        exImpl.addData("Reason", "Socket not yet initialized. Use getInstance(std::string ip_address, int port) to initialize it and retrieve the object.");
-        throw exImpl;
+        _EXCPT(ComponentErrors::SocketErrorExImpl, impl, "SRTMinorServoSocket::getInstance()");
+        impl.addData("Reason", "Socket not yet initialized. Use getInstance(std::string ip_address, int port) to initialize it and retrieve the object.");
+        throw impl;
     }
     return *m_instance;
 }
@@ -49,27 +49,27 @@ SRTMinorServoSocket::SRTMinorServoSocket(std::string ip_address, int port, doubl
     if(Create(m_error, STREAM) == FAIL)
     {
         Close(m_error);
-        ComponentErrors::SocketErrorExImpl exImpl(__FILE__, __LINE__, "SRTMinorServoSocket::SRTMinorServoSocket()");
-        exImpl.addData("Reason", "Cannot create the socket.");
-        throw exImpl;
+        _EXCPT(ComponentErrors::SocketErrorExImpl, impl, "SRTMinorServoSocket::SRTMinorServoSocket()");
+        impl.addData("Reason", "Cannot create the socket.");
+        throw impl;
     }
 
     if(Connect(m_error, ip_address.c_str(), port) == FAIL)
     {
         m_socket_status = TOUT;
         Close(m_error);
-        ComponentErrors::SocketErrorExImpl exImpl(__FILE__, __LINE__, "SRTMinorServoSocket::SRTMinorServoSocket()");
-        exImpl.addData("Reason", "Cannot connect the socket.");
-        throw exImpl;
+        _EXCPT(ComponentErrors::SocketErrorExImpl, impl, "SRTMinorServoSocket::SRTMinorServoSocket()");
+        impl.addData("Reason", "Cannot connect the socket.");
+        throw impl;
     }
 
     if(setSockMode(m_error, NONBLOCKING) != SUCCESS)
     {
         m_socket_status = NOTRDY;
         Close(m_error);
-        ComponentErrors::SocketErrorExImpl exImpl(__FILE__, __LINE__, "SRTMinorServoSocket::SRTMinorServoSocket()");
-        exImpl.addData("Reason", "Cannot set the socket to non-blocking.");
-        throw exImpl;
+        _EXCPT(ComponentErrors::SocketErrorExImpl, impl, "SRTMinorServoSocket::SRTMinorServoSocket()");
+        impl.addData("Reason", "Cannot set the socket to non-blocking.");
+        throw impl;
     }
 
     m_address = ip_address;
@@ -104,9 +104,9 @@ SRTMinorServoAnswerMap SRTMinorServoSocket::sendCommand(std::string command, std
         {
             m_socket_status = TOUT;
             Close(m_error);
-            ComponentErrors::SocketErrorExImpl exImpl(__FILE__, __LINE__, "SRTMinorServoSocket::sendCommand()");
-            exImpl.addData("Reason", "Timeout when sending command.");
-            throw exImpl;
+            _EXCPT(ComponentErrors::SocketErrorExImpl, impl, "SRTMinorServoSocket::sendCommand()");
+            impl.addData("Reason", "Timeout when sending command.");
+            throw impl;
         }
     }
 
@@ -127,9 +127,9 @@ SRTMinorServoAnswerMap SRTMinorServoSocket::sendCommand(std::string command, std
         {
             m_socket_status = TOUT;
             Close(m_error);
-            ComponentErrors::SocketErrorExImpl exImpl(__FILE__, __LINE__, "SRTMinorServoSocket::sendCommand()");
-            exImpl.addData("Reason", "Timeout when receiving answer.");
-            throw exImpl;
+            _EXCPT(ComponentErrors::SocketErrorExImpl, impl, "SRTMinorServoSocket::sendCommand()");
+            impl.addData("Reason", "Timeout when receiving answer.");
+            throw impl;
         }
     }
     SRTMinorServoAnswerMap map_answer = SRTMinorServoCommandLibrary::parseAnswer(answer);
@@ -158,18 +158,18 @@ SRTMinorServoSocketConfiguration::SRTMinorServoSocketConfiguration(maci::Contain
     IRA::CString _ip_address;
     if(!IRA::CIRATools::getDBValue(containerServices, "IPAddress", _ip_address, CONFIG_DOMAIN, CONFIG_DIRNAME))
     {
-        ComponentErrors::CDBAccessExImpl exImpl(__FILE__, __LINE__, "SRTMinorServoSocketConfiguration()");
-        exImpl.setFieldName("IPAddress");
-        throw exImpl;
+        _EXCPT(ComponentErrors::CDBAccessExImpl, impl, "SRTMinorServoSocketConfiguration::SRTMinorServoSocketConfiguration()");
+        impl.setFieldName("IPAddress");
+        throw impl;
     }
     m_ip_address = (std::string)_ip_address;
 
     DWORD port;
     if(!IRA::CIRATools::getDBValue(containerServices, "Port", port, CONFIG_DOMAIN, CONFIG_DIRNAME))
     {
-        ComponentErrors::CDBAccessExImpl exImpl(__FILE__, __LINE__, "SRTMinorServoSocketConfiguration()");
-        exImpl.setFieldName("Port");
-        throw exImpl;
+        _EXCPT(ComponentErrors::CDBAccessExImpl, impl, "SRTMinorServoSocketConfiguration::SRTMinorServoSocketConfiguration()");
+        impl.setFieldName("Port");
+        throw impl;
     }
     else
     {
@@ -178,9 +178,9 @@ SRTMinorServoSocketConfiguration::SRTMinorServoSocketConfiguration(maci::Contain
 
     if(!IRA::CIRATools::getDBValue(containerServices, "SocketTimeout", m_timeout, CONFIG_DOMAIN, CONFIG_DIRNAME))
     {
-        ComponentErrors::CDBAccessExImpl exImpl(__FILE__, __LINE__, "SRTMinorServoSocketConfiguration()");
-        exImpl.setFieldName("SocketTimeout");
-        throw exImpl;
+        _EXCPT(ComponentErrors::CDBAccessExImpl, impl, "SRTMinorServoSocketConfiguration::SRTMinorServoSocketConfiguration()");
+        impl.setFieldName("SocketTimeout");
+        throw impl;
     }
 }
 

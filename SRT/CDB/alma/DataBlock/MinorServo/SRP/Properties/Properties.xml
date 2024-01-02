@@ -10,12 +10,12 @@
 	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-    <axes_enabled><property_name>Z1_ENABLED</property_name></axes_enabled>
-    <axes_enabled><property_name>Z2_ENABLED</property_name></axes_enabled>
-    <axes_enabled><property_name>Z3_ENABLED</property_name></axes_enabled>
-    <axes_enabled><property_name>Y1_ENABLED</property_name></axes_enabled>
-    <axes_enabled><property_name>Y2_ENABLED</property_name></axes_enabled>
-    <axes_enabled><property_name>X1_ENABLED</property_name></axes_enabled>
+    <physical_axes_enabled><property_name>Z1_ENABLED</property_name></physical_axes_enabled>
+    <physical_axes_enabled><property_name>Z2_ENABLED</property_name></physical_axes_enabled>
+    <physical_axes_enabled><property_name>Z3_ENABLED</property_name></physical_axes_enabled>
+    <physical_axes_enabled><property_name>Y1_ENABLED</property_name></physical_axes_enabled>
+    <physical_axes_enabled><property_name>Y2_ENABLED</property_name></physical_axes_enabled>
+    <physical_axes_enabled><property_name>X1_ENABLED</property_name></physical_axes_enabled>
 
     <physical_positions><property_name>ELONG_Z1</property_name></physical_positions>
     <physical_positions><property_name>ELONG_Z2</property_name></physical_positions>

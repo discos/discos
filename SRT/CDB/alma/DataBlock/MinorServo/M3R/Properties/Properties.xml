@@ -10,8 +10,8 @@
 	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-    <axes_enabled><property_name>CLOCKWISE_ENABLED</property_name></axes_enabled>
-    <axes_enabled><property_name>COUNTERCLOCKWISE_ENABLED</property_name></axes_enabled>
+    <physical_axes_enabled><property_name>CLOCKWISE_ENABLED</property_name></physical_axes_enabled>
+    <physical_axes_enabled><property_name>COUNTERCLOCKWISE_ENABLED</property_name></physical_axes_enabled>
 
     <physical_positions><property_name>CLOCKWISE</property_name></physical_positions>
     <physical_positions><property_name>COUNTERCLOCKWISE</property_name></physical_positions>

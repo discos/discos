@@ -6,25 +6,22 @@ SRTMinorServoBossCore::SRTMinorServoBossCore(SRTMinorServoBossImpl* component)
 {
     AUTO_TRACE("SRTMinorServoBossCore::SRTMinorServoBossCore()");
 
-    m_boss_status = MinorServo::BOSS_STATUS_UNCONFIGURED;
-
-    m_current_configuration = MinorServo::CONFIGURATION_UNKNOWN;
-    m_requested_configuration = MinorServo::CONFIGURATION_UNKNOWN;
-    m_focal_configurations_table.insert(SRTMinorServoFocalConfigurationsTable::value_type("Primario", MinorServo::CONFIGURATION_PRIMARY));
-    m_focal_configurations_table.insert(SRTMinorServoFocalConfigurationsTable::value_type("Gregoriano1", MinorServo::CONFIGURATION_GREGORIAN1));
-    m_focal_configurations_table.insert(SRTMinorServoFocalConfigurationsTable::value_type("Gregoriano2", MinorServo::CONFIGURATION_GREGORIAN2));
-    m_focal_configurations_table.insert(SRTMinorServoFocalConfigurationsTable::value_type("Gregoriano3", MinorServo::CONFIGURATION_GREGORIAN3));
-    m_focal_configurations_table.insert(SRTMinorServoFocalConfigurationsTable::value_type("Gregoriano4", MinorServo::CONFIGURATION_GREGORIAN4));
-    m_focal_configurations_table.insert(SRTMinorServoFocalConfigurationsTable::value_type("Gregoriano5", MinorServo::CONFIGURATION_GREGORIAN5));
-    m_focal_configurations_table.insert(SRTMinorServoFocalConfigurationsTable::value_type("Gregoriano6", MinorServo::CONFIGURATION_GREGORIAN6));
-    m_focal_configurations_table.insert(SRTMinorServoFocalConfigurationsTable::value_type("Gregoriano7", MinorServo::CONFIGURATION_GREGORIAN7));
-    m_focal_configurations_table.insert(SRTMinorServoFocalConfigurationsTable::value_type("Gregoriano8", MinorServo::CONFIGURATION_GREGORIAN8));
-    m_focal_configurations_table.insert(SRTMinorServoFocalConfigurationsTable::value_type("BWG1", MinorServo::CONFIGURATION_BWG1));
-    m_focal_configurations_table.insert(SRTMinorServoFocalConfigurationsTable::value_type("BWG2", MinorServo::CONFIGURATION_BWG2));
-    m_focal_configurations_table.insert(SRTMinorServoFocalConfigurationsTable::value_type("BWG3", MinorServo::CONFIGURATION_BWG3));
-    m_focal_configurations_table.insert(SRTMinorServoFocalConfigurationsTable::value_type("BWG4", MinorServo::CONFIGURATION_BWG4));
-
     m_component = component;
+
+    m_motion_status = MinorServo::MOTION_STATUS_UNCONFIGURED;
+    m_actual_setup = "Unknown";
+    m_commanded_setup = "Unknown";
+    m_commanded_configuration = MinorServo::CONFIGURATION_UNKNOWN;
+
+    m_subsystem_status = Management::MNG_WARNING;
+    m_ready = Management::MNG_FALSE;
+    m_starting = Management::MNG_FALSE;
+    m_as_configuration = Management::MNG_FALSE;
+    m_elevation_tracking = Management::MNG_FALSE;
+    m_elevation_tracking_enabled = Management::MNG_FALSE;
+    m_scan_active = Management::MNG_FALSE;
+    m_scanning = Management::MNG_FALSE;
+    m_tracking = Management::MNG_FALSE;
 
     m_socket_configuration = &SRTMinorServoSocketConfiguration::getInstance(m_component->getContainerServices());
     m_socket = &SRTMinorServoSocket::getInstance(m_socket_configuration->m_ip_address, m_socket_configuration->m_port, m_socket_configuration->m_timeout);
@@ -33,16 +30,17 @@ SRTMinorServoBossCore::SRTMinorServoBossCore(SRTMinorServoBossImpl* component)
     m_socket->sendCommand(SRTMinorServoCommandLibrary::status(), m_status);
     m_status_secure_area = new IRA::CSecureArea<SRTMinorServoAnswerMap>(&m_status);
 
-    m_GFR = m_component->getContainerServices()->getComponent<MinorServo::SRTGenericMinorServo>("MINORSERVO/GFR");
-    m_SRP = m_component->getContainerServices()->getComponent<MinorServo::SRTProgramTrackMinorServo>("MINORSERVO/SRP");
-
-    m_servos.push_back((MinorServo::SRTBaseMinorServo_ptr)m_GFR);
-    m_servos.push_back((MinorServo::SRTBaseMinorServo_ptr)m_SRP);
+    // Retrieve the minor servos components
+    m_tracking_servos["PFP"] = m_component->getContainerServices()->getComponent<MinorServo::SRTProgramTrackMinorServo>("MINORSERVO/PFP");
+    m_tracking_servos["SRP"] = m_component->getContainerServices()->getComponent<MinorServo::SRTProgramTrackMinorServo>("MINORSERVO/SRP");
+    m_servos["PFP"] = (MinorServo::SRTBaseMinorServo_ptr)m_tracking_servos["PFP"];
+    m_servos["SRP"] = (MinorServo::SRTBaseMinorServo_ptr)m_tracking_servos["SRP"];
+    m_servos["GFR"] = (MinorServo::SRTBaseMinorServo_ptr)m_component->getContainerServices()->getComponent<MinorServo::SRTGenericMinorServo>("MINORSERVO/GFR");
+    m_servos["M3R"] = (MinorServo::SRTBaseMinorServo_ptr)m_component->getContainerServices()->getComponent<MinorServo::SRTGenericMinorServo>("MINORSERVO/M3R");
 
     m_setup_thread = NULL;
     m_park_thread = NULL;
-
-    m_ready = false;
+    m_tracking_thread = NULL;
 }
 
 SRTMinorServoBossCore::~SRTMinorServoBossCore()
@@ -61,57 +59,76 @@ SRTMinorServoBossCore::~SRTMinorServoBossCore()
         m_park_thread->terminate();
         m_component->getContainerServices()->getThreadManager()->destroy(m_park_thread);
     }
+    if(m_tracking_thread != NULL)
+    {
+        m_tracking_thread->suspend();
+        m_tracking_thread->terminate();
+        m_component->getContainerServices()->getThreadManager()->destroy(m_tracking_thread);
+    }
 }
 
-void SRTMinorServoBossCore::setup(std::string configuration)
+void SRTMinorServoBossCore::setup(std::string commanded_setup)
 {
     AUTO_TRACE("SRTMinorServoBossCore::setup()");
 
-    ACSErr::Completion_var comp;
+    checkControl();
+    checkEmergency();
 
-    if(!checkControl() || m_component->emergency()->get_sync(comp.out()))
-    {
-        // Minor servos are controlled by VBrain or there is an emergency button pressed somewhere
-        // I raise OperationNotPermitted since there is no other, more fitting error
-		_THROW_EXCPT(MinorServoErrors::OperationNotPermittedExImpl, "SRTMinorServoBossCore::setup()");
-    }
+    std::transform(commanded_setup.begin(), commanded_setup.end(), commanded_setup.begin(), ::toupper);
 
-    MinorServo::SRTMinorServoFocalConfiguration requested_configuration;
+    std::pair<MinorServo::SRTMinorServoFocalConfiguration, bool> cmd_configuration;
+    MinorServo::SRTMinorServoFocalConfiguration commanded_configuration;
 
     try
     {
-        requested_configuration = m_focal_configurations_table.left.at(configuration);
+        cmd_configuration = MinorServo::DiscosConfigurationNameTable.at(commanded_setup);
+        commanded_configuration = cmd_configuration.first;
+        if(m_as_configuration == Management::MNG_TRUE && cmd_configuration.second)
+        {
+            commanded_setup += "_ASACTIVE";
+        }
     }
     catch(std::out_of_range& ex)  // Unknown configuration
     {
-		_THROW_EXCPT(MinorServoErrors::ConfigurationErrorExImpl, "SRTMinorServoBossCore::setup()");
+        _EXCPT(MinorServoErrors::ConfigurationErrorExImpl, impl, "SRTMinorServoBossCore::setup()");
+        throw impl;
     }
 
-    // Exit if commanded configuration is already in place
-    if(requested_configuration == m_current_configuration && (m_boss_status == MinorServo::BOSS_STATUS_CONFIGURED || m_boss_status == MinorServo::BOSS_STATUS_SETUP_IN_PROGRESS))
+    // Exit if commanded setup is already in place or is about to be
+    if(commanded_configuration == m_commanded_configuration && commanded_setup == m_commanded_setup)
     {
-        return;
+        if(m_motion_status == MinorServo::MOTION_STATUS_CONFIGURING || m_motion_status == MinorServo::MOTION_STATUS_CONFIGURED || m_motion_status == MinorServo::MOTION_STATUS_TRACKING)
+        {
+            return;
+        }
     }
 
-    m_requested_configuration = requested_configuration;
+    m_commanded_configuration = commanded_configuration;
+    m_commanded_setup = commanded_setup;
 
     // Stop the setup and park threads if running
-    if(m_setup_thread != NULL)
+    if(m_setup_thread != NULL && m_setup_thread->isAlive())
     {
-        m_setup_thread->suspend();
-        m_setup_thread->terminate();
+        m_setup_thread->setStopped();
     }
-    if(m_park_thread != NULL)
+    if(m_park_thread != NULL && m_park_thread->isAlive())
     {
-        m_park_thread->suspend();
-        m_park_thread->terminate();
+        m_park_thread->setStopped();
+    }
+    if(m_tracking_thread != NULL && m_tracking_thread->isAlive())
+    {
+        m_tracking_thread->setStopped();
     }
 
-    m_current_configuration = MinorServo::CONFIGURATION_UNKNOWN;
-    m_boss_status = MinorServo::BOSS_STATUS_SETUP_IN_PROGRESS;
+    m_actual_setup = "";
+    m_ready = Management::MNG_FALSE;
+    m_starting = Management::MNG_TRUE;
+    m_tracking = Management::MNG_FALSE;
+    m_motion_status = MinorServo::MOTION_STATUS_CONFIGURING;
+    m_subsystem_status = Management::MNG_WARNING;
 
     // Send the STOP command to each servo
-    for(auto& servo : m_servos)
+    for(const auto& [name, servo] : m_servos)
     {
         servo->stop();
     }
@@ -129,7 +146,12 @@ void SRTMinorServoBossCore::setup(std::string configuration)
         }
         catch(acsthreadErrType::acsthreadErrTypeExImpl& ex)
         {
-            _THROW_EXCPT(ComponentErrors::ThreadErrorExImpl, "SRTMinorServoBossImpl::setup()");
+            m_starting = Management::MNG_FALSE;
+            m_motion_status = MinorServo::MOTION_STATUS_ERROR;
+            m_subsystem_status = Management::MNG_FAILURE;
+            _EXCPT(ComponentErrors::CanNotStartThreadExImpl, impl, "SRTMinorServoBossCore::setup()");
+            impl.setThreadName("SRTMinorServoSetupThread");
+            throw impl;
         }
 
         m_setup_thread->resume();
@@ -140,40 +162,54 @@ void SRTMinorServoBossCore::park()
 {
     AUTO_TRACE("SRTMinorServoBossCore::park()");
 
-    ACSErr::Completion_var comp;
+    checkControl();
+    checkEmergency();
 
-    if(!checkControl() || m_component->emergency()->get_sync(comp.out()))
+    // Exit if the system is already parked or is about to be
+    if(m_commanded_configuration == MinorServo::CONFIGURATION_PARK)
     {
-        // Minor servos are controlled by VBrain or there is an emergency button pressed somewhere
-        // I raise OperationNotPermitted since there is no other, more fitting error
-		_THROW_EXCPT(MinorServoErrors::OperationNotPermittedExImpl, "SRTMinorServoBossCore::setup()");
+        if(m_motion_status == MinorServo::MOTION_STATUS_CONFIGURING || m_motion_status == MinorServo::MOTION_STATUS_PARK)
+        {
+            return;
+        }
     }
 
-    m_requested_configuration = MinorServos::CONFIGURATION_PARK;
+    m_commanded_configuration = MinorServo::CONFIGURATION_PARK;
+    m_commanded_setup = "Park";
 
     // Stop the setup and park threads if running
-    if(m_setup_thread != NULL)
+    if(m_setup_thread != NULL && m_setup_thread->isAlive())
     {
-        m_setup_thread->suspend();
-        m_setup_thread->terminate();
+        m_setup_thread->setStopped();
     }
-    if(m_park_thread != NULL)
+    if(m_park_thread != NULL && m_park_thread->isAlive())
     {
-        m_park_thread->suspend();
-        m_park_thread->terminate();
+        m_park_thread->setStopped();
+    }
+    if(m_tracking_thread != NULL && m_tracking_thread->isAlive())
+    {
+        m_tracking_thread->setStopped();
     }
 
-    m_current_configuration = MinorServo::CONFIGURATION_UNKNOWN;
-    m_boss_status = MinorServo::BOSS_STATUS_PARK_IN_PROGRESS;
+    m_actual_setup = "";
+    m_ready = Management::MNG_FALSE;
+    m_starting = Management::MNG_TRUE;
+    m_tracking = Management::MNG_FALSE;
+    m_motion_status = MinorServo::MOTION_STATUS_CONFIGURING;
+    m_subsystem_status = Management::MNG_WARNING;
 
     // Send the STOW command to the gregorian cover
     if(std::get<std::string>(m_socket->sendCommand(SRTMinorServoCommandLibrary::stow("GREGORIAN_CAP", 2))["OUTPUT"]) != "GOOD")
     {
-        _THROW_EXCPT(MinorServoErrors::SetupErrorExImpl, "SRTMinorServoBossCore::park()");
+        m_starting = Management::MNG_FALSE;
+        m_motion_status = MinorServo::MOTION_STATUS_ERROR;
+        m_subsystem_status = Management::MNG_FAILURE;
+        _EXCPT(MinorServoErrors::SetupErrorExImpl, impl, "SRTMinorServoBossCore::park()");
+        throw impl;
     }
 
     // Send the STOP command to each servo
-    for(auto& servo : m_servos)
+    for(const auto& [name, servo] : m_servos)
     {
         servo->stop();
     }
@@ -191,10 +227,62 @@ void SRTMinorServoBossCore::park()
         }
         catch(acsthreadErrType::acsthreadErrTypeExImpl& ex)
         {
-            _THROW_EXCPT(ComponentErrors::ThreadErrorExImpl, "SRTMinorServoBossImpl::park()");
+            m_starting = Management::MNG_FALSE;
+            m_motion_status = MinorServo::MOTION_STATUS_ERROR;
+            m_subsystem_status = Management::MNG_FAILURE;
+            _EXCPT(ComponentErrors::CanNotStartThreadExImpl, impl, "SRTMinorServoBossCore::park()");
+            impl.setThreadName("SRTMinorServoParkThread");
+            throw impl;
         }
 
         m_park_thread->resume();
+    }
+}
+
+void SRTMinorServoBossCore::setElevationTracking(std::string configuration)
+{
+    AUTO_TRACE("SRTMinorServoBossCore::setElevationTracking()");
+    std::transform(configuration.begin(), configuration.end(), configuration.begin(), ::toupper);
+
+    if(configuration == "ON")
+    {
+        m_elevation_tracking_enabled = Management::MNG_TRUE;
+    }
+    else if(configuration == "OFF")
+    {
+        m_elevation_tracking_enabled = Management::MNG_FALSE;
+    }
+    else
+    {
+        _EXCPT(MinorServoErrors::ConfigurationErrorExImpl, impl, "SRTMinorServoBossCore::setElevationTracking()");
+        throw impl;
+    }
+}
+
+void SRTMinorServoBossCore::setASConfiguration(std::string configuration)
+{
+    AUTO_TRACE("SRTMinorServoBossCore::setASConfiguration()");
+    std::transform(configuration.begin(), configuration.end(), configuration.begin(), ::toupper);
+
+    if(configuration == "ON")
+    {
+        m_as_configuration = Management::MNG_TRUE;
+    }
+    else if(configuration == "OFF")
+    {
+        m_as_configuration = Management::MNG_FALSE;
+    }
+    else
+    {
+        _EXCPT(MinorServoErrors::ConfigurationErrorExImpl, impl, "SRTMinorServoBossCore::setASConfiguration()");
+        throw impl;
+    }
+
+    // Should reload the correct setup if the system was already configured
+    if(!m_actual_setup.empty())
+    {
+        configuration = m_actual_setup.substr(0, m_actual_setup.find("_"));
+        setup(configuration);
     }
 }
 
@@ -206,8 +294,308 @@ void SRTMinorServoBossCore::status()
     m_socket->sendCommand(SRTMinorServoCommandLibrary::status(), m_status);
 }
 
-bool SRTMinorServoBossCore::checkControl()
+void SRTMinorServoBossCore::preset(double elevation)  // Elevation is expressed in degrees
+{
+    AUTO_TRACE("SRTMinorServoBossCore::preset()");
+
+    checkControl();
+    checkEmergency();
+
+    if(m_ready == Management::MNG_FALSE)
+    {
+        _EXCPT(MinorServoErrors::PositioningErrorExImpl, impl, "SRTMinorServoBossCore::preset()");
+        throw impl;
+    }
+
+    ACSErr::Completion_var comp;
+
+    for(const auto& [name, servo] : m_servos)
+    {
+        std::vector<double> coordinates;
+
+        if(servo->in_use()->get_sync(comp.out()) == Management::MNG_TRUE)
+        {
+            servo->preset(*servo->calcCoordinates(elevation));
+        }
+    }
+}
+
+void SRTMinorServoBossCore::clearUserOffsets(std::string servo_name)
+{
+    AUTO_TRACE("SRTMinorServoBossCore::clearUserOffsets()");
+
+    checkControl();
+    checkEmergency();
+
+    std::transform(servo_name.begin(), servo_name.end(), servo_name.begin(), ::toupper);
+
+    try
+    {
+        m_servos.at(servo_name)->clearUserOffsets();
+    }
+    catch(std::out_of_range& ex)
+    {
+        _EXCPT(MinorServoErrors::OffsetErrorExImpl, impl, "SRTMinorServoBossCore::clearUserOffsets()");
+        throw impl;
+    }
+}
+
+void SRTMinorServoBossCore::setUserOffset(std::string servo_axis_name, double offset)
+{
+    AUTO_TRACE("SRTMinorServoBossCore::setUserOffset()");
+
+    checkControl();
+    checkEmergency();
+
+    std::transform(servo_axis_name.begin(), servo_axis_name.end(), servo_axis_name.begin(), ::toupper);
+
+    std::stringstream ss(servo_axis_name);
+    std::string servo_name, axis_name;
+    std::getline(ss, servo_name, '_');
+    ss >> axis_name;
+
+    try
+    {
+        m_servos.at(servo_name)->setUserOffset(axis_name.c_str(), offset);
+    }
+    catch(std::out_of_range& ex)
+    {
+        _EXCPT(MinorServoErrors::OffsetErrorExImpl, impl, "SRTMinorServoBossCore::setUserOffsets()");
+        throw impl;
+    }
+}
+
+std::vector<double> SRTMinorServoBossCore::getUserOffsets()
+{
+    AUTO_TRACE("SRTMinorServoBossCore::getUserOffsets()");
+
+    std::vector<double> user_offsets;
+
+    ACSErr::Completion_var comp;
+    for(const auto& servo_name : MinorServo::ServoOrder)
+    {
+        auto servo = m_servos.at(servo_name);
+        if(servo->in_use()->get_sync(comp.out()) == Management::MNG_TRUE)
+        {
+            ACS::doubleSeq* servo_offsets = servo->getUserOffsets();
+            std::vector<double> offsets(servo_offsets->get_buffer(), servo_offsets->get_buffer() + servo_offsets->length());
+            user_offsets.insert(user_offsets.end(), offsets.begin(), offsets.end());
+        }
+    }
+
+    return user_offsets;
+}
+
+void SRTMinorServoBossCore::clearSystemOffsets(std::string servo_name)
+{
+    AUTO_TRACE("SRTMinorServoBossCore::clearSystemOffsets()");
+
+    checkControl();
+    checkEmergency();
+
+    std::transform(servo_name.begin(), servo_name.end(), servo_name.begin(), ::toupper);
+
+    try
+    {
+        m_servos.at(servo_name)->clearSystemOffsets();
+    }
+    catch(std::out_of_range& ex)
+    {
+        _EXCPT(MinorServoErrors::OffsetErrorExImpl, impl, "SRTMinorServoBossCore::clearSystemOffsets()");
+        throw impl;
+    }
+}
+
+void SRTMinorServoBossCore::setSystemOffset(std::string servo_axis_name, double offset)
+{
+    AUTO_TRACE("SRTMinorServoBossCore::setSystemOffset()");
+
+    checkControl();
+    checkEmergency();
+
+    std::transform(servo_axis_name.begin(), servo_axis_name.end(), servo_axis_name.begin(), ::toupper);
+
+    std::stringstream ss(servo_axis_name);
+    std::string servo_name, axis_name;
+    std::getline(ss, servo_name, '_');
+    ss >> axis_name;
+
+    try
+    {
+        m_servos.at(servo_name)->setSystemOffset(axis_name.c_str(), offset);
+    }
+    catch(std::out_of_range& ex)
+    {
+        _EXCPT(MinorServoErrors::OffsetErrorExImpl, impl, "SRTMinorServoBossCore::setSystemOffsets()");
+        throw impl;
+    }
+}
+
+std::vector<double> SRTMinorServoBossCore::getSystemOffsets()
+{
+    AUTO_TRACE("SRTMinorServoBossCore::getSystemOffsets()");
+
+    std::vector<double> system_offsets;
+
+    ACSErr::Completion_var comp;
+    for(const auto& servo_name : MinorServo::ServoOrder)
+    {
+        auto servo = m_servos.at(servo_name);
+        if(servo->in_use()->get_sync(comp.out()) == Management::MNG_TRUE)
+        {
+            ACS::doubleSeq* servo_offsets = servo->getSystemOffsets();
+            std::vector<double> offsets(servo_offsets->get_buffer(), servo_offsets->get_buffer() + servo_offsets->length());
+            system_offsets.insert(system_offsets.end(), offsets.begin(), offsets.end());
+        }
+    }
+
+    return system_offsets;
+}
+
+void SRTMinorServoBossCore::getAxesInfo(ACS::stringSeq_out axes_names, ACS::stringSeq_out axes_units)
+{
+    AUTO_TRACE("SRTMinorServoBossCore::getAxesInfo()");
+
+    std::vector<std::string> axes_names_vector, axes_units_vector;
+
+    unsigned int length = 0;
+    ACS::stringSeq_var axes_names_var = new ACS::stringSeq;
+    ACS::stringSeq_var axes_units_var = new ACS::stringSeq;
+
+    ACSErr::Completion_var comp;
+    for(const auto& servo_name : MinorServo::ServoOrder)
+    {
+        auto servo = m_servos.at(servo_name);
+        if(servo->in_use()->get_sync(comp.out()) == Management::MNG_TRUE)
+        {
+            ACS::stringSeq_var servo_axes_names;
+            ACS::stringSeq_var servo_axes_units;
+            servo->getAxesInfo(servo_axes_names, servo_axes_units);
+
+            unsigned int index = length;
+            unsigned int servo_length = (unsigned int)servo->virtual_axes()->get_sync(comp.out());
+            length += servo_length;
+            axes_names_var->length(length);
+            axes_units_var->length(length);
+
+            for(size_t i = 0; i < servo_length; i++, index++)
+            {
+                axes_names_var[index] = std::string(servo_name + "_" + (const char*)servo_axes_names[i]).c_str();
+                axes_units_var[index] = servo_axes_units[i];
+            }
+        }
+    }
+
+    axes_names = axes_names_var._retn();
+    axes_units = axes_units_var._retn();
+}
+
+bool SRTMinorServoBossCore::checkScan(const ACS::Time start_time, const MinorServo::MinorServoScan& scan_info, const Antenna::TRunTimeParameters& antenna_info, MinorServo::TRunTimeParameters_out ms_parameters)
+{
+    AUTO_TRACE("SRTMinorServoBossCore::checkScan()");
+
+    checkControl();
+    checkEmergency();
+
+    std::cout << "checkScan" << std::endl << std::endl;
+    std::cout << "now: " << CIRATools::getUNIXEpoch() << std::endl;
+
+    std::cout << "Scan info:" << std::endl;
+    std::cout << "start time: " << CIRATools::ACSTime2UNIXEpoch(start_time) << std::endl;
+    std::cout << "empty: " << std::boolalpha << scan_info.is_empty_scan << std::endl;
+    std::cout << "span: " << scan_info.range << std::endl;
+    std::cout << "total time: " << (int)scan_info.total_time << std::endl;
+    std::cout << "axis code: " << std::string(scan_info.axis_code) << std::endl << std::endl;
+
+    std::cout << "Antenna info:" << std::endl;
+    std::cout << "target name: " << std::string(antenna_info.targetName) << std::endl;
+    std::cout << "azimuth: " << antenna_info.azimuth << std::endl;
+    std::cout << "elevation: " << antenna_info.elevation << std::endl;
+    std::cout << "right ascension: " << antenna_info.rightAscension << std::endl;
+    std::cout << "declination: " << antenna_info.declination << std::endl;
+    std::cout << "start time: " << CIRATools::ACSTime2UNIXEpoch(antenna_info.startEpoch) << std::endl;
+    std::cout << "on the fly: " << std::boolalpha << antenna_info.onTheFly << std::endl;
+    std::cout << "slewing time: " << antenna_info.slewingTime << std::endl;
+    std::cout << "azimuth section: " << antenna_info.section << std::endl;
+    std::cout << "scan axis: " << antenna_info.axis << std::endl;
+    std::cout << "stop time: " << CIRATools::ACSTime2UNIXEpoch(antenna_info.timeToStop) << std::endl;
+
+    MinorServo::TRunTimeParameters_var ms_param_var = new MinorServo::TRunTimeParameters;
+    ms_param_var->onTheFly = false;
+    ms_param_var->startEpoch = 0;
+    ms_param_var->centerScan = 0;
+    ms_param_var->scanAxis = CORBA::string_dup("");
+    ms_param_var->timeToStop = 0;
+    ms_parameters = ms_param_var._retn();
+
+    if(scan_info.is_empty_scan && m_ready == Management::MNG_FALSE)
+    {
+        return true;
+    }
+
+    return true;
+}
+
+void SRTMinorServoBossCore::startScan(ACS::Time& start_time, const MinorServo::MinorServoScan& scan_info, const Antenna::TRunTimeParameters& antenna_info)
+{
+    AUTO_TRACE("SRTMinorServoBossCore::startScan()");
+
+    checkControl();
+    checkEmergency();
+
+    std::cout << "startScan" << std::endl;
+
+    // Start the tracking thread
+    if(m_tracking_thread != NULL)
+    {
+        m_tracking_thread->restart();
+    }
+    else
+    {
+        try
+        {
+            m_tracking_thread = m_component->getContainerServices()->getThreadManager()->create<SRTMinorServoTrackingThread, SRTMinorServoBossCore*>("SRTMinorServoTrackingThread", m_component->m_core);
+        }
+        catch(acsthreadErrType::acsthreadErrTypeExImpl& ex)
+        {
+            m_subsystem_status = Management::MNG_FAILURE;
+            _EXCPT(ComponentErrors::CanNotStartThreadExImpl, impl, "SRTMinorServoBossCore::startScan()");
+            impl.setThreadName("SRTMinorServoTrackingThread");
+            throw impl;
+        }
+
+        m_tracking_thread->resume();
+    }
+}
+
+void SRTMinorServoBossCore::closeScan(ACS::Time& close_time)
+{
+    AUTO_TRACE("SRTMinorServoBossCore::closeScan()");
+
+    checkControl();
+    checkEmergency();
+
+    std::cout << "closeScan" << std::endl;
+}
+
+void SRTMinorServoBossCore::checkControl()
 {
     ACSErr::Completion_var comp;
-    return m_component->control()->get_sync(comp.out()) == MinorServo::CONTROL_DISCOS ? true : false;
+    if(m_component->control()->get_sync(comp.out()) != MinorServo::CONTROL_DISCOS)
+    {
+        _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, "SRTMinorServoBossCore::checkControl()");
+        impl.setReason("MinorServo system is not controlled by DISCOS!");
+        throw impl;
+    }
+}
+
+void SRTMinorServoBossCore::checkEmergency()
+{
+    ACSErr::Completion_var comp;
+    if(m_component->emergency()->get_sync(comp.out()) == Management::MNG_TRUE)
+    {
+        _EXCPT(MinorServoErrors::StatusErrorExImpl, impl, "SRTMinorServoBossCore::checkEmergency()");
+        impl.setReason("MinorServo system in emergency status!");
+        throw impl;
+    }
 }

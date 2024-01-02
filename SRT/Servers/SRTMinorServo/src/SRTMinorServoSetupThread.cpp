@@ -16,6 +16,13 @@ SRTMinorServoSetupThread::~SRTMinorServoSetupThread()
 void SRTMinorServoSetupThread::onStart()
 {
     AUTO_TRACE(m_thread_name + "::onStart()");
+    this->setSleepTime(500000);   // 50 milliseconds
+    m_start_time = CIRATools::getUNIXEpoch();
+
+    MinorServo::SRTMinorServoFocalConfiguration commanded_configuration = m_core->m_commanded_configuration;
+    m_LDO_configuration = MinorServo::LDOConfigurationNameTable.left.at(commanded_configuration);
+    m_gregorian_cover_position = commanded_configuration == MinorServo::CONFIGURATION_PRIMARY ? MinorServo::COVER_STATUS_CLOSED : MinorServo::COVER_STATUS_OPEN;
+    m_status = 0;
 }
 
 void SRTMinorServoSetupThread::onStop()
@@ -23,89 +30,106 @@ void SRTMinorServoSetupThread::onStop()
     AUTO_TRACE(m_thread_name + "::onStop()");
 }
 
-void SRTMinorServoSetupThread::run()
+void SRTMinorServoSetupThread::runLoop()
 {
-    AUTO_TRACE(m_thread_name + "::run()");
-    double start_time = CIRATools::getUNIXEpoch();
-    std::string configuration_name = m_core->m_focal_configurations_table.right.at(m_core->m_requested_configuration);
-    MinorServo::SRTMinorServoGregorianCoverStatus gregorian_cover_position = m_core->m_requested_configuration == MinorServo::CONFIGURATION_PRIMARY ? MinorServo::COVER_STATUS_CLOSED : MinorServo::COVER_STATUS_OPEN;
-    ACSErr::Completion_var comp;
+    AUTO_TRACE(m_thread_name + "::runLoop()");
 
-    // Check if all the servos stopped
-    while(!std::all_of(m_core->m_servos.begin(), m_core->m_servos.end(), [](const MinorServo::SRTBaseMinorServo_ptr& servo) -> bool
+    try
     {
-        ACSErr::Completion_var comp;
-        return servo->operative_mode()->get_sync(comp.out()) == MinorServo::OPERATIVE_MODE_STOP ? true : false;
-    }))
-    {
-        if(CIRATools::getUNIXEpoch() - start_time >= SETUP_TIMEOUT)
-        {
-            m_core->m_boss_status = MinorServo::BOSS_STATUS_ERROR;
-            m_core->m_current_configuration = MinorServo::CONFIGURATION_UNKNOWN;
-            return;
-        }
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        m_core->checkControl();
+        m_core->checkEmergency();
     }
-
-    // Send the SETUP command
-    if(std::get<std::string>(m_core->m_socket->sendCommand(SRTMinorServoCommandLibrary::setup(configuration_name))["OUTPUT"]) != "GOOD")
+    catch(MinorServoErrors::StatusErrorExImpl& ex)
     {
-        _THROW_EXCPT(MinorServoErrors::SetupErrorExImpl, "SRTMinorServoBossCore::setup()");
-    }
-
-    // Wait for the system to show the commanded configuration
-    while(m_core->m_component->current_configuration()->get_sync(comp.out()) != m_core->m_current_configuration)
-    {
-        if(CIRATools::getUNIXEpoch() - start_time >= SETUP_TIMEOUT)
-        {
-            m_core->m_boss_status = MinorServo::BOSS_STATUS_ERROR;
-            m_core->m_current_configuration = MinorServo::CONFIGURATION_UNKNOWN;
-            return;
-        }
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    }
-
-    // Wait for the whole system to reach the desired configuration
-    while(true)
-    {
-        // First we check the status of the gregorian cover
-        bool completed = m_core->m_component->gregorian_cover()->get_sync(comp.out()) == gregorian_cover_position ? true : false;
-
-        // Then we cycle through all the servos and make sure their operative mode is SETUP
-        if(completed && std::all_of(m_core->m_servos.begin(), m_core->m_servos.end(), [](const MinorServo::SRTBaseMinorServo_ptr& servo) -> bool
-        {
-            ACSErr::Completion_var comp;
-            return servo->operative_mode()->get_sync(comp.out()) == MinorServo::OPERATIVE_MODE_SETUP ? true : false;
-        }))
-        {
-            break;
-        }
-
-        if(CIRATools::getUNIXEpoch() - start_time >= SETUP_TIMEOUT)
-        {
-            m_core->m_boss_status = MinorServo::BOSS_STATUS_ERROR;
-            m_core->m_current_configuration = MinorServo::CONFIGURATION_UNKNOWN;
-            return;
-        }
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    }
-
-    if(m_core->m_component->current_configuration()->get_sync(comp.out()) != m_core->m_requested_configuration)
-    {
-        m_core->m_boss_status = MinorServo::BOSS_STATUS_ERROR;
-        m_core->m_current_configuration = MinorServo::CONFIGURATION_UNKNOWN;
+        ACS_LOG(LM_FULL_INFO, m_thread_name + "::runLoop()", (LM_ERROR, ex.getData("Reason").c_str()));
+        this->setStopped();
         return;
     }
 
-    // Finally load the servos coefficients
-    for(auto& servo : m_core->m_servos)
+    if(CIRATools::getUNIXEpoch() - m_start_time >= SETUP_TIMEOUT)
     {
-        servo->setup(configuration_name.c_str());
+        m_core->m_starting = Management::MNG_FALSE;
+        m_core->m_motion_status = MinorServo::MOTION_STATUS_ERROR;
+        m_core->m_subsystem_status = Management::MNG_FAILURE;
+        ACS_LOG(LM_FULL_INFO, m_thread_name + "::runLoop()", (LM_ERROR, "Timeout while performing a setup operation."));
+        this->setStopped();
     }
 
-    m_core->m_current_configuration = m_requested_configuration;
-    m_core->m_boss_status = MinorServo::BOSS_STATUS_CONFIGURED;
+    ACSErr::Completion_var comp;
+
+    switch(m_status)
+    {
+        case 0: // Check if all the servos stopped
+        {
+            if(std::all_of(m_core->m_servos.begin(), m_core->m_servos.end(), [](const std::pair<std::string, MinorServo::SRTBaseMinorServo_ptr>& servo) -> bool
+            {
+                ACSErr::Completion_var comp;
+                return servo.second->operative_mode()->get_sync(comp.out()) == MinorServo::OPERATIVE_MODE_STOP ? true : false;
+            }))
+            {
+                // Move to phase 1
+                m_status = 1;
+            }
+
+            break;
+        }
+        case 1: // Send the SETUP command
+        {
+            if(std::get<std::string>(m_core->m_socket->sendCommand(SRTMinorServoCommandLibrary::setup(m_LDO_configuration))["OUTPUT"]) != "GOOD")
+            {
+                m_core->m_starting = Management::MNG_FALSE;
+                m_core->m_motion_status = MinorServo::MOTION_STATUS_ERROR;
+                m_core->m_subsystem_status = Management::MNG_FAILURE;
+                this->setStopped();
+            }
+            else
+            {
+                m_status = 2;
+            }
+
+            break;
+        }
+        case 2: // Wait for the system to show the commanded configuration
+        {
+            if(m_core->m_component->current_configuration()->get_sync(comp.out()) == m_core->m_commanded_configuration)
+            {
+                m_status = 3;
+            }
+
+            break;
+        }
+        case 3: // Wait for the whole system to reach the desired configuration
+        {
+            // First we check the status of the gregorian cover
+            bool completed = m_core->m_component->gregorian_cover()->get_sync(comp.out()) == m_gregorian_cover_position ? true : false;
+
+            // Then we cycle through all the servos and make sure their operative mode is SETUP
+            if(completed && std::all_of(m_core->m_servos.begin(), m_core->m_servos.end(), [](const std::pair<std::string, MinorServo::SRTBaseMinorServo_ptr>& servo) -> bool
+            {
+                ACSErr::Completion_var comp;
+                return servo.second->operative_mode()->get_sync(comp.out()) == MinorServo::OPERATIVE_MODE_SETUP ? true : false;
+            }))
+            {
+                m_status = 4;
+            }
+
+            break;
+        }
+        case 4: // Finally load the servos coefficients
+        {
+            m_core->m_actual_setup = m_core->m_commanded_setup;
+
+            for(const auto& [name, servo] : m_core->m_servos)
+            {
+                servo->setup(m_core->m_actual_setup.c_str());
+            }
+
+            m_core->m_starting = Management::MNG_FALSE;
+            m_core->m_ready = Management::MNG_TRUE;
+            m_core->m_subsystem_status = Management::MNG_OK;
+            m_core->m_motion_status = m_core->m_elevation_tracking_enabled == Management::MNG_TRUE ? MinorServo::MOTION_STATUS_TRACKING : MinorServo::MOTION_STATUS_CONFIGURED;
+            this->setStopped();
+            break;
+        }
+    }
 }

@@ -9,7 +9,20 @@
     xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
     xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    status_thread_period="0.05">
+    status_thread_period="0.05"
+    active_surface_configuration="ON"
+    elevation_tracking_enabled="ON">
+
+    <status description="The summary status of MinorServoBoss"/>
+    <actualSetup description="Mnemonic code that defines a setup" />
+    <motionInfo description="Description of the movement in progress" />
+    <ready description="True if the system is ready" />
+    <starting description="True if the system is starting" />
+    <asConfiguration description="True if the the AS configuration is active" />
+    <elevationTrack description="True if the SRP is tracking the elevation" />
+    <scanActive description="True if a scan is active" />
+    <scanning description="True if the system is performing a scan" />
+    <tracking description="Is the minor servo system tracking?" />
 
     <current_configuration description="Current minor servos focal configuration" />
     <simulation_enabled description="Boolean indicating whether the servos are acting in simulated mode" />
