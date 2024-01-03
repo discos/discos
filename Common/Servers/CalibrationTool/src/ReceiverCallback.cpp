@@ -41,11 +41,13 @@ int ReceiverCallback::cbReceive(ACE_Message_Block * frame_p)
 	char *buffer;
 	DDWORD headerSize=sizeof(Backends::TDumpHeader);*/
 	Backends::TDumpHeader *dumpH;
+	DDWORD totalBytes;
 	
 	if (flowNumber_m==1) {
 		if (m_buffer==NULL) {
 			m_buffer=new char[frame_p->total_length()];
 			m_bufferLen=frame_p->total_length();
+			totalBytes=frame_p->total_length();
 			m_bufferPointer=0;
 		}
 		else {
@@ -53,6 +55,7 @@ int ReceiverCallback::cbReceive(ACE_Message_Block * frame_p)
 			memcpy(newBuff,m_buffer,m_bufferPointer); // save the old buffer;
 			delete []m_buffer; //get rid of the old buffer;
 			m_bufferLen+=frame_p->total_length();  //update the buffer length;
+			totalBytes=frame_p->total_length();
 			m_buffer=newBuff;  // now keep track of the buffer pointer;
 		}
 		while (frame_p!=NULL) {
@@ -74,7 +77,7 @@ int ReceiverCallback::cbReceive(ACE_Message_Block * frame_p)
 			m_bufferLen=0;
 			m_bufferPointer=0;
 		}
-		m_receivedBytes+=frame_p->total_length();
+		m_receivedBytes+=totalBytes;
 	}
 	return 0;		
 }
