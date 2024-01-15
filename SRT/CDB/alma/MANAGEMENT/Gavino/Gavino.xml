@@ -9,7 +9,7 @@
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              SchedDir="/discos-archive/schedules/"
              DataDir="/discos-archive/data/"
-             SystemDataDir="/discos-archive/auxiliary/"
+             SystemDataDir="/discos-archive/extraData/"
              LogDir="/discos-archive/logs/"
              ScheduleReportPath=""
              ScheduleBackuptPath=""
