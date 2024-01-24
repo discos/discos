@@ -37,7 +37,7 @@
      </xs:complexContent>
     </xs:complexType>
 
-    <xs:complexType name="SRTMinorServoType">
+    <xs:complexType name="SRTBaseMinorServoType">
      <xs:complexContent>
       <xs:extension base="baci:CharacteristicComponent">
        <xs:sequence>
@@ -45,9 +45,11 @@
         <xs:element name="drive_cabinet_status" type="SRTMinorServoCabinetStatusType" />
         <xs:element name="block" type="mng:BooleanType" />
         <xs:element name="operative_mode" type="SRTMinorServoOperativeModeType" />
+        <xs:element name="physical_axes" type="baci:ROlong" /> 
         <xs:element name="physical_axes_enabled" type="baci:RObooleanSeq" /> 
         <xs:element name="physical_positions" type="baci:ROdoubleSeq" /> 
         <xs:element name="virtual_axes" type="baci:ROlong" /> 
+        <xs:element name="plain_virtual_positions" type="baci:ROdoubleSeq" /> 
         <xs:element name="virtual_positions" type="baci:ROdoubleSeq" /> 
         <xs:element name="virtual_offsets" type="baci:ROdoubleSeq" /> 
         <xs:element name="virtual_user_offsets" type="baci:ROdoubleSeq" /> 
@@ -57,10 +59,29 @@
        </xs:sequence>
        <xs:attribute name="physical_axes" type="xs:unsignedShort" use="required" />
        <xs:attribute name="virtual_axes" type="xs:unsignedShort" use="required" />
+       <xs:attribute name="max_speed" type="xs:string" use="required" />
+       <xs:attribute name="acceleration" type="xs:string" use="required" />
+       <xs:attribute name="min_range" type="xs:string" use="required" />
+       <xs:attribute name="max_range" type="xs:string" use="required" />
       </xs:extension>
      </xs:complexContent>
     </xs:complexType>
 
-    <xs:element name="SRTMinorServo" type="SRTMinorServoType"/>
+    <xs:complexType name="SRTProgramTrackMinorServoType">
+     <xs:complexContent>
+      <xs:extension base="SRTBaseMinorServoType">
+       <xs:sequence>
+        <xs:element name="tracking" type="mng:BooleanType" />
+        <xs:element name="trajectory_id" type="baci:ROlong" />
+        <xs:element name="total_trajectory_points" type="baci:ROlong" />
+        <xs:element name="remaining_trajectory_points" type="baci:ROlong" />
+       </xs:sequence>
+       <xs:attribute name="tracking_delta" type="xs:double" use="optional" default="1.0" />
+      </xs:extension>
+     </xs:complexContent>
+    </xs:complexType>
+
+    <xs:element name="SRTGenericMinorServo" type="SRTBaseMinorServoType" />
+    <xs:element name="SRTProgramTrackMinorServo" type="SRTProgramTrackMinorServoType" />
 
 </xs:schema>

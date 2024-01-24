@@ -2,26 +2,32 @@
 <!--
    Authors: Giuseppe Carboni giuseppe.carboni@inaf.it
 -->
-<SRTMinorServo
+<SRTGenericMinorServo
     xmlns="urn:schemas-cosylab-com:SRTMinorServo:1.0"
     xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
     xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     physical_axes="2"
-    virtual_axes="1">
+    virtual_axes="1"
+    max_speed="3.14"
+    acceleration="1.57"
+    min_range="-165"
+    max_range="165">
 
     <enabled description="All physical axes enabled" />
     <drive_cabinet_status description="Drive cabinet status" />
     <block description="Minor servo in block status" />
     <operative_mode description="Minor servo operating mode" />
+    <physical_axes description="Number of physical axes" />
     <physical_axes_enabled description="Sequence, physical axes enabled" />
     <physical_positions description="Sequence, physical axes positions" />
     <virtual_axes description="Number of virtual axes" />
-    <virtual_positions description="Sequence, virtual axes positions" />
+    <plain_virtual_positions description="Sequence, plain virtual axes positions, with offsets" />
+    <virtual_positions description="Sequence, virtual axes positions, without offsets" />
     <virtual_offsets description="Sequence, sum of user and system virtual axis offsets" />
     <virtual_user_offsets description="Sequence, virtual user axes offsets" />
     <virtual_system_offsets description="Sequence, virtual system axes offsets" />
     <in_use description="Boolean indicating whether the servo is in use in the current configuration" />
     <current_setup description="The name of the current configuration" />
 
-</SRTMinorServo>
+</SRTGenericMinorServo>

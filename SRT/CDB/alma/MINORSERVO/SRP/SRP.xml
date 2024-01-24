@@ -2,26 +2,36 @@
 <!--
    Authors: Giuseppe Carboni giuseppe.carboni@inaf.it
 -->
-<SRTMinorServo
+<SRTProgramTrackMinorServo
     xmlns="urn:schemas-cosylab-com:SRTMinorServo:1.0"
     xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
     xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     physical_axes="6"
-    virtual_axes="6">
+    virtual_axes="6"
+    max_speed="4, 4, 4, 0.38, 0.38, 0.38"
+    acceleration="8, 8, 8, 0.76, 0.76, 0.76"
+    min_range="-50, -110, -50, -0.25, -0.25, -0.25"
+    max_range="50, 110, 50, 0.25, 0.25, 0.25">
 
     <enabled description="All physical axes enabled" />
     <drive_cabinet_status description="Drive cabinet status" />
     <block description="Minor servo in block status" />
     <operative_mode description="Minor servo operating mode" />
+    <physical_axes description="Number of physical axes" />
     <physical_axes_enabled description="Sequence, physical axes enabled" />
     <physical_positions description="Sequence, physical axes positions" />
     <virtual_axes description="Number of virtual axes" />
-    <virtual_positions description="Sequence, virtual axes positions" />
+    <plain_virtual_positions description="Sequence, plain virtual axes positions, with offsets" />
+    <virtual_positions description="Sequence, virtual axes positions, without offsets" />
     <virtual_offsets description="Sequence, sum of user and system virtual axis offsets" />
     <virtual_user_offsets description="Sequence, virtual user axes offsets" />
     <virtual_system_offsets description="Sequence, virtual system axes offsets" />
     <in_use description="Boolean indicating whether the servo is in use in the current configuration" />
     <current_setup description="The name of the current configuration" />
+    <tracking description="Boolean indicating whether the servo is tracking the given coordinates" />
+    <trajectory_id description="Unsigned int, the UNIX Epoch * 1000 indicating the start time of the current trajectory" />
+    <total_trajectory_points description="Number of points sent for the current trajectory" />
+    <remaining_trajectory_points description="Remaining points of the current trahectory" />
 
-</SRTMinorServo>
+</SRTProgramTrackMinorServo>
