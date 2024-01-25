@@ -1,11 +1,13 @@
 #include "PySRTMinorServoCommandLibrary.h"
 
+using namespace MinorServo;
+
 std::string PySRTMinorServoCommandLibrary::preset(std::string servo_id, boost::python::list& coordinates)
 {
     return SRTMinorServoCommandLibrary::preset(servo_id, PySRTMinorServoCommandLibrary::pylist2cppvector(coordinates));
 }
 
-std::string PySRTMinorServoCommandLibrary::programTrack(std::string servo_id, unsigned int trajectory_id, unsigned int point_id, boost::python::list& coordinates, double start_time)
+std::string PySRTMinorServoCommandLibrary::programTrack(std::string servo_id, unsigned long trajectory_id, unsigned long point_id, boost::python::list& coordinates, double start_time)
 {
     return SRTMinorServoCommandLibrary::programTrack(servo_id, trajectory_id, point_id, PySRTMinorServoCommandLibrary::pylist2cppvector(coordinates), start_time);
 }

@@ -2,7 +2,7 @@
 #include <IRA>
 #include "SRTMinorServoCommandLibrary.h"
 
-using namespace IRA;
+using namespace MinorServo;
 
 TEST(SRTMinorServoCommandLibraryTest, status)
 {
@@ -33,7 +33,7 @@ TEST(SRTMinorServoCommandLibraryTest, preset)
 
 TEST(SRTMinorServoCommandLibraryTest, programTrack)
 {
-    double start_time = CIRATools::getUNIXEpoch() + 3;
+    double start_time = IRA::CIRATools::getUNIXEpoch() + 3;
     unsigned long int trajectory_id = (unsigned long int)start_time;
     std::stringstream expected_answer;
     expected_answer << std::fixed << std::setprecision(6);
@@ -58,24 +58,26 @@ TEST(SRTMinorServoCommandLibraryTest, parseAnswer)
     // Minimal correct answer
     std::string answer = "OUTPUT:GOOD,1665743366.654321\r\n";
     SRTMinorServoAnswerMap args;
-    args["OUTPUT"] = "GOOD";
-    args["TIMESTAMP"] = 1665743366.654321;
+    args.put("OUTPUT", "GOOD");
+    args.put("TIMESTAMP", 1665743366.654321);
     EXPECT_EQ(SRTMinorServoCommandLibrary::parseAnswer(answer), args);
+
+    EXPECT_EQ(args.getTimestamp(), 138850361666543210);
 
     // Complete correct answer
     answer = "OUTPUT:GOOD,1665743366.123456,CURRENT_CONFIG=21|SIMULATION_ENABLED=34|PLC_TIME=78|PLC_VERSION=69|CONTROL=14|POWER=38|EMERGENCY=69|ENABLED=51|OPERATIVE_MODE=94\r\n";
     args.clear();
-    args["OUTPUT"] = "GOOD";
-    args["TIMESTAMP"] = 1665743366.123456;
-    args["CURRENT_CONFIG"] = (long)21;
-    args["SIMULATION_ENABLED"] = (long)34;
-    args["PLC_TIME"] = (long)78;
-    args["PLC_VERSION"] = (long)69;
-    args["CONTROL"] = (long)14;
-    args["POWER"] = (long)38;
-    args["EMERGENCY"] = (long)69;
-    args["ENABLED"] = (long)51;
-    args["OPERATIVE_MODE"] = (long)94;
+    args.put("OUTPUT", "GOOD");
+    args.put("TIMESTAMP", 1665743366.123456);
+    args.put("CURRENT_CONFIG", 21);
+    args.put("SIMULATION_ENABLED", 34);
+    args.put("PLC_TIME", 78);
+    args.put("PLC_VERSION", 69);
+    args.put("CONTROL", 14);
+    args.put("POWER", 38);
+    args.put("EMERGENCY", 69);
+    args.put("ENABLED", 51);
+    args.put("OPERATIVE_MODE", 94);
     EXPECT_EQ(SRTMinorServoCommandLibrary::parseAnswer(answer), args);
 
     // Missing timestamp

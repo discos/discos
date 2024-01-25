@@ -37,23 +37,22 @@ class TestPySRTMinorServoCommandLibrary(unittest.TestCase):
 
     def test_preset(self):
         command = SRTMinorServoCommandLibrary.preset('PFP', [0.1, 1.1, 2.1])
-        expected_command = 'PRESET=PFP,0.1,1.1,2.1\r\n'
+        expected_command = 'PRESET=PFP,0.100000,1.100000,2.100000\r\n'
         self.assertEqual(command, expected_command)
 
     def test_programTrack(self):
         now = time.time()
         command = SRTMinorServoCommandLibrary.programTrack('PFP', 0, 0, [0.1, 1.1, 2.1], now)
-        now = int(now * 1000)
-        expected_command = 'PROGRAMTRACK=PFP,0,0,%d,0.1,1.1,2.1\r\n' % now
+        expected_command = f'PROGRAMTRACK=PFP,0,0,{now},0.100000,1.100000,2.100000\r\n'
         self.assertEqual(command, expected_command)
         for i in range(1, 10):
             command = SRTMinorServoCommandLibrary.programTrack('PFP', 0, i, [0.1, 1.1, 2.1])
-            expected_command = 'PROGRAMTRACK=PFP,0,%d,*,0.1,1.1,2.1\r\n' % i
+            expected_command = f'PROGRAMTRACK=PFP,0,{i},*,0.100000,1.100000,2.100000\r\n'
             self.assertEqual(command, expected_command)
 
     def test_offset(self):
         command = SRTMinorServoCommandLibrary.offset('PFP', [0.1, 1.1, 2.1])
-        expected_command = 'OFFSET=PFP,0.1,1.1,2.1\r\n'
+        expected_command = 'OFFSET=PFP,0.100000,1.100000,2.100000\r\n'
         self.assertEqual(command, expected_command)
 
     def test_parseAnswer(self):

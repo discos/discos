@@ -54,21 +54,24 @@ xxxxx_LIBS      =
 #
 # Includes (.h) files (public only)
 # ---------------------------------
-INCLUDES        = hexlib.h SRTMinorServoCommandLibrary.h
+INCLUDES        = hexlib.h SRTMinorServoCommandLibrary.h SRTMinorServoAnswerMap.h SRTMinorServoSocket.h
 
 #
 # Libraries (public and local)
 # ----------------------------
-LIBRARIES       = SRTMinorServoLibrary SRTMinorServoCommandLibrary PySRTMinorServoCommandLibrary
+LIBRARIES       = SRTMinorServoLibrary SRTMinorServoCommandLibrary SRTMinorServoSocketLibrary PySRTMinorServoCommandLibrary
 LIBRARIES_L     =
 SRTMinorServoLibrary_OBJECTS = hexlib
 SRTMinorServoLibrary_LIBS = gsl gslcblas m
 SRTMinorServoCommandLibrary_OBJECTS = SRTMinorServoCommandLibrary
 SRTMinorServoCommandLibrary_CFLAGS = -std=c++17
-SRTMinorServoCommandLibrary_LIBS =
+SRTMinorServoCommandLibrary_LIBS = pthread IRALibrary
 PySRTMinorServoCommandLibrary_OBJECTS = PySRTMinorServoCommandLibrary
 PySRTMinorServoCommandLibrary_CFLAGS = -std=c++17
 PySRTMinorServoCommandLibrary_LIBS = SRTMinorServoCommandLibrary boost_python3
+SRTMinorServoSocketLibrary_OBJECTS = SRTMinorServoSocket
+SRTMinorServoSocketLibrary_LIBS = IRALibrary ComponentErrors MinorServoErrors SRTMinorServoCommandLibrary
+SRTMinorServoSocket_CFLAGS = -std=c++17
 
 #
 # <brief description of lllll library>
@@ -95,7 +98,7 @@ PY_SCRIPTS_L       =
 PY_MODULES         =
 PY_MODULES_L       =
 
-PY_PACKAGES        = SRTMinorServoCommandLibrary
+PY_PACKAGES        = #SRTMinorServoCommandLibrary
 PY_PACKAGES_L      =
 pppppp_MODULES	   =
 

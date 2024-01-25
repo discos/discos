@@ -9,6 +9,8 @@
 #include <algorithm>
 #include "SRTMinorServoCommandLibrary.h"
 
+using namespace MinorServo;
+
 std::string SRTMinorServoCommandLibrary::status(std::string servo_id)
 {
     std::stringstream command;
@@ -54,7 +56,7 @@ std::string SRTMinorServoCommandLibrary::preset(std::string servo_id, std::vecto
     return command.str();
 }
 
-std::string SRTMinorServoCommandLibrary::programTrack(std::string servo_id, long unsigned int trajectory_id, unsigned int point_id, std::vector<double> coordinates, double start_time)
+std::string SRTMinorServoCommandLibrary::programTrack(std::string servo_id, unsigned long trajectory_id, unsigned long point_id, std::vector<double> coordinates, double start_time)
 {
     std::stringstream command;
     command << "PROGRAMTRACK=" << servo_id << "," << trajectory_id << "," << point_id << ",";
@@ -114,8 +116,10 @@ SRTMinorServoAnswerMap SRTMinorServoCommandLibrary::parseAnswer(std::string answ
             // No value, could be the timestamp
             if(value.empty())
             {
-                if(args.find("TIMESTAMP") != args.end())    // Timestamp already found, some other value is missing
+                if(args.contains("TIMESTAMP"))    // Timestamp already found, some other value is missing
+                {
                     throw std::invalid_argument(std::string("Missing key for value " + value));
+                }
 
                 value = key;
                 key = "TIMESTAMP";
@@ -124,32 +128,42 @@ SRTMinorServoAnswerMap SRTMinorServoCommandLibrary::parseAnswer(std::string answ
             if(key == "OUTPUT")
             {
                 if(value != "GOOD" && value != "BAD")
+                {
                     throw std::invalid_argument(std::string("Unrecognized OUTPUT value: " + value));
+                }
 
-                args[key] = value;
+                args.put(key, value);
             }
             else if(key == "TIMESTAMP")
             {
                 size_t last_char;
-                args[key] = std::stod(value, &last_char);
+                args.put(key, std::stod(value, &last_char));
                 if(last_char != value.size())
+                {
                     throw std::invalid_argument(std::string("Wrong TIMESTAMP value: " + value));
+                }
             }
             else
             {
                 size_t last_char;
-                args[key] = std::stol(value, &last_char);
+                args.put(key, std::stol(value, &last_char));
                 if(last_char != value.size())
-                    args[key] = std::stod(value);
+                {
+                    args.put(key, std::stod(value));
+                }
             }
         }
 
-        if(args.find("OUTPUT") == args.end())
+        if(!args.contains("OUTPUT"))
+        {
             throw std::invalid_argument(std::string("Missing OUTPUT value!"));
-        else if(std::get<std::string>(args["OUTPUT"]) == "GOOD" && args.find("TIMESTAMP") == args.end())
+        }
+        else if(args.checkOutput() && !args.contains("TIMESTAMP"))
+        {
             throw std::invalid_argument(std::string("Missing TIMESTAMP value!"));
+        }
     }
-    catch(const std::invalid_argument& e)
+    catch(const std::invalid_argument& ex)
     {
         // If we are not able to convert any of the values to the correct type,
         // or if OUTPUT and/or TIMESTAMP is missing, we send back an empty dictionary.

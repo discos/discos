@@ -11,14 +11,20 @@ USER_INC=-I$(GTEST_HOME) -I$(GMOCK_HOME)
 # DEFINE YOUR CPP UNIT TEST EXECUTABLES HERE as:
 #
 # EXECTUABLES_L = unittest
-# unittest_OBJECTS = unittest
-# unittest_LIBS = $(GTEST_LIBS) <ComponentNameImpl>
+# SRTMinorServoCommandLibraryTest_OBJECTS = unittest
+# SRTMinorServoCommandLibraryTest_LIBS = $(GTEST_LIBS) <ComponentNameImpl>
 
-EXECUTABLES_L = unittest
-unittest_OBJECTS = unittest
-unittest_CFLAGS = -std=c++17
-unittest_LIBS = $(GTEST_LIBS) SRTMinorServoCommandLibrary IRALibrary
-unittest_LDFLAGS = -lstdc++ -lpthread
+EXECUTABLES_L = SRTMinorServoCommandLibraryTest SRTMinorServoSocketTest
+
+SRTMinorServoCommandLibraryTest_OBJECTS = SRTMinorServoCommandLibraryTest
+SRTMinorServoCommandLibraryTest_CFLAGS = -std=c++17
+SRTMinorServoCommandLibraryTest_LIBS = $(GTEST_LIBS) SRTMinorServoCommandLibrary IRALibrary
+SRTMinorServoCommandLibraryTest_LDFLAGS = -lstdc++ -lpthread
+
+SRTMinorServoSocketTest_OBJECTS = SRTMinorServoSocketTest
+SRTMinorServoSocketTest_CFLAGS = -std=c++17
+SRTMinorServoSocketTest_LIBS = $(GTEST_LIBS) SRTMinorServoSocketLibrary SRTMinorServoCommandLibrary IRALibrary
+SRTMinorServoSocketTest_LDFLAGS = -lstdc++ -lpthread
 
 # END OF CUSTOMIZATION
 # do not edit below this line
