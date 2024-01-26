@@ -15,6 +15,9 @@
 
 module MinorServo
 {
+    /**
+     * Enumerator which indicates a Leonardo minor servo configuration
+     */
     enum SRTMinorServoFocalConfiguration
     {
         CONFIGURATION_UNKNOWN,
@@ -33,35 +36,43 @@ module MinorServo
         CONFIGURATION_BWG3,
         CONFIGURATION_BWG4
     };
-
     ACS_ENUM(SRTMinorServoFocalConfiguration);
 
+    /**
+     * Enumerator which indicates the status of the control for the Leonardo minor servo system
+     */
     enum SRTMinorServoControlStatus
     {
         CONTROL_DISCOS,
         CONTROL_VBRAIN
     };
-
     ACS_ENUM(SRTMinorServoControlStatus);
 
+    /**
+     * Enumerator which indicates the position of the gregorian cover
+     */
     enum SRTMinorServoGregorianCoverStatus
     {
         COVER_STATUS_UNKNOWN,
         COVER_STATUS_OPEN,
         COVER_STATUS_CLOSED
     };
-
     ACS_ENUM(SRTMinorServoGregorianCoverStatus);
 
+    /**
+     * Enumerator which indicates the status of a servo drive cabinet
+     */
     enum SRTMinorServoCabinetStatus
     {
         DRIVE_CABINET_OK,
         DRIVE_CABINET_WARNING,
         DRIVE_CABINET_ERROR
     };
-
     ACS_ENUM(SRTMinorServoCabinetStatus);
 
+    /**
+     * Enumerator which indicates the operating mode of a single servo
+     */
     enum SRTMinorServoOperativeMode
     {
         OPERATIVE_MODE_UNKNOWN,
@@ -71,19 +82,21 @@ module MinorServo
         OPERATIVE_MODE_PRESET,
         OPERATIVE_MODE_PROGRAMTRACK
     };
-
     ACS_ENUM(SRTMinorServoOperativeMode);
 
+    /**
+     * Enumerator which indicates the type of movement made by the whole system (i.e.: performing setup, parking, tracking...)
+     */
     enum SRTMinorServoMotionStatus
     {
         MOTION_STATUS_UNCONFIGURED,
-        MOTION_STATUS_CONFIGURING,
-        MOTION_STATUS_PARK,
-        MOTION_STATUS_ERROR,
+        MOTION_STATUS_STARTING,
         MOTION_STATUS_CONFIGURED,
-        MOTION_STATUS_TRACKING
+        MOTION_STATUS_TRACKING,
+        MOTION_STATUS_PARKING,
+        MOTION_STATUS_PARKED,
+        MOTION_STATUS_ERROR
     };
-
     ACS_ENUM(SRTMinorServoMotionStatus);
 };
 #endif

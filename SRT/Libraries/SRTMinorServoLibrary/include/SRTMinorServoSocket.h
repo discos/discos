@@ -14,51 +14,40 @@
 #include <optional>
 #include "SRTMinorServoCommandLibrary.h"
 
-
 #define SOCKET_TIMEOUT 0.1
 #define CONFIG_DOMAIN   "alma/"
 #define CONFIG_DIRNAME  "/MINORSERVO/Socket"
 
-
-class SRTMinorServoSocketTest;
-class SRPProgramTrackTest;
-class DerotatorProgramTrackTest;
-class CombinedProgramTrackTest;
-class ReadStatusOnlyTest;
-
-
 namespace MinorServo
 {
+    /**
+     * Testing class forward declaration.
+     * The declaration of this class can be found in the SRTMinorServoTestingSocket.h header file.
+     * Instructions on how to use this for testing purposes can be found there as well.
+     */
+    class SRTMinorServoTestingSocket;
+
     class SRTMinorServoSocket: public IRA::CSocket
     {
         /**
          * This class implements a singleton socket. The singleton pattern was necessary to provide each servo system component communication capabilities with the Leonardo system.
          * As long as all the said components run on the same container this will only be instanced once.
          */
-
-        /**
-         * Declare the testing classes as friend classes in order for them to have access to destroyInstance for testing purposes
-         */
-        friend class ::SRTMinorServoSocketTest;
-        friend class ::SRPProgramTrackTest;
-        friend class ::DerotatorProgramTrackTest;
-        friend class ::CombinedProgramTrackTest;
-        friend class ::ReadStatusOnlyTest;
-
     public:
         /**
          * Calls the constructor and returns the singleton socket instance
          * @param ip_address the IP address to which the socket will connect
          * @param port the port to which the socket will connect
          * @param timeout the timeout, in seconds, for the communication to be considered failed
-         * @throw MinorServoErrors::CommunicationErrorExImpl when the user calls this method a second time with different IP address and port arguments
+         * @throw MinorServoErrors::MinorServoErrorsEx when the user calls this method a second time with different IP address and port arguments (non testing mode)
+         * @throw MinorServoErrors::CommunicationErrorExImpl (testing mode)
          * @return the singleton socket instance, eventually connected to the given IP address and port, by reference
          */
         static SRTMinorServoSocket& getInstance(std::string ip_address, int port, double timeout=SOCKET_TIMEOUT);
 
         /**
          * Returns the previously generated singleton socket instance
-         * @throw MinorServoErrors::CommunicationErrorExImpl when the user calls this method when the instance has not been generated yet
+         * @throw MinorServoErrors::MinorServoErrorsExImpl when the user calls this method when the instance has not been generated yet
          * @return the singleton socket instance, by reference
          */
         static SRTMinorServoSocket& getInstance();
@@ -67,7 +56,8 @@ namespace MinorServo
          * Sends a command on the socket and returns the received answer, if any
          * @param command the command to be sent over the socket
          * @param map, optional SRTMinorServoAnswerMap object. If provided, the 'map' argument content gets updated with the newly received answer
-         * @throw MinorServoErrors::CommunicationErrorExImpl when the operation of sending or receiving fails unexpectedly
+         * @throw MinorServoErrors::MinorServoErrorsEx when the operation of sending or receiving fails unexpectedly (non testing mode)
+         * @throw MinorServoErrors::CommunicationErrorExImpl (testing mode)
          * @return the received answer to the given command
          */
         SRTMinorServoAnswerMap sendCommand(std::string command, std::optional<std::reference_wrapper<SRTMinorServoAnswerMap>> map = {});
@@ -90,6 +80,11 @@ namespace MinorServo
 
     private:
         /**
+         * Declare the testing class as friend class in order for it to have access to private members for testing purposes
+         */
+        friend class SRTMinorServoTestingSocket;
+
+        /**
          * Constructor method. Generates the singleton socket instance
          * @param ip_address the IP address to which the socket will connect
          * @param port the port to which the socket will connect
@@ -103,13 +98,9 @@ namespace MinorServo
         ~SRTMinorServoSocket();
 
         /**
-         * Force the destruction of the singleton socket object. Only used in tests
-         */
-        static void destroyInstance();
-
-        /**
          * Connection function. It gets called every time the socket gets disconnected
-         * throw MinorServoErrors::CommunicationErrorExImpl when the connection attempt fails
+         * throw MinorServoErrors::MinorServoErrorsEx when the connection attempt fails (non testing mode)
+         * throw MinorServoErrors::CommunicationErrorExImpl (testing mode)
          */
         void connect();
 
@@ -138,6 +129,11 @@ namespace MinorServo
          * Library mutex, used only to synchronize the getInstance methods
          */
         static std::mutex c_mutex;
+
+        /**
+         * Boolean indicating whether we are testing the socket or not
+         */
+        inline static bool c_testing = false;
 
         /**
          * Socket status enumerator
