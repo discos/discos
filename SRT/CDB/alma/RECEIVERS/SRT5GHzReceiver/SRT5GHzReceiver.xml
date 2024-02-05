@@ -1,17 +1,17 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
 <!--
    - History:
-   - 02 - 08 -2023 created Andrea Orlati (andrea.orlati@inaf.it)
+   - 02 - 08 -2011 created Andrea Orlati (a.orlati@ira.inaf.it)
 -->
 
-<SRT5GHzReceiver xmlns="urn:schemas-cosylab-com:SRT5GHzReceiver:1.0" 
+    <SRT5GHzReceiver xmlns="urn:schemas-cosylab-com:SRT5GHzReceiver:1.0" 
 				xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
 				xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"   
-				DewarIPAddress="192.168.200.188"
-				DewarPort="5002"
-				LNAIPAddress="192.168.200.189"
-				LNAPort="5002"		
+				DewarIPAddress="127.0.0.1"
+				DewarPort="12900"
+				LNAIPAddress="127.0.0.1"
+				LNAPort="12901"		
 				WatchDogResponseTime="400000"
 				WatchDogSleepTime="500000"
 				LNASamplingTime="250000"
