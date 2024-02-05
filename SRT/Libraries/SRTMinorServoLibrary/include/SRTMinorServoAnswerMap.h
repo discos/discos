@@ -3,42 +3,14 @@
 
 #include <sstream>
 #include <map>
-#include <variant>
-#include <type_traits>
 #include <mutex>
 #include <shared_mutex>
 #include <IRA>
-
-#include <Cplusplus11Helper.h>
-C11_IGNORE_WARNING_PUSH
-C11_IGNORE_WARNING("-Wunused-function")
-
-static std::ostream& operator<<(std::ostream& out, const std::variant<long, double, std::string>& value)
-{
-    std::visit([&out](const auto& val) { out << val; }, value);
-    return out;
-}
-
-C11_IGNORE_WARNING_POP
+#include "SRTMinorServoUtils.h"
 
 
 namespace MinorServo
 {
-    /**
-     * The following templates are useful if you want to check if a given type for the SRTMinorServoAnswerMap is accepted
-     */
-    template <typename T>
-    struct is_string : public std::disjunction<std::is_same<char*, std::decay_t<T>>, std::is_same<const char*, std::decay_t<T>>, std::is_same<std::string, std::decay_t<T>>> {};
-
-    template <typename T>
-    inline constexpr bool is_string_v = is_string<T>::value;
-
-    template <typename T>
-    struct is_known : public std::disjunction<std::is_arithmetic<std::decay_t<T>>, is_string<std::decay_t<T>>> {};
-
-    template <typename T>
-    inline constexpr bool is_known_v = is_known<T>::value;
-
     class SRTMinorServoAnswerMap : private  std::map<std::string, std::variant<long, double, std::string>>
     {
         /**
@@ -114,7 +86,7 @@ namespace MinorServo
         template <typename T>
         T get(const std::string& key) const
         {
-            if constexpr(std::negation_v<MinorServo::is_known<T>>)
+            if constexpr(std::negation_v<is_known<T>>)
             {
                 throw std::runtime_error("Unsupported type.");
             }
@@ -144,7 +116,7 @@ namespace MinorServo
         template <typename T>
         void put(const std::string& key, const T& value)
         {
-            if constexpr(std::negation_v<MinorServo::is_known<T>>)
+            if constexpr(std::negation_v<is_known<T>>)
             {
                 throw std::runtime_error("Unsupported type.");
             }

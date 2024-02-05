@@ -1,15 +1,5 @@
 #include "SRTMinorServoSocket.h"
 
-#define THROW \
-if(c_testing) \
-{ \
-    throw impl; \
-} \
-else \
-{ \
-    throw impl.getMinorServoErrorsEx(); \
-}
-
 using namespace MinorServo;
 
 std::mutex SRTMinorServoSocket::c_mutex;
@@ -24,7 +14,7 @@ SRTMinorServoSocket& SRTMinorServoSocket::getInstance(std::string ip_address, in
         {
             _EXCPT(MinorServoErrors::CommunicationErrorExImpl, impl, "SRTMinorServoSocket::getInstance(std::string, int)");
             impl.setReason(("Socket already open on '" + m_instance->m_ip_address + ":" + std::to_string(m_instance->m_port) + "' . Use getInstance() (no arguments) to retrieve the object.").c_str());
-            THROW;
+            throw impl.getMinorServoErrorsEx();
         }
     }
     else
@@ -42,7 +32,7 @@ SRTMinorServoSocket& SRTMinorServoSocket::getInstance()
     {
         _EXCPT(MinorServoErrors::CommunicationErrorExImpl, impl, "SRTMinorServoSocket::getInstance()");
         impl.setReason("Socket not yet initialized. Use getInstance(std::string ip_address, int port) to initialize it and retrieve the object.");
-        THROW;
+        throw impl.getMinorServoErrorsEx();
     }
     return *m_instance;
 }
@@ -81,7 +71,7 @@ void SRTMinorServoSocket::connect()
         Close(m_error);
         _EXCPT(MinorServoErrors::CommunicationErrorExImpl, impl, "SRTMinorServoSocket::SRTMinorServoSocket()");
         impl.setReason("Cannot create the socket.");
-        THROW;
+        throw impl.getMinorServoErrorsEx();
     }
 
     if(Connect(m_error, m_ip_address.c_str(), m_port) == FAIL)
@@ -90,7 +80,7 @@ void SRTMinorServoSocket::connect()
         Close(m_error);
         _EXCPT(MinorServoErrors::CommunicationErrorExImpl, impl, "SRTMinorServoSocket::SRTMinorServoSocket()");
         impl.setReason("Cannot connect the socket.");
-        THROW;
+        throw impl.getMinorServoErrorsEx();
     }
 
     if(setSockMode(m_error, NONBLOCKING) != SUCCESS)
@@ -99,7 +89,7 @@ void SRTMinorServoSocket::connect()
         Close(m_error);
         _EXCPT(MinorServoErrors::CommunicationErrorExImpl, impl, "SRTMinorServoSocket::SRTMinorServoSocket()");
         impl.setReason("Cannot set the socket to non-blocking.");
-        THROW;
+        throw impl.getMinorServoErrorsEx();
     }
 
     m_socket_status = READY;
@@ -134,7 +124,7 @@ SRTMinorServoAnswerMap SRTMinorServoSocket::sendCommand(std::string command, std
             Close(m_error);
             _EXCPT(MinorServoErrors::CommunicationErrorExImpl, impl, "SRTMinorServoSocker::sendCommand()");
             impl.setReason("Something went wrong while sending some bytes.");
-            THROW;
+            throw impl.getMinorServoErrorsEx();
         }
 
         if(sent_now > 0)
@@ -148,7 +138,7 @@ SRTMinorServoAnswerMap SRTMinorServoSocket::sendCommand(std::string command, std
             Close(m_error);
             _EXCPT(MinorServoErrors::CommunicationErrorExImpl, impl, "SRTMinorServoSocket::sendCommand()");
             impl.setReason("Timeout when sending command.");
-            THROW;
+            throw impl.getMinorServoErrorsEx();
         }
     }
 
@@ -173,7 +163,7 @@ SRTMinorServoAnswerMap SRTMinorServoSocket::sendCommand(std::string command, std
                 Close(m_error);
                 _EXCPT(MinorServoErrors::CommunicationErrorExImpl, impl, "SRTMinorServoSocket::sendCommand()");
                 impl.setReason("Timeout when receiving answer.");
-                THROW;
+                throw impl.getMinorServoErrorsEx();
             }
         }
         catch(...)
@@ -182,7 +172,7 @@ SRTMinorServoAnswerMap SRTMinorServoSocket::sendCommand(std::string command, std
             Close(m_error);
             _EXCPT(MinorServoErrors::CommunicationErrorExImpl, impl, "SRTMinorServoSocker::sendCommand()");
             impl.setReason("Something went wrong while receiving some bytes.");
-            THROW;
+            throw impl.getMinorServoErrorsEx();
         }
     }
 

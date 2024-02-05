@@ -4,17 +4,15 @@
 #include "gtest/gtest.h"
 #include <iostream>
 #include <thread>
+#include "SRTMinorServoUtils.h"
 #include "SRTMinorServoCommandLibrary.h"
+#include "SRTMinorServoTestingSocket.h"
 
 // This address and port are the ones set in the simulator
 // In order for the test to properly be executed, the simulator should be launched with the following command:
 // discos-simulator -s minor_servo start &
 #define ADDRESS std::string("127.0.0.1")
 #define PORT    12800
-
-class SRTMinorServoSocketTest;
-#define FRIEND_CLASS_DECLARATION friend class ::SRTMinorServoSocketTest;
-#include "SRTMinorServoTestingSocket.h"
 
 using namespace MinorServo;
 
@@ -51,7 +49,7 @@ TEST_F(SRTMinorServoSocketTest, instance_passed_to_threads)
 
     if(!socket.isConnected())
     {
-        FAIL() << "Socket failed to connect. Check if the simulator or the hardware can be reached." << std::endl;
+        FAIL() << "Socket failed to connect. Check if the simulator or the hardware can be reached.";
     }
 
     for(auto command : this->commands)
@@ -89,18 +87,23 @@ TEST_F(SRTMinorServoSocketTest, instance_retrieved_in_threads)
                 // and if the answer was received correctly without being interleaved with the answer from another thread
                 EXPECT_TRUE(args.checkOutput());
             }
-            catch(MinorServoErrors::CommunicationErrorExImpl& ex)
+            catch(MinorServoErrors::MinorServoErrorsEx& ex)
             {
                 std::lock_guard<std::mutex> guard(mutex);
 
-                if(ex.getReason() == std::string("Cannot connect the socket.").c_str())
+                try
                 {
-                    error = "Socket failed to connect. Check if the simulator or the hardware can be reached.";
+                    if(std::string(getReasonFromEx(ex)) == "Cannot connect the socket.")
+                    {
+                        error = "Socket failed to connect. Check if the simulator or the hardware can be reached.";
+                        return;
+                    }
                 }
-                else
+                catch(...)
                 {
-                    error = "Unexpected failure.";
                 }
+
+                error = "Unexpected failure.";
             }
         }));
     }
@@ -112,7 +115,7 @@ TEST_F(SRTMinorServoSocketTest, instance_retrieved_in_threads)
 
     if(error != "")
     {
-        FAIL() << error << std::endl;
+        FAIL() << error;
     }
 }
 
@@ -127,17 +130,26 @@ TEST_F(SRTMinorServoSocketTest, open_with_args_retrieve_without)
         // Let's try to instance another socket on a different port
         SRTMinorServoTestingSocket::getInstance(ADDRESS, PORT + 1);
     }
-    catch(MinorServoErrors::CommunicationErrorExImpl& ex)
+    catch(MinorServoErrors::MinorServoErrorsEx& ex)
     {
-        if(ex.getReason() == std::string("Cannot connect the socket.").c_str())
+        try
         {
-            FAIL() << "Socket failed to connect. Check if the simulator or the hardware can be reached." << std::endl;
-            return;
+            std::string reason(getReasonFromEx(ex));
+
+            if(reason == "Cannot connect the socket.")
+            {
+                FAIL() << "Socket failed to connect. Check if the simulator or the hardware can be reached.";
+                return;
+            }
+            else
+            {
+                // Check if we got the correct exception
+                EXPECT_EQ(reason, "Socket already open on '" + ADDRESS + ":" + std::to_string(PORT) + "' . Use getInstance() (no arguments) to retrieve the object.");
+            }
         }
-        else
+        catch(...)
         {
-            // Check if we got the correct exception
-            EXPECT_EQ(ex.getReason(), std::string("Socket already open on '" + ADDRESS + ":" + std::to_string(PORT) + "' . Use getInstance() (no arguments) to retrieve the object.").c_str());
+            FAIL() << "Unexpected failure.";
         }
     }
 }
@@ -149,17 +161,26 @@ TEST_F(SRTMinorServoSocketTest, try_open_without_args)
     {
         SRTMinorServoTestingSocket::getInstance();
     }
-    catch(MinorServoErrors::CommunicationErrorExImpl& ex)
+    catch(MinorServoErrors::MinorServoErrorsEx& ex)
     {
-        if(ex.getReason() == std::string("Cannot connect the socket.").c_str())
+        try
         {
-            FAIL() << "Socket failed to connect. Check if the simulator or the hardware can be reached." << std::endl;
-            return;
+            std::string reason(getReasonFromEx(ex));
+
+            if(reason == "Cannot connect the socket.")
+            {
+                FAIL() << "Socket failed to connect. Check if the simulator or the hardware can be reached.";
+                return;
+            }
+            else
+            {
+                // Check if we got the correct exception
+                EXPECT_EQ(reason, "Socket not yet initialized. Use getInstance(std::string ip_address, int port) to initialize it and retrieve the object.");
+            }
         }
-        else
+        catch(...)
         {
-            // Check if we got the correct exception
-            EXPECT_EQ(ex.getReason(), std::string("Socket not yet initialized. Use getInstance(std::string ip_address, int port) to initialize it and retrieve the object.").c_str());
+            FAIL() << "Unexpected failure.";
         }
     }
 }
@@ -172,9 +193,18 @@ TEST_F(SRTMinorServoSocketTest, try_open_on_wrong_address)
         // The exception is raised only if the given port is wrong
         SRTMinorServoTestingSocket::getInstance(ADDRESS, 0);
     }
-    catch(MinorServoErrors::CommunicationErrorExImpl& ex)
+    catch(MinorServoErrors::MinorServoErrorsEx& ex)
     {
-        // Check if we got the correct exception
-        EXPECT_EQ(ex.getReason(), std::string("Cannot connect the socket.").c_str());
+        try
+        {
+            std::string reason(getReasonFromEx(ex));
+
+            // Check if we got the correct exception
+            EXPECT_EQ(reason, "Cannot connect the socket.");
+        }
+        catch(...)
+        {
+            FAIL() << "Unexpected failure.";
+        }
     }
 }

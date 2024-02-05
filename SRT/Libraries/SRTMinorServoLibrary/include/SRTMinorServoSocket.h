@@ -23,7 +23,7 @@ namespace MinorServo
     /**
      * Testing class forward declaration.
      * The declaration of this class can be found in the SRTMinorServoTestingSocket.h header file.
-     * Instructions on how to use this for testing purposes can be found there as well.
+     * A developer must use this class for testing purposes if he needs to destroy the singleton socket instance as well.
      */
     class SRTMinorServoTestingSocket;
 
@@ -39,8 +39,7 @@ namespace MinorServo
          * @param ip_address the IP address to which the socket will connect
          * @param port the port to which the socket will connect
          * @param timeout the timeout, in seconds, for the communication to be considered failed
-         * @throw MinorServoErrors::MinorServoErrorsEx when the user calls this method a second time with different IP address and port arguments (non testing mode)
-         * @throw MinorServoErrors::CommunicationErrorExImpl (testing mode)
+         * @throw MinorServoErrors::MinorServoErrorsEx when the user calls this method a second time with different IP address and port arguments
          * @return the singleton socket instance, eventually connected to the given IP address and port, by reference
          */
         static SRTMinorServoSocket& getInstance(std::string ip_address, int port, double timeout=SOCKET_TIMEOUT);
@@ -56,8 +55,7 @@ namespace MinorServo
          * Sends a command on the socket and returns the received answer, if any
          * @param command the command to be sent over the socket
          * @param map, optional SRTMinorServoAnswerMap object. If provided, the 'map' argument content gets updated with the newly received answer
-         * @throw MinorServoErrors::MinorServoErrorsEx when the operation of sending or receiving fails unexpectedly (non testing mode)
-         * @throw MinorServoErrors::CommunicationErrorExImpl (testing mode)
+         * @throw MinorServoErrors::MinorServoErrorsEx when the operation of sending or receiving fails unexpectedly
          * @return the received answer to the given command
          */
         SRTMinorServoAnswerMap sendCommand(std::string command, std::optional<std::reference_wrapper<SRTMinorServoAnswerMap>> map = {});
@@ -99,8 +97,7 @@ namespace MinorServo
 
         /**
          * Connection function. It gets called every time the socket gets disconnected
-         * throw MinorServoErrors::MinorServoErrorsEx when the connection attempt fails (non testing mode)
-         * throw MinorServoErrors::CommunicationErrorExImpl (testing mode)
+         * throw MinorServoErrors::MinorServoErrorsEx when the connection attempt fails
          */
         void connect();
 
@@ -129,11 +126,6 @@ namespace MinorServo
          * Library mutex, used only to synchronize the getInstance methods
          */
         static std::mutex c_mutex;
-
-        /**
-         * Boolean indicating whether we are testing the socket or not
-         */
-        inline static bool c_testing = false;
 
         /**
          * Socket status enumerator

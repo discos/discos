@@ -17,12 +17,12 @@ USER_INC=-I$(GTEST_HOME) -I$(GMOCK_HOME)
 EXECUTABLES_L = SRTMinorServoCommandLibraryTest SRTMinorServoSocketTest
 
 SRTMinorServoCommandLibraryTest_OBJECTS = SRTMinorServoCommandLibraryTest
-SRTMinorServoCommandLibraryTest_CFLAGS = -std=c++17
+SRTMinorServoCommandLibraryTest_CFLAGS = -std=c++17 -fconcepts
 SRTMinorServoCommandLibraryTest_LIBS = $(GTEST_LIBS) SRTMinorServoCommandLibrary IRALibrary
 SRTMinorServoCommandLibraryTest_LDFLAGS = -lstdc++ -lpthread
 
 SRTMinorServoSocketTest_OBJECTS = SRTMinorServoSocketTest
-SRTMinorServoSocketTest_CFLAGS = -std=c++17
+SRTMinorServoSocketTest_CFLAGS = -std=c++17 -fconcepts
 SRTMinorServoSocketTest_LIBS = $(GTEST_LIBS) SRTMinorServoSocketLibrary SRTMinorServoCommandLibrary IRALibrary
 SRTMinorServoSocketTest_LDFLAGS = -lstdc++ -lpthread
 
