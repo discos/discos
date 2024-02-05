@@ -352,6 +352,16 @@ public:
      * @param att new attenuation level, It could be in the range 0-15. A negative will keep the previous value.  
      */
     virtual void setAttenuation(CORBA::Long input,CORBA::Double att) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+
+    /**
+     * This method is used to set a range in the bandwith of the backend where calculate the Tsys.
+     * @throw CORBA::SystemException
+     * @throw ComponentErrors::ComponentErrorsEx
+     * @throw BackendsErrors::BackendsErrorsEx
+     * @param freq starting frequency.
+     * @param bw bandwidth interval.
+     */
+    virtual void setTsysRange(CORBA::Double freq,CORBA::Double bw) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
     
     /**
      * In order  to get the inputs definition in just one call. The returned argument contains the configuration sequentially, the first element corresponds to the first input and so on.
