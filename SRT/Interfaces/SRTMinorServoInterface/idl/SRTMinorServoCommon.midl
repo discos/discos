@@ -54,8 +54,8 @@ module MinorServo
     enum SRTMinorServoGregorianCoverStatus
     {
         COVER_STATUS_UNKNOWN,
-        COVER_STATUS_OPEN,
-        COVER_STATUS_CLOSED
+        COVER_STATUS_CLOSED,
+        COVER_STATUS_OPEN
     };
     ACS_ENUM(SRTMinorServoGregorianCoverStatus);
 

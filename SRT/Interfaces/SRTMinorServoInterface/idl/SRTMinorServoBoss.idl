@@ -18,6 +18,11 @@ module MinorServo
     interface SRTMinorServoBoss: MinorServoBoss
     {
         /**
+         * Boolean indicating whether the component is connected to the Leonardo Minor Servo system
+         */
+        readonly attribute Management::ROTBoolean connected;
+
+        /**
          * Current configuration of the Leonardo minor servo system
          */
         readonly attribute ROSRTMinorServoFocalConfiguration current_configuration;
