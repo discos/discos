@@ -170,9 +170,13 @@ void CComponentCore::activate() throw (
     m_calDiode=false; 
     guard.release();
     
-	lnaOn(); // Throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
-    //externalCalOff();
-
+    try {
+	 	lnaOn(); // Throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
+    	//externalCalOff();
+	 }
+	 catch (ReceiversErrors::ReceiversErrorsExImpl& E) {
+	 	ACS_LOG(LM_FULL_INFO,"CComponentCore::activate()",(LM_WARNING,"LNA control board is showing some issues"));
+	 }	 
     bool answer;
     try {
         answer=m_control->isRemoteOn();
