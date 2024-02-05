@@ -13,6 +13,7 @@
     active_surface_configuration="ON"
     elevation_tracking_enabled="ON">
 
+    <connected description="Boolean indicating whether the component is connected to the Leonardo Minor Servo System" />
     <status description="The summary status of MinorServoBoss"/>
     <actualSetup description="Mnemonic code that defines a setup" />
     <motionInfo description="Description of the movement in progress" />
@@ -23,7 +24,6 @@
     <scanActive description="True if a scan is active" />
     <scanning description="True if the system is performing a scan" />
     <tracking description="Is the minor servo system tracking?" />
-
     <current_configuration description="Current minor servos focal configuration" />
     <simulation_enabled description="Boolean indicating whether the servos are acting in simulated mode" />
     <plc_time description="UNIX time of the minor servo PLC" />

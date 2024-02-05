@@ -12,8 +12,8 @@
     max_speed="1, 1, 1"
     acceleration="1, 1, 1"
     min_range="0, 0, 0"
-    max_range="0, 0, 0">
-
+    max_range="0, 0, 0"
+    tracking_delta="1, 1, 1">
 
     <enabled description="All physical axes enabled" />
     <drive_cabinet_status description="Drive cabinet status" />

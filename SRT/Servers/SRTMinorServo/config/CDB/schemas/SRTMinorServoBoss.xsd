@@ -50,6 +50,7 @@
      <xs:complexContent>
       <xs:extension base="baci:CharacteristicComponent">
        <xs:sequence>
+        <xs:element name="connected" type="mng:BooleanType" />
         <xs:element name="status" type="mng:SystemStatusType" />
         <xs:element name="actualSetup" type="baci:ROstring" />
         <xs:element name="motionInfo" type="baci:ROstring" />
@@ -60,7 +61,6 @@
         <xs:element name="scanActive" type="mng:BooleanType" />
         <xs:element name="scanning" type="mng:BooleanType" />
         <xs:element name="tracking" type="mng:BooleanType" />
-
         <xs:element name="current_configuration" type="SRTMinorServoFocalConfigurationType" />
         <xs:element name="simulation_enabled" type="mng:BooleanType" />
         <xs:element name="plc_time" type="baci:ROdouble" />

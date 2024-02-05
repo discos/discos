@@ -31,6 +31,13 @@
     <virtual_positions><property_name>RY</property_name></virtual_positions>
     <virtual_positions><property_name>RZ</property_name></virtual_positions>
 
+    <virtual_axes_units><property_name>mm</property_name></virtual_axes_units>
+    <virtual_axes_units><property_name>mm</property_name></virtual_axes_units>
+    <virtual_axes_units><property_name>mm</property_name></virtual_axes_units>
+    <virtual_axes_units><property_name>degree</property_name></virtual_axes_units>
+    <virtual_axes_units><property_name>degree</property_name></virtual_axes_units>
+    <virtual_axes_units><property_name>degree</property_name></virtual_axes_units>
+
     <virtual_offsets><property_name>OFFSET_TX</property_name></virtual_offsets>
     <virtual_offsets><property_name>OFFSET_TY</property_name></virtual_offsets>
     <virtual_offsets><property_name>OFFSET_TZ</property_name></virtual_offsets>

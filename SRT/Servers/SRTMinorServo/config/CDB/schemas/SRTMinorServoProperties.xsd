@@ -25,6 +25,7 @@
       <xs:element name="physical_axes_enabled" type="SRTMinorServoPropertyType" minOccurs="1" maxOccurs="unbounded" /> 
       <xs:element name="physical_positions" type="SRTMinorServoPropertyType" minOccurs="1" maxOccurs="unbounded" /> 
       <xs:element name="virtual_positions" type="SRTMinorServoPropertyType" minOccurs="1" maxOccurs="unbounded" /> 
+      <xs:element name="virtual_axes_units" type="SRTMinorServoPropertyType" minOccurs="1" maxOccurs="unbounded" />
       <xs:element name="virtual_offsets" type="SRTMinorServoPropertyType" minOccurs="1" maxOccurs="unbounded" /> 
      </xs:sequence>
     </xs:complexType>

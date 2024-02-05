@@ -18,5 +18,7 @@
 
     <virtual_positions><property_name>ROTATION</property_name></virtual_positions>
 
+    <virtual_axes_units><property_name>degree</property_name></virtual_axes_units>
+
     <virtual_offsets><property_name>OFFSET</property_name></virtual_offsets>
 </SRTMinorServoProperties>
