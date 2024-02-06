@@ -67,8 +67,8 @@ void CSRTActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetComp
     char * value2;
 
     //s_usdTable = getenv ("ACS_CDB");
-    //strcat(s_usdTable,USDTABLE);
-    value2 = USDTABLE;
+    //strcat(s_usdTable,USDTABLE.c_str());
+    value2 = USDTABLE.c_str();
     //ifstream usdTable(s_usdTable);
     ifstream usdTable(value2);
     if(!usdTable)
@@ -78,7 +78,7 @@ void CSRTActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetComp
         exit(-1);
     }
 
-    value = USDTABLECORRECTIONS;
+    value = USDTABLECORRECTIONS.c_str();
     ifstream usdCorrections (value);
     if(!usdCorrections)
     {
@@ -1360,7 +1360,7 @@ void CSRTActiveSurfaceBossCore::workingActiveSurface() throw (ComponentErrors::C
 
 void CSRTActiveSurfaceBossCore::asSetLUT(const char *newlut)
 {
-    m_lut= (CDBPATH + "alma/AS/" + newlut).c_str();
+    m_lut = std::string(CDBPATH + "alma/AS/" + newlut);
     m_newlut = true;
 }
 
@@ -1377,12 +1377,10 @@ void CSRTActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newP
 
     if(all_sectors) // USD tables has not been loaded yet
     {
-        ifstream usdCorrections (m_lut);
-        //ifstream usdCorrections (USDTABLECORRECTIONS);
+        ifstream usdCorrections(m_lut);
         if(!usdCorrections)
         {
-            ACS_SHORT_LOG ((LM_INFO, "File %s not found", m_lut));
-            //ACS_SHORT_LOG ((LM_INFO, "File %s not found", USDTABLECORRECTIONS));
+            ACS_SHORT_LOG ((LM_INFO, "File %s not found", m_lut.c_str()));
             exit(-1);
         }
         actuatorsCorrections.length(NPOSITIONS);
