@@ -667,8 +667,8 @@ public:
             const BYTE port_type=MCB_PORT_TYPE_DIO,
             const BYTE port_number_sd=MCB_PORT_NUMBER_13,
             const BYTE port_number_vlbi=MCB_PORT_NUMBER_14,
-            const BYTE value_sd=0x00,
-            const BYTE value_vlbi=0x01
+            const BYTE value_sd=0x01,
+            const BYTE value_vlbi=0x00
     );
 
 
@@ -682,7 +682,7 @@ public:
     bool isSingleDishModeOn(
             const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
             const BYTE port_type=MCB_PORT_TYPE_DIO, 
-            const BYTE port_number=MCB_PORT_NUMBER_29
+            const BYTE port_number=MCB_PORT_NUMBER_13
     );
 
 
@@ -704,8 +704,8 @@ public:
             const BYTE port_type=MCB_PORT_TYPE_DIO,
             const BYTE port_number_vlbi=MCB_PORT_NUMBER_14,
             const BYTE port_number_sd=MCB_PORT_NUMBER_13,
-            const BYTE value_vlbi=0x00,
-            const BYTE value_sd=0x01
+            const BYTE value_vlbi=0x01,
+            const BYTE value_sd=0x00
     );
 
 
@@ -719,7 +719,7 @@ public:
     bool isVLBIModeOn(
             const BYTE data_type=MCB_CMD_DATA_TYPE_B01,
             const BYTE port_type=MCB_PORT_TYPE_DIO,
-            const BYTE port_number=MCB_PORT_NUMBER_30
+            const BYTE port_number=MCB_PORT_NUMBER_14
     );
 
     

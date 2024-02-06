@@ -889,20 +889,6 @@ void ReceiverControl::setSingleDishMode(
                 port_number_vlbi,
                 value_vlbi
         );
-                
-        // Turn OFF the single dish mode on port number 13
-        makeRequest(
-                m_dewar_board_ptr,     // Pointer to the dewar board
-                MCB_CMD_SET_DATA,      // Command to send
-                4,                     // Number of parameters
-                data_type,
-                port_type,
-                port_number_sd,
-                !value_sd
-        );
-
-        // Now the bits 13 and 14 are set to 1
-        // We need to set the bit 13 to 0, wait a bit and set it to 1
         
         usleep(3 * SETMODE_SLEEP_TIME);
         // Turn ON the single dish mode on port number 13
@@ -915,21 +901,7 @@ void ReceiverControl::setSingleDishMode(
                 port_number_sd,
                 value_sd
         );
-        
-        usleep(3 * SETMODE_SLEEP_TIME);
-        // Turn OFF the single dish mode on port number 13
-        makeRequest(
-                m_dewar_board_ptr,     // Pointer to the dewar board
-                MCB_CMD_SET_DATA,      // Command to send
-                4,                     // Number of parameters
-                data_type,
-                port_type,
-                port_number_sd,
-                !value_sd
-        );
         pthread_mutex_unlock(&m_dewar_mutex); 
-
-        // Now the bits 13 and 14 are set, respectively, to 0 and 1
     }
     catch(MicroControllerBoardEx& ex) {
         pthread_mutex_unlock(&m_dewar_mutex); 
@@ -989,19 +961,6 @@ void ReceiverControl::setVLBIMode(
                 port_number_sd,
                 value_sd
         );
-        // Turn OFF the VLBI mode on port number 14
-        makeRequest(
-                m_dewar_board_ptr,     // Pointer to the dewar board
-                MCB_CMD_SET_DATA,      // Command to send
-                4,                     // Number of parameters
-                data_type,
-                port_type,
-                port_number_vlbi,
-                !value_vlbi
-        );
-
-        // Now the bits 13 and 14 are set to 1
-        // We need to set the bit 13 to 1, wait a bit and set again it to 0
         
         usleep(3 * SETMODE_SLEEP_TIME);
         
@@ -1015,20 +974,7 @@ void ReceiverControl::setVLBIMode(
                 port_number_vlbi,
                 value_vlbi
         );
-       
-        usleep(3 * SETMODE_SLEEP_TIME);
-        // Turn OFF the VLBI mode on port number 14
-        makeRequest(
-                m_dewar_board_ptr,     // Pointer to the dewar board
-                MCB_CMD_SET_DATA,      // Command to send
-                4,                     // Number of parameters
-                data_type,
-                port_type,
-                port_number_vlbi,
-                !value_vlbi
-        );
         pthread_mutex_unlock(&m_dewar_mutex); 
-
     }
     catch(MicroControllerBoardEx& ex) {
         pthread_mutex_unlock(&m_dewar_mutex); 

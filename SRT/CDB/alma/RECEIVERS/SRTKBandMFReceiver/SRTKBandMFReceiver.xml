@@ -18,7 +18,7 @@
     DewarIPAddress="127.0.0.1"
     DewarPort="12902"
     LNAIPAddress=""
-    LNAPort="12903"      
+    LNAPort="0"
     WatchDogResponseTime="10000000"
     WatchDogSleepTime="10000000"
     LNASamplingTime="250000"
