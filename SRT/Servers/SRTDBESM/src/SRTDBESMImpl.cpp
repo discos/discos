@@ -240,6 +240,27 @@ void SRTDBESMImpl::aboutToAbort()
 	_IRA_LOGFILTER_DESTROY;
 }
 
+void SRTDBESMImpl::handle_addr(short * b_addr)
+{
+	  ACS::Time timestamp;
+     if (*b_addr == 1)
+    		 {
+    				*b_addr = m_paddr_1->getDevIO()->read(timestamp);
+    		 }
+     else if (*b_addr == 2)
+   	  	 {
+    				*b_addr = m_paddr_2->getDevIO()->read(timestamp);
+    		 }
+     else if (*b_addr == 3)
+   	  	 {
+    				*b_addr = m_paddr_3->getDevIO()->read(timestamp); 
+    		 }
+     else if (*b_addr == 4)
+   	  	 {
+    				*b_addr = m_paddr_4->getDevIO()->read(timestamp); 
+    		 }
+     }
+
 void SRTDBESMImpl::set_all(const char * cfg_name) //throw (BackendsErrors::BackendsErrorsEx)
 {
 	 AUTO_TRACE("SRTDBESMImpl::set_all()");
@@ -268,6 +289,9 @@ void SRTDBESMImpl::set_all(const char * cfg_name) //throw (BackendsErrors::Backe
 void SRTDBESMImpl::set_mode(short b_addr, const char * cfg_name) //throw (BackendsErrors::BackendsErrorsEx)
 {
 	AUTO_TRACE("SRTDBESMImpl::set_mode()");
+	
+   handle_addr(&b_addr);	
+	
 	try {
 		
    	 m_commandSocket.set_mode(b_addr, cfg_name);
@@ -292,6 +316,9 @@ void SRTDBESMImpl::set_mode(short b_addr, const char * cfg_name) //throw (Backen
 void SRTDBESMImpl::set_att(short b_addr, short out_ch, double att_val) //throw (BackendsErrors::BackendsErrorsEx)
 {
 	AUTO_TRACE("SRTDBESMImpl::set_att()");
+	
+	handle_addr(&b_addr);
+	
 	try {
 		
     	m_commandSocket.set_att(b_addr, out_ch, att_val);
@@ -371,6 +398,8 @@ void SRTDBESMImpl::get_status(short b_addr)// throw (BackendsErrors::BackendsErr
 	 new_att_vals.length(17);
     string output;
     
+    handle_addr(&b_addr);
+ 
     try {
     	
     	output= m_commandSocket.get_status(b_addr);
@@ -446,6 +475,8 @@ void SRTDBESMImpl::get_comp(short b_addr) //throw (BackendsErrors::BackendsError
 	 new_eq_vals.length(10);
 	 new_bpf_vals.length(11);
 	 string output;
+	 
+    handle_addr(&b_addr);	 
 	 
 	 try {
 	 	
@@ -528,6 +559,8 @@ void SRTDBESMImpl::get_diag(short b_addr) //throw (BackendsErrors::BackendsError
 	 double new_temp_val;
 	 string output;
 	 
+    handle_addr(&b_addr);	 
+	 
 	 try {
 	 	
     	 output = m_commandSocket.get_diag(b_addr);
@@ -555,14 +588,24 @@ void SRTDBESMImpl::get_diag(short b_addr) //throw (BackendsErrors::BackendsError
     	 m_commandSocket.parse_double_response(output, "5V ", " 3V3", &new_volt_val);
   		 new_volt_vals[0] = new_volt_val;  														
          
-   	 m_commandSocket.parse_double_response(output, "3V3 ", "\nT0", &new_volt_val2);
+   	 m_commandSocket.parse_double_response(output, "3V3 ", "\n", &new_volt_val2);
        new_volt_vals[1] = new_volt_val2;
-         
-   	 m_commandSocket.parse_double_response(output, "T0 ", "\r\n", &new_temp_val);
     }
     catch (std::out_of_range) {
 			_EXCPT(BackendsErrors::MalformedAnswerExImpl,impl,"SRTDBESMImpl::get_diag()");
 			throw impl; }
+			
+    try {  
+   	 m_commandSocket.parse_double_response(output, "T0 ", "\r\n", &new_temp_val);
+    }
+    catch (std::out_of_range) {
+   	    if (output.find("temp sensor not present") != std::string::npos) {
+             new_temp_val = 0.0;
+             }
+          else {
+			 _EXCPT(BackendsErrors::MalformedAnswerExImpl,impl,"SRTDBESMImpl::get_diag()");
+			 throw impl; }
+		 }
 			
    try {
    	 
@@ -606,7 +649,8 @@ void SRTDBESMImpl::get_cfg()
 {
 	 AUTO_TRACE("SRTDBESMImpl::get_cfg()");
 	 string cfg_message;
-	 int newlines =0;
+	 int newlines =0; 
+	 
 	 try {
 	 	
     	 cfg_message = m_commandSocket.get_cfg();
@@ -825,6 +869,8 @@ void SRTDBESMImpl::get_firm(short b_addr) //throw (BackendsErrors::BackendsError
 {
 	 AUTO_TRACE("SRTDBESMImpl::get_firm()");
 	 string output;
+	 
+    handle_addr(&b_addr);	 
 	 
 	 try {
 	 	

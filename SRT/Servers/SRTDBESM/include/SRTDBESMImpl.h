@@ -87,6 +87,8 @@ public:
  	virtual void get_dbeatt(const char * out_dbe); //throw (BackendsErrors::BackendsErrorsEx);
  	
  	virtual void get_firm(short b_addr);
+ 	
+ 	virtual void handle_addr(short * b_addr);
 
 	/** 
 	 * Returns a reference to addr_1.

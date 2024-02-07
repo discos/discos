@@ -375,6 +375,11 @@ void CCommandSocket::set_mode_command(short b_addr, const char * cfg_name) //thr
     //cout << "Message to send is: " << msg << endl;
     sendCommand(msg, &outBuff, 0);
 
+    if (outBuff.find("not existing") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::set_mode_command()");
+		impl.setReason("Board address entered not valid");
+		throw impl;
+	   }
     if (outBuff.find("unreachable") != string::npos) {
 		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::set_mode_command()");
 		impl.setReason("DBESM board unreachable, timeout error");
@@ -393,7 +398,12 @@ void CCommandSocket::set_att_command(short b_addr, short out_ch, double att_val)
     string msg = CDBESMCommand::comm_set_att(to_string(b_addr), to_string(out_ch), to_string(att_val));
     //cout << "Message to send is: " << msg << endl;
     sendCommand(msg, &outBuff, 0);
-
+    
+    if (outBuff.find("not existing") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::set_att_command()");
+		impl.setReason("Board address entered not valid");
+		throw impl;
+	   }
     if (outBuff.find("unreachable") != string::npos) {
 		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::set_att_command()");
 		impl.setReason("DBESM board unreachable, timeout error");
@@ -451,6 +461,11 @@ string CCommandSocket::get_status_command(short b_addr) //throw (BackendsErrors:
     //cout << "Message to send is: " << msg << endl;
     sendCommand(msg, &response, 0);
 
+    if (response.find("not existing") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::get_status_command()");
+		impl.setReason("Board address entered not valid");
+		throw impl;
+	   }
     if (response.find("unreachable") != string::npos) {
 		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::get_status_command()");
 		impl.setReason("DBESM board unreachable, timeout error");
@@ -471,6 +486,11 @@ string CCommandSocket::get_comp_command(short b_addr) //throw (BackendsErrors::B
     //cout << "Message to send is: " << msg << endl;
     sendCommand(msg, &response, 0);
 
+    if (response.find("not existing") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::get_comp_command()");
+		impl.setReason("Board address entered not valid");
+		throw impl;
+	   }
     if (response.find("unreachable") != string::npos) {
 		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::get_comp_command()");
 		impl.setReason("DBESM board unreachable, timeout error");
@@ -491,6 +511,11 @@ string CCommandSocket::get_diag_command(short b_addr) //throw (BackendsErrors::B
     //cout << "Message to send is: " << msg << endl;
     sendCommand(msg, &response, 0);
 
+    if (response.find("not existing") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::get_diag_command()");
+		impl.setReason("Board address entered not valid");
+		throw impl;
+	   }
     if (response.find("unreachable") != string::npos) {
 		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::get_diag_command()");
 		impl.setReason("DBESM board unreachable, timeout error");
@@ -510,7 +535,7 @@ string CCommandSocket::get_cfg_command() //throw (BackendsErrors::BackendsErrors
     string msg = CDBESMCommand::comm_get_cfg();
     //cout << "Message to send is: " << msg << endl;
     sendCommand(msg, &response, 0);
-    
+
     if (response.find("unreachable") != string::npos) {
 		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::get_cfg_command()");
 		impl.setReason("DBESM board unreachable, timeout error");
@@ -571,6 +596,11 @@ string CCommandSocket::get_firm_command(short b_addr) //throw (BackendsErrors::B
     //cout << "Message to send is: " << msg << endl;
     sendCommand(msg, &response, 0);
 
+    if (response.find("not existing") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::get_firm_command()");
+		impl.setReason("Board address entered not valid");
+		throw impl;
+	   }
     if (response.find("unreachable") != string::npos) {
 		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::get_firm_command()");
 		impl.setReason("DBESM board unreachable, timeout error");
