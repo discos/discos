@@ -1,5 +1,7 @@
 #include "ReceiverControl.h"
 #include <cstdlib>
+#include <string>
+
 
 using namespace IRA;
 
@@ -59,6 +61,9 @@ int main(int argc, char *argv[])
     // unsigned int switch_port = atoi(argv[6]);
     unsigned short feeds = 7; 
     std::vector<BYTE> data;
+    std::string input;
+
+
 
 
     // Test the constructor 
@@ -78,10 +83,41 @@ int main(int argc, char *argv[])
                 0x7C,
                 0x7D,
                 0x7C,
-                0x01
+                0x01,
+                false
         );
         cout << "Connection" << " done!" << endl << endl;
         
+        
+        while (true){
+        
+		  
+		      std::cout << "Command:>";
+		      std::cin >> input ;
+		      if (input=="calOn"){
+		  		    std::cout <<"calOn" <<std::endl;
+		  		    rc.setCalibrationOn();
+		  		    cout << "Is the noise mark generator ON? " << (rc.isCalibrationOn() == true ? "yes" : "no") << endl;
+						  
+		      } else if (input=="calOff"){
+		  		    
+		  		    std::cout <<"calOff" <<std::endl;
+		         rc.setCalibrationOff();
+               cout << "Is the noise mark generator ON? " << (rc.isCalibrationOn() == true ? "yes" : "no") << endl;
+               cout << "Done!\n" << endl;
+        
+            } else if (input=="exit"){
+		  		    
+		  		    
+		  		    std::cout <<"exit" <<std::endl;
+		          break;
+        
+            } else {
+            
+               std::cout <<"Command Unknown" << std::endl;
+            }
+        
+        }
         // // Test the setCalibrationOn()
         // cout << "Test setCalibrationOn() with a reliable communication" << endl;
         // rc.setCalibrationOn();
@@ -93,9 +129,9 @@ int main(int argc, char *argv[])
         // cout << "Done!\n" << endl;
 
         // Test the setCalibrationOff()
-        // cout << "Test setCalibrationOff()" << endl;
-        // rc.setCalibrationOff();
-        // cout << "Done!\n" << endl;
+       // cout << "Test setCalibrationOff()" << endl;
+         //rc.setCalibrationOff();
+         //cout << "Done!\n" << endl;
 
         // // Test the isCalibrationOn()
         // cout << "Test isCalibrationOn() with a reliable communication" << endl;
@@ -139,12 +175,16 @@ int main(int argc, char *argv[])
         // cout << "Is the vacuum sensor ON? " << (rc.isVacuumSensorOn() == true ? "yes" : "no") << endl;
         // cout << "Done!\n" << endl;
 
+        // Test the isRemoteOn()
+        // cout << "Test isRemoteOn() with a reliable communication" << endl;
+        // cout << "Is the remote command enable? " << (rc.isRemoteOn() == true ? "yes" : "no") << endl;
+        // cout << "Done!\n" << endl;
 
         // Test the vacuum() voltage value, without conversion
-        cout << "Test vacuum()" << endl;
-        cout << "Vacuum value before conversion [Volt]: " << rc.vacuum() << endl;
-        cout << "Vacuum value after conversion: " << rc.vacuum(voltage2mbar) << endl;
-        cout << "Done!\n" << endl;
+        // cout << "Test vacuum()" << endl;
+        // cout << "Vacuum value before conversion [Volt]: " << rc.vacuum() << endl;
+        // cout << "Vacuum value after conversion: " << rc.vacuum(voltage2mbar) << endl;
+        // cout << "Done!\n" << endl;
 
         // // Test the setReliableCommOn()
         // cout << "Test setReliableCommOn()" << endl;
@@ -172,33 +212,33 @@ int main(int argc, char *argv[])
         // cout << "Done!\n" << endl;
 
         // Test the vertexTemperature() voltage value, without conversion
-        cout << "Test vertexTemperature()" << endl;
-        cout << "Vertex temperature value before conversion [Volt]: " << rc.vertexTemperature(voltage2Celsius) << endl;
-        cout << "Done!\n" << endl;
+        //cout << "Test vertexTemperature()" << endl;
+        //cout << "Vertex temperature value before conversion [Volt]: " << rc.vertexTemperature(voltage2Celsius) << endl;
+        //cout << "Done!\n" << endl;
 
         // Test the cryoTemperature(0)
-        cout << "Test cryoTemperature(0) with a reliable communication" << endl;
-        cout << "First Cryogenic Temperature value (mbar): " << rc.cryoTemperature(0, voltage2Kelvin) << endl;
-        cout << "First Cryogenic Temperature value (Volt): " << rc.cryoTemperature(0) << endl;
-        cout << "Done!\n" << endl;
+        //cout << "Test cryoTemperature(0) with a reliable communication" << endl;
+        //cout << "First Cryogenic Temperature value (mbar): " << rc.cryoTemperature(0, voltage2Kelvin) << endl;
+        //cout << "First Cryogenic Temperature value (Volt): " << rc.cryoTemperature(0) << endl;
+        //cout << "Done!\n" << endl;
 
         // Test the cryoTemperature(1)
-        cout << "Test cryoTemperature(1) with a reliable communication" << endl;
-        cout << "Second Cryogenic Temperature value (mbar): " << rc.cryoTemperature(1, voltage2Kelvin) << endl;
-        cout << "Second Cryogenic Temperature value (Volt): " << rc.cryoTemperature(1) << endl;
-        cout << "Done!\n" << endl;
+        //cout << "Test cryoTemperature(1) with a reliable communication" << endl;
+        //cout << "Second Cryogenic Temperature value (mbar): " << rc.cryoTemperature(1, voltage2Kelvin) << endl;
+        //cout << "Second Cryogenic Temperature value (Volt): " << rc.cryoTemperature(1) << endl;
+        //cout << "Done!\n" << endl;
 
         // Test the cryoTemperature(3)
-        cout << "Test cryoTemperature(3) with a reliable communication" << endl;
-        cout << "Third Cryogenic Temperature value (mbar): " << rc.cryoTemperature(3, voltage2Kelvin) << endl;
-        cout << "Third Cryogenic Temperature value (volt): " << rc.cryoTemperature(3) << endl;
-        cout << "Done!\n" << endl;
+        //cout << "Test cryoTemperature(3) with a reliable communication" << endl;
+        //cout << "Third Cryogenic Temperature value (mbar): " << rc.cryoTemperature(3, voltage2Kelvin) << endl;
+        //cout << "Third Cryogenic Temperature value (volt): " << rc.cryoTemperature(3) << endl;
+        //cout << "Done!\n" << endl;
 
         // // Test the cryoTemperature(4)
-        cout << "Test cryoTemperature(4) with a reliable communication" << endl;
-        cout << "Fouth Cryogenic Temperature value (mbar): " << rc.cryoTemperature(4, voltage2Kelvin) << endl;
-        cout << "Fouth Cryogenic Temperature value (volt): " << rc.cryoTemperature(4) << endl;
-        cout << "Done!\n" << endl;
+        //cout << "Test cryoTemperature(4) with a reliable communication" << endl;
+        //cout << "Fouth Cryogenic Temperature value (mbar): " << rc.cryoTemperature(4, voltage2Kelvin) << endl;
+        //cout << "Fouth Cryogenic Temperature value (volt): " << rc.cryoTemperature(4) << endl;
+        //cout << "Done!\n" << endl;
 
         // // Test the isCoolHeadOn()
         // cout << "Test isCoolHeadOn() with a reliable communication" << endl;
@@ -357,10 +397,6 @@ int main(int argc, char *argv[])
         // cout << "Is the vacuum valve ON? " << (rc.isVacuumValveOn() == true ? "yes" : "no") << endl;
         // cout << "Done!\n" << endl;
 
-        // Test the isRemoteOn()
-        cout << "Test isRemoteOn() with a reliable communication" << endl;
-        cout << "Is the remote command enable? " << (rc.isRemoteOn() == true ? "yes" : "no") << endl;
-        cout << "Done!\n" << endl;
 
         // // Test the selectLO1()
         // cout << "Test selectLO1() with a reliable communication" << endl;
@@ -407,35 +443,35 @@ int main(int argc, char *argv[])
         // cout << "Is the single dish mode active? " << (rc.isSingleDishModeOn() == true ? "yes" : "no") << endl;
         // cout << "Done!\n" << endl;
 
-        // // // Test the isVLBIModeOn()
-        // cout << "Test isVLBIModeOn() with a reliable communication" << endl;
-        // cout << "Is the VLBI mode active? " << (rc.isVLBIModeOn() == true ? "yes" : "no") << endl;
-        // cout << "Done!\n" << endl;
-
-        // // // Test the setVLBIMode()
-        // cout << "Test setVLBIMode() with a reliable communication" << endl;
-        // rc.setVLBIMode();
-        // cout << "Done!\n" << endl;
-
         // // Test the isVLBIModeOn()
-        // cout << "Test isVLBIModeOn() with a reliable communication" << endl;
-        // cout << "Is the VLBI mode active? " << (rc.isVLBIModeOn() == true ? "yes" : "no") << endl;
-        // cout << "Done!\n" << endl;
+        cout << "Test isVLBIModeOn() with a reliable communication" << endl;
+        cout << "Is the VLBI mode active? " << (rc.isVLBIModeOn() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
+
+        // // Test the setVLBIMode()
+        cout << "Test setVLBIMode() with a reliable communication" << endl;
+        rc.setVLBIMode();
+        cout << "Done!\n" << endl;
+
+        // Test the isVLBIModeOn()
+        cout << "Test isVLBIModeOn() with a reliable communication" << endl;
+        cout << "Is the VLBI mode active? " << (rc.isVLBIModeOn() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
 
         // // Test the isSingleDishModeOn()
-        // cout << "Test isSingleDishModeOn() with a reliable communication" << endl;
-        // cout << "Is the single dish mode active? " << (rc.isSingleDishModeOn() == true ? "yes" : "no") << endl;
-        // cout << "Done!\n" << endl;
+        cout << "Test isSingleDishModeOn() with a reliable communication" << endl;
+        cout << "Is the single dish mode active? " << (rc.isSingleDishModeOn() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
         // 
         // // Test the setSingleDishMode()
-        // cout << "Test setSingleDishMode() with a reliable communication" << endl;
-        // rc.setSingleDishMode();
-        // cout << "Done!\n" << endl;
+        cout << "Test setSingleDishMode() with a reliable communication" << endl;
+        rc.setSingleDishMode();
+        cout << "Done!\n" << endl;
 
         // // Test the isSingleDishModeOn()
-        // cout << "Test isSingleDishModeOn() with a reliable communication" << endl;
-        // cout << "Is the single dish mode active? " << (rc.isSingleDishModeOn() == true ? "yes" : "no") << endl;
-        // cout << "Done!\n" << endl;
+        cout << "Test isSingleDishModeOn() with a reliable communication" << endl;
+        cout << "Is the single dish mode active? " << (rc.isSingleDishModeOn() == true ? "yes" : "no") << endl;
+        cout << "Done!\n" << endl;
 
         // // Test the isVLBIModeOn()
         // cout << "Test isVLBIModeOn() with a reliable communication" << endl;

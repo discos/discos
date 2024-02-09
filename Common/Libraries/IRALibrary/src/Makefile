@@ -53,7 +53,7 @@ PY_SCRIPTS =
 
 EXECUTABLES     = 
 EXECUTABLES_L   = Test1 Test2 TestDBTable TestTypes TestMicroControllerBoard TestReceiverControl TestLogDike TestTimeTaggedCircularArray  \
-				  TestFlux TestTimer TestRounding
+				  TestFlux TestTimer TestRounding TestCommandRXBoard
 
 #
 # <brief description of xxxxx program>
@@ -74,6 +74,10 @@ TestMicroControllerBoard_LIBS      = IRALibrary
 
 TestReceiverControl_OBJECTS   = TestReceiverControl
 TestReceiverControl_LIBS      = IRALibrary
+
+TestCommandRXBoard_OBJECTS   = TestCommandRXBoard
+TestCommandRXBoard_LIBS      = IRALibrary
+
 
 TestLogDike_OBJECTS = TestDike
 TestLogDike_LIBS      = IRALibrary ClientErrors

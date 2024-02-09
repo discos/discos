@@ -124,6 +124,7 @@ private:
     const DWORD m_timeout;
     const BYTE m_master_address;
     const BYTE m_slave_address;
+    bool m_connected;
     IRA::CSocket *m_socket;
     unsigned long long m_id;
     BYTE m_command_type;

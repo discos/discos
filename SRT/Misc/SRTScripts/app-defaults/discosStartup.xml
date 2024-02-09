@@ -47,15 +47,6 @@
             <remoteAccount>discos</remoteAccount>
         </container>
         <container>
-            <name>DerotatorContainer</name>
-            <type>cpp</type>
-            <heapSizeMB></heapSizeMB>
-            <useDedicatedSettings>true</useDedicatedSettings>
-            <scriptBase>0</scriptBase>
-            <remoteHost>MASTERHOST</remoteHost>
-            <remoteAccount>discos</remoteAccount>
-        </container>
-        <container>
             <name>DerotatorPositionerContainer</name>
             <type>py</type>
             <heapSizeMB></heapSizeMB>
