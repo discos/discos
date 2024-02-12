@@ -28,7 +28,7 @@
 
 <AvailableReceiver Code="CCG" Derotator="false" Component="RECEIVERS/SRT5GHzReceiver"/>
 
-<AvailableReceiver Code="KKG" Derotator="true" Component="RECEIVERS/SRTKBandMFReceiver"/>
+<AvailableReceiver Code="KKG" Derotator="false" Component="RECEIVERS/SRTKBandMFReceiver"/>
 
 <AvailableReceiver Code="LLP" Derotator="false" Component="RECEIVERS/SRTLPBandReceiver"/>
 
