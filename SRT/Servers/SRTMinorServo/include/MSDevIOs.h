@@ -7,6 +7,7 @@
  */
 
 #include "SRTMinorServoCommon.h"
+#include "SRTMinorServoContainers.h"
 #include <type_traits>
 #include <baciDevIO.h>
 #include <ComponentErrors.h>
@@ -64,9 +65,16 @@ namespace MinorServo
         /**
          * Constructor.
          * @param motion_status the atomic status of the motion of the minor servo system.
-         * @param answer_map the SRTMinorServoAnswerMap containing the status of the system. It is used to read the position of the gregorian cover.
+         * @param answer_map a reference to the SRTMinorServoAnswerMap object containing the status of the system. It is used to read the position of the gregorian cover.
+         * @param scanning a reference to the TBoolean indicating whether the system is scanning or not.
+         * @param current_scan a reference to the SRTMinorServoScan object containing the parameters for the current scan. It is used to read the servo name and axis involved in the scan.
          */
-        MSMotionInfoDevIO(const std::atomic<SRTMinorServoMotionStatus>& motion_status, const SRTMinorServoAnswerMap& answer_map) : m_motion_status(motion_status), m_answer_map(answer_map) {}
+        MSMotionInfoDevIO(const std::atomic<SRTMinorServoMotionStatus>& motion_status, const SRTMinorServoAnswerMap& answer_map, const std::atomic<Management::TBoolean>& scanning, const SRTMinorServoScan& current_scan) :
+            m_motion_status(motion_status),
+            m_answer_map(answer_map),
+            m_scanning(scanning),
+            m_current_scan(current_scan)
+        {}
 
         /**
          * Returns the property value.
@@ -97,7 +105,14 @@ namespace MinorServo
                 }
                 case MOTION_STATUS_TRACKING:
                 {
-                    motion_status = "Elevation Track Mode";
+                    if(m_scanning.load() == Management::MNG_FALSE)
+                    {
+                        motion_status = "Elevation Track Mode";
+                    }
+                    else
+                    {
+                        motion_status = "Scanning along " + m_current_scan.servo_name + " " + m_current_scan.axis_name + " axis";
+                    }
                     break;
                 }
                 case MOTION_STATUS_PARKING:
@@ -149,6 +164,16 @@ namespace MinorServo
          * Reference to the SRTMinorServoAnswerMap object of the Boss.
          */
         const SRTMinorServoAnswerMap& m_answer_map;
+
+        /**
+         * Reference to the boolean telling if the system is scanning.
+         */
+        const std::atomic<Management::TBoolean>& m_scanning;
+
+        /**
+         * Reference to the SRTMinorServoScan object of the Boss.
+         */
+        const SRTMinorServoScan& m_current_scan;
     };
 
     /**
