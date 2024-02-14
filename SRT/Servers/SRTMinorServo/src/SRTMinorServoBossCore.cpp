@@ -324,8 +324,8 @@ void SRTMinorServoBossCore::park()
 
     try
     {
-        // Send the STOW command to the gregorian cover
-        if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::stow("GREGORIAN_CAP", 2)).checkOutput())
+        // Send the STOW command to close the gregorian cover
+        if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::stow("GREGORIAN_CAP", 1)).checkOutput())
         {
             _EXCPT(ManagementErrors::ParkingErrorExImpl, ex, "SRTMinorServoBossCore::park()");
             ex.setSubsystem("MinorServo");
