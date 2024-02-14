@@ -1,371 +1,520 @@
 #ifndef _MSDEVIOS_H
 #define _MSDEVIOS_H
 
-/**********************************************************/
-/* Giuseppe Carboni <giuseppe.carboni@inaf.it> 20/09/2023 */
-/**********************************************************/
+/**
+ * MSDevIO.h
+ * Giuseppe Carboni (giuseppe.carboni@inaf.it)
+ */
 
-#include "Common.h"
+#include "SRTMinorServoCommon.h"
 #include <type_traits>
 #include <baciDevIO.h>
-#include <IRA>
-#include <AntennaErrors.h>
 #include <ComponentErrors.h>
 #include <SRTMinorServoCommonS.h>
-#include "SRTMinorServoCommandLibrary.h"
+#include "SRTMinorServoAnswerMap.h"
 
 
-struct SRTMinorServoDevIOInfo
+namespace MinorServo
 {
-    IRA::CSecureArea<SRTMinorServoAnswerMap>* secure_area;
-    std::string prefix = "";
-    std::string property_name;
-    std::vector<std::string> property_fields;
-};
-
-
-/**
- * This template class is derived from DevIO and it is used by the almost all attributes of the SRT Minor Servos components.
- * The associeted property can be selected at construction time and cannot be changed anymore.
- * @author Giuseppe Carboni <giuseppe.carboni@inaf.it>,
- */
-template <class T> class MSDevIO : public DevIO<T>
-{
-public:
     /**
-     * Constructor
-     * @param data pointer to a SecureArea that protects a SRTMinorServoAnswerMap object.
-     * @param property_info an std::pair containing the name of the property as shown in the Object Explorer and the fields to read from the SRTMinorServoAnswerMap
-    */
-    MSDevIO(SRTMinorServoDevIOInfo property_info)
-    {
-        // The following expression will produce an error at compile time if the T class type is not one of the following
-        static_assert(
-            std::disjunction<
-                std::is_same<T, Management::TBoolean>,
-                std::is_same<T, CORBA::Double>,
-                std::is_same<T, ACE_CString>,
-                std::is_same<T, ACS::booleanSeq>,
-                std::is_same<T, ACS::doubleSeq>,
-                std::is_same<T, MinorServo::SRTMinorServoFocalConfiguration>,
-                std::is_same<T, MinorServo::SRTMinorServoControlStatus>,
-                std::is_same<T, MinorServo::SRTMinorServoGregorianCoverStatus>,
-                std::is_same<T, MinorServo::SRTMinorServoCabinetStatus>,
-                std::is_same<T, MinorServo::SRTMinorServoOperativeMode>
-            >::value,
-            "Not accepted MSDevIO type!"
-        );
-
-        m_secure_area = property_info.secure_area;
-        m_prefix = property_info.prefix;
-        m_property_name = property_info.property_name;
-        m_property_fields = property_info.property_fields;
-    }
-
-    /**
-     * Destructor
-    */
-    ~MSDevIO()
-    {
-    }
-
-    /**
-     * @return true to initialize the property with default value from CDB.
-    */
-    bool initializeValue()
-    {
-        return false;
-    }
-
-    /**
-     * Used to read the property value.
-     * @throw ComponentErrors::PropertyError
-     * @param timestamp epoch when the operation completes
-    */
-    T read(ACS::Time& timestamp)
-    {
-        try
-        {
-            if(m_secure_area)
-            {
-                IRA::CSecAreaResourceWrapper<SRTMinorServoAnswerMap> data = m_secure_area->Get();
-
-                try
-                {
-                    if constexpr(std::is_same<T, Management::TBoolean>::value)
-                    {
-                        unsigned int value = std::get<long>(data->at(m_prefix + m_property_fields[0]));
-                        m_value = (value == 1) ? Management::MNG_TRUE : Management::MNG_FALSE;
-                    }
-                    else if constexpr(std::is_same<T, CORBA::Double>::value)
-                    {
-                        auto object = data->at(m_prefix + m_property_fields[0]);
-                        if(object.index() == 0)
-                        {
-                            m_value = double(std::get<long>(object));
-                        }
-                        else if(object.index() == 1)
-                        {
-                            m_value = std::get<double>(object);
-                        }
-                    }
-                    else if constexpr(std::is_same<T, ACE_CString>::value)
-                    {
-                        auto object = data->at(m_prefix + m_property_fields[0]);
-                        if(object.index() == 0)
-                        {
-                            m_value = std::to_string(std::get<long>(object)).c_str();
-                        }
-                        else if(object.index() == 1)
-                        {
-                            m_value = std::to_string(std::get<double>(object)).c_str();
-                        }
-                        else
-                        {
-                            m_value = std::get<std::string>(object).c_str();
-                        }
-                    }
-                    else if constexpr(std::is_same<T, ACS::booleanSeq>::value)
-                    {
-                        m_value.length(m_property_fields.size());
-
-                        for(size_t i = 0; i < m_property_fields.size(); i++)
-                        {
-                            m_value[i] = std::get<long>(data->at(m_prefix + m_property_fields[i]));
-                        }
-                    }
-                    else if constexpr(std::is_same<T, ACS::doubleSeq>::value)
-                    {
-                        m_value.length(m_property_fields.size());
-
-                        for(size_t i = 0; i < m_property_fields.size(); i++)
-                        {
-                            m_value[i] = std::get<double>(data->at(m_prefix + m_property_fields[i]));
-                        }
-                    }
-                    else if constexpr(std::is_same<T, MinorServo::SRTMinorServoFocalConfiguration>::value)
-                    {
-                        int value = std::get<long>(data->at(m_prefix + m_property_fields[0]));
-                        m_value = MinorServo::LDOConfigurationIDTable.right.at(value);
-                    }
-                    else if constexpr(std::is_same<T, MinorServo::SRTMinorServoControlStatus>::value)
-                    {
-                        m_value = MinorServo::SRTMinorServoControlStatus(std::get<long>(data->at(m_prefix + m_property_fields[0])) - 1);
-                    }
-                    else if constexpr(std::is_same<T, MinorServo::SRTMinorServoGregorianCoverStatus>::value)
-                    {
-                        m_value = MinorServo::SRTMinorServoGregorianCoverStatus(std::get<long>(data->at(m_prefix + m_property_fields[0])));
-                    }
-                    else if constexpr(std::is_same<T, MinorServo::SRTMinorServoCabinetStatus>::value)
-                    {
-                        m_value = MinorServo::SRTMinorServoCabinetStatus(std::get<long>(data->at(m_prefix + m_property_fields[0])) - 1);
-                    }
-                    else if constexpr(std::is_same<T, MinorServo::SRTMinorServoOperativeMode>::value)
-                    {
-                        m_value = MinorServo::SRTMinorServoOperativeMode(std::get<long>(data->at(m_prefix + m_property_fields[0])) / 10);
-                    }
-                    else
-                    {
-                        // This should never happen thanks to the static_assert in the constructor
-                        _EXCPT(ComponentErrors::PropertyErrorExImpl, impl, "MSDevIO::read()");
-                        impl.setPropertyName(m_property_name.c_str());
-                        impl.setReason("Unknown property type!");
-                        throw impl;
-                    }
-                }
-                catch(std::out_of_range& ex)
-                {
-                    _EXCPT(ComponentErrors::PropertyErrorExImpl, impl, "MSDevIO::read()");
-                    impl.setPropertyName(m_property_name.c_str());
-                    impl.setReason("Property is missing from the map!");
-                }
-                catch(std::bad_variant_access& ex)
-                {
-                    _EXCPT(ComponentErrors::PropertyErrorExImpl, impl, "MSDevIO::read()");
-                    impl.setPropertyName(m_property_name.c_str());
-                    impl.setReason("Attempt to access the property with the wrong type!");
-                }
-            }
-            else
-            {
-                _EXCPT(ComponentErrors::PropertyErrorExImpl, impl, "MSDevIO::read()");
-                impl.setPropertyName(m_property_name.c_str());
-                impl.setReason("SecureArea not ready!");
-                throw impl;
-            }
-        }
-        catch(ACSErr::ACSbaseExImpl& ex)
-        {
-            _ADD_BACKTRACE(ComponentErrors::PropertyErrorExImpl, impl, ex, "MSDevIO::read()");
-            impl.setPropertyName(m_property_name.c_str());
-            impl.setReason("Property could not be read!");
-            throw impl;
-        }
-
-        timestamp = getTimeStamp(); //completion time
-        return m_value;
-    }
-
-    /**
-     * It writes values into controller. Unused because the properties are read-only.
+     * This class acts as a base class for all the SRTMinorServo DevIOs.
      */
-    void write(const T& value, ACS::Time& timestamp)
+    template <class T> class MSBaseDevIO : public DevIO<T>
     {
-        timestamp = getTimeStamp();
-        return;
-    }
+    public:
+        /**
+         * Destructor.
+         */
+        ~MSBaseDevIO()
+        {
+        }
 
-private:
-    IRA::CSecureArea<SRTMinorServoAnswerMap>* m_secure_area;
-    T m_value;
-    std::string m_prefix;
-    std::string m_property_name;
-    std::vector<std::string> m_property_fields;
-};
+        /**
+         * Used to read the property value.
+         * This is pure virtual and has to be implemented in the derived DevIOs.
+         * @throw ComponentErrors::PropertyError.
+         * @param timestamp epoch when the operation completes.
+         */
+        virtual T read(ACS::Time& timestamp);
 
+        /**
+         * @return true to initialize the property with default value from CDB.
+         */
+        bool initializeValue()
+        {
+            return false;
+        }
 
-template <class C, typename A> class MSGenericDevIO : public DevIO<C>
-{
-public:
-    MSGenericDevIO(A* value)
-    {
-        // The following expression will produce an error at compile time if the T class type is not one of the following
-        static_assert(
-            std::disjunction<
-                std::is_same<C, Management::TSystemStatus>,
-                std::is_same<C, Management::TBoolean>,
-                std::is_same<C, ACE_CString>,
-                std::is_same<C, CORBA::Long>,
-                std::is_same<C, ACS::doubleSeq>
-            >::value,
-            "Not accepted MSDevIO type!"
-        );
-
-        // The following expressions will produce an error at compile time if the provided A argument class type is not recognized
-        static_assert(
-            std::disjunction<
-                std::negation<std::is_same<C, ACE_CString> >,
-                std::conjunction<
-                    std::is_same<C, ACE_CString>,
-                    std::disjunction<
-                        std::is_same<A, std::string>,
-                        std::is_same<A, std::atomic<MinorServo::SRTMinorServoMotionStatus> >
-                    >
-                >
-            >::value,
-            "Not accepted argument type!"
-        );
-
-        static_assert(
-            std::disjunction<
-                std::negation<std::is_same<C, ACS::doubleSeq> >,
-                std::conjunction<
-                    std::is_same<C, ACS::doubleSeq>,
-                    std::is_same<A, std::vector<double> >
-                >
-            >::value,
-            "Not accepted argument type!"
-        );
-
-        m_value = value;
-    }
+        /**
+         * It writes values into controller. Unused because all the properties are read-only.
+         */
+        void write(const T& value, ACS::Time& timestamp)
+        {
+            timestamp = getTimeStamp();
+            return;
+        }
+    };
 
     /**
-     * Destructor
-    */
-    ~MSGenericDevIO()
+     * This class is used to read the status of the motion of the minor servo system.
+     */
+    class MSMotionInfoDevIO : public MSBaseDevIO<ACE_CString>
     {
-    }
+    public:
+        /**
+         * Constructor.
+         * @param motion_status the atomic status of the motion of the minor servo system.
+         * @param answer_map the SRTMinorServoAnswerMap containing the status of the system. It is used to read the position of the gregorian cover.
+         */
+        MSMotionInfoDevIO(const std::atomic<SRTMinorServoMotionStatus>& motion_status, const SRTMinorServoAnswerMap& answer_map) : m_motion_status(motion_status), m_answer_map(answer_map) {}
 
-    /**
-     * @return true to initialize the property with default value from CDB.
-    */
-    bool initializeValue()
-    {
-        return false;
-    }
-
-    /**
-     * Used to read the property value.
-     * @param timestamp epoch when the operation completes
-    */
-    C read(ACS::Time& timestamp)
-    {
-        timestamp = getTimeStamp(); //completion time
-
-        if constexpr(std::is_same<A, std::atomic<MinorServo::SRTMinorServoMotionStatus> >::value)  // Motion status
+        /**
+         * Returns the property value.
+         * @param timestamp epoch when the operation completes.
+         * @return a string containing the information about the motion status of the minor servo system.
+         */
+        ACE_CString read(ACS::Time& timestamp)
         {
             std::string motion_status;
+            SRTMinorServoAnswerMap answer_map = m_answer_map;
 
-            switch(*m_value)
+            switch(m_motion_status.load())
             {
-                case MinorServo::MOTION_STATUS_UNCONFIGURED:
+                case MOTION_STATUS_UNCONFIGURED:
                 {
-                    motion_status = "Not configured";
+                    motion_status = "Unknown";
                     break;
                 }
-                case MinorServo::MOTION_STATUS_CONFIGURING:
+                case MOTION_STATUS_STARTING:
                 {
-                    motion_status = "Configuring...";
+                    motion_status = "Setup in progress...";
                     break;
                 }
-                case MinorServo::MOTION_STATUS_PARK:
-                {
-                    motion_status = "Parked";
-                    break;
-                }
-                case MinorServo::MOTION_STATUS_ERROR:
-                {
-                    motion_status = "Error";
-                    break;
-                }
-                case MinorServo::MOTION_STATUS_CONFIGURED:
+                case MOTION_STATUS_CONFIGURED:
                 {
                     motion_status = "Elevation Track Mode Disabled";
                     break;
                 }
-                case MinorServo::MOTION_STATUS_TRACKING:
+                case MOTION_STATUS_TRACKING:
                 {
                     motion_status = "Elevation Track Mode";
+                    break;
+                }
+                case MOTION_STATUS_PARKING:
+                {
+                    motion_status = "Parking...";
+                    break;
+                }
+                case MOTION_STATUS_PARKED:
+                {
+                    motion_status = "Parked";
+
+                    try
+                    {
+                        // If I can read the status of the gregorian cover I will notify the user about it on the GUI
+                        SRTMinorServoGregorianCoverStatus cover_status = SRTMinorServoGregorianCoverStatus(answer_map.get<unsigned int>("GREGORIAN_CAP"));
+
+                        if(cover_status == COVER_STATUS_OPEN)
+                        {
+                            motion_status += ", gregorian cover open";
+                        }
+                        else if(cover_status == COVER_STATUS_CLOSED)
+                        {
+                            motion_status += ", gregorian cover closed";
+                        }
+                    }
+                    catch(...)
+                    {
+                        // If I can't, it doesn't matter
+                    }
+
+                    break;
+                }
+                case MOTION_STATUS_ERROR:
+                {
+                    motion_status = "Error";
                     break;
                 }
             }
 
             return motion_status.c_str();
         }
-        else if constexpr(std::is_same<A, std::string>::value)
-        {
-            return m_value->c_str();
-        }
-        else if constexpr(std::is_same<C, ACS::doubleSeq>::value)
-        {
-            ACS::doubleSeq_var sequence = new ACS::doubleSeq;
-            sequence->length(m_value->size());
+    private:
+        /**
+         * Reference to the motion status object of the Boss.
+         */
+        const std::atomic<SRTMinorServoMotionStatus>& m_motion_status;
 
-            for(size_t i = 0; i < m_value->size(); i++)
-            {
-                sequence[i] = m_value->operator[](i);
-            }
-
-            return sequence;
-        }
-        else
-        {
-            return *m_value;
-        }
-    }
+        /**
+         * Reference to the SRTMinorServoAnswerMap object of the Boss.
+         */
+        const SRTMinorServoAnswerMap& m_answer_map;
+    };
 
     /**
-     * It writes values into controller. Unused because the properties are read-only.
+     * This class is used to read the virtual positions of a minor servo system. It is specialized this way in order to sum the plain virtual positions and the offsets.
      */
-    void write(const C& value, ACS::Time& timestamp)
+    class MSVirtualPositionsDevIO : public MSBaseDevIO<ACS::doubleSeq>
     {
-        timestamp = getTimeStamp();
-        return;
-    }
+    public:
+        /**
+         * Constructor.
+         * @param servo_name the name of the minor servo system the property belongs to.
+         * @param virtual_positions_fields the name of the virtual positions fields inside the SRTMinorServoAnswerMap object.
+         * @param virtual_offsets_fields the name of the virtual offsets fields inside the SRTMinorServoAnswerMap object.
+         * @param answer_map the SRTMinorServoAnswerMap object containing the status of the minor servo system.
+         */
+        MSVirtualPositionsDevIO(const std::string& servo_name, std::vector<std::string> virtual_positions_fields, std::vector<std::string> virtual_offsets_fields, const SRTMinorServoAnswerMap& answer_map) :
+            m_virtual_positions_fields([&]()
+            {
+                std::transform(virtual_positions_fields.begin(), virtual_positions_fields.end(), virtual_positions_fields.begin(), [servo_name](const std::string& field)
+                {
+                    return servo_name + "_" + field;
+                });
+                return virtual_positions_fields;
+            }()),
+            m_virtual_offsets_fields([&]()
+            {
+                std::transform(virtual_offsets_fields.begin(), virtual_offsets_fields.end(), virtual_offsets_fields.begin(), [servo_name](const std::string& field)
+                {
+                    return servo_name + "_" + field;
+                });
+                return virtual_offsets_fields;
+            }()),
+            m_answer_map(answer_map)
+        {
+        }
 
-private:
-    A* m_value;
-};
+        /**
+         * Returns the property value.
+         * @param timestamp epoch when the operation completes.
+         * @return a sequence of double containing the virtual positions taking the virtual offsets into account.
+         */
+        ACS::doubleSeq read(ACS::Time& timestamp)
+        {
+            SRTMinorServoAnswerMap answer_map = m_answer_map;
+
+            ACS::doubleSeq sequence;
+
+            try
+            {
+                sequence.length(m_virtual_positions_fields.size());
+
+                for(size_t i = 0; i < m_virtual_positions_fields.size(); i++)
+                {
+                    sequence[i] = answer_map.get<double>(m_virtual_positions_fields[i]) - answer_map.get<double>(m_virtual_offsets_fields[i]);
+                }
+            }
+            catch(std::out_of_range& ex)
+            {
+                _EXCPT(ComponentErrors::PropertyErrorExImpl, impl, "MSVirtualPositionsDevIO::read()");
+                impl.setPropertyName("virtual_positions");
+                impl.setReason("Property is missing from the map!");
+                throw impl;
+            }
+            catch(std::bad_variant_access& ex)
+            {
+                _EXCPT(ComponentErrors::PropertyErrorExImpl, impl, "MSVirtualPositionsDevIO::read()");
+                impl.setPropertyName("virtual_positions");
+                impl.setReason("Attempt to access the property with the wrong variant type!");
+                throw impl;
+            }
+            catch(ACSErr::ACSbaseExImpl& ex)
+            {
+                _ADD_BACKTRACE(ComponentErrors::PropertyErrorExImpl, impl, ex, "MSVirtualPositionsDevIO::read()");
+                impl.setPropertyName("virtual_positions");
+                impl.setReason("Property could not be read!");
+                throw impl;
+            }
+
+            timestamp = getTimeStamp(); //completion time
+            return sequence;
+        }
+
+    private:
+        /**
+         * The virtual positions fields names.
+         */
+        const std::vector<std::string> m_virtual_positions_fields;
+
+        /**
+         * The virtual offsets fields names.
+         */
+        const std::vector<std::string> m_virtual_offsets_fields;
+
+        /**
+         * The SRTMinorServoAnswerMap containing the status of the minor servo system.
+         */
+        const SRTMinorServoAnswerMap& m_answer_map;
+    };
+
+    /**
+     * This template class is used to retrieve values from a SRTMinorServoAnswerMap and provide them as properties.
+     * The templates is specialized for the types listed right below and compilation will fail if the developer attempts to use it for an unknown MSDevIO type.
+     */
+    template <typename T, typename = std::enable_if<is_any_v<T, 
+        Management::TBoolean,
+        CORBA::Double,
+        ACE_CString,
+        ACS::booleanSeq,
+        ACS::doubleSeq,
+        SRTMinorServoFocalConfiguration,
+        SRTMinorServoControlStatus,
+        SRTMinorServoGregorianCoverStatus,
+        SRTMinorServoCabinetStatus,
+        SRTMinorServoOperativeMode
+    >>>
+    class MSAnswerMapDevIO : public MSBaseDevIO<T>
+    {
+    public:
+        /**
+         * Single property-field, no servo-name constructor.
+         * @param property_name the name of the property, used when raising exceptions.
+         * @param property_field the field name of the property as it appears inside the SRTMinorServoAnswerMap.
+         * @param answer_map the reference to the SRTMinorServoAnswerMap containing the readings from the PLC.
+         */
+        MSAnswerMapDevIO(const std::string& property_name, const std::string& property_field, const SRTMinorServoAnswerMap& answer_map) :
+            MSAnswerMapDevIO(property_name, std::vector<std::string>{ property_field }, answer_map) {}
+
+        /**
+         * Multiple property-fields, no servo-name constructor.
+         * @param property_name the name of the property, used when raising exceptions.
+         * @param property_fields the field names of the property as they appear inside the SRTMinorServoAnswerMap.
+         * @param answer_map the reference to the SRTMinorServoAnswerMap containing the readings from the PLC.
+         */
+        MSAnswerMapDevIO(const std::string& property_name, const std::vector<std::string>& property_fields, const SRTMinorServoAnswerMap& answer_map) :
+            m_property_name(property_name),
+            m_property_fields(property_fields),
+            m_answer_map(answer_map) {}
+
+        /**
+         * Single property-field, with servo-name constructor.
+         * @param servo_name the name of the minor servo system the property belongs to. Used as prefix for the property_field argument.
+         * @param property_name the name of the property, used when raising exceptions.
+         * @param property_field the field name of the property as it appears inside the SRTMinorServoAnswerMap.
+         * @param answer_map the reference to the SRTMinorServoAnswerMap containing the readings from the PLC.
+         */
+        MSAnswerMapDevIO(const std::string& servo_name, const std::string& property_name, const std::string& property_field, const SRTMinorServoAnswerMap& answer_map) :
+            MSAnswerMapDevIO(servo_name, property_name, std::vector<std::string>{ property_field }, answer_map) {}
+
+        /**
+         * Multiple property-fields, with servo-name constructor.
+         * @param servo_name the name of the minor servo system the property belongs to. Used as prefix for the property_fields argument.
+         * @param property_name the name of the property, used when raising exceptions.
+         * @param property_fields the field names of the property as they appear inside the SRTMinorServoAnswerMap.
+         * @param answer_map the reference to the SRTMinorServoAnswerMap containing the readings from the PLC.
+         */
+        MSAnswerMapDevIO(const std::string& servo_name, const std::string& property_name, std::vector<std::string> property_fields, const SRTMinorServoAnswerMap& answer_map) :
+            m_property_name(property_name),
+            m_property_fields([&]()
+            {
+                std::transform(property_fields.begin(), property_fields.end(), property_fields.begin(), [servo_name](const std::string& field)
+                {
+                    return servo_name + "_" + field;
+                });
+                return property_fields;
+            }()),
+            m_answer_map(answer_map) {}
+
+        /**
+         * Used to read the property value.
+         * @param timestamp epoch when the operation completes.
+         * @throw ComponentErrors::PropertyError.
+         * @return the property value as read from the SRTMinorServoAnswerMap object reference.
+         */
+        T read(ACS::Time& timestamp)
+        {
+            timestamp = getTimeStamp();
+
+            // Copy the answer map by value. This will ensure all the elements for any sequence belong to the same reading from PLC.
+            SRTMinorServoAnswerMap answer_map = m_answer_map;
+
+            try
+            {
+                if constexpr(std::is_same_v<T, Management::TBoolean>)
+                {
+                    return (answer_map.get<unsigned int>(m_property_fields[0]) == 1) ? Management::MNG_TRUE : Management::MNG_FALSE;
+                }
+                else if constexpr(std::is_same_v<T, CORBA::Double>)
+                {
+                    unsigned int index = answer_map.index(m_property_fields[0]);
+
+                    switch(index)
+                    {
+                        case 0:
+                        {
+                            return (double)answer_map.get<long>(m_property_fields[0]);
+                        }
+                        case 1:
+                        {
+                            return answer_map.get<double>(m_property_fields[0]);
+                        }
+                        default:
+                        {
+                            throw std::bad_variant_access();
+                        }
+                    }
+                }
+                else if constexpr(std::is_same_v<T, ACE_CString>)
+                {
+                    unsigned int index = answer_map.index(m_property_fields[0]);
+
+                    switch(index)
+                    {
+                        case 0:
+                        {
+                            return std::to_string(answer_map.get<long>(m_property_fields[0])).c_str();
+                        }
+                        case 1:
+                        {
+                            return std::to_string(answer_map.get<double>(m_property_fields[0])).c_str();
+                        }
+                        default:
+                        {
+                            return answer_map.get<std::string>(m_property_fields[0]).c_str();
+                        }
+                    }
+                }
+                else if constexpr(std::is_same_v<T, ACS::booleanSeq>)
+                {
+                    ACS::booleanSeq value;
+                    value.length(m_property_fields.size());
+
+                    for(size_t i = 0; i < m_property_fields.size(); i++)
+                    {
+                        value[i] = answer_map.get<long>(m_property_fields[i]);
+                    }
+                    return value;
+                }
+                else if constexpr(std::is_same_v<T, ACS::doubleSeq>)
+                {
+                    ACS::doubleSeq value;
+                    value.length(m_property_fields.size());
+
+                    for(size_t i = 0; i < m_property_fields.size(); i++)
+                    {
+                        value[i] = answer_map.get<double>(m_property_fields[i]);
+                    }
+                    return value;
+                }
+                else if constexpr(std::is_same_v<T, SRTMinorServoFocalConfiguration>)
+                {
+                    return LDOConfigurationIDTable.right.at(answer_map.get<int>(m_property_fields[0]));
+                }
+                else if constexpr(std::is_same_v<T, SRTMinorServoControlStatus>)
+                {
+                    return SRTMinorServoControlStatus(answer_map.get<unsigned int>(m_property_fields[0]) - 1);
+                }
+                else if constexpr(std::is_same_v<T, SRTMinorServoGregorianCoverStatus>)
+                {
+                    return SRTMinorServoGregorianCoverStatus(answer_map.get<unsigned int>(m_property_fields[0]));
+                }
+                else if constexpr(std::is_same_v<T, SRTMinorServoCabinetStatus>)
+                {
+                    return SRTMinorServoCabinetStatus(answer_map.get<unsigned int>(m_property_fields[0]) - 1);
+                }
+                else if constexpr(std::is_same_v<T, SRTMinorServoOperativeMode>)
+                {
+                    return SRTMinorServoOperativeMode(answer_map.get<unsigned int>(m_property_fields[0]) / 10);
+                }
+            }
+            catch(std::out_of_range& ex)
+            {
+                _EXCPT(ComponentErrors::PropertyErrorExImpl, impl, "MSAnswerMapDevIO::read()");
+                impl.setPropertyName(m_property_name.c_str());
+                impl.setReason("Property is missing from the map!");
+                throw impl;
+            }
+            catch(std::bad_variant_access& ex)
+            {
+                _EXCPT(ComponentErrors::PropertyErrorExImpl, impl, "MSAnswerMapDevIO::read()");
+                impl.setPropertyName(m_property_name.c_str());
+                impl.setReason("Attempt to access the property with the wrong variant type!");
+                throw impl;
+            }
+            catch(ACSErr::ACSbaseExImpl& ex)
+            {
+                _ADD_BACKTRACE(ComponentErrors::PropertyErrorExImpl, impl, ex, "MSAnswerMapDevIO::read()");
+                impl.setPropertyName(m_property_name.c_str());
+                impl.setReason("Property could not be read!");
+                throw impl;
+            }
+        }
+
+    private:
+        /**
+         * The name of the property, used when raising exceptions.
+         */
+        const std::string m_property_name;
+
+        /**
+         * The field names of the property as they appear on the SRTMinorServoAnswerMap.
+         */
+        const std::vector<std::string> m_property_fields;
+
+        /**
+         * The reference to the SRTMinorServoAnswerMap in whichthe readings from the PLC appear.
+         */
+        const SRTMinorServoAnswerMap& m_answer_map;
+    };
+
+    /**
+     * This template class represents a generic Minor Servo DevIO.
+     * It accepts 2 types, the DevIO type (the return type) and the type of the object reference which stores the original value to be returned by the read method.
+     * The templates is specialized for the combinations of types listed right below and the compilation will fail if the developer attempts to use it with any other types combination.
+     */
+    template <typename C, typename A, typename = std::enable_if_t<
+        is_any_v<C, Management::TSystemStatus, Management::TBoolean, ACE_CString, CORBA::Long> || (std::is_same_v<C, ACS::doubleSeq> && std::is_same_v<A, std::vector<double>>)
+    >>
+    class MSGenericDevIO : public MSBaseDevIO<C>
+    {
+    public:
+        /**
+         * Default constructor.
+         * @param value a constant reference to the object from which the DevIO will read the value to be returned as property.
+         */
+        MSGenericDevIO(const A& value) : m_value(value) {}
+
+        /**
+         * Used to read the property value.
+         * @param timestamp epoch when the operation completes.
+         * @return the property value read from the original referenced object.
+         */
+        C read(ACS::Time& timestamp)
+        {
+            timestamp = getTimeStamp(); //completion time
+
+            if constexpr(std::is_same_v<A, std::string>)
+            {
+                return m_value.c_str();
+            }
+            else if constexpr(std::is_same_v<C, ACS::doubleSeq>)
+            {
+                ACS::doubleSeq_var sequence = new ACS::doubleSeq;
+                sequence->length(m_value.size());
+
+                for(size_t i = 0; i < m_value.size(); i++)
+                {
+                    sequence[i] = m_value.operator[](i);
+                }
+
+                return sequence;
+            }
+            else if constexpr(is_atomic_v<A>)
+            {
+                return m_value.load();
+            }
+            else
+            {
+                return m_value;
+            }
+        }
+
+        /**
+         * The reference to the object containing the value to be returned as property.
+         */
+        const A& m_value;
+    };
+}
 
 #endif

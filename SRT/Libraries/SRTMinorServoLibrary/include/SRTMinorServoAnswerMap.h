@@ -11,7 +11,7 @@
 
 namespace MinorServo
 {
-    class SRTMinorServoAnswerMap : private  std::map<std::string, std::variant<long, double, std::string>>
+    class SRTMinorServoAnswerMap : private std::map<std::string, std::variant<long, double, std::string>>
     {
         /**
          * This class privately extends the type std::map<std::string, std::variant<long, double, std::string>>.

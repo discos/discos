@@ -94,27 +94,28 @@ module MinorServo
 
         /**
          * This method asks the PLC the status for the corresponding servo
+         * @throw MinorServoErrors::MinorServoErrorsEx when trying to reset the offsets when they don't match the ones loaded into the hardware
          * @return true if the servo is not in an error state, false otherwise
          */
-        boolean status();
+        boolean status() raises (MinorServoErrors::MinorServoErrorsEx);
 
         /**
          * This method commands a STOW operation to the servo
          * @param stow_position the index of the position we want the servo to stow to
-         * @throw MinorServo::MinorServoErrorsEx if there has been a communication error or if the command was not accepted
+         * @throw MinorServoErrors::MinorServoErrorsEx if there has been a communication error or if the command was not accepted
          */
         void stow(in long stow_position) raises (MinorServoErrors::MinorServoErrorsEx);
 
         /**
          * This method commands a STOP operation to the servo
-         * @throw MinorServo::MinorServoErrorsEx if there has been a communication error or if the command was not accepted
+         * @throw MinorServoErrors::MinorServoErrorsEx if there has been a communication error or if the command was not accepted
          */
         void stop() raises (MinorServoErrors::MinorServoErrorsEx);
 
         /**
          * This method commands a PRESET operation to the servo
          * @param coordinates, a sequence of double
-         * @throw MinorServo::MinorServoErrorsEx if the length of the coordinates sequence doesn't match the number of virtual axes of the servo,
+         * @throw MinorServoErrors::MinorServoErrorsEx if the length of the coordinates sequence doesn't match the number of virtual axes of the servo,
          *        if the resulting position summing the offsets would go outside the accepted range of the servo,
          *        if there has been a communication error or if the command was not accepted
          */
@@ -130,7 +131,7 @@ module MinorServo
         /**
          * This method calculates the servo coordinates for a given elevation
          * @param elevation the elevation to use for the coordinates calculation, expressed in degrees
-         * @throw MinorServoErrors::MinorServoErrorsEx when the servo has not been configured yet and has not loaded any coefficient for the position calculalation
+         * @throw MinorServoErrors::MinorServoErrorsEx when the servo has not been configured yet and has not loaded any coefficient for the position calculation
          * @return the calculated coordinates as a sequence of doubles
          */
         ACS::doubleSeq calcCoordinates(in double elevation) raises (MinorServoErrors::MinorServoErrorsEx);

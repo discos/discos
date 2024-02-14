@@ -9,38 +9,36 @@
 EXECUTABLES     =
 EXECUTABLES_L   =
 
+PY_SCRIPTS = #_cover
+
 # On-Line Database Files
 # ----------------------
-CDB_SCHEMAS = SRTMinorServoBoss SRTMinorServo SRTMinorServoSocket SRTMinorServoProperties SRTMinorServoLookupTable
+CDB_SCHEMAS = SRTMinorServoBoss SRTMinorServo SRTMinorServoSocketConfiguration SRTMinorServoProperties SRTMinorServoLookupTable
 
 # ----------------------------
 # Libraries (public and local)
 # ----------------------------
-LIBRARIES = SRTMinorServoSocket SRTGenericMinorServoImpl SRTProgramTrackMinorServoImpl SRTMinorServoBossImpl
+LIBRARIES = SRTGenericMinorServoImpl SRTProgramTrackMinorServoImpl SRTMinorServoBossImpl
 
-SRTMinorServoSocket_OBJECTS = SRTMinorServoSocket
-SRTMinorServoSocket_LIBS = IRALibrary ComponentErrors SRTMinorServoCommandLibrary
-SRTMinorServoSocket_CFLAGS = -std=c++17
+USER_CFLAGS =
 
-SRTMinorServoBossImpl_OBJECTS = SRTMinorServoStatusThread SRTMinorServoSetupThread SRTMinorServoParkThread SRTMinorServoTrackingThread SRTMinorServoBossCore SRTMinorServoBossImpl
-SRTMinorServoBossImpl_LIBS = IRALibrary SRTMinorServoBossStubs SRTMinorServoStubs ComponentErrors MinorServoErrors ManagementErrors MinorServoDefinitionsStubs SRTMinorServoCommandLibrary AntennaBossStubs SRTMinorServoSocket ParserErrors DiscosVersion
-SRTMinorServoBossImpl_CFLAGS = -std=c++17
-SRTMinorServoBossCore_CFLAGS = -std=c++17
-SRTMinorServoStatusThread_CFLAGS = -std=c++17
-SRTMinorServoSetupThread_CFLAGS = -std=c++17
-SRTMinorServoParkThread_CFLAGS = -std=c++17
-SRTMinorServoTrackingThread_CFLAGS = -std=c++17
-SRTMinorServoTrackingThread_LIBS = IRALibrary
+SRTMinorServoBossImpl_OBJECTS = SRTMinorServoBossCore SRTMinorServoSetupThread SRTMinorServoParkThread SRTMinorServoTrackingThread SRTMinorServoScanThread SRTMinorServoBossImpl SRTMinorServoStatusThread
+SRTMinorServoBossImpl_LIBS = IRALibrary SRTMinorServoBossStubs SRTMinorServoStubs ComponentErrors MinorServoErrors ManagementErrors MinorServoDefinitionsStubs SRTMinorServoCommandLibrary AntennaBossStubs SRTMinorServoSocketLibrary ParserErrors DiscosVersion acsnc
+SRTMinorServoBossImpl_CFLAGS = -std=c++17 -fconcepts
+SRTMinorServoBossCore_CFLAGS = -std=c++17 -fconcepts
+SRTMinorServoStatusThread_CFLAGS = -std=c++17 -fconcepts
+SRTMinorServoSetupThread_CFLAGS = -std=c++17 -fconcepts
+SRTMinorServoParkThread_CFLAGS = -std=c++17 -fconcepts
+SRTMinorServoTrackingThread_CFLAGS = -std=c++17 -fconcepts
+SRTMinorServoScanThread_CFLAGS = -std=c++17 -fconcepts
 
+SRTBaseMinorServoImpl_CFLAGS = -std=c++17 -fconcepts
 SRTGenericMinorServoImpl_OBJECTS = SRTGenericMinorServoImpl SRTBaseMinorServoImpl
-SRTGenericMinorServoImpl_LIBS = IRALibrary SRTMinorServoStubs MinorServoErrors MinorServoDefinitionsStubs SRTMinorServoCommandLibrary SRTMinorServoSocket DiscosVersion
-SRTGenericMinorServoImpl_CFLAGS = -std=c++17
-
+SRTGenericMinorServoImpl_LIBS = IRALibrary SRTMinorServoStubs MinorServoErrors MinorServoDefinitionsStubs SRTMinorServoCommandLibrary SRTMinorServoSocketLibrary DiscosVersion
+SRTGenericMinorServoImpl_CFLAGS = -std=c++17 -fconcepts
 SRTProgramTrackMinorServoImpl_OBJECTS = SRTProgramTrackMinorServoImpl SRTBaseMinorServoImpl
-SRTProgramTrackMinorServoImpl_LIBS = IRALibrary SRTMinorServoStubs MinorServoErrors MinorServoDefinitionsStubs SRTMinorServoCommandLibrary SRTMinorServoSocket DiscosVersion
-SRTProgramTrackMinorServoImpl_CFLAGS = -std=c++17
-
-SRTBaseMinorServoImpl_CFLAGS = -std=c++17
+SRTProgramTrackMinorServoImpl_LIBS = IRALibrary SRTMinorServoStubs MinorServoErrors MinorServoDefinitionsStubs SRTMinorServoCommandLibrary SRTMinorServoSocketLibrary DiscosVersion
+SRTProgramTrackMinorServoImpl_CFLAGS = -std=c++17 -fconcepts
 
 
 # ----------------------------------------------------------------------

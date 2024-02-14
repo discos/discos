@@ -1,14 +1,17 @@
 #include "SRTMinorServoBossImpl.h"
 
-using namespace maci;
-using namespace SimpleParser;
+using namespace MinorServo;
+namespace SP = SimpleParser;
 
 _IRA_LOGFILTER_DECLARE;
 
-SRTMinorServoBossImpl::SRTMinorServoBossImpl(const ACE_CString &componentName, maci::ContainerServices *containerServices) :
-    CharacteristicComponentImpl(componentName, containerServices),
-    m_core(NULL),
-    m_parser(NULL),
+SRTMinorServoBossImpl::SRTMinorServoBossImpl(const ACE_CString& component_name, maci::ContainerServices* container_services) :
+    CharacteristicComponentImpl(component_name, container_services),
+    m_component_name(std::string(component_name.c_str())),
+    m_core_ptr(std::make_shared<SRTMinorServoBossCore>(*this)),
+    m_core(*m_core_ptr),
+    m_parser(SP::CParser<SRTMinorServoBossImpl>(this, 2)),
+    m_connected_ptr(this),
     m_status_ptr(this),
     m_ready_ptr(this),
     m_actual_setup_ptr(this),
@@ -35,172 +38,74 @@ SRTMinorServoBossImpl::SRTMinorServoBossImpl(const ACE_CString &componentName, m
 SRTMinorServoBossImpl::~SRTMinorServoBossImpl()
 {
     AUTO_TRACE("SRTMinorServoBossImpl::~SRTMinorServoBossImpl()");
-
-    if(m_parser != NULL)
-    {
-        delete m_parser;
-    }
-    if(m_core != NULL)
-    {
-        delete m_core;
-    }
 }
 
 void SRTMinorServoBossImpl::initialize()
 {
     AUTO_TRACE("SRTMinorServoBossImpl::initialize()");
-    _IRA_LOGFILTER_ACTIVATE(200000000, 500000000);
-
-    m_core = new SRTMinorServoBossCore(this);
-
-    IRA::CString string_buffer;
-    if(!IRA::CIRATools::getDBValue(getContainerServices(), "active_surface_configuration", string_buffer))
-    {
-        _EXCPT(ComponentErrors::CDBAccessExImpl, impl, "SRTMinorServoBossImpl::initialize()");
-        impl.setFieldName("active_surface_configuration");
-        throw impl;
-    }
-    else
-    {
-        std::string active_surface_configuration(string_buffer);
-
-        if(active_surface_configuration == "ON")
-        {
-            m_core->m_as_configuration = Management::MNG_TRUE;
-        }
-        else if(active_surface_configuration == "OFF")
-        {
-            m_core->m_as_configuration = Management::MNG_FALSE;
-        }
-        else
-        {
-            _EXCPT(ComponentErrors::CDBAccessExImpl, impl, "SRTMinorServoBossImpl::initialize()");
-            impl.setFieldName("active_surface_configuration");
-            impl.addData("Reason", "Value should be 'ON' or 'OFF'");
-            throw impl;
-        }
-    }
-
-    if(!IRA::CIRATools::getDBValue(getContainerServices(), "elevation_tracking_enabled", string_buffer))
-    {
-        _EXCPT(ComponentErrors::CDBAccessExImpl, impl, "SRTMinorServoBossImpl::initialize()");
-        impl.setFieldName("elevation_tracking_enabled");
-        throw impl;
-    }
-    else
-    {
-        std::string elevation_tracking_enabled(string_buffer);
-
-        if(elevation_tracking_enabled == "ON")
-        {
-            m_core->m_elevation_tracking_enabled = Management::MNG_TRUE;
-        }
-        else if(elevation_tracking_enabled == "OFF")
-        {
-            m_core->m_elevation_tracking_enabled = Management::MNG_FALSE;
-        }
-        else
-        {
-            _EXCPT(ComponentErrors::CDBAccessExImpl, impl, "SRTMinorServoBossImpl::initialize()");
-            impl.setFieldName("elevation_tracking_enabled");
-            impl.addData("Reason", "Value should be 'ON' or 'OFF'");
-            throw impl;
-        }
-    }
+    _IRA_LOGFILTER_ACTIVATE(10000000, 20000000);
 
     try
     {
-        std::string component_name = getContainerServices()->getName().c_str();
-
-        m_status_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus), POA_Management::ROTSystemStatus>((component_name + ":status").c_str(), getComponent(), new MSGenericDevIO<Management::TSystemStatus, std::atomic<Management::TSystemStatus> >(&m_core->m_subsystem_status), true);
-        m_ready_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((component_name + ":ready").c_str(), getComponent(), new MSGenericDevIO<Management::TBoolean, std::atomic<Management::TBoolean> >(&m_core->m_ready), true);
-        m_actual_setup_ptr = new baci::ROstring((component_name + ":actualSetup").c_str(), getComponent(), new MSGenericDevIO<ACE_CString, std::string>(&m_core->m_actual_setup), true);
-        m_motion_info_ptr = new baci::ROstring((component_name + ":motionInfo").c_str(), getComponent(), new MSGenericDevIO<ACE_CString, std::atomic<MinorServo::SRTMinorServoMotionStatus> >(&m_core->m_motion_status), true);
-        m_starting_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((component_name + ":starting").c_str(), getComponent(), new MSGenericDevIO<Management::TBoolean, std::atomic<Management::TBoolean> >(&m_core->m_starting), true);
-        m_as_configuration_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((component_name + ":asConfiguration").c_str(), getComponent(), new MSGenericDevIO<Management::TBoolean, std::atomic<Management::TBoolean> >(&m_core->m_as_configuration), true);
-        m_elevation_tracking_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((component_name + ":elevationTrack").c_str(), getComponent(), new MSGenericDevIO<Management::TBoolean, std::atomic<Management::TBoolean> >(&m_core->m_elevation_tracking_enabled), true);
-        m_scan_active_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((component_name + ":scanActive").c_str(), getComponent(), new MSGenericDevIO<Management::TBoolean, std::atomic<Management::TBoolean> >(&m_core->m_scan_active), true);
-        m_scanning_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((component_name + ":scanning").c_str(), getComponent(), new MSGenericDevIO<Management::TBoolean, std::atomic<Management::TBoolean> >(&m_core->m_scanning), true);
-        m_tracking_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((component_name + ":tracking").c_str(), getComponent(), new MSGenericDevIO<Management::TBoolean, std::atomic<Management::TBoolean> >(&m_core->m_tracking), true);
-
-        SRTMinorServoDevIOInfo dev_io_info;
-        dev_io_info.secure_area = m_core->m_status_secure_area;
-
-        dev_io_info.property_name = "current_configuration";
-        dev_io_info.property_fields = std::vector<std::string>{ "CURRENT_CONFIG" };
-        m_current_configuration_ptr = new ROEnumImpl<ACS_ENUM_T(MinorServo::SRTMinorServoFocalConfiguration), POA_MinorServo::ROSRTMinorServoFocalConfiguration>((component_name + ":current_configuration").c_str(), getComponent(), new MSDevIO<MinorServo::SRTMinorServoFocalConfiguration>(dev_io_info), true);
-
-        dev_io_info.property_name = "simulation_enabled";
-        dev_io_info.property_fields = std::vector<std::string>{ "SIMULATION_ENABLED" };
-        m_simulation_enabled_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((component_name + ":simulation_enabled").c_str(), getComponent(), new MSDevIO<Management::TBoolean>(dev_io_info), true);
-
-        dev_io_info.property_name = "plc_time";
-        dev_io_info.property_fields = std::vector<std::string>{ "PLC_TIME" };
-        m_plc_time_ptr = new baci::ROdouble((component_name + ":plc_time").c_str(), getComponent(), new MSDevIO<CORBA::Double>(dev_io_info), true);
-
-        dev_io_info.property_name = "plc_version";
-        dev_io_info.property_fields = std::vector<std::string>{ "PLC_VERSION" };
-        m_plc_version_ptr = new baci::ROstring((component_name + ":plc_version").c_str(), getComponent(), new MSDevIO<ACE_CString>(dev_io_info), true);
-
-        dev_io_info.property_name = "control";
-        dev_io_info.property_fields = std::vector<std::string>{ "CONTROL" };
-        m_control_ptr = new ROEnumImpl<ACS_ENUM_T(MinorServo::SRTMinorServoControlStatus), POA_MinorServo::ROSRTMinorServoControlStatus>((component_name + ":control").c_str(), getComponent(), new MSDevIO<MinorServo::SRTMinorServoControlStatus>(dev_io_info), true);
-
-        dev_io_info.property_name = "power";
-        dev_io_info.property_fields = std::vector<std::string>{ "POWER" };
-        m_power_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((component_name + ":power").c_str(), getComponent(), new MSDevIO<Management::TBoolean>(dev_io_info), true);
-
-        dev_io_info.property_name = "emergency";
-        dev_io_info.property_fields = std::vector<std::string>{ "EMERGENCY" };
-        m_emergency_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((component_name + ":emergency").c_str(), getComponent(), new MSDevIO<Management::TBoolean>(dev_io_info), true);
-
-        dev_io_info.property_name = "gregorian_cover";
-        dev_io_info.property_fields = std::vector<std::string>{ "GREGORIAN_CAP" };
-        m_gregorian_cover_ptr = new ROEnumImpl<ACS_ENUM_T(MinorServo::SRTMinorServoGregorianCoverStatus), POA_MinorServo::ROSRTMinorServoGregorianCoverStatus>((component_name + ":gregorian_cover").c_str(), getComponent(), new MSDevIO<MinorServo::SRTMinorServoGregorianCoverStatus>(dev_io_info), true);
-
-        dev_io_info.property_name = "last_executed_command";
-        dev_io_info.property_fields = std::vector<std::string>{ "LAST_EXECUTED_COMMAND" };
-        m_last_executed_command_ptr = new baci::ROdouble((component_name + ":last_executed_command").c_str(), getComponent(), new MSDevIO<CORBA::Double>(dev_io_info), true);
+        m_connected_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":connected").c_str(), getComponent(),
+                new MSGenericDevIO<Management::TBoolean, std::atomic<Management::TBoolean>>(m_core.m_socket_connected), true);
+        m_status_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus), POA_Management::ROTSystemStatus>((m_component_name + ":status").c_str(), getComponent(),
+                new MSGenericDevIO<Management::TSystemStatus, std::atomic<Management::TSystemStatus>>(m_core.m_subsystem_status), true);
+        m_ready_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":ready").c_str(), getComponent(),
+                new MSGenericDevIO<Management::TBoolean, std::atomic<Management::TBoolean>>(m_core.m_ready), true);
+        m_actual_setup_ptr = new baci::ROstring((m_component_name + ":actualSetup").c_str(), getComponent(),
+                new MSGenericDevIO<ACE_CString, std::string>(m_core.m_actual_setup), true);
+        m_motion_info_ptr = new baci::ROstring((m_component_name + ":motionInfo").c_str(), getComponent(),
+                new MSMotionInfoDevIO(m_core.m_motion_status, m_core.m_status), true);
+        m_starting_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":starting").c_str(), getComponent(),
+                new MSGenericDevIO<Management::TBoolean, std::atomic<Management::TBoolean>>(m_core.m_starting), true);
+        m_as_configuration_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":asConfiguration").c_str(), getComponent(),
+                new MSGenericDevIO<Management::TBoolean, std::atomic<Management::TBoolean>>(m_core.m_as_configuration), true);
+        m_elevation_tracking_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":elevationTrack").c_str(), getComponent(),
+                new MSGenericDevIO<Management::TBoolean, std::atomic<Management::TBoolean>>(m_core.m_elevation_tracking_enabled), true);
+        m_scan_active_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":scanActive").c_str(), getComponent(),
+                new MSGenericDevIO<Management::TBoolean, std::atomic<Management::TBoolean>>(m_core.m_scan_active), true);
+        m_scanning_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":scanning").c_str(), getComponent(),
+                new MSGenericDevIO<Management::TBoolean, std::atomic<Management::TBoolean>>(m_core.m_scanning), true);
+        m_tracking_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":tracking").c_str(), getComponent(),
+                new MSGenericDevIO<Management::TBoolean, std::atomic<Management::TBoolean>>(m_core.m_tracking), true);
+        m_current_configuration_ptr = new ROEnumImpl<ACS_ENUM_T(SRTMinorServoFocalConfiguration), POA_MinorServo::ROSRTMinorServoFocalConfiguration>((m_component_name + ":current_configuration").c_str(), getComponent(),
+                new MSAnswerMapDevIO<SRTMinorServoFocalConfiguration>("current_configuration", "CURRENT_CONFIG", m_core.m_status), true);
+        m_simulation_enabled_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":simulation_enabled").c_str(), getComponent(),
+                new MSAnswerMapDevIO<Management::TBoolean>("simulation_enabled", "SIMULATION_ENABLED", m_core.m_status), true);
+        m_plc_time_ptr = new baci::ROdouble((m_component_name + ":plc_time").c_str(), getComponent(),
+                new MSAnswerMapDevIO<CORBA::Double>("plc_time", "PLC_TIME", m_core.m_status), true);
+        m_plc_version_ptr = new baci::ROstring((m_component_name + ":plc_version").c_str(), getComponent(),
+                new MSAnswerMapDevIO<ACE_CString>("plc_version", "PLC_VERSION", m_core.m_status), true);
+        m_control_ptr = new ROEnumImpl<ACS_ENUM_T(SRTMinorServoControlStatus), POA_MinorServo::ROSRTMinorServoControlStatus>((m_component_name + ":control").c_str(), getComponent(),
+                new MSAnswerMapDevIO<SRTMinorServoControlStatus>("control", "CONTROL", m_core.m_status), true);
+        m_power_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":power").c_str(), getComponent(),
+                new MSAnswerMapDevIO<Management::TBoolean>("power", "POWER", m_core.m_status), true);
+        m_emergency_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":emergency").c_str(), getComponent(),
+                new MSAnswerMapDevIO<Management::TBoolean>("emergency", "EMERGENCY", m_core.m_status), true);
+        m_gregorian_cover_ptr = new ROEnumImpl<ACS_ENUM_T(SRTMinorServoGregorianCoverStatus), POA_MinorServo::ROSRTMinorServoGregorianCoverStatus>((m_component_name + ":gregorian_cover").c_str(), getComponent(),
+                new MSAnswerMapDevIO<SRTMinorServoGregorianCoverStatus>("gregorian_cover", "GREGORIAN_CAP", m_core.m_status), true);
+        m_last_executed_command_ptr = new baci::ROdouble((m_component_name + ":last_executed_command").c_str(), getComponent(),
+                new MSAnswerMapDevIO<CORBA::Double>("last_executed_command", "LAST_EXECUTED_COMMAND", m_core.m_status), true);
     }
-    catch(std::bad_alloc& ex)
+    catch(std::bad_alloc& ba)
     {
-		_THROW_EXCPT(ComponentErrors::MemoryAllocationExImpl, "SRTMinorServoBossImpl::initialize()");
+        _EXCPT(ComponentErrors::MemoryAllocationExImpl, ex, "SRTMinorServoBossImpl::initialize()");
+        ex.log(LM_DEBUG);
+        throw ex.getComponentErrorsEx();
     }
 
-    m_parser = new SimpleParser::CParser<SRTMinorServoBossImpl>(this, 10);
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossImpl::SRTMinorServoBossImpl()", (LM_INFO, "PROPERTIES INITIALIZED"));
 
-    m_parser->add("servoSetup", new function1<SRTMinorServoBossImpl, non_constant, void_type, I<string_type> >(this, &SRTMinorServoBossImpl::setup), 1);
-    m_parser->add("servoPark", new function0<SRTMinorServoBossImpl, non_constant, void_type>(this, &SRTMinorServoBossImpl::park), 0);
-    m_parser->add("setServoElevationTracking", new function1<SRTMinorServoBossImpl, non_constant, void_type, I<string_type> >(this, &SRTMinorServoBossImpl::setElevationTracking), 1);
-    m_parser->add("setServoASConfiguration", new function1<SRTMinorServoBossImpl, non_constant, void_type, I<string_type> >(this, &SRTMinorServoBossImpl::setASConfiguration), 1);
-    m_parser->add("setServoOffset", new function2<SRTMinorServoBossImpl, non_constant, void_type, I<string_type>, I<double_type> >(this, &SRTMinorServoBossImpl::setOffsets), 2);
-    m_parser->add("clearServoOffsets", new function0<SRTMinorServoBossImpl, non_constant, void_type>(this, &SRTMinorServoBossImpl::clearOffsets), 0);
+    m_parser.add("servoSetup", new SP::function1<SRTMinorServoBossImpl, SP::non_constant, SP::void_type, SP::I<SP::string_type>>(this, &SRTMinorServoBossImpl::setup), 1);
+    m_parser.add("servoPark", new SP::function0<SRTMinorServoBossImpl, SP::non_constant, SP::void_type>(this, &SRTMinorServoBossImpl::park), 0);
+    m_parser.add("setServoElevationTracking", new SP::function1<SRTMinorServoBossImpl, SP::non_constant, SP::void_type, SP::I<SP::string_type>>(this, &SRTMinorServoBossImpl::setElevationTracking), 1);
+    m_parser.add("setServoASConfiguration", new SP::function1<SRTMinorServoBossImpl, SP::non_constant, SP::void_type, SP::I<SP::string_type>>(this, &SRTMinorServoBossImpl::setASConfiguration), 1);
+    m_parser.add("setServoOffset", new SP::function2<SRTMinorServoBossImpl, SP::non_constant, SP::void_type, SP::I<SP::string_type>, SP::I<SP::double_type>>(this, &SRTMinorServoBossImpl::setUserOffset), 2);
+    m_parser.add("clearServoOffsets", new SP::function0<SRTMinorServoBossImpl, SP::non_constant, SP::void_type>(this, &SRTMinorServoBossImpl::clearOffsets), 0);
+    m_parser.add("setGregorianCoverPosition", new SP::function1<SRTMinorServoBossImpl, SP::non_constant, SP::void_type, SP::I<SP::string_type>>(this, &SRTMinorServoBossImpl::setGregorianCoverPosition), 1);
 
-    try
-    {
-        double status_thread_period;
-        if(!IRA::CIRATools::getDBValue(getContainerServices(), "status_thread_period", status_thread_period))
-        {
-            _EXCPT(ComponentErrors::CDBAccessExImpl, impl, "SRTMinorServoBossImpl::initialize()");
-            impl.setFieldName("status_thread_period");
-            throw impl;
-        }
-        m_status_thread = getContainerServices()->getThreadManager()->create<SRTMinorServoStatusThread, SRTMinorServoBossCore*>("SRTMinorServoStatusThread", m_core);
-        m_status_thread->setSleepTime(status_thread_period * 10000000);
-        m_status_thread->resume();
-    }
-    catch(acsthreadErrType::acsthreadErrTypeExImpl& ex)
-    {
-        _EXCPT(ComponentErrors::CanNotStartThreadExImpl, impl, "SRTMinorServoBossImpl::initialize()");
-        impl.setThreadName("SRTMinorServoStatusThread");
-        throw impl;
-    }
-    catch(...)
-    {
-        _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "SRTMinorServoBossImpl::initialize()");
-        impl.addData("Reason", "Encountered an unexpected error when starting the SRTMinorServoStatusThread!");
-        throw impl;
-    }
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossImpl::SRTMinorServoBossImpl()", (LM_INFO, "PARSER INITIALIZED"));
 }
 
 void SRTMinorServoBossImpl::execute()
@@ -212,13 +117,6 @@ void SRTMinorServoBossImpl::cleanUp()
 {
     AUTO_TRACE("SRTMinorServoBossImpl::cleanUp()");
     stopPropertiesMonitoring();
-
-    if(m_status_thread != NULL)
-    {
-        m_status_thread->suspend();
-        m_status_thread->terminate();
-    }
-
 	_IRA_LOGFILTER_FLUSH;
 	_IRA_LOGFILTER_DESTROY;
     CharacteristicComponentImpl::cleanUp();
@@ -228,13 +126,6 @@ void SRTMinorServoBossImpl::aboutToAbort()
 {
     AUTO_TRACE("SRTMinorServoBossImpl::aboutToAbort()");
     stopPropertiesMonitoring();
-
-    if(m_status_thread != NULL)
-    {
-        m_status_thread->suspend();
-        m_status_thread->terminate();
-    }
-
 	_IRA_LOGFILTER_FLUSH;
 	_IRA_LOGFILTER_DESTROY;
     CharacteristicComponentImpl::aboutToAbort();
@@ -243,152 +134,168 @@ void SRTMinorServoBossImpl::aboutToAbort()
 void SRTMinorServoBossImpl::setup(const char* configuration)
 {
     AUTO_TRACE("SRTMinorServoBossImpl::setup()");
-    m_core->setup(std::string(configuration));
+    m_core.setup(std::string(configuration));
 }
 
 void SRTMinorServoBossImpl::park()
 {
     AUTO_TRACE("SRTMinorServoBossImpl::park()");
-    m_core->park();
+    m_core.park();
 }
 
 CORBA::Boolean SRTMinorServoBossImpl::isElevationTrackingEn()
 {
     AUTO_TRACE("SRTMinorServoBossImpl::isElevationTrackingEn()");
-    return m_core->m_elevation_tracking_enabled == Management::MNG_TRUE ? true : false;
+    return m_core.m_elevation_tracking_enabled.load() == Management::MNG_TRUE ? true : false;
 }
 
 CORBA::Boolean SRTMinorServoBossImpl::isElevationTracking()
 {
     AUTO_TRACE("SRTMinorServoBossImpl::isElevationTracking()");
-    return m_core->m_elevation_tracking == Management::MNG_TRUE ? true : false;
+    return m_core.m_elevation_tracking.load() == Management::MNG_TRUE ? true : false;
 }
 
 CORBA::Boolean SRTMinorServoBossImpl::isTracking()
 {
     AUTO_TRACE("SRTMinorServoBossImpl::isTracking()");
-    return m_core->m_tracking == Management::MNG_TRUE ? true : false;
+    return m_core.m_tracking.load() == Management::MNG_TRUE ? true : false;
 }
 
 CORBA::Boolean SRTMinorServoBossImpl::isStarting()
 {
     AUTO_TRACE("SRTMinorServoBossImpl::isStarting()");
-    return m_core->m_starting == Management::MNG_TRUE ? true : false;
+    return m_core.m_starting.load() == Management::MNG_TRUE ? true : false;
 }
 
 CORBA::Boolean SRTMinorServoBossImpl::isASConfiguration()
 {
     AUTO_TRACE("SRTMinorServoBossImpl::isASConfiguration()");
-    return m_core->m_as_configuration == Management::MNG_TRUE ? true : false;
+    return m_core.m_as_configuration.load() == Management::MNG_TRUE ? true : false;
 }
 
 CORBA::Boolean SRTMinorServoBossImpl::isParking()
 {
     AUTO_TRACE("SRTMinorServoBossImpl::isParking()");
-    return (m_core->m_starting == Management::MNG_TRUE && m_core->m_commanded_configuration == MinorServo::CONFIGURATION_PARK);
+    return (m_core.m_starting.load() == Management::MNG_TRUE && m_core.m_commanded_configuration.load() == CONFIGURATION_PARK);
 }
 
 CORBA::Boolean SRTMinorServoBossImpl::isReady()
 {
     AUTO_TRACE("SRTMinorServoBossImpl::isReady()");
-    return m_core->m_ready == Management::MNG_TRUE ? true : false;
+    return m_core.m_ready.load() == Management::MNG_TRUE ? true : false;
 }
 
 CORBA::Boolean SRTMinorServoBossImpl::isScanning()
 {
     AUTO_TRACE("SRTMinorServoBossImpl::isScanning()");
-    return m_core->m_scanning == Management::MNG_TRUE ? true : false;
+    return m_core.m_scanning.load() == Management::MNG_TRUE ? true : false;
 }
 
 CORBA::Boolean SRTMinorServoBossImpl::isScanActive()
 {
     AUTO_TRACE("SRTMinorServoBossImpl::isScanActive()");
-    return m_core->m_scan_active == Management::MNG_TRUE ? true : false;
+    return m_core.m_scan_active.load() == Management::MNG_TRUE ? true : false;
 }
 
 char* SRTMinorServoBossImpl::getActualSetup()
 {
     AUTO_TRACE("SRTMinorServoBossImpl::getActualSetup()");
-    return CORBA::string_dup(m_core->m_actual_setup.c_str());
+    return CORBA::string_dup(m_core.m_actual_setup.c_str());
 }
 
 char* SRTMinorServoBossImpl::getCommandedSetup()
 {
     AUTO_TRACE("SRTMinorServoBossImpl::getCommandedSetup()");
-    return CORBA::string_dup(m_core->m_commanded_setup.c_str());
+    return CORBA::string_dup(m_core.m_commanded_setup.c_str());
 }
 
 CORBA::Double SRTMinorServoBossImpl::getCentralScanPosition()
 {
     AUTO_TRACE("SRTMinorServoBossImpl::getCentralScanPosition()");
-    return 0.0;
+
+    if(m_core.m_scan_active.load() == Management::MNG_TRUE)
+    {
+        return CORBA::Double(m_core.m_current_scan.central_position);
+    }
+    else if(m_core.m_last_scan.servo_name != "")  // We are not scanning now, but we performed a scan previously
+    {
+        return CORBA::Double(m_core.m_last_scan.central_position);
+    }
+    else
+    {
+        _EXCPT(MinorServoErrors::StatusErrorExImpl, ex, "SRTMinorServoBossImpl::getCentralPosition()");
+        ex.setReason("No scan has been performed yet.");
+        ex.log(LM_DEBUG);
+        throw ex.getMinorServoErrorsEx();
+    }
+}
+
+void SRTMinorServoBossImpl::clearOffsets()
+{
+    AUTO_TRACE("SRTMinorServoBossImpl::clearOffsets()");
+    ACS_LOG(LM_FULL_INFO, "clearServoOffsets", (LM_INFO, "CLEARING ALL USER OFFSETS"));
+    m_core.clearUserOffsets("ALL");
 }
 
 void SRTMinorServoBossImpl::clearUserOffset(const char* servo_name)
 {
     AUTO_TRACE("SRTMinorServoBossImpl::clearUserOffset()");
-    m_core->clearUserOffsets(std::string(servo_name));
+    m_core.clearUserOffsets(std::string(servo_name));
 }
 
 void SRTMinorServoBossImpl::setUserOffset(const char* servo_axis_name, CORBA::Double offset)
 {
     AUTO_TRACE("SRTMinorServoBossImpl::setUserOffset()");
-    m_core->setUserOffset(std::string(servo_axis_name), (double)offset);
+    m_core.setUserOffset(std::string(servo_axis_name), (double)offset);
+}
+
+void SRTMinorServoBossImpl::setUserOffset(const char* servo_axis_name, const double& offset)
+{
+    AUTO_TRACE("SRTMinorServoBossImpl::setUserOffset()");
+    m_core.setUserOffset(std::string(servo_axis_name), (double)offset, true);
 }
 
 ACS::doubleSeq* SRTMinorServoBossImpl::getUserOffset()
 {
     AUTO_TRACE("SRTMinorServoBossImpl::getUserOffset()");
-
-    std::vector<double> userOffsets = m_core->getUserOffsets();
-    ACS::doubleSeq_var offsets = new ACS::doubleSeq;
-    offsets->length(userOffsets.size());
-    for(size_t i = 0; i < userOffsets.size(); i++)
-    {
-        offsets[i] = userOffsets[i];
-    }
-    return offsets._retn();
+    return m_core.getUserOffsets();
 }
 
 void SRTMinorServoBossImpl::clearSystemOffset(const char* servo_name)
 {
     AUTO_TRACE("SRTMinorServoBossImpl::clearSystemOffset()");
-    m_core->clearSystemOffsets(std::string(servo_name));
+    m_core.clearSystemOffsets(std::string(servo_name));
 }
 
 void SRTMinorServoBossImpl::setSystemOffset(const char* servo_axis_name, CORBA::Double offset)
 {
     AUTO_TRACE("SRTMinorServoBossImpl::setSystemOffset()");
-    m_core->setSystemOffset(std::string(servo_axis_name), (double)offset);
+    m_core.setSystemOffset(std::string(servo_axis_name), (double)offset);
 }
 
 ACS::doubleSeq* SRTMinorServoBossImpl::getSystemOffset()
 {
     AUTO_TRACE("SRTMinorServoBossImpl::getSystemOffset()");
-
-    std::vector<double> systemOffsets = m_core->getSystemOffsets();
-    ACS::doubleSeq_var offsets = new ACS::doubleSeq;
-    offsets->length(systemOffsets.size());
-    for(size_t i = 0; i < systemOffsets.size(); i++)
-    {
-        offsets[i] = systemOffsets[i];
-    }
-    return offsets._retn();
+    return m_core.getSystemOffsets();
 }
 
 void SRTMinorServoBossImpl::getAxesInfo(ACS::stringSeq_out axes_names, ACS::stringSeq_out axes_units)
 {
     AUTO_TRACE("SRTMinorServoBossImpl::getAxesInfo()");
-    m_core->getAxesInfo(axes_names, axes_units);
+    m_core.getAxesInfo(axes_names, axes_units);
 }
 
 char* SRTMinorServoBossImpl::getScanAxis()
 {
     AUTO_TRACE("SRTMinorServoBossImpl::getScanAxis()");
 
-    if(isScanActive())
+    if(m_core.m_scan_active.load() == Management::MNG_TRUE)
     {
-        return CORBA::string_dup("");
+        return CORBA::string_dup((m_core.m_current_scan.servo_name + "_" + m_core.m_current_scan.axis_name).c_str());
+    }
+    else if(!m_core.m_last_scan.servo_name.empty())
+    {
+        return CORBA::string_dup((m_core.m_last_scan.servo_name + "_" + m_core.m_last_scan.axis_name).c_str());
     }
     else
     {
@@ -396,70 +303,52 @@ char* SRTMinorServoBossImpl::getScanAxis()
     }
 }
 
-ACS::doubleSeq* SRTMinorServoBossImpl::getAxesPosition(ACS::Time)
+ACS::doubleSeq* SRTMinorServoBossImpl::getAxesPosition(ACS::Time acs_time)
 {
-    AUTO_TRACE("SRTMinorServoBossImpl::getAxesPosition()");
-
-    ACS::doubleSeq_var positions = new ACS::doubleSeq;
-    positions->length(3);
-    for(size_t i = 0; i < 3; i++)
-    {
-        positions[i] = 0;
-    }
-    return positions._retn();
+    AUTO_TRACE("SRTMinorServoBossImpl::getAxesPositions()");
+    return m_core.getAxesPositions(acs_time == 0 ? getTimeStamp() : acs_time);
 }
 
 void SRTMinorServoBossImpl::setElevationTracking(const char* configuration)
 {
     AUTO_TRACE("SRTMinorServoBossImpl::setElevationTracking()");
-    m_core->setElevationTracking(std::string(configuration));
+    m_core.setElevationTracking(std::string(configuration));
 }
 
 void SRTMinorServoBossImpl::setASConfiguration(const char* configuration)
 {
     AUTO_TRACE("SRTMinorServoBossImpl::setASConfiguration()");
-    m_core->setASConfiguration(std::string(configuration));
+    m_core.setASConfiguration(std::string(configuration));
 }
 
-void SRTMinorServoBossImpl::setOffsets(const char* axis_code, const double& offset)
+void SRTMinorServoBossImpl::setGregorianCoverPosition(const char* position)
 {
-    AUTO_TRACE("SRTMinorServoBossImpl::setOffset()");
+    AUTO_TRACE("SRTMinorServoBossImpl::setGregorianCoverPosition()");
+    m_core.setGregorianCoverPosition(std::string(position));
 }
 
-void SRTMinorServoBossImpl::clearOffsets()
-{
-    AUTO_TRACE("SRTMinorServoBossImpl::clearOffsets()");
-
-    for(const auto& [name, servo] : m_core->m_servos)
-    {
-        m_core->clearUserOffsets(name);
-        // Not sure about the following
-        //m_core->clearSystemOffsets(name);
-    }
-}
-
-CORBA::Boolean SRTMinorServoBossImpl::checkScan(const ACS::Time start_time, const MinorServo::MinorServoScan& scan_info, const Antenna::TRunTimeParameters& antenna_info, MinorServo::TRunTimeParameters_out ms_parameters)
+CORBA::Boolean SRTMinorServoBossImpl::checkScan(const ACS::Time start_time, const MinorServoScan& scan_info, const Antenna::TRunTimeParameters& antenna_info, TRunTimeParameters_out ms_parameters)
 {
     AUTO_TRACE("SRTMinorServoBossImpl::checkScan()");
-    return m_core->checkScan(start_time, scan_info, antenna_info, ms_parameters);
+    return m_core.checkScan(start_time, scan_info, antenna_info, ms_parameters);
 }
 
-void SRTMinorServoBossImpl::startScan(ACS::Time& start_time, const MinorServo::MinorServoScan& scan_info, const Antenna::TRunTimeParameters& antenna_info)
+void SRTMinorServoBossImpl::startScan(ACS::Time& start_time, const MinorServoScan& scan_info, const Antenna::TRunTimeParameters& antenna_info)
 {
     AUTO_TRACE("SRTMinorServoBossImpl::startScan()");
-    m_core->startScan(start_time, scan_info, antenna_info);
+    m_core.startScan(start_time, scan_info, antenna_info);
 }
 
 void SRTMinorServoBossImpl::closeScan(ACS::Time& close_time)
 {
     AUTO_TRACE("SRTMinorServoBossImpl::closeScan()");
-    m_core->closeScan(close_time);
+    m_core.closeScan(close_time);
 }
 
 void SRTMinorServoBossImpl::preset(double elevation)
 {
     AUTO_TRACE("SRTMinorServoBossImpl::preset()");
-    m_core->preset(elevation);
+    m_core.preset(elevation);
 }
 
 CORBA::Boolean SRTMinorServoBossImpl::command(const char* cmd, CORBA::String_out answer)
@@ -467,55 +356,60 @@ CORBA::Boolean SRTMinorServoBossImpl::command(const char* cmd, CORBA::String_out
     AUTO_TRACE("SRTMinorServoBossImpl::command()");
 
     IRA::CString out;
-    bool res;
+    bool res = false;
+
     try
     {
-        m_parser->run(cmd, out);
+        m_parser.run(cmd, out);
         res = true;
     }
-    catch(ParserErrors::ParserErrorsExImpl& ex)
+    catch(MinorServoErrors::MinorServoErrorsEx& ex)
     {
-        res = false;
+        // Only print the routine, the reason is automatically provided in the message inside the jlog.
+        ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
     }
-    catch(ManagementErrors::ConfigurationErrorExImpl& ex)
+    catch(ComponentErrors::ComponentErrorsEx& ex)
     {
-        ex.log(LM_ERROR); 
-        res = false;
+        ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
     }
-    catch(ACSErr::ACSbaseExImpl& ex)
+    catch(ManagementErrors::ConfigurationErrorEx& ex)
     {
-        ex.log(LM_ERROR); 
-        res = false;
+        ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
     }
-    catch(...)
+    catch(ManagementErrors::ParkingErrorEx& ex)
     {
-        ACS_SHORT_LOG((LM_WARNING, "SRTMinorServoBossImpl::command(): unknown exception."));
-        res = false;
+        ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
     }
+    catch(...) // Unknown exception. If the above catch blocks are written correctly we should never get here.
+    {
+        ACS_SHORT_LOG((LM_ERROR, "SRTMinorServoBossImpl::command()"));
+    }
+
     answer = CORBA::string_dup((const char *)out);
     return res;
 }
 
-GET_PROPERTY_REFERENCE(Management::ROTSystemStatus, m_status_ptr, status)
-GET_PROPERTY_REFERENCE(Management::ROTBoolean, m_ready_ptr, ready)
-GET_PROPERTY_REFERENCE(ACS::ROstring, m_actual_setup_ptr, actualSetup)
-GET_PROPERTY_REFERENCE(ACS::ROstring, m_motion_info_ptr, motionInfo)
-GET_PROPERTY_REFERENCE(Management::ROTBoolean, m_starting_ptr, starting)
-GET_PROPERTY_REFERENCE(Management::ROTBoolean, m_as_configuration_ptr, asConfiguration)
-GET_PROPERTY_REFERENCE(Management::ROTBoolean, m_elevation_tracking_ptr, elevationTrack)
-GET_PROPERTY_REFERENCE(Management::ROTBoolean, m_scan_active_ptr, scanActive)
-GET_PROPERTY_REFERENCE(Management::ROTBoolean, m_scanning_ptr, scanning)
-GET_PROPERTY_REFERENCE(Management::ROTBoolean, m_tracking_ptr, tracking)
 
-GET_PROPERTY_REFERENCE(MinorServo::ROSRTMinorServoFocalConfiguration, m_current_configuration_ptr, current_configuration);
-GET_PROPERTY_REFERENCE(Management::ROTBoolean, m_simulation_enabled_ptr, simulation_enabled);
-GET_PROPERTY_REFERENCE(ACS::ROdouble, m_plc_time_ptr, plc_time);
-GET_PROPERTY_REFERENCE(ACS::ROstring, m_plc_version_ptr, plc_version);
-GET_PROPERTY_REFERENCE(MinorServo::ROSRTMinorServoControlStatus, m_control_ptr, control);
-GET_PROPERTY_REFERENCE(Management::ROTBoolean, m_power_ptr, power);
-GET_PROPERTY_REFERENCE(Management::ROTBoolean, m_emergency_ptr, emergency);
-GET_PROPERTY_REFERENCE(MinorServo::ROSRTMinorServoGregorianCoverStatus, m_gregorian_cover_ptr, gregorian_cover);
-GET_PROPERTY_REFERENCE(ACS::ROdouble, m_last_executed_command_ptr, last_executed_command);
+GET_PROPERTY_REFERENCE(Management::ROTSystemStatus, SRTMinorServoBossImpl, m_status_ptr, status)
+GET_PROPERTY_REFERENCE(Management::ROTBoolean, SRTMinorServoBossImpl, m_ready_ptr, ready)
+GET_PROPERTY_REFERENCE(ACS::ROstring, SRTMinorServoBossImpl, m_actual_setup_ptr, actualSetup)
+GET_PROPERTY_REFERENCE(ACS::ROstring, SRTMinorServoBossImpl, m_motion_info_ptr, motionInfo)
+GET_PROPERTY_REFERENCE(Management::ROTBoolean, SRTMinorServoBossImpl, m_starting_ptr, starting)
+GET_PROPERTY_REFERENCE(Management::ROTBoolean, SRTMinorServoBossImpl, m_as_configuration_ptr, asConfiguration)
+GET_PROPERTY_REFERENCE(Management::ROTBoolean, SRTMinorServoBossImpl, m_elevation_tracking_ptr, elevationTrack)
+GET_PROPERTY_REFERENCE(Management::ROTBoolean, SRTMinorServoBossImpl, m_scan_active_ptr, scanActive)
+GET_PROPERTY_REFERENCE(Management::ROTBoolean, SRTMinorServoBossImpl, m_scanning_ptr, scanning)
+GET_PROPERTY_REFERENCE(Management::ROTBoolean, SRTMinorServoBossImpl, m_tracking_ptr, tracking)
+GET_PROPERTY_REFERENCE(Management::ROTBoolean, SRTMinorServoBossImpl, m_connected_ptr, connected)
+GET_PROPERTY_REFERENCE(ROSRTMinorServoFocalConfiguration, SRTMinorServoBossImpl, m_current_configuration_ptr, current_configuration);
+GET_PROPERTY_REFERENCE(Management::ROTBoolean, SRTMinorServoBossImpl, m_simulation_enabled_ptr, simulation_enabled);
+GET_PROPERTY_REFERENCE(ACS::ROdouble, SRTMinorServoBossImpl, m_plc_time_ptr, plc_time);
+GET_PROPERTY_REFERENCE(ACS::ROstring, SRTMinorServoBossImpl, m_plc_version_ptr, plc_version);
+GET_PROPERTY_REFERENCE(ROSRTMinorServoControlStatus, SRTMinorServoBossImpl, m_control_ptr, control);
+GET_PROPERTY_REFERENCE(Management::ROTBoolean, SRTMinorServoBossImpl, m_power_ptr, power);
+GET_PROPERTY_REFERENCE(Management::ROTBoolean, SRTMinorServoBossImpl, m_emergency_ptr, emergency);
+GET_PROPERTY_REFERENCE(ROSRTMinorServoGregorianCoverStatus, SRTMinorServoBossImpl, m_gregorian_cover_ptr, gregorian_cover);
+GET_PROPERTY_REFERENCE(ACS::ROdouble, SRTMinorServoBossImpl, m_last_executed_command_ptr, last_executed_command);
 
 #include <maciACSComponentDefines.h>
 MACI_DLL_SUPPORT_FUNCTIONS(SRTMinorServoBossImpl)

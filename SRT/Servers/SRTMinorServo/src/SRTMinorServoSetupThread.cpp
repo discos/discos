@@ -1,58 +1,63 @@
 #include "SRTMinorServoSetupThread.h"
 
-SRTMinorServoSetupThread::SRTMinorServoSetupThread(const ACE_CString& name, SRTMinorServoBossCore* core, const ACS::TimeInterval& responseTime, const ACS::TimeInterval& sleepTime):
-    ACS::Thread(name, responseTime, sleepTime),
+using namespace MinorServo;
+
+SRTMinorServoSetupThread::SRTMinorServoSetupThread(const ACE_CString& name, SRTMinorServoBossCore& core, const ACS::TimeInterval& response_time, const ACS::TimeInterval& sleep_time) :
+    ACS::Thread(name, response_time, sleep_time),
     m_core(core)
 {
-    m_thread_name = std::string(name.c_str());
-    AUTO_TRACE(m_thread_name + "::SRTMinorServoSetupThread()");
+    AUTO_TRACE("SRTMinorServoSetupThread::SRTMinorServoSetupThread()");
 }
 
 SRTMinorServoSetupThread::~SRTMinorServoSetupThread()
 {
-    AUTO_TRACE(m_thread_name + "::~SRTMinorServoSetupThread()");
+    AUTO_TRACE("SRTMinorServoSetupThread::~SRTMinorServoSetupThread()");
 }
 
 void SRTMinorServoSetupThread::onStart()
 {
-    AUTO_TRACE(m_thread_name + "::onStart()");
-    this->setSleepTime(500000);   // 50 milliseconds
-    m_start_time = CIRATools::getUNIXEpoch();
+    AUTO_TRACE("SRTMinorServoSetupThread::onStart()");
 
-    MinorServo::SRTMinorServoFocalConfiguration commanded_configuration = m_core->m_commanded_configuration;
-    m_LDO_configuration = MinorServo::LDOConfigurationNameTable.left.at(commanded_configuration);
-    m_gregorian_cover_position = commanded_configuration == MinorServo::CONFIGURATION_PRIMARY ? MinorServo::COVER_STATUS_CLOSED : MinorServo::COVER_STATUS_OPEN;
+    this->setSleepTime(500000);   // 50 milliseconds
+    m_start_time = IRA::CIRATools::getUNIXEpoch();
+
+    SRTMinorServoFocalConfiguration commanded_configuration = m_core.m_commanded_configuration.load();
+    m_LDO_configuration = LDOConfigurationNameTable.left.at(commanded_configuration);
+    m_gregorian_cover_position = commanded_configuration == CONFIGURATION_PRIMARY ? COVER_STATUS_CLOSED : COVER_STATUS_OPEN;
     m_status = 0;
+
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::onStart()", (LM_INFO, ("SETUP THREAD STARTED WITH '" + m_core.m_commanded_setup + "' CONFIGURATION").c_str()));
 }
 
 void SRTMinorServoSetupThread::onStop()
 {
-    AUTO_TRACE(m_thread_name + "::onStop()");
+    AUTO_TRACE("SRTMinorServoSetupThread::onStop()");
+
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::onStop()", (LM_INFO, "SETUP THREAD STOPPED"));
 }
 
 void SRTMinorServoSetupThread::runLoop()
 {
-    AUTO_TRACE(m_thread_name + "::runLoop()");
+    AUTO_TRACE("SRTMinorServoSetupThread::runLoop()");
 
     try
     {
-        m_core->checkControl();
-        m_core->checkEmergency();
+        m_core.checkLineStatus();
     }
-    catch(MinorServoErrors::StatusErrorExImpl& ex)
+    catch(MinorServoErrors::StatusErrorEx& ex)
     {
-        ACS_LOG(LM_FULL_INFO, m_thread_name + "::runLoop()", (LM_ERROR, ex.getData("Reason").c_str()));
+        ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
+        m_core.setFailure();
         this->setStopped();
         return;
     }
 
-    if(CIRATools::getUNIXEpoch() - m_start_time >= SETUP_TIMEOUT)
+    if(IRA::CIRATools::getUNIXEpoch() - m_start_time >= SETUP_TIMEOUT)
     {
-        m_core->m_starting = Management::MNG_FALSE;
-        m_core->m_motion_status = MinorServo::MOTION_STATUS_ERROR;
-        m_core->m_subsystem_status = Management::MNG_FAILURE;
-        ACS_LOG(LM_FULL_INFO, m_thread_name + "::runLoop()", (LM_ERROR, "Timeout while performing a setup operation."));
+        ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::runLoop()", (LM_ERROR, "Timeout while performing a setup operation."));
+        m_core.setFailure();
         this->setStopped();
+        return;
     }
 
     ACSErr::Completion_var comp;
@@ -61,73 +66,165 @@ void SRTMinorServoSetupThread::runLoop()
     {
         case 0: // Check if all the servos stopped
         {
-            if(std::all_of(m_core->m_servos.begin(), m_core->m_servos.end(), [](const std::pair<std::string, MinorServo::SRTBaseMinorServo_ptr>& servo) -> bool
+            if(std::all_of(m_core.m_servos.begin(), m_core.m_servos.end(), [](const std::pair<std::string, SRTBaseMinorServo_ptr>& servo) -> bool
             {
                 ACSErr::Completion_var comp;
-                return servo.second->operative_mode()->get_sync(comp.out()) == MinorServo::OPERATIVE_MODE_STOP ? true : false;
+                return servo.second->operative_mode()->get_sync(comp.out()) == OPERATIVE_MODE_STOP ? true : false;
             }))
             {
-                // Move to phase 1
                 m_status = 1;
             }
 
             break;
         }
-        case 1: // Send the SETUP command
+        case 1: // Set all the servo offsets to 0
         {
-            if(std::get<std::string>(m_core->m_socket->sendCommand(SRTMinorServoCommandLibrary::setup(m_LDO_configuration))["OUTPUT"]) != "GOOD")
+            for(const auto& [name, servo] : m_core.m_servos)
             {
-                m_core->m_starting = Management::MNG_FALSE;
-                m_core->m_motion_status = MinorServo::MOTION_STATUS_ERROR;
-                m_core->m_subsystem_status = Management::MNG_FAILURE;
+                // Not sure about this
+                servo->clearSystemOffsets();
+                servo->clearUserOffsets();
+            }
+
+            m_status = 2;
+            break;
+        }
+        case 2: // Send the SETUP command
+        {
+            try
+            {
+                if(!m_core.m_socket.sendCommand(SRTMinorServoCommandLibrary::setup(m_LDO_configuration)).checkOutput())
+                {
+                    ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::runLoop()", (LM_ERROR, "Received NAK in response to a SETUP command."));
+                    m_core.setFailure();
+                    this->setStopped();
+                    return;
+                }
+                else
+                {
+                    m_status = 3;
+                }
+            }
+            catch(...)
+            {
+                ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::runLoop()", (LM_ERROR, "Communication error while sending a SETUP command."));
+                m_core.setFailure();
                 this->setStopped();
-            }
-            else
-            {
-                m_status = 2;
+                return;
             }
 
             break;
         }
-        case 2: // Wait for the system to show the commanded configuration
+        case 3: // Wait for the system to show the commanded configuration
         {
-            if(m_core->m_component->current_configuration()->get_sync(comp.out()) == m_core->m_commanded_configuration)
-            {
-                m_status = 3;
-            }
-
-            break;
-        }
-        case 3: // Wait for the whole system to reach the desired configuration
-        {
-            // First we check the status of the gregorian cover
-            bool completed = m_core->m_component->gregorian_cover()->get_sync(comp.out()) == m_gregorian_cover_position ? true : false;
-
-            // Then we cycle through all the servos and make sure their operative mode is SETUP
-            if(completed && std::all_of(m_core->m_servos.begin(), m_core->m_servos.end(), [](const std::pair<std::string, MinorServo::SRTBaseMinorServo_ptr>& servo) -> bool
-            {
-                ACSErr::Completion_var comp;
-                return servo.second->operative_mode()->get_sync(comp.out()) == MinorServo::OPERATIVE_MODE_SETUP ? true : false;
-            }))
+            if(m_core.m_component.current_configuration()->get_sync(comp.out()) == m_core.m_commanded_configuration.load())
             {
                 m_status = 4;
             }
 
             break;
         }
-        case 4: // Finally load the servos coefficients
+        case 4: // Wait for the whole system to reach the desired configuration
         {
-            m_core->m_actual_setup = m_core->m_commanded_setup;
+            // First we check the status of the gregorian cover
+            bool completed = m_core.m_component.gregorian_cover()->get_sync(comp.out()) == m_gregorian_cover_position ? true : false;
 
-            for(const auto& [name, servo] : m_core->m_servos)
+            // Then we cycle through all the servos and make sure their operative mode is SETUP
+            if(completed && std::all_of(m_core.m_servos.begin(), m_core.m_servos.end(), [](const std::pair<std::string, SRTBaseMinorServo_ptr>& servo) -> bool
             {
-                servo->setup(m_core->m_actual_setup.c_str());
+                ACSErr::Completion_var comp;
+                return servo.second->operative_mode()->get_sync(comp.out()) == OPERATIVE_MODE_SETUP ? true : false;
+            }))
+            {
+                m_status = 5;
             }
 
-            m_core->m_starting = Management::MNG_FALSE;
-            m_core->m_ready = Management::MNG_TRUE;
-            m_core->m_subsystem_status = Management::MNG_OK;
-            m_core->m_motion_status = m_core->m_elevation_tracking_enabled == Management::MNG_TRUE ? MinorServo::MOTION_STATUS_TRACKING : MinorServo::MOTION_STATUS_CONFIGURED;
+            break;
+        }
+        case 5: // Load the servos coefficients and send a PRESET command
+        {
+            for(const auto& [servo_name, servo] : m_core.m_servos)
+            {
+                try
+                {
+                    servo->setup(m_core.m_commanded_setup.c_str());
+                }
+                catch(...)
+                {
+                    ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::runLoop()", (LM_ERROR, ("Error while loading a SETUP to servo'" + servo_name + "'.").c_str()));
+                    m_core.setFailure();
+                    this->setStopped();
+                    return;
+                }
+
+                // This step is necessary because we have _ASACTIVE configurations that have a slightly different position from the commanded one
+                // Unfortunately, the Leonardo implementation accepts a fixed number of configurations, therefore we share the _ASACTIVE and AS not active configurations for each focal position
+                if(servo->in_use()->get_sync(comp.out()) == Management::MNG_TRUE)
+                {
+                    try
+                    {
+                        servo->preset(*servo->calcCoordinates(45));
+                    }
+                    catch(MinorServoErrors::MinorServoErrorsEx& ex)
+                    {
+                        ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
+                        m_core.setFailure();
+                        this->setStopped();
+                        return;
+                    }
+                }
+            }
+
+            m_status = 6;
+            break;
+        }
+        case 6: // Wait for the whole system to reach the PRESET configuration
+        {
+            if(std::all_of(m_core.m_servos.begin(), m_core.m_servos.end(), [this](const std::pair<std::string, SRTBaseMinorServo_ptr>& servo) -> bool
+            {
+                ACSErr::Completion_var comp;
+                if(servo.second->in_use()->get_sync(comp.out()) == Management::MNG_TRUE)
+                {
+                    return servo.second->operative_mode()->get_sync(comp.out()) == OPERATIVE_MODE_PRESET ? true : false;
+                }
+                else
+                {
+                    return true;
+                }
+            }))
+            {
+                m_status = 7;
+            }
+
+            break;
+        }
+        case 7: // Finally set all the variables values and eventually start the elevation tracking thread
+        {
+            m_core.m_actual_setup = m_core.m_commanded_setup;
+            m_core.m_starting.store(Management::MNG_FALSE);
+            m_core.m_ready.store(Management::MNG_TRUE);
+            m_core.m_subsystem_status.store(Management::MNG_OK);
+
+            if(m_core.m_elevation_tracking_enabled.load() == Management::MNG_TRUE)
+            {
+                m_core.m_motion_status.store(MOTION_STATUS_TRACKING);
+                try
+                {
+                    m_core.startThread(m_core.m_tracking_thread);
+                }
+                catch(ComponentErrors::ComponentErrorsEx& ex)
+                {
+                    ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
+                    m_core.setFailure();
+                    this->setStopped();
+                    return;
+                }
+            }
+            else
+            {
+                m_core.m_motion_status.store(MOTION_STATUS_CONFIGURED);
+            }
+
             this->setStopped();
             break;
         }
