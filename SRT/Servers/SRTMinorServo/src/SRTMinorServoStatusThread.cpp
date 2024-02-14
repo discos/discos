@@ -35,16 +35,14 @@ void SRTMinorServoStatusThread::runLoop()
     AUTO_TRACE("SRTMinorServoStatusThread::runLoop()");
 
     ACS::Time t0 = getTimeStamp();
-    unsigned long sleep_time;
+    unsigned long sleep_time = 10000000;
 
-    // Update the sleep time in order to not drift away by adding latency
-    if(m_core.status())
+    // Check the status only if the properties are already being monitored by the Boss component.
+    // This is necessary since this thread might start before the start of the properties monitoring.
+    if(m_core.m_component.isPropertiesMonitoringActive() && m_core.status())
     {
+        // Update the sleep time in order to not drift away by adding latency
         sleep_time = std::max(m_sleep_time - (getTimeStamp() - t0), (long unsigned int)0);
-    }
-    else
-    {
-        sleep_time = 10000000;
     }
 
     publish();

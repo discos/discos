@@ -5,6 +5,7 @@
 #include <Cplusplus11Helper.h>
 #include <IRA>
 #include <ComponentErrors.h>
+#include <iostream>
 
 /**
  * The following templates are useful if you want to check if a given type for the SRTMinorServoAnswerMap is accepted
@@ -43,18 +44,12 @@ struct DB_type
 };
 
 template <typename T>
-T getCDBValue(maci::ContainerServices* container_services, const std::string& field, const std::string& component="")
-{
-    return getCDBValue<T>(container_services, field.c_str(), component.c_str());
-}
-
-template <typename T>
-T getCDBValue(maci::ContainerServices* container_services, const char* field, const char* component="")
+T getCDBValue(maci::ContainerServices* container_services, const std::string& field, const std::string component = "")
 {
     using C = typename DB_type<T>::type;
 
     C temp;
-    if(IRA::CIRATools::getDBValue(container_services, field, temp, "alma/", component))
+    if(IRA::CIRATools::getDBValue(container_services, field.c_str(), temp, "alma/", component.c_str()))
     {
         if constexpr(std::is_same_v<T, std::vector<double>>)
         {
@@ -71,13 +66,13 @@ T getCDBValue(maci::ContainerServices* container_services, const char* field, co
                 catch(std::invalid_argument& ia)
                 {
                     _EXCPT(ComponentErrors::CDBAccessExImpl, ex, "SRTMinorServoUtils::getCDBValue()");
-                    ex.setFieldName(field);
+                    ex.setFieldName(field.c_str());
                     throw ex.getComponentErrorsEx();
                 }
                 catch(std::out_of_range& oor)
                 {
                     _EXCPT(ComponentErrors::ValueOutofRangeExImpl, ex, "SRTMinorServoUtils::getCDBValue()");
-                    ex.setValueName(field);
+                    ex.setValueName(field.c_str());
                     ex.setValueLimit(token.find('-') == std::string::npos ? std::numeric_limits<double>::max() : std::numeric_limits<double>::min());
                     throw ex.getComponentErrorsEx();
                 }
@@ -98,7 +93,7 @@ T getCDBValue(maci::ContainerServices* container_services, const char* field, co
     else
     {
         _EXCPT(ComponentErrors::CDBAccessExImpl, ex, "SRTMinorServoUtils::getCDBValue()");
-        ex.setFieldName(field);
+        ex.setFieldName(field.c_str());
         throw ex.getComponentErrorsEx();  // Maybe throw the plain ex
     }
 }
