@@ -8,11 +8,11 @@
            xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               
-	Name="5GHzReceiver"
-	Code="SRT5GHzImpl"
-	Type="IDL:alma/Receivers/SRT5GHz:1.0"
-	Container="SRT5GHzContainer"
-	KeepAliveTime="-1"
+	Name="LO_CLOW"
+	Code="LocalOscillatorImpl.LocalOscillator"
+	Type="IDL:alma/Receivers/LocalOscillator:1.0"
+	Container="LocalOscillatorKContainer"
+	KeepAliveTime="10"
 	Default="false"
-   ImplLang="cpp"
+    ImplLang="py"
 />
