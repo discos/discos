@@ -86,10 +86,24 @@ void SRTMinorServoSetupThread::runLoop()
                 servo->clearUserOffsets();
             }
 
-            m_status = 2;
+            //m_status = 2;
+            m_status = 100;
             break;
         }
-        case 2: // Send the SETUP command
+        case 100: // Send the STOW command to the gregorian cover
+        {
+            if(!m_core.m_socket.sendCommand(SRTMinorServoCommandLibrary::stow("GREGORIAN_CAP", m_gregorian_cover_position)).checkOutput())
+            {
+                ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::runLoop()", (LM_ERROR, "Received NAK when setting the gregorian cover position."));
+                m_core.setFailure();
+                this->setStopped();
+                return;
+            }
+
+            m_status = 5;
+            break;
+        }
+        /*case 2: // Send the SETUP command
         {
             try
             {
@@ -140,7 +154,7 @@ void SRTMinorServoSetupThread::runLoop()
             }
 
             break;
-        }
+        }*/
         case 5: // Load the servos coefficients and send a PRESET command
         {
             for(const auto& [servo_name, servo] : m_core.m_servos)
@@ -180,7 +194,10 @@ void SRTMinorServoSetupThread::runLoop()
         }
         case 6: // Wait for the whole system to reach the PRESET configuration
         {
-            if(std::all_of(m_core.m_servos.begin(), m_core.m_servos.end(), [this](const std::pair<std::string, SRTBaseMinorServo_ptr>& servo) -> bool
+            // First we check the status of the gregorian cover
+            bool completed = m_core.m_component.gregorian_cover()->get_sync(comp.out()) == m_gregorian_cover_position ? true : false;
+
+            if(completed && std::all_of(m_core.m_servos.begin(), m_core.m_servos.end(), [this](const std::pair<std::string, SRTBaseMinorServo_ptr>& servo) -> bool
             {
                 ACSErr::Completion_var comp;
                 if(servo.second->in_use()->get_sync(comp.out()) == Management::MNG_TRUE)
