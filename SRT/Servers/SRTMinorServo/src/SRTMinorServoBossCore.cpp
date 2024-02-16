@@ -242,21 +242,21 @@ void SRTMinorServoBossCore::setup(std::string commanded_setup)
     m_tracking.store(Management::MNG_FALSE);
     m_motion_status.store(MOTION_STATUS_STARTING);
 
-    try
+    // Send the STOP command to each servo
+    for(const auto& [servo_name, servo] : m_servos)
     {
-        // Send the STOP command to each servo
-        for(const auto& [servo_name, servo] : m_servos)
+        try
         {
             servo->stop();
         }
-    }
-    catch(MinorServoErrors::MinorServoErrorsEx& mse)
-    {
-        _ADD_BACKTRACE(ManagementErrors::ConfigurationErrorExImpl, ex, mse, "SRTMinorServoBossCore::setup()");
-        ex.setSubsystem("MinorServo");
-        ex.setReason("Error while sending the STOP command to a minor servo system.");
-        ex.log(LM_DEBUG);
-        throw ex.getConfigurationErrorEx();
+        catch(MinorServoErrors::MinorServoErrorsEx& mse)
+        {
+            _ADD_BACKTRACE(ManagementErrors::ConfigurationErrorExImpl, ex, mse, "SRTMinorServoBossCore::setup()");
+            ex.setSubsystem("MinorServo");
+            ex.setReason(("Error while sending the STOP command to " + servo_name + ".").c_str());
+            ex.log(LM_DEBUG);
+            throw ex.getConfigurationErrorEx();
+        }
     }
 
     // Start the setup thread
@@ -335,7 +335,7 @@ void SRTMinorServoBossCore::park()
     try
     {
         // Send the STOW command to close the gregorian cover
-        if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::stow("GREGORIAN_CAP", 1)).checkOutput())
+        if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::stow("GREGORIAN_CAP", COVER_STATUS_CLOSED)).checkOutput())
         {
             _EXCPT(ManagementErrors::ParkingErrorExImpl, ex, "SRTMinorServoBossCore::park()");
             ex.setSubsystem("MinorServo");
@@ -343,20 +343,31 @@ void SRTMinorServoBossCore::park()
             ex.log(LM_DEBUG);
             throw ex.getParkingErrorEx();
         }
-
-        // Send the STOP command to each servo
-        for(const auto& [servo_name, servo] : m_servos)
-        {
-            servo->stop();
-        }
     }
     catch(MinorServoErrors::MinorServoErrorsEx& mse)
     {
         _ADD_BACKTRACE(ManagementErrors::ParkingErrorExImpl, ex, mse, "SRTMinorServoBossCore::park()");
         ex.setSubsystem("MinorServo");
-        ex.setReason("Error while sending the STOP command to a minor servo system.");
+        ex.setReason("Error while sending the STOW command to the gregorian cover.");
         ex.log(LM_DEBUG);
         throw ex.getParkingErrorEx();
+    }
+
+    // Send the STOP command to each servo
+    for(const auto& [servo_name, servo] : m_servos)
+    {
+        try
+        {
+            servo->stop();
+        }
+        catch(MinorServoErrors::MinorServoErrorsEx& mse)
+        {
+            _ADD_BACKTRACE(ManagementErrors::ParkingErrorExImpl, ex, mse, "SRTMinorServoBossCore::park()");
+            ex.setSubsystem("MinorServo");
+            ex.setReason(("Error while sending the STOP command to " + servo_name + ".").c_str());
+            ex.log(LM_DEBUG);
+            throw ex.getParkingErrorEx();
+        }
     }
 
     // Start the park thread
