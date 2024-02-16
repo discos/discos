@@ -179,6 +179,12 @@ module MinorServo
         void clearSystemOffsets() raises (MinorServoErrors::MinorServoErrorsEx);
 
         /**
+         * This method resets the Leonardo offsets to the sum of the DISCOS user and system offsets.
+         * @throw MinorServoErrors::MinorServoErrorsEx when there has been a communication error or when the command was not accepted
+         */
+        void reloadOffsets() raises (MinorServoErrors::MinorServoErrorsEx);
+
+        /**
          * This method returns in the two parameters passed as reference, the names and the units of measure of the axes of the servo, respectively
          * @param axes_names the sequence of strings containing the names of the virtual axes of the servo
          * @param axes_units the sequence of strings containing the units of measure of each virtual axis of the servo

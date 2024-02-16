@@ -68,6 +68,11 @@ private:
     SRTMinorServoBossCore& m_core;
 
     /**
+     * The current status of the finite-state machine.
+     */
+    unsigned int m_status;
+
+    /**
      * The sleeping time of the thread.
      * The thread should be cycling at a constant rate, therefore the inner sleeping time is always updated taking into account this and the thread execution time.
      */

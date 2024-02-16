@@ -383,6 +383,12 @@ private:
     std::atomic<Management::TBoolean> m_tracking;
 
     /**
+     * This boolean will be set to true every time the socket connects.
+     * When true it will trigger a procedure that will check if the minor servos offsets need to be reloaded because of a discrepancy between the DISCOS offsets (user + system) and the Leonardo offsets.
+     */
+    bool m_reload_servo_offsets;
+
+    /**
      * Configuration of the socket object.
      */
     const SRTMinorServoSocketConfiguration& m_socket_configuration;

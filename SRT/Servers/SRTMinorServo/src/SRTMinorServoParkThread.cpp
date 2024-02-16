@@ -4,7 +4,8 @@ using namespace MinorServo;
 
 SRTMinorServoParkThread::SRTMinorServoParkThread(const ACE_CString& name, SRTMinorServoBossCore& core, const ACS::TimeInterval& response_time, const ACS::TimeInterval& sleep_time) :
     ACS::Thread(name, response_time, sleep_time),
-    m_core(core)
+    m_core(core),
+    m_status(0)
 {
     AUTO_TRACE("SRTMinorServoParkThread::SRTMinorServoParkThread()");
 }
@@ -19,8 +20,6 @@ void SRTMinorServoParkThread::onStart()
     AUTO_TRACE("SRTMinorServoParkThread::onStart()");
     this->setSleepTime(500000);   // 50 milliseconds
     m_start_time = IRA::CIRATools::getUNIXEpoch();
-
-    m_status = 0;
 
     ACS_LOG(LM_FULL_INFO, "SRTMinorServoParkThread::onStart()", (LM_INFO, "PARK THREAD STARTED"));
 }

@@ -159,6 +159,12 @@ public:
     void clearSystemOffsets();
 
     /**
+     * Reload the user and the system offsets to the minor servo when the Leonardo offsets do not correspond to the sum of the DISCOS user and system offsets.
+     * @throw MinorServoErrors::MinorServoErrorsEx when there has been a communication error or when the command was not accepted.
+     */
+    void reloadOffsets();
+
+    /**
      * Returns the name and the unit of each virtual axes of the servo system, as reference arguments.
      * @param axes_names_out a string sequence object containing the names of the virtual axes of the servo system.
      * @param axes_units_out a string sequence object containing the units of the virtual axes of the servo system.
@@ -291,13 +297,6 @@ protected:
     static std::vector<double> getMotionConstant(SRTBaseMinorServoImpl& object, const std::string& constant);
 
 private:
-    /**
-     * Resets both the user and the system offsets to 0. This is needed since the Leonardo servo system only tracks a single set of offsets.
-     * If we lose track of the offsets inside DISCOS (when restarting this component, for example), we need to reset the offsets in order to track them again.
-     * @throw MinorServoErrors::MinorServoErrorsEx when there has been a communication error or when the command was not accepted.
-     */
-    void resetOffsets();
-
     /**
      * Static function used to retrieve a table from the CDB DataBlock directory. Used inside the initialization list.
      * @param object the instance of this class, used inside the function logic.
@@ -513,6 +512,7 @@ protected:
     ACS::doubleSeq* getSystemOffsets()                                                          { return SRTBaseMinorServoImpl::getSystemOffsets();                     }\
     void setSystemOffset(const char* axis_name, CORBA::Double offset)                           { SRTBaseMinorServoImpl::setSystemOffset(axis_name, offset);            }\
     void clearSystemOffsets()                                                                   { SRTBaseMinorServoImpl::clearSystemOffsets();                          }\
+    void reloadOffsets()                                                                        { SRTBaseMinorServoImpl::reloadOffsets();                               }\
     void getAxesInfo(ACS::stringSeq_out axes_names_out, ACS::stringSeq_out axes_units_out)      { SRTBaseMinorServoImpl::getAxesInfo(axes_names_out, axes_units_out);   }\
     ACS::doubleSeq* getAxesPositions(ACS::Time acs_time)                                        { return SRTBaseMinorServoImpl::getAxesPositions(acs_time);             }\
     long getTravelTime(const ACS::doubleSeq& start, const ACS::doubleSeq& dest)                 { return SRTBaseMinorServoImpl::getTravelTime(start, dest);             }\

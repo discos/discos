@@ -129,10 +129,6 @@ bool SRTBaseMinorServoImpl::status()
     {
         m_socket.sendCommand(SRTMinorServoCommandLibrary::status(m_servo_name), m_status);
 
-        // We need to call this here since we might just have established the connection, therefore we might not know how the Leonardo offsets are split between user and system
-        // This might eventually throw MinorServoErrorsEx
-        resetOffsets();
-
         ACSErr::Completion_var comp;
         ACS::doubleSeq current_point = *virtual_positions()->get_sync(comp.out());
 
@@ -491,6 +487,35 @@ void SRTBaseMinorServoImpl::clearSystemOffsets()
     }
 }
 
+void SRTBaseMinorServoImpl::reloadOffsets()
+{
+    AUTO_TRACE(m_servo_name + "::reloadOffsets()");
+
+    // Sum the user and system DISCOS offsets to check whether they correspond to the Leonardo offsets
+    std::vector<double> DISCOS_offsets(m_virtual_axes, 0.0);
+    std::transform(m_user_offsets.begin(), m_user_offsets.end(), m_system_offsets.begin(), DISCOS_offsets.begin(), std::plus<double>());
+
+    // Read the Leonardo offsets
+    ACSErr::Completion_var comp;
+    ACS::doubleSeq sequence = *virtual_offsets()->get_sync(comp.out());
+    std::vector<double> LEONARDO_offsets(sequence.get_buffer(), sequence.get_buffer() + sequence.length());
+
+    // Check if the offsets correspond or not
+    if(!std::equal(DISCOS_offsets.begin(), DISCOS_offsets.end(), LEONARDO_offsets.begin()))
+    {
+        // Offsets do not correspond, should reset them by sending a offset command
+        if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::offset(m_servo_name, DISCOS_offsets)).checkOutput())
+        {
+            _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::reloadOffsets()").c_str());
+            ex.setReason("Received NAK in response to an OFFSET command.");
+            ex.log(LM_DEBUG);
+            throw ex.getMinorServoErrorsEx();
+        }
+
+        ACS_LOG(LM_FULL_INFO, m_servo_name + "::reloadOffsets()", (LM_INFO, "Offsets discrepancy, reload"));
+    }
+}
+
 void SRTBaseMinorServoImpl::getAxesInfo(ACS::stringSeq_out axes_names_out, ACS::stringSeq_out axes_units_out)
 {
     AUTO_TRACE("SRTBaseMinorServoImpl::getAxesInfo()");
@@ -703,35 +728,6 @@ std::vector<double> SRTBaseMinorServoImpl::getMotionConstant(SRTBaseMinorServoIm
 }
 
 /////////////////// PRIVATE methods
-void SRTBaseMinorServoImpl::resetOffsets()
-{
-    AUTO_TRACE(m_servo_name + "::resetOffsets()");
-
-    // Sum the user and system DISCOS offsets to check whether they correspond to the Leonardo offsets
-    std::vector<double> DISCOS_offsets(m_virtual_axes, 0.0);
-    std::transform(m_user_offsets.begin(), m_user_offsets.end(), m_system_offsets.begin(), DISCOS_offsets.begin(), std::plus<double>());
-
-    // Read the Leonardo offsets
-    ACSErr::Completion_var comp;
-    ACS::doubleSeq sequence = *virtual_offsets()->get_sync(comp.out());
-    std::vector<double> LEONARDO_offsets(sequence.get_buffer(), sequence.get_buffer() + sequence.length());
-
-    // Check if the offsets correspond or not
-    if(!std::equal(DISCOS_offsets.begin(), DISCOS_offsets.end(), LEONARDO_offsets.begin()))
-    {
-        // Offsets do not correspond, should reset them by sending a offset command
-        if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::offset(m_servo_name, DISCOS_offsets)).checkOutput())
-        {
-            _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::resetOffsets()").c_str());
-            ex.setReason("Received NAK in response to an OFFSET command.");
-            ex.log(LM_DEBUG);
-            throw ex.getMinorServoErrorsEx();
-        }
-
-        ACS_LOG(LM_FULL_INFO, m_servo_name + "::resetOffsets()", (LM_INFO, "Offsets discrepancy, reset"));
-    }
-}
-
 std::vector<std::string> SRTBaseMinorServoImpl::getPropertiesTable(SRTBaseMinorServoImpl& object, const std::string& properties_name)
 {
     AUTO_STATIC_TRACE(object.m_servo_name + "::getPropertiesTable()");

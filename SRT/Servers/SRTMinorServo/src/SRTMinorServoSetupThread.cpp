@@ -4,7 +4,8 @@ using namespace MinorServo;
 
 SRTMinorServoSetupThread::SRTMinorServoSetupThread(const ACE_CString& name, SRTMinorServoBossCore& core, const ACS::TimeInterval& response_time, const ACS::TimeInterval& sleep_time) :
     ACS::Thread(name, response_time, sleep_time),
-    m_core(core)
+    m_core(core),
+    m_status(0)
 {
     AUTO_TRACE("SRTMinorServoSetupThread::SRTMinorServoSetupThread()");
 }
@@ -24,7 +25,6 @@ void SRTMinorServoSetupThread::onStart()
     SRTMinorServoFocalConfiguration commanded_configuration = m_core.m_commanded_configuration.load();
     m_LDO_configuration = LDOConfigurationNameTable.left.at(commanded_configuration);
     m_gregorian_cover_position = commanded_configuration == CONFIGURATION_PRIMARY ? COVER_STATUS_CLOSED : COVER_STATUS_OPEN;
-    m_status = 0;
 
     ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::onStart()", (LM_INFO, ("SETUP THREAD STARTED WITH '" + m_core.m_commanded_setup + "' CONFIGURATION").c_str()));
 }

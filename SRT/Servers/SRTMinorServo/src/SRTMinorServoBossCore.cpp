@@ -24,6 +24,7 @@ SRTMinorServoBossCore::SRTMinorServoBossCore(SRTMinorServoBossImpl& component) :
     m_scan_active(Management::MNG_FALSE),
     m_scanning(Management::MNG_FALSE),
     m_tracking(Management::MNG_FALSE),
+    m_reload_servo_offsets(true),
     m_socket_configuration(SRTMinorServoSocketConfiguration::getInstance(m_component.getContainerServices())),
     m_socket(SRTMinorServoSocket::getInstance(m_socket_configuration.m_ip_address, m_socket_configuration.m_port, m_socket_configuration.m_timeout)),
     m_socket_connected(m_socket.isConnected() ? Management::MNG_TRUE : Management::MNG_FALSE),
@@ -82,6 +83,8 @@ bool SRTMinorServoBossCore::status()
             stopThread(m_tracking_thread);
             stopThread(m_scan_thread);
             setFailure();
+
+            m_reload_servo_offsets = true;
         }
 
         return false;
@@ -120,7 +123,14 @@ bool SRTMinorServoBossCore::status()
             setFailure();
             return false;
         }
+
+        if(m_reload_servo_offsets)
+        {
+            servo->reloadOffsets();
+        }
     }
+
+    m_reload_servo_offsets = false;
 
     if(motion_status == MOTION_STATUS_TRACKING)
     {
