@@ -335,7 +335,7 @@ void SRTMinorServoBossCore::park()
     try
     {
         // Send the STOW command to close the gregorian cover
-        if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::stow("GREGORIAN_CAP", COVER_STATUS_CLOSED)).checkOutput())
+        if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::stow("Gregoriano", COVER_STATUS_CLOSED)).checkOutput())
         {
             _EXCPT(ManagementErrors::ParkingErrorExImpl, ex, "SRTMinorServoBossCore::park()");
             ex.setSubsystem("MinorServo");
@@ -513,7 +513,7 @@ void SRTMinorServoBossCore::setGregorianCoverPosition(std::string position)
 
     ACS_LOG(LM_FULL_INFO, "setGregorianCoverPosition", (LM_INFO, ("SETTING GREGORIAN COVER POSITION TO " + position).c_str()));
 
-    if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::stow("GREGORIAN_CAP", position == "OPEN" ? COVER_STATUS_OPEN : COVER_STATUS_CLOSED)).checkOutput())
+    if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::stow("Gregoriano", position == "OPEN" ? COVER_STATUS_OPEN : COVER_STATUS_CLOSED)).checkOutput())
     {
         _EXCPT(MinorServoErrors::StowErrorExImpl, ex, "SRTMinorServoBossCore::setGregorianCoverPosition()");
         ex.addData("Reason", "Error while sending a STOW command to the gregorian cover.");

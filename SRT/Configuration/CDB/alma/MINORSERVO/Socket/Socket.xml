@@ -9,4 +9,5 @@
     xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     IPAddress="192.168.200.13"
-    Port="4758"/>
+    Port="4758"
+    SocketTimeout="0.2"/>

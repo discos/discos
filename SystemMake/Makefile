@@ -49,7 +49,7 @@ COMMON_SIMULATORS:= TCPGenericProtocolSim ReceiverBoardSim
 SRT_DOC:=SRTDox
 SRT_ERRORS:=
 SRT_INTERFACES:=SRTAntennaInterface SRTActiveSurfaceInterface \
-                SRTReceiversInterface
+                SRTMinorServoInterface SRTReceiversInterface
 SRT_LIBRARIES:=SRTMinorServoLibrary
 SRT_SERVERS:=SRTMount SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver \
              SRT7GHzReceiver SRT5GHzReceiver SRTLPBandReceiver SRTPyIFDistributor WeatherStation

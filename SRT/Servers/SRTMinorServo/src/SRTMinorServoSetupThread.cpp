@@ -92,7 +92,7 @@ void SRTMinorServoSetupThread::runLoop()
         }
         case 100: // Send the STOW command to the gregorian cover
         {
-            if(!m_core.m_socket.sendCommand(SRTMinorServoCommandLibrary::stow("GREGORIAN_CAP", m_gregorian_cover_position)).checkOutput())
+            if(!m_core.m_socket.sendCommand(SRTMinorServoCommandLibrary::stow("Gregoriano", m_gregorian_cover_position)).checkOutput())
             {
                 ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::runLoop()", (LM_ERROR, "Received NAK when setting the gregorian cover position."));
                 m_core.setFailure();
