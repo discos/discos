@@ -98,7 +98,7 @@ PY_SCRIPTS_L       =
 PY_MODULES         =
 PY_MODULES_L       =
 
-PY_PACKAGES        = #SRTMinorServoCommandLibrary
+PY_PACKAGES        = SRTMinorServoCommandLibrary
 PY_PACKAGES_L      =
 pppppp_MODULES	   =
 

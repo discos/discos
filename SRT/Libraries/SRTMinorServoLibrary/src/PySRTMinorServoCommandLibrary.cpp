@@ -2,32 +2,42 @@
 
 using namespace MinorServo;
 
-std::string PySRTMinorServoCommandLibrary::preset(std::string servo_id, boost::python::list& coordinates)
+boost::python::object PySRTMinorServoCommandLibrary::status(const std::string servo_id)
 {
-    return SRTMinorServoCommandLibrary::preset(servo_id, PySRTMinorServoCommandLibrary::pylist2cppvector(coordinates));
+    return stringToBytes(SRTMinorServoCommandLibrary::status(servo_id));
 }
 
-std::string PySRTMinorServoCommandLibrary::programTrack(std::string servo_id, unsigned long trajectory_id, unsigned long point_id, boost::python::list& coordinates, double start_time)
+boost::python::object PySRTMinorServoCommandLibrary::setup(const std::string& configuration)
 {
-    return SRTMinorServoCommandLibrary::programTrack(servo_id, trajectory_id, point_id, PySRTMinorServoCommandLibrary::pylist2cppvector(coordinates), start_time);
+    return stringToBytes(SRTMinorServoCommandLibrary::setup(configuration));
 }
 
-std::string PySRTMinorServoCommandLibrary::offset(std::string servo_id, boost::python::list& coordinates)
+boost::python::object PySRTMinorServoCommandLibrary::stow(const std::string& servo_id, unsigned int stow_position)
 {
-    return SRTMinorServoCommandLibrary::offset(servo_id, PySRTMinorServoCommandLibrary::pylist2cppvector(coordinates));
+    return stringToBytes(SRTMinorServoCommandLibrary::stow(servo_id, stow_position));
 }
 
-std::vector<double> PySRTMinorServoCommandLibrary::pylist2cppvector(boost::python::list& py_list)
+boost::python::object PySRTMinorServoCommandLibrary::stop(const std::string& servo_id)
 {
-    std::vector<double> cpp_vector;
-    for(unsigned int i = 0; i < len(py_list); i++)
-    {
-        cpp_vector.push_back(boost::python::extract<double>(py_list[i]));
-    }
-    return cpp_vector;
+    return stringToBytes(SRTMinorServoCommandLibrary::stop(servo_id));
 }
 
-boost::python::dict PySRTMinorServoCommandLibrary::parseAnswer(std::string answer)
+boost::python::object PySRTMinorServoCommandLibrary::preset(const std::string& servo_id, const boost::python::list& coordinates)
+{
+    return stringToBytes(SRTMinorServoCommandLibrary::preset(servo_id, pylist2cppvector(coordinates)));
+}
+
+boost::python::object PySRTMinorServoCommandLibrary::programTrack(const std::string& servo_id, const unsigned long& trajectory_id, const unsigned long& point_id, const boost::python::list& coordinates, double start_time)
+{
+    return stringToBytes(SRTMinorServoCommandLibrary::programTrack(servo_id, trajectory_id, point_id, pylist2cppvector(coordinates), start_time));
+}
+
+boost::python::object PySRTMinorServoCommandLibrary::offset(const std::string& servo_id, const boost::python::list& coordinates)
+{
+    return stringToBytes(SRTMinorServoCommandLibrary::offset(servo_id, pylist2cppvector(coordinates)));
+}
+
+boost::python::dict PySRTMinorServoCommandLibrary::parseAnswer(const std::string& answer)
 {
     auto args = SRTMinorServoCommandLibrary::parseAnswer(answer);
 
@@ -41,4 +51,19 @@ boost::python::dict PySRTMinorServoCommandLibrary::parseAnswer(std::string answe
     }
 
     return dictionary;
+}
+
+std::vector<double> PySRTMinorServoCommandLibrary::pylist2cppvector(const boost::python::list& py_list)
+{
+    std::vector<double> cpp_vector;
+    for(unsigned int i = 0; i < len(py_list); i++)
+    {
+        cpp_vector.push_back(boost::python::extract<double>(py_list[i]));
+    }
+    return cpp_vector;
+}
+
+boost::python::object PySRTMinorServoCommandLibrary::stringToBytes(const std::string& command)
+{
+    return boost::python::object(boost::python::handle<>(PyBytes_FromString(command.c_str())));
 }

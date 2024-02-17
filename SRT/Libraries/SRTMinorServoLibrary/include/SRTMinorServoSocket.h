@@ -14,7 +14,7 @@
 #include <optional>
 #include "SRTMinorServoCommandLibrary.h"
 
-#define SOCKET_TIMEOUT 0.1
+#define SOCKET_TIMEOUT  0.1
 #define CONFIG_DOMAIN   "alma/"
 #define CONFIG_DIRNAME  "/MINORSERVO/Socket"
 

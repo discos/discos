@@ -11,7 +11,7 @@
 
 using namespace MinorServo;
 
-std::string SRTMinorServoCommandLibrary::status(std::string servo_id)
+std::string SRTMinorServoCommandLibrary::status(const std::string servo_id)
 {
     std::stringstream command;
     command << "STATUS";
@@ -23,28 +23,28 @@ std::string SRTMinorServoCommandLibrary::status(std::string servo_id)
     return command.str();
 }
 
-std::string SRTMinorServoCommandLibrary::setup(std::string configuration)
+std::string SRTMinorServoCommandLibrary::setup(const std::string& configuration)
 {
     std::stringstream command;
     command << "SETUP=" << configuration << CLOSER;
     return command.str();
 }
 
-std::string SRTMinorServoCommandLibrary::stow(std::string servo_id, unsigned int stow_position)
+std::string SRTMinorServoCommandLibrary::stow(const std::string& servo_id, const unsigned int stow_position)
 {
     std::stringstream command;
     command << "STOW=" << servo_id << "," << stow_position << CLOSER;
     return command.str();
 }
 
-std::string SRTMinorServoCommandLibrary::stop(std::string servo_id)
+std::string SRTMinorServoCommandLibrary::stop(const std::string& servo_id)
 {
     std::stringstream command;
     command << "STOP=" << servo_id << CLOSER;
     return command.str();
 }
 
-std::string SRTMinorServoCommandLibrary::preset(std::string servo_id, std::vector<double> coordinates)
+std::string SRTMinorServoCommandLibrary::preset(const std::string& servo_id, const std::vector<double>& coordinates)
 {
     std::stringstream command;
     command << "PRESET=" << servo_id;
@@ -56,7 +56,7 @@ std::string SRTMinorServoCommandLibrary::preset(std::string servo_id, std::vecto
     return command.str();
 }
 
-std::string SRTMinorServoCommandLibrary::programTrack(std::string servo_id, unsigned long trajectory_id, unsigned long point_id, std::vector<double> coordinates, double start_time)
+std::string SRTMinorServoCommandLibrary::programTrack(const std::string& servo_id, const unsigned long& trajectory_id, const unsigned long& point_id, const std::vector<double>& coordinates, const double start_time)
 {
     std::stringstream command;
     command << "PROGRAMTRACK=" << servo_id << "," << trajectory_id << "," << point_id << ",";
@@ -77,7 +77,7 @@ std::string SRTMinorServoCommandLibrary::programTrack(std::string servo_id, unsi
     return command.str();
 }
 
-std::string SRTMinorServoCommandLibrary::offset(std::string servo_id, std::vector<double> coordinates)
+std::string SRTMinorServoCommandLibrary::offset(const std::string& servo_id, const std::vector<double>& coordinates)
 {
     std::stringstream command;
     command << "OFFSET=" << servo_id;
@@ -89,9 +89,10 @@ std::string SRTMinorServoCommandLibrary::offset(std::string servo_id, std::vecto
     return command.str();
 }
 
-SRTMinorServoAnswerMap SRTMinorServoCommandLibrary::parseAnswer(std::string answer)
+SRTMinorServoAnswerMap SRTMinorServoCommandLibrary::parseAnswer(const std::string& original_answer)
 {
     // First thing first, standardize the separators and remove the newline/carriage return characters
+    std::string answer(original_answer);
     std::replace(answer.begin(), answer.end(), ':', '=');
     std::replace(answer.begin(), answer.end(), '|', ',');
     answer.erase(std::remove(answer.begin(), answer.end(), '\n'), answer.end());

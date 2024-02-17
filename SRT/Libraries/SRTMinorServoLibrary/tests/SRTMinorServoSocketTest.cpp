@@ -4,6 +4,7 @@
 #include "gtest/gtest.h"
 #include <iostream>
 #include <thread>
+#include <chrono>
 #include "SRTMinorServoUtils.h"
 #include "SRTMinorServoCommandLibrary.h"
 #include "SRTMinorServoTestingSocket.h"
@@ -13,6 +14,8 @@
 // discos-simulator -s minor_servo start &
 #define ADDRESS std::string("127.0.0.1")
 #define PORT    12800
+//#define ADDRESS std::string("192.168.200.13")
+//#define PORT    4758
 
 using namespace MinorServo;
 
@@ -39,6 +42,7 @@ protected:
     void TearDown() override
     {
         SRTMinorServoTestingSocket::destroyInstance();
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
 };
 
