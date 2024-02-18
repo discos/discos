@@ -5,7 +5,6 @@ using namespace MinorServo;
 SRTMinorServoStatusThread::SRTMinorServoStatusThread(const ACE_CString& name, SRTMinorServoBossCore& core, const ACS::TimeInterval& response_time, const ACS::TimeInterval& sleep_time) :
     ACS::Thread(name, response_time, sleep_time),
     m_core(core),
-    m_status(0),
     m_sleep_time(this->getSleepTime()),
     m_notification_channel(nullptr)
 {
@@ -21,7 +20,9 @@ void SRTMinorServoStatusThread::onStart()
 {
     AUTO_TRACE("SRTMinorServoStatusThread::onStart()");
 
-    ACS_LOG(LM_FULL_INFO, "SRTMinorServoStatusThread::onStart()", (LM_INFO, "STATUS THREAD STARTED"));
+    m_status = 0;
+
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoStatusThread::onStart()", (LM_NOTICE, "STATUS THREAD STARTED"));
 }
 
 void SRTMinorServoStatusThread::onStop()
@@ -34,7 +35,7 @@ void SRTMinorServoStatusThread::onStop()
         m_notification_channel = nullptr;
     }
 
-    ACS_LOG(LM_FULL_INFO, "SRTMinorServoStatusThread::onStop()", (LM_INFO, "STATUS THREAD STOPPED"));
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoStatusThread::onStop()", (LM_NOTICE, "STATUS THREAD STOPPED"));
 }
 
 void SRTMinorServoStatusThread::runLoop()

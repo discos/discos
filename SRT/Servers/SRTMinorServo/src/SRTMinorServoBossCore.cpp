@@ -29,13 +29,13 @@ SRTMinorServoBossCore::SRTMinorServoBossCore(SRTMinorServoBossImpl& component) :
     m_socket(SRTMinorServoSocket::getInstance(m_socket_configuration.m_ip_address, m_socket_configuration.m_port, m_socket_configuration.m_timeout)),
     m_socket_connected(m_socket.isConnected() ? Management::MNG_TRUE : Management::MNG_FALSE),
     m_servos{
-        { "PFP", m_component.getContainerServices()->getComponent<SRTBaseMinorServo>("MINORSERVO/PFP") },
-        { "SRP", m_component.getContainerServices()->getComponent<SRTBaseMinorServo>("MINORSERVO/SRP") },
-        { "GFR", m_component.getContainerServices()->getComponent<SRTBaseMinorServo>("MINORSERVO/GFR") },
-        { "M3R", m_component.getContainerServices()->getComponent<SRTBaseMinorServo>("MINORSERVO/M3R") }
+        //{ "PFP", m_component.getContainerServices()->getComponent<SRTBaseMinorServo>("MINORSERVO/PFP") },
+        { "SRP", m_component.getContainerServices()->getComponent<SRTBaseMinorServo>("MINORSERVO/SRP") }
+        //{ "GFR", m_component.getContainerServices()->getComponent<SRTBaseMinorServo>("MINORSERVO/GFR") },
+        //{ "M3R", m_component.getContainerServices()->getComponent<SRTBaseMinorServo>("MINORSERVO/M3R") }
     },
     m_tracking_servos{
-        { "PFP", m_component.getContainerServices()->getComponent<SRTProgramTrackMinorServo>("MINORSERVO/PFP") },
+        //{ "PFP", m_component.getContainerServices()->getComponent<SRTProgramTrackMinorServo>("MINORSERVO/PFP") },
         { "SRP", m_component.getContainerServices()->getComponent<SRTProgramTrackMinorServo>("MINORSERVO/SRP") }
     }
 {
@@ -66,7 +66,7 @@ bool SRTMinorServoBossCore::status()
 
         if(m_socket_connected.load() == Management::MNG_FALSE)
         {
-            ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::status()", (LM_INFO, "Socket connected."));
+            ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::status()", (LM_NOTICE, "Socket connected."));
             m_socket_connected.store(Management::MNG_TRUE);
             m_subsystem_status.store(Management::MNG_WARNING);
         }
@@ -75,7 +75,7 @@ bool SRTMinorServoBossCore::status()
     {
         if(m_socket_connected.load() == Management::MNG_TRUE)
         {
-            ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::status()", (LM_INFO, "Socket disconnected."));
+            ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::status()", (LM_NOTICE, "Socket disconnected."));
             m_socket_connected.store(Management::MNG_FALSE);
 
             stopThread(m_setup_thread);
@@ -104,7 +104,7 @@ bool SRTMinorServoBossCore::status()
     ACSErr::Completion_var comp;
 
     SRTMinorServoMotionStatus motion_status = m_motion_status.load();
-    if(motion_status == MOTION_STATUS_TRACKING || motion_status == MOTION_STATUS_CONFIGURED)
+    /*if(motion_status == MOTION_STATUS_TRACKING || motion_status == MOTION_STATUS_CONFIGURED)
     {
         // We only get here if the system is configured, therefore we check the correct position of the gregorian cover
         SRTMinorServoGregorianCoverStatus commanded_gregorian_cover_position = m_component.current_configuration()->get_sync(comp.out()) == CONFIGURATION_PRIMARY ? COVER_STATUS_CLOSED : COVER_STATUS_OPEN;
@@ -114,7 +114,7 @@ bool SRTMinorServoBossCore::status()
             setFailure();
             return false;
         }
-    }
+    }*/
 
     for(const auto& [name, servo] : m_servos)
     {
@@ -175,7 +175,7 @@ void SRTMinorServoBossCore::setup(std::string commanded_setup)
 
     if(m_scan_active.load() == Management::MNG_TRUE)
     {
-        ACS_LOG(LM_FULL_INFO, "servoSetup", (LM_INFO, "THE SYSTEM IS PERFORMING A SCAN, CANNOT SETUP NOW"));
+        ACS_LOG(LM_FULL_INFO, "servoSetup", (LM_NOTICE, "THE SYSTEM IS PERFORMING A SCAN, CANNOT SETUP NOW"));
         _EXCPT(ManagementErrors::ConfigurationErrorExImpl, ex, "SRTMinorServoBossCore::setup()");
         ex.setSubsystem("MinorServo");
         ex.setReason("The system is waiting for a scan to be completed.");
@@ -199,7 +199,7 @@ void SRTMinorServoBossCore::setup(std::string commanded_setup)
     }
     catch(std::out_of_range& oor)
     {
-        ACS_LOG(LM_FULL_INFO, "servoSetup", (LM_INFO, ("UNKNOWN CONFIGURATION '" + commanded_setup + "'").c_str()));
+        ACS_LOG(LM_FULL_INFO, "servoSetup", (LM_NOTICE, ("UNKNOWN CONFIGURATION '" + commanded_setup + "'").c_str()));
         _EXCPT(ManagementErrors::ConfigurationErrorExImpl, ex, "SRTMinorServoBossCore::setup()");
         ex.setSubsystem("MinorServo");
         ex.setReason(("Unknown configuration '" + commanded_setup + "'.").c_str());
@@ -213,17 +213,17 @@ void SRTMinorServoBossCore::setup(std::string commanded_setup)
         SRTMinorServoMotionStatus motion_status = m_motion_status.load();
         if(motion_status == MOTION_STATUS_STARTING)
         {
-            ACS_LOG(LM_FULL_INFO, "servoSetup", (LM_INFO, ("ALREADY SETTING UP '" + commanded_setup + "' CONFIGURATION").c_str()));
+            ACS_LOG(LM_FULL_INFO, "servoSetup", (LM_NOTICE, ("ALREADY SETTING UP '" + commanded_setup + "' CONFIGURATION").c_str()));
             return;
         }
         else if(motion_status == MOTION_STATUS_CONFIGURED || motion_status == MOTION_STATUS_TRACKING)
         {
-            ACS_LOG(LM_FULL_INFO, "servoSetup", (LM_INFO, ("CONFIGURATION '" + commanded_setup + "' ALREADY IN PLACE").c_str()));
+            ACS_LOG(LM_FULL_INFO, "servoSetup", (LM_NOTICE, ("CONFIGURATION '" + commanded_setup + "' ALREADY IN PLACE").c_str()));
             return;
         }
     }
 
-    ACS_LOG(LM_FULL_INFO, "servoSetup", (LM_INFO, ("SETTING UP '" + commanded_setup + "' CONFIGURATION").c_str()));
+    ACS_LOG(LM_FULL_INFO, "servoSetup", (LM_NOTICE, ("SETTING UP '" + commanded_setup + "' CONFIGURATION").c_str()));
 
     m_commanded_configuration.store(commanded_configuration);
     m_commanded_setup = commanded_setup;
@@ -293,7 +293,7 @@ void SRTMinorServoBossCore::park()
 
     if(m_scan_active.load() == Management::MNG_TRUE)
     {
-        ACS_LOG(LM_FULL_INFO, "servoPark", (LM_INFO, "THE SYSTEM IS PERFORMING A SCAN, CANNOT PARK NOW"));
+        ACS_LOG(LM_FULL_INFO, "servoPark", (LM_NOTICE, "THE SYSTEM IS PERFORMING A SCAN, CANNOT PARK NOW"));
         _EXCPT(ManagementErrors::ParkingErrorExImpl, ex, "SRTMinorServoBossCore::park()");
         ex.setSubsystem("MinorServo");
         ex.setReason("The system is waiting for a scan to be completed.");
@@ -304,16 +304,16 @@ void SRTMinorServoBossCore::park()
     SRTMinorServoMotionStatus motion_status = m_motion_status.load();
     if(motion_status == MOTION_STATUS_PARKING)
     {
-        ACS_LOG(LM_FULL_INFO, "servoPark", (LM_INFO, "MINOR SERVOS ALREADY PARKING"));
+        ACS_LOG(LM_FULL_INFO, "servoPark", (LM_NOTICE, "MINOR SERVOS ALREADY PARKING"));
         return;
     }
     else if (motion_status == MOTION_STATUS_PARKED)
     {
-        ACS_LOG(LM_FULL_INFO, "servoPark", (LM_INFO, "MINOR SERVOS ALREADY PARKED"));
+        ACS_LOG(LM_FULL_INFO, "servoPark", (LM_NOTICE, "MINOR SERVOS ALREADY PARKED"));
         return;
     }
 
-    ACS_LOG(LM_FULL_INFO, "servoPark", (LM_INFO, "PARKING"));
+    ACS_LOG(LM_FULL_INFO, "servoPark", (LM_NOTICE, "PARKING"));
 
     m_commanded_configuration.store(CONFIGURATION_PARK);
     m_commanded_setup = "Park";
@@ -332,7 +332,7 @@ void SRTMinorServoBossCore::park()
     m_tracking.store(Management::MNG_FALSE);
     m_motion_status.store(MOTION_STATUS_PARKING);
 
-    try
+    /*try
     {
         // Send the STOW command to close the gregorian cover
         if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::stow("Gregoriano", COVER_STATUS_CLOSED)).checkOutput())
@@ -351,7 +351,7 @@ void SRTMinorServoBossCore::park()
         ex.setReason("Error while sending the STOW command to the gregorian cover.");
         ex.log(LM_DEBUG);
         throw ex.getParkingErrorEx();
-    }
+    }*/
 
     // Send the STOP command to each servo
     for(const auto& [servo_name, servo] : m_servos)
@@ -407,7 +407,7 @@ void SRTMinorServoBossCore::setElevationTracking(std::string configuration)
        throw ex.getMinorServoErrorsEx();
     }
 
-    ACS_LOG(LM_FULL_INFO, "setServoElevationTracking", (LM_INFO, ("SETTING ELEVATION TRACKING TO " + configuration).c_str()));
+    ACS_LOG(LM_FULL_INFO, "setServoElevationTracking", (LM_NOTICE, ("SETTING ELEVATION TRACKING TO " + configuration).c_str()));
 
     if(configuration == "ON" && m_elevation_tracking_enabled.load() != Management::MNG_TRUE)
     {
@@ -453,7 +453,7 @@ void SRTMinorServoBossCore::setASConfiguration(std::string configuration)
        throw ex.getMinorServoErrorsEx();
     }
 
-    ACS_LOG(LM_FULL_INFO, "setServoASConfiguration", (LM_INFO, ("SETTING ACTIVE SURFACE CONFIGURATION TO " + configuration).c_str()));
+    ACS_LOG(LM_FULL_INFO, "setServoASConfiguration", (LM_NOTICE, ("SETTING ACTIVE SURFACE CONFIGURATION TO " + configuration).c_str()));
 
     if(configuration == "ON" && m_as_configuration.load() != Management::MNG_TRUE)
     {
@@ -511,7 +511,7 @@ void SRTMinorServoBossCore::setGregorianCoverPosition(std::string position)
         throw ex.getMinorServoErrorsEx();
     }
 
-    ACS_LOG(LM_FULL_INFO, "setGregorianCoverPosition", (LM_INFO, ("SETTING GREGORIAN COVER POSITION TO " + position).c_str()));
+    ACS_LOG(LM_FULL_INFO, "setGregorianCoverPosition", (LM_NOTICE, ("SETTING GREGORIAN COVER POSITION TO " + position).c_str()));
 
     if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::stow("Gregoriano", position == "OPEN" ? COVER_STATUS_OPEN : COVER_STATUS_CLOSED)).checkOutput())
     {
@@ -656,7 +656,7 @@ void SRTMinorServoBossCore::setUserOffset(std::string servo_axis_name, double of
         {
             if(log)
             {
-                ACS_LOG(LM_FULL_INFO, "setServoOffset", (LM_INFO, ("SETTING '" + servo_name + "' '" + axis_name + "' OFFSET TO " + std::to_string(offset)).c_str()));
+                ACS_LOG(LM_FULL_INFO, "setServoOffset", (LM_NOTICE, ("SETTING '" + servo_name + "' '" + axis_name + "' OFFSET TO " + std::to_string(offset)).c_str()));
             }
             servo->setUserOffset(axis_name.c_str(), offset);
         }
@@ -1307,7 +1307,7 @@ void SRTMinorServoBossCore::startThread(T*& thread, const ACS::TimeInterval& sle
         throw ex.getComponentErrorsEx();
     }
 
-    ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::startThread()", (LM_INFO, (std::string(T::c_thread_name) + " STARTED").c_str()));
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::startThread()", (LM_NOTICE, (std::string(T::c_thread_name) + " STARTED").c_str()));
 }
 
 template <typename T, typename = std::enable_if<is_any_v<T, SRTMinorServoStatusThread, SRTMinorServoSetupThread, SRTMinorServoParkThread, SRTMinorServoTrackingThread, SRTMinorServoScanThread>>>

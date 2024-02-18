@@ -16,8 +16,8 @@
 /**
  * programTrack constants. The first indicates the time between two consecutive points, the second indicates the time we send each point in advance.
  */
-#define PROGRAM_TRACK_TIMEGAP        2000000 //200 milliseconds
-#define PROGRAM_TRACK_FUTURE_TIME    4000000 //400 milliseconds
+#define PROGRAM_TRACK_TIMEGAP        2000000    //200 milliseconds, time between each programTrack point
+#define PROGRAM_TRACK_FUTURE_TIME    26000000   //2.6 seconds, we send points this amount of time before their actual timestamp
 
 /**
  * Macro used to link the properties pointers to their methods.
@@ -100,10 +100,10 @@ namespace MinorServo
      */
     const std::vector<std::string> ServoOrder =
     {
-        "PFP",
+        //"PFP",
         "SRP",
-        "GFR",
-        "M3R"
+        //"GFR",
+        //"M3R"
     };
 }
 

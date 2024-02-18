@@ -95,7 +95,7 @@ void SRTMinorServoBossImpl::initialize()
         throw ex.getComponentErrorsEx();
     }
 
-    ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossImpl::SRTMinorServoBossImpl()", (LM_INFO, "PROPERTIES INITIALIZED"));
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossImpl::SRTMinorServoBossImpl()", (LM_NOTICE, "PROPERTIES INITIALIZED"));
 
     m_parser.add("servoSetup", new SP::function1<SRTMinorServoBossImpl, SP::non_constant, SP::void_type, SP::I<SP::string_type>>(this, &SRTMinorServoBossImpl::setup), 1);
     m_parser.add("servoPark", new SP::function0<SRTMinorServoBossImpl, SP::non_constant, SP::void_type>(this, &SRTMinorServoBossImpl::park), 0);
@@ -103,9 +103,9 @@ void SRTMinorServoBossImpl::initialize()
     m_parser.add("setServoASConfiguration", new SP::function1<SRTMinorServoBossImpl, SP::non_constant, SP::void_type, SP::I<SP::string_type>>(this, &SRTMinorServoBossImpl::setASConfiguration), 1);
     m_parser.add("setServoOffset", new SP::function2<SRTMinorServoBossImpl, SP::non_constant, SP::void_type, SP::I<SP::string_type>, SP::I<SP::double_type>>(this, &SRTMinorServoBossImpl::setUserOffset), 2);
     m_parser.add("clearServoOffsets", new SP::function0<SRTMinorServoBossImpl, SP::non_constant, SP::void_type>(this, &SRTMinorServoBossImpl::clearOffsets), 0);
-    m_parser.add("setGregorianCoverPosition", new SP::function1<SRTMinorServoBossImpl, SP::non_constant, SP::void_type, SP::I<SP::string_type>>(this, &SRTMinorServoBossImpl::setGregorianCoverPosition), 1);
+    //m_parser.add("setGregorianCoverPosition", new SP::function1<SRTMinorServoBossImpl, SP::non_constant, SP::void_type, SP::I<SP::string_type>>(this, &SRTMinorServoBossImpl::setGregorianCoverPosition), 1);
 
-    ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossImpl::SRTMinorServoBossImpl()", (LM_INFO, "PARSER INITIALIZED"));
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossImpl::SRTMinorServoBossImpl()", (LM_NOTICE, "PARSER INITIALIZED"));
 }
 
 void SRTMinorServoBossImpl::execute()
@@ -233,7 +233,7 @@ CORBA::Double SRTMinorServoBossImpl::getCentralScanPosition()
 void SRTMinorServoBossImpl::clearOffsets()
 {
     AUTO_TRACE("SRTMinorServoBossImpl::clearOffsets()");
-    ACS_LOG(LM_FULL_INFO, "clearServoOffsets", (LM_INFO, "CLEARING ALL USER OFFSETS"));
+    ACS_LOG(LM_FULL_INFO, "clearServoOffsets", (LM_NOTICE, "CLEARING ALL USER OFFSETS"));
     m_core.clearUserOffsets("ALL");
 }
 

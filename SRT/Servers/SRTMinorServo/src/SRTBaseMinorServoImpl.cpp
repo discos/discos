@@ -512,7 +512,7 @@ void SRTBaseMinorServoImpl::reloadOffsets()
             throw ex.getMinorServoErrorsEx();
         }
 
-        ACS_LOG(LM_FULL_INFO, m_servo_name + "::reloadOffsets()", (LM_INFO, "Offsets discrepancy, reload"));
+        ACS_LOG(LM_FULL_INFO, m_servo_name + "::reloadOffsets()", (LM_NOTICE, "Offsets discrepancy, reloading them"));
     }
 }
 

@@ -28,7 +28,7 @@ void SRTMinorServoScanThread::onStart()
     size_t pre_scan_points = std::floor((m_core.m_current_scan.start_time - (getTimeStamp() + PROGRAM_TRACK_FUTURE_TIME)) / PROGRAM_TRACK_TIMEGAP);
     m_point_time = m_core.m_current_scan.start_time - pre_scan_points * PROGRAM_TRACK_TIMEGAP;
     m_point_id = 0;
-    m_trajectory_id = (unsigned int)(m_point_time / 1000);
+    m_trajectory_id = (unsigned int)(IRA::CIRATools::ACSTime2UNIXEpoch(m_point_time));
 
     // How many points in the scan trajectory?
     // We don't check the modulo of the division, we assume all the scans duration is always expressed in seconds, therefore the modulo should always be 0
@@ -51,7 +51,7 @@ void SRTMinorServoScanThread::onStart()
     auto servo = m_core.m_tracking_servos.at(m_core.m_current_scan.servo_name);
     m_starting_coordinates = *servo->virtual_positions()->get_sync(comp.out());
 
-    ACS_LOG(LM_FULL_INFO, "SRTMinorServoScanThread::onStart()", (LM_INFO, "SCAN THREAD STARTED"));
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoScanThread::onStart()", (LM_NOTICE, "SCAN THREAD STARTED"));
 }
 
 void SRTMinorServoScanThread::onStop()
@@ -101,7 +101,7 @@ void SRTMinorServoScanThread::onStop()
     // Finally unlock the scan capabilities
     m_core.m_scan_active.store(Management::MNG_FALSE);
 
-    ACS_LOG(LM_FULL_INFO, "SRTMinorServoScanThread::onStop()", (LM_INFO, "SCAN THREAD STOPPED"));
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoScanThread::onStop()", (LM_NOTICE, "SCAN THREAD STOPPED"));
 }
 
 void SRTMinorServoScanThread::runLoop()
@@ -167,7 +167,10 @@ void SRTMinorServoScanThread::runLoop()
         }))
         {
             // All used servos are set to PROGRAMTRACK operative mode, we are tracking the elevation
-            elevation_tracking = Management::MNG_TRUE;
+            if(m_core.m_motion_status.load() == MOTION_STATUS_TRACKING)
+            {
+                elevation_tracking = Management::MNG_TRUE;
+            }
         }
         else
         {

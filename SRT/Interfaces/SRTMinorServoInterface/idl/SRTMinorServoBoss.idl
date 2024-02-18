@@ -79,7 +79,7 @@ module MinorServo
          * @param value, the desired gregorian cover position, accepted values are 'open', 'OPEN', 'closed' or 'CLOSED'
          * @throw MinorServoErrors::MinorServoErrorsEx
          */
-        void setGregorianCoverPosition(in string value) raises (MinorServoErrors::MinorServoErrorsEx);
+        //void setGregorianCoverPosition(in string value) raises (MinorServoErrors::MinorServoErrorsEx);
     };
 };
 

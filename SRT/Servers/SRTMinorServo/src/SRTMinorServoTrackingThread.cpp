@@ -23,7 +23,7 @@ void SRTMinorServoTrackingThread::onStart()
     m_point_id = 0;
     m_point_time = 0;
 
-    ACS_LOG(LM_FULL_INFO, "SRTMinorServoTrackingThread::onStart()", (LM_INFO, "TRACKING THREAD STARTED"));
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoTrackingThread::onStart()", (LM_NOTICE, "TRACKING THREAD STARTED"));
 }
 
 void SRTMinorServoTrackingThread::onStop()
@@ -35,7 +35,7 @@ void SRTMinorServoTrackingThread::onStop()
         m_core.setFailure();
     }
 
-    ACS_LOG(LM_FULL_INFO, "SRTMinorServoTrackingThread::onStop()", (LM_INFO, "TRACKING THREAD STOPPED"));
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoTrackingThread::onStop()", (LM_NOTICE, "TRACKING THREAD STOPPED"));
 }
 
 void SRTMinorServoTrackingThread::runLoop()
@@ -67,7 +67,7 @@ void SRTMinorServoTrackingThread::runLoop()
     if(m_point_id == 0)
     {
         m_point_time = getTimeStamp() + PROGRAM_TRACK_FUTURE_TIME;
-        m_trajectory_id = (unsigned int)(m_point_time / 1000);
+        m_trajectory_id = (unsigned int)(IRA::CIRATools::ACSTime2UNIXEpoch(m_point_time));
     }
     else
     {

@@ -105,14 +105,7 @@ namespace MinorServo
                 }
                 case MOTION_STATUS_TRACKING:
                 {
-                    if(m_scanning.load() == Management::MNG_FALSE)
-                    {
-                        motion_status = "Elevation Track Mode";
-                    }
-                    else
-                    {
-                        motion_status = "Scanning along " + m_current_scan.servo_name + " " + m_current_scan.axis_name + " axis";
-                    }
+                    motion_status = "Elevation Track Mode";
                     break;
                 }
                 case MOTION_STATUS_PARKING:
@@ -150,6 +143,11 @@ namespace MinorServo
                     motion_status = "Error";
                     break;
                 }
+            }
+
+            if(m_scanning.load() == Management::MNG_TRUE)
+            {
+                motion_status = "Scanning along " + m_current_scan.servo_name + " " + m_current_scan.axis_name + " axis";
             }
 
             return motion_status.c_str();

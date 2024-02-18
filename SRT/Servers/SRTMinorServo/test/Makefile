@@ -14,31 +14,25 @@ USER_INC=-I$(GTEST_HOME) -I$(GMOCK_HOME)
 # unittest_OBJECTS = unittest
 # unittest_LIBS = $(GTEST_LIBS) <ComponentNameImpl>
 
-EXECUTABLES_L = SRTMinorServoSocketTest SRPProgramTrackTest DerotatorProgramTrackTest CombinedProgramTrackTest ReadStatusOnlyTest
-
-SRTMinorServoSocketTest_OBJECTS = SRTMinorServoSocketTest
-SRTMinorServoSocketTest_CFLAGS = -std=c++17
-SRTMinorServoSocketTest_LIBS = $(GTEST_LIBS) SRTMinorServoSocket SRTMinorServoCommandLibrary IRALibrary ComponentErrors
-SRTMinorServoSocketTest_LDFLAGS = -lstdc++ -lpthread
+EXECUTABLES_L = SRPProgramTrackTest #DerotatorProgramTrackTest CombinedProgramTrackTest ReadStatusOnlyTest
 
 SRPProgramTrackTest_OBJECTS = SRPProgramTrackTest
-SRPProgramTrackTest_CFLAGS = -std=c++17
-SRPProgramTrackTest_LIBS = $(GTEST_LIBS) SRTMinorServoSocket SRTMinorServoCommandLibrary IRALibrary ComponentErrors boost_filesystem
-SRPProgramTrackTest_LDFLAGS = -lstdc++ -lpthread
+SRPProgramTrackTest_CFLAGS = -std=c++17 -fconcepts
+SRPProgramTrackTest_LIBS = $(GTEST_LIBS) SRTMinorServoSocketLibrary SRTMinorServoCommandLibrary IRALibrary ComponentErrors boost_filesystem
 
 DerotatorProgramTrackTest_OBJECTS = DerotatorProgramTrackTest
 DerotatorProgramTrackTest_CFLAGS = -std=c++17
-DerotatorProgramTrackTest_LIBS = $(GTEST_LIBS) SRTMinorServoSocket SRTMinorServoCommandLibrary IRALibrary ComponentErrors boost_filesystem
+DerotatorProgramTrackTest_LIBS = $(GTEST_LIBS) SRTMinorServoSocketLibrary SRTMinorServoCommandLibrary IRALibrary ComponentErrors boost_filesystem
 DerotatorProgramTrackTest_LDFLAGS = -lstdc++ -lpthread
 
 CombinedProgramTrackTest_OBJECTS = CombinedProgramTrackTest
 CombinedProgramTrackTest_CFLAGS = -std=c++17
-CombinedProgramTrackTest_LIBS = $(GTEST_LIBS) SRTMinorServoSocket SRTMinorServoCommandLibrary IRALibrary ComponentErrors boost_filesystem
+CombinedProgramTrackTest_LIBS = $(GTEST_LIBS) SRTMinorServoSocketLibrary SRTMinorServoCommandLibrary IRALibrary ComponentErrors boost_filesystem
 CombinedProgramTrackTest_LDFLAGS = -lstdc++ -lpthread
 
 ReadStatusOnlyTest_OBJECTS = ReadStatusOnlyTest
 ReadStatusOnlyTest_CFLAGS = -std=c++17
-ReadStatusOnlyTest_LIBS = $(GTEST_LIBS) SRTMinorServoSocket SRTMinorServoCommandLibrary IRALibrary ComponentErrors boost_filesystem
+ReadStatusOnlyTest_LIBS = $(GTEST_LIBS) SRTMinorServoSocketLibrary SRTMinorServoCommandLibrary IRALibrary ComponentErrors boost_filesystem
 ReadStatusOnlyTest_LDFLAGS = -lstdc++ -lpthread
 
 # END OF CUSTOMIZATION

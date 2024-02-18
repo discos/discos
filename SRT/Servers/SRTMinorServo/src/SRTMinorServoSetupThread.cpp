@@ -4,8 +4,7 @@ using namespace MinorServo;
 
 SRTMinorServoSetupThread::SRTMinorServoSetupThread(const ACE_CString& name, SRTMinorServoBossCore& core, const ACS::TimeInterval& response_time, const ACS::TimeInterval& sleep_time) :
     ACS::Thread(name, response_time, sleep_time),
-    m_core(core),
-    m_status(0)
+    m_core(core)
 {
     AUTO_TRACE("SRTMinorServoSetupThread::SRTMinorServoSetupThread()");
 }
@@ -22,18 +21,20 @@ void SRTMinorServoSetupThread::onStart()
     this->setSleepTime(500000);   // 50 milliseconds
     m_start_time = IRA::CIRATools::getUNIXEpoch();
 
-    SRTMinorServoFocalConfiguration commanded_configuration = m_core.m_commanded_configuration.load();
-    m_LDO_configuration = LDOConfigurationNameTable.left.at(commanded_configuration);
-    m_gregorian_cover_position = commanded_configuration == CONFIGURATION_PRIMARY ? COVER_STATUS_CLOSED : COVER_STATUS_OPEN;
+    m_status = 0;
 
-    ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::onStart()", (LM_INFO, ("SETUP THREAD STARTED WITH '" + m_core.m_commanded_setup + "' CONFIGURATION").c_str()));
+    //SRTMinorServoFocalConfiguration commanded_configuration = m_core.m_commanded_configuration.load();
+    //m_LDO_configuration = LDOConfigurationNameTable.left.at(commanded_configuration);
+    //m_gregorian_cover_position = commanded_configuration == CONFIGURATION_PRIMARY ? COVER_STATUS_CLOSED : COVER_STATUS_OPEN;
+
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::onStart()", (LM_NOTICE, ("SETUP THREAD STARTED WITH '" + m_core.m_commanded_setup + "' CONFIGURATION").c_str()));
 }
 
 void SRTMinorServoSetupThread::onStop()
 {
     AUTO_TRACE("SRTMinorServoSetupThread::onStop()");
 
-    ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::onStop()", (LM_INFO, "SETUP THREAD STOPPED"));
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::onStop()", (LM_NOTICE, "SETUP THREAD STOPPED"));
 }
 
 void SRTMinorServoSetupThread::runLoop()
@@ -87,10 +88,11 @@ void SRTMinorServoSetupThread::runLoop()
             }
 
             //m_status = 2;
-            m_status = 100;
+            //m_status = 100;
+            m_status = 5;
             break;
         }
-        case 100: // Send the STOW command to the gregorian cover
+        /*case 100: // Send the STOW command to the gregorian cover
         {
             if(!m_core.m_socket.sendCommand(SRTMinorServoCommandLibrary::stow("Gregoriano", m_gregorian_cover_position)).checkOutput())
             {
@@ -102,7 +104,7 @@ void SRTMinorServoSetupThread::runLoop()
 
             m_status = 5;
             break;
-        }
+        }*/
         /*case 2: // Send the SETUP command
         {
             try
@@ -195,9 +197,9 @@ void SRTMinorServoSetupThread::runLoop()
         case 6: // Wait for the whole system to reach the PRESET configuration
         {
             // First we check the status of the gregorian cover
-            bool completed = m_core.m_component.gregorian_cover()->get_sync(comp.out()) == m_gregorian_cover_position ? true : false;
+            //bool completed = m_core.m_component.gregorian_cover()->get_sync(comp.out()) == m_gregorian_cover_position ? true : false;
 
-            if(completed && std::all_of(m_core.m_servos.begin(), m_core.m_servos.end(), [this](const std::pair<std::string, SRTBaseMinorServo_ptr>& servo) -> bool
+            if(/*completed && */std::all_of(m_core.m_servos.begin(), m_core.m_servos.end(), [this](const std::pair<std::string, SRTBaseMinorServo_ptr>& servo) -> bool
             {
                 ACSErr::Completion_var comp;
                 if(servo.second->in_use()->get_sync(comp.out()) == Management::MNG_TRUE)

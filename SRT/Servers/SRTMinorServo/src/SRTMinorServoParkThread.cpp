@@ -4,8 +4,7 @@ using namespace MinorServo;
 
 SRTMinorServoParkThread::SRTMinorServoParkThread(const ACE_CString& name, SRTMinorServoBossCore& core, const ACS::TimeInterval& response_time, const ACS::TimeInterval& sleep_time) :
     ACS::Thread(name, response_time, sleep_time),
-    m_core(core),
-    m_status(0)
+    m_core(core)
 {
     AUTO_TRACE("SRTMinorServoParkThread::SRTMinorServoParkThread()");
 }
@@ -21,14 +20,16 @@ void SRTMinorServoParkThread::onStart()
     this->setSleepTime(500000);   // 50 milliseconds
     m_start_time = IRA::CIRATools::getUNIXEpoch();
 
-    ACS_LOG(LM_FULL_INFO, "SRTMinorServoParkThread::onStart()", (LM_INFO, "PARK THREAD STARTED"));
+    m_status = 0;
+
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoParkThread::onStart()", (LM_NOTICE, "PARK THREAD STARTED"));
 }
 
 void SRTMinorServoParkThread::onStop()
 {
     AUTO_TRACE("SRTMinorServoParkThread::onStop()");
 
-    ACS_LOG(LM_FULL_INFO, "SRTMinorServoParkThread::onStop()", (LM_INFO, "PARK THREAD STOPPED"));
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoParkThread::onStop()", (LM_NOTICE, "PARK THREAD STOPPED"));
 }
 
 void SRTMinorServoParkThread::runLoop()
@@ -62,10 +63,10 @@ void SRTMinorServoParkThread::runLoop()
         case 0:
         {
             // First we check if the gregorian cover has closed
-            bool completed = m_core.m_component.gregorian_cover()->get_sync(comp.out()) == COVER_STATUS_CLOSED? true : false;
+            //bool completed = m_core.m_component.gregorian_cover()->get_sync(comp.out()) == COVER_STATUS_CLOSED? true : false;
 
             // Then we cycle through all the servos and make sure their operative mode is STOP
-            if(completed && std::all_of(m_core.m_servos.begin(), m_core.m_servos.end(), [](const std::pair<std::string, SRTBaseMinorServo_ptr>& servo) -> bool
+            if(/*completed && */std::all_of(m_core.m_servos.begin(), m_core.m_servos.end(), [](const std::pair<std::string, SRTBaseMinorServo_ptr>& servo) -> bool
             {
                 ACSErr::Completion_var comp;
                 return servo.second->operative_mode()->get_sync(comp.out()) == OPERATIVE_MODE_STOP ? true : false;
