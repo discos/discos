@@ -75,7 +75,7 @@ bool SRTMinorServoBossCore::status()
     {
         if(m_socket_connected.load() == Management::MNG_TRUE)
         {
-            ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::status()", (LM_CRITICAL, "Socket disconnected."));
+            ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::status()", (LM_CRITICAL, (std::string("Socket disconnected: ") + getReasonFromEx(ex)).c_str()));
             m_socket_connected.store(Management::MNG_FALSE);
 
             stopThread(m_setup_thread);
