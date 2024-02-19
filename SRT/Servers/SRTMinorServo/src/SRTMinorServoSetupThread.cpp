@@ -55,7 +55,7 @@ void SRTMinorServoSetupThread::runLoop()
 
     if(IRA::CIRATools::getUNIXEpoch() - m_start_time >= SETUP_TIMEOUT)
     {
-        ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::runLoop()", (LM_ERROR, "Timeout while performing a setup operation."));
+        ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::runLoop()", (LM_CRITICAL, "Timeout while performing a setup operation."));
         m_core.setFailure();
         this->setStopped();
         return;
@@ -96,7 +96,7 @@ void SRTMinorServoSetupThread::runLoop()
         {
             if(!m_core.m_socket.sendCommand(SRTMinorServoCommandLibrary::stow("Gregoriano", m_gregorian_cover_position)).checkOutput())
             {
-                ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::runLoop()", (LM_ERROR, "Received NAK when setting the gregorian cover position."));
+                ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::runLoop()", (LM_CRITICAL, "Received NAK when setting the gregorian cover position."));
                 m_core.setFailure();
                 this->setStopped();
                 return;
@@ -111,7 +111,7 @@ void SRTMinorServoSetupThread::runLoop()
             {
                 if(!m_core.m_socket.sendCommand(SRTMinorServoCommandLibrary::setup(m_LDO_configuration)).checkOutput())
                 {
-                    ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::runLoop()", (LM_ERROR, "Received NAK in response to a SETUP command."));
+                    ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::runLoop()", (LM_CRITICAL, "Received NAK in response to a SETUP command."));
                     m_core.setFailure();
                     this->setStopped();
                     return;
@@ -123,7 +123,7 @@ void SRTMinorServoSetupThread::runLoop()
             }
             catch(...)
             {
-                ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::runLoop()", (LM_ERROR, "Communication error while sending a SETUP command."));
+                ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::runLoop()", (LM_CRITICAL, "Communication error while sending a SETUP command."));
                 m_core.setFailure();
                 this->setStopped();
                 return;
@@ -167,7 +167,7 @@ void SRTMinorServoSetupThread::runLoop()
                 }
                 catch(...)
                 {
-                    ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::runLoop()", (LM_ERROR, ("Error while loading a SETUP to servo'" + servo_name + "'.").c_str()));
+                    ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::runLoop()", (LM_CRITICAL, ("Error while loading a SETUP to servo'" + servo_name + "'.").c_str()));
                     m_core.setFailure();
                     this->setStopped();
                     return;

@@ -19,7 +19,6 @@
 #include "MinorServoErrors.h"
 #include "SRTMinorServoBossCore.h"
 #include "SRTMinorServoStatusThread.h"
-#include "SRTMinorServoUtils.h"
 #include "MSDevIOs.h"
 
 using namespace MinorServo;

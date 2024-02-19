@@ -117,8 +117,8 @@ void SRTMinorServoBossImpl::cleanUp()
 {
     AUTO_TRACE("SRTMinorServoBossImpl::cleanUp()");
     stopPropertiesMonitoring();
-	_IRA_LOGFILTER_FLUSH;
-	_IRA_LOGFILTER_DESTROY;
+    _IRA_LOGFILTER_FLUSH;
+    _IRA_LOGFILTER_DESTROY;
     CharacteristicComponentImpl::cleanUp();
 }
 
@@ -126,8 +126,8 @@ void SRTMinorServoBossImpl::aboutToAbort()
 {
     AUTO_TRACE("SRTMinorServoBossImpl::aboutToAbort()");
     stopPropertiesMonitoring();
-	_IRA_LOGFILTER_FLUSH;
-	_IRA_LOGFILTER_DESTROY;
+    _IRA_LOGFILTER_FLUSH;
+    _IRA_LOGFILTER_DESTROY;
     CharacteristicComponentImpl::aboutToAbort();
 }
 
@@ -365,20 +365,19 @@ CORBA::Boolean SRTMinorServoBossImpl::command(const char* cmd, CORBA::String_out
     }
     catch(MinorServoErrors::MinorServoErrorsEx& ex)
     {
-        // Only print the routine, the reason is automatically provided in the message inside the jlog.
-        ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
+        LOG_EX(MinorServoErrors::MinorServoErrorsEx);
     }
     catch(ComponentErrors::ComponentErrorsEx& ex)
     {
-        ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
+        LOG_EX(ComponentErrors::ComponentErrorsEx);
     }
     catch(ManagementErrors::ConfigurationErrorEx& ex)
     {
-        ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
+        LOG_EX(ManagementErrors::ConfigurationErrorEx);
     }
     catch(ManagementErrors::ParkingErrorEx& ex)
     {
-        ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
+        LOG_EX(ManagementErrors::ParkingErrorEx);
     }
     catch(...) // Unknown exception. If the above catch blocks are written correctly we should never get here.
     {

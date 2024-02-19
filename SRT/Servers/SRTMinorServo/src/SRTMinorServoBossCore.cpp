@@ -75,7 +75,7 @@ bool SRTMinorServoBossCore::status()
     {
         if(m_socket_connected.load() == Management::MNG_TRUE)
         {
-            ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::status()", (LM_NOTICE, "Socket disconnected."));
+            ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::status()", (LM_CRITICAL, "Socket disconnected."));
             m_socket_connected.store(Management::MNG_FALSE);
 
             stopThread(m_setup_thread);
@@ -94,8 +94,9 @@ bool SRTMinorServoBossCore::status()
     {
         checkLineStatus();
     }
-    catch(...)
+    catch(MinorServoErrors::MinorServoErrorsEx& ex)
     {
+        _IRA_LOGFILTER_LOG(LM_ERROR, "SRTMinorServoBossCore::status()", getReasonFromEx(ex));
         setFailure();
         return false;
     }
@@ -110,7 +111,7 @@ bool SRTMinorServoBossCore::status()
         SRTMinorServoGregorianCoverStatus commanded_gregorian_cover_position = m_component.current_configuration()->get_sync(comp.out()) == CONFIGURATION_PRIMARY ? COVER_STATUS_CLOSED : COVER_STATUS_OPEN;
         if(m_component.gregorian_cover()->get_sync(comp.out()) != commanded_gregorian_cover_position)
         {
-            ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::status()", (LM_ERROR, "Gregorian cover in wrong position."));
+            ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::status()", (LM_CRITICAL, "Gregorian cover in wrong position."));
             setFailure();
             return false;
         }
@@ -120,6 +121,7 @@ bool SRTMinorServoBossCore::status()
     {
         if(!servo->status())
         {
+            ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::status()", (LM_CRITICAL, ("Error checking " + name + " status.").c_str()));
             setFailure();
             return false;
         }
@@ -1079,7 +1081,7 @@ bool SRTMinorServoBossCore::checkScan(const ACS::Time start_time, const MinorSer
     // Check if we are already performing another scan
     if(m_scan_active.load() == Management::MNG_TRUE)
     {
-        ACS_SHORT_LOG((LM_ERROR, "SRTMinorServoBossCore::checkScan(): The system is waiting for a scan to be completed."));
+        ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::checkScan()", (LM_CRITICAL, "The system is waiting for a scan to be completed."));
         ms_parameters = ms_param_var._retn();
         return false;
     }
@@ -1105,7 +1107,7 @@ bool SRTMinorServoBossCore::checkScan(const ACS::Time start_time, const MinorSer
     SRTMinorServoMotionStatus motion_status = m_motion_status.load();
     if(motion_status != MOTION_STATUS_TRACKING && motion_status != MOTION_STATUS_CONFIGURED)
     {
-        ACS_SHORT_LOG((LM_ERROR, "SRTMinorServoBossCore::checkScan(): The system is not ready yet."));
+        ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::checkScan()", (LM_CRITICAL, "The system is not ready yet."));
         ms_parameters = ms_param_var._retn();
         return false;
     }
@@ -1149,6 +1151,7 @@ void SRTMinorServoBossCore::startScan(ACS::Time& start_time, const MinorServoSca
     if(scan_info.is_empty_scan)
     {
         start_time = getTimeStamp();
+        ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::startScan()", (LM_NOTICE, "Empty scan, nothing to do."));
         return;
     }
 
@@ -1171,6 +1174,7 @@ void SRTMinorServoBossCore::startScan(ACS::Time& start_time, const MinorServoSca
     m_current_scan = scan;
     start_time = scan.start_time;
     m_scan_active.store(Management::MNG_TRUE);
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::startScan()", (LM_NOTICE, "Scan started."));
     startThread(m_scan_thread);
 }
 
@@ -1199,6 +1203,7 @@ void SRTMinorServoBossCore::closeScan(ACS::Time& close_time)
 
     // Set the close_time
     close_time = std::max(getTimeStamp(), m_last_scan.close_time);
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::closeScan()", (LM_NOTICE, "Scan closed."));
 }
 
 double SRTMinorServoBossCore::getElevation(const ACS::Time& acs_time)
@@ -1241,29 +1246,29 @@ void SRTMinorServoBossCore::checkLineStatus()
 
     if(!m_socket.isConnected())
     {
-        setFailure();
         _EXCPT(MinorServoErrors::StatusErrorExImpl, ex, "SRTMinorServoBossCore::checkLineStatus()");
         ex.setReason("Socket not connected.");
         ex.log(LM_DEBUG);
+        setFailure();
         throw ex.getMinorServoErrorsEx();
     }
 
     ACSErr::Completion_var comp;
     if(m_component.control()->get_sync(comp.out()) != CONTROL_DISCOS)
     {
-        setFailure();
         _EXCPT(MinorServoErrors::StatusErrorExImpl, ex, "SRTMinorServoBossCore::checkLineStatus()");
         ex.setReason("MinorServo system is not controlled by DISCOS.");
         ex.log(LM_DEBUG);
+        setFailure();
         throw ex.getMinorServoErrorsEx();
     }
 
     if(m_component.emergency()->get_sync(comp.out()) == Management::MNG_TRUE)
     {
-        setFailure();
         _EXCPT(MinorServoErrors::StatusErrorExImpl, ex, "SRTMinorServoBossCore::checkLineStatus()");
         ex.setReason("MinorServo system in emergency status.");
         ex.log(LM_DEBUG);
+        setFailure();
         throw ex.getMinorServoErrorsEx();
     }
 }
@@ -1300,10 +1305,10 @@ void SRTMinorServoBossCore::startThread(T*& thread, const ACS::TimeInterval& sle
     catch(acsthreadErrType::CanNotSpawnThreadExImpl& impl)
     {
         // The thread failed to start for some reason
-        setFailure();
         _ADD_BACKTRACE(ComponentErrors::CanNotStartThreadExImpl, ex, impl, "SRTMinorServoBossCore::startThread()");
         ex.setThreadName(T::c_thread_name);
         ex.log(LM_DEBUG);
+        setFailure();
         throw ex.getComponentErrorsEx();
     }
 
@@ -1338,6 +1343,8 @@ void SRTMinorServoBossCore::destroyThread(T*& thread)
         thread->terminate();
         m_component.getContainerServices()->getThreadManager()->destroy(thread);
     }
+
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::destroyThread()", (LM_NOTICE, (std::string(T::c_thread_name) + " destroyed.").c_str()));
 }
 
 void SRTMinorServoBossCore::setFailure()

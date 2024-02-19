@@ -59,10 +59,10 @@ INCLUDES        = SRTMinorServoCommandLibrary.h SRTMinorServoAnswerMap.h SRTMino
 #
 # Libraries (public and local)
 # ----------------------------
-LIBRARIES       = SRTMinorServoLibrary SRTMinorServoCommandLibrary SRTMinorServoSocketLibrary PySRTMinorServoCommandLibrary
+LIBRARIES       = SRTMinorServoCommandLibrary SRTMinorServoSocketLibrary PySRTMinorServoCommandLibrary #SRTMinorServoLibrary
 LIBRARIES_L     =
-SRTMinorServoLibrary_OBJECTS = hexlib
-SRTMinorServoLibrary_LIBS = gsl gslcblas m
+#SRTMinorServoLibrary_OBJECTS = hexlib
+#SRTMinorServoLibrary_LIBS = gsl gslcblas m
 SRTMinorServoCommandLibrary_OBJECTS = SRTMinorServoCommandLibrary
 SRTMinorServoCommandLibrary_CFLAGS = -std=c++17 -fconcepts
 SRTMinorServoCommandLibrary_LIBS = pthread IRALibrary

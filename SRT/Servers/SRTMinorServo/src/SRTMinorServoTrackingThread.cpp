@@ -79,7 +79,7 @@ void SRTMinorServoTrackingThread::runLoop()
                 bool return_value = servo.second->operative_mode()->get_sync(comp.out()) == OPERATIVE_MODE_PROGRAMTRACK ? true : false;
                 if(!return_value)
                 {
-                    ACS_LOG(LM_FULL_INFO, "SRTMinorServoTrackingThread::runLoop()", (LM_ERROR, (servo.first + ": failed to set PROGRAM_TRACK operative mode!").c_str()));
+                    ACS_LOG(LM_FULL_INFO, "SRTMinorServoTrackingThread::runLoop()", (LM_CRITICAL, (servo.first + ": failed to set PROGRAM_TRACK operative mode!").c_str()));
                 }
                 return return_value;
             }
