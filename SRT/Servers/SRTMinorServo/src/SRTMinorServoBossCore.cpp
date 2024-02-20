@@ -886,6 +886,11 @@ void SRTMinorServoBossCore::getAxesInfo(ACS::stringSeq_out axes_names_out, ACS::
             ACS::stringSeq_var servo_axes_units;
             servo->getAxesInfo(servo_axes_names, servo_axes_units);
 
+            std::transform(servo_axes_names->begin(), servo_axes_names->end(), servo_axes_names->begin(), [servo_name](const char* axis_name)
+            {
+                return CORBA::string_dup((servo_name + "_" + axis_name).c_str());
+            });
+
             size_t names_index = axes_names->length();
             size_t units_index = axes_units->length();
             axes_names->length(names_index + servo_axes_names->length());
@@ -1323,13 +1328,6 @@ void SRTMinorServoBossCore::stopThread(T*& thread)
     if(thread != nullptr && thread->isAlive())
     {
         thread->stop();
-        // We might not need this block, but if the previous call is blocking we won't get here anyway, better keep it
-        while(thread->isAlive())
-        {
-            // TODO: remove this if found unnecessary
-            std::cout << "waiting thread" << std::endl;
-            std::this_thread::sleep_for(std::chrono::milliseconds(5));
-        }
     }
 }
 

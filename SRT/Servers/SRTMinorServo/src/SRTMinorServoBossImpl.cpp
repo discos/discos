@@ -33,11 +33,15 @@ SRTMinorServoBossImpl::SRTMinorServoBossImpl(const ACE_CString& component_name, 
     m_last_executed_command_ptr(this)
 {
     AUTO_TRACE("SRTMinorServoBossImpl::SRTMinorServoBossImpl()");
+
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossImpl::SRTMinorServoBossImpl()", (LM_NOTICE, "COMPONENT CREATED"));
 }
 
 SRTMinorServoBossImpl::~SRTMinorServoBossImpl()
 {
     AUTO_TRACE("SRTMinorServoBossImpl::~SRTMinorServoBossImpl()");
+
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossImpl::SRTMinorServoBossImpl()", (LM_NOTICE, "COMPONENT DESTROYED"));
 }
 
 void SRTMinorServoBossImpl::initialize()
@@ -95,7 +99,7 @@ void SRTMinorServoBossImpl::initialize()
         throw ex.getComponentErrorsEx();
     }
 
-    ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossImpl::SRTMinorServoBossImpl()", (LM_NOTICE, "PROPERTIES INITIALIZED"));
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossImpl::initialize()", (LM_NOTICE, "PROPERTIES INITIALIZED"));
 
     m_parser.add("servoSetup", new SP::function1<SRTMinorServoBossImpl, SP::non_constant, SP::void_type, SP::I<SP::string_type>>(this, &SRTMinorServoBossImpl::setup), 1);
     m_parser.add("servoPark", new SP::function0<SRTMinorServoBossImpl, SP::non_constant, SP::void_type>(this, &SRTMinorServoBossImpl::park), 0);
@@ -105,17 +109,22 @@ void SRTMinorServoBossImpl::initialize()
     m_parser.add("clearServoOffsets", new SP::function0<SRTMinorServoBossImpl, SP::non_constant, SP::void_type>(this, &SRTMinorServoBossImpl::clearOffsets), 0);
     //m_parser.add("setGregorianCoverPosition", new SP::function1<SRTMinorServoBossImpl, SP::non_constant, SP::void_type, SP::I<SP::string_type>>(this, &SRTMinorServoBossImpl::setGregorianCoverPosition), 1);
 
-    ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossImpl::SRTMinorServoBossImpl()", (LM_NOTICE, "PARSER INITIALIZED"));
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossImpl::initialize()", (LM_NOTICE, "PARSER INITIALIZED"));
+
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossImpl::initialize()", (LM_NOTICE, "COMPONENT INITIALIZED"));
 }
 
 void SRTMinorServoBossImpl::execute()
 {
     AUTO_TRACE("SRTMinorServoBossImpl::execute()");
+
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossImpl::execute()", (LM_NOTICE, "STARTING TO ACCEPT FUNCTIONAL CALLS"));
 }
 
 void SRTMinorServoBossImpl::cleanUp()
 {
     AUTO_TRACE("SRTMinorServoBossImpl::cleanUp()");
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossImpl::cleanUp()", (LM_NOTICE, "CLEANING UP RESOURCES"));
     stopPropertiesMonitoring();
     _IRA_LOGFILTER_FLUSH;
     _IRA_LOGFILTER_DESTROY;
@@ -125,6 +134,7 @@ void SRTMinorServoBossImpl::cleanUp()
 void SRTMinorServoBossImpl::aboutToAbort()
 {
     AUTO_TRACE("SRTMinorServoBossImpl::aboutToAbort()");
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossImpl::aboutToAbort()", (LM_NOTICE, "ATTEMPTING TO CLEAN UP RESOURCES"));
     stopPropertiesMonitoring();
     _IRA_LOGFILTER_FLUSH;
     _IRA_LOGFILTER_DESTROY;
