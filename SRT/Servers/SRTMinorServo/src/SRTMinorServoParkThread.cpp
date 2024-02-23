@@ -61,7 +61,7 @@ void SRTMinorServoParkThread::runLoop()
         case 0:
         {
             // First we check if the gregorian cover has closed
-            ACS::Time comp;
+            // ACS::Time comp;
             //bool completed = m_core.m_component.m_gregorian_cover_devio->read(comp) == COVER_STATUS_CLOSED ? true : false;
 
             // Then we cycle through all the servos and make sure their operative mode is STOP

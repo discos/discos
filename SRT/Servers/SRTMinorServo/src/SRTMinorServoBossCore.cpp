@@ -139,7 +139,7 @@ bool SRTMinorServoBossCore::status()
         if(std::all_of(m_current_tracking_servos.begin(), m_current_tracking_servos.end(), [](const std::pair<std::string, SRTProgramTrackMinorServo_ptr>& servo) -> bool
         {
             ACSErr::Completion_var comp;
-            return servo.second->tracking()->get_sync(comp.out()) == Management::MNG_TRUE ? true : false;
+            return servo.second->isTracking();
         }))
         {
             m_tracking.store(Management::MNG_TRUE);
@@ -985,7 +985,7 @@ SRTMinorServoScan SRTMinorServoBossCore::checkScanFeasibility(const ACS::Time& s
             ex.log(LM_DEBUG);
             throw ex.getMinorServoErrorsEx();
         }
-        else if(final_position[i] + offsets[i] < min_ranges[i] || final_position[i] + offsets[i] > max_ranges[i])
+        else if(final_position[i] + user_offsets[i] + system_offsets[i] < min_ranges[i] || final_position[i] + user_offsets[i] + system_offsets[i] > max_ranges[i])
         {
             ex.setReason("Final position out of range.");
             ex.log(LM_DEBUG);

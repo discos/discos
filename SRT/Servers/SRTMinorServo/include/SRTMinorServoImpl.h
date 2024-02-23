@@ -661,6 +661,12 @@ public:
     void programTrack(CORBA::Long trajectory_id, CORBA::Long point_id, ACS::Time point_time, const ACS::doubleSeq& coordinates);
 
     /**
+     * Returns the tracking status of the minor servo.
+     * @return true if the minor servo is tracking within the tracking error, false otherwise
+     */
+    bool isTracking() { return m_tracking.load() == Management::MNG_TRUE; }
+
+    /**
      * Declaration of all the other inherited properties methods.
      */
     PROPERTIES_DECLARATION;
