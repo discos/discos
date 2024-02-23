@@ -61,8 +61,6 @@ void SRTMinorServoSetupThread::runLoop()
         return;
     }
 
-    ACSErr::Completion_var comp;
-
     switch(m_status)
     {
         case 0: // Check if all the servos stopped
@@ -133,7 +131,8 @@ void SRTMinorServoSetupThread::runLoop()
         }
         case 3: // Wait for the system to show the commanded configuration
         {
-            if(m_core.m_component.current_configuration()->get_sync(comp.out()) == m_core.m_commanded_configuration.load())
+            ACS::Time comp;
+            if(m_core.m_component.m_current_configuration_devio->read(comp) == m_core.m_commanded_configuration.load())
             {
                 m_status = 4;
             }
@@ -142,8 +141,9 @@ void SRTMinorServoSetupThread::runLoop()
         }
         case 4: // Wait for the whole system to reach the desired configuration
         {
+            ACSErr::Completion_var comp;
             // First we check the status of the gregorian cover
-            bool completed = m_core.m_component.gregorian_cover()->get_sync(comp.out()) == m_gregorian_cover_position ? true : false;
+            bool completed = m_core.m_component.m_gregorian_cover_devio->read(comp) == m_gregorian_cover_position ? true : false;
 
             // Then we cycle through all the servos and make sure their operative mode is SETUP
             if(completed && std::all_of(m_core.m_servos.begin(), m_core.m_servos.end(), [](const std::pair<std::string, SRTBaseMinorServo_ptr>& servo) -> bool
@@ -163,7 +163,18 @@ void SRTMinorServoSetupThread::runLoop()
             {
                 try
                 {
-                    servo->setup(m_core.m_commanded_setup.c_str());
+                    if(servo->setup(m_core.m_commanded_setup.c_str()))
+                    {
+                        m_core.m_current_servos[servo_name] = servo;
+                        try
+                        {
+                            m_core.m_current_tracking_servos[servo_name] = m_core.m_tracking_servos.at(servo_name);
+                        }
+                        catch(...)
+                        {
+                            // Not a tracking servo, ignore
+                        }
+                    }
                 }
                 catch(...)
                 {
@@ -172,22 +183,22 @@ void SRTMinorServoSetupThread::runLoop()
                     this->setStopped();
                     return;
                 }
+            }
 
-                // This step is necessary because we have _ASACTIVE configurations that have a slightly different position from the commanded one
-                // Unfortunately, the Leonardo implementation accepts a fixed number of configurations, therefore we share the _ASACTIVE and AS not active configurations for each focal position
-                if(servo->in_use()->get_sync(comp.out()) == Management::MNG_TRUE)
+            // This step is necessary because we have _ASACTIVE configurations that have a slightly different position from the commanded one
+            // Unfortunately, the Leonardo implementation accepts a fixed number of configurations, therefore we share the _ASACTIVE and AS not active configurations for each focal position
+            for(const auto& [servo_name, servo] : m_core.m_current_servos)
+            {
+                try
                 {
-                    try
-                    {
-                        servo->preset(*servo->calcCoordinates(45));
-                    }
-                    catch(MinorServoErrors::MinorServoErrorsEx& ex)
-                    {
-                        ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
-                        m_core.setFailure();
-                        this->setStopped();
-                        return;
-                    }
+                    servo->preset(*servo->calcCoordinates(45));
+                }
+                catch(MinorServoErrors::MinorServoErrorsEx& ex)
+                {
+                    ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
+                    m_core.setFailure();
+                    this->setStopped();
+                    return;
                 }
             }
 
@@ -196,20 +207,14 @@ void SRTMinorServoSetupThread::runLoop()
         }
         case 6: // Wait for the whole system to reach the PRESET configuration
         {
+            //ACSErr::Completion_var comp;
             // First we check the status of the gregorian cover
-            //bool completed = m_core.m_component.gregorian_cover()->get_sync(comp.out()) == m_gregorian_cover_position ? true : false;
+            //bool completed = m_core.m_component.m_gregorian_cover_devio->read(comp) == m_gregorian_cover_position ? true : false;
 
-            if(/*completed && */std::all_of(m_core.m_servos.begin(), m_core.m_servos.end(), [this](const std::pair<std::string, SRTBaseMinorServo_ptr>& servo) -> bool
+            if(/*completed && */std::all_of(m_core.m_current_servos.begin(), m_core.m_current_servos.end(), [this](const std::pair<std::string, SRTBaseMinorServo_ptr>& servo) -> bool
             {
                 ACSErr::Completion_var comp;
-                if(servo.second->in_use()->get_sync(comp.out()) == Management::MNG_TRUE)
-                {
-                    return servo.second->operative_mode()->get_sync(comp.out()) == OPERATIVE_MODE_PRESET ? true : false;
-                }
-                else
-                {
-                    return true;
-                }
+                return servo.second->operative_mode()->get_sync(comp.out()) == OPERATIVE_MODE_PRESET ? true : false;
             }))
             {
                 m_status = 7;

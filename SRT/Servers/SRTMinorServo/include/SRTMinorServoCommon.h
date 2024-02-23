@@ -107,17 +107,6 @@ namespace MinorServo
         (CONFIGURATION_BWG2,        22)
         (CONFIGURATION_BWG3,        23)
         (CONFIGURATION_BWG4,        24);
-
-    /**
-     * This is a simple list indicating the order of the minor servo components.
-     */
-    const std::vector<std::string> ServoOrder =
-    {
-        //"PFP",
-        "SRP",
-        //"GFR",
-        //"M3R"
-    };
 }
 
 #endif

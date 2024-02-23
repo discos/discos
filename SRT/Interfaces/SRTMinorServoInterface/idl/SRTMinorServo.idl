@@ -125,8 +125,9 @@ module MinorServo
          * This method loads from the CDB the positioning coefficients related to the given configuration
          * @param configuration the string representing the name of the table from which the coefficients will be loaded
          * @throw ComponentErrors::ComponentErrorsEx when there is an error while trying to load the table for the given configuration
+         * @return true if the servo is in use with the current configuration, false otherwise
          */
-        void setup(in string configuration) raises (ComponentErrors::ComponentErrorsEx);
+        boolean setup(in string configuration) raises (ComponentErrors::ComponentErrorsEx);
 
         /**
          * This method calculates the servo coordinates for a given elevation
@@ -265,6 +266,12 @@ module MinorServo
          *        when there has been a communication error or when the command was not accepted
          */
         void programTrack(in long trajectory_id, in long point_id, in ACS::Time point_time, in ACS::doubleSeq coordinates);
+
+        /**
+         * This method returns a boolean indicating if the servo is tracking or not
+         * @return true if the servo is tracking, false otherwise
+         */
+        boolean isTracking();
     };
 };
 

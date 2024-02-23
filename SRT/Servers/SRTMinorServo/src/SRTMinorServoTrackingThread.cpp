@@ -62,35 +62,26 @@ void SRTMinorServoTrackingThread::runLoop()
     }
 
     // All checks passed, we have to track
-    Management::TBoolean elevation_tracking = Management::MNG_FALSE;
-
     if(m_point_id == 0)
     {
         m_point_time = getTimeStamp() + PROGRAM_TRACK_FUTURE_TIME;
         m_trajectory_id = (unsigned int)(IRA::CIRATools::ACSTime2UNIXEpoch(m_point_time));
     }
-    else
+    else if(m_point_id == 1)
     {
-        if(std::all_of(m_core.m_tracking_servos.begin(), m_core.m_tracking_servos.end(), [this](const std::pair<std::string, SRTBaseMinorServo_ptr>& servo) -> bool
+        if(std::all_of(m_core.m_current_tracking_servos.begin(), m_core.m_current_tracking_servos.end(), [this](const std::pair<std::string, SRTBaseMinorServo_ptr>& servo) -> bool
         {
             ACSErr::Completion_var comp;
-            if(servo.second->in_use()->get_sync(comp.out()) == Management::MNG_TRUE)
+            if(servo.second->operative_mode()->get_sync(comp.out()) != OPERATIVE_MODE_PROGRAMTRACK)
             {
-                bool return_value = servo.second->operative_mode()->get_sync(comp.out()) == OPERATIVE_MODE_PROGRAMTRACK ? true : false;
-                if(!return_value)
-                {
-                    ACS_LOG(LM_FULL_INFO, "SRTMinorServoTrackingThread::runLoop()", (LM_CRITICAL, (servo.first + ": failed to set PROGRAM_TRACK operative mode!").c_str()));
-                }
-                return return_value;
+                ACS_LOG(LM_FULL_INFO, "SRTMinorServoTrackingThread::runLoop()", (LM_CRITICAL, (servo.first + ": failed to set PROGRAM_TRACK operative mode!").c_str()));
+                return false;
             }
-            else
-            {
-                return true;
-            }
+            return true;
         }))
         {
             // All used servos are set to PROGRAMTRACK operative mode, we are tracking the elevation
-            elevation_tracking = Management::MNG_TRUE;
+            m_core.m_elevation_tracking.store(Management::MNG_TRUE);
         }
         else
         {
@@ -100,38 +91,32 @@ void SRTMinorServoTrackingThread::runLoop()
         }
     }
 
-    ACSErr::Completion_var comp;
-    for(const auto& [servo_name, servo] : m_core.m_tracking_servos)
+    for(const auto& [servo_name, servo] : m_core.m_current_tracking_servos)
     {
-        if(servo->in_use()->get_sync(comp.out()) == Management::MNG_TRUE)
+        double elevation = 45.0;
+
+        try
         {
-            double elevation = 45.0;
+            elevation = m_core.getElevation(m_point_time);
+        }
+        catch(ComponentErrors::ComponentErrorsEx& ex)
+        {
+            _IRA_LOGFILTER_LOG(LM_WARNING, "SRTMinorServoScanThread::runLoop()", (std::string(getReasonFromEx(ex)) + ": using a fixed elevation of 45° for tracking!").c_str());
+            m_core.m_elevation_tracking.store(Management::MNG_FALSE);
+        }
 
-            try
-            {
-                elevation = m_core.getElevation(m_point_time);
-            }
-            catch(ComponentErrors::ComponentErrorsEx& ex)
-            {
-                _IRA_LOGFILTER_LOG(LM_WARNING, "SRTMinorServoScanThread::runLoop()", (std::string(getReasonFromEx(ex)) + ": using a fixed elevation of 45° for tracking!").c_str());
-                elevation_tracking = Management::MNG_FALSE;
-            }
-
-            try
-            {
-                servo->programTrack(m_trajectory_id, m_point_id, m_point_time, *servo->calcCoordinates(elevation));
-            }
-            catch(MinorServoErrors::MinorServoErrorsEx& ex)
-            {
-                ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
-                m_error = true;
-                this->setStopped();
-                return;
-            }
+        try
+        {
+            servo->programTrack(m_trajectory_id, m_point_id, m_point_time, *servo->calcCoordinates(elevation));
+        }
+        catch(MinorServoErrors::MinorServoErrorsEx& ex)
+        {
+            ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
+            m_error = true;
+            this->setStopped();
+            return;
         }
     }
-
-    m_core.m_elevation_tracking.store(elevation_tracking);
 
     m_point_id++;
     m_point_time += PROGRAM_TRACK_TIMEGAP;

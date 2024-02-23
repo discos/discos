@@ -11,6 +11,8 @@ SRTBaseMinorServoImpl::SRTBaseMinorServoImpl(const ACE_CString& component_name, 
     m_physical_axes(getCDBValue<size_t>(container_services, "physical_axes")),
     m_virtual_axes_names(SRTBaseMinorServoImpl::getPropertiesTable(*this, "virtual_positions")),
     m_virtual_axes_units(SRTBaseMinorServoImpl::getPropertiesTable(*this, "virtual_axes_units")),
+    m_user_offsets(m_virtual_axes, 0.0),
+    m_system_offsets(m_virtual_axes, 0.0),
     m_positions_queue(5 * 60 * int(1 / getCDBValue<double>(container_services, "status_thread_period", "/MINORSERVO/Boss")), m_virtual_axes),
     m_min(SRTBaseMinorServoImpl::getMotionConstant(*this, "min_range")),
     m_max(SRTBaseMinorServoImpl::getMotionConstant(*this, "max_range")),
@@ -19,19 +21,21 @@ SRTBaseMinorServoImpl::SRTBaseMinorServoImpl(const ACE_CString& component_name, 
     m_r_t(SRTBaseMinorServoImpl::getMotionConstant(*this, "ramp_times")),
     m_r_d(SRTBaseMinorServoImpl::getMotionConstant(*this, "ramp_distances")),
     m_c_s(m_virtual_axes, 0.0),
-    m_user_offsets(m_virtual_axes, 0.0),
-    m_system_offsets(m_virtual_axes, 0.0),
     m_in_use(Management::MNG_FALSE),
     m_current_setup(""),
     m_enabled_ptr(this),
+    m_drive_cabinet_status_devio(nullptr),
     m_drive_cabinet_status_ptr(this),
+    m_block_devio(nullptr),
     m_block_ptr(this),
     m_operative_mode_ptr(this),
     m_physical_axes_enabled_ptr(this),
     m_physical_positions_ptr(this),
     m_virtual_axes_ptr(this),
     m_plain_virtual_positions_ptr(this),
+    m_virtual_positions_devio(nullptr),
     m_virtual_positions_ptr(this),
+    m_virtual_offsets_devio(nullptr),
     m_virtual_offsets_ptr(this),
     m_virtual_user_offsets_ptr(this),
     m_virtual_system_offsets_ptr(this),
@@ -57,10 +61,10 @@ void SRTBaseMinorServoImpl::initialize()
     {
         m_enabled_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":enabled").c_str(), getComponent(),
                 new MSAnswerMapDevIO<Management::TBoolean>(m_servo_name, "enabled", "ENABLED", m_status), true);
-        m_drive_cabinet_status_ptr = new ROEnumImpl<ACS_ENUM_T(SRTMinorServoCabinetStatus), POA_MinorServo::ROSRTMinorServoCabinetStatus>((m_component_name + ":drive_cabinet_status").c_str(), getComponent(),
-                new MSAnswerMapDevIO<SRTMinorServoCabinetStatus>(m_servo_name, "drive_cabinet_status", "STATUS", m_status), true);
-        m_block_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":block").c_str(), getComponent(),
-                new MSAnswerMapDevIO<Management::TBoolean>(m_servo_name, "block", "BLOCK", m_status), true);
+        m_drive_cabinet_status_devio = new MSAnswerMapDevIO<SRTMinorServoCabinetStatus>(m_servo_name, "drive_cabinet_status", "STATUS", m_status);
+        m_drive_cabinet_status_ptr = new ROEnumImpl<ACS_ENUM_T(SRTMinorServoCabinetStatus), POA_MinorServo::ROSRTMinorServoCabinetStatus>((m_component_name + ":drive_cabinet_status").c_str(), getComponent(), m_drive_cabinet_status_devio, true);
+        m_block_devio = new MSAnswerMapDevIO<Management::TBoolean>(m_servo_name, "block", "BLOCK", m_status);
+        m_block_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":block").c_str(), getComponent(), m_block_devio, true);
         m_operative_mode_ptr = new ROEnumImpl<ACS_ENUM_T(SRTMinorServoOperativeMode), POA_MinorServo::ROSRTMinorServoOperativeMode>((m_component_name + ":operative_mode").c_str(), getComponent(),
                 new MSAnswerMapDevIO<SRTMinorServoOperativeMode>(m_servo_name, "operative_mode", "OPERATIVE_MODE", m_status), true);
         m_physical_axes_enabled_ptr = new baci::RObooleanSeq((m_component_name + ":physical_axes_enabled").c_str(), getComponent(),
@@ -72,10 +76,10 @@ void SRTBaseMinorServoImpl::initialize()
         m_plain_virtual_positions_ptr = new baci::ROdoubleSeq((m_component_name + ":plain_virtual_positions").c_str(), getComponent(),
                 new MSAnswerMapDevIO<ACS::doubleSeq>(m_servo_name, "virtual_positions", m_virtual_axes_names, m_status), true);
         std::vector<std::string> virtual_offsets = SRTBaseMinorServoImpl::getPropertiesTable(*this, "virtual_offsets");
-        m_virtual_positions_ptr = new baci::ROdoubleSeq((m_component_name + ":virtual_positions").c_str(), getComponent(),
-                new MSVirtualPositionsDevIO(m_servo_name, m_virtual_axes_names, virtual_offsets, m_status), true);
-        m_virtual_offsets_ptr = new baci::ROdoubleSeq((m_component_name + ":virtual_offsets").c_str(), getComponent(),
-                new MSAnswerMapDevIO<ACS::doubleSeq>(m_servo_name, "virtual_offsets", virtual_offsets, m_status), true);
+        m_virtual_positions_devio = new MSVirtualPositionsDevIO(m_servo_name, m_virtual_axes_names, virtual_offsets, m_status);
+        m_virtual_positions_ptr = new baci::ROdoubleSeq((m_component_name + ":virtual_positions").c_str(), getComponent(), m_virtual_positions_devio, true);
+        m_virtual_offsets_devio = new MSAnswerMapDevIO<ACS::doubleSeq>(m_servo_name, "virtual_offsets", virtual_offsets, m_status);
+        m_virtual_offsets_ptr = new baci::ROdoubleSeq((m_component_name + ":virtual_offsets").c_str(), getComponent(), m_virtual_offsets_devio, true);
         m_virtual_user_offsets_ptr = new baci::ROdoubleSeq((m_component_name + ":virtual_user_offsets").c_str(), getComponent(),
                 new MSGenericDevIO<ACS::doubleSeq, std::vector<double>>(m_user_offsets), true);
         m_virtual_system_offsets_ptr = new baci::ROdoubleSeq((m_component_name + ":virtual_system_offsets").c_str(), getComponent(),
@@ -129,8 +133,8 @@ bool SRTBaseMinorServoImpl::status()
     {
         m_socket.sendCommand(SRTMinorServoCommandLibrary::status(m_servo_name), m_status);
 
-        ACSErr::Completion_var comp;
-        ACS::doubleSeq current_point = *virtual_positions()->get_sync(comp.out());
+        ACS::Time comp;
+        ACS::doubleSeq current_point = m_virtual_positions_devio->read(comp);
 
         // Calculate the current speed of the axes
         try
@@ -201,14 +205,13 @@ void SRTBaseMinorServoImpl::preset(const ACS::doubleSeq& virtual_coordinates)
     }
 
     std::vector<double> coordinates(virtual_coordinates.get_buffer(), virtual_coordinates.get_buffer() + virtual_coordinates.length());
-
-    // Read the current servo offsets
-    ACSErr::Completion_var comp;
-    ACS::doubleSeq offsets = *virtual_offsets()->get_sync(comp.out());
+    ACS::Time comp;
+    ACS::doubleSeq offsets = m_virtual_offsets_devio->read(comp);
 
     for(size_t i = 0; i < m_virtual_axes; i++)
     {
-        if(coordinates[i] + offsets[i] < m_min[i] || coordinates[i] + offsets[i] > m_max[i])
+        double coordinate = coordinates[i] + offsets[i];
+        if(coordinate < m_min[i] || coordinate > m_max[i])
         {
             _EXCPT(MinorServoErrors::PositioningErrorExImpl, ex, (m_servo_name + "::preset()").c_str());
             ex.addData("Reason", "Resulting position out of range, check the offsets.");
@@ -226,7 +229,7 @@ void SRTBaseMinorServoImpl::preset(const ACS::doubleSeq& virtual_coordinates)
     }
 }
 
-void SRTBaseMinorServoImpl::setup(const char* configuration_name)
+bool SRTBaseMinorServoImpl::setup(const char* configuration_name)
 {
     AUTO_TRACE(m_servo_name + "::setup()");
     m_in_use.store(Management::MNG_FALSE);
@@ -238,7 +241,7 @@ void SRTBaseMinorServoImpl::setup(const char* configuration_name)
 
     if(setup_name.empty())
     {
-        return;
+        return false;
     }
 
     IRA::CDBTable table(getContainerServices(), setup_name.c_str(), std::string("DataBlock/MinorServo/" + m_servo_name).c_str());
@@ -294,6 +297,8 @@ void SRTBaseMinorServoImpl::setup(const char* configuration_name)
         clearSystemOffsets();
         m_in_use.store(Management::MNG_TRUE);
     }
+
+    return true;
 }
 
 ACS::doubleSeq* SRTBaseMinorServoImpl::calcCoordinates(double elevation)
@@ -496,8 +501,8 @@ void SRTBaseMinorServoImpl::reloadOffsets()
     std::transform(m_user_offsets.begin(), m_user_offsets.end(), m_system_offsets.begin(), DISCOS_offsets.begin(), std::plus<double>());
 
     // Read the Leonardo offsets
-    ACSErr::Completion_var comp;
-    ACS::doubleSeq sequence = *virtual_offsets()->get_sync(comp.out());
+    ACS::Time comp;
+    ACS::doubleSeq sequence = m_virtual_offsets_devio->read(comp);
     std::vector<double> LEONARDO_offsets(sequence.get_buffer(), sequence.get_buffer() + sequence.length());
 
     // Check if the offsets correspond or not
@@ -539,6 +544,12 @@ ACS::doubleSeq* SRTBaseMinorServoImpl::getAxesPositions(ACS::Time acs_time)
 {
     AUTO_TRACE("SRTBaseMinorServoImpl::getAxesPositions()");
 
+    // Get the latest position
+    if(acs_time == 0)
+    {
+        acs_time = getTimeStamp();
+    }
+
     try
     {
         std::vector<double> p = m_positions_queue.get(acs_time).second;
@@ -568,8 +579,7 @@ ACS::TimeInterval SRTBaseMinorServoImpl::getTravelTime(const ACS::doubleSeq& _s_
     // No starting coordinates, it means we have to start from the current position taking into account the current speed
     if(_s_p.length() == 0)
     {
-        ACSErr::Completion_var comp;
-        s_p = *virtual_positions()->get_sync(comp.out());
+        s_p = *getAxesPositions(0);
     }
     else if(_s_p.length() != m_virtual_axes)
     {
@@ -662,8 +672,8 @@ void SRTBaseMinorServoImpl::checkLineStatus()
         throw ex.getMinorServoErrorsEx();
     }
 
-    ACSErr::Completion_var comp;
-    if(block()->get_sync(comp.out()) == Management::MNG_TRUE || drive_cabinet_status()->get_sync(comp.out()) == DRIVE_CABINET_ERROR)
+    ACS::Time comp;
+    if(m_block_devio->read(comp) == Management::MNG_TRUE || m_drive_cabinet_status_devio->read(comp) == DRIVE_CABINET_ERROR)
     {
         _EXCPT(MinorServoErrors::StatusErrorExImpl, ex, (m_servo_name + "::checkLineStatus()").c_str());
         ex.setReason("Servo system blocked or drive cabinet error.");

@@ -56,14 +56,13 @@ void SRTMinorServoParkThread::runLoop()
         return;
     }
 
-    ACSErr::Completion_var comp;
-
     switch(m_status)
     {
         case 0:
         {
             // First we check if the gregorian cover has closed
-            //bool completed = m_core.m_component.gregorian_cover()->get_sync(comp.out()) == COVER_STATUS_CLOSED? true : false;
+            ACS::Time comp;
+            //bool completed = m_core.m_component.m_gregorian_cover_devio->read(comp) == COVER_STATUS_CLOSED ? true : false;
 
             // Then we cycle through all the servos and make sure their operative mode is STOP
             if(/*completed && */std::all_of(m_core.m_servos.begin(), m_core.m_servos.end(), [](const std::pair<std::string, SRTBaseMinorServo_ptr>& servo) -> bool

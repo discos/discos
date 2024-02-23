@@ -105,8 +105,9 @@ public:
      * Asks the servo system to load the commanded configuration table.
      * @param configuration_name the configuration the servo system should assume.
      * @throw ComponentErrors::ComponentErrorsEx when there is an error while trying to load the table for the given configuration.
+     * @return true if the servo is in use with the current configuration, false otherwise
      */
-    void setup(const char* configuration_name = "");
+    bool setup(const char* configuration_name = "");
 
     /**
      * Asks the component to calculate the servo system position starting from the given elevation.
@@ -331,7 +332,6 @@ protected:
      */
     const size_t m_virtual_axes;
 private:
-
     /**
      * Number of physical axes of the servo system.
      */
@@ -347,6 +347,15 @@ private:
      */
     const std::vector<std::string> m_virtual_axes_units;
 protected:
+    /**
+     * Commanded user offsets for each axis of the servo system.
+     */
+    std::vector<double> m_user_offsets;
+
+    /**
+     * Commanded system offsets for each axis of the servo system.
+     */
+    std::vector<double> m_system_offsets;
 
     /**
      * Queue of positions assumed by the servo system in time.
@@ -389,16 +398,6 @@ private:
     std::vector<double> m_c_s;
 
     /**
-     * Commanded user offsets for each axis of the servo system.
-     */
-    std::vector<double> m_user_offsets;
-
-    /**
-     * Commanded system offsets for each axis of the servo system.
-     */
-    std::vector<double> m_system_offsets;
-
-    /**
      * Boolean indicating whether the servo system is used in the current focal configuration.
      */
     std::atomic<Management::TBoolean> m_in_use;
@@ -414,9 +413,19 @@ private:
     baci::SmartPropertyPointer<ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>> m_enabled_ptr;
 
     /**
+     * DevIO of the drive_cabinet_status property.
+     */
+    MSAnswerMapDevIO<SRTMinorServoCabinetStatus>* m_drive_cabinet_status_devio;
+
+    /**
      * Pointer to the drive_cabinet_status property.
      */
     baci::SmartPropertyPointer<ROEnumImpl<ACS_ENUM_T(SRTMinorServoCabinetStatus), POA_MinorServo::ROSRTMinorServoCabinetStatus>> m_drive_cabinet_status_ptr;
+
+    /**
+     * DevIO of the block property.
+     */
+    MSAnswerMapDevIO<Management::TBoolean>* m_block_devio;
 
     /**
      * Pointer to the block property.
@@ -449,10 +458,22 @@ private:
     baci::SmartPropertyPointer<baci::ROdoubleSeq> m_plain_virtual_positions_ptr;
 
     /**
+     * DevIO of the virtual_positions property.
+     */
+    MSVirtualPositionsDevIO* m_virtual_positions_devio;
+
+    /**
      * Pointer to the virtual_positions property.
      */
     baci::SmartPropertyPointer<baci::ROdoubleSeq> m_virtual_positions_ptr;
 
+protected:
+    /**
+     * DevIO of the virtual_offsets property.
+     */
+    MSAnswerMapDevIO<ACS::doubleSeq>* m_virtual_offsets_devio;
+
+private:
     /**
      * Pointer to the virtual_offsets property.
      */
@@ -569,7 +590,7 @@ public:
     /**
      * Setup method definition. It simply calls the SRTBaseMinorServoImpl method.
      */
-    void setup(const char* configuration_name = "")                                             { SRTBaseMinorServoImpl::setup(configuration_name);                     }
+    bool setup(const char* configuration_name = "")                                             { return SRTBaseMinorServoImpl::setup(configuration_name);              }
 
     /**
      * Declaration of all the other inherited methods.
@@ -620,7 +641,7 @@ public:
      * @param configuration_name the configuration the servo system should assume.
      * @throw ComponentErrors::ComponentErrorsEx when there is an error while trying to load the table for the given configuration.
      */
-    void setup(const char* configuration_name = "");
+    bool setup(const char* configuration_name = "");
 
     /**
      * Declaration of all the other inherited methods.

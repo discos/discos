@@ -414,6 +414,16 @@ private:
     const std::map<std::string, SRTProgramTrackMinorServo_ptr> m_tracking_servos;
 
     /**
+     * Map that will dynamically be updated containing the current configuration's minor servos.
+     */
+    std::map<std::string, SRTBaseMinorServo_ptr> m_current_servos;
+
+    /**
+     * Map that will dynamically be updated containing the current configuration's tracking minor servos.
+     */
+    std::map<std::string, SRTProgramTrackMinorServo_ptr> m_current_tracking_servos;
+
+    /**
      * Current scan parameters.
      */
     SRTMinorServoScan m_current_scan;

@@ -102,14 +102,14 @@ bool SRTMinorServoBossCore::status()
     }
 
     // Call servo status
-    ACSErr::Completion_var comp;
+    //ACS::Time comp;
 
     SRTMinorServoMotionStatus motion_status = m_motion_status.load();
     /*if(motion_status == MOTION_STATUS_TRACKING || motion_status == MOTION_STATUS_CONFIGURED)
     {
         // We only get here if the system is configured, therefore we check the correct position of the gregorian cover
-        SRTMinorServoGregorianCoverStatus commanded_gregorian_cover_position = m_component.current_configuration()->get_sync(comp.out()) == CONFIGURATION_PRIMARY ? COVER_STATUS_CLOSED : COVER_STATUS_OPEN;
-        if(m_component.gregorian_cover()->get_sync(comp.out()) != commanded_gregorian_cover_position)
+        SRTMinorServoGregorianCoverStatus commanded_gregorian_cover_position = m_component.m_current_configuration_devio->read(comp) == CONFIGURATION_PRIMARY ? COVER_STATUS_CLOSED : COVER_STATUS_OPEN;
+        if(m_component.m_gregorian_cover_devio->read(comp) != commanded_gregorian_cover_position)
         {
             ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::status()", (LM_CRITICAL, "Gregorian cover in wrong position."));
             setFailure();
@@ -136,14 +136,9 @@ bool SRTMinorServoBossCore::status()
 
     if(motion_status == MOTION_STATUS_TRACKING)
     {
-        if(std::all_of(m_tracking_servos.begin(), m_tracking_servos.end(), [](const std::pair<std::string, SRTProgramTrackMinorServo_ptr>& servo) -> bool
+        if(std::all_of(m_current_tracking_servos.begin(), m_current_tracking_servos.end(), [](const std::pair<std::string, SRTProgramTrackMinorServo_ptr>& servo) -> bool
         {
             ACSErr::Completion_var comp;
-            if(servo.second->in_use()->get_sync(comp.out()) == Management::MNG_FALSE)
-            {
-                return true;
-            }
-
             return servo.second->tracking()->get_sync(comp.out()) == Management::MNG_TRUE ? true : false;
         }))
         {
@@ -243,8 +238,10 @@ void SRTMinorServoBossCore::setup(std::string commanded_setup)
     m_scanning.store(Management::MNG_FALSE);
     m_tracking.store(Management::MNG_FALSE);
     m_motion_status.store(MOTION_STATUS_STARTING);
+    m_current_servos.clear();
+    m_current_tracking_servos.clear();
 
-    // Send the STOP command to each servo
+    // Send the STOP command to all the servos
     for(const auto& [servo_name, servo] : m_servos)
     {
         try
@@ -333,6 +330,8 @@ void SRTMinorServoBossCore::park()
     m_scanning.store(Management::MNG_FALSE);
     m_tracking.store(Management::MNG_FALSE);
     m_motion_status.store(MOTION_STATUS_PARKING);
+    m_current_servos.clear();
+    m_current_tracking_servos.clear();
 
     /*try
     {
@@ -355,7 +354,7 @@ void SRTMinorServoBossCore::park()
         throw ex.getParkingErrorEx();
     }*/
 
-    // Send the STOP command to each servo
+    // Send the STOP command to all the servos
     for(const auto& [servo_name, servo] : m_servos)
     {
         try
@@ -547,14 +546,9 @@ void SRTMinorServoBossCore::preset(double elevation)
         throw ex.getMinorServoErrorsEx();
     }
 
-    ACSErr::Completion_var comp;
-
-    for(const auto& [servo_name, servo] : m_servos)
+    for(const auto& [servo_name, servo] : m_current_servos)
     {
-        if(servo->in_use()->get_sync(comp.out()) == Management::MNG_TRUE)
-        {
-            servo->preset(*servo->calcCoordinates(elevation));
-        }
+        servo->preset(*servo->calcCoordinates(elevation));
     }
 }
 
@@ -583,38 +577,31 @@ void SRTMinorServoBossCore::clearUserOffsets(std::string servo_name)
 
     std::transform(servo_name.begin(), servo_name.end(), servo_name.begin(), ::toupper);
 
-    ACSErr::Completion_var comp;
     if(servo_name == "ALL")
     {
-        for(const auto& [servo_name, servo] : m_servos)
+        for(const auto& [servo_name, servo] : m_current_servos)
         {
-            if(servo->in_use()->get_sync(comp.out()) == Management::MNG_TRUE)
-            {
                 servo->clearUserOffsets();
-            }
         }
         return;
+    }
+    else if(!m_servos.count(servo_name))
+    {
+        _EXCPT(MinorServoErrors::OffsetErrorExImpl, ex, "SRTMinorServoBossCore::clearUserOffsets()");
+        ex.addData("Reason", ("Unknown servo '" + servo_name + "'.").c_str());
+        ex.log(LM_DEBUG);
+        throw ex.getMinorServoErrorsEx();
     }
 
     try
     {
-        auto servo = m_servos.at(servo_name);
-        if(servo->in_use()->get_sync(comp.out()) == Management::MNG_TRUE)
-        {
-            servo->clearUserOffsets();
-        }
-        else
-        {
-            _EXCPT(MinorServoErrors::OffsetErrorExImpl, ex, "SRTMinorServoBossCore::clearUserOffsets()");
-            ex.addData("Reason", ("Servo '" + servo_name + "' not in use with the current configuration.").c_str());
-            ex.log(LM_DEBUG);
-            throw ex.getMinorServoErrorsEx();
-        }
+        auto servo = m_current_servos.at(servo_name);
+        servo->clearUserOffsets();
     }
     catch(std::out_of_range& oor)
     {
         _EXCPT(MinorServoErrors::OffsetErrorExImpl, ex, "SRTMinorServoBossCore::clearUserOffsets()");
-        ex.addData("Reason", ("Unknown servo '" + servo_name + "'.").c_str());
+        ex.addData("Reason", ("Servo '" + servo_name + "' not in use with the current configuration.").c_str());
         ex.log(LM_DEBUG);
         throw ex.getMinorServoErrorsEx();
     }
@@ -650,30 +637,27 @@ void SRTMinorServoBossCore::setUserOffset(std::string servo_axis_name, double of
     std::getline(ss, servo_name, '_');
     ss >> axis_name;
 
+    if(!m_servos.count(servo_name))
+    {
+        _EXCPT(MinorServoErrors::OffsetErrorExImpl, ex, "SRTMinorServoBossCore::setUserOffsets()");
+        ex.addData("Reason", ("Unknown servo '" + servo_name + "'.").c_str());
+        ex.log(LM_DEBUG);
+        throw ex.getMinorServoErrorsEx();
+    }
+
     try
     {
-        auto servo = m_servos.at(servo_name);
-        ACSErr::Completion_var comp;
-        if(servo->in_use()->get_sync(comp.out()) == Management::MNG_TRUE)
+        auto servo = m_current_servos.at(servo_name);
+        if(log)
         {
-            if(log)
-            {
-                ACS_LOG(LM_FULL_INFO, "setServoOffset", (LM_NOTICE, ("SETTING '" + servo_name + "' '" + axis_name + "' OFFSET TO " + std::to_string(offset)).c_str()));
-            }
-            servo->setUserOffset(axis_name.c_str(), offset);
+            ACS_LOG(LM_FULL_INFO, "setServoOffset", (LM_NOTICE, ("SETTING '" + servo_name + "' '" + axis_name + "' OFFSET TO " + std::to_string(offset)).c_str()));
         }
-        else
-        {
-            _EXCPT(MinorServoErrors::OffsetErrorExImpl, ex, "SRTMinorServoBossCore::setUserOffset()");
-            ex.addData("Reason", ("Servo '" + servo_name + "' not in use with the current configuration.").c_str());
-            ex.log(LM_DEBUG);
-            throw ex.getMinorServoErrorsEx();
-        }
+        servo->setUserOffset(axis_name.c_str(), offset);
     }
     catch(std::out_of_range& oor)
     {
         _EXCPT(MinorServoErrors::OffsetErrorExImpl, ex, "SRTMinorServoBossCore::setUserOffset()");
-        ex.addData("Reason", ("Unknown servo '" + servo_name + "'.").c_str());
+        ex.addData("Reason", ("Servo '" + servo_name + "' not in use with the current configuration.").c_str());
         ex.log(LM_DEBUG);
         throw ex.getMinorServoErrorsEx();
     }
@@ -693,18 +677,13 @@ ACS::doubleSeq* SRTMinorServoBossCore::getUserOffsets()
     }
 
     ACS::doubleSeq_var offsets = new ACS::doubleSeq;
-    ACSErr::Completion_var comp;
 
-    for(const auto& servo_name : ServoOrder)
+    for(const auto& [servo_name, servo] : m_current_servos)
     {
-        auto servo = m_servos.at(servo_name);
-        if(servo->in_use()->get_sync(comp.out()) == Management::MNG_TRUE)
-        {
-            ACS::doubleSeq servo_offsets = *servo->getUserOffsets();
-            size_t start_index = offsets->length();
-            offsets->length(start_index + servo_offsets.length());
-            std::copy(servo_offsets.begin(), servo_offsets.end(), offsets->begin() + start_index);
-        }
+        ACS::doubleSeq servo_offsets = *servo->getUserOffsets();
+        size_t start_index = offsets->length();
+        offsets->length(start_index + servo_offsets.length());
+        std::copy(servo_offsets.begin(), servo_offsets.end(), offsets->begin() + start_index);
     }
 
     return offsets._retn();
@@ -735,38 +714,31 @@ void SRTMinorServoBossCore::clearSystemOffsets(std::string servo_name)
 
     std::transform(servo_name.begin(), servo_name.end(), servo_name.begin(), ::toupper);
 
-    ACSErr::Completion_var comp;
     if(servo_name == "ALL")
     {
-        for(const auto& [servo_name, servo] : m_servos)
+        for(const auto& [servo_name, servo] : m_current_servos)
         {
-            if(servo->in_use()->get_sync(comp.out()) == Management::MNG_TRUE)
-            {
-                servo->clearSystemOffsets();
-            }
+            servo->clearSystemOffsets();
         }
         return;
+    }
+    else if(!m_servos.count(servo_name))
+    {
+        _EXCPT(MinorServoErrors::OffsetErrorExImpl, ex, "SRTMinorServoBossCore::clearSystemOffsets()");
+        ex.addData("Reason", ("Unknown servo '" + servo_name + "'.").c_str());
+        ex.log(LM_DEBUG);
+        throw ex.getMinorServoErrorsEx();
     }
 
     try
     {
-        auto servo = m_servos.at(servo_name);
-        if(servo->in_use()->get_sync(comp.out()) == Management::MNG_TRUE)
-        {
-            servo->clearSystemOffsets();
-        }
-        else
-        {
-            _EXCPT(MinorServoErrors::OffsetErrorExImpl, ex, "SRTMinorServoBossCore::clearSystemOffsets()");
-            ex.addData("Reason", ("Servo '" + servo_name + "' not in use with the current configuration.").c_str());
-            ex.log(LM_DEBUG);
-            throw ex.getMinorServoErrorsEx();
-        }
+        auto servo = m_current_servos.at(servo_name);
+        servo->clearSystemOffsets();
     }
     catch(std::out_of_range& oor)
     {
         _EXCPT(MinorServoErrors::OffsetErrorExImpl, ex, "SRTMinorServoBossCore::clearSystemOffsets()");
-        ex.addData("Reason", ("Unknown servo '" + servo_name + "'.").c_str());
+        ex.addData("Reason", ("Servo '" + servo_name + "' not in use with the current configuration.").c_str());
         ex.log(LM_DEBUG);
         throw ex.getMinorServoErrorsEx();
     }
@@ -802,26 +774,23 @@ void SRTMinorServoBossCore::setSystemOffset(std::string servo_axis_name, double 
     std::getline(ss, servo_name, '_');
     ss >> axis_name;
 
+    if(!m_servos.count(servo_name))
+    {
+        _EXCPT(MinorServoErrors::OffsetErrorExImpl, ex, "SRTMinorServoBossCore::setSystemOffset()");
+        ex.addData("Reason", ("Unknown servo '" + servo_name + "'.").c_str());
+        ex.log(LM_DEBUG);
+        throw ex.getMinorServoErrorsEx();
+    }
+
     try
     {
-        auto servo = m_servos.at(servo_name);
-        ACSErr::Completion_var comp;
-        if(servo->in_use()->get_sync(comp.out()) == Management::MNG_TRUE)
-        {
-            servo->setSystemOffset(axis_name.c_str(), offset);
-        }
-        else
-        {
-            _EXCPT(MinorServoErrors::OffsetErrorExImpl, ex, "SRTMinorServoBossCore::setSystemOffset()");
-            ex.addData("Reason", ("Servo '" + servo_name + "' not in use with the current configuration.").c_str());
-            ex.log(LM_DEBUG);
-            throw ex.getMinorServoErrorsEx();
-        }
+        auto servo = m_current_servos.at(servo_name);
+        servo->setSystemOffset(axis_name.c_str(), offset);
     }
     catch(std::out_of_range& oor)
     {
         _EXCPT(MinorServoErrors::OffsetErrorExImpl, ex, "SRTMinorServoBossCore::setSystemOffset()");
-        ex.addData("Reason", ("Unknown servo '" + servo_name + "'.").c_str());
+        ex.addData("Reason", ("Servo '" + servo_name + "' not in use with the current configuration.").c_str());
         ex.log(LM_DEBUG);
         throw ex.getMinorServoErrorsEx();
     }
@@ -841,18 +810,13 @@ ACS::doubleSeq* SRTMinorServoBossCore::getSystemOffsets()
     }
 
     ACS::doubleSeq_var offsets = new ACS::doubleSeq;
-    ACSErr::Completion_var comp;
 
-    for(const auto& servo_name : ServoOrder)
+    for(const auto& [servo_name, servo] : m_current_servos)
     {
-        auto servo = m_servos.at(servo_name);
-        if(servo->in_use()->get_sync(comp.out()) == Management::MNG_TRUE)
-        {
-            ACS::doubleSeq servo_offsets = *servo->getSystemOffsets();
-            size_t start_index = offsets->length();
-            offsets->length(start_index + servo_offsets.length());
-            std::copy(servo_offsets.begin(), servo_offsets.end(), offsets->begin() + start_index);
-        }
+        ACS::doubleSeq servo_offsets = *servo->getSystemOffsets();
+        size_t start_index = offsets->length();
+        offsets->length(start_index + servo_offsets.length());
+        std::copy(servo_offsets.begin(), servo_offsets.end(), offsets->begin() + start_index);
     }
 
     return offsets._retn();
@@ -876,28 +840,23 @@ void SRTMinorServoBossCore::getAxesInfo(ACS::stringSeq_out axes_names_out, ACS::
     ACS::stringSeq_var axes_names = new ACS::stringSeq;
     ACS::stringSeq_var axes_units = new ACS::stringSeq;
 
-    ACSErr::Completion_var comp;
-    for(const auto& servo_name : ServoOrder)
+    for(const auto& [servo_name, servo] : m_current_servos)
     {
-        auto servo = m_servos.at(servo_name);
-        if(servo->in_use()->get_sync(comp.out()) == Management::MNG_TRUE)
+        ACS::stringSeq_var servo_axes_names;
+        ACS::stringSeq_var servo_axes_units;
+        servo->getAxesInfo(servo_axes_names, servo_axes_units);
+
+        std::transform(servo_axes_names->begin(), servo_axes_names->end(), servo_axes_names->begin(), [servo_name](const char* axis_name)
         {
-            ACS::stringSeq_var servo_axes_names;
-            ACS::stringSeq_var servo_axes_units;
-            servo->getAxesInfo(servo_axes_names, servo_axes_units);
+            return CORBA::string_dup((servo_name + "_" + axis_name).c_str());
+        });
 
-            std::transform(servo_axes_names->begin(), servo_axes_names->end(), servo_axes_names->begin(), [servo_name](const char* axis_name)
-            {
-                return CORBA::string_dup((servo_name + "_" + axis_name).c_str());
-            });
-
-            size_t names_index = axes_names->length();
-            size_t units_index = axes_units->length();
-            axes_names->length(names_index + servo_axes_names->length());
-            axes_units->length(units_index + servo_axes_units->length());
-            std::copy(servo_axes_names->begin(), servo_axes_names->end(), axes_names->begin() + names_index);
-            std::copy(servo_axes_units->begin(), servo_axes_units->end(), axes_units->begin() + units_index);
-        }
+        size_t names_index = axes_names->length();
+        size_t units_index = axes_units->length();
+        axes_names->length(names_index + servo_axes_names->length());
+        axes_units->length(units_index + servo_axes_units->length());
+        std::copy(servo_axes_names->begin(), servo_axes_names->end(), axes_names->begin() + names_index);
+        std::copy(servo_axes_units->begin(), servo_axes_units->end(), axes_units->begin() + units_index);
     }
 
     axes_names_out = axes_names._retn();
@@ -916,18 +875,13 @@ ACS::doubleSeq* SRTMinorServoBossCore::getAxesPositions(ACS::Time acs_time)
     }
 
     ACS::doubleSeq_var positions = new ACS::doubleSeq;
-    ACSErr::Completion_var comp;
 
-    for(const auto& servo_name : ServoOrder)
+    for(const auto& [servo_name, servo] : m_current_servos)
     {
-        auto servo = m_servos.at(servo_name);
-        if(servo->in_use()->get_sync(comp.out()) == Management::MNG_TRUE)
-        {
-            ACS::doubleSeq servo_positions = *servo->getAxesPositions(acs_time);
-            size_t start_index = positions->length();
-            positions->length(start_index + servo_positions.length());
-            std::copy(servo_positions.begin(), servo_positions.end(), positions->begin() + start_index);
-        }
+        ACS::doubleSeq servo_positions = *servo->getAxesPositions(acs_time);
+        size_t start_index = positions->length();
+        positions->length(start_index + servo_positions.length());
+        std::copy(servo_positions.begin(), servo_positions.end(), positions->begin() + start_index);
     }
 
     return positions._retn();
@@ -955,28 +909,26 @@ SRTMinorServoScan SRTMinorServoBossCore::checkScanFeasibility(const ACS::Time& s
 
     ACS::stringSeq_var servo_axes_names, servo_axes_units;
 
-    SRTBaseMinorServo_ptr servo;
-
-    try
-    {
-        servo = m_tracking_servos.at(servo_name);
-    }
-    catch(std::out_of_range& oor)
+    if(!m_servos.count(servo_name))
     {
         ex.setReason(("Unknown servo '" + servo_name + "'.").c_str());
         ex.log(LM_DEBUG);
         throw ex.getMinorServoErrorsEx();
     }
-
-    ACSErr::Completion_var comp;
-
-    if(servo->in_use()->get_sync(comp.out()) == Management::MNG_FALSE)
+    else if(!m_tracking_servos.count(servo_name))
+    {
+        ex.setReason(("Servo '" + servo_name + "' is not a tracking servo.").c_str());
+        ex.log(LM_DEBUG);
+        throw ex.getMinorServoErrorsEx();
+    }
+    else if(!m_current_tracking_servos.count(servo_name))
     {
         ex.setReason(("Servo '" + servo_name + "' not in use with the current configuration.").c_str());
         ex.log(LM_DEBUG);
         throw ex.getMinorServoErrorsEx();
     }
 
+    SRTProgramTrackMinorServo_ptr servo = m_current_tracking_servos.at(servo_name);
     servo->getAxesInfo(servo_axes_names, servo_axes_units);
 
     size_t axis_index;
@@ -1021,12 +973,13 @@ SRTMinorServoScan SRTMinorServoBossCore::checkScanFeasibility(const ACS::Time& s
     servo->getAxesRanges(min_ranges, max_ranges);
 
     // Read the servo offsets
-    ACS::doubleSeq offsets = *servo->virtual_offsets()->get_sync(comp.out());
+    ACS::doubleSeq user_offsets = *servo->getUserOffsets();
+    ACS::doubleSeq system_offsets = *servo->getSystemOffsets();
 
     // Check if starting or final positions are outside the axes range (considering offsets)
     for(size_t i = 0; i < starting_position.length(); i++)
     {
-        if(starting_position[i] + offsets[i] < min_ranges[i] || starting_position[i] + offsets[i] > max_ranges[i])
+        if(starting_position[i] + user_offsets[i] + system_offsets[i] < min_ranges[i] || starting_position[i] + user_offsets[i] + system_offsets[i] > max_ranges[i])
         {
             ex.setReason("Starting position out of range.");
             ex.log(LM_DEBUG);
@@ -1258,8 +1211,8 @@ void SRTMinorServoBossCore::checkLineStatus()
         throw ex.getMinorServoErrorsEx();
     }
 
-    ACSErr::Completion_var comp;
-    if(m_component.control()->get_sync(comp.out()) != CONTROL_DISCOS)
+    ACS::Time comp;
+    if(m_component.m_control_devio->read(comp) != CONTROL_DISCOS)
     {
         _EXCPT(MinorServoErrors::StatusErrorExImpl, ex, "SRTMinorServoBossCore::checkLineStatus()");
         ex.setReason("MinorServo system is not controlled by DISCOS.");
@@ -1268,7 +1221,7 @@ void SRTMinorServoBossCore::checkLineStatus()
         throw ex.getMinorServoErrorsEx();
     }
 
-    if(m_component.emergency()->get_sync(comp.out()) == Management::MNG_TRUE)
+    if(m_component.m_emergency_devio->read(comp) == Management::MNG_TRUE)
     {
         _EXCPT(MinorServoErrors::StatusErrorExImpl, ex, "SRTMinorServoBossCore::checkLineStatus()");
         ex.setReason("MinorServo system in emergency status.");

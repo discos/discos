@@ -49,7 +49,7 @@ void SRTMinorServoScanThread::onStart()
     // We save the starting coordinates to return to them when the scan is finished
     ACSErr::Completion_var comp;
     auto servo = m_core.m_tracking_servos.at(m_core.m_current_scan.servo_name);
-    m_starting_coordinates = *servo->virtual_positions()->get_sync(comp.out());
+    m_starting_coordinates = *servo->getAxesPositions(0);
 
     ACS_LOG(LM_FULL_INFO, "SRTMinorServoScanThread::onStart()", (LM_NOTICE, "SCAN THREAD STARTED"));
 }
@@ -138,38 +138,29 @@ void SRTMinorServoScanThread::runLoop()
         return;
     }
 
-    Management::TBoolean elevation_tracking = Management::MNG_FALSE;
-
-    if(m_point_id > 0)
+    if(m_point_id == 1)
     {
-        if(std::all_of(m_core.m_tracking_servos.begin(), m_core.m_tracking_servos.end(), [this](const std::pair<std::string, SRTBaseMinorServo_ptr>& servo) -> bool
+        if(std::all_of(m_core.m_current_tracking_servos.begin(), m_core.m_current_tracking_servos.end(), [this](const std::pair<std::string, SRTBaseMinorServo_ptr>& servo) -> bool
         {
-            ACSErr::Completion_var comp;
-            if(servo.second->in_use()->get_sync(comp.out()) == Management::MNG_TRUE)
+            if(m_core.m_motion_status.load() == MOTION_STATUS_CONFIGURED && servo.first != m_core.m_current_scan.servo_name)
             {
-                if(m_core.m_motion_status.load() == MOTION_STATUS_CONFIGURED && servo.first != m_core.m_current_scan.servo_name)
-                {
-                    // Not tracking the elevation and this servo is not involved in the current scan
-                    return true;
-                }
-
-                bool return_value = servo.second->operative_mode()->get_sync(comp.out()) == OPERATIVE_MODE_PROGRAMTRACK ? true : false;
-                if(!return_value)
-                {
-                    ACS_LOG(LM_FULL_INFO, "SRTMinorServoScanThread::runLoop()", (LM_CRITICAL, (servo.first + ": failed to set PROGRAM_TRACK operative mode!").c_str()));
-                }
-                return return_value;
-            }
-            else
-            {
+                // Not tracking the elevation and this servo is not involved in the current scan
                 return true;
             }
+
+            ACSErr::Completion_var comp;
+            if(servo.second->operative_mode()->get_sync(comp.out()) != OPERATIVE_MODE_PROGRAMTRACK)
+            {
+                ACS_LOG(LM_FULL_INFO, "SRTMinorServoScanThread::runLoop()", (LM_CRITICAL, (servo.first + ": failed to set PROGRAM_TRACK operative mode!").c_str()));
+                return false;
+            }
+            return true;
         }))
         {
             // All used servos are set to PROGRAMTRACK operative mode, we are tracking the elevation
             if(m_core.m_motion_status.load() == MOTION_STATUS_TRACKING)
             {
-                elevation_tracking = Management::MNG_TRUE;
+                m_core.m_elevation_tracking.store(Management::MNG_TRUE);
             }
         }
         else
@@ -191,56 +182,50 @@ void SRTMinorServoScanThread::runLoop()
         catch(ComponentErrors::ComponentErrorsEx& ex)
         {
             _IRA_LOGFILTER_LOG(LM_WARNING, "SRTMinorServoScanThread::runLoop()", (std::string(getErrorFromEx(ex)) + " Using a fixed elevation of " + std::to_string(elevation) + "° as scan central coordinate!").c_str());
-            elevation_tracking = Management::MNG_FALSE;
+            m_core.m_elevation_tracking.store(Management::MNG_FALSE);
         }
     }
 
-    ACSErr::Completion_var comp;
-    for(const auto& [servo_name, servo] : m_core.m_tracking_servos)
+    for(const auto& [servo_name, servo] : m_core.m_current_tracking_servos)
     {
-        if(servo->in_use()->get_sync(comp.out()) == Management::MNG_TRUE)
+        if(m_core.m_motion_status.load() == MOTION_STATUS_CONFIGURED && servo_name != m_core.m_current_scan.servo_name)
         {
-            if(m_core.m_motion_status.load() == MOTION_STATUS_CONFIGURED && servo_name != m_core.m_current_scan.servo_name)
-            {
-                // Not tracking the elevation and this servo is not involved in the current scan
-                continue;
-            }
+            // Not tracking the elevation and this servo is not involved in the current scan
+            continue;
+        }
 
-            ACS::doubleSeq coordinates = m_starting_coordinates;
+        ACS::doubleSeq coordinates = m_starting_coordinates;
 
-            if(m_core.m_motion_status.load() == MOTION_STATUS_TRACKING)
-            {
-                coordinates = *servo->calcCoordinates(elevation);
-            }
+        if(m_core.m_motion_status.load() == MOTION_STATUS_TRACKING)
+        {
+            coordinates = *servo->calcCoordinates(elevation);
+        }
 
-            if(servo_name == m_core.m_current_scan.servo_name)
-            {
-                try
-                {
-                    // Ask for the offset in the exact m_point_time (we don't want to interpolate or retrieve any value before or after the scan time span)
-                    coordinates[m_core.m_current_scan.axis_index] += m_scan_offsets.get(m_point_time, true).second[0];
-                }
-                catch(...)
-                {
-                    // No offset found for this point_time, ignore
-                }
-            }
-
+        if(servo_name == m_core.m_current_scan.servo_name)
+        {
             try
             {
-                servo->programTrack(m_trajectory_id, m_point_id, m_point_time, coordinates);
+                // Ask for the offset in the exact m_point_time (we don't want to interpolate or retrieve any value before or after the scan time span)
+                coordinates[m_core.m_current_scan.axis_index] += m_scan_offsets.get(m_point_time, true).second[0];
             }
-            catch(MinorServoErrors::MinorServoErrorsEx& ex)
+            catch(...)
             {
-                ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
-                m_error = true;
-                this->setStopped();
-                return;
+                // No offset found for this point_time, ignore
             }
         }
-    }
 
-    m_core.m_elevation_tracking.store(elevation_tracking);
+        try
+        {
+            servo->programTrack(m_trajectory_id, m_point_id, m_point_time, coordinates);
+        }
+        catch(MinorServoErrors::MinorServoErrorsEx& ex)
+        {
+            ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
+            m_error = true;
+            this->setStopped();
+            return;
+        }
+    }
 
     m_point_id++;
     m_point_time += PROGRAM_TRACK_TIMEGAP;

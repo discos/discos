@@ -94,13 +94,15 @@ bool SRTProgramTrackMinorServoImpl::status()
     return status;
 }
 
-void SRTProgramTrackMinorServoImpl::setup(const char* configuration_name)
+bool SRTProgramTrackMinorServoImpl::setup(const char* configuration_name)
 {
-    SRTBaseMinorServoImpl::setup(configuration_name);
+    bool return_value = SRTBaseMinorServoImpl::setup(configuration_name);
 
     m_tracking_queue.clear();
     m_total_trajectory_points.store(0);
     m_remaining_trajectory_points.store(0);
+
+    return return_value;
 }
 
 void SRTProgramTrackMinorServoImpl::programTrack(CORBA::Long trajectory_id, CORBA::Long point_id, ACS::Time point_time, const ACS::doubleSeq& virtual_coordinates)
@@ -118,14 +120,13 @@ void SRTProgramTrackMinorServoImpl::programTrack(CORBA::Long trajectory_id, CORB
     }
 
     std::vector<double> coordinates(virtual_coordinates.get_buffer(), virtual_coordinates.get_buffer() + virtual_coordinates.length());
-
-    // Read the current servo offsets
-    ACSErr::Completion_var comp;
-    ACS::doubleSeq offsets = *virtual_offsets()->get_sync(comp.out());
+    ACS::Time comp;
+    ACS::doubleSeq offsets = m_virtual_offsets_devio->read(comp);
 
     for(size_t i = 0; i < m_virtual_axes; i++)
     {
-        if(coordinates[i] + offsets[i] < m_min[i] || coordinates[i] + offsets[i] > m_max[i])
+        double coordinate = coordinates[i] + offsets[i];
+        if(coordinate < m_min[i] || coordinate > m_max[i])
         {
             _EXCPT(MinorServoErrors::TrackingErrorExImpl, ex, (m_servo_name + "::programTrack()").c_str());
             ex.addData("Reason", "Resulting position out of range, check the offsets!");
