@@ -7,7 +7,7 @@
  * Giuseppe Carboni (giuseppe.carboni@inaf.it)
  */
 
-#include "SRTMinorServoAnswerMap.h"
+#include "SRTMinorServoContainers.h"
 #include <sstream>
 #include <vector>
 #include <map>

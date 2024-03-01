@@ -29,13 +29,15 @@ void SRTMinorServoTrackingThread::onStart()
 void SRTMinorServoTrackingThread::onStop()
 {
     AUTO_TRACE("SRTMinorServoTrackingThread::onStop()");
+
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoTrackingThread::onStop()", (LM_NOTICE, "TRACKING THREAD STOPPED"));
+
     m_core.m_elevation_tracking.store(Management::MNG_FALSE);
+
     if(m_error)
     {
         m_core.setFailure();
     }
-
-    ACS_LOG(LM_FULL_INFO, "SRTMinorServoTrackingThread::onStop()", (LM_NOTICE, "TRACKING THREAD STOPPED"));
 }
 
 void SRTMinorServoTrackingThread::runLoop()

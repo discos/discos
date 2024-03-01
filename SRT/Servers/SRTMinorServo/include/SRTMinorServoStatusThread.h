@@ -6,7 +6,7 @@
  * Giuseppe Carboni (giuseppe.carboni@inaf.it)
  */
 
-#include "SRTMinorServoCommon.h"
+#include "SuppressWarnings.h"
 #include <acsThread.h>
 #include <ComponentErrors.h>
 #include "SRTMinorServoSocket.h"

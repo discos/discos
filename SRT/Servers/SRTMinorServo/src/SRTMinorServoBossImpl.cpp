@@ -22,17 +22,13 @@ SRTMinorServoBossImpl::SRTMinorServoBossImpl(const ACE_CString& component_name, 
     m_scan_active_ptr(this),
     m_scanning_ptr(this),
     m_tracking_ptr(this),
-    m_current_configuration_devio(nullptr),
     m_current_configuration_ptr(this),
     m_simulation_enabled_ptr(this),
     m_plc_time_ptr(this),
     m_plc_version_ptr(this),
-    m_control_devio(nullptr),
     m_control_ptr(this),
     m_power_ptr(this),
-    m_emergency_devio(nullptr),
     m_emergency_ptr(this),
-    m_gregorian_cover_devio(nullptr),
     m_gregorian_cover_ptr(this),
     m_last_executed_command_ptr(this)
 {
@@ -77,24 +73,22 @@ void SRTMinorServoBossImpl::initialize()
                 new MSGenericDevIO<Management::TBoolean, std::atomic<Management::TBoolean>>(m_core.m_scanning), true);
         m_tracking_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":tracking").c_str(), getComponent(),
                 new MSGenericDevIO<Management::TBoolean, std::atomic<Management::TBoolean>>(m_core.m_tracking), true);
-        m_current_configuration_devio = new MSAnswerMapDevIO<SRTMinorServoFocalConfiguration>("current_configuration", "CURRENT_CONFIG", m_core.m_status);
-        m_current_configuration_ptr = new ROEnumImpl<ACS_ENUM_T(SRTMinorServoFocalConfiguration), POA_MinorServo::ROSRTMinorServoFocalConfiguration>((m_component_name + ":current_configuration").c_str(), getComponent(), m_current_configuration_devio, true);
+        m_current_configuration_ptr = new ROEnumImpl<ACS_ENUM_T(SRTMinorServoFocalConfiguration), POA_MinorServo::ROSRTMinorServoFocalConfiguration>((m_component_name + ":current_configuration").c_str(), getComponent(), new MSAnswerMapDevIO<SRTMinorServoFocalConfiguration, SRTMinorServoGeneralStatus>("current_configuration", m_core.m_status, &SRTMinorServoGeneralStatus::getFocalConfiguration), true);
         m_simulation_enabled_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":simulation_enabled").c_str(), getComponent(),
-                new MSAnswerMapDevIO<Management::TBoolean>("simulation_enabled", "SIMULATION_ENABLED", m_core.m_status), true);
+                new MSAnswerMapDevIO<Management::TBoolean, SRTMinorServoGeneralStatus>("simulation_enabled", m_core.m_status, &SRTMinorServoGeneralStatus::isSimulationEnabled), true);
         m_plc_time_ptr = new baci::ROdouble((m_component_name + ":plc_time").c_str(), getComponent(),
-                new MSAnswerMapDevIO<CORBA::Double>("plc_time", "PLC_TIME", m_core.m_status), true);
+                new MSAnswerMapDevIO<CORBA::Double, SRTMinorServoGeneralStatus>("plc_time", m_core.m_status, &SRTMinorServoGeneralStatus::getPLCTime), true);
         m_plc_version_ptr = new baci::ROstring((m_component_name + ":plc_version").c_str(), getComponent(),
-                new MSAnswerMapDevIO<ACE_CString>("plc_version", "PLC_VERSION", m_core.m_status), true);
-        m_control_devio = new MSAnswerMapDevIO<SRTMinorServoControlStatus>("control", "CONTROL", m_core.m_status);
-        m_control_ptr = new ROEnumImpl<ACS_ENUM_T(SRTMinorServoControlStatus), POA_MinorServo::ROSRTMinorServoControlStatus>((m_component_name + ":control").c_str(), getComponent(), m_control_devio, true);
+                new MSAnswerMapDevIO<ACE_CString, SRTMinorServoGeneralStatus>("plc_version", m_core.m_status, &SRTMinorServoGeneralStatus::getPLCVersion), true);
+        m_control_ptr = new ROEnumImpl<ACS_ENUM_T(SRTMinorServoControlStatus), POA_MinorServo::ROSRTMinorServoControlStatus>((m_component_name + ":control").c_str(), getComponent(),
+                new MSAnswerMapDevIO<SRTMinorServoControlStatus, SRTMinorServoGeneralStatus>("control", m_core.m_status, &SRTMinorServoGeneralStatus::getControl), true);
         m_power_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":power").c_str(), getComponent(),
-                new MSAnswerMapDevIO<Management::TBoolean>("power", "POWER", m_core.m_status), true);
-        m_emergency_devio = new MSAnswerMapDevIO<Management::TBoolean>("emergency", "EMERGENCY", m_core.m_status);
-        m_emergency_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":emergency").c_str(), getComponent(), m_emergency_devio, true);
-        m_gregorian_cover_devio = new MSAnswerMapDevIO<SRTMinorServoGregorianCoverStatus>("gregorian_cover", "GREGORIAN_CAP", m_core.m_status);
-        m_gregorian_cover_ptr = new ROEnumImpl<ACS_ENUM_T(SRTMinorServoGregorianCoverStatus), POA_MinorServo::ROSRTMinorServoGregorianCoverStatus>((m_component_name + ":gregorian_cover").c_str(), getComponent(), m_gregorian_cover_devio, true);
+                new MSAnswerMapDevIO<Management::TBoolean, SRTMinorServoGeneralStatus>("power", m_core.m_status, &SRTMinorServoGeneralStatus::hasPower), true);
+        m_emergency_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":emergency").c_str(), getComponent(),
+                new MSAnswerMapDevIO<Management::TBoolean, SRTMinorServoGeneralStatus>("emergency", m_core.m_status, &SRTMinorServoGeneralStatus::emergencyPressed), true);
+        m_gregorian_cover_ptr = new ROEnumImpl<ACS_ENUM_T(SRTMinorServoGregorianCoverStatus), POA_MinorServo::ROSRTMinorServoGregorianCoverStatus>((m_component_name + ":gregorian_cover").c_str(), getComponent(), new MSAnswerMapDevIO<SRTMinorServoGregorianCoverStatus, SRTMinorServoGeneralStatus>("gregorian_cover", m_core.m_status, &SRTMinorServoGeneralStatus::getGregorianCoverPosition), true);
         m_last_executed_command_ptr = new baci::ROdouble((m_component_name + ":last_executed_command").c_str(), getComponent(),
-                new MSAnswerMapDevIO<CORBA::Double>("last_executed_command", "LAST_EXECUTED_COMMAND", m_core.m_status), true);
+                new MSAnswerMapDevIO<CORBA::Double, SRTMinorServoGeneralStatus>("last_executed_command", m_core.m_status, &SRTMinorServoGeneralStatus::getLastExecutedCommand), true);
     }
     catch(std::bad_alloc& ba)
     {

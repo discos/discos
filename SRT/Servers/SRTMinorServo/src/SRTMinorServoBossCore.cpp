@@ -101,15 +101,12 @@ bool SRTMinorServoBossCore::status()
         return false;
     }
 
-    // Call servo status
-    //ACS::Time comp;
-
     SRTMinorServoMotionStatus motion_status = m_motion_status.load();
     /*if(motion_status == MOTION_STATUS_TRACKING || motion_status == MOTION_STATUS_CONFIGURED)
     {
         // We only get here if the system is configured, therefore we check the correct position of the gregorian cover
-        SRTMinorServoGregorianCoverStatus commanded_gregorian_cover_position = m_component.m_current_configuration_devio->read(comp) == CONFIGURATION_PRIMARY ? COVER_STATUS_CLOSED : COVER_STATUS_OPEN;
-        if(m_component.m_gregorian_cover_devio->read(comp) != commanded_gregorian_cover_position)
+        SRTMinorServoGregorianCoverStatus commanded_gregorian_cover_position = m_status.getFocalConfiguration() == CONFIGURATION_PRIMARY ? COVER_STATUS_CLOSED : COVER_STATUS_OPEN;
+        if(m_status.getGregorianCoverPosition() != commanded_gregorian_cover_position)
         {
             ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::status()", (LM_CRITICAL, "Gregorian cover in wrong position."));
             setFailure();
@@ -1109,7 +1106,6 @@ void SRTMinorServoBossCore::startScan(ACS::Time& start_time, const MinorServoSca
     if(scan_info.is_empty_scan)
     {
         start_time = getTimeStamp();
-        ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::startScan()", (LM_NOTICE, "Empty scan, nothing to do."));
         return;
     }
 
@@ -1132,7 +1128,6 @@ void SRTMinorServoBossCore::startScan(ACS::Time& start_time, const MinorServoSca
     m_current_scan = scan;
     start_time = scan.start_time;
     m_scan_active.store(Management::MNG_TRUE);
-    ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::startScan()", (LM_NOTICE, "Scan started."));
     startThread(m_scan_thread);
 }
 
@@ -1211,8 +1206,7 @@ void SRTMinorServoBossCore::checkLineStatus()
         throw ex.getMinorServoErrorsEx();
     }
 
-    ACS::Time comp;
-    if(m_component.m_control_devio->read(comp) != CONTROL_DISCOS)
+    if(m_status.getControl() != CONTROL_DISCOS)
     {
         _EXCPT(MinorServoErrors::StatusErrorExImpl, ex, "SRTMinorServoBossCore::checkLineStatus()");
         ex.setReason("MinorServo system is not controlled by DISCOS.");
@@ -1221,7 +1215,7 @@ void SRTMinorServoBossCore::checkLineStatus()
         throw ex.getMinorServoErrorsEx();
     }
 
-    if(m_component.m_emergency_devio->read(comp) == Management::MNG_TRUE)
+    if(m_status.emergencyPressed() == Management::MNG_TRUE)
     {
         _EXCPT(MinorServoErrors::StatusErrorExImpl, ex, "SRTMinorServoBossCore::checkLineStatus()");
         ex.setReason("MinorServo system in emergency status.");
@@ -1269,8 +1263,6 @@ void SRTMinorServoBossCore::startThread(T*& thread, const ACS::TimeInterval& sle
         setFailure();
         throw ex.getComponentErrorsEx();
     }
-
-    ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::startThread()", (LM_NOTICE, (std::string(T::c_thread_name) + " STARTED").c_str()));
 }
 
 template <typename T, typename = std::enable_if<is_any_v<T, SRTMinorServoStatusThread, SRTMinorServoSetupThread, SRTMinorServoParkThread, SRTMinorServoTrackingThread, SRTMinorServoScanThread>>>

@@ -51,12 +51,16 @@ void SRTMinorServoScanThread::onStart()
     auto servo = m_core.m_tracking_servos.at(m_core.m_current_scan.servo_name);
     m_starting_coordinates = *servo->getAxesPositions(0);
 
-    ACS_LOG(LM_FULL_INFO, "SRTMinorServoScanThread::onStart()", (LM_NOTICE, "SCAN THREAD STARTED"));
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoScanThread::onStart()", (LM_NOTICE,
+        ("SCAN THREAD STARTED, SCANNING " + std::to_string((int)m_core.m_current_scan.scan_range) + "MM IN " + std::to_string((int)(m_core.m_current_scan.scan_duration / 10000000)) + " SECONDS ALONG " + m_core.m_current_scan.servo_name + " " + m_core.m_current_scan.axis_name + " AXIS").c_str()
+    ));
 }
 
 void SRTMinorServoScanThread::onStop()
 {
     AUTO_TRACE("SRTMinorServoScanThread::onStop()");
+
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoScanThread::onStop()", (LM_NOTICE, "SCAN THREAD STOPPED"));
 
     m_core.m_scanning.store(Management::MNG_FALSE);
 
@@ -100,8 +104,6 @@ void SRTMinorServoScanThread::onStop()
 
     // Finally unlock the scan capabilities
     m_core.m_scan_active.store(Management::MNG_FALSE);
-
-    ACS_LOG(LM_FULL_INFO, "SRTMinorServoScanThread::onStop()", (LM_NOTICE, "SCAN THREAD STOPPED"));
 }
 
 void SRTMinorServoScanThread::runLoop()

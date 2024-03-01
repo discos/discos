@@ -6,7 +6,7 @@
  * Giuseppe Carboni (giuseppe.carboni@inaf.it)
  */
 
-#include "SRTMinorServoCommon.h"
+#include "SuppressWarnings.h"
 #include <IRA>
 #include <baciSmartPropertyPointer.h>
 #include <baciROboolean.h>
@@ -313,9 +313,9 @@ private:
     Antenna::AntennaBoss_var m_antennaBoss;
 
     /**
-     * SRTMinorServoAnswerMap object containing the status read from the PLC.
+     * SRTMinorServoGeneralStatus object containing the status read from the PLC.
      */
-    SRTMinorServoAnswerMap m_status;
+    SRTMinorServoGeneralStatus m_status;
 
     /**
      * Enumeration indicating the status of the motion of the minor servo system.

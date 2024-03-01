@@ -2,17 +2,16 @@
 #define _MSDEVIOS_H
 
 /**
- * MSDevIO.h
+ * MSDevIOs.h
  * Giuseppe Carboni (giuseppe.carboni@inaf.it)
  */
 
-#include "SRTMinorServoCommon.h"
+#include "SuppressWarnings.h"
 #include "SRTMinorServoContainers.h"
 #include <type_traits>
 #include <baciDevIO.h>
 #include <ComponentErrors.h>
-#include <SRTMinorServoCommonS.h>
-#include "SRTMinorServoAnswerMap.h"
+#include "SRTMinorServoBossCore.h"
 
 
 namespace MinorServo
@@ -69,9 +68,9 @@ namespace MinorServo
          * @param scanning a reference to the TBoolean indicating whether the system is scanning or not.
          * @param current_scan a reference to the SRTMinorServoScan object containing the parameters for the current scan. It is used to read the servo name and axis involved in the scan.
          */
-        MSMotionInfoDevIO(const std::atomic<SRTMinorServoMotionStatus>& motion_status, const SRTMinorServoAnswerMap& answer_map, const std::atomic<Management::TBoolean>& scanning, const SRTMinorServoScan& current_scan) :
+        MSMotionInfoDevIO(const std::atomic<SRTMinorServoMotionStatus>& motion_status, const SRTMinorServoGeneralStatus& boss_status, const std::atomic<Management::TBoolean>& scanning, const SRTMinorServoScan& current_scan) :
             m_motion_status(motion_status),
-            m_answer_map(answer_map),
+            m_boss_status(boss_status),
             m_scanning(scanning),
             m_current_scan(current_scan)
         {}
@@ -84,7 +83,6 @@ namespace MinorServo
         ACE_CString read(ACS::Time& timestamp)
         {
             std::string motion_status;
-            SRTMinorServoAnswerMap answer_map = m_answer_map;
 
             switch(m_motion_status.load())
             {
@@ -120,13 +118,13 @@ namespace MinorServo
                     try
                     {
                         // If I can read the status of the gregorian cover I will notify the user about it on the GUI
-                        SRTMinorServoGregorianCoverStatus cover_status = SRTMinorServoGregorianCoverStatus(answer_map.get<unsigned int>("GREGORIAN_CAP"));
+                        SRTMinorServoGregorianCoverStatus cover_position = m_boss_status.getGregorianCoverPosition();
 
-                        if(cover_status == COVER_STATUS_OPEN)
+                        if(cover_position == COVER_STATUS_OPEN)
                         {
                             motion_status += ", gregorian cover open";
                         }
-                        else if(cover_status == COVER_STATUS_CLOSED)
+                        else if(cover_position == COVER_STATUS_CLOSED)
                         {
                             motion_status += ", gregorian cover closed";
                         }
@@ -159,9 +157,9 @@ namespace MinorServo
         const std::atomic<SRTMinorServoMotionStatus>& m_motion_status;
 
         /**
-         * Reference to the SRTMinorServoAnswerMap object of the Boss.
+         * Reference to the SRTMinorServoGeneralStatus object of the Boss.
          */
-        const SRTMinorServoAnswerMap& m_answer_map;
+        const SRTMinorServoGeneralStatus& m_boss_status;
 
         /**
          * Reference to the boolean telling if the system is scanning.
@@ -175,169 +173,33 @@ namespace MinorServo
     };
 
     /**
-     * This class is used to read the virtual positions of a minor servo system. It is specialized this way in order to sum the plain virtual positions and the offsets.
-     */
-    class MSVirtualPositionsDevIO : public MSBaseDevIO<ACS::doubleSeq>
-    {
-    public:
-        /**
-         * Constructor.
-         * @param servo_name the name of the minor servo system the property belongs to.
-         * @param virtual_positions_fields the name of the virtual positions fields inside the SRTMinorServoAnswerMap object.
-         * @param virtual_offsets_fields the name of the virtual offsets fields inside the SRTMinorServoAnswerMap object.
-         * @param answer_map the SRTMinorServoAnswerMap object containing the status of the minor servo system.
-         */
-        MSVirtualPositionsDevIO(const std::string& servo_name, std::vector<std::string> virtual_positions_fields, std::vector<std::string> virtual_offsets_fields, const SRTMinorServoAnswerMap& answer_map) :
-            m_virtual_positions_fields([&]()
-            {
-                std::transform(virtual_positions_fields.begin(), virtual_positions_fields.end(), virtual_positions_fields.begin(), [servo_name](const std::string& field)
-                {
-                    return servo_name + "_" + field;
-                });
-                return virtual_positions_fields;
-            }()),
-            m_virtual_offsets_fields([&]()
-            {
-                std::transform(virtual_offsets_fields.begin(), virtual_offsets_fields.end(), virtual_offsets_fields.begin(), [servo_name](const std::string& field)
-                {
-                    return servo_name + "_" + field;
-                });
-                return virtual_offsets_fields;
-            }()),
-            m_answer_map(answer_map)
-        {
-        }
-
-        /**
-         * Returns the property value.
-         * @param timestamp epoch when the operation completes.
-         * @return a sequence of double containing the virtual positions taking the virtual offsets into account.
-         */
-        ACS::doubleSeq read(ACS::Time& timestamp)
-        {
-            SRTMinorServoAnswerMap answer_map = m_answer_map;
-
-            ACS::doubleSeq sequence;
-
-            try
-            {
-                sequence.length(m_virtual_positions_fields.size());
-
-                for(size_t i = 0; i < m_virtual_positions_fields.size(); i++)
-                {
-                    sequence[i] = answer_map.get<double>(m_virtual_positions_fields[i]) - answer_map.get<double>(m_virtual_offsets_fields[i]);
-                }
-            }
-            catch(std::out_of_range& ex)
-            {
-                _EXCPT(ComponentErrors::PropertyErrorExImpl, impl, "MSVirtualPositionsDevIO::read()");
-                impl.setPropertyName("virtual_positions");
-                impl.setReason("Property is missing from the map!");
-                throw impl;
-            }
-            catch(std::bad_variant_access& ex)
-            {
-                _EXCPT(ComponentErrors::PropertyErrorExImpl, impl, "MSVirtualPositionsDevIO::read()");
-                impl.setPropertyName("virtual_positions");
-                impl.setReason("Attempt to access the property with the wrong variant type!");
-                throw impl;
-            }
-            catch(ACSErr::ACSbaseExImpl& ex)
-            {
-                _ADD_BACKTRACE(ComponentErrors::PropertyErrorExImpl, impl, ex, "MSVirtualPositionsDevIO::read()");
-                impl.setPropertyName("virtual_positions");
-                impl.setReason("Property could not be read!");
-                throw impl;
-            }
-
-            timestamp = getTimeStamp(); //completion time
-            return sequence;
-        }
-
-    private:
-        /**
-         * The virtual positions fields names.
-         */
-        const std::vector<std::string> m_virtual_positions_fields;
-
-        /**
-         * The virtual offsets fields names.
-         */
-        const std::vector<std::string> m_virtual_offsets_fields;
-
-        /**
-         * The SRTMinorServoAnswerMap containing the status of the minor servo system.
-         */
-        const SRTMinorServoAnswerMap& m_answer_map;
-    };
-
-    /**
      * This template class is used to retrieve values from a SRTMinorServoAnswerMap and provide them as properties.
      * The templates is specialized for the types listed right below and compilation will fail if the developer attempts to use it for an unknown MSDevIO type.
      */
-    template <typename T, typename = std::enable_if<is_any_v<T, 
-        Management::TBoolean,
-        CORBA::Double,
-        ACE_CString,
-        ACS::booleanSeq,
-        ACS::doubleSeq,
-        SRTMinorServoFocalConfiguration,
-        SRTMinorServoControlStatus,
-        SRTMinorServoGregorianCoverStatus,
-        SRTMinorServoCabinetStatus,
-        SRTMinorServoOperativeMode
-    >>>
-    class MSAnswerMapDevIO : public MSBaseDevIO<T>
+    template <typename X, typename Y, typename = std::enable_if<
+        is_any_v<Y, SRTMinorServoGeneralStatus, SRTMinorServoStatus>
+        && is_any_v<X,
+            Management::TBoolean,
+            CORBA::Double,
+            ACE_CString,
+            ACS::booleanSeq,
+            ACS::doubleSeq,
+            SRTMinorServoFocalConfiguration,
+            SRTMinorServoControlStatus,
+            SRTMinorServoGregorianCoverStatus,
+            SRTMinorServoCabinetStatus,
+            SRTMinorServoOperativeMode
+        >
+    >>
+    class MSAnswerMapDevIO : public MSBaseDevIO<X>
     {
     public:
         /**
-         * Single property-field, no servo-name constructor.
-         * @param property_name the name of the property, used when raising exceptions.
-         * @param property_field the field name of the property as it appears inside the SRTMinorServoAnswerMap.
-         * @param answer_map the reference to the SRTMinorServoAnswerMap containing the readings from the PLC.
+         * Constructor, accepting the SRTMinorServoAnswerMap derived object and a pointer to the method used to retrieve the DevIO value.
+         * @param map, the SRTMinorServoAnswerMap derived object.
+         * @param method, the method to call in order to retrieve the return value.
          */
-        MSAnswerMapDevIO(const std::string& property_name, const std::string& property_field, const SRTMinorServoAnswerMap& answer_map) :
-            MSAnswerMapDevIO(property_name, std::vector<std::string>{ property_field }, answer_map) {}
-
-        /**
-         * Multiple property-fields, no servo-name constructor.
-         * @param property_name the name of the property, used when raising exceptions.
-         * @param property_fields the field names of the property as they appear inside the SRTMinorServoAnswerMap.
-         * @param answer_map the reference to the SRTMinorServoAnswerMap containing the readings from the PLC.
-         */
-        MSAnswerMapDevIO(const std::string& property_name, const std::vector<std::string>& property_fields, const SRTMinorServoAnswerMap& answer_map) :
-            m_property_name(property_name),
-            m_property_fields(property_fields),
-            m_answer_map(answer_map) {}
-
-        /**
-         * Single property-field, with servo-name constructor.
-         * @param servo_name the name of the minor servo system the property belongs to. Used as prefix for the property_field argument.
-         * @param property_name the name of the property, used when raising exceptions.
-         * @param property_field the field name of the property as it appears inside the SRTMinorServoAnswerMap.
-         * @param answer_map the reference to the SRTMinorServoAnswerMap containing the readings from the PLC.
-         */
-        MSAnswerMapDevIO(const std::string& servo_name, const std::string& property_name, const std::string& property_field, const SRTMinorServoAnswerMap& answer_map) :
-            MSAnswerMapDevIO(servo_name, property_name, std::vector<std::string>{ property_field }, answer_map) {}
-
-        /**
-         * Multiple property-fields, with servo-name constructor.
-         * @param servo_name the name of the minor servo system the property belongs to. Used as prefix for the property_fields argument.
-         * @param property_name the name of the property, used when raising exceptions.
-         * @param property_fields the field names of the property as they appear inside the SRTMinorServoAnswerMap.
-         * @param answer_map the reference to the SRTMinorServoAnswerMap containing the readings from the PLC.
-         */
-        MSAnswerMapDevIO(const std::string& servo_name, const std::string& property_name, std::vector<std::string> property_fields, const SRTMinorServoAnswerMap& answer_map) :
-            m_property_name(property_name),
-            m_property_fields([&]()
-            {
-                std::transform(property_fields.begin(), property_fields.end(), property_fields.begin(), [servo_name](const std::string& field)
-                {
-                    return servo_name + "_" + field;
-                });
-                return property_fields;
-            }()),
-            m_answer_map(answer_map) {}
+        MSAnswerMapDevIO(const std::string& property_name, const Y& map, X (Y::*method)() const) : m_property_name(property_name), m_map(map), m_method(method) {}
 
         /**
          * Used to read the property value.
@@ -345,101 +207,13 @@ namespace MinorServo
          * @throw ComponentErrors::PropertyError.
          * @return the property value as read from the SRTMinorServoAnswerMap object reference.
          */
-        T read(ACS::Time& timestamp)
+        X read(ACS::Time& timestamp)
         {
             timestamp = getTimeStamp();
 
-            // Copy the answer map by value. This will ensure all the elements for any sequence belong to the same reading from PLC.
-            SRTMinorServoAnswerMap answer_map = m_answer_map;
-
             try
             {
-                if constexpr(std::is_same_v<T, Management::TBoolean>)
-                {
-                    return (answer_map.get<unsigned int>(m_property_fields[0]) == 1) ? Management::MNG_TRUE : Management::MNG_FALSE;
-                }
-                else if constexpr(std::is_same_v<T, CORBA::Double>)
-                {
-                    unsigned int index = answer_map.index(m_property_fields[0]);
-
-                    switch(index)
-                    {
-                        case 0:
-                        {
-                            return (double)answer_map.get<long>(m_property_fields[0]);
-                        }
-                        case 1:
-                        {
-                            return answer_map.get<double>(m_property_fields[0]);
-                        }
-                        default:
-                        {
-                            throw std::bad_variant_access();
-                        }
-                    }
-                }
-                else if constexpr(std::is_same_v<T, ACE_CString>)
-                {
-                    unsigned int index = answer_map.index(m_property_fields[0]);
-
-                    switch(index)
-                    {
-                        case 0:
-                        {
-                            return std::to_string(answer_map.get<long>(m_property_fields[0])).c_str();
-                        }
-                        case 1:
-                        {
-                            return std::to_string(answer_map.get<double>(m_property_fields[0])).c_str();
-                        }
-                        default:
-                        {
-                            return answer_map.get<std::string>(m_property_fields[0]).c_str();
-                        }
-                    }
-                }
-                else if constexpr(std::is_same_v<T, ACS::booleanSeq>)
-                {
-                    ACS::booleanSeq value;
-                    value.length(m_property_fields.size());
-
-                    for(size_t i = 0; i < m_property_fields.size(); i++)
-                    {
-                        value[i] = answer_map.get<long>(m_property_fields[i]);
-                    }
-                    return value;
-                }
-                else if constexpr(std::is_same_v<T, ACS::doubleSeq>)
-                {
-                    ACS::doubleSeq value;
-                    value.length(m_property_fields.size());
-
-                    for(size_t i = 0; i < m_property_fields.size(); i++)
-                    {
-                        value[i] = answer_map.get<double>(m_property_fields[i]);
-                    }
-                    return value;
-                }
-                else if constexpr(std::is_same_v<T, SRTMinorServoFocalConfiguration>)
-                {
-                    return LDOConfigurationIDTable.right.at(answer_map.get<int>(m_property_fields[0]));
-                }
-                else if constexpr(std::is_same_v<T, SRTMinorServoControlStatus>)
-                {
-                    return SRTMinorServoControlStatus(answer_map.get<unsigned int>(m_property_fields[0]) - 1);
-                }
-                else if constexpr(std::is_same_v<T, SRTMinorServoGregorianCoverStatus>)
-                {
-                    return SRTMinorServoGregorianCoverStatus(answer_map.get<unsigned int>(m_property_fields[0]));
-                }
-                else if constexpr(std::is_same_v<T, SRTMinorServoCabinetStatus>)
-                {
-                    return SRTMinorServoCabinetStatus(answer_map.get<unsigned int>(m_property_fields[0]) - 1);
-                }
-                else if constexpr(std::is_same_v<T, SRTMinorServoOperativeMode>)
-                {
-                    return SRTMinorServoOperativeMode(answer_map.get<unsigned int>(m_property_fields[0]) / 10);
-                }
+                return (m_map.*m_method)();
             }
             catch(std::out_of_range& ex)
             {
@@ -466,19 +240,19 @@ namespace MinorServo
 
     private:
         /**
-         * The name of the property, used when raising exceptions.
+         * The name of the property.
          */
         const std::string m_property_name;
 
         /**
-         * The field names of the property as they appear on the SRTMinorServoAnswerMap.
+         * The reference to the SRTMinorServoAnswerMap in which the readings from the PLC appear. This could be either a SRTMinorServoGeneralStatus or a SRTMinorServoStatus.
          */
-        const std::vector<std::string> m_property_fields;
+        const Y& m_map;
 
         /**
-         * The reference to the SRTMinorServoAnswerMap in whichthe readings from the PLC appear.
+         * Pointer to the method of the SRTMinorServoAnswerMap to call in order to retrieve the DevIO return value.
          */
-        const SRTMinorServoAnswerMap& m_answer_map;
+        X (Y::*m_method)() const;
     };
 
     /**

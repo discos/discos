@@ -6,7 +6,7 @@
  * Giuseppe Carboni (giuseppe.carboni@inaf.it)
  */
 
-#include "SRTMinorServoCommon.h"
+#include "SuppressWarnings.h"
 #include <IRA>
 #include <baciCharacteristicComponentImpl.h>
 #include <baciSmartPropertyPointer.h>
@@ -20,6 +20,7 @@
 #include "SRTMinorServoBossCore.h"
 #include "SRTMinorServoStatusThread.h"
 #include "MSDevIOs.h"
+#include "SRTMinorServoCommon.h"
 
 using namespace MinorServo;
 
@@ -499,11 +500,6 @@ private:
     baci::SmartPropertyPointer<ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>> m_tracking_ptr;
 
     /**
-     * DevIO of the current_configuration property.
-     */
-    MSAnswerMapDevIO<SRTMinorServoFocalConfiguration>* m_current_configuration_devio;
-
-    /**
      * Pointer to the current_configuration property.
      */
     baci::SmartPropertyPointer<ROEnumImpl<ACS_ENUM_T(SRTMinorServoFocalConfiguration), POA_MinorServo::ROSRTMinorServoFocalConfiguration>> m_current_configuration_ptr;
@@ -524,11 +520,6 @@ private:
     baci::SmartPropertyPointer<baci::ROstring> m_plc_version_ptr;
 
     /**
-     * DevIO of the control property.
-     */
-    MSAnswerMapDevIO<SRTMinorServoControlStatus>* m_control_devio;
-
-    /**
      * Pointer to the control property.
      */
     baci::SmartPropertyPointer<ROEnumImpl<ACS_ENUM_T(SRTMinorServoControlStatus), POA_MinorServo::ROSRTMinorServoControlStatus>> m_control_ptr;
@@ -539,19 +530,9 @@ private:
     baci::SmartPropertyPointer<ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>> m_power_ptr;
 
     /**
-     * DevIO of the emergency property.
-     */
-    MSAnswerMapDevIO<Management::TBoolean>* m_emergency_devio;
-
-    /**
      * Pointer to the emergency property.
      */
     baci::SmartPropertyPointer<ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>> m_emergency_ptr;
-
-    /**
-     * DevIO of the gregorian_cover property.
-     */
-    MSAnswerMapDevIO<SRTMinorServoGregorianCoverStatus>* m_gregorian_cover_devio;
 
     /**
      * Pointer to the gregorian_cover property.

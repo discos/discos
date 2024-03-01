@@ -6,7 +6,7 @@
  * Giuseppe Carboni (giuseppe.carboni@inaf.it)
  */
 
-#include "SRTMinorServoCommon.h"
+#include "SuppressWarnings.h"
 #include <regex>
 #include <IRA>
 #include <baciCharacteristicComponentImpl.h>
@@ -24,6 +24,7 @@
 #include "SRTMinorServoSocket.h"
 #include "MSDevIOs.h"
 #include "SRTMinorServoContainers.h"
+#include "SRTMinorServoCommon.h"
 
 
 using namespace MinorServo;
@@ -323,11 +324,6 @@ protected:
     const std::string m_servo_name;
 
     /**
-     * Dictionary containing the last status retrieved form the servo system.
-     */
-    SRTMinorServoAnswerMap m_status;
-
-    /**
      * Number of virtual axes of the servo system.
      */
     const size_t m_virtual_axes;
@@ -347,6 +343,11 @@ private:
      */
     const std::vector<std::string> m_virtual_axes_units;
 protected:
+    /**
+     * Dictionary containing the last status retrieved form the servo system.
+     */
+    SRTMinorServoStatus m_status;
+
     /**
      * Commanded user offsets for each axis of the servo system.
      */
@@ -413,19 +414,9 @@ private:
     baci::SmartPropertyPointer<ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>> m_enabled_ptr;
 
     /**
-     * DevIO of the drive_cabinet_status property.
-     */
-    MSAnswerMapDevIO<SRTMinorServoCabinetStatus>* m_drive_cabinet_status_devio;
-
-    /**
      * Pointer to the drive_cabinet_status property.
      */
     baci::SmartPropertyPointer<ROEnumImpl<ACS_ENUM_T(SRTMinorServoCabinetStatus), POA_MinorServo::ROSRTMinorServoCabinetStatus>> m_drive_cabinet_status_ptr;
-
-    /**
-     * DevIO of the block property.
-     */
-    MSAnswerMapDevIO<Management::TBoolean>* m_block_devio;
 
     /**
      * Pointer to the block property.
@@ -458,22 +449,10 @@ private:
     baci::SmartPropertyPointer<baci::ROdoubleSeq> m_plain_virtual_positions_ptr;
 
     /**
-     * DevIO of the virtual_positions property.
-     */
-    MSVirtualPositionsDevIO* m_virtual_positions_devio;
-
-    /**
      * Pointer to the virtual_positions property.
      */
     baci::SmartPropertyPointer<baci::ROdoubleSeq> m_virtual_positions_ptr;
 
-protected:
-    /**
-     * DevIO of the virtual_offsets property.
-     */
-    MSAnswerMapDevIO<ACS::doubleSeq>* m_virtual_offsets_devio;
-
-private:
     /**
      * Pointer to the virtual_offsets property.
      */

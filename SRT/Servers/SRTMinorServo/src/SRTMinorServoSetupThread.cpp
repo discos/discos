@@ -35,6 +35,19 @@ void SRTMinorServoSetupThread::onStop()
     AUTO_TRACE("SRTMinorServoSetupThread::onStop()");
 
     ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::onStop()", (LM_NOTICE, "SETUP THREAD STOPPED"));
+
+    if(m_core.m_motion_status.load() == MOTION_STATUS_TRACKING)
+    {
+        try
+        {
+            m_core.startThread(m_core.m_tracking_thread);
+        }
+        catch(ComponentErrors::ComponentErrorsEx& ex)
+        {
+            ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
+            m_core.setFailure();
+        }
+    }
 }
 
 void SRTMinorServoSetupThread::runLoop()
@@ -131,8 +144,7 @@ void SRTMinorServoSetupThread::runLoop()
         }
         case 3: // Wait for the system to show the commanded configuration
         {
-            ACS::Time comp;
-            if(m_core.m_component.m_current_configuration_devio->read(comp) == m_core.m_commanded_configuration.load())
+            if(m_core.m_status.getFocalConfiguration() == m_core.m_commanded_configuration.load())
             {
                 m_status = 4;
             }
@@ -141,9 +153,8 @@ void SRTMinorServoSetupThread::runLoop()
         }
         case 4: // Wait for the whole system to reach the desired configuration
         {
-            ACSErr::Completion_var comp;
             // First we check the status of the gregorian cover
-            bool completed = m_core.m_component.m_gregorian_cover_devio->read(comp) == m_gregorian_cover_position ? true : false;
+            bool completed = m_core.m_status.getGregorianCoverPosition() == m_gregorian_cover_position ? true : false;
 
             // Then we cycle through all the servos and make sure their operative mode is SETUP
             if(completed && std::all_of(m_core.m_servos.begin(), m_core.m_servos.end(), [](const std::pair<std::string, SRTBaseMinorServo_ptr>& servo) -> bool
@@ -207,9 +218,8 @@ void SRTMinorServoSetupThread::runLoop()
         }
         case 6: // Wait for the whole system to reach the PRESET configuration
         {
-            //ACSErr::Completion_var comp;
             // First we check the status of the gregorian cover
-            //bool completed = m_core.m_component.m_gregorian_cover_devio->read(comp) == m_gregorian_cover_position ? true : false;
+            //bool completed = m_core.m_status.getGregorianCoverPosition() == m_gregorian_cover_position ? true : false;
 
             if(/*completed && */std::all_of(m_core.m_current_servos.begin(), m_core.m_current_servos.end(), [this](const std::pair<std::string, SRTBaseMinorServo_ptr>& servo) -> bool
             {
@@ -232,17 +242,6 @@ void SRTMinorServoSetupThread::runLoop()
             if(m_core.m_elevation_tracking_enabled.load() == Management::MNG_TRUE)
             {
                 m_core.m_motion_status.store(MOTION_STATUS_TRACKING);
-                try
-                {
-                    m_core.startThread(m_core.m_tracking_thread);
-                }
-                catch(ComponentErrors::ComponentErrorsEx& ex)
-                {
-                    ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
-                    m_core.setFailure();
-                    this->setStopped();
-                    return;
-                }
             }
             else
             {

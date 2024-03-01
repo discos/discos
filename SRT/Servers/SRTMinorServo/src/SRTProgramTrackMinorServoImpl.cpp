@@ -120,8 +120,7 @@ void SRTProgramTrackMinorServoImpl::programTrack(CORBA::Long trajectory_id, CORB
     }
 
     std::vector<double> coordinates(virtual_coordinates.get_buffer(), virtual_coordinates.get_buffer() + virtual_coordinates.length());
-    ACS::Time comp;
-    ACS::doubleSeq offsets = m_virtual_offsets_devio->read(comp);
+    ACS::doubleSeq offsets = m_status.getVirtualOffsets();
 
     for(size_t i = 0; i < m_virtual_axes; i++)
     {
