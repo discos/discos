@@ -425,7 +425,7 @@ namespace MinorServo
         SRTMinorServoAnswerMap(const SRTMinorServoAnswerMap& other) : m_mutex()
         {
             std::unique_lock<std::shared_mutex> lockThis(m_mutex, std::defer_lock);
-            std::unique_lock<std::shared_mutex> lockOther(other.m_mutex, std::defer_lock);
+            std::shared_lock<std::shared_mutex> lockOther(other.m_mutex, std::defer_lock);
             std::lock(lockThis, lockOther);
             static_cast<std::map <std::string, std::variant<long, double, std::string>>&>(*this) = static_cast<const std::map<std::string, std::variant<long, double, std::string>>&>(other);
         }
@@ -439,9 +439,26 @@ namespace MinorServo
             if(this != &other)
             {
                 std::unique_lock<std::shared_mutex> lockThis(m_mutex, std::defer_lock);
-                std::unique_lock<std::shared_mutex> lockOther(other.m_mutex, std::defer_lock);
+                std::shared_lock<std::shared_mutex> lockOther(other.m_mutex, std::defer_lock);
                 std::lock(lockThis, lockOther);
                 static_cast<std::map <std::string, std::variant<long, double, std::string>>&>(*this) = static_cast<const std::map<std::string, std::variant<long, double, std::string>>&>(other);
+            }
+
+            return *this;
+        }
+
+        /**
+         * Update operator. It merges the current object with the elements of another object
+         * @param other the SRTMinorServoAnswerMap which values have to be copied inside the current object
+         */
+        SRTMinorServoAnswerMap& operator+=(const SRTMinorServoAnswerMap& other)
+        {
+            std::unique_lock<std::shared_mutex> lockThis(m_mutex, std::defer_lock);
+            std::shared_lock<std::shared_mutex> lockOther(other.m_mutex, std::defer_lock);
+            std::lock(lockThis, lockOther);
+            for(const auto& entry : other)
+            {
+                this->operator[](entry.first) = entry.second;
             }
 
             return *this;

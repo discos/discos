@@ -30,8 +30,8 @@ SRTMinorServoBossCore::SRTMinorServoBossCore(SRTMinorServoBossImpl& component) :
     m_socket_connected(m_socket.isConnected() ? Management::MNG_TRUE : Management::MNG_FALSE),
     m_servos{
         //{ "PFP", m_component.getContainerServices()->getComponent<SRTBaseMinorServo>("MINORSERVO/PFP") },
-        { "SRP", m_component.getContainerServices()->getComponent<SRTBaseMinorServo>("MINORSERVO/SRP") }
-        //{ "GFR", m_component.getContainerServices()->getComponent<SRTBaseMinorServo>("MINORSERVO/GFR") },
+        { "SRP", m_component.getContainerServices()->getComponent<SRTBaseMinorServo>("MINORSERVO/SRP") },
+        { "GFR", m_component.getContainerServices()->getComponent<SRTBaseMinorServo>("MINORSERVO/GFR") }
         //{ "M3R", m_component.getContainerServices()->getComponent<SRTBaseMinorServo>("MINORSERVO/M3R") }
     },
     m_tracking_servos{

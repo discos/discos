@@ -61,8 +61,14 @@ TEST(SRTMinorServoCommandLibraryTest, parseAnswer)
     args.put("OUTPUT", "GOOD");
     args.put("TIMESTAMP", 1665743366.654321);
     EXPECT_EQ(SRTMinorServoCommandLibrary::parseAnswer(answer), args);
-
     EXPECT_EQ(args.getTimestamp(), 138850361666543210);
+    EXPECT_TRUE(args.checkOutput());
+    SRTMinorServoAnswerMap other;
+    other.put("OTHER", 123456);
+    args += other;
+    EXPECT_EQ(args.get<int>("OTHER"), 123456);
+    EXPECT_EQ(args.getTimestamp(), 138850361666543210);
+    EXPECT_TRUE(args.checkOutput());
 
     // Complete correct answer
     answer = "OUTPUT:GOOD,1665743366.123456,CURRENT_CONFIG=21|SIMULATION_ENABLED=34|PLC_TIME=78|PLC_VERSION=69|CONTROL=14|POWER=38|EMERGENCY=69|ENABLED=51|OPERATIVE_MODE=94\r\n";
