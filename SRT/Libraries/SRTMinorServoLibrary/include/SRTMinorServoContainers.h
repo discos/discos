@@ -492,17 +492,26 @@ namespace MinorServo
 
             std::shared_lock<std::shared_mutex> lock(m_mutex);
 
-            if constexpr(std::is_integral_v<T>)
+            try
             {
-                return (T)std::get<long>(this->at(key));
+                if constexpr(std::is_integral_v<T>)
+                {
+                    return (T)std::get<long>(this->at(key));
+                }
+                else if constexpr(std::is_floating_point_v<T>)
+                {
+                    return (T)std::get<double>(this->at(key));
+                }
+                else if constexpr(is_string_v<T>)
+                {
+                    return (T)std::get<std::string>(this->at(key)).c_str();
+                }
             }
-            else if constexpr(std::is_floating_point_v<T>)
+            catch(std::out_of_range& ex)
             {
-                return (T)std::get<double>(this->at(key));
-            }
-            else if constexpr(is_string_v<T>)
-            {
-                return (T)std::get<std::string>(this->at(key)).c_str();
+                std::cout << "PLAIN ANSWER:" << std::endl;
+                std::cout << this->getPlainAnswer() << std::endl;
+                throw ex;
             }
         }
 
@@ -589,6 +598,16 @@ namespace MinorServo
         {
             std::shared_lock<std::shared_mutex> lock(m_mutex);
             return IRA::CIRATools::UNIXEpoch2ACSTime(this->get<double>("TIMESTAMP"));
+        }
+
+        /**
+         * This method returns the plain answer received from the socket. Useful for log purposes.
+         * @return a std::string containing the plain answer received from the socket.
+         */
+        const std::string getPlainAnswer() const
+        {
+            std::shared_lock<std::shared_mutex> lock(m_mutex);
+            return this->get<std::string>("PLAIN_ANSWER");
         }
 
     protected:

@@ -179,7 +179,7 @@ SRTMinorServoAnswerMap SRTMinorServoSocket::sendCommand(std::string command, std
     SRTMinorServoAnswerMap map_answer = SRTMinorServoCommandLibrary::parseAnswer(answer);
     if(map)
     {
-        map->get() += map_answer;
+        map->get() = map_answer;
     }
 
     return map_answer;

@@ -172,5 +172,7 @@ SRTMinorServoAnswerMap SRTMinorServoCommandLibrary::parseAnswer(const std::strin
         args.clear();
     }
 
+    args.put("PLAIN_ANSWER", original_answer);
+
     return args;
 }
