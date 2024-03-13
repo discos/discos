@@ -125,6 +125,10 @@ private:
     	/** This is the reference to the mount component */
     	Antenna::Mount_var m_mount;
 
+    /** Address and port of the connected client **/
+    CString m_peerAddress;
+    WORD m_peerPort;
+
     	int receiveBuffer(BYTE *Msg,WORD Len);
     	void printBuffer(BYTE *Buff,WORD Len);
     	OperationResult sendBuffer(BYTE *Msg,WORD Len);
