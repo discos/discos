@@ -200,85 +200,85 @@ public:
 
     /**
      * Returns a reference to the enabled property implementation of the IDL interface.
-     * @return pointer to read-only boolean property enabled.
+     * @return pointer to the read-only boolean property enabled.
      */
     virtual Management::ROTBoolean_ptr enabled();
 
     /**
      * Returns a reference to the drive_cabinet_status property implementation of the IDL interface.
-     * @return pointer to read-only SRTMinorServoCabinerStatus (enumeration) property drive_cabinet_status.
+     * @return pointer to the read-only SRTMinorServoCabinerStatus (enumeration) property drive_cabinet_status.
      */
     virtual ROSRTMinorServoCabinetStatus_ptr drive_cabinet_status();
 
     /**
      * Returns a reference to the block property implementation of the IDL interface.
-     * @return pointer to read-only boolean property block.
+     * @return pointer to the read-only boolean property block.
      */
     virtual Management::ROTBoolean_ptr block();
 
     /**
      * Returns a reference to the operative_mode property implementation of the IDL interface.
-     * @return pointer to read-only SRTMinorServoOperativeMode (enumeration) property operative_mode.
+     * @return pointer to the read-only SRTMinorServoOperativeMode (enumeration) property operative_mode.
      */
     virtual ROSRTMinorServoOperativeMode_ptr operative_mode();
 
     /**
      * Returns a reference to the physical_axes_enabled property implementation of the IDL interface.
-     * @return pointer to read-only boolean sequence property physical_axes_enabled.
+     * @return pointer to the read-only boolean sequence property physical_axes_enabled.
      */
     virtual ACS::RObooleanSeq_ptr physical_axes_enabled();
 
     /**
      * Returns a reference to the physical_positions property implementation of the IDL interface.
-     * @return pointer to read-only boolean sequence property physical_positions.
+     * @return pointer to the read-only boolean sequence property physical_positions.
      */
     virtual ACS::ROdoubleSeq_ptr physical_positions();
 
     /**
      * Returns a reference to the virtual_axes property implementation of the IDL interface.
-     * @return pointer to read-only long property virtual_axes.
+     * @return pointer to the read-only long property virtual_axes.
      */
     virtual ACS::ROlong_ptr virtual_axes();
 
     /**
      * Returns a reference to the plain_virtual_positions property implementation of the IDL interface.
-     * @return pointer to read-only double sequence property plain_virtual_positions.
+     * @return pointer to the read-only double sequence property plain_virtual_positions.
      */
     virtual ACS::ROdoubleSeq_ptr plain_virtual_positions();
 
     /**
      * Returns a reference to the virtual_positions property implementation of the IDL interface.
-     * @return pointer to read-only double sequence property virtual_positions.
+     * @return pointer to the read-only double sequence property virtual_positions.
      */
     virtual ACS::ROdoubleSeq_ptr virtual_positions();
 
     /**
      * Returns a reference to the virtual_offsets property implementation of the IDL interface.
-     * @return pointer to read-only double sequence property virtual_offsets.
+     * @return pointer to the read-only double sequence property virtual_offsets.
      */
     virtual ACS::ROdoubleSeq_ptr virtual_offsets();
 
     /**
      * Returns a reference to the virtual_user_offsets property implementation of the IDL interface.
-     * @return pointer to read-only double sequence property virtual_user_offsets.
+     * @return pointer to the read-only double sequence property virtual_user_offsets.
      */
     virtual ACS::ROdoubleSeq_ptr virtual_user_offsets();
 
     /**
      * Returns a reference to the virtual_system_offsets property implementation of the IDL interface.
-     * @return pointer to read-only double sequence property virtual_system_offsets.
+     * @return pointer to the read-only double sequence property virtual_system_offsets.
      */
     virtual ACS::ROdoubleSeq_ptr virtual_system_offsets();
 
     /**
      * Returns a reference to the in_use property implementation of the IDL interface.
-     * @return pointer to read-only boolean property in_use.
+     * @return pointer to the read-only boolean property in_use.
      */
     virtual Management::ROTBoolean_ptr in_use();
 
     /**
      * Returns a reference to the current_setup property implementation of the IDL interface.
-     * @return pointer to read-only string property current_setup.
+     * @return pointer to the read-only string property current_setup.
      */
     virtual ACS::ROstring_ptr current_setup();
 
@@ -652,27 +652,33 @@ public:
 
     /**
      * Returns a reference to the tracking property implementation of the IDL interface.
-     * @return pointer to read-only boolean property tracking.
+     * @return pointer to the read-only boolean property tracking.
      */
     virtual Management::ROTBoolean_ptr tracking();
 
     /**
      * Returns a reference to the trajectory_id property implementation of the IDL interface.
-     * @return pointer to read-only long property trajectory_id.
+     * @return pointer to the read-only long property trajectory_id.
      */
     virtual ACS::ROlong_ptr trajectory_id();
 
     /**
      * Returns a reference to the total_trajectory_points property implementation of the IDL interface.
-     * @return pointer to read-only long property total_trajectory_points.
+     * @return pointer to the read-only long property total_trajectory_points.
      */
     virtual ACS::ROlong_ptr total_trajectory_points();
 
     /**
      * Returns a reference to the remaining_trajectory_points property implementation of the IDL interface.
-     * @return pointer to read-only long property remaining_trajectory_points.
+     * @return pointer to the read-only long property remaining_trajectory_points.
      */
     virtual ACS::ROlong_ptr remaining_trajectory_points();
+
+    /**
+     * Returns a reference to the tracking_error property implementation of the IDL interface.
+     * @return pointer to the read-only double sequence property tracking_error.
+     */
+    virtual ACS::ROdoubleSeq_ptr tracking_error();
 
 private:
     /**
@@ -684,6 +690,11 @@ private:
      * Tracking delta values for all minor servo system virtual axes.
      */
     const std::vector<double> m_tracking_delta;
+
+    /**
+     * Tracking error values for all minor servo system virtual axes.
+     */
+    std::vector<double> m_tracking_error;
 
     /**
      * Indicates if the servo system is tracking or not. It is tracking when the position error is lower than the tracking delta for all the virtual axes.
@@ -724,6 +735,11 @@ private:
      * Pointer to the remaining_trajectory_points property.
      */
     baci::SmartPropertyPointer<baci::ROlong> m_remaining_trajectory_points_ptr;
+
+    /**
+     * Pointer to the tracking_error property.
+     */
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_tracking_error_ptr;
 };
 
 #endif

@@ -509,8 +509,8 @@ namespace MinorServo
             }
             catch(std::out_of_range& ex)
             {
-                std::cout << "PLAIN ANSWER:" << std::endl;
-                std::cout << this->getPlainAnswer() << std::endl;
+                std::cout << "PLAIN_COMMAND: " << this->getPlainCommand();
+                std::cout << "PLAIN_ANSWER:" << this->getPlainAnswer();
                 throw ex;
             }
         }
@@ -598,6 +598,16 @@ namespace MinorServo
         {
             std::shared_lock<std::shared_mutex> lock(m_mutex);
             return IRA::CIRATools::UNIXEpoch2ACSTime(this->get<double>("TIMESTAMP"));
+        }
+
+        /**
+         * This method returns the plain command sent using the socket. Useful for log purposes.
+         * @return a std::string containing the plain command sent using the socket.
+         */
+        const std::string getPlainCommand() const
+        {
+            std::shared_lock<std::shared_mutex> lock(m_mutex);
+            return this->get<std::string>("PLAIN_COMMAND");
         }
 
         /**

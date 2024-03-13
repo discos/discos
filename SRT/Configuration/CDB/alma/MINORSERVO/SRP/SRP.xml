@@ -34,5 +34,6 @@
     <trajectory_id description="Unsigned int, the UNIX Epoch * 1000 indicating the start time of the current trajectory" />
     <total_trajectory_points description="Number of points sent for the current trajectory" />
     <remaining_trajectory_points description="Remaining points of the current trahectory" />
+    <tracking_error description="The tracking error of each axis" />
 
 </SRTProgramTrackMinorServo>

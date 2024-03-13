@@ -118,6 +118,20 @@ void SRTMinorServoTrackingThread::runLoop()
             this->setStopped();
             return;
         }
+        catch(std::exception& ex)
+        {
+            ACS_SHORT_LOG((LM_ERROR, ex.what()));
+            m_error = true;
+            this->setStopped();
+            return;
+        }
+        catch(CORBA::Exception& ex)
+        {
+            ACS_SHORT_LOG((LM_ERROR, ex._info().c_str()));
+            m_error = true;
+            this->setStopped();
+            return;
+        }
     }
 
     m_point_id++;

@@ -102,9 +102,9 @@ const bool SRTMinorServoSocket::isConnected() const
 
 SRTMinorServoAnswerMap SRTMinorServoSocket::sendCommand(std::string command, std::optional<std::reference_wrapper<SRTMinorServoAnswerMap>> map)
 {
-    connect();
-
     std::lock_guard<std::mutex> guard(m_mutex);
+
+    connect();
 
     double start_time = IRA::CIRATools::getUNIXEpoch();
     size_t sent_bytes = 0;
@@ -171,12 +171,13 @@ SRTMinorServoAnswerMap SRTMinorServoSocket::sendCommand(std::string command, std
             m_socket_status = NOTREADY;
             Close(m_error);
             _EXCPT(MinorServoErrors::CommunicationErrorExImpl, impl, "SRTMinorServoSocker::sendCommand()");
-            impl.setReason("Something went wrong while receiving some bytes.");
+            impl.setReason(("Something went wrong while receiving some bytes. Command: " + command).c_str());
             throw impl.getMinorServoErrorsEx();
         }
     }
 
     SRTMinorServoAnswerMap map_answer = SRTMinorServoCommandLibrary::parseAnswer(answer);
+    map_answer.put("PLAIN_COMMAND", command);
     if(map)
     {
         map->get() = map_answer;

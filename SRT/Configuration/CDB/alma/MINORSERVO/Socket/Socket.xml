@@ -10,4 +10,4 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     IPAddress="192.168.200.13"
     Port="4758"
-    SocketTimeout="0.2"/>
+    SocketTimeout="1"/>

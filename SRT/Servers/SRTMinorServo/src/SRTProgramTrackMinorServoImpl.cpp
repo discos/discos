@@ -6,6 +6,7 @@ SRTProgramTrackMinorServoImpl::SRTProgramTrackMinorServoImpl(const ACE_CString &
     SRTBaseMinorServoImpl(componentName, containerServices),
     m_tracking_queue(1500, m_virtual_axes),
     m_tracking_delta(SRTBaseMinorServoImpl::getMotionConstant(*this, "tracking_delta")),
+    m_tracking_error(m_virtual_axes, 0.0),
     m_tracking(Management::MNG_FALSE),
     m_trajectory_id(0),
     m_total_trajectory_points(0),
@@ -13,7 +14,8 @@ SRTProgramTrackMinorServoImpl::SRTProgramTrackMinorServoImpl(const ACE_CString &
     m_tracking_ptr(this),
     m_trajectory_id_ptr(this),
     m_total_trajectory_points_ptr(this),
-    m_remaining_trajectory_points_ptr(this)
+    m_remaining_trajectory_points_ptr(this),
+    m_tracking_error_ptr(this)
 {
     AUTO_TRACE(m_servo_name + "::SRTProgramTrackMinorServoImpl()");
 }
@@ -37,6 +39,8 @@ void SRTProgramTrackMinorServoImpl::initialize()
                 new MSGenericDevIO<CORBA::Long, std::atomic<unsigned int>>(m_total_trajectory_points), true);
         m_remaining_trajectory_points_ptr = new baci::ROlong((m_component_name + ":remaining_trajectory_points").c_str(), getComponent(),
                 new MSGenericDevIO<CORBA::Long, std::atomic<unsigned int>>(m_remaining_trajectory_points), true);
+        m_tracking_error_ptr = new baci::ROdoubleSeq((m_component_name + ":tracking_error").c_str(), getComponent(),
+                new MSGenericDevIO<ACS::doubleSeq, std::vector<double>>(m_tracking_error), true);
     }
     catch(std::bad_alloc& ba)
     {
@@ -57,7 +61,7 @@ bool SRTProgramTrackMinorServoImpl::status()
 
         // The timestamp of the read positions always corresponds to the one we're asking since they both belong to the same STATUS command answer
         // The tracking timestamp is interpolated instead
-        std::vector<double> virtual_positions = m_positions_queue.get(last_timestamp).second;
+        ACS::doubleSeq virtual_positions = m_status.getVirtualPositions();
         std::pair<ACS::Time, std::vector<double>> tracking_point = m_tracking_queue.get(last_timestamp);
 
         m_remaining_trajectory_points.store(m_tracking_queue.getRemainingPoints(last_timestamp));
@@ -67,14 +71,20 @@ bool SRTProgramTrackMinorServoImpl::status()
             // We are past the last point of the trajectory, we concluded it
             m_tracking.store(Management::MNG_FALSE);
             m_tracking_queue.clear();
+            m_tracking_error = std::vector<double>(m_virtual_axes, 0.0);
         }
         else
         {
             bool is_tracking = true;
 
-            for(size_t i = 0; i < virtual_positions.size(); i++)
+            std::transform(virtual_positions.begin(), virtual_positions.end(), tracking_point.second.begin(), m_tracking_error.begin(), [](double current_pos, double commanded_pos)
             {
-                if(std::fabs(virtual_positions[i] - tracking_point.second[i]) > m_tracking_delta[i])
+                return std::fabs(current_pos - commanded_pos);
+            });
+
+            for(size_t i = 0; i < m_virtual_axes; i++)
+            {
+                if(std::fabs(m_tracking_error[i]) > m_tracking_delta[i])
                 {
                     is_tracking = false;
                     break;
@@ -89,6 +99,7 @@ bool SRTProgramTrackMinorServoImpl::status()
         // We might get here if m_tracking_queue is empty
         // So whenever we just got a new setup or if we are past the last point inside the trajectory
         m_tracking.store(Management::MNG_FALSE);  // May be redundant but who cares?
+        m_tracking_error = std::vector<double>(m_virtual_axes, 0.0);
     }
 
     return status;
@@ -157,5 +168,6 @@ GET_PROPERTY_REFERENCE(Management::ROTBoolean, SRTProgramTrackMinorServoImpl, m_
 GET_PROPERTY_REFERENCE(ACS::ROlong, SRTProgramTrackMinorServoImpl, m_trajectory_id_ptr, trajectory_id);
 GET_PROPERTY_REFERENCE(ACS::ROlong, SRTProgramTrackMinorServoImpl, m_total_trajectory_points_ptr, total_trajectory_points);
 GET_PROPERTY_REFERENCE(ACS::ROlong, SRTProgramTrackMinorServoImpl, m_remaining_trajectory_points_ptr, remaining_trajectory_points);
+GET_PROPERTY_REFERENCE(ACS::ROdoubleSeq, SRTProgramTrackMinorServoImpl, m_tracking_error_ptr, tracking_error);
 
 MACI_DLL_SUPPORT_FUNCTIONS(SRTProgramTrackMinorServoImpl)

@@ -75,6 +75,7 @@
         <xs:element name="trajectory_id" type="baci:ROlong" />
         <xs:element name="total_trajectory_points" type="baci:ROlong" />
         <xs:element name="remaining_trajectory_points" type="baci:ROlong" />
+        <xs:element name="tracking_error" type="baci:ROdoubleSeq" />
        </xs:sequence>
        <xs:attribute name="tracking_delta" type="xs:string" use="required" />
       </xs:extension>

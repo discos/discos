@@ -255,6 +255,11 @@ module MinorServo
         readonly attribute ACS::ROlong remaining_trajectory_points;
 
         /**
+         * This property returns the sequence of tracking error for each virtual axis of the servo
+         */
+        readonly attribute ACS::ROdoubleSeq tracking_error;
+
+        /**
          * This method loads a set of coordinates that have to be tracked by the servo system
          * @param trajectory_id the ID of the trajectory to which the current point belongs
          * @param point_id the ID of the point inside the current trajectory. It must be a consecutive number for the servo system to acknowledge
