@@ -17,8 +17,7 @@ using namespace ComponentErrors;
 using namespace ManagementErrors;
 
 CExternalClientsSocketServer::CExternalClientsSocketServer (ContainerServices * service):CSocket (),
-m_services
-(service)
+m_services (service), m_logDike(_IRA_LOGDIKE_GETLOGGER)
 {
   AUTO_TRACE ("CExternalClientsSocketServer::CExternalClientsSocketServer()");
   setExternalClientSocketStatus (ExternalClientSocketStatus_NOTCNTD);
@@ -308,7 +307,8 @@ CExternalClientsSocketServer::cmdToScheduler ()
 	  {
 	    _EXCPT (ComponentErrors::UnexpectedExImpl, impl,
 		    "CExternalClientsSocketServer::cmdToScheduler()");
-	    impl.log (LM_ERROR);
+	    _IRA_LOGDIKE_EXCEPTION(m_logDike,impl,LM_ERROR);
+	    //impl.log (LM_ERROR);
 	    status_val = "NA";
 	  }
 	  out.Concat (status_val);
@@ -322,7 +322,8 @@ CExternalClientsSocketServer::cmdToScheduler ()
 	  {
 	    _EXCPT (ComponentErrors::UnexpectedExImpl, impl,
 		    "CExternalClientsSocketServer::cmdToScheduler()");
-	    impl.log (LM_ERROR);
+	    _IRA_LOGDIKE_EXCEPTION(m_logDike,impl,LM_ERROR);
+	    //impl.log (LM_ERROR);
 	    target = "NA";
 	  }
 	  out.Concat (target);
@@ -350,7 +351,8 @@ CExternalClientsSocketServer::cmdToScheduler ()
 	  {
 	    _EXCPT (ComponentErrors::UnexpectedExImpl, impl,
 		    "CExternalClientsSocketServer::cmdToScheduler()");
-	    impl.log (LM_ERROR);
+	    _IRA_LOGDIKE_EXCEPTION(m_logDike,impl,LM_ERROR);
+	    //impl.log (LM_ERROR);
 	    azStr = "NA";
 	    elStr = "NA";
 	    raStr = "NA";
@@ -385,7 +387,8 @@ CExternalClientsSocketServer::cmdToScheduler ()
 	  {
 	    _EXCPT (ComponentErrors::UnexpectedExImpl, impl,
 		    "CExternalClientsSocketServer::cmdToScheduler()");
-	    impl.log (LM_ERROR);
+	    _IRA_LOGDIKE_EXCEPTION(m_logDike,impl,LM_ERROR);
+	    //impl.log (LM_ERROR);
 	    azErr = 0.0;
 	  }
 	  out.Concat (azErr);
@@ -399,7 +402,8 @@ CExternalClientsSocketServer::cmdToScheduler ()
 	  {
 	    _EXCPT (ComponentErrors::UnexpectedExImpl, impl,
 		    "CExternalClientsSocketServer::cmdToScheduler()");
-	    impl.log (LM_ERROR);
+	    _IRA_LOGDIKE_EXCEPTION(m_logDike,impl,LM_ERROR);
+	    //impl.log (LM_ERROR);
 	    elErr = 0.0;
 	  }
 	  out.Concat (elErr);
@@ -413,7 +417,8 @@ CExternalClientsSocketServer::cmdToScheduler ()
 	  {
 	    _EXCPT (ComponentErrors::UnexpectedExImpl, impl,
 		    "CExternalClientsSocketServer::cmdToScheduler()");
-	    impl.log (LM_ERROR);
+	    _IRA_LOGDIKE_EXCEPTION(m_logDike,impl,LM_ERROR);
+	    //impl.log (LM_ERROR);
 	    pointingAzCorr = 0.0;
 	  }
 	  out.Concat (pointingAzCorr);
@@ -428,7 +433,8 @@ CExternalClientsSocketServer::cmdToScheduler ()
 	  {
 	    _EXCPT (ComponentErrors::UnexpectedExImpl, impl,
 		    "CExternalClientsSocketServer::cmdToScheduler()");
-	    impl.log (LM_ERROR);
+	    _IRA_LOGDIKE_EXCEPTION(m_logDike,impl,LM_ERROR);
+	    //impl.log (LM_ERROR);
 	    pointingElCorr = 0.0;
 	  }
 	  out.Concat (pointingElCorr);
@@ -442,7 +448,8 @@ CExternalClientsSocketServer::cmdToScheduler ()
 	  {
 	    _EXCPT (ComponentErrors::UnexpectedExImpl, impl,
 		    "CExternalClientsSocketServer::cmdToScheduler()");
-	    impl.log (LM_ERROR);
+	    _IRA_LOGDIKE_EXCEPTION(m_logDike,impl,LM_ERROR);
+	    //impl.log (LM_ERROR);
 	    refractionCorr = 0.0;
 	  }
 	  out.Concat (refractionCorr);
@@ -456,7 +463,8 @@ CExternalClientsSocketServer::cmdToScheduler ()
 	  {
 	    _EXCPT (ComponentErrors::UnexpectedExImpl, impl,
 		    "CExternalClientsSocketServer::cmdToScheduler()");
-	    impl.log (LM_ERROR);
+	    _IRA_LOGDIKE_EXCEPTION(m_logDike,impl,LM_ERROR);
+	    //impl.log (LM_ERROR);
 	    azOff = 0.0;
 	    elOff = 0.0;
 	    raOff = 0.0;
@@ -485,7 +493,8 @@ CExternalClientsSocketServer::cmdToScheduler ()
 	  {
 	    _EXCPT (ComponentErrors::UnexpectedExImpl, impl,
 		    "CExternalClientsSocketServer::cmdToScheduler()");
-	    impl.log (LM_ERROR);
+	    _IRA_LOGDIKE_EXCEPTION(m_logDike,impl,LM_ERROR);
+	    //impl.log (LM_ERROR);
 	    receiver = "NA";
 	  }
 	  out.Concat (receiver);
@@ -500,7 +509,8 @@ CExternalClientsSocketServer::cmdToScheduler ()
 	  {
 	    _EXCPT (ComponentErrors::UnexpectedExImpl, impl,
 		    "CExternalClientsSocketServer::cmdToScheduler()");
-	    impl.log (LM_ERROR);
+	    _IRA_LOGDIKE_EXCEPTION(m_logDike,impl,LM_ERROR);
+	    //impl.log (LM_ERROR);
 	    lo[0] = 0.0;
 	  }
 	  out.Concat (lo[0]);
@@ -522,7 +532,8 @@ CExternalClientsSocketServer::cmdToScheduler ()
 	  {
 	    _EXCPT (ComponentErrors::UnexpectedExImpl, impl,
 		    "CExternalClientsSocketServer::cmdToScheduler()");
-	    impl.log (LM_ERROR);
+	    _IRA_LOGDIKE_EXCEPTION(m_logDike,impl,LM_ERROR);
+	    //impl.log (LM_ERROR);
 	    trackingStr = "NA";
 	  }
 	  out.Concat (trackingStr);
@@ -549,7 +560,8 @@ CExternalClientsSocketServer::cmdToScheduler ()
 	  {
 	    _EXCPT (ComponentErrors::UnexpectedExImpl, impl,
 		    "CExternalClientsSocketServer::cmdToScheduler()");
-	    impl.log (LM_ERROR);
+	    _IRA_LOGDIKE_EXCEPTION(m_logDike,impl,LM_ERROR);
+	    //impl.log (LM_ERROR);
 	    ret_val = "Unexpected Error";
 	    out = IRA::CString (ret_val);
 	  }
