@@ -288,8 +288,8 @@ class Application(Qt.QDialog,calibrationtool_ui.Ui_CalibrationToolDialog):
         else:
             self.scanAxisLabel.setText('ScanAxis - Focus')
             xaxis_text="Distance (mm)"
-            hpbw_label_text='HPBW(mm)'
-            peakOffsetLabel_text='PeakOffset(mm)'
+            hpbw_label_text='HPBW (arcmin)'
+            peakOffsetLabel_text='PeakOffset (mm)'
             self.qwtPlot_datax.setAxisTitle(Qwt.QwtPlot.xBottom, xaxis_text)
             self.qwtPlot_datay.setAxisTitle(Qwt.QwtPlot.xBottom, xaxis_text)
             self.hpbw_label.setText(hpbw_label_text)
