@@ -20,6 +20,7 @@
 #include <AntennaBossC.h>
 #include <ReceiversBossC.h>
 #include <MountC.h>
+#include <LogDike.h>
 
 #define BUFFERSIZE 1000
 #define GAVINO "MANAGEMENT/Gavino"
@@ -96,7 +97,12 @@ public:
     	void byebye() {m_byebye=true;};
 	
 private:
-    	ContainerServices* m_services;
+	/**
+	 * Log filtering object
+	 */
+	IRA::CLogDike m_logDike;
+
+	ContainerServices* m_services;
 
 	/** It contains error information */	
 	CError m_Error;
