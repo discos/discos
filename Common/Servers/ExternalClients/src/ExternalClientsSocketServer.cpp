@@ -17,7 +17,7 @@ using namespace ComponentErrors;
 using namespace ManagementErrors;
 
 CExternalClientsSocketServer::CExternalClientsSocketServer (ContainerServices * service):CSocket (),
-m_services (service), m_logDike(_IRA_LOGDIKE_GETLOGGER)
+m_services (service), m_logDike(_IRA_LOGDIKE_GETLOGGER), m_peerAddress(""), m_peerPort(0)
 {
   AUTO_TRACE ("CExternalClientsSocketServer::CExternalClientsSocketServer()");
   setExternalClientSocketStatus (ExternalClientSocketStatus_NOTCNTD);
@@ -230,6 +230,9 @@ CExternalClientsSocketServer::cmdToScheduler ()
 	}
       if (Res == WOULDBLOCK)
 	setSockMode (m_Error, BLOCKING);
+
+      newExternalClientsSocketServer.getPeerName(m_peerAddress, m_peerPort);
+      ACS_LOG(LM_FULL_INFO, "CExternalClientsSocketServer::cmdToScheduler()", (LM_NOTICE, std::string("Got connection from " + std::string(m_peerAddress) + " " + std::to_string(m_peerPort)).c_str()));
     }
   m_accept = true;
 
@@ -602,7 +605,10 @@ CExternalClientsSocketServer::cmdToScheduler ()
     }
   else
     {
+      ACS_LOG(LM_FULL_INFO, "CExternalClientsSocketServer::cmdToScheduler()", (LM_NOTICE, std::string("Closed connection from " + std::string(m_peerAddress) + " " + std::to_string(m_peerPort)).c_str()));
       newExternalClientsSocketServer.Close (m_Error);
+      m_peerAddress = "";
+      m_peerPort = 0;
       m_accept = false;
     }
 }
