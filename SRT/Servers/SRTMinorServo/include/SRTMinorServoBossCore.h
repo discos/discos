@@ -15,7 +15,7 @@
 #include <enumpropROImpl.h>
 #include <SRTMinorServoBossS.h>
 #include <SRTMinorServoS.h>
-#include <AntennaBossC.h>
+#include <AntennaProxy.h>
 #include <ManagmentDefinitionsS.h>
 #include <thread>
 #include <chrono>
@@ -310,7 +310,7 @@ private:
     /**
      * Pointer to the AntennaBoss component.
      */
-    Antenna::AntennaBoss_var m_antennaBoss;
+    Antenna::AntennaBoss_proxy m_antennaBoss;
 
     /**
      * SRTMinorServoGeneralStatus object containing the status read from the PLC.
