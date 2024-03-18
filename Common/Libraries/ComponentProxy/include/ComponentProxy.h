@@ -55,10 +55,10 @@ class ComponentProxy
         ComponentProxy();
         ComponentProxy(const char*, maci::ContainerServices*);
         virtual ~ComponentProxy();
-        void loadDefault() throw (ComponentErrors::CouldntGetComponentExImpl);
+        void loadDefault(); //throw (ComponentErrors::CouldntGetComponentExImpl);
         void unload();
         //ComponentVar getComponentVar(){ return m_component_var;};
-        ComponentVar& operator->() throw (ComponentErrors::CouldntGetComponentExImpl);
+        ComponentVar& operator->(); //throw (ComponentErrors::CouldntGetComponentExImpl);
         void setError(){ m_error = true;};
         void resetError(){ m_error = false;};
         bool isError(){ return m_error;};
@@ -103,7 +103,7 @@ ComponentProxy<ComponentClass, ComponentVar>::~ComponentProxy()
 template <typename ComponentClass, typename ComponentVar>
 void
 ComponentProxy<ComponentClass, ComponentVar>::loadDefault()
-throw (ComponentErrors::CouldntGetComponentExImpl)
+//throw (ComponentErrors::CouldntGetComponentExImpl)
 {
     if(m_name == "")
     {
@@ -230,7 +230,7 @@ ComponentProxy<ComponentClass, ComponentVar>::setContainerServices(
 template <typename ComponentClass, typename ComponentVar>
 ComponentVar&
 ComponentProxy<ComponentClass, ComponentVar>::operator->()
-throw (ComponentErrors::CouldntGetComponentExImpl)
+//throw (ComponentErrors::CouldntGetComponentExImpl)
 {
     loadDefault();
     //return m_component_var.out();
