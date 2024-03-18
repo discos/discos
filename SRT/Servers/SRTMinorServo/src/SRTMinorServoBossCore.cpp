@@ -9,7 +9,7 @@ SRTMinorServoBossCore::SRTMinorServoBossCore(SRTMinorServoBossImpl& component) :
     m_park_thread(nullptr),
     m_tracking_thread(nullptr),
     m_scan_thread(nullptr),
-    m_antennaBoss(Antenna::AntennaBoss::_nil()),
+    m_antennaBoss("IDL:alma/Antenna/AntennaBoss:1.0", m_component.getContainerServices()),
     m_status(),
     m_motion_status(MOTION_STATUS_UNCONFIGURED),
     m_commanded_setup("Unknown"),
@@ -145,6 +145,14 @@ bool SRTMinorServoBossCore::status()
         {
             m_tracking.store(Management::MNG_FALSE);
         }
+    }
+    else if(motion_status == MOTION_STATUS_CONFIGURED)
+    {
+        m_tracking.store(Management::MNG_TRUE);
+    }
+    else
+    {
+        m_tracking.store(Management::MNG_FALSE);
     }
 
     return true;
@@ -1162,33 +1170,18 @@ void SRTMinorServoBossCore::closeScan(ACS::Time& close_time)
 double SRTMinorServoBossCore::getElevation(const ACS::Time& acs_time)
 {
     AUTO_TRACE("SRTMinorServoBossCore::getElevation()");
-    // TODO automatically try to get a new reference if the AntennaBoss component were to be deallocated
-    // What happens if we lose the reference? m_antennaBoss will not be _nil but getRawCoordinates will behave unexpectedly
 
-    // Retrieve the AntennaBoss component if it was not initialized yet
+    double azimuth, elevation;
+
     try
     {
-        if(CORBA::is_nil(m_antennaBoss))
-        {
-            m_antennaBoss = m_component.getContainerServices()->getComponent<Antenna::AntennaBoss>("ANTENNA/Boss");
-        }
-
-        double azimuth, elevation;
         m_antennaBoss->getRawCoordinates(acs_time, azimuth, elevation);
         elevation *= DR2D;
-        // If the antennaBoss didn't command any movement to the telescope yet we get an elevation of 0°
-        // We don't want to track an elevation of 0°, especially when DISCOS just started
-        // There is a high chance the antenna is still at around 90° of elevation
-        // We "initialize" the tracking to an elevation of 45°
         return elevation == 0.0 ? 45.0 : elevation;
     }
-    catch(maciErrType::CannotGetComponentExImpl& impl)
+    catch(ComponentErrors::CouldntGetComponentExImpl& ex)
     {
-        m_antennaBoss = Antenna::AntennaBoss::_nil();
-        _EXCPT(ComponentErrors::CouldntGetComponentExImpl, ex, "SRTMinorServoBossCore::getElevation()");
-        ex.setComponentName("ANTENNA/Boss");
         ex.addData("Reason", "Cannot get the ANTENNA/Boss component");
-        ex.log(LM_DEBUG);
         throw ex.getComponentErrorsEx();
     }
 }
