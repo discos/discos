@@ -1381,7 +1381,7 @@ void CSRTActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newP
         if(!usdCorrections)
         {
             ACS_SHORT_LOG ((LM_INFO, "File %s not found", m_lut.c_str()));
-            exit(-1);
+            return;
         }
         actuatorsCorrections.length(NPOSITIONS);
         for (int i = 1; i <= CIRCLES; i++)
@@ -1402,7 +1402,6 @@ void CSRTActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newP
         usdCounter = 0;
         for(unsigned int i = 0; i < SECTORS; i++)
         {
-            m_sector[i] = false;
             usdCounter += usdCounters[i];
         }
 
