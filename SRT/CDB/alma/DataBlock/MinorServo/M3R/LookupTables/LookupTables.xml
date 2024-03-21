@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+   - Author: Giuseppe Carboni
+   - History:
+ 	- 14-03-23 Created
+-->
+
+<SRTMinorServoLookupTable xmlns="urn:schemas-cosylab-com:SRTMinorServoLookupTable:1.0" 
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <CCB>           <axis>ROTATION</axis> <coefficients>0</coefficients></CCB>
+    <CCB_ASACTIVE>  <axis>ROTATION</axis> <coefficients>0</coefficients></CCB_ASACTIVE>
+    <XB>            <axis>ROTATION</axis> <coefficients>0</coefficients></XB>
+    <XB_ASACTIVE>   <axis>ROTATION</axis> <coefficients>0</coefficients></XB_ASACTIVE>
+
+</SRTMinorServoLookupTable>

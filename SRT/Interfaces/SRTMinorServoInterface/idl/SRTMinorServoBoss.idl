@@ -1,0 +1,86 @@
+#ifndef __SRTMINORSERVOBOSS_IDL__
+#define __SRTMINORSERVOBOSS_IDL__
+/***************************************************************\
+ *  Authors: 
+ *      Giuseppe Carboni <giuseppe.carboni@inaf.it>
+ *
+ *  Created: Mon Mar 06 12:30:00 CEST 2023
+ *  Last Modified: Mon Mar 06 12:30:00 CEST 2023
+\***************************************************************/
+
+#include <MinorServoBoss.idl>
+#include "SRTMinorServoCommon.idl"
+
+#pragma prefix "alma"
+
+module MinorServo
+{
+    interface SRTMinorServoBoss: MinorServoBoss
+    {
+        /**
+         * Boolean indicating whether the component is connected to the Leonardo Minor Servo system
+         */
+        readonly attribute Management::ROTBoolean connected;
+
+        /**
+         * Current configuration of the Leonardo minor servo system
+         */
+        readonly attribute ROSRTMinorServoFocalConfiguration current_configuration;
+
+        /**
+         * Boolean indicating whether the system is in simulation mode or not
+         */
+        readonly attribute Management::ROTBoolean simulation_enabled;
+
+        /**
+         * UNIX Epoch of the Leonardo minor servo system PLC machine
+         */
+        readonly attribute ACS::ROdouble plc_time;
+
+        /**
+         * Version of the software on the PLC machine
+         */
+        readonly attribute ACS::ROstring plc_version;
+
+        /**
+         * Enumeration indicating whether the system is controlled by VBrain or DISCOS
+         */
+        readonly attribute ROSRTMinorServoControlStatus control;
+
+        /**
+         * Boolean indicating whether all the axes are powered or not
+         */
+        readonly attribute Management::ROTBoolean power;
+
+        /**
+         * Boolean indicating whether the system entered an emergency status
+         */
+        readonly attribute Management::ROTBoolean emergency;
+
+        /**
+         * Position of the gregorian cover
+         */
+        readonly attribute ROSRTMinorServoGregorianCoverStatus gregorian_cover;
+
+        /**
+         * UNIX Epoch of the last executed command (STATUS commands are not shown here)
+         */
+        readonly attribute ACS::ROdouble last_executed_command;
+
+        /**
+         * This command sets all the minor servos involved in the current focal configuration to their position calculated from the elevation argument
+         * @param elevation, the elevation the minor servos should use to calculate their position
+         * @throw MinorServoErrors::MinorServoErrorsEx
+         */
+        void preset(in double elevation) raises (MinorServoErrors::MinorServoErrorsEx);
+
+        /**
+         * This command opens or closes the gregorian cover
+         * @param value, the desired gregorian cover position, accepted values are 'open', 'OPEN', 'closed' or 'CLOSED'
+         * @throw MinorServoErrors::MinorServoErrorsEx
+         */
+        //void setGregorianCoverPosition(in string value) raises (MinorServoErrors::MinorServoErrorsEx);
+    };
+};
+
+#endif

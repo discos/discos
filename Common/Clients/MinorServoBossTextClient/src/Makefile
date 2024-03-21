@@ -69,6 +69,9 @@ _tui_MinorServoBossTextClient_LIBS      = MinorServoBossStubs IRALibrary Managme
          TextWindowLibrary ClientErrors ComponentErrors ManagementErrors MinorServoErrors AntennaDefinitionsStubs \
 		 MinorServoDefinitionsStubs
 
+ifeq ($(STATION),SRT)
+	MinorServoBossTextClient_CFLAGS = -DCOMPONENT_INTERFACE_TPYE="\"IDL:alma/MinorServo/SRTMinorServoBoss:1.0\""
+endif
 
 SCRIPTS         = minorservoBossTui
 

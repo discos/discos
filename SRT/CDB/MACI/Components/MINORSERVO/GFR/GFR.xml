@@ -6,10 +6,9 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               
     Name="GFR"    
-    Code="WPServoImpl"
+    Code="SRTGenericMinorServoImpl"
     ImplLang="cpp"
-    Type="IDL:alma/MinorServo/WPServo:1.0"
+    Type="IDL:alma/MinorServo/SRTGenericMinorServo:1.0"
     Container="MinorServoContainer"
-	Default="true"
-
+    Default="true"
 />

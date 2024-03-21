@@ -6,9 +6,9 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               
     Name="PFP"    
-    Code="WPServoImpl"
+    Code="SRTProgramTrackMinorServoImpl"
     ImplLang="cpp"
-    Type="IDL:alma/MinorServo/WPServo:1.0"
+    Type="IDL:alma/MinorServo/SRTProgramTrackMinorServo:1.0"
     Container="MinorServoContainer"
 	Default="true"
 

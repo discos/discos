@@ -289,7 +289,7 @@ int main(int argc, char *argv[]) {
 		status_box->setStatusLook(Management::MNG_OK,CStyle(BLACK_GREEN,CStyle::BOLD));
 		status_box->setStatusLook(Management::MNG_WARNING,CStyle(BLACK_YELLOW,CStyle::BOLD));
 		status_box->setStatusLook(Management::MNG_FAILURE,CStyle(BLACK_RED,CStyle::BOLD));
-        _TW_SET_COMPONENT(motionInfo_field,18,3,23,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+        _TW_SET_COMPONENT(motionInfo_field,18,3,30,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 
         /* ****************************************************************** */
         _TW_SET_COMPONENT(userInput,0,WINDOW_HEIGHT-6,WINDOW_WIDTH-1,1,USER_INPUT_COLOR_PAIR,USER_INPUT_STYLE,NULL);
