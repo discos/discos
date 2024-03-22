@@ -51,7 +51,8 @@ CCommandLine::CCommandLine(ContainerServices *service): CSocket(),
 	// SRT configurations
 	m_SK00=false; m_SK00S=false;
 	m_SK77=false; m_SK77S=false;
-	m_SC00=false; m_SC00S=false;
+	m_SCC00=false; m_SCC00S=false;
+	m_SCH00=false; m_SCH00S=false;
 	m_SL00=false; m_SL00S=false;
 	m_SP00=false; m_SP00S=false;
 	m_stationSRT=false;
@@ -780,7 +781,8 @@ void CCommandLine::setDefaultConfiguration(const IRA::CString & config) throw (C
     if (m_stationSRT==true) {
         m_SK77=m_SK77S=false;
         m_SK00=m_SK00S=false;
-        m_SC00=m_SC00S=false;
+        m_SCC00=m_SCC00S=false;
+        m_SCH00=m_SCH00S=false;
         m_SL00=m_SL00S=false;
         m_SP00=m_SP00S=false;
         m_stokes=false;
@@ -797,10 +799,16 @@ void CCommandLine::setDefaultConfiguration(const IRA::CString & config) throw (C
             m_SK00=true;
             m_CK=true;
         }
-        if (config.Compare("SC00")==0) {
+        if (config.Compare("SCC00")==0) {
             m_filter=1250.0;
             m_inputsNumber=m_sectionsNumber;
-            m_SC00=true;
+            m_SCC00=true;
+            m_CK=true;
+        }
+        if (config.Compare("SCH00")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SCH00=true;
             m_CK=true;
         }
         if (config.Compare("SL00")==0) {
@@ -833,11 +841,19 @@ void CCommandLine::setDefaultConfiguration(const IRA::CString & config) throw (C
             m_stokes=true;
             m_CK=true;
         }
-        if (config.Compare("SC00S")==0) {
+        if (config.Compare("SCC00S")==0) {
             m_filter=1250.0;
             m_inputsNumber=m_sectionsNumber;
             m_sectionsNumber=m_sectionsNumber/2;
-            m_SC00S=true;
+            m_SCC00S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SCH00S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SCH00S=true;
             m_stokes=true;
             m_CK=true;
         }
