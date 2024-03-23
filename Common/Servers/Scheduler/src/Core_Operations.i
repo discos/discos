@@ -1175,3 +1175,57 @@ void CCore::_startSchedule(const char* scheduleFile,const char * startSubScan) t
 		m_schedExecuter->startSchedule(scheduleFile,startSubScan);
 	}
 }
+
+void CCore::_setAttenuations(const ACS::longSeq& attenuations, IRA::CString& message) throw (
+		ComponentErrors::CouldntGetComponentExImpl,
+		ComponentErrors::CORBAProblemExImpl,
+		ParserErrors::NotEnoughParametersExImpl,
+		ParserErrors::TooManyParametersExImpl)
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
+	loadDefaultBackend(); // throw ComponentErrors::CouldntGetComponentExImpl& err)
+
+	ACS::longSeq inputSection;
+	ACSErr::Completion_var comp;
+	try
+	{
+		inputSection = *m_defaultBackend->inputSection()->get_sync(comp.out());
+	}
+	catch(CORBA::SystemException& ex)
+	{
+		_EXCPT(ComponentErrors::CORBAProblemExImpl, impl, "CCore::_setAttenuations()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		throw impl;
+	}
+
+	if(attenuations.length() < inputSection.length())
+	{
+		_EXCPT(ParserErrors::NotEnoughParametersExImpl, impl, "CCore::_setAttenuations()");
+		throw impl;
+	}
+	else if(attenuations.length() > inputSection.length())
+	{
+		_EXCPT(ParserErrors::TooManyParametersExImpl, impl, "CCore::_setAttenuations()");
+		throw impl;
+	}
+
+	std::string error = "";
+
+	for(size_t i = 0; i < inputSection.length(); i++)
+	{
+		if(attenuations[i] != -1) // -1 means the user typed an asterisk for this section, keep the same attenuation
+		{
+			try
+			{
+				m_defaultBackend->setAttenuation(inputSection[i], attenuations[i]);
+			}
+			catch(...)
+			{
+				error += std::string(error.empty() ? "" : "\n") + "Could not set attenuation for section " + std::to_string(inputSection[i]);
+			}
+		}
+	}
+
+	error.empty() ? message.Format("") : message.Format("STR %s", error.c_str());
+}

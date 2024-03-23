@@ -260,4 +260,19 @@ void _startRecording(const long& subScanId,const ACS::TimeInterval& duration) th
  */
 void _terminateScan() throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl);
 
+/**
+ * Sets all the sections attenuations with a single command
+ * @param attenuations an ACS::doubleSeq containing all the desired sections attenuations
+ * @param message a return message that will return a list of sections that the system was not able to configure
+ * @throw ComponentErrors::CouldntGetComponentExImpl when the default backend component was not reachable
+ * @throw ComponentErrors::CORBAProblemExImpl when something went wrong while trying to read the current sections from the default backend component
+ * @throw ParserErrors::NotEnoughParametersExImpl when the user specifies less attenuations values than the currently configured number of sections
+ * @throw ParserErrors::TooManyParametersExImpl when the user specifies more attenuations values than the currently configured number of sections
+ */
+void _setAttenuations(const ACS::longSeq& attenuations, IRA::CString& message) throw (
+		ComponentErrors::CouldntGetComponentExImpl,
+		ComponentErrors::CORBAProblemExImpl,
+		ParserErrors::NotEnoughParametersExImpl,
+		ParserErrors::TooManyParametersExImpl);
+
 #endif /* CORE_OPERATIONS_H_ */

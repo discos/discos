@@ -32,39 +32,7 @@ C11_IGNORE_WARNING_POP
 
 #include "SP_typeConversion.h"
 
-#define _SP_JOLLYCHARACTER '*'
-#define _SP_JOLLYCHARACTER_REPLACEMENT "-1"
-
 namespace SimpleParser {
-
-#define _SP_WILDCARD_CLASS(NAME,REPLACE) \
-class NAME { \
-public: \
-	static char *replace(const char *str) { \
-		if (str[0]==_SP_JOLLYCHARACTER) { \
-			char * out=new char[strlen(REPLACE)+1]; \
-			strcpy(out,REPLACE); \
-			return out; \
-		} \
-		else { \
-			char *tmp=new char[strlen(str)+1]; \
-			strcpy(tmp,str); \
-			return tmp; \
-		} \
-	} \
-}; \
-
-_SP_WILDCARD_CLASS(_default_wildcard,_SP_JOLLYCHARACTER_REPLACEMENT);
-
-class _no_wildcard
-{
-public:
-	static char *replace(const char *str) {
-		char *tmp=new char[strlen(str)+1];
-		strcpy(tmp,str);
-		return tmp;
-	}
-};
 
 /**
  * This is the base class for all types that are known to the parser. New types can be easily added, just providing the converter class.
