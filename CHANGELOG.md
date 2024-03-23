@@ -102,7 +102,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/
                  The syntax for the command is the following: `enable=X;Y` with X and Y representing the 2 feeds the user would like to use for the Nodding observation.
                  This command must be placed in the <schedule_name>.bck file in order to work properly.
     issue #619 - Active surface components are now capable of changing look-up tables on the fly via the `asSetLUT` command
-    issue #806   Added support for the C-band receiver at the SRT
+    issue #806 - Added support for the C-band receiver at the SRT
+    issue #855 - Added `setAttenuations` command
 
 ## Fixed
 ## Changed
