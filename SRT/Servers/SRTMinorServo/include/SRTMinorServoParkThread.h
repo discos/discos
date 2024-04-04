@@ -11,8 +11,8 @@
 #include <ComponentErrors.h>
 #include "SRTMinorServoBossCore.h"
 
-// TODO: fine-tune this with the real hardware. The correct procedure can easily exceed this timeout, it should be increased accordingly.
-#define PARK_TIMEOUT 60
+// Same timeout as the one defined for the SETUP procedure
+#define PARK_TIMEOUT 120
 
 class SRTMinorServoBossCore;
 

@@ -11,8 +11,8 @@
 #include <ComponentErrors.h>
 #include "SRTMinorServoBossCore.h"
 
-// TODO: fine-tune this with the real hardware. The correct procedure can easily exceed this timeout, it should be increased accordingly.
-#define SETUP_TIMEOUT 60
+// GFR from -160 to 160 takes approximately 110 seconds
+#define SETUP_TIMEOUT 120
 
 class SRTMinorServoBossCore;
 
