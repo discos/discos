@@ -103,6 +103,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/
                  This command must be placed in the <schedule_name>.bck file in order to work properly.
     issue #619 - Active surface components are now capable of changing look-up tables on the fly via the `asSetLUT` command
     issue #806   Added support for the C-band receiver at the SRT
+    project #2 - Completed integration of new SRT Minor Servos
 
 ## Fixed
 ## Changed
