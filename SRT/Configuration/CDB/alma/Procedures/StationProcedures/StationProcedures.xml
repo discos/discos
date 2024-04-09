@@ -20,6 +20,7 @@
 <Procedure name="setupCCG" args="0">
 <body>
 	antennaSetup=CCG
+	servoSetup=CCG
 	receiversSetup=CCG
 	chooseBackend=TotalPower
 	initialize=CCG

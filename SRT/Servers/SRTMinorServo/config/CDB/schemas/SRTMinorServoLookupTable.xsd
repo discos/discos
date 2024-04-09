@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+    Author: Giuseppe Carboni, giuseppe.carboni@inaf.it
+-->
+<xs:schema
+    targetNamespace="urn:schemas-cosylab-com:SRTMinorServoLookupTable:1.0"
+    xmlns="urn:schemas-cosylab-com:SRTMinorServoLookupTable:1.0"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+
+    <xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd" />
+    <xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd" />
+
+    <xs:complexType name="SRTMinorServoCoefficientsType">
+     <xs:sequence>
+      <xs:element name="axis" type="xs:string" />
+      <xs:element name="coefficients" type="xs:string" />
+     </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="SRTMinorServoLookupTableType">
+     <xs:sequence>
+      <xs:element name="LLP"                type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="PPP"                type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="PLP"                type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="HHP"                type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="XKP"                type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="CCG"                type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="CCG_ASACTIVE"       type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="KKG"                type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="KKG_ASACTIVE"       type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="WWG"                type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="WWG_ASACTIVE"       type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="QQG"                type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="QQG_ASACTIVE"       type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="TRI"                type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="TRI_ASACTIVE"       type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="MISTRAL"            type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="MISTRAL_ASACTIVE"   type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="CCB"                type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="CCB_ASACTIVE"       type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="XB"                 type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="XB_ASACTIVE"        type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+     </xs:sequence>
+    </xs:complexType>
+
+    <xs:element name="SRTMinorServoLookupTable" type="SRTMinorServoLookupTableType" />
+
+</xs:schema>

@@ -1,11 +1,10 @@
 # CPP UNIT TESTING SETUP
 #--------------
-# GTEST_HOME=/usr/local/include/gtest
-# GMOCK_HOME=/usr/local/include/gmock
-# GTEST_LIBS=gtest gtest_main
+GTEST_HOME=/usr/local/include/gtest
+GMOCK_HOME=/usr/local/include/gmock
+GTEST_LIBS=gtest gtest_main
 
-# USER_INC=-I$(GTEST_HOME) -I$(GMOCK_HOME)
-# USER_LIBS=C++ pthread
+USER_INC=-I$(GTEST_HOME) -I$(GMOCK_HOME)
 # END OF CPP UNIT TESTING SETUP
 #---------------------
 
@@ -15,9 +14,26 @@
 # unittest_OBJECTS = unittest
 # unittest_LIBS = $(GTEST_LIBS) <ComponentNameImpl>
 
-# EXECUTABLES_L = unittest
-# unittest_OBJECTS = unittest
-# unittest_LIBS = $(GTEST_LIBS) 
+EXECUTABLES_L = SRPProgramTrackTest #DerotatorProgramTrackTest CombinedProgramTrackTest ReadStatusOnlyTest
+
+SRPProgramTrackTest_OBJECTS = SRPProgramTrackTest
+SRPProgramTrackTest_CFLAGS = -std=c++17 -fconcepts
+SRPProgramTrackTest_LIBS = $(GTEST_LIBS) SRTMinorServoSocketLibrary SRTMinorServoCommandLibrary IRALibrary ComponentErrors boost_filesystem
+
+DerotatorProgramTrackTest_OBJECTS = DerotatorProgramTrackTest
+DerotatorProgramTrackTest_CFLAGS = -std=c++17
+DerotatorProgramTrackTest_LIBS = $(GTEST_LIBS) SRTMinorServoSocketLibrary SRTMinorServoCommandLibrary IRALibrary ComponentErrors boost_filesystem
+DerotatorProgramTrackTest_LDFLAGS = -lstdc++ -lpthread
+
+CombinedProgramTrackTest_OBJECTS = CombinedProgramTrackTest
+CombinedProgramTrackTest_CFLAGS = -std=c++17
+CombinedProgramTrackTest_LIBS = $(GTEST_LIBS) SRTMinorServoSocketLibrary SRTMinorServoCommandLibrary IRALibrary ComponentErrors boost_filesystem
+CombinedProgramTrackTest_LDFLAGS = -lstdc++ -lpthread
+
+ReadStatusOnlyTest_OBJECTS = ReadStatusOnlyTest
+ReadStatusOnlyTest_CFLAGS = -std=c++17
+ReadStatusOnlyTest_LIBS = $(GTEST_LIBS) SRTMinorServoSocketLibrary SRTMinorServoCommandLibrary IRALibrary ComponentErrors boost_filesystem
+ReadStatusOnlyTest_LDFLAGS = -lstdc++ -lpthread
 
 # END OF CUSTOMIZATION
 # do not edit below this line
@@ -39,7 +55,11 @@ endif
 
 do_unit: all
 	@echo "running cpp unit tests"
-	../bin/unittest --gtest_output=xml:results/cppunittest.xml
+	../bin/SRTMinorServoSocketTest --gtest_output=xml:results/cppSRTMinorServoSocketTest.xml
+	../bin/SRPProgramTrackTest --gtest_output=xml:results/cppSRPProgramTrackTest.xml
+	../bin/DerotatorProgramTrackTest --gtest_output=xml:results/cppDerotatorProgramTrackTest.xml
+	../bin/CombinedProgramTrackTest --gtest_output=xml:results/cppCombinedProgramTrackTest.xml
+	../bin/ReadStatusOnlyTest --gtest_output=xml:results/cppReadStatusOnlyTest.xml
 
 do_pyunit:
 	@echo "running python unit tests"

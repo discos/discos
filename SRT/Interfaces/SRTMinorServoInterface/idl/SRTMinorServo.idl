@@ -1,0 +1,283 @@
+#ifndef __SRTMINORSERVO_IDL__
+#define __SRTMINORSERVO_IDL__
+/***************************************************************\
+ *  Authors: 
+ *      Giuseppe Carboni <giuseppe.carboni@inaf.it>
+ *
+ *  Created: Mon Mar 06 12:30:00 CEST 2023
+\***************************************************************/
+
+#include "SRTMinorServoCommon.idl"
+
+#pragma prefix "alma"
+
+module MinorServo
+{
+    /**
+     * This IDL interface describes the CORBA interface of a common SRTMinorServo component.
+     * This is simply the base interface from which the SRTGenericMinorServo and SRTProgramTrackMinorServo interfaces inherit.
+     */
+    interface SRTBaseMinorServo : ACS::CharacteristicComponent
+    {
+        /**
+         * This property tells if all the servo axes are enabled
+         */
+        readonly attribute Management::ROTBoolean enabled;
+
+        /**
+         * This property tells the status of the servo drive cabinet
+         */
+        readonly attribute ROSRTMinorServoCabinetStatus drive_cabinet_status;
+
+        /**
+         * This property tells if the servo is in blocked state and cannot move
+         */
+        readonly attribute Management::ROTBoolean block;
+
+        /**
+         * This property returns the current operative mode of the servo
+         */
+        readonly attribute ROSRTMinorServoOperativeMode operative_mode;
+
+        /**
+         * This property returns the sequence of statuses of the servo physical axes
+         */
+        readonly attribute ACS::RObooleanSeq physical_axes_enabled;
+
+        /**
+         * This property returns the sequence of current positions of the physical axes of the servo
+         */
+        readonly attribute ACS::ROdoubleSeq physical_positions;
+
+        /**
+         * This property returns the number of virtual axes of the servo
+         */
+        readonly attribute ACS::ROlong virtual_axes;
+
+        /**
+         * This property returns the current plain positions of the virtual axes of the servo
+         * The plain positions are the positions returned from the Leonardo servo system, without subtracting the offsets
+         */
+        readonly attribute ACS::ROdoubleSeq plain_virtual_positions;
+
+        /**
+         * This property returns the current positions of the virtual axes of the servo
+         * The positions returned by this property equals to the plain virtual positions minus the offsets
+         */
+        readonly attribute ACS::ROdoubleSeq virtual_positions;
+
+        /**
+         * This property returns the current offsets of the virtual axes of the servo
+         * The offset values are the sum of user and system offsets
+         */
+        readonly attribute ACS::ROdoubleSeq virtual_offsets;
+
+        /**
+         * This property returns the current user offsets of the virtual axes of the servo
+         */
+        readonly attribute ACS::ROdoubleSeq virtual_user_offsets;
+
+        /**
+         * This property returns the current system offsets of the virtual axes of the servo
+         */
+        readonly attribute ACS::ROdoubleSeq virtual_system_offsets;
+
+        /**
+         * This property indicates whether the servo is in use in the current configuration
+         */
+        readonly attribute Management::ROTBoolean in_use;
+
+        /**
+         * This property returns the configuration of the servo. Each configuration has different positioning coefficients
+         */
+        readonly attribute ACS::ROstring current_setup;
+
+        /**
+         * This method asks the PLC the status for the corresponding servo
+         * @throw MinorServoErrors::MinorServoErrorsEx when trying to reset the offsets when they don't match the ones loaded into the hardware
+         * @return true if the servo is not in an error state, false otherwise
+         */
+        boolean status() raises (MinorServoErrors::MinorServoErrorsEx);
+
+        /**
+         * This method commands a STOW operation to the servo
+         * @param stow_position the index of the position we want the servo to stow to
+         * @throw MinorServoErrors::MinorServoErrorsEx if there has been a communication error or if the command was not accepted
+         */
+        void stow(in long stow_position) raises (MinorServoErrors::MinorServoErrorsEx);
+
+        /**
+         * This method commands a STOP operation to the servo
+         * @throw MinorServoErrors::MinorServoErrorsEx if there has been a communication error or if the command was not accepted
+         */
+        void stop() raises (MinorServoErrors::MinorServoErrorsEx);
+
+        /**
+         * This method commands a PRESET operation to the servo
+         * @param coordinates, a sequence of double
+         * @throw MinorServoErrors::MinorServoErrorsEx if the length of the coordinates sequence doesn't match the number of virtual axes of the servo,
+         *        if the resulting position summing the offsets would go outside the accepted range of the servo,
+         *        if there has been a communication error or if the command was not accepted
+         */
+        void preset(in ACS::doubleSeq coordinates) raises (MinorServoErrors::MinorServoErrorsEx);
+
+        /**
+         * This method loads from the CDB the positioning coefficients related to the given configuration
+         * @param configuration the string representing the name of the table from which the coefficients will be loaded
+         * @throw ComponentErrors::ComponentErrorsEx when there is an error while trying to load the table for the given configuration
+         * @return true if the servo is in use with the current configuration, false otherwise
+         */
+        boolean setup(in string configuration) raises (ComponentErrors::ComponentErrorsEx);
+
+        /**
+         * This method calculates the servo coordinates for a given elevation
+         * @param elevation the elevation to use for the coordinates calculation, expressed in degrees
+         * @throw MinorServoErrors::MinorServoErrorsEx when the servo has not been configured yet and has not loaded any coefficient for the position calculation
+         * @return the calculated coordinates as a sequence of doubles
+         */
+        ACS::doubleSeq calcCoordinates(in double elevation) raises (MinorServoErrors::MinorServoErrorsEx);
+
+        /**
+         * This method returns the user offsets of the servo
+         * @return the user offsets as a sequence of doubles
+         */
+        ACS::doubleSeq getUserOffsets();
+
+        /**
+         * This method sets the user offset of the servo for a given axis
+         * @param axis_name a string corresponding to the axis we want to set the offset for
+         * @param offset the absolute user offset value for the given servo axis
+         * @throw MinorServoErrors::MinorServoErrorsEx when the given axis is unknown, when the sum of user and system offsets for the given axis are out of range,
+         *        when there has been a communication error or when the command was not accepted
+         */
+        void setUserOffset(in string axis_name, in double offset) raises (MinorServoErrors::MinorServoErrorsEx);
+
+        /**
+         * This method sets the user offsets to zero for all the servo axes
+         * @throw MinorServoErrors::MinorServoErrorsEx when there has been a communication error or when the command was not accepted
+         */
+        void clearUserOffsets() raises (MinorServoErrors::MinorServoErrorsEx);
+
+        /**
+         * This method returns the system offsets of the servo
+         * @return the system offsets as a sequence of doubles
+         */
+        ACS::doubleSeq getSystemOffsets();
+
+        /**
+         * This method sets the system offset of the servo for a given axis
+         * @param axis_name a string corresponding to the axis we want to set the offset for
+         * @param offset the absolute system offset value for the given servo axis
+         * @throw MinorServoErrors::MinorServoErrorsEx when the given axis is unknown, when the sum of user and system offsets for the given axis are out of range,
+         *        when there has been a communication error or when the command was not accepted
+         */
+        void setSystemOffset(in string axis_name, in double offset) raises (MinorServoErrors::MinorServoErrorsEx);
+
+        /**
+         * This method sets the system offsets to zero for all the servo axes
+         * @throw MinorServoErrors::MinorServoErrorsEx when there has been a communication error or when the command was not accepted
+         */
+        void clearSystemOffsets() raises (MinorServoErrors::MinorServoErrorsEx);
+
+        /**
+         * This method resets the Leonardo offsets to the sum of the DISCOS user and system offsets.
+         * @throw MinorServoErrors::MinorServoErrorsEx when there has been a communication error or when the command was not accepted
+         */
+        void reloadOffsets() raises (MinorServoErrors::MinorServoErrorsEx);
+
+        /**
+         * This method returns in the two parameters passed as reference, the names and the units of measure of the axes of the servo, respectively
+         * @param axes_names the sequence of strings containing the names of the virtual axes of the servo
+         * @param axes_units the sequence of strings containing the units of measure of each virtual axis of the servo
+         */
+        void getAxesInfo(out ACS::stringSeq axes_names, out ACS::stringSeq axes_units);
+
+        /**
+         * This method returns the positions of all the axes of the servo for a given time
+         * @param acs_time the ACS::Time for which we want to retrieve the servo positions
+         * @throw MinorServoErrors::MinorServoErrorsEx when the position history is empty
+         * @return a sequence of doubles containing the positions of the servo for the given time
+         */
+        ACS::doubleSeq getAxesPositions(in ACS::Time acs_time) raises (MinorServoErrors::MinorServoErrorsEx);
+
+        /**
+         * This method returns the time it would take for the servo to get from a starting position to a destination position
+         * An empty starting position means the function will calculate the travel time from the current position, taking into account the current speed as well
+         * To account for the current speed, it is sufficient to call the method in this way:
+         * getTravelTime(ACS::doubleSeq(), <destination_position>);
+         * @param starting_position the sequence of starting axes positions or an empty sequence
+         * @param destination_position the sequence of destination axes positions, mandatory
+         * @throw MinorServoErrors::MinorServoErrorsEx when receiving a starting position sequence of length different from zero or the number of virtual axes of the servo,
+         *        when receiving a destination position sequence of lenght different from the number of virtual axes of the servo
+         * @return an ACS::TimeInterval object representing the total duration of the movement from the starting position to the destination position
+         */
+        ACS::TimeInterval getTravelTime(in ACS::doubleSeq starting_position, in ACS::doubleSeq destination_position);
+
+        /**
+         * This method returns the minimum and maximun ranges for all the servo axes in the given sequence passed by reference
+         * @param min_ranges the minimum range of the servo axes
+         * @param max_ranges the maximum range of the servo axes
+         */
+        void getAxesRanges(out ACS::doubleSeq min_ranges, out ACS::doubleSeq max_ranges);
+    };
+
+    /**
+     * This IDL interface describes the CORBA interface of a generic SRTMinorServo component.
+     * This interface is derived from the SRTBaseMinorServo and it is empty.
+     * It's sole purpose is to generate the POA_MinorServo::SRTGenericMinorServo class needed for the components.
+     */
+    interface SRTGenericMinorServo : SRTBaseMinorServo {};
+
+    /**
+     * This IDL interface describes the CORBA interface of a ProgramTrack-capable SRTMinorServo component.
+     * It extends the SRTBaseMinorServo interface with some more attributes and methods described below.
+     */
+    interface SRTProgramTrackMinorServo : SRTBaseMinorServo
+    {
+        /**
+         * This property indicates whether the servo system is tracking the given trajectory
+         */
+        readonly attribute Management::ROTBoolean tracking;
+
+        /**
+         * This property indicates the ID of the trajectory. It always corresponds to starting time of the trajectory, expressed as the UNIX Epoch * 1000 (long)
+         */
+        readonly attribute ACS::ROlong trajectory_id;
+
+        /**
+         * This property indicates the total number of points loaded into the current trajectory
+         */
+        readonly attribute ACS::ROlong total_trajectory_points;
+
+        /**
+         * This property indicates the number of points of the current trajectory which remain to be tracked
+         */
+        readonly attribute ACS::ROlong remaining_trajectory_points;
+
+        /**
+         * This property returns the sequence of tracking error for each virtual axis of the servo
+         */
+        readonly attribute ACS::ROdoubleSeq tracking_error;
+
+        /**
+         * This method loads a set of coordinates that have to be tracked by the servo system
+         * @param trajectory_id the ID of the trajectory to which the current point belongs
+         * @param point_id the ID of the point inside the current trajectory. It must be a consecutive number for the servo system to acknowledge
+         * @param point_time an ACS::Time object indicating the time associated with the coordinates to be tracked.
+         *        Only the start time is sent to the servo system and the points after are spaced by 0.2 seconds from one another.
+         *        It is still necessary to fill this field in order to associate a time to the coordinates inside the component.
+         * @param coordinates the coordinates to track at the given time
+         * @throw MinorServoErrorsEx when the length of the coordinates sequence does not match the number of virtual axis of the servo system,
+         *        when there has been a communication error or when the command was not accepted
+         */
+        void programTrack(in long trajectory_id, in long point_id, in ACS::Time point_time, in ACS::doubleSeq coordinates);
+
+        /**
+         * This method returns a boolean indicating if the servo is tracking or not
+         * @return true if the servo is tracking, false otherwise
+         */
+        boolean isTracking();
+    };
+};
+
+#endif
