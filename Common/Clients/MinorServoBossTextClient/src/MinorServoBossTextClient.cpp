@@ -279,7 +279,7 @@ int main(int argc, char *argv[]) {
         userInput=new TW::CInputCommand();
         
         /** setting up the properties of the components of the frame controls */
-        _TW_SET_COMPONENT(actualSetup_field,18,0,12,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+        _TW_SET_COMPONENT(actualSetup_field,18,0,20,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
         tracking_display->setPosition(CPoint(18,1));
         tracking_display->setOrientation(TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>::HORIZONTAL);
         tracking_display->setFormatFunction(boolFormat,NULL);
