@@ -119,16 +119,31 @@
 </body>
 </Procedure>
 
+<Procedure name="setupMISTRAL" args="0">
+<body>
+	antennaSetup=MISTRAL
+	servoSetup=MISTRAL
+	receiversSetup=KKG
+	receiversMode=SINGLEDISH
+	chooseBackend=TotalPower
+	initialize=CCG
+	device=0
+	calOff
+	restFrequency=0
+	azelOffsets=0d,0d
+</body>
+</Procedure>
+
 <Procedure name="telescopePark" args="0">
 <body>
-	goTo=180d,89.8d
+	goTo=*,89.8d
+	receiversPark
+	servoPark
+	asPark
 	waitOnSource
 	antennaStop
 	wait=1
 	antennaPark
-	receiversPark
-	servoPark
-	asPark
 	logMessage=Telescope is now parked
 </body>
 </Procedure>
