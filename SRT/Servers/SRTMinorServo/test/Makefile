@@ -14,11 +14,15 @@ USER_INC=-I$(GTEST_HOME) -I$(GMOCK_HOME)
 # unittest_OBJECTS = unittest
 # unittest_LIBS = $(GTEST_LIBS) <ComponentNameImpl>
 
-EXECUTABLES_L = SRPProgramTrackTest #DerotatorProgramTrackTest CombinedProgramTrackTest ReadStatusOnlyTest
+EXECUTABLES_L = SRPProgramTrackTest PFPProgramTrackTest #DerotatorProgramTrackTest CombinedProgramTrackTest ReadStatusOnlyTest
 
 SRPProgramTrackTest_OBJECTS = SRPProgramTrackTest
 SRPProgramTrackTest_CFLAGS = -std=c++17 -fconcepts
 SRPProgramTrackTest_LIBS = $(GTEST_LIBS) SRTMinorServoSocketLibrary SRTMinorServoCommandLibrary IRALibrary ComponentErrors boost_filesystem
+
+PFPProgramTrackTest_OBJECTS = PFPProgramTrackTest
+PFPProgramTrackTest_CFLAGS = -std=c++17 -fconcepts
+PFPProgramTrackTest_LIBS = $(GTEST_LIBS) SRTMinorServoSocketLibrary SRTMinorServoCommandLibrary IRALibrary ComponentErrors boost_filesystem
 
 DerotatorProgramTrackTest_OBJECTS = DerotatorProgramTrackTest
 DerotatorProgramTrackTest_CFLAGS = -std=c++17
