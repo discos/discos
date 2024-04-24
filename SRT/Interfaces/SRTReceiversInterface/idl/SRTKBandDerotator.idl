@@ -11,6 +11,14 @@
 module Receivers {
 
     interface SRTKBandDerotator : GenericDerotator {
+
+        /**
+         * <h3>Methods</h3>:
+         * <ul>
+         *     <li>setSpeed(): set the derotator speed, in rpm</li>
+         *     <li>getSpeed(): get the derotator speed, in rpm</li>
+         * </ul>
+         */
  
         /** Computation of the sensor lenght
          *
@@ -104,9 +112,32 @@ module Receivers {
             ComponentErrors::ComponentErrorsEx
         );
 
-	};
+
+        /**
+         * Set the derotator speed
+         *
+         * @arg speed speed in rpm
+         * @throw ComponentErrors::ComponentErrorsEx,
+         * @throw DerotatorErrors::DerotatorErrorsEx
+         */
+        void setSpeed(in unsigned long speed) raises (
+            ComponentErrors::ComponentErrorsEx,
+            DerotatorErrors::DerotatorErrorsEx
+        );
 
 
+        /**
+         * Get the derotator speed
+         *
+         * @return the derotator speed in rpm
+         * @throw ComponentErrors::ComponentErrorsEx,
+         * @throw DerotatorErrors::DerotatorErrorsEx
+         */
+        unsigned long getSpeed() raises (
+            ComponentErrors::ComponentErrorsEx,
+            DerotatorErrors::DerotatorErrorsEx
+        );
+    };
 };
 
 #endif
