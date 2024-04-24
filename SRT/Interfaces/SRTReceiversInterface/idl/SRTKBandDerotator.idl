@@ -15,6 +15,7 @@ module Receivers {
         /**
          * <h3>Methods</h3>:
          * <ul>
+         *     <li>powerOff(): switch the power amplifier off </li>
          *     <li>setSpeed(): set the derotator speed, in rpm</li>
          *     <li>getSpeed(): get the derotator speed, in rpm</li>
          * </ul>
@@ -113,6 +114,14 @@ module Receivers {
         );
 
 
+        /** Switch the power amplifier off
+         *
+         * @throw CORBA::SystemException
+         * @throw ComponentErrors::ComponentErrorsEx
+         */
+        void powerOff() raises (ComponentErrors::ComponentErrorsEx);
+
+
         /**
          * Set the derotator speed
          *
@@ -137,6 +146,8 @@ module Receivers {
             ComponentErrors::ComponentErrorsEx,
             DerotatorErrors::DerotatorErrorsEx
         );
+
+
     };
 };
 

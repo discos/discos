@@ -43,7 +43,6 @@ module Receivers {
      * <h3>Methods</h3>:
      * <ul>
      *     <li>setup(): allow the derotator to be ready to move</li>
-     *     <li>powerOff(): switch the power amplifier off </li>
      *     <li>setPosition(): set the derotator position</li>
      *     <li>getActPosition(): return the actPosition value</li>
      *     <li>getCmdPosition(): return the cmdPosition value</li>
@@ -121,14 +120,6 @@ module Receivers {
             DerotatorErrors::DerotatorErrorsEx, 
             ComponentErrors::ComponentErrorsEx
         );
-
-
-        /** Switch the power amplifier off
-         *
-         * @throw CORBA::SystemException
-         * @throw ComponentErrors::ComponentErrorsEx
-         */
-        void powerOff() raises (ComponentErrors::ComponentErrorsEx);
 
 
         /** 
