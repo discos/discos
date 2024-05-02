@@ -58,7 +58,8 @@ module Receivers {
      *     <li>isSlewing(): return true when the derotator is moving</li>
      * </ul> 
      */
-    interface GenericDerotator : ACS::CharacteristicComponent {
+    interface GenericDerotator
+    {
        
         /** 
          * This property returns the sensor encoder position in the user

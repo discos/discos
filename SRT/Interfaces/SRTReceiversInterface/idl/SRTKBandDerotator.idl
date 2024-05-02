@@ -10,7 +10,8 @@
 
 module Receivers {
 
-    interface SRTKBandDerotator : GenericDerotator {
+    interface SRTKBandDerotator : GenericDerotator, ACS::CharacteristicComponent
+    {
 
         /**
          * <h3>Methods</h3>:
