@@ -18,11 +18,12 @@
     #define ADDRESS             std::string("192.168.200.13")
     #define PORT                4758
 #endif
-#define NOISE_THRESHOLD     1
 #define TIMEGAP             0.2
 #define ADVANCE_TIMEGAP     2.6
-#define MIN_RANGES          std::vector<double>{ -1490, -200, -1 }
-#define MAX_RANGES          std::vector<double>{ 1490, 50, 76 }
+//#define MIN_RANGES          std::vector<double>{ -1490, -200, -1 }
+//#define MAX_RANGES          std::vector<double>{ 1490, 50, 76 }
+#define MIN_RANGES          std::vector<double>{ -1000, -100, 0 }
+#define MAX_RANGES          std::vector<double>{ 1000, 25, 20 }
 #define MAX_SPEED           std::vector<double>{ 25, 5, 0.42 }
 #define STATUS_PERIOD       0.01
 
@@ -155,29 +156,82 @@ protected:
         return currentElongations;
     }
 
-    static bool moveAxis(std::vector<double> &coordinates, int axis_to_move, int sign)
+    bool moveAxis(std::vector<double>& coordinates, unsigned int& axis_to_move, int& sign)
     {
-        double starting_sign = coordinates[axis_to_move] > 0 ? 1 : (coordinates[axis_to_move] < 0 ? -1 : 0);
+        bool last_segment = false;
+        bool go_idle = false;
+        double starting_position = coordinates[axis_to_move];
+
+        if(startingCoordinates[axis_to_move] == MIN_RANGES[axis_to_move] || startingCoordinates[axis_to_move] == MAX_RANGES[axis_to_move])
+        {
+            if(starting_position == startingCoordinates[axis_to_move])
+            {
+                // We just started the trajectory for the current axis, correct the sign eventually
+                if(startingCoordinates[axis_to_move] == MIN_RANGES[axis_to_move])
+                {
+                    // Only above
+                    sign = 1;
+                }
+                else
+                {
+                    // Only below
+                    sign = -1;
+                }
+            }
+            else
+            {
+                // We are executing the trajectory, check if we are already headed towards the starting position
+                if((startingCoordinates[axis_to_move] == MIN_RANGES[axis_to_move] && sign < 0) || (startingCoordinates[axis_to_move] == MAX_RANGES[axis_to_move] && sign > 0))
+                {
+                    last_segment = true;
+                }
+            }
+        }
+        else if(starting_position < startingCoordinates[axis_to_move] && sign > 0)
+        {
+            last_segment = true;
+        }
+
         double offset_to_add = MAX_SPEED[axis_to_move] / 5;
-        coordinates[axis_to_move] += sign * offset_to_add;
-        double ending_sign = coordinates[axis_to_move] > 0 ? 1 : (coordinates[axis_to_move] < 0 ? -1 : 0);
-        if(starting_sign == -1 && ending_sign >= 0)
+        double ending_position = starting_position + sign * offset_to_add;
+
+        if(ending_position >= MAX_RANGES[axis_to_move])
         {
-            // Zero crossed
-            coordinates[axis_to_move] = 0.0;
-            return false;
+            // Top reached, go down
+            ending_position = MAX_RANGES[axis_to_move];
+            go_idle = true;
         }
-        if(coordinates[axis_to_move] >= MAX_RANGES[axis_to_move])
+        else if(ending_position <= MIN_RANGES[axis_to_move])
         {
-            coordinates[axis_to_move] = MAX_RANGES[axis_to_move];
-            return true;
+            // Bottom reached, go up
+            ending_position = MIN_RANGES[axis_to_move];
+            go_idle = true;
         }
-        else if(coordinates[axis_to_move] <= MIN_RANGES[axis_to_move])
+
+        // Check if we finished the current axis' trajectory
+        if(sign == 1 && starting_position < startingCoordinates[axis_to_move] && startingCoordinates[axis_to_move] <= ending_position)
         {
-            coordinates[axis_to_move] = MIN_RANGES[axis_to_move];
-            return true;
+            // Crossed zero while going up, round to zero and change axis
+            ending_position = startingCoordinates[axis_to_move];
+            go_idle = true;
         }
-        return false;
+
+        coordinates[axis_to_move] = ending_position;
+
+        if(go_idle)
+        {
+            if(last_segment)
+            {
+                sign = 1;
+                axis_to_move == 2 ? axis_to_move = 0 : axis_to_move++;
+            }
+            else
+            {
+                sign *= -1;
+            }
+        }
+
+        return go_idle;
     }
 
     void SetUp() override
@@ -303,41 +357,29 @@ TEST_F(PFPProgramTrackTest, ContinuousMovementTest)
 
     while(!terminate)
     {
-        while(!terminate)
+        next_expected_time += TIMEGAP;
+
+        std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXEpoch()))));
+        point_id++;
+
+        if(idle)
         {
-            next_expected_time += TIMEGAP;
-
-            std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXEpoch()))));
-            point_id++;
-
-            if(idle)
+            idle_count++;
+            if(idle_count == 5)
             {
-                idle_count++;
-                if(idle_count == 5)
-                {
-                    idle_count = 0;
-                    idle = false;
-                }
-            }
-            else if(moveAxis(programTrackCoordinates, axis_to_move, sign))
-            {
-                sign *= -1;
-                idle = true;
-            }
-
-            PFPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::programTrack("PFP", trajectory_id, point_id, programTrackCoordinates));
-            EXPECT_TRUE(PFPStatus.checkOutput());
-            //std::cout << PFPProgramTrackTest::serializeCoordinates(next_expected_time, programTrackCoordinates) << std::endl;
-            programTrackFile << PFPProgramTrackTest::serializeCoordinates(next_expected_time, programTrackCoordinates) << std::endl;
-
-            if(round(programTrackCoordinates[axis_to_move] * 100) == 0 && sign == 1)
-            {
-                programTrackCoordinates[axis_to_move] = 0.0;
-                break;
+                idle_count = 0;
+                idle = false;
             }
         }
+        else if(moveAxis(programTrackCoordinates, axis_to_move, sign))
+        {
+            idle = true;
+        }
 
-        axis_to_move == 2 ? axis_to_move = 0 : axis_to_move++;
+        PFPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::programTrack("PFP", trajectory_id, point_id, programTrackCoordinates));
+        EXPECT_TRUE(PFPStatus.checkOutput());
+        //std::cout << PFPProgramTrackTest::serializeCoordinates(next_expected_time, programTrackCoordinates) << std::endl;
+        programTrackFile << PFPProgramTrackTest::serializeCoordinates(next_expected_time, programTrackCoordinates) << std::endl;
     }
 
     programTrackFile.close();
@@ -383,10 +425,13 @@ TEST_F(PFPProgramTrackTest, AllAxesMovementTest)
         {
             if(!idle[axis])
             {
-                if(moveAxis(programTrackCoordinates, axis, sign[axis]))
+                unsigned int axis_to_move = axis;
+                if(moveAxis(programTrackCoordinates, axis_to_move, sign[axis]))
                 {
-                    sign[axis] *= -1;
-                    idle[axis] = true;
+                    if(programTrackCoordinates[axis] != startingCoordinates[axis] || programTrackCoordinates[axis] == MIN_RANGES[axis] || programTrackCoordinates[axis] == MAX_RANGES[axis])
+                    {
+                        idle[axis] = true;
+                    }
                 }
             }
             else
@@ -404,14 +449,6 @@ TEST_F(PFPProgramTrackTest, AllAxesMovementTest)
         EXPECT_TRUE(PFPStatus.checkOutput());
         //std::cout << PFPProgramTrackTest::serializeCoordinates(next_expected_time, programTrackCoordinates) << std::endl;
         programTrackFile << PFPProgramTrackTest::serializeCoordinates(next_expected_time, programTrackCoordinates) << std::endl;
-
-        for(size_t axis = 0; axis < 3; axis++)
-        {
-            if(round(programTrackCoordinates[axis] * 100) == 0 && sign[axis] == 1)
-            {
-                programTrackCoordinates[axis] = 0.0;
-            }
-        }
     }
 
     programTrackFile.close();
@@ -496,7 +533,7 @@ TEST_F(PFPProgramTrackTest, SeparateMovementTest)
     std::cout << "PRESET position reached, starting PROGRAMTRACK" << std::endl;
     std::vector<double> programTrackCoordinates = startingCoordinates;
 
-    bool immediate = true;
+    bool immediate = false;
 
     while(!terminate)
     {
@@ -536,12 +573,6 @@ TEST_F(PFPProgramTrackTest, SeparateMovementTest)
             {
                 if(moveAxis(programTrackCoordinates, axis_to_move, sign))
                 {
-                    sign *= -1;
-                    idle = true;
-                }
-                else if(programTrackCoordinates[axis_to_move] == 0.0 && sign == 1)
-                {
-                    axis_to_move == 2 ? axis_to_move = 0 : axis_to_move++;
                     idle = true;
                 }
 
@@ -568,8 +599,6 @@ TEST_F(PFPProgramTrackTest, RapidTrajectoryTest)
     ofstream programTrackFile;
     programTrackFile.open(directory + "/trajectory.txt", ios::out);
 
-    unsigned int axis_to_move = 1;
-    int sign = -1;
     unsigned int idle_count = 0;
     bool idle = false;
 
@@ -577,6 +606,9 @@ TEST_F(PFPProgramTrackTest, RapidTrajectoryTest)
 
     while(!terminate)
     {
+        unsigned int axis_to_move = 1;
+        int sign = -1;
+
         std::vector<double> programTrackCoordinates = startingCoordinates;
         programTrackCoordinates[axis_to_move] = MAX_RANGES[axis_to_move];
 
