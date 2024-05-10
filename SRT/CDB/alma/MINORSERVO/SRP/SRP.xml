@@ -11,8 +11,8 @@
     virtual_axes="6"
     max_speed="4, 4, 4, 0.38, 0.38, 0.38"
     acceleration="8, 8, 8, 0.76, 0.76, 0.76"
-    min_range="-125, -125, -125, -0.25, -0.25, -0.25"
-    max_range="125, 125, 125, 0.25, 0.25, 0.25"
+    min_range="-120, -120, -120, -0.25, -0.25, -0.25"
+    max_range="120, 120, 120, 0.25, 0.25, 0.25"
     tracking_delta="1, 1, 1, 1, 1, 1">
 
     <enabled description="All physical axes enabled" />
