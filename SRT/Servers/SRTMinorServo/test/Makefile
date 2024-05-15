@@ -22,7 +22,7 @@ SRPProgramTrackTest_LIBS = $(GTEST_LIBS) SRTMinorServoSocketLibrary SRTMinorServ
 
 PFPProgramTrackTest_OBJECTS = PFPProgramTrackTest
 PFPProgramTrackTest_CFLAGS = -std=c++17 -fconcepts
-PFPProgramTrackTest_LIBS = $(GTEST_LIBS) SRTMinorServoSocketLibrary SRTMinorServoCommandLibrary IRALibrary ComponentErrors boost_filesystem
+PFPProgramTrackTest_LIBS = $(GTEST_LIBS) SRTMinorServoSocketLibrary SRTMinorServoCommandLibrary IRALibrary ComponentErrors MinorServoErrors boost_filesystem
 
 DerotatorProgramTrackTest_OBJECTS = DerotatorProgramTrackTest
 DerotatorProgramTrackTest_CFLAGS = -std=c++17

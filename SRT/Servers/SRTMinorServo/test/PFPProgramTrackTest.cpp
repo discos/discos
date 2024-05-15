@@ -4,13 +4,15 @@
 #include <chrono>
 #include <ctime>
 #include <boost/filesystem.hpp>
+#include <MinorServoErrors.h>
+#include "SRTMinorServoUtils.h"
 #include "SRTMinorServoTestingSocket.h"
 #include "SRTMinorServoCommandLibrary.h"
 
 // This address and port are the ones set in the simulator
 // In order for the test to properly be executed, the simulator should be launched with the following command:
 // discos-simulator -s minor_servo start &
-#define SIMULATION
+//#define SIMULATION
 #ifdef SIMULATION
     #define ADDRESS             std::string("127.0.0.1")
     #define PORT                12800
@@ -22,8 +24,8 @@
 #define ADVANCE_TIMEGAP     2.6
 //#define MIN_RANGES          std::vector<double>{ -1490, -200, -1 }
 //#define MAX_RANGES          std::vector<double>{ 1490, 50, 76 }
-#define MIN_RANGES          std::vector<double>{ -1000, -100, 0 }
-#define MAX_RANGES          std::vector<double>{ 1000, 25, 20 }
+#define MIN_RANGES          std::vector<double>{ -1000, -150, 0 }
+#define MAX_RANGES          std::vector<double>{ 1000, 40, 70 }
 #define MAX_SPEED           std::vector<double>{ 25, 5, 0.42 }
 #define STATUS_PERIOD       0.01
 
@@ -52,9 +54,20 @@ protected:
 
         double tn = CIRATools::getUNIXEpoch();
 
-        while(!terminate)
+        while(!terminate.load())
         {
-            PFPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::status("PFP"));
+            try
+            {
+                PFPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::status("PFP"));
+            }
+            catch(MinorServoErrors::MinorServoErrorsEx& ex)
+            {
+                //MinorServoErrors::MinorServoErrorsExImpl impl(ex);
+                std::cout << getErrorFromEx(ex) << std::endl;
+                terminate.store(true);
+                break;
+            }
+
             std::string status = serializeStatus(PFPStatus);
 
             statusFile << status << std::endl;
@@ -72,7 +85,7 @@ protected:
     static void sigintHandler(int sig_num)
     {
         std::cout << std::endl << "Terminating..." << std::endl;
-        terminate = true;
+        terminate.store(true);
     }
 
     static std::string serializeStatus(SRTMinorServoAnswerMap map)
@@ -288,7 +301,7 @@ protected:
             EXPECT_TRUE(PFPStatus.checkOutput());
             std::cout << serializeStatus(PFPStatus) << std::endl;
 
-            if(terminate)
+            if(terminate.load())
                 FAIL() << "Aborting test..." << std::endl;
         }
         while(PFPStatus.get<unsigned int>("PFP_OPERATIVE_MODE") != 40);
@@ -322,7 +335,7 @@ protected:
     void TearDown() override
     {
         SRTMinorServoTestingSocket::destroyInstance();
-        terminate = false;
+        terminate.store(false);
     }
 };
 
@@ -355,7 +368,7 @@ TEST_F(PFPProgramTrackTest, ContinuousMovementTest)
     unsigned int idle_count = 0;
     bool idle = false;
 
-    while(!terminate)
+    while(!terminate.load())
     {
         next_expected_time += TIMEGAP;
 
@@ -414,7 +427,7 @@ TEST_F(PFPProgramTrackTest, AllAxesMovementTest)
     std::vector<unsigned int> idle_count = { 0, 0, 0 };
     std::vector<bool> idle = { false, false, false };
 
-    while(!terminate)
+    while(!terminate.load())
     {
         next_expected_time += TIMEGAP;
 
@@ -493,7 +506,7 @@ TEST_F(PFPProgramTrackTest, SineWaveMovementTest)
 
     double next_expected_time = start_time;
 
-    while(!terminate)
+    while(!terminate.load())
     {
         next_expected_time += TIMEGAP;
         double time_delta = next_expected_time - start_time;
@@ -525,24 +538,27 @@ TEST_F(PFPProgramTrackTest, SeparateMovementTest)
     ofstream programTrackFile;
     programTrackFile.open(directory + "/trajectory.txt", ios::out);
 
-    unsigned int axis_to_move = 0;
+    unsigned int axis_to_move = 1;
     int sign = 1;
     unsigned int idle_count = 0;
     bool idle = false;
 
-    std::cout << "PRESET position reached, starting PROGRAMTRACK" << std::endl;
+    std::cout << "PRESET position reached" << std::endl;
     std::vector<double> programTrackCoordinates = startingCoordinates;
 
     bool immediate = false;
 
-    while(!terminate)
+    while(!terminate.load())
     {
         double start_time = CIRATools::getUNIXEpoch() + ADVANCE_TIMEGAP;
+        std::cout << "starting PROGRAMTRACK with timestamp " << std::to_string(start_time) << std::endl;
         long unsigned int trajectory_id = int(start_time);
         double next_expected_time = start_time;
         unsigned int point_id = 0;
 
-        PFPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::programTrack("PFP", trajectory_id, point_id, programTrackCoordinates, start_time));
+        std::string command = SRTMinorServoCommandLibrary::programTrack("PFP", trajectory_id, point_id, programTrackCoordinates, start_time);
+        //std::cout << command;
+        PFPStatus = socket.sendCommand(command);
         EXPECT_TRUE(PFPStatus.checkOutput());
         programTrackFile << PFPProgramTrackTest::serializeCoordinates(start_time, programTrackCoordinates) << std::endl;
 
@@ -552,7 +568,7 @@ TEST_F(PFPProgramTrackTest, SeparateMovementTest)
         EXPECT_TRUE(PFPStatus.checkOutput());
         EXPECT_EQ(PFPStatus.get<unsigned int>("PFP_OPERATIVE_MODE"), 50);
 
-        while(!terminate)
+        while(!terminate.load())
         {
             next_expected_time += TIMEGAP;
 
@@ -576,7 +592,10 @@ TEST_F(PFPProgramTrackTest, SeparateMovementTest)
                     idle = true;
                 }
 
-                PFPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::programTrack("PFP", trajectory_id, point_id, programTrackCoordinates));
+                command = SRTMinorServoCommandLibrary::programTrack("PFP", trajectory_id, point_id, programTrackCoordinates);
+                PFPStatus = socket.sendCommand(command);
+                //std::cout << command;
+                //PFPStatus = socket.sendCommand(SRTMinorServoCommandLibrary::programTrack("PFP", trajectory_id, point_id, programTrackCoordinates));
                 EXPECT_TRUE(PFPStatus.checkOutput());
             }
 
@@ -604,7 +623,7 @@ TEST_F(PFPProgramTrackTest, RapidTrajectoryTest)
 
     std::cout << "PRESET position reached, starting PROGRAMTRACK" << std::endl;
 
-    while(!terminate)
+    while(!terminate.load())
     {
         unsigned int axis_to_move = 1;
         int sign = -1;
@@ -627,7 +646,7 @@ TEST_F(PFPProgramTrackTest, RapidTrajectoryTest)
         EXPECT_TRUE(PFPStatus.checkOutput());
         EXPECT_EQ(PFPStatus.get<unsigned int>("PFP_OPERATIVE_MODE"), 50);
 
-        while(!terminate)
+        while(!terminate.load())
         {
             next_expected_time += TIMEGAP;
 

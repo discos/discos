@@ -22,7 +22,7 @@
 #define TIMEGAP             0.2
 #define ADVANCE_TIMEGAP     2.6
 #define MAX_RANGES          std::vector<double>{ 40, 40, 40, 0.2, 0.2, 0.2 }
-#define MAX_RANGES          std::vector<double>{ 50, 110, 50, 0.25, 0.25, 0.25 }
+#define MAX_RANGES          std::vector<double>{ 50, 120, 120, 0.25, 0.25, 0.25 }
 #define MAX_SPEED           std::vector<double>{ 4, 4, 4, 0.04, 0.04, 0.04 }
 #define STATUS_PERIOD       0.01
 
@@ -432,7 +432,7 @@ TEST_F(SRPProgramTrackTest, SineWaveMovementTest)
 
     std::vector<double> phase_shift;
     std::vector<double> period;
-    for(size_t axis = 0; axis < 6; axis++)
+    for(size_t axis = 0; axis < 3; axis++)
     {
         double period_multiplier = axis < 3 ? 4 : 4;
         period.push_back(MAX_RANGES[axis] / MAX_SPEED[axis] * period_multiplier);
@@ -465,7 +465,7 @@ TEST_F(SRPProgramTrackTest, SineWaveMovementTest)
         std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXEpoch()))));
         point_id++;
 
-        for(size_t axis = 0; axis < 6; axis++)
+        for(size_t axis = 0; axis < 3; axis++)
         {
             programTrackCoordinates[axis] = MAX_RANGES[axis] * sin((time_delta + phase_shift[axis]) * 2 * M_PI / period[axis]);
         }
