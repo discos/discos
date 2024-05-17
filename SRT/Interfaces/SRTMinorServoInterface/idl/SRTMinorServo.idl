@@ -83,6 +83,12 @@ module MinorServo
         readonly attribute ACS::ROdoubleSeq virtual_system_offsets;
 
         /**
+         * This property returns the latest virtual positions commanded with a preset command.
+         * Offsets are not taken into account since they are added by the LDO system.
+         */
+        readonly attribute ACS::ROdoubleSeq commanded_virtual_positions;
+
+        /**
          * This property indicates whether the servo is in use in the current configuration
          */
         readonly attribute Management::ROTBoolean in_use;

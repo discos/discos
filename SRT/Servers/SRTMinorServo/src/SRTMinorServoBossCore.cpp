@@ -135,7 +135,6 @@ bool SRTMinorServoBossCore::status()
     {
         if(std::all_of(m_current_tracking_servos.begin(), m_current_tracking_servos.end(), [](const std::pair<std::string, SRTProgramTrackMinorServo_ptr>& servo) -> bool
         {
-            ACSErr::Completion_var comp;
             return servo.second->isTracking();
         }))
         {
@@ -194,6 +193,7 @@ void SRTMinorServoBossCore::setup(std::string commanded_setup)
     {
         cmd_configuration = DiscosConfigurationNameTable.at(commanded_setup);
         commanded_configuration = cmd_configuration.first;
+
         if(m_as_configuration.load() == Management::MNG_TRUE && cmd_configuration.second)
         {
             commanded_setup += "_ASACTIVE";
@@ -586,7 +586,12 @@ void SRTMinorServoBossCore::clearUserOffsets(std::string servo_name)
     {
         for(const auto& [servo_name, servo] : m_current_servos)
         {
-                servo->clearUserOffsets();
+            servo->clearUserOffsets();
+            if(motion_status == MOTION_STATUS_CONFIGURED)
+            {
+                // We are not tracking but we need to update the servo position to load the offsets
+                servo->preset(ACS::doubleSeq());
+            }
         }
         return;
     }
@@ -602,6 +607,11 @@ void SRTMinorServoBossCore::clearUserOffsets(std::string servo_name)
     {
         auto servo = m_current_servos.at(servo_name);
         servo->clearUserOffsets();
+        if(motion_status == MOTION_STATUS_CONFIGURED)
+        {
+            // We are not tracking but we need to update the servo position to load the offsets
+            servo->preset(ACS::doubleSeq());
+        }
     }
     catch(std::out_of_range& oor)
     {
@@ -658,6 +668,12 @@ void SRTMinorServoBossCore::setUserOffset(std::string servo_axis_name, double of
             ACS_LOG(LM_FULL_INFO, "setServoOffset", (LM_NOTICE, ("SETTING '" + servo_name + "' '" + axis_name + "' OFFSET TO " + std::to_string(offset)).c_str()));
         }
         servo->setUserOffset(axis_name.c_str(), offset);
+
+        if(m_motion_status.load() == MOTION_STATUS_CONFIGURED)
+        {
+            // We are not tracking but we need to update the servo position to load the offsets
+            servo->preset(ACS::doubleSeq());
+        }
     }
     catch(std::out_of_range& oor)
     {
@@ -724,6 +740,11 @@ void SRTMinorServoBossCore::clearSystemOffsets(std::string servo_name)
         for(const auto& [servo_name, servo] : m_current_servos)
         {
             servo->clearSystemOffsets();
+            if(motion_status == MOTION_STATUS_CONFIGURED)
+            {
+                // We are not tracking but we need to update the servo position to load the offsets
+                servo->preset(ACS::doubleSeq());
+            }
         }
         return;
     }
@@ -739,6 +760,11 @@ void SRTMinorServoBossCore::clearSystemOffsets(std::string servo_name)
     {
         auto servo = m_current_servos.at(servo_name);
         servo->clearSystemOffsets();
+        if(motion_status == MOTION_STATUS_CONFIGURED)
+        {
+            // We are not tracking but we need to update the servo position to load the offsets
+            servo->preset(ACS::doubleSeq());
+        }
     }
     catch(std::out_of_range& oor)
     {
@@ -791,6 +817,12 @@ void SRTMinorServoBossCore::setSystemOffset(std::string servo_axis_name, double 
     {
         auto servo = m_current_servos.at(servo_name);
         servo->setSystemOffset(axis_name.c_str(), offset);
+
+        if(m_motion_status.load() == MOTION_STATUS_CONFIGURED)
+        {
+            // We are not tracking but we need to update the servo position to load the offsets
+            servo->preset(ACS::doubleSeq());
+        }
     }
     catch(std::out_of_range& oor)
     {
