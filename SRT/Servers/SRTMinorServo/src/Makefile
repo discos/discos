@@ -9,7 +9,7 @@
 EXECUTABLES     =
 EXECUTABLES_L   =
 
-PY_SCRIPTS = #_cover
+PY_SCRIPTS = _cover _airblade
 
 # On-Line Database Files
 # ----------------------

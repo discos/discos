@@ -217,6 +217,8 @@ void CCore::execute() throw(ComponentErrors::TimerErrorExImpl, ComponentErrors::
 	m_parser->add("setServoASConfiguration", "minorservo", 4, &CCore::remoteCall);
 	m_parser->add("clearServoOffsets", "minorservo", 4, &CCore::remoteCall);
 	m_parser->add("setServoOffset", "minorservo", 4, &CCore::remoteCall);
+	m_parser->add("setGregorianCoverPosition","_cover",1,"SRT");
+	m_parser->add("setGregorianAirBladeStatus","_airblade",1,"SRT");
 
 	// active surface
 	m_parser->add("asSetup", "activesurface", 5, &CCore::remoteCall);

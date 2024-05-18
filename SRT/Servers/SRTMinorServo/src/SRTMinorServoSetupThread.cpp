@@ -23,9 +23,9 @@ void SRTMinorServoSetupThread::onStart()
 
     m_status = 0;
 
-    //SRTMinorServoFocalConfiguration commanded_configuration = m_core.m_commanded_configuration.load();
-    //m_LDO_configuration = LDOConfigurationNameTable.left.at(commanded_configuration);
-    //m_gregorian_cover_position = commanded_configuration == CONFIGURATION_PRIMARY ? COVER_STATUS_CLOSED : COVER_STATUS_OPEN;
+    SRTMinorServoFocalConfiguration commanded_configuration = m_core.m_commanded_configuration.load();
+    m_LDO_configuration = LDOConfigurationNameTable.left.at(commanded_configuration);
+    m_gregorian_cover_position = commanded_configuration == CONFIGURATION_PRIMARY ? COVER_STATUS_CLOSED : COVER_STATUS_OPEN;
 
     ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::onStart()", (LM_NOTICE, ("SETUP THREAD STARTED WITH '" + m_core.m_commanded_setup + "' CONFIGURATION").c_str()));
 }
@@ -98,25 +98,10 @@ void SRTMinorServoSetupThread::runLoop()
                 servo->clearUserOffsets();
             }
 
-            //m_status = 2;
-            //m_status = 100;
-            m_status = 5;
+            m_status = 2;
             break;
         }
-        /*case 100: // Send the STOW command to the gregorian cover
-        {
-            if(!m_core.m_socket.sendCommand(SRTMinorServoCommandLibrary::stow("Gregoriano", m_gregorian_cover_position)).checkOutput())
-            {
-                ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::runLoop()", (LM_CRITICAL, "Received NAK when setting the gregorian cover position."));
-                m_core.setFailure();
-                this->setStopped();
-                return;
-            }
-
-            m_status = 5;
-            break;
-        }*/
-        /*case 2: // Send the SETUP command
+        case 2: // Send the SETUP command
         {
             try
             {
@@ -151,24 +136,21 @@ void SRTMinorServoSetupThread::runLoop()
 
             break;
         }
-        case 4: // Wait for the whole system to reach the desired configuration
+        case 4: // Wait for all the servos to reach the desired configuration
         {
-            // First we check the status of the gregorian cover
-            bool completed = m_core.m_status.getGregorianCoverPosition() == m_gregorian_cover_position ? true : false;
-
             // Then we cycle through all the servos and make sure their operative mode is SETUP
-            if(completed && std::all_of(m_core.m_servos.begin(), m_core.m_servos.end(), [](const std::pair<std::string, SRTBaseMinorServo_ptr>& servo) -> bool
+            if(std::all_of(m_core.m_servos.begin(), m_core.m_servos.end(), [](const std::pair<std::string, SRTBaseMinorServo_ptr>& servo) -> bool
             {
                 ACSErr::Completion_var comp;
-                return servo.second->operative_mode()->get_sync(comp.out()) == OPERATIVE_MODE_SETUP ? true : false;
+                return servo.second->operative_mode()->get_sync(comp.out()) == OPERATIVE_MODE_SETUP;
             }))
             {
                 m_status = 5;
             }
 
             break;
-        }*/
-        case 5: // Load the servos coefficients and send a PRESET command
+        }
+        case 5: // Load the servos coefficients
         {
             for(const auto& [servo_name, servo] : m_core.m_servos)
             {
@@ -196,32 +178,37 @@ void SRTMinorServoSetupThread::runLoop()
                 }
             }
 
-            // This step is necessary because we have _ASACTIVE configurations that have a slightly different position from the commanded one
-            // Unfortunately, the Leonardo implementation accepts a fixed number of configurations, therefore we share the _ASACTIVE and AS not active configurations for each focal position
-            for(const auto& [servo_name, servo] : m_core.m_current_servos)
+            if(m_core.m_commanded_setup.find("_ASACTIVE") == std::string::npos)
             {
-                try
+                // We commanded a configuration which does not use the active surface, therefore we need to send some slightly different coordinates with a preset command
+
+                for(const auto& [servo_name, servo] : m_core.m_current_servos)
                 {
-                    servo->preset(*servo->calcCoordinates(45));
+                    try
+                    {
+                        servo->preset(*servo->calcCoordinates(45));
+                    }
+                    catch(MinorServoErrors::MinorServoErrorsEx& ex)
+                    {
+                        ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
+                        m_core.setFailure();
+                        this->setStopped();
+                        return;
+                    }
                 }
-                catch(MinorServoErrors::MinorServoErrorsEx& ex)
-                {
-                    ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
-                    m_core.setFailure();
-                    this->setStopped();
-                    return;
-                }
+                m_status = 6;
+            }
+            else
+            {
+                // _ASACTIVE configuration, jump directly to state 7
+                m_status = 7;
             }
 
-            m_status = 6;
             break;
         }
-        case 6: // Wait for the whole system to reach the PRESET configuration
+        case 6: // Wait for the used servos to reach the PRESET configuration
         {
-            // First we check the status of the gregorian cover
-            //bool completed = m_core.m_status.getGregorianCoverPosition() == m_gregorian_cover_position ? true : false;
-
-            if(/*completed && */std::all_of(m_core.m_current_servos.begin(), m_core.m_current_servos.end(), [this](const std::pair<std::string, SRTBaseMinorServo_ptr>& servo) -> bool
+            if(std::all_of(m_core.m_current_servos.begin(), m_core.m_current_servos.end(), [this](const std::pair<std::string, SRTBaseMinorServo_ptr>& servo) -> bool
             {
                 ACSErr::Completion_var comp;
                 return servo.second->operative_mode()->get_sync(comp.out()) == OPERATIVE_MODE_PRESET ? true : false;
@@ -232,7 +219,16 @@ void SRTMinorServoSetupThread::runLoop()
 
             break;
         }
-        case 7: // Finally set all the variables values and eventually start the elevation tracking thread
+        case 7: // Check the status of the gregorian cover
+        {
+            if(m_core.m_status.getGregorianCoverPosition() == m_gregorian_cover_position)
+            {
+                m_status = 8;
+            }
+
+            break;
+        }
+        case 8: // Finally set all the variables values and eventually start the elevation tracking thread
         {
             m_core.m_actual_setup = m_core.m_commanded_setup;
             m_core.m_starting.store(Management::MNG_FALSE);

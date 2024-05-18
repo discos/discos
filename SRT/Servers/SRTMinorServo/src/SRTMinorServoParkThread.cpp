@@ -61,13 +61,13 @@ void SRTMinorServoParkThread::runLoop()
         case 0:
         {
             // First we check if the gregorian cover has closed
-            //bool completed = m_core.m_status.getGregorianCoverPosition() == COVER_STATUS_CLOSED ? true : false;
+            bool completed = m_core.m_status.getGregorianCoverPosition() == COVER_STATUS_CLOSED;
 
             // Then we cycle through all the servos and make sure their operative mode is STOP
-            if(/*completed && */std::all_of(m_core.m_servos.begin(), m_core.m_servos.end(), [](const std::pair<std::string, SRTBaseMinorServo_ptr>& servo) -> bool
+            if(completed && std::all_of(m_core.m_servos.begin(), m_core.m_servos.end(), [](const std::pair<std::string, SRTBaseMinorServo_ptr>& servo) -> bool
             {
                 ACSErr::Completion_var comp;
-                return servo.second->operative_mode()->get_sync(comp.out()) == OPERATIVE_MODE_STOP ? true : false;
+                return servo.second->operative_mode()->get_sync(comp.out()) == OPERATIVE_MODE_STOP;
             }))
             {
                 m_status = 1;

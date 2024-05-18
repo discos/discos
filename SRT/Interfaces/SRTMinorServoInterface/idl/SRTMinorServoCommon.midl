@@ -60,6 +60,17 @@ module MinorServo
     ACS_ENUM(SRTMinorServoGregorianCoverStatus);
 
     /**
+     * Enumerator which indicates the status of the gregorian air blade
+     */
+    enum SRTMinorServoGregorianAirBladeStatus
+    {
+        AIR_BLADE_STATUS_AUTO,
+        AIR_BLADE_STATUS_OFF,
+        AIR_BLADE_STATUS_ON
+    };
+    ACS_ENUM(SRTMinorServoGregorianAirBladeStatus);
+
+    /**
      * Enumerator which indicates the status of a servo drive cabinet
      */
     enum SRTMinorServoCabinetStatus

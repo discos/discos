@@ -265,6 +265,14 @@ public:
     virtual void setGregorianCoverPosition(const char* position);
 
     /**
+     * Sets the gregorian air blade status.
+     * @param status the desired status of the gregorian air blade, allowed values are 'on', 'ON', 'off', 'OFF', 'auto' or 'AUTO'.
+     * @throw MinorServoErrors::MinorServoErrorsEx when the commanded status is unknown or the gregorian cover is currently closed,
+     *                                             when anything goes wrong in the lower communication level or if checkLineStatus throws.
+     */
+    virtual void setGregorianAirBladeStatus(const char* status);
+
+    /**
      * This method checks if a scan with the given parameters is feasible.
      * @param start_time the starting ACS::Time for the requested scan.
      * @param scan_info the minor servo scan parameters for the requested scan.
@@ -418,6 +426,12 @@ public:
     virtual ROSRTMinorServoGregorianCoverStatus_ptr gregorian_cover();
 
     /**
+     * Returns a reference to the air_blade property implementation of the IDL interface.
+     * @return pointer to read-only SRTMinorServoGregorianAirBladeStatus property air_blade.
+     */
+    virtual ROSRTMinorServoGregorianAirBladeStatus_ptr air_blade();
+
+    /**
      * Returns a reference to the last_executed_command property implementation of the IDL interface.
      * @return pointer to read-only double property last_executed_command.
      */
@@ -538,6 +552,11 @@ private:
      * Pointer to the gregorian_cover property.
      */
     baci::SmartPropertyPointer<ROEnumImpl<ACS_ENUM_T(SRTMinorServoGregorianCoverStatus), POA_MinorServo::ROSRTMinorServoGregorianCoverStatus>> m_gregorian_cover_ptr;
+
+    /**
+     * Pointer to the air_blade property.
+     */
+    baci::SmartPropertyPointer<ROEnumImpl<ACS_ENUM_T(SRTMinorServoGregorianAirBladeStatus), POA_MinorServo::ROSRTMinorServoGregorianAirBladeStatus>> m_air_blade_ptr;
 
     /**
      * Pointer to the last_executed_command property.
