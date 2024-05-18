@@ -429,14 +429,14 @@ void SRTMinorServoBossCore::setElevationTracking(std::string configuration)
         if(m_motion_status.load() == MOTION_STATUS_TRACKING)
         {
             m_motion_status.store(MOTION_STATUS_CONFIGURED);
-        }
 
-        try
-        {
-            preset(getElevation(getTimeStamp()));
-        }
-        catch(...)
-        {
+            try
+            {
+                preset(getElevation(getTimeStamp()));
+            }
+            catch(...)
+            {
+            }
         }
     }
 }
