@@ -54,6 +54,7 @@
         <xs:element name="virtual_offsets" type="baci:ROdoubleSeq" /> 
         <xs:element name="virtual_user_offsets" type="baci:ROdoubleSeq" /> 
         <xs:element name="virtual_system_offsets" type="baci:ROdoubleSeq" /> 
+        <xs:element name="commanded_virtual_positions" type="baci:ROdoubleSeq" />
         <xs:element name="in_use" type="mng:BooleanType" />
         <xs:element name="current_setup" type="baci:ROstring" />
        </xs:sequence>

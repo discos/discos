@@ -2,6 +2,7 @@
 This module is intended to extend the ACS Logging module in our python code.
 """
 import logging
+logging._srcfile = None
 import sys
 from Acspy.Common import Log
 from ACSLog import ACS_LOG_CRITICAL

@@ -210,7 +210,7 @@ class CDBConf(object):
         try:
             dal = ACSCorba.cdb()
             dao = dal.get_DAO(path)
-            children = ElementTree.fromstring(dao).getchildren()
+            children = list(ElementTree.fromstring(dao))
         except cdbErrType.CDBRecordDoesNotExistEx:
             raeson = "CDB record %s does not exists" %path
             logger.logError(raeson)
@@ -218,7 +218,7 @@ class CDBConf(object):
             exc.setReason(raeson)
             raise exc
         except Exception as ex:
-            children = () 
+            children = []
 
         setattr(self, dictName, {})
         d = getattr(self, dictName)

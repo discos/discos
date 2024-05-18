@@ -41,6 +41,7 @@ SRTBaseMinorServoImpl::SRTBaseMinorServoImpl(const ACE_CString& component_name, 
     m_virtual_offsets_ptr(this),
     m_virtual_user_offsets_ptr(this),
     m_virtual_system_offsets_ptr(this),
+    m_commanded_virtual_positions_ptr(this),
     m_in_use_ptr(this),
     m_current_setup_ptr(this),
     m_current_lookup_table(),
@@ -85,6 +86,8 @@ void SRTBaseMinorServoImpl::initialize()
                 new MSGenericDevIO<ACS::doubleSeq, std::vector<double>>(m_user_offsets), true);
         m_virtual_system_offsets_ptr = new baci::ROdoubleSeq((m_component_name + ":virtual_system_offsets").c_str(), getComponent(),
                 new MSGenericDevIO<ACS::doubleSeq, std::vector<double>>(m_system_offsets), true);
+        m_commanded_virtual_positions_ptr = new baci::ROdoubleSeq((m_component_name + ":commanded_virtual_positions").c_str(), getComponent(),
+                new MSGenericDevIO<ACS::doubleSeq, std::vector<double>>(m_commanded_virtual_positions), true);
         m_in_use_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":in_use").c_str(), getComponent(),
                 new MSGenericDevIO<Management::TBoolean, std::atomic<Management::TBoolean>>(m_in_use), true);
         m_current_setup_ptr = new baci::ROstring((m_component_name + ":current_setup").c_str(), getComponent(),
@@ -190,11 +193,27 @@ void SRTBaseMinorServoImpl::stop()
     }
 }
 
-void SRTBaseMinorServoImpl::preset(const ACS::doubleSeq& virtual_coordinates)
+void SRTBaseMinorServoImpl::preset(const ACS::doubleSeq& virtual_coords)
 {
     AUTO_TRACE(m_servo_name + "::preset()");
 
     checkLineStatus();
+
+    ACS::doubleSeq virtual_coordinates;
+    virtual_coordinates.length(virtual_coords.length());
+    std::copy(virtual_coords.begin(), virtual_coords.end(), virtual_coordinates.begin());
+
+    if(virtual_coordinates.length() == 0)
+    {
+        // It means we want to command the latest coordinates again, to apply the offset in the LDO servo system
+        // We execute the copy only if we already commanded a set of coordinates, otherwise we let the flow go to the next
+        // if which will raise regardless
+        if(!m_commanded_virtual_positions.empty())
+        {
+            virtual_coordinates.length(m_commanded_virtual_positions.size());
+            std::copy(m_commanded_virtual_positions.begin(), m_commanded_virtual_positions.end(), virtual_coordinates.begin());
+        }
+    }
 
     if(virtual_coordinates.length() != m_virtual_axes)
     {
@@ -226,6 +245,12 @@ void SRTBaseMinorServoImpl::preset(const ACS::doubleSeq& virtual_coordinates)
         ex.log(LM_DEBUG);
         throw ex.getMinorServoErrorsEx();
     }
+
+    if(m_commanded_virtual_positions.empty())
+    {
+        m_commanded_virtual_positions.resize(m_virtual_axes);
+    }
+    std::copy(coordinates.begin(), coordinates.end(), m_commanded_virtual_positions.begin());
 }
 
 bool SRTBaseMinorServoImpl::setup(const char* configuration_name)
@@ -807,5 +832,6 @@ GET_PROPERTY_REFERENCE(ACS::ROdoubleSeq, SRTBaseMinorServoImpl, m_virtual_positi
 GET_PROPERTY_REFERENCE(ACS::ROdoubleSeq, SRTBaseMinorServoImpl, m_virtual_offsets_ptr, virtual_offsets);
 GET_PROPERTY_REFERENCE(ACS::ROdoubleSeq, SRTBaseMinorServoImpl, m_virtual_user_offsets_ptr, virtual_user_offsets);
 GET_PROPERTY_REFERENCE(ACS::ROdoubleSeq, SRTBaseMinorServoImpl, m_virtual_system_offsets_ptr, virtual_system_offsets);
+GET_PROPERTY_REFERENCE(ACS::ROdoubleSeq, SRTBaseMinorServoImpl, m_commanded_virtual_positions_ptr, commanded_virtual_positions);
 GET_PROPERTY_REFERENCE(Management::ROTBoolean, SRTBaseMinorServoImpl, m_in_use_ptr, in_use);
 GET_PROPERTY_REFERENCE(ACS::ROstring, SRTBaseMinorServoImpl, m_current_setup_ptr, current_setup);

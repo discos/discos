@@ -197,8 +197,7 @@ class PyCalmuxImpl(CalMux, cc, services, lcycle):
             raise exc
 
         try:
-            children = ElementTree.fromstring(dao).getchildren()
-            for child in children:
+            for child in list(ElementTree.fromstring(dao)):
                 backend, channel, polarity = [c.text.strip() for c in child]
                 backend = backend.lower()
                 value = (int(channel), int(polarity))
