@@ -31,8 +31,8 @@ SRTMinorServoBossCore::SRTMinorServoBossCore(SRTMinorServoBossImpl& component) :
     m_servos{
         //{ "PFP", m_component.getContainerServices()->getComponent<SRTBaseMinorServo>("MINORSERVO/PFP") },
         { "SRP", m_component.getContainerServices()->getComponent<SRTBaseMinorServo>("MINORSERVO/SRP") },
-        { "GFR", m_component.getContainerServices()->getComponent<SRTBaseMinorServo>("MINORSERVO/GFR") }
-        //{ "M3R", m_component.getContainerServices()->getComponent<SRTBaseMinorServo>("MINORSERVO/M3R") }
+        { "GFR", m_component.getContainerServices()->getComponent<SRTBaseMinorServo>("MINORSERVO/GFR") },
+        { "M3R", m_component.getContainerServices()->getComponent<SRTBaseMinorServo>("MINORSERVO/M3R") }
     },
     m_tracking_servos{
         //{ "PFP", m_component.getContainerServices()->getComponent<SRTProgramTrackMinorServo>("MINORSERVO/PFP") },
@@ -102,7 +102,7 @@ bool SRTMinorServoBossCore::status()
     }
 
     SRTMinorServoMotionStatus motion_status = m_motion_status.load();
-    /*if(motion_status == MOTION_STATUS_TRACKING || motion_status == MOTION_STATUS_CONFIGURED)
+    if(motion_status == MOTION_STATUS_TRACKING || motion_status == MOTION_STATUS_CONFIGURED)
     {
         // We only get here if the system is configured, therefore we check the correct position of the gregorian cover
         SRTMinorServoGregorianCoverStatus commanded_gregorian_cover_position = m_status.getFocalConfiguration() == CONFIGURATION_PRIMARY ? COVER_STATUS_CLOSED : COVER_STATUS_OPEN;
@@ -112,7 +112,7 @@ bool SRTMinorServoBossCore::status()
             setFailure();
             return false;
         }
-    }*/
+    }
 
     for(const auto& [name, servo] : m_servos)
     {
@@ -131,7 +131,7 @@ bool SRTMinorServoBossCore::status()
 
     m_reload_servo_offsets = false;
 
-    if(motion_status == MOTION_STATUS_TRACKING)
+    if(motion_status == MOTION_STATUS_CONFIGURED || motion_status == MOTION_STATUS_TRACKING)
     {
         if(std::all_of(m_current_tracking_servos.begin(), m_current_tracking_servos.end(), [](const std::pair<std::string, SRTProgramTrackMinorServo_ptr>& servo) -> bool
         {
@@ -144,10 +144,6 @@ bool SRTMinorServoBossCore::status()
         {
             m_tracking.store(Management::MNG_FALSE);
         }
-    }
-    else if(motion_status == MOTION_STATUS_CONFIGURED)
-    {
-        m_tracking.store(Management::MNG_TRUE);
     }
     else
     {
@@ -338,10 +334,10 @@ void SRTMinorServoBossCore::park()
     m_current_servos.clear();
     m_current_tracking_servos.clear();
 
-    /*try
+    try
     {
         // Send the STOW command to close the gregorian cover
-        if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::stow("Gregoriano", COVER_STATUS_CLOSED)).checkOutput())
+        if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::stow("GREGORIAN_CAP", COVER_STATUS_CLOSED)).checkOutput())
         {
             _EXCPT(ManagementErrors::ParkingErrorExImpl, ex, "SRTMinorServoBossCore::park()");
             ex.setSubsystem("MinorServo");
@@ -357,7 +353,7 @@ void SRTMinorServoBossCore::park()
         ex.setReason("Error while sending the STOW command to the gregorian cover.");
         ex.log(LM_DEBUG);
         throw ex.getParkingErrorEx();
-    }*/
+    }
 
     // Send the STOP command to all the servos
     for(const auto& [servo_name, servo] : m_servos)
@@ -433,6 +429,14 @@ void SRTMinorServoBossCore::setElevationTracking(std::string configuration)
         if(m_motion_status.load() == MOTION_STATUS_TRACKING)
         {
             m_motion_status.store(MOTION_STATUS_CONFIGURED);
+        }
+
+        try
+        {
+            preset(getElevation(getTimeStamp()));
+        }
+        catch(...)
+        {
         }
     }
 }
@@ -517,14 +521,81 @@ void SRTMinorServoBossCore::setGregorianCoverPosition(std::string position)
         throw ex.getMinorServoErrorsEx();
     }
 
-    ACS_LOG(LM_FULL_INFO, "setGregorianCoverPosition", (LM_NOTICE, ("SETTING GREGORIAN COVER POSITION TO " + position).c_str()));
-
-    if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::stow("Gregoriano", position == "OPEN" ? COVER_STATUS_OPEN : COVER_STATUS_CLOSED)).checkOutput())
+    SRTMinorServoGregorianCoverStatus desired_position;
+    if(position == "OPEN")
     {
-        _EXCPT(MinorServoErrors::StowErrorExImpl, ex, "SRTMinorServoBossCore::setGregorianCoverPosition()");
-        ex.addData("Reason", "Error while sending a STOW command to the gregorian cover.");
+        desired_position = COVER_STATUS_OPEN;
+    }
+    else
+    {
+        desired_position = COVER_STATUS_CLOSED;
+    }
+
+    if(desired_position != m_status.getGregorianCoverPosition())
+    {
+        ACS_LOG(LM_FULL_INFO, "setGregorianCoverPosition", (LM_NOTICE, ("SETTING GREGORIAN COVER POSITION TO " + position).c_str()));
+
+        if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::stow("GREGORIAN_CAP", desired_position)).checkOutput())
+        {
+            _EXCPT(MinorServoErrors::StowErrorExImpl, ex, "SRTMinorServoBossCore::setGregorianCoverPosition()");
+            ex.addData("Reason", "Error while sending a STOW command to the gregorian cover.");
+            ex.log(LM_DEBUG);
+            throw ex.getMinorServoErrorsEx();
+        }
+    }
+}
+
+void SRTMinorServoBossCore::setGregorianAirBladeStatus(std::string status)
+{
+    AUTO_TRACE("SRTMinorServoBossCore::setGregorianAirBladeStatus()");
+
+    checkLineStatus();
+
+    std::transform(status.begin(), status.end(), status.begin(), ::toupper);
+
+    if(status != "ON" && status != "OFF" && status != "AUTO")
+    {
+        _EXCPT(MinorServoErrors::StowErrorExImpl, ex, "SRTMinorServoBossCore::setGregorianAirBladeStatus()");
+        ex.addData("Reason", ("Unknown status '" + status + "'.").c_str());
         ex.log(LM_DEBUG);
         throw ex.getMinorServoErrorsEx();
+    }
+
+    SRTMinorServoMotionStatus motion_status = m_motion_status.load();
+    SRTMinorServoGregorianCoverStatus cover_status = m_status.getGregorianCoverPosition();
+    if((motion_status != MOTION_STATUS_CONFIGURED && motion_status != MOTION_STATUS_TRACKING) || cover_status == COVER_STATUS_CLOSED)
+    {
+        _EXCPT(MinorServoErrors::StatusErrorExImpl, ex, "SRTMinorServoBossCore::setGregorianAirBladeStatus()");
+        ex.setReason("You can set the gregorian cover air blade status only when the system is configured or tracking and the gregorian cover is open.");
+        ex.log(LM_DEBUG);
+        throw ex.getMinorServoErrorsEx();
+    }
+
+    SRTMinorServoGregorianAirBladeStatus desired_status;
+    if(status == "ON")
+    {
+        desired_status = AIR_BLADE_STATUS_ON;
+    }
+    else if(status == "OFF")
+    {
+        desired_status = AIR_BLADE_STATUS_OFF;
+    }
+    else
+    {
+        desired_status = AIR_BLADE_STATUS_AUTO;
+    }
+
+    if(desired_status != m_status.getGregorianAirBladeStatus())
+    {
+        ACS_LOG(LM_FULL_INFO, "setGregorianAirBladeStatus", (LM_NOTICE, ("SETTING AIR BLADE STATUS TO " + status).c_str()));
+
+        if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::stow("GREGORIAN_CAP", 2 + (unsigned int)desired_status)).checkOutput())
+        {
+            _EXCPT(MinorServoErrors::StowErrorExImpl, ex, "SRTMinorServoBossCore::setGregorianAirBladeStatus()");
+            ex.addData("Reason", "Error while sending a STOW command to the gregorian cover.");
+            ex.log(LM_DEBUG);
+            throw ex.getMinorServoErrorsEx();
+        }
     }
 }
 

@@ -348,11 +348,6 @@ private:
      * Units of the virtual axes of the servo system.
      */
     const std::vector<std::string> m_virtual_axes_units;
-
-    /**
-     * Latest commanded virtual positions. It only takes into account the preset command.
-     */
-    std::vector<double> m_commanded_virtual_positions;
 protected:
     /**
      * Dictionary containing the last status retrieved form the servo system.
@@ -368,6 +363,11 @@ protected:
      * Commanded system offsets for each axis of the servo system.
      */
     std::vector<double> m_system_offsets;
+
+    /**
+     * Latest commanded virtual positions. It only takes into account the preset command.
+     */
+    std::vector<double> m_commanded_virtual_positions;
 
     /**
      * Queue of positions assumed by the servo system in time.

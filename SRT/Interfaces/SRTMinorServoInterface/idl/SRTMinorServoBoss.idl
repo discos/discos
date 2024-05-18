@@ -63,6 +63,11 @@ module MinorServo
         readonly attribute ROSRTMinorServoGregorianCoverStatus gregorian_cover;
 
         /**
+         * Status of the gregorian air blade
+         */
+        readonly attribute ROSRTMinorServoGregorianAirBladeStatus air_blade;
+
+        /**
          * UNIX Epoch of the last executed command (STATUS commands are not shown here)
          */
         readonly attribute ACS::ROdouble last_executed_command;
@@ -79,7 +84,14 @@ module MinorServo
          * @param value, the desired gregorian cover position, accepted values are 'open', 'OPEN', 'closed' or 'CLOSED'
          * @throw MinorServoErrors::MinorServoErrorsEx
          */
-        //void setGregorianCoverPosition(in string value) raises (MinorServoErrors::MinorServoErrorsEx);
+        void setGregorianCoverPosition(in string value) raises (MinorServoErrors::MinorServoErrorsEx);
+
+        /**
+         * This command turns the gregorian air blade on or off, or sets it to automatic mode
+         * @param value, the desired air blade status, accepted values are 'on', 'ON', 'off', 'OFF', 'auto' or 'AUTO'
+         * @throw MinorServoErrors::MinorServoErrorsEx
+         */
+        void setGregorianAirBladeStatus(in string value) raises (MinorServoErrors::MinorServoErrorsEx);
     };
 };
 

@@ -120,13 +120,13 @@ namespace MinorServo
                         // If I can read the status of the gregorian cover I will notify the user about it on the GUI
                         SRTMinorServoGregorianCoverStatus cover_position = m_boss_status.getGregorianCoverPosition();
 
+                        if(cover_position == COVER_STATUS_CLOSED)
+                        {
+                            motion_status += ", gregorian cover closed";
+                        }
                         if(cover_position == COVER_STATUS_OPEN)
                         {
                             motion_status += ", gregorian cover open";
-                        }
-                        else if(cover_position == COVER_STATUS_CLOSED)
-                        {
-                            motion_status += ", gregorian cover closed";
                         }
                     }
                     catch(...)
@@ -187,6 +187,7 @@ namespace MinorServo
             SRTMinorServoFocalConfiguration,
             SRTMinorServoControlStatus,
             SRTMinorServoGregorianCoverStatus,
+            SRTMinorServoGregorianAirBladeStatus,
             SRTMinorServoCabinetStatus,
             SRTMinorServoOperativeMode
         >

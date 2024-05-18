@@ -23,10 +23,10 @@
     <MISTRAL>           <axis>ROTATION</axis> <coefficients>-51.821170  </coefficients></MISTRAL>
     <MISTRAL_ASACTIVE>  <axis>ROTATION</axis> <coefficients>-51.821170  </coefficients></MISTRAL_ASACTIVE>
 
-    <!-- BWG - GFR open -->
-    <CCB>               <axis>ROTATION</axis> <coefficients>0           </coefficients></CCB>
-    <CCB_ASACTIVE>      <axis>ROTATION</axis> <coefficients>0           </coefficients></CCB_ASACTIVE>
-    <XB>                <axis>ROTATION</axis> <coefficients>0           </coefficients></XB>
-    <XB_ASACTIVE>       <axis>ROTATION</axis> <coefficients>0           </coefficients></XB_ASACTIVE>
+    <!-- BWG - GFR open - configurations commented out since the SETUP command takes care of positioning the GFR to 0 -->
+    <!--CCB>               <axis>ROTATION</axis> <coefficients>0           </coefficients></CCB-->
+    <!--CCB_ASACTIVE>      <axis>ROTATION</axis> <coefficients>0           </coefficients></CCB_ASACTIVE-->
+    <!--XB>                <axis>ROTATION</axis> <coefficients>0           </coefficients></XB-->
+    <!--XB_ASACTIVE>       <axis>ROTATION</axis> <coefficients>0           </coefficients></XB_ASACTIVE-->
 
 </SRTMinorServoLookupTable>

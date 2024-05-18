@@ -31,7 +31,8 @@
     <control description="Boolean indicating whether the servos are controlled by DISCOS or VBrain" />
     <power description="All drive cabinets power status" />
     <emergency description="Boolean indicating whether there is an emergency button(s) pressed" />
-    <gregorian_cover description="Status of the gregorian cover" />
+    <gregorian_cover description="Position of the gregorian cover" />
+    <air_blade description="Status of the gregorian air blade" />
     <last_executed_command description="UNIX time of the last correctly executed command" />
 
 </SRTMinorServoBoss>

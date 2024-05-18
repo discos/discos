@@ -55,52 +55,69 @@ bool SRTProgramTrackMinorServoImpl::status()
 {
     bool status = SRTBaseMinorServoImpl::status();
 
-    try
+    ACS::doubleSeq virtual_positions = m_status.getVirtualPositions();
+    std::vector<double> commanded_positions;
+
+    SRTMinorServoOperativeMode operative_mode = m_status.getOperativeMode();
+    if(operative_mode == OPERATIVE_MODE_PROGRAMTRACK)
     {
-        ACS::Time last_timestamp = m_status.getTimestamp();
-
-        // The timestamp of the read positions always corresponds to the one we're asking since they both belong to the same STATUS command answer
-        // The tracking timestamp is interpolated instead
-        ACS::doubleSeq virtual_positions = m_status.getVirtualPositions();
-        std::pair<ACS::Time, std::vector<double>> tracking_point = m_tracking_queue.get(last_timestamp);
-
-        m_remaining_trajectory_points.store(m_tracking_queue.getRemainingPoints(last_timestamp));
-
-        if(tracking_point.first < last_timestamp)
+        try
         {
-            // We are past the last point of the trajectory, we concluded it
-            m_tracking.store(Management::MNG_FALSE);
-            m_tracking_queue.clear();
-            m_tracking_error = std::vector<double>(m_virtual_axes, 0.0);
-        }
-        else
-        {
-            bool is_tracking = true;
+            ACS::Time last_timestamp = m_status.getTimestamp();
 
-            std::transform(virtual_positions.begin(), virtual_positions.end(), tracking_point.second.begin(), m_tracking_error.begin(), [](double current_pos, double commanded_pos)
-            {
-                return std::fabs(current_pos - commanded_pos);
-            });
+            // The timestamp of the read positions always corresponds to the one we're asking since they both belong to the same STATUS command answer
+            // The tracking timestamp is interpolated instead
+            std::pair<ACS::Time, std::vector<double>> tracking_point = m_tracking_queue.get(last_timestamp);
+            commanded_positions = tracking_point.second;
 
-            for(size_t i = 0; i < m_virtual_axes; i++)
+            m_remaining_trajectory_points.store(m_tracking_queue.getRemainingPoints(last_timestamp));
+
+            if(tracking_point.first < last_timestamp)
             {
-                if(std::fabs(m_tracking_error[i]) > m_tracking_delta[i])
-                {
-                    is_tracking = false;
-                    break;
-                }
+                // We are past the last point of the trajectory, we concluded it
+                m_tracking.store(Management::MNG_FALSE);
+                m_tracking_queue.clear();
+                m_tracking_error = std::vector<double>(m_virtual_axes, 0.0);
+                return status;
             }
-
-            m_tracking.store(is_tracking ? Management::MNG_TRUE : Management::MNG_FALSE);
+        }
+        catch(...)
+        {
+            // We might get here if m_tracking_queue is empty
+            // So whenever we just got a new setup or if we are past the last point inside the trajectory
+            m_tracking.store(Management::MNG_FALSE);  // May be redundant but who cares?
+            m_tracking_error = std::vector<double>(m_virtual_axes, 0.0);
+            return status;
         }
     }
-    catch(...)
+    else if(operative_mode == OPERATIVE_MODE_SETUP || operative_mode == OPERATIVE_MODE_PRESET)
     {
-        // We might get here if m_tracking_queue is empty
-        // So whenever we just got a new setup or if we are past the last point inside the trajectory
-        m_tracking.store(Management::MNG_FALSE);  // May be redundant but who cares?
-        m_tracking_error = std::vector<double>(m_virtual_axes, 0.0);
+        commanded_positions = m_commanded_virtual_positions;
     }
+    else
+    {
+        m_tracking.store(Management::MNG_FALSE);
+        m_tracking_error = std::vector<double>(m_virtual_axes, 0.0);
+        return status;
+    }
+
+    bool is_tracking = true;
+
+    std::transform(virtual_positions.begin(), virtual_positions.end(), commanded_positions.begin(), m_tracking_error.begin(), [](double current_pos, double commanded_pos)
+    {
+        return std::fabs(current_pos - commanded_pos);
+    });
+
+    for(size_t i = 0; i < m_virtual_axes; i++)
+    {
+        if(std::fabs(m_tracking_error[i]) > m_tracking_delta[i])
+        {
+            is_tracking = false;
+            break;
+        }
+    }
+
+    m_tracking.store(is_tracking ? Management::MNG_TRUE : Management::MNG_FALSE);
 
     return status;
 }

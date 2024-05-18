@@ -36,6 +36,16 @@
      </xs:complexContent>
     </xs:complexType>
 
+    <xs:complexType name="SRTMinorServoGregorianAirBladeStatusType">
+     <xs:complexContent>
+      <xs:restriction base="baci:ROEnum">
+       <xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
+       <xs:attribute name="graph_max" type="xs:int" use="optional" default="2" />
+       <xs:attribute name="statesDescription" type="xs:string" use="optional" default="AIR_BLADE_STATUS_OFF" />
+      </xs:restriction>
+     </xs:complexContent>
+    </xs:complexType>
+
     <xs:complexType name="SRTMinorServoControlStatusType">
      <xs:complexContent>
       <xs:restriction base="baci:ROEnum">
@@ -69,6 +79,7 @@
         <xs:element name="power" type="mng:BooleanType" />
         <xs:element name="emergency" type="mng:BooleanType" />
         <xs:element name="gregorian_cover" type="SRTMinorServoGregorianCoverStatusType" />
+        <xs:element name="air_blade" type="SRTMinorServoGregorianAirBladeStatusType" />
         <xs:element name="last_executed_command" type="baci:ROdouble" />
        </xs:sequence>
        <xs:attribute name="status_thread_period" type="xs:double" use="required" />

@@ -19,6 +19,7 @@ SRTBaseMinorServoImpl::SRTBaseMinorServoImpl(const ACE_CString& component_name, 
     ),
     m_user_offsets(m_virtual_axes, 0.0),
     m_system_offsets(m_virtual_axes, 0.0),
+    m_commanded_virtual_positions(m_virtual_axes, 0.0),
     m_positions_queue(5 * 60 * int(1 / getCDBValue<double>(container_services, "status_thread_period", "/MINORSERVO/Boss")), m_virtual_axes),
     m_min(SRTBaseMinorServoImpl::getMotionConstant(*this, "min_range")),
     m_max(SRTBaseMinorServoImpl::getMotionConstant(*this, "max_range")),
@@ -206,13 +207,8 @@ void SRTBaseMinorServoImpl::preset(const ACS::doubleSeq& virtual_coords)
     if(virtual_coordinates.length() == 0)
     {
         // It means we want to command the latest coordinates again, to apply the offset in the LDO servo system
-        // We execute the copy only if we already commanded a set of coordinates, otherwise we let the flow go to the next
-        // if which will raise regardless
-        if(!m_commanded_virtual_positions.empty())
-        {
-            virtual_coordinates.length(m_commanded_virtual_positions.size());
-            std::copy(m_commanded_virtual_positions.begin(), m_commanded_virtual_positions.end(), virtual_coordinates.begin());
-        }
+        virtual_coordinates.length(m_commanded_virtual_positions.size());
+        std::copy(m_commanded_virtual_positions.begin(), m_commanded_virtual_positions.end(), virtual_coordinates.begin());
     }
 
     if(virtual_coordinates.length() != m_virtual_axes)
@@ -246,10 +242,6 @@ void SRTBaseMinorServoImpl::preset(const ACS::doubleSeq& virtual_coords)
         throw ex.getMinorServoErrorsEx();
     }
 
-    if(m_commanded_virtual_positions.empty())
-    {
-        m_commanded_virtual_positions.resize(m_virtual_axes);
-    }
     std::copy(coordinates.begin(), coordinates.end(), m_commanded_virtual_positions.begin());
 }
 
@@ -320,9 +312,16 @@ bool SRTBaseMinorServoImpl::setup(const char* configuration_name)
         clearUserOffsets();
         clearSystemOffsets();
         m_in_use.store(Management::MNG_TRUE);
+        // The positions tables inside the Leonardo minor servo systems are calculated with an elevation of 45 degrees.
+        // We need to be sure the values are correct otherwise there will be a discrepancy.
+        ACS::doubleSeq commanded_coordinates = *calcCoordinates(45);
+        std::copy(commanded_coordinates.begin(), commanded_coordinates.end(), m_commanded_virtual_positions.begin());
+        return true;
     }
-
-    return true;
+    else
+    {
+        return false;
+    }
 }
 
 ACS::doubleSeq* SRTBaseMinorServoImpl::calcCoordinates(double elevation)
@@ -555,7 +554,7 @@ void SRTBaseMinorServoImpl::getAxesInfo(ACS::stringSeq_out axes_names_out, ACS::
 
     for(size_t i = 0; i < m_virtual_axes; i++)
     {
-        axes_names[i] = (m_servo_name + "_" + m_virtual_axes_names[i] == "ROTATION" ? "RZ" : m_virtual_axes_names[i]).c_str();
+        axes_names[i] = (m_virtual_axes_names[i] == "ROTATION" ? "RZ" : m_virtual_axes_names[i]).c_str();
         axes_units[i] = m_virtual_axes_units[i].c_str();
     }
 
