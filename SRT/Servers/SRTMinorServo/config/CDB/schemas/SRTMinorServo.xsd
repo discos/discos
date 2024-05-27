@@ -37,6 +37,16 @@
      </xs:complexContent>
     </xs:complexType>
 
+    <xs:complexType name="SRTMinorServoErrorType">
+     <xs:complexContent>
+      <xs:restriction base="baci:ROEnum">
+       <xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
+       <xs:attribute name="graph_max" type="xs:int" use="optional" default="7" />
+       <xs:attribute name="statesDescription" type="xs:string" use="optional" default="ERROR_NO_ERROR" />
+      </xs:restriction>
+     </xs:complexContent>
+    </xs:complexType>
+
     <xs:complexType name="SRTBaseMinorServoType">
      <xs:complexContent>
       <xs:extension base="baci:CharacteristicComponent">
@@ -57,6 +67,7 @@
         <xs:element name="commanded_virtual_positions" type="baci:ROdoubleSeq" />
         <xs:element name="in_use" type="mng:BooleanType" />
         <xs:element name="current_setup" type="baci:ROstring" />
+        <xs:element name="error_code" type="SRTMinorServoErrorType" />
        </xs:sequence>
        <xs:attribute name="physical_axes" type="xs:unsignedShort" use="required" />
        <xs:attribute name="virtual_axes" type="xs:unsignedShort" use="required" />

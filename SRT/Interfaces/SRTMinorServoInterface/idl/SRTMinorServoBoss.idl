@@ -92,6 +92,13 @@ module MinorServo
          * @throw MinorServoErrors::MinorServoErrorsEx
          */
         void setGregorianAirBladeStatus(in string value) raises (MinorServoErrors::MinorServoErrorsEx);
+
+        /**
+         * This command resets the error status inside the component. It DOES NOT send a reset command to the Leonardo minor servo system.
+         * In order to reset emergencies and alarms inside the Leonardo minor servo system the user has to call the servoReset command from operatorInput.
+         * The servoReset command sends a reset to the Leonardo minnor servo system and then calls this method to clear the component error status.
+         */
+        void reset();
     };
 };
 

@@ -307,6 +307,11 @@ public:
     virtual void preset(double elevation);
 
     /**
+     * This command clears the error status from the component.
+     */
+    void reset();
+
+    /**
      * Parser method. It executes the desired command.
      */
     virtual CORBA::Boolean command(const char*, CORBA::String_out);

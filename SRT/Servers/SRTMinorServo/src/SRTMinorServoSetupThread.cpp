@@ -45,7 +45,6 @@ void SRTMinorServoSetupThread::onStop()
         catch(ComponentErrors::ComponentErrorsEx& ex)
         {
             ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
-            m_core.setFailure();
         }
     }
 }
@@ -61,7 +60,6 @@ void SRTMinorServoSetupThread::runLoop()
     catch(MinorServoErrors::StatusErrorEx& ex)
     {
         ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
-        m_core.setFailure();
         this->setStopped();
         return;
     }
@@ -69,7 +67,7 @@ void SRTMinorServoSetupThread::runLoop()
     if(IRA::CIRATools::getUNIXEpoch() - m_start_time >= SETUP_TIMEOUT)
     {
         ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::runLoop()", (LM_CRITICAL, "Timeout while performing a setup operation."));
-        m_core.setFailure();
+        m_core.setError(ERROR_CONFIG_ERROR);
         this->setStopped();
         return;
     }
@@ -108,7 +106,7 @@ void SRTMinorServoSetupThread::runLoop()
                 if(!m_core.m_socket.sendCommand(SRTMinorServoCommandLibrary::setup(m_LDO_configuration)).checkOutput())
                 {
                     ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::runLoop()", (LM_CRITICAL, "Received NAK in response to a SETUP command."));
-                    m_core.setFailure();
+                    m_core.setError(ERROR_CONFIG_ERROR);
                     this->setStopped();
                     return;
                 }
@@ -120,7 +118,7 @@ void SRTMinorServoSetupThread::runLoop()
             catch(...)
             {
                 ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::runLoop()", (LM_CRITICAL, "Communication error while sending a SETUP command."));
-                m_core.setFailure();
+                m_core.setError(ERROR_CONFIG_ERROR);
                 this->setStopped();
                 return;
             }
@@ -172,7 +170,7 @@ void SRTMinorServoSetupThread::runLoop()
                 catch(...)
                 {
                     ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::runLoop()", (LM_CRITICAL, ("Error while loading a SETUP to servo'" + servo_name + "'.").c_str()));
-                    m_core.setFailure();
+                    m_core.setError(ERROR_CONFIG_ERROR);
                     this->setStopped();
                     return;
                 }
@@ -191,7 +189,7 @@ void SRTMinorServoSetupThread::runLoop()
                     catch(MinorServoErrors::MinorServoErrorsEx& ex)
                     {
                         ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
-                        m_core.setFailure();
+                        m_core.setError(ERROR_COMMAND_ERROR);
                         this->setStopped();
                         return;
                     }

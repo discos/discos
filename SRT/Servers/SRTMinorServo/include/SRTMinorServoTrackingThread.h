@@ -75,11 +75,6 @@ private:
      * The current trajectory point time.
      */
     ACS::Time m_point_time;
-
-    /**
-     * Boolean which indicates if the tracking thread exited with an error or not.
-     */
-    bool m_error;
 };
 
 #endif /*_SRTMINORSERVOTRACKINGTHREAD_H_*/

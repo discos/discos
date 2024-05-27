@@ -67,7 +67,6 @@ void SRTMinorServoScanThread::onStop()
     if(m_error)  // We didn't reach the end of the scan because of some error
     {
         // Should we set everything to failure?
-        m_core.setFailure();
         return;
     }
 
@@ -168,6 +167,7 @@ void SRTMinorServoScanThread::runLoop()
         else
         {
             m_error = true;
+            m_core.setError(ERROR_CONFIG_ERROR);
             this->setStopped();
             return;
         }
@@ -224,6 +224,7 @@ void SRTMinorServoScanThread::runLoop()
         {
             ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
             m_error = true;
+            m_core.setError(ERROR_COMMAND_ERROR);
             this->setStopped();
             return;
         }

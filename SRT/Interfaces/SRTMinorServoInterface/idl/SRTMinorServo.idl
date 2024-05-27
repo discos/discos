@@ -99,6 +99,11 @@ module MinorServo
         readonly attribute ACS::ROstring current_setup;
 
         /**
+         * This property returns the current eventual error code.
+         */
+        readonly attribute ROSRTMinorServoError error_code;
+
+        /**
          * This method asks the PLC the status for the corresponding servo
          * @throw MinorServoErrors::MinorServoErrorsEx when trying to reset the offsets when they don't match the ones loaded into the hardware
          * @return true if the servo is not in an error state, false otherwise
@@ -225,6 +230,17 @@ module MinorServo
          * @param max_ranges the maximum range of the servo axes
          */
         void getAxesRanges(out ACS::doubleSeq min_ranges, out ACS::doubleSeq max_ranges);
+
+        /*
+         * This method returns the current eventual error code
+         * @return the current eventual error code
+         */
+        SRTMinorServoError getErrorCode();
+
+        /**
+         * This command resets the error status inside the component.
+         */
+        void reset();
     };
 
     /**

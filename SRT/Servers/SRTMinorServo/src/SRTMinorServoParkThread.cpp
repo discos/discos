@@ -43,7 +43,6 @@ void SRTMinorServoParkThread::runLoop()
     catch(MinorServoErrors::MinorServoErrorsEx& ex)
     {
         ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
-        m_core.setFailure();
         this->setStopped();
         return;
     }
@@ -51,7 +50,7 @@ void SRTMinorServoParkThread::runLoop()
     if(IRA::CIRATools::getUNIXEpoch() - m_start_time >= PARK_TIMEOUT)
     {
         ACS_LOG(LM_FULL_INFO, "SRTMinorServoParkThread::runLoop()", (LM_CRITICAL, "Timeout while performing a park operation."));
-        m_core.setFailure();
+        m_core.setError(ERROR_CONFIG_ERROR);
         this->setStopped();
         return;
     }

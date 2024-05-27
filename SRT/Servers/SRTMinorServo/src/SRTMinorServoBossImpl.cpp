@@ -61,7 +61,7 @@ void SRTMinorServoBossImpl::initialize()
         m_actual_setup_ptr = new baci::ROstring((m_component_name + ":actualSetup").c_str(), getComponent(),
                 new MSGenericDevIO<ACE_CString, std::string>(m_core.m_actual_setup), true);
         m_motion_info_ptr = new baci::ROstring((m_component_name + ":motionInfo").c_str(), getComponent(),
-                new MSMotionInfoDevIO(m_core.m_motion_status, m_core.m_status, m_core.m_scanning, m_core.m_current_scan), true);
+                new MSMotionInfoDevIO(m_core.m_motion_status, m_core.m_status, m_core.m_error, m_core.m_scanning, m_core.m_current_scan), true);
         m_starting_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":starting").c_str(), getComponent(),
                 new MSGenericDevIO<Management::TBoolean, std::atomic<Management::TBoolean>>(m_core.m_starting), true);
         m_as_configuration_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":asConfiguration").c_str(), getComponent(),
@@ -366,6 +366,12 @@ void SRTMinorServoBossImpl::preset(double elevation)
 {
     AUTO_TRACE("SRTMinorServoBossImpl::preset()");
     m_core.preset(elevation);
+}
+
+void SRTMinorServoBossImpl::reset()
+{
+    AUTO_TRACE("SRTMinorServoBossImpl::reset()");
+    m_core.reset();
 }
 
 CORBA::Boolean SRTMinorServoBossImpl::command(const char* cmd, CORBA::String_out answer)

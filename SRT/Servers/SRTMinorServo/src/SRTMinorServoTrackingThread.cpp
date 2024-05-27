@@ -4,8 +4,7 @@ using namespace MinorServo;
 
 SRTMinorServoTrackingThread::SRTMinorServoTrackingThread(const ACE_CString& name, SRTMinorServoBossCore& core, const ACS::TimeInterval& response_time, const ACS::TimeInterval& sleep_time):
     ACS::Thread(name, response_time, sleep_time),
-    m_core(core),
-    m_error(false)
+    m_core(core)
 {
     AUTO_TRACE("SRTMinorServoTrackingThread::SRTMinorServoTrackingThread()");
 }
@@ -33,11 +32,6 @@ void SRTMinorServoTrackingThread::onStop()
     ACS_LOG(LM_FULL_INFO, "SRTMinorServoTrackingThread::onStop()", (LM_NOTICE, "TRACKING THREAD STOPPED"));
 
     m_core.m_elevation_tracking.store(Management::MNG_FALSE);
-
-    if(m_error)
-    {
-        m_core.setFailure();
-    }
 }
 
 void SRTMinorServoTrackingThread::runLoop()
@@ -51,7 +45,6 @@ void SRTMinorServoTrackingThread::runLoop()
     catch(MinorServoErrors::MinorServoErrorsEx& ex)
     {
         ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
-        m_error = true;
         this->setStopped();
         return;
     }
@@ -59,7 +52,7 @@ void SRTMinorServoTrackingThread::runLoop()
     if(m_core.m_motion_status.load() != MOTION_STATUS_TRACKING)
     {
         // System is not ready or is not configured for tracking yet, we wait, even though we should never get here
-        _IRA_LOGFILTER_LOG(LM_WARNING, "SRTMinorServoScanThread::runLoop()", "Waiting for the system to be configured for tracking!");
+        _IRA_LOGFILTER_LOG(LM_WARNING, "SRTMinorServoTrackingThread::runLoop()", "Waiting for the system to be configured for tracking!");
         return;
     }
 
@@ -87,7 +80,7 @@ void SRTMinorServoTrackingThread::runLoop()
         }
         else
         {
-            m_error = true;
+            m_core.setError(ERROR_CONFIG_ERROR);
             this->setStopped();
             return;
         }
@@ -103,7 +96,7 @@ void SRTMinorServoTrackingThread::runLoop()
         }
         catch(ComponentErrors::ComponentErrorsEx& ex)
         {
-            _IRA_LOGFILTER_LOG(LM_WARNING, "SRTMinorServoScanThread::runLoop()", (std::string(getReasonFromEx(ex)) + ": using a fixed elevation of 45° for tracking!").c_str());
+            _IRA_LOGFILTER_LOG(LM_WARNING, "SRTMinorServoTrackingThread::runLoop()", (std::string(getReasonFromEx(ex)) + ": using a fixed elevation of 45° for tracking!").c_str());
             m_core.m_elevation_tracking.store(Management::MNG_FALSE);
         }
 
@@ -114,21 +107,21 @@ void SRTMinorServoTrackingThread::runLoop()
         catch(MinorServoErrors::MinorServoErrorsEx& ex)
         {
             ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
-            m_error = true;
+            m_core.setError(ERROR_COMMAND_ERROR);
             this->setStopped();
             return;
         }
         catch(std::exception& ex)
         {
             ACS_SHORT_LOG((LM_ERROR, ex.what()));
-            m_error = true;
+            m_core.setError(ERROR_COMMAND_ERROR);
             this->setStopped();
             return;
         }
         catch(CORBA::Exception& ex)
         {
             ACS_SHORT_LOG((LM_ERROR, ex._info().c_str()));
-            m_error = true;
+            m_core.setError(ERROR_COMMAND_ERROR);
             this->setStopped();
             return;
         }
