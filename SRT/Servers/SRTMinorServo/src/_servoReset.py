@@ -8,6 +8,7 @@
 import sys
 import time
 import requests
+import urllib3
 import cdbErrType
 import ComponentErrorsImpl
 import ClientErrorsImpl
@@ -48,6 +49,7 @@ def send_requests(protocol, address, port):
     f'{protocol}://{address}:{port}/Exporting/json/ExecuteCommand?name'
     emergency = f'{url}=INAF_SRT_OR7_EMG_RESET_CMD'
     alarms = f'{url}=INAF_SRT_OR7_RESET_CMD'
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     try:
         # We just try to send the commands, if it fails, we do nothing, it
         # means there is a problem reaching the VBrain server so we cannot
