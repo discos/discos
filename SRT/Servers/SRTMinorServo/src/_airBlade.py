@@ -29,7 +29,7 @@ def main():
         sys.exit(1)
 
     try:
-        inputs = component.setAirBladeStatus(sys.argv[1])
+        inputs = component.setGregorianAirBladeStatus(sys.argv[1])
     except MinorServoErrors.MinorServoErrorsEx as ex:
         newEx = ClientErrorsImpl.CouldntPerformActionExImpl(exception=ex, create=1)
         newEx.setReason('MinorServoBoss gregorian air blade status')

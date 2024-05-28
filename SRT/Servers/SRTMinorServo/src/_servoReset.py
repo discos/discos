@@ -52,9 +52,9 @@ def send_requests(protocol, address, port):
         # We just try to send the commands, if it fails, we do nothing, it
         # means there is a problem reaching the VBrain server so we cannot
         # reset the status anyway
-        response = requests.get(emergency, timeout=3)
+        response = requests.get(emergency, verify=False, timeout=3)
         time.sleep(3)
-        response = requests.get(alarms, timeout=3)
+        response = requests.get(alarms, verify=False, timeout=3)
     except:
         pass
 
