@@ -16,6 +16,7 @@ from IRAPy import logger
 from SimpleParserPy import add_user_message
 from Acspy.Clients.SimpleClient import PySimpleClient
 from Acspy.Util import ACSCorba
+from MinorServo import ERROR_NO_ERROR
 
 
 def get_cdb_args():
@@ -72,6 +73,10 @@ if __name__ == "__main__":
 
     try:
         component = simpleClient.getComponent(compName)
+        # Check if we have an error, if not we just exit immediately
+        error_code = component.error_code.get_sync()[0]
+        if error_code == ERROR_NO_ERROR:
+            sys.exit(0)
     except Exception as ex:
         newEx = ClientErrorsImpl.CouldntAccessComponentExImpl(exception=ex, create=1)
         newEx.setComponentName(compName)

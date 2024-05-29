@@ -73,6 +73,11 @@ module MinorServo
         readonly attribute ACS::ROdouble last_executed_command;
 
         /**
+         * This property returns the current eventual error code.
+         */
+        readonly attribute ROSRTMinorServoError error_code;
+
+        /**
          * This command sets all the minor servos involved in the current focal configuration to their position calculated from the elevation argument
          * @param elevation, the elevation the minor servos should use to calculate their position
          * @throw MinorServoErrors::MinorServoErrorsEx

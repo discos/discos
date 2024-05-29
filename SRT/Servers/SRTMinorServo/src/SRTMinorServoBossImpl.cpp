@@ -31,7 +31,8 @@ SRTMinorServoBossImpl::SRTMinorServoBossImpl(const ACE_CString& component_name, 
     m_emergency_ptr(this),
     m_gregorian_cover_ptr(this),
     m_air_blade_ptr(this),
-    m_last_executed_command_ptr(this)
+    m_last_executed_command_ptr(this),
+    m_error_code_ptr(this)
 {
     AUTO_TRACE("SRTMinorServoBossImpl::SRTMinorServoBossImpl()");
 
@@ -61,7 +62,7 @@ void SRTMinorServoBossImpl::initialize()
         m_actual_setup_ptr = new baci::ROstring((m_component_name + ":actualSetup").c_str(), getComponent(),
                 new MSGenericDevIO<ACE_CString, std::string>(m_core.m_actual_setup), true);
         m_motion_info_ptr = new baci::ROstring((m_component_name + ":motionInfo").c_str(), getComponent(),
-                new MSMotionInfoDevIO(m_core.m_motion_status, m_core.m_status, m_core.m_error, m_core.m_scanning, m_core.m_current_scan), true);
+                new MSMotionInfoDevIO(m_core.m_motion_status, m_core.m_status, m_core.m_error_code, m_core.m_scanning, m_core.m_current_scan), true);
         m_starting_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":starting").c_str(), getComponent(),
                 new MSGenericDevIO<Management::TBoolean, std::atomic<Management::TBoolean>>(m_core.m_starting), true);
         m_as_configuration_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":asConfiguration").c_str(), getComponent(),
@@ -91,6 +92,8 @@ void SRTMinorServoBossImpl::initialize()
         m_air_blade_ptr = new ROEnumImpl<ACS_ENUM_T(SRTMinorServoGregorianAirBladeStatus), POA_MinorServo::ROSRTMinorServoGregorianAirBladeStatus>((m_component_name + ":air_blade").c_str(), getComponent(), new MSAnswerMapDevIO<SRTMinorServoGregorianAirBladeStatus, SRTMinorServoGeneralStatus>("air_blade", m_core.m_status, &SRTMinorServoGeneralStatus::getGregorianAirBladeStatus), true);
         m_last_executed_command_ptr = new baci::ROdouble((m_component_name + ":last_executed_command").c_str(), getComponent(),
                 new MSAnswerMapDevIO<CORBA::Double, SRTMinorServoGeneralStatus>("last_executed_command", m_core.m_status, &SRTMinorServoGeneralStatus::getLastExecutedCommand), true);
+        m_error_code_ptr = new ROEnumImpl<ACS_ENUM_T(SRTMinorServoError), POA_MinorServo::ROSRTMinorServoError>((m_component_name + ":error_code").c_str(), getComponent(),
+                new MSGenericDevIO<SRTMinorServoError, std::atomic<SRTMinorServoError>>(m_core.m_error_code), true);
     }
     catch(std::bad_alloc& ba)
     {
@@ -433,6 +436,7 @@ GET_PROPERTY_REFERENCE(Management::ROTBoolean, SRTMinorServoBossImpl, m_emergenc
 GET_PROPERTY_REFERENCE(ROSRTMinorServoGregorianCoverStatus, SRTMinorServoBossImpl, m_gregorian_cover_ptr, gregorian_cover);
 GET_PROPERTY_REFERENCE(ROSRTMinorServoGregorianAirBladeStatus, SRTMinorServoBossImpl, m_air_blade_ptr, air_blade);
 GET_PROPERTY_REFERENCE(ACS::ROdouble, SRTMinorServoBossImpl, m_last_executed_command_ptr, last_executed_command);
+GET_PROPERTY_REFERENCE(ROSRTMinorServoError, SRTMinorServoBossImpl, m_error_code_ptr, error_code);
 
 #include <maciACSComponentDefines.h>
 MACI_DLL_SUPPORT_FUNCTIONS(SRTMinorServoBossImpl)

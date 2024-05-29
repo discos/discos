@@ -400,7 +400,7 @@ private:
     /**
      * Enumerator containing the error code.
      */
-    std::atomic<SRTMinorServoError> m_error;
+    std::atomic<SRTMinorServoError> m_error_code;
 
     /**
      * This boolean will be set to true every time the socket connects.

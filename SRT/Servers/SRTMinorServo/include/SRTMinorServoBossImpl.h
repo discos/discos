@@ -442,6 +442,12 @@ public:
      */
     virtual ACS::ROdouble_ptr last_executed_command();
 
+    /**
+     * Returns a reference to the error_code property implementation of the IDL interface.
+     * @return pointer to the read-only SRTMinorServoError property error_code.
+     */
+    virtual ROSRTMinorServoError_ptr error_code();
+
 private:
     /**
      * Component name.
@@ -567,6 +573,11 @@ private:
      * Pointer to the last_executed_command property.
      */
     baci::SmartPropertyPointer<baci::ROdouble> m_last_executed_command_ptr;
+
+    /**
+     * Pointer to the error_code property.
+     */
+    baci::SmartPropertyPointer<ROEnumImpl<ACS_ENUM_T(SRTMinorServoError), POA_MinorServo::ROSRTMinorServoError>> m_error_code_ptr;
 };
 
 #endif

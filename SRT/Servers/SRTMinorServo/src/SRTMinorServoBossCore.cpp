@@ -24,7 +24,7 @@ SRTMinorServoBossCore::SRTMinorServoBossCore(SRTMinorServoBossImpl& component) :
     m_scan_active(Management::MNG_FALSE),
     m_scanning(Management::MNG_FALSE),
     m_tracking(Management::MNG_FALSE),
-    m_error(ERROR_NO_ERROR),
+    m_error_code(ERROR_NO_ERROR),
     m_reload_servo_offsets(true),
     m_socket_configuration(SRTMinorServoSocketConfiguration::getInstance(m_component.getContainerServices())),
     m_socket(SRTMinorServoSocket::getInstance(m_socket_configuration.m_ip_address, m_socket_configuration.m_port, m_socket_configuration.m_timeout)),
@@ -1405,14 +1405,14 @@ void SRTMinorServoBossCore::setError(SRTMinorServoError error)
     m_scanning.store(Management::MNG_FALSE);
     m_tracking.store(Management::MNG_FALSE);
     m_motion_status.store(MOTION_STATUS_ERROR);
-    m_error.store(error);
+    m_error_code.store(error);
 }
 
 void SRTMinorServoBossCore::reset(bool force)
 {
     AUTO_TRACE("SRTMinorServoBossCore::reset()");
 
-    if(m_error.load() == ERROR_NOT_CONNECTED && !force)
+    if(m_error_code.load() == ERROR_NOT_CONNECTED && !force)
     {
         // If we are still not connected we should not proceed with the reset
         return;
@@ -1426,7 +1426,7 @@ void SRTMinorServoBossCore::reset(bool force)
     m_actual_setup = "Unknown";
     m_subsystem_status.store(Management::MNG_WARNING);
     m_motion_status.store(MOTION_STATUS_UNCONFIGURED);
-    m_error.store(ERROR_NO_ERROR);
+    m_error_code.store(ERROR_NO_ERROR);
 }
 
 Management::TBoolean SRTMinorServoBossCore::getCDBConfiguration(std::string which_configuration)

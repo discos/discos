@@ -34,5 +34,6 @@
     <gregorian_cover description="Position of the gregorian cover" />
     <air_blade description="Status of the gregorian air blade" />
     <last_executed_command description="UNIX time of the last correctly executed command" />
+    <error_code description="The type of error encountered" />
 
 </SRTMinorServoBoss>
