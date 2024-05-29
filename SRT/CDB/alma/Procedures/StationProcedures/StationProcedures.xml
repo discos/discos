@@ -137,11 +137,11 @@
 <Procedure name="telescopePark" args="0">
 <body>
 	goTo=*,89.8d
-	receiversPark
-	servoPark
-	asPark
 	waitOnSource
 	antennaStop
+	servoPark
+	asPark
+	receiversPark
 	wait=1
 	antennaPark
 	logMessage=Telescope is now parked
