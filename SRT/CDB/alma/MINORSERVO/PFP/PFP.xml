@@ -31,6 +31,7 @@
     <commanded_virtual_positions description="Sequence, latest commanded (via preset) virtual positions" />
     <in_use description="Boolean indicating whether the servo is in use in the current configuration" />
     <current_setup description="The name of the current configuration" />
+    <error_code description="The type of error encountered" />
     <tracking description="Boolean indicating whether the servo is tracking the given coordinates" />
     <trajectory_id description="Unsigned int, the UNIX Epoch * 1000 indicating the start time of the current trajectory" />
     <total_trajectory_points description="Number of points sent for the current trajectory" />

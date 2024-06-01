@@ -702,7 +702,25 @@ namespace MinorServo
          */
         SRTMinorServoGregorianCoverStatus getGregorianCoverPosition() const
         {
-            return SRTMinorServoGregorianCoverStatus(this->get<unsigned int>("GREGORIAN_CAP"));
+            return SRTMinorServoGregorianCoverStatus(std::min(this->get<unsigned int>("GREGORIAN_CAP"), (unsigned int)COVER_STATUS_OPEN));
+        }
+
+        /**
+         * Returns the status of the gregorian air blade.
+         * @return an enum indicating the status of the gregorian air blade.
+         */
+        SRTMinorServoGregorianAirBladeStatus getGregorianAirBladeStatus() const
+        {
+            unsigned int status = this->get<unsigned int>("GREGORIAN_CAP");
+            if(status <= COVER_STATUS_CLOSED)
+            {
+                status = AIR_BLADE_STATUS_OFF;
+            }
+            else
+            {
+                status -= 2;
+            }
+            return SRTMinorServoGregorianAirBladeStatus(status);
         }
 
         /**

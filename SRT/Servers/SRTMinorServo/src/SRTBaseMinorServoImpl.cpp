@@ -17,8 +17,10 @@ SRTBaseMinorServoImpl::SRTBaseMinorServoImpl(const ACE_CString& component_name, 
         m_virtual_axes_names,
         SRTBaseMinorServoImpl::getPropertiesTable(*this, "virtual_offsets")
     ),
+    m_error_code(ERROR_NO_ERROR),
     m_user_offsets(m_virtual_axes, 0.0),
     m_system_offsets(m_virtual_axes, 0.0),
+    m_commanded_virtual_positions(m_virtual_axes, 0.0),
     m_positions_queue(5 * 60 * int(1 / getCDBValue<double>(container_services, "status_thread_period", "/MINORSERVO/Boss")), m_virtual_axes),
     m_min(SRTBaseMinorServoImpl::getMotionConstant(*this, "min_range")),
     m_max(SRTBaseMinorServoImpl::getMotionConstant(*this, "max_range")),
@@ -44,6 +46,7 @@ SRTBaseMinorServoImpl::SRTBaseMinorServoImpl(const ACE_CString& component_name, 
     m_commanded_virtual_positions_ptr(this),
     m_in_use_ptr(this),
     m_current_setup_ptr(this),
+    m_error_code_ptr(this),
     m_current_lookup_table(),
     m_socket_configuration(SRTMinorServoSocketConfiguration::getInstance(container_services)),
     m_socket(SRTMinorServoSocket::getInstance(m_socket_configuration.m_ip_address, m_socket_configuration.m_port, m_socket_configuration.m_timeout))
@@ -92,6 +95,8 @@ void SRTBaseMinorServoImpl::initialize()
                 new MSGenericDevIO<Management::TBoolean, std::atomic<Management::TBoolean>>(m_in_use), true);
         m_current_setup_ptr = new baci::ROstring((m_component_name + ":current_setup").c_str(), getComponent(),
                 new MSGenericDevIO<ACE_CString, std::string>(m_current_setup), true);
+        m_error_code_ptr = new ROEnumImpl<ACS_ENUM_T(SRTMinorServoError), POA_MinorServo::ROSRTMinorServoError>((m_component_name + ":error_code").c_str(), getComponent(),
+                new MSGenericDevIO<SRTMinorServoError, std::atomic<SRTMinorServoError>>(m_error_code), true);
     }
     catch(std::bad_alloc& ba)
     {
@@ -157,6 +162,8 @@ bool SRTBaseMinorServoImpl::status()
     }
     catch(...)
     {
+        // Something went wrong when sending the status command
+        m_error_code.store(ERROR_COMMAND_ERROR);
         return false;
     }
 
@@ -171,6 +178,7 @@ void SRTBaseMinorServoImpl::stow(CORBA::Long stow_position)
 
     if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::stow(m_servo_name, (unsigned int)stow_position)).checkOutput())
     {
+        m_error_code.store(ERROR_COMMAND_ERROR);
         _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::stow()").c_str());
         ex.setReason("Received NAK in response to a STOW command.");
         ex.log(LM_DEBUG);
@@ -186,6 +194,7 @@ void SRTBaseMinorServoImpl::stop()
 
     if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::stop(m_servo_name)).checkOutput())
     {
+        m_error_code.store(ERROR_COMMAND_ERROR);
         _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::stop()").c_str());
         ex.setReason("Received NAK in response to a STOP command.");
         ex.log(LM_DEBUG);
@@ -206,13 +215,8 @@ void SRTBaseMinorServoImpl::preset(const ACS::doubleSeq& virtual_coords)
     if(virtual_coordinates.length() == 0)
     {
         // It means we want to command the latest coordinates again, to apply the offset in the LDO servo system
-        // We execute the copy only if we already commanded a set of coordinates, otherwise we let the flow go to the next
-        // if which will raise regardless
-        if(!m_commanded_virtual_positions.empty())
-        {
-            virtual_coordinates.length(m_commanded_virtual_positions.size());
-            std::copy(m_commanded_virtual_positions.begin(), m_commanded_virtual_positions.end(), virtual_coordinates.begin());
-        }
+        virtual_coordinates.length(m_commanded_virtual_positions.size());
+        std::copy(m_commanded_virtual_positions.begin(), m_commanded_virtual_positions.end(), virtual_coordinates.begin());
     }
 
     if(virtual_coordinates.length() != m_virtual_axes)
@@ -240,16 +244,13 @@ void SRTBaseMinorServoImpl::preset(const ACS::doubleSeq& virtual_coords)
 
     if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::preset(m_servo_name, coordinates)).checkOutput())
     {
+        m_error_code.store(ERROR_COMMAND_ERROR);
         _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::preset()").c_str());
         ex.setReason("Received NAK in response to a PRESET command.");
         ex.log(LM_DEBUG);
         throw ex.getMinorServoErrorsEx();
     }
 
-    if(m_commanded_virtual_positions.empty())
-    {
-        m_commanded_virtual_positions.resize(m_virtual_axes);
-    }
     std::copy(coordinates.begin(), coordinates.end(), m_commanded_virtual_positions.begin());
 }
 
@@ -320,9 +321,16 @@ bool SRTBaseMinorServoImpl::setup(const char* configuration_name)
         clearUserOffsets();
         clearSystemOffsets();
         m_in_use.store(Management::MNG_TRUE);
+        // The positions tables inside the Leonardo minor servo systems are calculated with an elevation of 45 degrees.
+        // We need to be sure the values are correct otherwise there will be a discrepancy.
+        ACS::doubleSeq commanded_coordinates = *calcCoordinates(45);
+        std::copy(commanded_coordinates.begin(), commanded_coordinates.end(), m_commanded_virtual_positions.begin());
+        return true;
     }
-
-    return true;
+    else
+    {
+        return false;
+    }
 }
 
 ACS::doubleSeq* SRTBaseMinorServoImpl::calcCoordinates(double elevation)
@@ -408,6 +416,7 @@ void SRTBaseMinorServoImpl::setUserOffset(const char* axis_name, CORBA::Double o
 
     if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::offset(m_servo_name, offsets)).checkOutput())
     {
+        m_error_code.store(ERROR_COMMAND_ERROR);
         _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::setUserOffset()").c_str());
         ex.setReason("Received NAK in response to an OFFSET command.");
         ex.log(LM_DEBUG);
@@ -430,6 +439,7 @@ void SRTBaseMinorServoImpl::clearUserOffsets()
 
     if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::offset(m_servo_name, offsets)).checkOutput())
     {
+        m_error_code.store(ERROR_COMMAND_ERROR);
         _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::clearUserOffset()").c_str());
         ex.setReason("Received NAK in response to an OFFSET command.");
         ex.log(LM_DEBUG);
@@ -486,6 +496,7 @@ void SRTBaseMinorServoImpl::setSystemOffset(const char* axis_name, CORBA::Double
 
     if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::offset(m_servo_name, offsets)).checkOutput())
     {
+        m_error_code.store(ERROR_COMMAND_ERROR);
         _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::setSystemOffset()").c_str());
         ex.setReason("Received NAK in response to an OFFSET command.");
         ex.log(LM_DEBUG);
@@ -509,6 +520,7 @@ void SRTBaseMinorServoImpl::clearSystemOffsets()
 
     if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::offset(m_servo_name, offsets)).checkOutput())
     {
+        m_error_code.store(ERROR_COMMAND_ERROR);
         _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::clearSystemOffset()").c_str());
         ex.setReason("Received NAK in response to an OFFSET command.");
         ex.log(LM_DEBUG);
@@ -534,6 +546,7 @@ void SRTBaseMinorServoImpl::reloadOffsets()
         // Offsets do not correspond, should reset them by sending a offset command
         if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::offset(m_servo_name, DISCOS_offsets)).checkOutput())
         {
+            m_error_code.store(ERROR_COMMAND_ERROR);
             _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::reloadOffsets()").c_str());
             ex.setReason("Received NAK in response to an OFFSET command.");
             ex.log(LM_DEBUG);
@@ -555,7 +568,7 @@ void SRTBaseMinorServoImpl::getAxesInfo(ACS::stringSeq_out axes_names_out, ACS::
 
     for(size_t i = 0; i < m_virtual_axes; i++)
     {
-        axes_names[i] = (m_servo_name + "_" + m_virtual_axes_names[i] == "ROTATION" ? "RZ" : m_virtual_axes_names[i]).c_str();
+        axes_names[i] = (m_virtual_axes_names[i] == "ROTATION" ? "RZ" : m_virtual_axes_names[i]).c_str();
         axes_units[i] = m_virtual_axes_units[i].c_str();
     }
 
@@ -684,6 +697,12 @@ void SRTBaseMinorServoImpl::getAxesRanges(ACS::doubleSeq_out min_ranges_out, ACS
     max_ranges_out = max_ranges._retn();
 }
 
+void SRTBaseMinorServoImpl::reset()
+{
+    AUTO_TRACE("SRTBaseMinorServoImpl::reset()");
+    m_error_code.store(ERROR_NO_ERROR);
+}
+
 /////////////////// PROTECTED methods
 void SRTBaseMinorServoImpl::checkLineStatus()
 {
@@ -692,14 +711,25 @@ void SRTBaseMinorServoImpl::checkLineStatus()
         _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "checkLineStatus()").c_str());
         ex.setReason("Socket not connected.");
         ex.log(LM_DEBUG);
+        m_error_code.store(ERROR_NOT_CONNECTED);
         throw ex.getMinorServoErrorsEx();
     }
 
-    if(m_status.isBlocked() == Management::MNG_TRUE || m_status.getDriveCabinetStatus() == DRIVE_CABINET_ERROR)
+    if(m_status.isBlocked() == Management::MNG_TRUE)
     {
         _EXCPT(MinorServoErrors::StatusErrorExImpl, ex, (m_servo_name + "::checkLineStatus()").c_str());
-        ex.setReason("Servo system blocked or drive cabinet error.");
+        ex.setReason("Servo system blocked.");
         ex.log(LM_DEBUG);
+        m_error_code.store(ERROR_SERVO_BLOCKED);
+        throw ex.getMinorServoErrorsEx();
+    }
+
+    if(m_status.getDriveCabinetStatus() == DRIVE_CABINET_ERROR)
+    {
+        _EXCPT(MinorServoErrors::StatusErrorExImpl, ex, (m_servo_name + "::checkLineStatus()").c_str());
+        ex.setReason("Drive cabinet error.");
+        ex.log(LM_DEBUG);
+        m_error_code.store(ERROR_DRIVE_CABINET);
         throw ex.getMinorServoErrorsEx();
     }
 }
@@ -835,3 +865,4 @@ GET_PROPERTY_REFERENCE(ACS::ROdoubleSeq, SRTBaseMinorServoImpl, m_virtual_system
 GET_PROPERTY_REFERENCE(ACS::ROdoubleSeq, SRTBaseMinorServoImpl, m_commanded_virtual_positions_ptr, commanded_virtual_positions);
 GET_PROPERTY_REFERENCE(Management::ROTBoolean, SRTBaseMinorServoImpl, m_in_use_ptr, in_use);
 GET_PROPERTY_REFERENCE(ACS::ROstring, SRTBaseMinorServoImpl, m_current_setup_ptr, current_setup);
+GET_PROPERTY_REFERENCE(ROSRTMinorServoError, SRTBaseMinorServoImpl, m_error_code_ptr, error_code);

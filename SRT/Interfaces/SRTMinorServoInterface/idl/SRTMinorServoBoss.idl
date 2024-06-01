@@ -63,9 +63,19 @@ module MinorServo
         readonly attribute ROSRTMinorServoGregorianCoverStatus gregorian_cover;
 
         /**
+         * Status of the gregorian air blade
+         */
+        readonly attribute ROSRTMinorServoGregorianAirBladeStatus air_blade;
+
+        /**
          * UNIX Epoch of the last executed command (STATUS commands are not shown here)
          */
         readonly attribute ACS::ROdouble last_executed_command;
+
+        /**
+         * This property returns the current eventual error code.
+         */
+        readonly attribute ROSRTMinorServoError error_code;
 
         /**
          * This command sets all the minor servos involved in the current focal configuration to their position calculated from the elevation argument
@@ -79,7 +89,21 @@ module MinorServo
          * @param value, the desired gregorian cover position, accepted values are 'open', 'OPEN', 'closed' or 'CLOSED'
          * @throw MinorServoErrors::MinorServoErrorsEx
          */
-        //void setGregorianCoverPosition(in string value) raises (MinorServoErrors::MinorServoErrorsEx);
+        void setGregorianCoverPosition(in string value) raises (MinorServoErrors::MinorServoErrorsEx);
+
+        /**
+         * This command turns the gregorian air blade on or off, or sets it to automatic mode
+         * @param value, the desired air blade status, accepted values are 'on', 'ON', 'off', 'OFF', 'auto' or 'AUTO'
+         * @throw MinorServoErrors::MinorServoErrorsEx
+         */
+        void setGregorianAirBladeStatus(in string value) raises (MinorServoErrors::MinorServoErrorsEx);
+
+        /**
+         * This command resets the error status inside the component. It DOES NOT send a reset command to the Leonardo minor servo system.
+         * In order to reset emergencies and alarms inside the Leonardo minor servo system the user has to call the servoReset command from operatorInput.
+         * The servoReset command sends a reset to the Leonardo minnor servo system and then calls this method to clear the component error status.
+         */
+        void reset();
     };
 };
 

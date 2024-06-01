@@ -30,7 +30,9 @@ SRTMinorServoBossImpl::SRTMinorServoBossImpl(const ACE_CString& component_name, 
     m_power_ptr(this),
     m_emergency_ptr(this),
     m_gregorian_cover_ptr(this),
-    m_last_executed_command_ptr(this)
+    m_air_blade_ptr(this),
+    m_last_executed_command_ptr(this),
+    m_error_code_ptr(this)
 {
     AUTO_TRACE("SRTMinorServoBossImpl::SRTMinorServoBossImpl()");
 
@@ -60,7 +62,7 @@ void SRTMinorServoBossImpl::initialize()
         m_actual_setup_ptr = new baci::ROstring((m_component_name + ":actualSetup").c_str(), getComponent(),
                 new MSGenericDevIO<ACE_CString, std::string>(m_core.m_actual_setup), true);
         m_motion_info_ptr = new baci::ROstring((m_component_name + ":motionInfo").c_str(), getComponent(),
-                new MSMotionInfoDevIO(m_core.m_motion_status, m_core.m_status, m_core.m_scanning, m_core.m_current_scan), true);
+                new MSMotionInfoDevIO(m_core.m_motion_status, m_core.m_status, m_core.m_error_code, m_core.m_scanning, m_core.m_current_scan), true);
         m_starting_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":starting").c_str(), getComponent(),
                 new MSGenericDevIO<Management::TBoolean, std::atomic<Management::TBoolean>>(m_core.m_starting), true);
         m_as_configuration_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":asConfiguration").c_str(), getComponent(),
@@ -87,8 +89,11 @@ void SRTMinorServoBossImpl::initialize()
         m_emergency_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":emergency").c_str(), getComponent(),
                 new MSAnswerMapDevIO<Management::TBoolean, SRTMinorServoGeneralStatus>("emergency", m_core.m_status, &SRTMinorServoGeneralStatus::emergencyPressed), true);
         m_gregorian_cover_ptr = new ROEnumImpl<ACS_ENUM_T(SRTMinorServoGregorianCoverStatus), POA_MinorServo::ROSRTMinorServoGregorianCoverStatus>((m_component_name + ":gregorian_cover").c_str(), getComponent(), new MSAnswerMapDevIO<SRTMinorServoGregorianCoverStatus, SRTMinorServoGeneralStatus>("gregorian_cover", m_core.m_status, &SRTMinorServoGeneralStatus::getGregorianCoverPosition), true);
+        m_air_blade_ptr = new ROEnumImpl<ACS_ENUM_T(SRTMinorServoGregorianAirBladeStatus), POA_MinorServo::ROSRTMinorServoGregorianAirBladeStatus>((m_component_name + ":air_blade").c_str(), getComponent(), new MSAnswerMapDevIO<SRTMinorServoGregorianAirBladeStatus, SRTMinorServoGeneralStatus>("air_blade", m_core.m_status, &SRTMinorServoGeneralStatus::getGregorianAirBladeStatus), true);
         m_last_executed_command_ptr = new baci::ROdouble((m_component_name + ":last_executed_command").c_str(), getComponent(),
                 new MSAnswerMapDevIO<CORBA::Double, SRTMinorServoGeneralStatus>("last_executed_command", m_core.m_status, &SRTMinorServoGeneralStatus::getLastExecutedCommand), true);
+        m_error_code_ptr = new ROEnumImpl<ACS_ENUM_T(SRTMinorServoError), POA_MinorServo::ROSRTMinorServoError>((m_component_name + ":error_code").c_str(), getComponent(),
+                new MSGenericDevIO<SRTMinorServoError, std::atomic<SRTMinorServoError>>(m_core.m_error_code), true);
     }
     catch(std::bad_alloc& ba)
     {
@@ -105,7 +110,8 @@ void SRTMinorServoBossImpl::initialize()
     m_parser.add("setServoASConfiguration", new SP::function1<SRTMinorServoBossImpl, SP::non_constant, SP::void_type, SP::I<SP::string_type>>(this, &SRTMinorServoBossImpl::setASConfiguration), 1);
     m_parser.add("setServoOffset", new SP::function2<SRTMinorServoBossImpl, SP::non_constant, SP::void_type, SP::I<SP::string_type>, SP::I<SP::double_type>>(this, &SRTMinorServoBossImpl::setUserOffset), 2);
     m_parser.add("clearServoOffsets", new SP::function0<SRTMinorServoBossImpl, SP::non_constant, SP::void_type>(this, &SRTMinorServoBossImpl::clearOffsets), 0);
-    //m_parser.add("setGregorianCoverPosition", new SP::function1<SRTMinorServoBossImpl, SP::non_constant, SP::void_type, SP::I<SP::string_type>>(this, &SRTMinorServoBossImpl::setGregorianCoverPosition), 1);
+    m_parser.add("setGregorianCoverPosition", new SP::function1<SRTMinorServoBossImpl, SP::non_constant, SP::void_type, SP::I<SP::string_type>>(this, &SRTMinorServoBossImpl::setGregorianCoverPosition), 1);
+    m_parser.add("setGregorianAirBladeStatus", new SP::function1<SRTMinorServoBossImpl, SP::non_constant, SP::void_type, SP::I<SP::string_type>>(this, &SRTMinorServoBossImpl::setGregorianAirBladeStatus), 1);
 
     ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossImpl::initialize()", (LM_NOTICE, "PARSER INITIALIZED"));
 
@@ -335,6 +341,12 @@ void SRTMinorServoBossImpl::setGregorianCoverPosition(const char* position)
     m_core.setGregorianCoverPosition(std::string(position));
 }
 
+void SRTMinorServoBossImpl::setGregorianAirBladeStatus(const char* status)
+{
+    AUTO_TRACE("SRTMinorServoBossImpl::setGregorianAirBladeStatus()");
+    m_core.setGregorianAirBladeStatus(std::string(status));
+}
+
 CORBA::Boolean SRTMinorServoBossImpl::checkScan(const ACS::Time start_time, const MinorServoScan& scan_info, const Antenna::TRunTimeParameters& antenna_info, TRunTimeParameters_out ms_parameters)
 {
     AUTO_TRACE("SRTMinorServoBossImpl::checkScan()");
@@ -357,6 +369,12 @@ void SRTMinorServoBossImpl::preset(double elevation)
 {
     AUTO_TRACE("SRTMinorServoBossImpl::preset()");
     m_core.preset(elevation);
+}
+
+void SRTMinorServoBossImpl::reset()
+{
+    AUTO_TRACE("SRTMinorServoBossImpl::reset()");
+    m_core.reset();
 }
 
 CORBA::Boolean SRTMinorServoBossImpl::command(const char* cmd, CORBA::String_out answer)
@@ -416,7 +434,9 @@ GET_PROPERTY_REFERENCE(ROSRTMinorServoControlStatus, SRTMinorServoBossImpl, m_co
 GET_PROPERTY_REFERENCE(Management::ROTBoolean, SRTMinorServoBossImpl, m_power_ptr, power);
 GET_PROPERTY_REFERENCE(Management::ROTBoolean, SRTMinorServoBossImpl, m_emergency_ptr, emergency);
 GET_PROPERTY_REFERENCE(ROSRTMinorServoGregorianCoverStatus, SRTMinorServoBossImpl, m_gregorian_cover_ptr, gregorian_cover);
+GET_PROPERTY_REFERENCE(ROSRTMinorServoGregorianAirBladeStatus, SRTMinorServoBossImpl, m_air_blade_ptr, air_blade);
 GET_PROPERTY_REFERENCE(ACS::ROdouble, SRTMinorServoBossImpl, m_last_executed_command_ptr, last_executed_command);
+GET_PROPERTY_REFERENCE(ROSRTMinorServoError, SRTMinorServoBossImpl, m_error_code_ptr, error_code);
 
 #include <maciACSComponentDefines.h>
 MACI_DLL_SUPPORT_FUNCTIONS(SRTMinorServoBossImpl)

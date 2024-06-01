@@ -74,21 +74,21 @@ void SRTMinorServoSocket::connect()
         throw impl.getMinorServoErrorsEx();
     }
 
-    if(Connect(m_error, m_ip_address.c_str(), m_port) == FAIL)
-    {
-        m_socket_status = TIMEOUT;
-        Close(m_error);
-        _EXCPT(MinorServoErrors::CommunicationErrorExImpl, impl, "SRTMinorServoSocket::SRTMinorServoSocket()");
-        impl.setReason("Cannot connect the socket.");
-        throw impl.getMinorServoErrorsEx();
-    }
-
     if(setSockMode(m_error, NONBLOCKING) != SUCCESS)
     {
         m_socket_status = NOTREADY;
         Close(m_error);
         _EXCPT(MinorServoErrors::CommunicationErrorExImpl, impl, "SRTMinorServoSocket::SRTMinorServoSocket()");
         impl.setReason("Cannot set the socket to non-blocking.");
+        throw impl.getMinorServoErrorsEx();
+    }
+
+    if(Connect(m_error, m_ip_address.c_str(), m_port) == FAIL)
+    {
+        m_socket_status = TIMEOUT;
+        Close(m_error);
+        _EXCPT(MinorServoErrors::CommunicationErrorExImpl, impl, "SRTMinorServoSocket::SRTMinorServoSocket()");
+        impl.setReason("Cannot connect the socket.");
         throw impl.getMinorServoErrorsEx();
     }
 
@@ -102,9 +102,9 @@ const bool SRTMinorServoSocket::isConnected() const
 
 SRTMinorServoAnswerMap SRTMinorServoSocket::sendCommand(std::string command, std::optional<std::reference_wrapper<SRTMinorServoAnswerMap>> map)
 {
-    std::lock_guard<std::mutex> guard(m_mutex);
-
     connect();
+
+    std::lock_guard<std::mutex> guard(m_mutex);
 
     double start_time = IRA::CIRATools::getUNIXEpoch();
     size_t sent_bytes = 0;

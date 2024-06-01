@@ -24,6 +24,7 @@ SRTMinorServoBossCore::SRTMinorServoBossCore(SRTMinorServoBossImpl& component) :
     m_scan_active(Management::MNG_FALSE),
     m_scanning(Management::MNG_FALSE),
     m_tracking(Management::MNG_FALSE),
+    m_error_code(ERROR_NO_ERROR),
     m_reload_servo_offsets(true),
     m_socket_configuration(SRTMinorServoSocketConfiguration::getInstance(m_component.getContainerServices())),
     m_socket(SRTMinorServoSocket::getInstance(m_socket_configuration.m_ip_address, m_socket_configuration.m_port, m_socket_configuration.m_timeout)),
@@ -31,8 +32,8 @@ SRTMinorServoBossCore::SRTMinorServoBossCore(SRTMinorServoBossImpl& component) :
     m_servos{
         //{ "PFP", m_component.getContainerServices()->getComponent<SRTBaseMinorServo>("MINORSERVO/PFP") },
         { "SRP", m_component.getContainerServices()->getComponent<SRTBaseMinorServo>("MINORSERVO/SRP") },
-        { "GFR", m_component.getContainerServices()->getComponent<SRTBaseMinorServo>("MINORSERVO/GFR") }
-        //{ "M3R", m_component.getContainerServices()->getComponent<SRTBaseMinorServo>("MINORSERVO/M3R") }
+        { "GFR", m_component.getContainerServices()->getComponent<SRTBaseMinorServo>("MINORSERVO/GFR") },
+        { "M3R", m_component.getContainerServices()->getComponent<SRTBaseMinorServo>("MINORSERVO/M3R") }
     },
     m_tracking_servos{
         //{ "PFP", m_component.getContainerServices()->getComponent<SRTProgramTrackMinorServo>("MINORSERVO/PFP") },
@@ -62,13 +63,18 @@ bool SRTMinorServoBossCore::status()
     try
     {
         // Attempt communication anyway
-        m_socket.sendCommand(SRTMinorServoCommandLibrary::status(), m_status);
+        if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::status(), m_status).checkOutput())
+        {
+            setError(ERROR_COMMAND_ERROR);
+            return false;
+        }
 
         if(m_socket_connected.load() == Management::MNG_FALSE)
         {
             ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::status()", (LM_NOTICE, "Socket connected."));
+            // We just reconnected, we can try to reset the error automatically, if there is another error in the following code the reset will simply be overridden
             m_socket_connected.store(Management::MNG_TRUE);
-            m_subsystem_status.store(Management::MNG_WARNING);
+            reset(true);
         }
     }
     catch(MinorServoErrors::MinorServoErrorsEx& ex)
@@ -82,7 +88,7 @@ bool SRTMinorServoBossCore::status()
             stopThread(m_park_thread);
             stopThread(m_tracking_thread);
             stopThread(m_scan_thread);
-            setFailure();
+            setError(ERROR_NOT_CONNECTED);
 
             m_reload_servo_offsets = true;
         }
@@ -97,29 +103,28 @@ bool SRTMinorServoBossCore::status()
     catch(MinorServoErrors::MinorServoErrorsEx& ex)
     {
         _IRA_LOGFILTER_LOG(LM_ERROR, "SRTMinorServoBossCore::status()", getReasonFromEx(ex));
-        setFailure();
         return false;
     }
 
     SRTMinorServoMotionStatus motion_status = m_motion_status.load();
-    /*if(motion_status == MOTION_STATUS_TRACKING || motion_status == MOTION_STATUS_CONFIGURED)
+    if(motion_status == MOTION_STATUS_TRACKING || motion_status == MOTION_STATUS_CONFIGURED)
     {
         // We only get here if the system is configured, therefore we check the correct position of the gregorian cover
         SRTMinorServoGregorianCoverStatus commanded_gregorian_cover_position = m_status.getFocalConfiguration() == CONFIGURATION_PRIMARY ? COVER_STATUS_CLOSED : COVER_STATUS_OPEN;
         if(m_status.getGregorianCoverPosition() != commanded_gregorian_cover_position)
         {
             ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::status()", (LM_CRITICAL, "Gregorian cover in wrong position."));
-            setFailure();
+            setError(ERROR_COVER_WRONG_POSITION);
             return false;
         }
-    }*/
+    }
 
     for(const auto& [name, servo] : m_servos)
     {
         if(!servo->status())
         {
             ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::status()", (LM_CRITICAL, ("Error checking " + name + " status.").c_str()));
-            setFailure();
+            setError(servo->getErrorCode());
             return false;
         }
 
@@ -131,7 +136,7 @@ bool SRTMinorServoBossCore::status()
 
     m_reload_servo_offsets = false;
 
-    if(motion_status == MOTION_STATUS_TRACKING)
+    if(motion_status == MOTION_STATUS_CONFIGURED || motion_status == MOTION_STATUS_TRACKING)
     {
         if(std::all_of(m_current_tracking_servos.begin(), m_current_tracking_servos.end(), [](const std::pair<std::string, SRTProgramTrackMinorServo_ptr>& servo) -> bool
         {
@@ -144,10 +149,6 @@ bool SRTMinorServoBossCore::status()
         {
             m_tracking.store(Management::MNG_FALSE);
         }
-    }
-    else if(motion_status == MOTION_STATUS_CONFIGURED)
-    {
-        m_tracking.store(Management::MNG_TRUE);
     }
     else
     {
@@ -338,10 +339,10 @@ void SRTMinorServoBossCore::park()
     m_current_servos.clear();
     m_current_tracking_servos.clear();
 
-    /*try
+    try
     {
         // Send the STOW command to close the gregorian cover
-        if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::stow("Gregoriano", COVER_STATUS_CLOSED)).checkOutput())
+        if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::stow("GREGORIAN_CAP", COVER_STATUS_CLOSED)).checkOutput())
         {
             _EXCPT(ManagementErrors::ParkingErrorExImpl, ex, "SRTMinorServoBossCore::park()");
             ex.setSubsystem("MinorServo");
@@ -357,7 +358,7 @@ void SRTMinorServoBossCore::park()
         ex.setReason("Error while sending the STOW command to the gregorian cover.");
         ex.log(LM_DEBUG);
         throw ex.getParkingErrorEx();
-    }*/
+    }
 
     // Send the STOP command to all the servos
     for(const auto& [servo_name, servo] : m_servos)
@@ -433,6 +434,14 @@ void SRTMinorServoBossCore::setElevationTracking(std::string configuration)
         if(m_motion_status.load() == MOTION_STATUS_TRACKING)
         {
             m_motion_status.store(MOTION_STATUS_CONFIGURED);
+
+            try
+            {
+                preset(getElevation(getTimeStamp()));
+            }
+            catch(...)
+            {
+            }
         }
     }
 }
@@ -517,14 +526,81 @@ void SRTMinorServoBossCore::setGregorianCoverPosition(std::string position)
         throw ex.getMinorServoErrorsEx();
     }
 
-    ACS_LOG(LM_FULL_INFO, "setGregorianCoverPosition", (LM_NOTICE, ("SETTING GREGORIAN COVER POSITION TO " + position).c_str()));
-
-    if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::stow("Gregoriano", position == "OPEN" ? COVER_STATUS_OPEN : COVER_STATUS_CLOSED)).checkOutput())
+    SRTMinorServoGregorianCoverStatus desired_position;
+    if(position == "OPEN")
     {
-        _EXCPT(MinorServoErrors::StowErrorExImpl, ex, "SRTMinorServoBossCore::setGregorianCoverPosition()");
-        ex.addData("Reason", "Error while sending a STOW command to the gregorian cover.");
+        desired_position = COVER_STATUS_OPEN;
+    }
+    else
+    {
+        desired_position = COVER_STATUS_CLOSED;
+    }
+
+    if(desired_position != m_status.getGregorianCoverPosition())
+    {
+        ACS_LOG(LM_FULL_INFO, "setGregorianCoverPosition", (LM_NOTICE, ("SETTING GREGORIAN COVER POSITION TO " + position).c_str()));
+
+        if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::stow("GREGORIAN_CAP", desired_position)).checkOutput())
+        {
+            _EXCPT(MinorServoErrors::StowErrorExImpl, ex, "SRTMinorServoBossCore::setGregorianCoverPosition()");
+            ex.addData("Reason", "Error while sending a STOW command to the gregorian cover.");
+            ex.log(LM_DEBUG);
+            throw ex.getMinorServoErrorsEx();
+        }
+    }
+}
+
+void SRTMinorServoBossCore::setGregorianAirBladeStatus(std::string status)
+{
+    AUTO_TRACE("SRTMinorServoBossCore::setGregorianAirBladeStatus()");
+
+    checkLineStatus();
+
+    std::transform(status.begin(), status.end(), status.begin(), ::toupper);
+
+    if(status != "ON" && status != "OFF" && status != "AUTO")
+    {
+        _EXCPT(MinorServoErrors::StowErrorExImpl, ex, "SRTMinorServoBossCore::setGregorianAirBladeStatus()");
+        ex.addData("Reason", ("Unknown status '" + status + "'.").c_str());
         ex.log(LM_DEBUG);
         throw ex.getMinorServoErrorsEx();
+    }
+
+    SRTMinorServoMotionStatus motion_status = m_motion_status.load();
+    SRTMinorServoGregorianCoverStatus cover_status = m_status.getGregorianCoverPosition();
+    if((motion_status != MOTION_STATUS_CONFIGURED && motion_status != MOTION_STATUS_TRACKING) || cover_status == COVER_STATUS_CLOSED)
+    {
+        _EXCPT(MinorServoErrors::StatusErrorExImpl, ex, "SRTMinorServoBossCore::setGregorianAirBladeStatus()");
+        ex.setReason("You can set the gregorian cover air blade status only when the system is configured or tracking and the gregorian cover is open.");
+        ex.log(LM_DEBUG);
+        throw ex.getMinorServoErrorsEx();
+    }
+
+    SRTMinorServoGregorianAirBladeStatus desired_status;
+    if(status == "ON")
+    {
+        desired_status = AIR_BLADE_STATUS_ON;
+    }
+    else if(status == "OFF")
+    {
+        desired_status = AIR_BLADE_STATUS_OFF;
+    }
+    else
+    {
+        desired_status = AIR_BLADE_STATUS_AUTO;
+    }
+
+    if(desired_status != m_status.getGregorianAirBladeStatus())
+    {
+        ACS_LOG(LM_FULL_INFO, "setGregorianAirBladeStatus", (LM_NOTICE, ("SETTING AIR BLADE STATUS TO " + status).c_str()));
+
+        if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::stow("GREGORIAN_CAP", 2 + (unsigned int)desired_status)).checkOutput())
+        {
+            _EXCPT(MinorServoErrors::StowErrorExImpl, ex, "SRTMinorServoBossCore::setGregorianAirBladeStatus()");
+            ex.addData("Reason", "Error while sending a STOW command to the gregorian cover.");
+            ex.log(LM_DEBUG);
+            throw ex.getMinorServoErrorsEx();
+        }
     }
 }
 
@@ -1227,7 +1303,7 @@ void SRTMinorServoBossCore::checkLineStatus()
         _EXCPT(MinorServoErrors::StatusErrorExImpl, ex, "SRTMinorServoBossCore::checkLineStatus()");
         ex.setReason("Socket not connected.");
         ex.log(LM_DEBUG);
-        setFailure();
+        setError(ERROR_NOT_CONNECTED);
         throw ex.getMinorServoErrorsEx();
     }
 
@@ -1236,7 +1312,7 @@ void SRTMinorServoBossCore::checkLineStatus()
         _EXCPT(MinorServoErrors::StatusErrorExImpl, ex, "SRTMinorServoBossCore::checkLineStatus()");
         ex.setReason("MinorServo system is not controlled by DISCOS.");
         ex.log(LM_DEBUG);
-        setFailure();
+        setError(ERROR_MAINTENANCE);
         throw ex.getMinorServoErrorsEx();
     }
 
@@ -1245,7 +1321,7 @@ void SRTMinorServoBossCore::checkLineStatus()
         _EXCPT(MinorServoErrors::StatusErrorExImpl, ex, "SRTMinorServoBossCore::checkLineStatus()");
         ex.setReason("MinorServo system in emergency status.");
         ex.log(LM_DEBUG);
-        setFailure();
+        setError(ERROR_EMERGENCY_STOP);
         throw ex.getMinorServoErrorsEx();
     }
 }
@@ -1285,7 +1361,7 @@ void SRTMinorServoBossCore::startThread(T*& thread, const ACS::TimeInterval& sle
         _ADD_BACKTRACE(ComponentErrors::CanNotStartThreadExImpl, ex, impl, "SRTMinorServoBossCore::startThread()");
         ex.setThreadName(T::c_thread_name);
         ex.log(LM_DEBUG);
-        setFailure();
+        setError(ERROR_CONFIG_ERROR);
         throw ex.getComponentErrorsEx();
     }
 }
@@ -1315,10 +1391,12 @@ void SRTMinorServoBossCore::destroyThread(T*& thread)
     ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::destroyThread()", (LM_NOTICE, (std::string(T::c_thread_name) + " destroyed.").c_str()));
 }
 
-void SRTMinorServoBossCore::setFailure()
+void SRTMinorServoBossCore::setError(SRTMinorServoError error)
 {
-    AUTO_TRACE("SRTMinorServoBossCore::setFailure()");
+    AUTO_TRACE("SRTMinorServoBossCore::setError()");
 
+    m_commanded_setup = "";
+    m_actual_setup = "Error";
     m_subsystem_status.store(Management::MNG_FAILURE);
     m_ready.store(Management::MNG_FALSE);
     m_elevation_tracking.store(Management::MNG_FALSE);
@@ -1327,6 +1405,28 @@ void SRTMinorServoBossCore::setFailure()
     m_scanning.store(Management::MNG_FALSE);
     m_tracking.store(Management::MNG_FALSE);
     m_motion_status.store(MOTION_STATUS_ERROR);
+    m_error_code.store(error);
+}
+
+void SRTMinorServoBossCore::reset(bool force)
+{
+    AUTO_TRACE("SRTMinorServoBossCore::reset()");
+
+    if(m_error_code.load() == ERROR_NOT_CONNECTED && !force)
+    {
+        // If we are still not connected we should not proceed with the reset
+        return;
+    }
+
+    for(const auto& [servo_name, servo] : m_servos)
+    {
+        servo->reset();
+    }
+
+    m_actual_setup = "Unknown";
+    m_subsystem_status.store(Management::MNG_WARNING);
+    m_motion_status.store(MOTION_STATUS_UNCONFIGURED);
+    m_error_code.store(ERROR_NO_ERROR);
 }
 
 Management::TBoolean SRTMinorServoBossCore::getCDBConfiguration(std::string which_configuration)

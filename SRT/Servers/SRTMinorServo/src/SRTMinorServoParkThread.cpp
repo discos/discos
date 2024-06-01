@@ -43,7 +43,6 @@ void SRTMinorServoParkThread::runLoop()
     catch(MinorServoErrors::MinorServoErrorsEx& ex)
     {
         ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
-        m_core.setFailure();
         this->setStopped();
         return;
     }
@@ -51,7 +50,7 @@ void SRTMinorServoParkThread::runLoop()
     if(IRA::CIRATools::getUNIXEpoch() - m_start_time >= PARK_TIMEOUT)
     {
         ACS_LOG(LM_FULL_INFO, "SRTMinorServoParkThread::runLoop()", (LM_CRITICAL, "Timeout while performing a park operation."));
-        m_core.setFailure();
+        m_core.setError(ERROR_CONFIG_ERROR);
         this->setStopped();
         return;
     }
@@ -61,13 +60,13 @@ void SRTMinorServoParkThread::runLoop()
         case 0:
         {
             // First we check if the gregorian cover has closed
-            //bool completed = m_core.m_status.getGregorianCoverPosition() == COVER_STATUS_CLOSED ? true : false;
+            bool completed = m_core.m_status.getGregorianCoverPosition() == COVER_STATUS_CLOSED;
 
             // Then we cycle through all the servos and make sure their operative mode is STOP
-            if(/*completed && */std::all_of(m_core.m_servos.begin(), m_core.m_servos.end(), [](const std::pair<std::string, SRTBaseMinorServo_ptr>& servo) -> bool
+            if(completed && std::all_of(m_core.m_servos.begin(), m_core.m_servos.end(), [](const std::pair<std::string, SRTBaseMinorServo_ptr>& servo) -> bool
             {
                 ACSErr::Completion_var comp;
-                return servo.second->operative_mode()->get_sync(comp.out()) == OPERATIVE_MODE_STOP ? true : false;
+                return servo.second->operative_mode()->get_sync(comp.out()) == OPERATIVE_MODE_STOP;
             }))
             {
                 m_status = 1;

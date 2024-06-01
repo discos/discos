@@ -119,6 +119,14 @@ private:
     void setGregorianCoverPosition(std::string position);
 
     /**
+     * Sets the gregorian air blade status.
+     * @param status the desired status for the gregorian air blade, allowed value are 'on', 'ON', 'off', 'OFF', 'auto' or 'AUTO'.
+     * @throw MinorServoErrors::MinorServoErrorsEx when the commanded status is unknown or the gregorian cover is currently closed,
+     *                                             when anything goes wrong in the lower communication level or if checkLineStatus throws.
+     */
+    void setGregorianAirBladeStatus(std::string status);
+
+    /**
      * Configures the whole minor servo system to a desired position.
      * @param elevation the elevation to use for all the minor servo positions calculation.
      * @throw MinorServoErrors::MinorServoErrorsEx when a scan is waiting to be completed, when the system was not configured yet,
@@ -268,8 +276,15 @@ private:
 
     /**
      * Method that sets all the necessary variable to signal a failure of the minor servo system.
+     * @param error the type of error the system should display
      */
-    void setFailure();
+    void setError(SRTMinorServoError error);
+
+    /**
+     * Method that clears the error status from the system.
+     * This will show the system cleared the error status and is ready to be configured again.
+     */
+    void reset(bool force=false);
 
     /**
      * Method used to retrieve a configuration value from the CDB.
@@ -381,6 +396,11 @@ private:
      * Boolean indicating whether the system is tracking or not.
      */
     std::atomic<Management::TBoolean> m_tracking;
+
+    /**
+     * Enumerator containing the error code.
+     */
+    std::atomic<SRTMinorServoError> m_error_code;
 
     /**
      * This boolean will be set to true every time the socket connects.
