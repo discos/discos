@@ -24,6 +24,7 @@ SRTMinorServoBossCore::SRTMinorServoBossCore(SRTMinorServoBossImpl& component) :
     m_scan_active(Management::MNG_FALSE),
     m_scanning(Management::MNG_FALSE),
     m_tracking(Management::MNG_FALSE),
+    m_error_code(ERROR_NO_ERROR),
     m_reload_servo_offsets(true),
     m_socket_configuration(SRTMinorServoSocketConfiguration::getInstance(m_component.getContainerServices())),
     m_socket(SRTMinorServoSocket::getInstance(m_socket_configuration.m_ip_address, m_socket_configuration.m_port, m_socket_configuration.m_timeout)),
@@ -62,13 +63,18 @@ bool SRTMinorServoBossCore::status()
     try
     {
         // Attempt communication anyway
-        m_socket.sendCommand(SRTMinorServoCommandLibrary::status(), m_status);
+        if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::status(), m_status).checkOutput())
+        {
+            setError(ERROR_COMMAND_ERROR);
+            return false;
+        }
 
         if(m_socket_connected.load() == Management::MNG_FALSE)
         {
             ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::status()", (LM_NOTICE, "Socket connected."));
+            // We just reconnected, we can try to reset the error automatically, if there is another error in the following code the reset will simply be overridden
             m_socket_connected.store(Management::MNG_TRUE);
-            m_subsystem_status.store(Management::MNG_WARNING);
+            reset(true);
         }
     }
     catch(MinorServoErrors::MinorServoErrorsEx& ex)
@@ -82,7 +88,7 @@ bool SRTMinorServoBossCore::status()
             stopThread(m_park_thread);
             stopThread(m_tracking_thread);
             stopThread(m_scan_thread);
-            setFailure();
+            setError(ERROR_NOT_CONNECTED);
 
             m_reload_servo_offsets = true;
         }
@@ -97,7 +103,6 @@ bool SRTMinorServoBossCore::status()
     catch(MinorServoErrors::MinorServoErrorsEx& ex)
     {
         _IRA_LOGFILTER_LOG(LM_ERROR, "SRTMinorServoBossCore::status()", getReasonFromEx(ex));
-        setFailure();
         return false;
     }
 
@@ -109,7 +114,7 @@ bool SRTMinorServoBossCore::status()
         if(m_status.getGregorianCoverPosition() != commanded_gregorian_cover_position)
         {
             ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::status()", (LM_CRITICAL, "Gregorian cover in wrong position."));
-            setFailure();
+            setError(ERROR_COVER_WRONG_POSITION);
             return false;
         }
     }
@@ -119,7 +124,7 @@ bool SRTMinorServoBossCore::status()
         if(!servo->status())
         {
             ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::status()", (LM_CRITICAL, ("Error checking " + name + " status.").c_str()));
-            setFailure();
+            setError(servo->getErrorCode());
             return false;
         }
 
@@ -1298,7 +1303,7 @@ void SRTMinorServoBossCore::checkLineStatus()
         _EXCPT(MinorServoErrors::StatusErrorExImpl, ex, "SRTMinorServoBossCore::checkLineStatus()");
         ex.setReason("Socket not connected.");
         ex.log(LM_DEBUG);
-        setFailure();
+        setError(ERROR_NOT_CONNECTED);
         throw ex.getMinorServoErrorsEx();
     }
 
@@ -1307,7 +1312,7 @@ void SRTMinorServoBossCore::checkLineStatus()
         _EXCPT(MinorServoErrors::StatusErrorExImpl, ex, "SRTMinorServoBossCore::checkLineStatus()");
         ex.setReason("MinorServo system is not controlled by DISCOS.");
         ex.log(LM_DEBUG);
-        setFailure();
+        setError(ERROR_MAINTENANCE);
         throw ex.getMinorServoErrorsEx();
     }
 
@@ -1316,7 +1321,7 @@ void SRTMinorServoBossCore::checkLineStatus()
         _EXCPT(MinorServoErrors::StatusErrorExImpl, ex, "SRTMinorServoBossCore::checkLineStatus()");
         ex.setReason("MinorServo system in emergency status.");
         ex.log(LM_DEBUG);
-        setFailure();
+        setError(ERROR_EMERGENCY_STOP);
         throw ex.getMinorServoErrorsEx();
     }
 }
@@ -1356,7 +1361,7 @@ void SRTMinorServoBossCore::startThread(T*& thread, const ACS::TimeInterval& sle
         _ADD_BACKTRACE(ComponentErrors::CanNotStartThreadExImpl, ex, impl, "SRTMinorServoBossCore::startThread()");
         ex.setThreadName(T::c_thread_name);
         ex.log(LM_DEBUG);
-        setFailure();
+        setError(ERROR_CONFIG_ERROR);
         throw ex.getComponentErrorsEx();
     }
 }
@@ -1386,10 +1391,12 @@ void SRTMinorServoBossCore::destroyThread(T*& thread)
     ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::destroyThread()", (LM_NOTICE, (std::string(T::c_thread_name) + " destroyed.").c_str()));
 }
 
-void SRTMinorServoBossCore::setFailure()
+void SRTMinorServoBossCore::setError(SRTMinorServoError error)
 {
-    AUTO_TRACE("SRTMinorServoBossCore::setFailure()");
+    AUTO_TRACE("SRTMinorServoBossCore::setError()");
 
+    m_commanded_setup = "";
+    m_actual_setup = "Error";
     m_subsystem_status.store(Management::MNG_FAILURE);
     m_ready.store(Management::MNG_FALSE);
     m_elevation_tracking.store(Management::MNG_FALSE);
@@ -1398,6 +1405,28 @@ void SRTMinorServoBossCore::setFailure()
     m_scanning.store(Management::MNG_FALSE);
     m_tracking.store(Management::MNG_FALSE);
     m_motion_status.store(MOTION_STATUS_ERROR);
+    m_error_code.store(error);
+}
+
+void SRTMinorServoBossCore::reset(bool force)
+{
+    AUTO_TRACE("SRTMinorServoBossCore::reset()");
+
+    if(m_error_code.load() == ERROR_NOT_CONNECTED && !force)
+    {
+        // If we are still not connected we should not proceed with the reset
+        return;
+    }
+
+    for(const auto& [servo_name, servo] : m_servos)
+    {
+        servo->reset();
+    }
+
+    m_actual_setup = "Unknown";
+    m_subsystem_status.store(Management::MNG_WARNING);
+    m_motion_status.store(MOTION_STATUS_UNCONFIGURED);
+    m_error_code.store(ERROR_NO_ERROR);
 }
 
 Management::TBoolean SRTMinorServoBossCore::getCDBConfiguration(std::string which_configuration)

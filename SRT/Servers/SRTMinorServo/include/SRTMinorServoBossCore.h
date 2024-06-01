@@ -276,8 +276,15 @@ private:
 
     /**
      * Method that sets all the necessary variable to signal a failure of the minor servo system.
+     * @param error the type of error the system should display
      */
-    void setFailure();
+    void setError(SRTMinorServoError error);
+
+    /**
+     * Method that clears the error status from the system.
+     * This will show the system cleared the error status and is ready to be configured again.
+     */
+    void reset(bool force=false);
 
     /**
      * Method used to retrieve a configuration value from the CDB.
@@ -389,6 +396,11 @@ private:
      * Boolean indicating whether the system is tracking or not.
      */
     std::atomic<Management::TBoolean> m_tracking;
+
+    /**
+     * Enumerator containing the error code.
+     */
+    std::atomic<SRTMinorServoError> m_error_code;
 
     /**
      * This boolean will be set to true every time the socket connects.

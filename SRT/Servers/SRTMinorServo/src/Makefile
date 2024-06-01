@@ -9,11 +9,11 @@
 EXECUTABLES     =
 EXECUTABLES_L   =
 
-PY_SCRIPTS = _cover _airblade
+PY_SCRIPTS = _cover _airBlade _servoReset
 
 # On-Line Database Files
 # ----------------------
-CDB_SCHEMAS = SRTMinorServoBoss SRTMinorServo SRTMinorServoSocketConfiguration SRTMinorServoProperties SRTMinorServoLookupTable
+CDB_SCHEMAS = SRTMinorServoCommon SRTMinorServoBoss SRTMinorServo SRTMinorServoSocketConfiguration SRTMinorServoVBrainConfiguration SRTMinorServoProperties SRTMinorServoLookupTable
 
 # ----------------------------
 # Libraries (public and local)

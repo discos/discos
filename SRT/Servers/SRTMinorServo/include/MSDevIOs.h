@@ -68,9 +68,10 @@ namespace MinorServo
          * @param scanning a reference to the TBoolean indicating whether the system is scanning or not.
          * @param current_scan a reference to the SRTMinorServoScan object containing the parameters for the current scan. It is used to read the servo name and axis involved in the scan.
          */
-        MSMotionInfoDevIO(const std::atomic<SRTMinorServoMotionStatus>& motion_status, const SRTMinorServoGeneralStatus& boss_status, const std::atomic<Management::TBoolean>& scanning, const SRTMinorServoScan& current_scan) :
+        MSMotionInfoDevIO(const std::atomic<SRTMinorServoMotionStatus>& motion_status, const SRTMinorServoGeneralStatus& boss_status, const std::atomic<SRTMinorServoError>& error, const std::atomic<Management::TBoolean>& scanning, const SRTMinorServoScan& current_scan) :
             m_motion_status(motion_status),
             m_boss_status(boss_status),
+            m_error(error),
             m_scanning(scanning),
             m_current_scan(current_scan)
         {}
@@ -138,7 +139,61 @@ namespace MinorServo
                 }
                 case MOTION_STATUS_ERROR:
                 {
-                    motion_status = "Error";
+                    switch(m_error.load())
+                    {
+                        case ERROR_NO_ERROR:
+                        {
+                            // Should never get here, leave empty
+                            motion_status = "";
+                            break;
+                        }
+                        case ERROR_NOT_CONNECTED:
+                        {
+                            motion_status = "Socket not connected";
+                            break;
+                        }
+                        case ERROR_MAINTENANCE:
+                        {
+                            motion_status = "System in maintenance mode";
+                            break;
+                        }
+                        case ERROR_EMERGENCY_STOP:
+                        {
+                            motion_status = "Emergency stop pressed";
+                            break;
+                        }
+                        case ERROR_COVER_WRONG_POSITION:
+                        {
+                            motion_status = "Gregorian cover in wrong position";
+                            break;
+                        }
+                        case ERROR_CONFIG_ERROR:
+                        {
+                            motion_status = "Error while configuring the system";
+                            break;
+                        }
+                        case ERROR_COMMAND_ERROR:
+                        {
+                            motion_status = "Error while executing a remote command";
+                            break;
+                        }
+                        case ERROR_SERVO_BLOCKED:
+                        {
+                            motion_status = "Minor servo group is blocked";
+                            break;
+                        }
+                        case ERROR_DRIVE_CABINET:
+                        {
+                            motion_status = "Minor servo group drive cabinet error";
+                            break;
+                        }
+                        default:
+                        {
+                            // Should never get here, unknown error condition
+                            motion_status = "Unknown error";
+                            break;
+                        }
+                    }
                     break;
                 }
             }
@@ -160,6 +215,11 @@ namespace MinorServo
          * Reference to the SRTMinorServoGeneralStatus object of the Boss.
          */
         const SRTMinorServoGeneralStatus& m_boss_status;
+
+        /**
+         * Reference to the SRTMinorServoError object of the Boss.
+         */
+        const std::atomic<SRTMinorServoError>& m_error;
 
         /**
          * Reference to the boolean telling if the system is scanning.
@@ -262,7 +322,7 @@ namespace MinorServo
      * The templates is specialized for the combinations of types listed right below and the compilation will fail if the developer attempts to use it with any other types combination.
      */
     template <typename C, typename A, typename = std::enable_if_t<
-        is_any_v<C, Management::TSystemStatus, Management::TBoolean, ACE_CString, CORBA::Long> || (std::is_same_v<C, ACS::doubleSeq> && std::is_same_v<A, std::vector<double>>)
+        is_any_v<C, Management::TSystemStatus, Management::TBoolean, ACE_CString, CORBA::Long, SRTMinorServoError> || (std::is_same_v<C, ACS::doubleSeq> && std::is_same_v<A, std::vector<double>>)
     >>
     class MSGenericDevIO : public MSBaseDevIO<C>
     {

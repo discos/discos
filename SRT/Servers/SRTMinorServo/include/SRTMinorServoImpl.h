@@ -174,6 +174,17 @@ public:
     void getAxesInfo(ACS::stringSeq_out axes_names_out, ACS::stringSeq_out axes_units_out);
 
     /**
+     * Returns the current error code.
+     * @return the current SRTMinorServoError code.
+     */
+    SRTMinorServoError getErrorCode() { return m_error_code.load(); };
+
+    /**
+     * Resets the component error code to ERROR_NO_ERROR.
+     */
+    void reset();
+
+    /**
      * Returns the virtual axes positions to where the servo system was at the given time acs_time.
      * @param acs_time the epoch we want to retrieve the axes virtual positions of the servo system.
      * @throw MinorServoErrors::MinorServoErrorsEx when the position history is empty.
@@ -288,6 +299,12 @@ public:
      */
     virtual ACS::ROstring_ptr current_setup();
 
+    /**
+     * Returns a reference to the error_code property implementation of the IDL interface.
+     * @return pointer to the read-only SRTMinorServoError property error_code.
+     */
+    virtual ROSRTMinorServoError_ptr error_code();
+
 protected:
     /**
      * Checks if the socket is connected and if the minor servo system is in a good state.
@@ -353,6 +370,11 @@ protected:
      * Dictionary containing the last status retrieved form the servo system.
      */
     SRTMinorServoStatus m_status;
+
+    /**
+     * Current error code.
+     */
+    std::atomic<SRTMinorServoError> m_error_code;
 
     /**
      * Commanded user offsets for each axis of the servo system.
@@ -495,6 +517,11 @@ private:
     baci::SmartPropertyPointer<baci::ROstring> m_current_setup_ptr;
 
     /**
+     * Pointer to the error_code property.
+     */
+    baci::SmartPropertyPointer<ROEnumImpl<ACS_ENUM_T(SRTMinorServoError), POA_MinorServo::ROSRTMinorServoError>> m_error_code_ptr;
+
+    /**
      * Table containing the coefficients for the positions calculations.
      */
     SRTMinorServoLookupTable m_current_lookup_table;
@@ -532,7 +559,9 @@ protected:
     void getAxesInfo(ACS::stringSeq_out axes_names_out, ACS::stringSeq_out axes_units_out)      { SRTBaseMinorServoImpl::getAxesInfo(axes_names_out, axes_units_out);   }\
     ACS::doubleSeq* getAxesPositions(ACS::Time acs_time)                                        { return SRTBaseMinorServoImpl::getAxesPositions(acs_time);             }\
     long getTravelTime(const ACS::doubleSeq& start, const ACS::doubleSeq& dest)                 { return SRTBaseMinorServoImpl::getTravelTime(start, dest);             }\
-    void getAxesRanges(ACS::doubleSeq_out min_ranges_out, ACS::doubleSeq_out max_ranges_out)    { SRTBaseMinorServoImpl::getAxesRanges(min_ranges_out, max_ranges_out); }
+    void getAxesRanges(ACS::doubleSeq_out min_ranges_out, ACS::doubleSeq_out max_ranges_out)    { SRTBaseMinorServoImpl::getAxesRanges(min_ranges_out, max_ranges_out); }\
+    SRTMinorServoError getErrorCode()                                                           { return SRTBaseMinorServoImpl::getErrorCode();                         }\
+    void reset()                                                                                { SRTBaseMinorServoImpl::reset();                                       }
 
 /**
  * MACRO definition of child classes properties methods.
@@ -556,7 +585,8 @@ protected:
     virtual ACS::ROdoubleSeq_ptr virtual_system_offsets()                                       { return SRTBaseMinorServoImpl::virtual_system_offsets();               }\
     virtual ACS::ROdoubleSeq_ptr commanded_virtual_positions()                                  { return SRTBaseMinorServoImpl::commanded_virtual_positions();          }\
     virtual Management::ROTBoolean_ptr in_use()                                                 { return SRTBaseMinorServoImpl::in_use();                               }\
-    virtual ACS::ROstring_ptr current_setup()                                                   { return SRTBaseMinorServoImpl::current_setup();                        }
+    virtual ACS::ROstring_ptr current_setup()                                                   { return SRTBaseMinorServoImpl::current_setup();                        }\
+    virtual ROSRTMinorServoError_ptr error_code()                                               { return SRTBaseMinorServoImpl::error_code();                           }
 
 /**
  * This class implements the SRTGenericMinorServoImpl CORBA interface for a generic SRTMinorServo component.
