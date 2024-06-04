@@ -100,7 +100,7 @@ void NotoActiveSurfaceBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 
     try
     {
-        m_workingThread=getContainerServices()->getThreadManager()->create<CNotoActiveSurfaceBossWorkingThread,CSecureArea<CNotoActiveSurfaceBossCore> *>("MEDICINAACTIVESURFACEBOSSWORKER",m_core);
+        m_workingThread=getContainerServices()->getThreadManager()->create<CNotoActiveSurfaceBossWorkingThread,CSecureArea<CNotoActiveSurfaceBossCore> *>("NOTOACTIVESURFACEBOSSWORKER",m_core);
         m_workingThread->setSleepTime(workingThreadTime*10);
     }
     catch (acsthreadErrType::acsthreadErrTypeExImpl& ex)
@@ -116,7 +116,7 @@ void NotoActiveSurfaceBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
     for(int sector = 0; sector < SECTORS; sector++)
     {
         std::stringstream threadName;
-        threadName << "MEDICINAACTIVESURFACEBOSSSECTOR";
+        threadName << "NOTOACTIVESURFACEBOSSSECTOR";
         threadName << sector+1;
         try
         {
