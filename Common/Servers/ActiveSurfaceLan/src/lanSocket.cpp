@@ -101,7 +101,7 @@ int lanSocket::sendCmd(BYTE cmd,BYTE addr,long par,BYTE nbytes)
 	}
 
 	res=receiveBuffer(&resp,1);
-	
+
 	if(res != 1) { // USD timeout or error
 		ACS_DEBUG("::lanSocket::lanSocket","problems on usd reply!");
 		return res;
