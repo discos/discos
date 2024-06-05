@@ -1,0 +1,52 @@
+#ifndef __SRTDEROTATOR_IDL__
+#define __SRTDEROTATOR_IDL__
+/***************************************************************\
+ *  Authors: 
+ *      Giuseppe Carboni <giuseppe.carboni@inaf.it>
+ *
+ *  Created: Mon May 06 10:00:00 CEST 2024
+\***************************************************************/
+
+#include "GenericDerotator.idl"
+#include "SRTMinorServoCommon.idl"
+
+#pragma prefix "alma"
+
+module MinorServo
+{
+    /**
+     * This IDL interface describes the CORBA interface of a common Leonardo Derotator component.
+     */
+    interface SRTDerotator : SRTLDOBaseProperties, Receivers::GenericDerotator, ACS::CharacteristicComponent
+    {
+        /**
+         * This property indicates the ID of the trajectory. It always corresponds to starting time of the trajectory, expressed as the UNIX Epoch * 1000 (long)
+         */
+        readonly attribute ACS::ROlong trajectory_id;
+
+        /**
+         * This property indicates the total number of points loaded into the current trajectory
+         */
+        readonly attribute ACS::ROlong total_trajectory_points;
+
+        /**
+         * This property indicates the number of points of the current trajectory which remain to be tracked
+         */
+        readonly attribute ACS::ROlong remaining_trajectory_points;
+
+        /**
+         * This method loads a set of coordinates that have to be tracked by the servo system
+         * @param trajectory_id the ID of the trajectory to which the current point belongs
+         * @param point_id the ID of the point inside the current trajectory. It must be a consecutive number for the servo system to acknowledge
+         * @param point_time an ACS::Time object indicating the time associated with the coordinates to be tracked.
+         *        Only the start time is sent to the servo system and the points after are spaced by 0.2 seconds from one another.
+         *        It is still necessary to fill this field in order to associate a time to the coordinates inside the component.
+         * @param coordinates the coordinates to track at the given time
+         * @throw MinorServoErrorsEx when the length of the coordinates sequence does not match the number of virtual axis of the servo system,
+         *        when there has been a communication error or when the command was not accepted
+         */
+        void programTrack(in long trajectory_id, in long point_id, in ACS::Time point_time, in ACS::doubleSeq coordinates);
+    };
+};
+
+#endif

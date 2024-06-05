@@ -17,61 +17,8 @@ module MinorServo
      * This IDL interface describes the CORBA interface of a common SRTMinorServo component.
      * This is simply the base interface from which the SRTGenericMinorServo and SRTProgramTrackMinorServo interfaces inherit.
      */
-    interface SRTBaseMinorServo : ACS::CharacteristicComponent
+    interface SRTBaseMinorServo : SRTLDOBaseProperties, ACS::CharacteristicComponent
     {
-        /**
-         * This property tells if all the servo axes are enabled
-         */
-        readonly attribute Management::ROTBoolean enabled;
-
-        /**
-         * This property tells the status of the servo drive cabinet
-         */
-        readonly attribute ROSRTMinorServoCabinetStatus drive_cabinet_status;
-
-        /**
-         * This property tells if the servo is in blocked state and cannot move
-         */
-        readonly attribute Management::ROTBoolean block;
-
-        /**
-         * This property returns the current operative mode of the servo
-         */
-        readonly attribute ROSRTMinorServoOperativeMode operative_mode;
-
-        /**
-         * This property returns the sequence of statuses of the servo physical axes
-         */
-        readonly attribute ACS::RObooleanSeq physical_axes_enabled;
-
-        /**
-         * This property returns the sequence of current positions of the physical axes of the servo
-         */
-        readonly attribute ACS::ROdoubleSeq physical_positions;
-
-        /**
-         * This property returns the number of virtual axes of the servo
-         */
-        readonly attribute ACS::ROlong virtual_axes;
-
-        /**
-         * This property returns the current plain positions of the virtual axes of the servo
-         * The plain positions are the positions returned from the Leonardo servo system, without subtracting the offsets
-         */
-        readonly attribute ACS::ROdoubleSeq plain_virtual_positions;
-
-        /**
-         * This property returns the current positions of the virtual axes of the servo
-         * The positions returned by this property equals to the plain virtual positions minus the offsets
-         */
-        readonly attribute ACS::ROdoubleSeq virtual_positions;
-
-        /**
-         * This property returns the current offsets of the virtual axes of the servo
-         * The offset values are the sum of user and system offsets
-         */
-        readonly attribute ACS::ROdoubleSeq virtual_offsets;
-
         /**
          * This property returns the current user offsets of the virtual axes of the servo
          */

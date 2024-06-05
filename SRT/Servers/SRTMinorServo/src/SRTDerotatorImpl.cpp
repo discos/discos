@@ -1,0 +1,667 @@
+#include "SRTDerotatorImpl.h"
+
+using namespace MinorServo;
+
+SRTDerotatorImpl::SRTDerotatorImpl(const ACE_CString& component_name, maci::ContainerServices* container_services):
+    CharacteristicComponentImpl(component_name, container_services),
+    m_component_name(std::string(component_name.c_str())),
+    m_servo_name(std::string(strchr(component_name.c_str(), '/') + 1)),
+    /*m_virtual_axes(getCDBValue<size_t>(container_services, "virtual_axes")),
+    m_physical_axes(getCDBValue<size_t>(container_services, "physical_axes")),
+    m_virtual_axes_names(SRTDerotatorImpl::getPropertiesTable(*this, "virtual_positions")),
+    m_virtual_axes_units(SRTDerotatorImpl::getPropertiesTable(*this, "virtual_axes_units")),
+    m_status(
+        m_servo_name,
+        SRTDerotatorImpl::getPropertiesTable(*this, "physical_axes_enabled"),
+        SRTDerotatorImpl::getPropertiesTable(*this, "physical_positions"),
+        m_virtual_axes_names,
+        SRTDerotatorImpl::getPropertiesTable(*this, "virtual_offsets")
+    ),
+    m_positions_queue(5 * 60 * int(1 / getCDBValue<double>(container_services, "status_thread_period", "/MINORSERVO/Boss")), m_virtual_axes),
+    m_min(getCDBValue<double>(container_services, "min_range")),
+    m_max(getCDBValue<double>(container_services, "max_range")),
+    m_tracking_queue(1500, m_virtual_axes),
+    m_tracking_delta(getCDBValue<size_t>(container_services, "tracking_delta")),
+    m_tracking_error(m_virtual_axes, 0.0),
+    m_tracking(Management::MNG_FALSE),
+    m_trajectory_id(0),
+    m_total_trajectory_points(0),
+    m_remaining_trajectory_points(0),*/
+    m_enabled_ptr(this),
+    m_drive_cabinet_status_ptr(this),
+    m_block_ptr(this),
+    m_operative_mode_ptr(this),
+    m_physical_axes_enabled_ptr(this),
+    m_physical_positions_ptr(this),
+    m_virtual_axes_ptr(this),
+    m_plain_virtual_positions_ptr(this),
+    m_virtual_positions_ptr(this),
+    m_virtual_offsets_ptr(this),
+    m_tracking_ptr(this),
+    m_trajectory_id_ptr(this),
+    m_total_trajectory_points_ptr(this),
+    m_remaining_trajectory_points_ptr(this),
+    m_actual_position_ptr(this),
+    m_commanded_position_ptr(this),
+    m_position_difference_ptr(this),
+    m_status_ptr(this)
+    /*m_socket_configuration(SRTMinorServoSocketConfiguration::getInstance(container_services)),
+    m_socket(SRTMinorServoSocket::getInstance(m_socket_configuration.m_ip_address, m_socket_configuration.m_port, m_socket_configuration.m_timeout))*/
+{
+    AUTO_TRACE(m_servo_name + "::SRTDerotatorImpl()");
+    std::cout << m_component_name << " " << m_servo_name << std::endl;
+}
+
+SRTDerotatorImpl::~SRTDerotatorImpl()
+{
+    AUTO_TRACE(m_servo_name + "::~SRTDerotatorImpl()");
+}
+
+void SRTDerotatorImpl::initialize()
+{
+    AUTO_TRACE(m_servo_name + "::initialize()");
+
+    /*try
+    {
+        m_enabled_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":enabled").c_str(), getComponent(),
+                new MSAnswerMapDevIO<Management::TBoolean, SRTMinorServoStatus>("enabled", m_status, &SRTMinorServoStatus::isEnabled), true);
+        m_drive_cabinet_status_ptr = new ROEnumImpl<ACS_ENUM_T(SRTMinorServoCabinetStatus), POA_MinorServo::ROSRTMinorServoCabinetStatus>((m_component_name + ":drive_cabinet_status").c_str(), getComponent(),
+                new MSAnswerMapDevIO<SRTMinorServoCabinetStatus, SRTMinorServoStatus>("drive_cabinet_status", m_status, &SRTMinorServoStatus::getDriveCabinetStatus), true);
+        m_block_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":block").c_str(), getComponent(),
+                new MSAnswerMapDevIO<Management::TBoolean, SRTMinorServoStatus>("block", m_status, &SRTMinorServoStatus::isBlocked), true);
+        m_operative_mode_ptr = new ROEnumImpl<ACS_ENUM_T(SRTMinorServoOperativeMode), POA_MinorServo::ROSRTMinorServoOperativeMode>((m_component_name + ":operative_mode").c_str(), getComponent(),
+                new MSAnswerMapDevIO<SRTMinorServoOperativeMode, SRTMinorServoStatus>("operative_mode", m_status, &SRTMinorServoStatus::getOperativeMode), true);
+        m_physical_axes_enabled_ptr = new baci::RObooleanSeq((m_component_name + ":physical_axes_enabled").c_str(), getComponent(),
+                new MSAnswerMapDevIO<ACS::booleanSeq, SRTMinorServoStatus>("physical_axes_enabled", m_status, &SRTMinorServoStatus::getPhysicalAxesEnabled), true);
+        m_physical_positions_ptr = new baci::ROdoubleSeq((m_component_name + ":physical_positions").c_str(), getComponent(),
+                new MSAnswerMapDevIO<ACS::doubleSeq, SRTMinorServoStatus>("physical_positions", m_status, &SRTMinorServoStatus::getPhysicalPositions), true);
+        m_virtual_axes_ptr = new baci::ROlong((m_component_name + ":virtual_axes").c_str(), getComponent(),
+                new MSGenericDevIO<CORBA::Long, const size_t>(m_virtual_axes), true);
+        m_plain_virtual_positions_ptr = new baci::ROdoubleSeq((m_component_name + ":plain_virtual_positions").c_str(), getComponent(),
+                new MSAnswerMapDevIO<ACS::doubleSeq, SRTMinorServoStatus>("plain_virtual_positions", m_status, &SRTMinorServoStatus::getPlainVirtualPositions), true);
+        m_virtual_positions_ptr = new baci::ROdoubleSeq((m_component_name + ":virtual_positions").c_str(), getComponent(),
+                new MSAnswerMapDevIO<ACS::doubleSeq, SRTMinorServoStatus>("virtual_positions", m_status, &SRTMinorServoStatus::getVirtualPositions), true);
+        m_virtual_offsets_ptr = new baci::ROdoubleSeq((m_component_name + ":virtual_offsets").c_str(), getComponent(),
+                new MSAnswerMapDevIO<ACS::doubleSeq, SRTMinorServoStatus>("virtual_offsets", m_status, &SRTMinorServoStatus::getVirtualOffsets), true);
+        m_tracking_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":tracking").c_str(), getComponent(),
+                new MSGenericDevIO<Management::TBoolean, std::atomic<Management::TBoolean>>(m_tracking), true);
+        m_trajectory_id_ptr = new baci::ROlong((m_component_name + ":trajectory_id").c_str(), getComponent(),
+                new MSGenericDevIO<CORBA::Long, std::atomic<unsigned int>>(m_trajectory_id), true);
+        m_total_trajectory_points_ptr = new baci::ROlong((m_component_name + ":total_trajectory_points").c_str(), getComponent(),
+                new MSGenericDevIO<CORBA::Long, std::atomic<unsigned int>>(m_total_trajectory_points), true);
+        m_remaining_trajectory_points_ptr = new baci::ROlong((m_component_name + ":remaining_trajectory_points").c_str(), getComponent(),
+                new MSGenericDevIO<CORBA::Long, std::atomic<unsigned int>>(m_remaining_trajectory_points), true);
+    }
+    catch(std::bad_alloc& ba)
+    {
+        _EXCPT(ComponentErrors::MemoryAllocationExImpl, ex, (m_servo_name + "::initialize()").c_str());
+        ex.log(LM_DEBUG);
+        throw ex.getComponentErrorsEx();
+    }*/
+
+    // Try to read the current status of the servo
+    /*try
+    {
+        status();
+    }
+    catch(...)
+    {
+        // This block is necessary since the socket might not be connected yet. If the Leonardo system is not reachable the status(); call will fail, but we want to instantiate the component anyway
+        // A non connected socket will try to connect every time a new command is sent, therefore the status thread will establish the connection as soon as possible.
+    }*/
+}
+
+void SRTDerotatorImpl::execute()
+{
+    AUTO_TRACE(m_servo_name + "::execute()");
+}
+
+void SRTDerotatorImpl::cleanUp()
+{
+    AUTO_TRACE(m_servo_name + "::cleanUp()");
+}
+
+void SRTDerotatorImpl::aboutToAbort()
+{
+    AUTO_TRACE(m_servo_name + "::aboutToAbort()");
+}
+
+/////////////////// PUBLIC methods
+/*bool SRTBaseMinorServoImpl::status()
+{
+    AUTO_TRACE(m_servo_name + "::status()");
+
+    // We don't check if the socket is connected here since a status command will try to reconnect it automatically
+    try
+    {
+        m_socket.sendCommand(SRTMinorServoCommandLibrary::status(m_servo_name), m_status);
+
+        ACS::doubleSeq current_point = m_status.getVirtualPositions();
+
+        // Calculate the current speed of the axes
+        try
+        {
+            std::pair<ACS::Time, const std::vector<double>> previous_point = m_positions_queue.get(m_status.getTimestamp());
+            for(size_t i = 0; i < m_virtual_axes; i++)
+            {
+                m_c_s[i] = (current_point[i] - previous_point.second[i]) * ((double(m_status.getTimestamp() - previous_point.first)) / 10000000);
+            }
+        }
+        catch(...)
+        {
+            // Empty queue, first reading, skip the speed calculation
+        }
+
+        m_positions_queue.put(m_status.getTimestamp(), current_point);
+    }
+    catch(...)
+    {
+        return false;
+    }
+
+    return true;
+}*/
+
+/*void SRTBaseMinorServoImpl::stow(CORBA::Long stow_position)
+{
+    AUTO_TRACE(m_servo_name + "::stow()");
+
+    checkLineStatus();
+
+    if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::stow(m_servo_name, (unsigned int)stow_position)).checkOutput())
+    {
+        _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::stow()").c_str());
+        ex.setReason("Received NAK in response to a STOW command.");
+        ex.log(LM_DEBUG);
+        throw ex.getMinorServoErrorsEx();
+    }
+}*/
+
+/*void SRTBaseMinorServoImpl::stop()
+{
+    AUTO_TRACE(m_servo_name + "::stop()");
+
+    checkLineStatus();
+
+    if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::stop(m_servo_name)).checkOutput())
+    {
+        _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::stop()").c_str());
+        ex.setReason("Received NAK in response to a STOP command.");
+        ex.log(LM_DEBUG);
+        throw ex.getMinorServoErrorsEx();
+    }
+}*/
+
+void SRTDerotatorImpl::setup()
+{
+    AUTO_TRACE(m_servo_name + "::setup()");
+
+    /*m_in_use.store(Management::MNG_FALSE);
+    m_current_lookup_table.clear();
+
+    m_current_setup = "";
+    std::string setup_name(configuration_name);
+    std::transform(setup_name.begin(), setup_name.end(), setup_name.begin(), ::toupper);
+
+    if(setup_name.empty())
+    {
+        return false;
+    }
+
+    IRA::CDBTable table(getContainerServices(), setup_name.c_str(), std::string("DataBlock/MinorServo/" + m_servo_name).c_str());
+    IRA::CError error;
+    error.Reset();
+
+    if(!table.addField(error, "axis", IRA::CDataField::STRING))
+    {
+        error.setExtra("Error adding field axis", 0);
+    }
+    if(!table.addField(error, "coefficients", IRA::CDataField::STRING))
+    {
+        error.setExtra("Error adding field coefficients", 0);
+    }
+    if(!error.isNoError())
+    {
+        _EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl, ex, error);
+        ex.setCode(error.getErrorCode());
+        ex.setDescription((const char *)error.getDescription());
+        ex.log(LM_DEBUG);
+        throw ex.getComponentErrorsEx();
+    }
+    if(!table.openTable(error))
+    {
+        _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, ex, error);
+        ex.log(LM_DEBUG);
+        throw ex.getComponentErrorsEx();
+    }
+
+    table.First();
+    for(unsigned int i = 0; i < table.recordCount(); i++, table.Next())
+    {
+        std::string axis = std::string(table["axis"]->asString());
+
+        std::vector<double> coefficients;
+
+        std::string coefficient_str;
+        std::stringstream stream(std::string(table["coefficients"]->asString()));
+
+        while(std::getline(stream, coefficient_str, ','))
+        {
+            coefficients.push_back(std::stod(std::regex_replace(coefficient_str, std::regex("\\s+"), "")));
+        }
+
+        m_current_lookup_table[axis] = coefficients;
+    }
+    table.closeTable();
+
+    if(m_current_lookup_table.size() > 0)
+    {
+        m_current_setup = setup_name;
+        clearUserOffsets();
+        clearSystemOffsets();
+        m_in_use.store(Management::MNG_TRUE);
+    }
+
+    return true;*/
+}
+
+void SRTDerotatorImpl::setPosition(CORBA::Double position)
+{
+    /*AUTO_TRACE(m_servo_name + "::setPosition()");
+
+    checkLineStatus();
+
+    //ACS::doubleSeq offsets = m_status.getVirtualOffsets();
+
+    //double coordinate = position;// + m_offset;
+    if(position < m_min || position > m_max)
+    {
+        _EXCPT(MinorServoErrors::PositioningErrorExImpl, ex, (m_servo_name + "::setPosition()").c_str());
+        ex.addData("Reason", "Resulting position out of range, check the offsets.");
+        ex.log(LM_DEBUG);
+        throw ex.getMinorServoErrorsEx();
+    }
+
+    if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::preset(m_servo_name, std::vector<double>{ position })).checkOutput())
+    {
+        _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::setPosition()").c_str());
+        ex.setReason("Received NAK in response to a PRESET command.");
+        ex.log(LM_DEBUG);
+        throw ex.getMinorServoErrorsEx();
+    }*/
+}
+
+/*ACS::doubleSeq* SRTBaseMinorServoImpl::calcCoordinates(double elevation)
+{
+    AUTO_TRACE(m_servo_name + "::calcCoordinates()");
+
+    if(m_in_use.load() == Management::MNG_TRUE)
+    {
+        ACS::doubleSeq_var coordinates = new ACS::doubleSeq;
+        coordinates->length(m_virtual_axes);
+
+        for(size_t axis = 0; axis < m_virtual_axes; axis++)
+        {
+            std::vector<double> coefficients = m_current_lookup_table.at(m_virtual_axes_names[axis]);
+
+            double coordinate = 0;
+
+            for(size_t index = 0; index < coefficients.size(); index++)
+            {
+                coordinate += coefficients[index] * pow(elevation, index);
+            }
+
+            coordinates[axis] = coordinate;
+        }
+
+        return coordinates._retn();
+    }
+    else
+    {
+        _EXCPT(MinorServoErrors::StatusErrorExImpl, ex, (m_servo_name + "::calcCoordinates()").c_str());
+        ex.setReason("Unable to calculate the coordinates since the servo system has not been configured yet.");
+        ex.log(LM_DEBUG);
+        throw ex.getMinorServoErrorsEx();
+    }
+}*/
+
+/*void SRTBaseMinorServoImpl::reloadOffsets()
+{
+    AUTO_TRACE(m_servo_name + "::reloadOffsets()");
+
+    // Sum the user and system DISCOS offsets to check whether they correspond to the Leonardo offsets
+    std::vector<double> DISCOS_offsets(m_virtual_axes, 0.0);
+    std::transform(m_user_offsets.begin(), m_user_offsets.end(), m_system_offsets.begin(), DISCOS_offsets.begin(), std::plus<double>());
+
+    // Read the Leonardo offsets
+    ACS::doubleSeq sequence = m_status.getVirtualOffsets();
+    std::vector<double> LEONARDO_offsets(sequence.get_buffer(), sequence.get_buffer() + sequence.length());
+
+    // Check if the offsets correspond or not
+    if(!std::equal(DISCOS_offsets.begin(), DISCOS_offsets.end(), LEONARDO_offsets.begin()))
+    {
+        // Offsets do not correspond, should reset them by sending a offset command
+        if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::offset(m_servo_name, DISCOS_offsets)).checkOutput())
+        {
+            _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::reloadOffsets()").c_str());
+            ex.setReason("Received NAK in response to an OFFSET command.");
+            ex.log(LM_DEBUG);
+            throw ex.getMinorServoErrorsEx();
+        }
+
+        ACS_LOG(LM_FULL_INFO, m_servo_name + "::reloadOffsets()", (LM_NOTICE, "Offsets discrepancy, reloading them"));
+    }
+}*/
+
+double SRTDerotatorImpl::getPositionFromHistory(ACS::Time acs_time)
+{
+    AUTO_TRACE(m_servo_name + "::getPositionFromHistory()");
+
+    // Get the latest position
+    /*if(acs_time == 0)
+    {
+        acs_time = getTimeStamp();
+    }
+
+    try
+    {
+        double position = m_positions_queue.get(acs_time).second[0];
+        return position;
+    }
+    catch(std::logic_error& le)
+    {
+        // TODO: change this to ComponentErrors
+        _EXCPT(MinorServoErrors::StatusErrorExImpl, ex, (m_servo_name + "::getPositionFromHistory()").c_str());
+        ex.setReason("Positions history is empty!");
+        ex.log(LM_DEBUG);
+        throw ex.getMinorServoErrorsEx();
+    }*/
+    return 0.0;
+}
+
+/*ACS::TimeInterval SRTBaseMinorServoImpl::getTravelTime(const ACS::doubleSeq& _s_p, const ACS::doubleSeq& d_p)
+{
+    AUTO_TRACE(m_servo_name + "::getTravelTime()");
+
+    std::vector<double> c_s = m_c_s;  // Current speed
+
+    ACS::doubleSeq s_p(_s_p);
+
+    // No starting coordinates, it means we have to start from the current position taking into account the current speed
+    if(_s_p.length() == 0)
+    {
+        s_p = *getAxesPositions(0);
+    }
+    else if(_s_p.length() != m_virtual_axes)
+    {
+        _EXCPT(MinorServoErrors::StatusErrorExImpl, ex, (m_servo_name + "getTravelTime()").c_str());
+        ex.setReason("Wrong number of axes for starting_position.");
+        ex.log(LM_DEBUG);
+        throw ex.getMinorServoErrorsEx();
+    }
+    if(d_p.length() != m_virtual_axes)
+    {
+        _EXCPT(MinorServoErrors::StatusErrorExImpl, ex, (m_servo_name + "getTravelTime()").c_str());
+        ex.setReason("Wrong number of axes for destination_position.");
+        ex.log(LM_DEBUG);
+        throw ex.getMinorServoErrorsEx();
+    }
+
+    // d = delta/distance
+    std::vector<double> d(m_virtual_axes);
+    for(size_t i = 0; i < m_virtual_axes; i++)
+    {
+        d[i] = d_p[i] - s_p[i];
+
+        // If we sent a starting position, we are just checking the maximum time to get from the start to the desired position
+        // We take into account the worst case scenario for the speed, we assume we are moving away from the desired position at maximum speed for each axis
+        if(_s_p.length() != 0)
+        {
+            c_s[i] = m_m_s[i] * (d[i] < 0 ? 1 : (d[i] > 0 ? -1 : 0));
+        }
+    }
+
+    double total_time = 0;
+
+    // Calculate the distance and time taken to get to the maximum speed towards the desired position
+    for(size_t i = 0; i < m_virtual_axes; i++)
+    {
+        double inversion_time = 0;
+        double inversion_distance = 0;
+
+        // We are moving away from our desired position, this is the only case in which we need a deceleration ramp before even starting to move towards our destination
+        if(std::signbit(c_s[i]) != std::signbit(d[i]) && c_s[i] != 0)
+        {
+            inversion_time = std::abs(c_s[i]) / m_a[i];
+            inversion_distance = std::abs(c_s[i]) * inversion_time + 0.5 * m_a[i] * std::pow(inversion_time, 2);
+            // In this case, we can calculate the next acceleration ramp using a starting speed of 0
+            c_s = std::vector<double>(c_s.size(), 0.0);
+        }
+
+        double accel_ramp_time = (m_m_s[i] - std::abs(c_s[i])) / m_a[i];
+        double accel_ramp_distance = std::abs(c_s[i]) * accel_ramp_time + 0.5 * m_a[i] * std::pow(accel_ramp_time, 2);
+
+        // Total time = eventual inversion time + calculated acceleration ramp time + full deceleration time + linear movement time
+        // Linear movement time = linear movement distance / maximum speed
+        // Linear movement distance = distance + eventual inversion distance - acceleration ramp distance - full deceleration ramp distance
+        double t = inversion_time + accel_ramp_time + m_r_t[i] + (std::abs(d[i]) + inversion_distance - accel_ramp_distance - m_r_d[i]) / m_m_s[i];
+
+        total_time = std::max(total_time, t);
+
+        // This does not take into account any dead time but:
+        // we're going to use this only for PROGRAMTRACK purposes and
+        // in PROGRAMTRACK mode the SRP servos move faster than the nominal max_speed
+        // i.e., IIRC, the max physical speed should be around 12mm/s instead of 4mm/s
+        // Therefore we might not need to add any guard time
+    }
+
+    return ACS::TimeInterval(total_time * 10000000);
+}*/
+
+/*void SRTBaseMinorServoImpl::getAxesRanges(ACS::doubleSeq_out min_ranges_out, ACS::doubleSeq_out max_ranges_out)
+{
+    AUTO_TRACE("SRTBaseMinorServoImpl::getAxesRanges()");
+
+    ACS::doubleSeq_var min_ranges = new ACS::doubleSeq;
+    ACS::doubleSeq_var max_ranges = new ACS::doubleSeq;
+    min_ranges->length(m_virtual_axes);
+    max_ranges->length(m_virtual_axes);
+    std::copy(m_min.begin(), m_min.end(), min_ranges->begin());
+    std::copy(m_max.begin(), m_max.end(), max_ranges->begin());
+    min_ranges_out = min_ranges._retn();
+    max_ranges_out = max_ranges._retn();
+}*/
+
+double SRTDerotatorImpl::getMinLimit()
+{
+    AUTO_TRACE(m_servo_name + "::getMinLimit()");
+
+    return 0.0;
+    //return m_min;
+}
+
+double SRTDerotatorImpl::getMaxLimit()
+{
+    AUTO_TRACE(m_servo_name + "::getMaxLimit()");
+
+    return 0.0;
+    //return m_max;
+}
+
+bool SRTDerotatorImpl::isReady()
+{
+    /*SRTMinorServoOperativeMode operative_mode = m_status.getOperativeMode();
+    if(operative_mode == OPERATIVE_MODE_SETUP || operative_mode == OPERATIVE_MODE_PRESET || operative_mode == OPERATIVE_MODE_PROGRAMTRACK)
+        return true;*/
+    return false;
+}
+
+bool SRTDerotatorImpl::isSlewing()
+{
+    /*SRTMinorServoOperativeMode operative_mode = m_status.getOperativeMode();
+    if(operative_mode == OPERATIVE_MODE_UNKNOWN || operative_mode == OPERATIVE_MODE_PROGRAMTRACK)
+        return true;*/
+    return false;
+}
+
+void SRTDerotatorImpl::programTrack(CORBA::Long trajectory_id, CORBA::Long point_id, ACS::Time point_time, const ACS::doubleSeq& virtual_coordinates)
+{
+    AUTO_TRACE("SRTProgramTrackMinorServoImpl::programTrack()");
+}
+
+
+/////////////////// PROTECTED methods
+void SRTDerotatorImpl::checkLineStatus()
+{
+    // TODO: check the exception types
+    /*if(!m_socket.isConnected())
+    {
+        _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "checkLineStatus()").c_str());
+        ex.setReason("Socket not connected.");
+        ex.log(LM_DEBUG);
+        throw ex.getMinorServoErrorsEx();
+    }
+
+    if(m_status.isBlocked() == Management::MNG_TRUE || m_status.getDriveCabinetStatus() == DRIVE_CABINET_ERROR)
+    {
+        _EXCPT(MinorServoErrors::StatusErrorExImpl, ex, (m_servo_name + "::checkLineStatus()").c_str());
+        ex.setReason("Servo system blocked or drive cabinet error.");
+        ex.log(LM_DEBUG);
+        throw ex.getMinorServoErrorsEx();
+    }*/
+}
+
+/*std::vector<double> SRTBaseMinorServoImpl::getMotionConstant(SRTBaseMinorServoImpl& object, const std::string& constant)
+{
+    AUTO_STATIC_TRACE(object.m_servo_name + "::getMotionConstant()");
+
+    std::vector<double> values;
+
+    if(constant == "max_speed" || constant == "acceleration")
+    {
+        values = getCDBValue<std::vector<double>>(object.getContainerServices(), constant.c_str());
+        if(values.size() != object.m_virtual_axes)
+        {
+            _EXCPT(ComponentErrors::CDBAccessExImpl, ex, (object.m_servo_name + "::getMotionConstant()").c_str());
+            ex.setFieldName(constant.c_str());
+            ex.log(LM_DEBUG);
+            throw ex.getComponentErrorsEx();
+        }
+        else if(std::any_of(values.begin(), values.end(), [](double value)
+        {
+            return value == 0.0;
+        }))
+        {
+            _EXCPT(ComponentErrors::NotAllowedExImpl, ex, (object.m_servo_name + "::getMotionConstant()").c_str());
+            ex.setReason(("A" + constant == "acceleration" ? "n " : " " + constant + " equals to 0 is not allowed.").c_str());
+            ex.log(LM_DEBUG);
+            throw ex.getComponentErrorsEx();
+        }
+    }
+    else if(constant == "min_range" || constant == "max_range" || constant == "tracking_delta")
+    {
+        values = getCDBValue<std::vector<double>>(object.getContainerServices(), constant.c_str());
+        if(values.size() != object.m_virtual_axes)
+        {
+            _EXCPT(ComponentErrors::CDBAccessExImpl, ex, (object.m_servo_name + "::getMotionConstant()").c_str());
+            ex.setFieldName(constant.c_str());
+            ex.log(LM_DEBUG);
+            throw ex.getComponentErrorsEx();
+        }
+    }
+    else if(constant == "ramp_times")       // Acceleration ramp times, 0 to max_speed and vice versa
+    {
+        values = std::vector<double>(object.m_virtual_axes);
+        std::transform(object.m_m_s.begin(), object.m_m_s.end(), object.m_a.begin(), values.begin(), std::divides<double>());
+    }
+    else if(constant == "ramp_distances")   // Acceleration ramp distances, 0 to max_speed and vice versa
+    {
+        values = std::vector<double>(object.m_virtual_axes);
+        std::transform(object.m_r_t.begin(), object.m_r_t.end(), object.m_a.begin(), values.begin(), [](double acceleration_ramp_time, double acceleration)
+        {
+            return 0.5 * acceleration * std::pow(acceleration_ramp_time, 2);
+        });
+    }
+
+    return values;
+}*/
+
+/////////////////// PRIVATE methods
+std::vector<std::string> SRTDerotatorImpl::getPropertiesTable(SRTDerotatorImpl& object, const std::string& properties_name)
+{
+    AUTO_STATIC_TRACE(object.m_servo_name + "::getPropertiesTable()");
+
+    std::vector<std::string> properties;
+    
+    IRA::CDBTable table(object.getContainerServices(), properties_name.c_str(), std::string("DataBlock/MinorServo/Derotators/" + object.m_servo_name).c_str());
+    IRA::CError error;
+    error.Reset();
+
+    if(!table.addField(error, "property_name", IRA::CDataField::STRING))
+    {
+        error.setExtra("Error adding field property_name", 0);
+    }
+    if(!error.isNoError())
+    {
+        _EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl, ex, error);
+        ex.setCode(error.getErrorCode());
+        ex.setDescription((const char *)error.getDescription());
+        ex.log(LM_DEBUG);
+        throw ex.getComponentErrorsEx();
+    }
+    if(!table.openTable(error))
+    {
+        _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, ex, error);
+        ex.setFieldName(properties_name.c_str());
+        ex.log(LM_DEBUG);
+        throw ex.getComponentErrorsEx();
+    }
+
+    table.First();
+    for(unsigned int i = 0; i < table.recordCount(); i++, table.Next())
+    {
+        properties.push_back(std::string(table["property_name"]->asString()));
+    }
+    table.closeTable();
+
+    size_t expected_size = 0;
+
+    if(properties_name.find("virtual_") == 0)
+    {
+        expected_size = object.m_virtual_axes;
+    }
+    else if(properties_name.find("physical_") == 0)
+    {
+        expected_size = object.m_physical_axes;
+    }
+
+    if(expected_size == 0 || properties.size() != expected_size)
+    {
+        _EXCPT(ComponentErrors::CDBAccessExImpl, ex, (object.m_servo_name + "::initialize()").c_str());
+        ex.setFieldName(properties_name.c_str());
+        ex.log(LM_DEBUG);
+        throw ex.getComponentErrorsEx();
+    }
+
+    return properties;
+}
+
+
+GET_PROPERTY_REFERENCE(Management::ROTBoolean, SRTDerotatorImpl, m_enabled_ptr, enabled);
+GET_PROPERTY_REFERENCE(ROSRTMinorServoCabinetStatus, SRTDerotatorImpl, m_drive_cabinet_status_ptr, drive_cabinet_status);
+GET_PROPERTY_REFERENCE(Management::ROTBoolean, SRTDerotatorImpl, m_block_ptr, block);
+GET_PROPERTY_REFERENCE(ROSRTMinorServoOperativeMode, SRTDerotatorImpl, m_operative_mode_ptr, operative_mode);
+GET_PROPERTY_REFERENCE(ACS::RObooleanSeq, SRTDerotatorImpl, m_physical_axes_enabled_ptr, physical_axes_enabled);
+GET_PROPERTY_REFERENCE(ACS::ROdoubleSeq, SRTDerotatorImpl, m_physical_positions_ptr, physical_positions);
+GET_PROPERTY_REFERENCE(ACS::ROlong, SRTDerotatorImpl, m_virtual_axes_ptr, virtual_axes);
+GET_PROPERTY_REFERENCE(ACS::ROdoubleSeq, SRTDerotatorImpl, m_plain_virtual_positions_ptr, plain_virtual_positions);
+GET_PROPERTY_REFERENCE(ACS::ROdoubleSeq, SRTDerotatorImpl, m_virtual_positions_ptr, virtual_positions);
+GET_PROPERTY_REFERENCE(ACS::ROdoubleSeq, SRTDerotatorImpl, m_virtual_offsets_ptr, virtual_offsets);
+GET_PROPERTY_REFERENCE(Management::ROTBoolean, SRTDerotatorImpl, m_tracking_ptr, tracking);
+GET_PROPERTY_REFERENCE(ACS::ROlong, SRTDerotatorImpl, m_trajectory_id_ptr, trajectory_id);
+GET_PROPERTY_REFERENCE(ACS::ROlong, SRTDerotatorImpl, m_total_trajectory_points_ptr, total_trajectory_points);
+GET_PROPERTY_REFERENCE(ACS::ROlong, SRTDerotatorImpl, m_remaining_trajectory_points_ptr, remaining_trajectory_points);
+GET_PROPERTY_REFERENCE(ACS::ROdouble, SRTDerotatorImpl, m_actual_position_ptr, actPosition);
+GET_PROPERTY_REFERENCE(ACS::RWdouble, SRTDerotatorImpl, m_commanded_position_ptr, cmdPosition);
+GET_PROPERTY_REFERENCE(ACS::ROdouble, SRTDerotatorImpl, m_position_difference_ptr, positionDiff);
+GET_PROPERTY_REFERENCE(ACS::ROpattern, SRTDerotatorImpl, m_status_ptr, status);

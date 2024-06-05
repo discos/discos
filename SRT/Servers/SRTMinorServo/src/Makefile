@@ -18,7 +18,7 @@ CDB_SCHEMAS = SRTMinorServoCommon SRTMinorServoBoss SRTMinorServo SRTMinorServoS
 # ----------------------------
 # Libraries (public and local)
 # ----------------------------
-LIBRARIES = SRTGenericMinorServoImpl SRTProgramTrackMinorServoImpl SRTMinorServoBossImpl
+LIBRARIES = SRTGenericMinorServoImpl SRTProgramTrackMinorServoImpl SRTMinorServoBossImpl SRTDerotatorImpl
 
 USER_CFLAGS =
 
@@ -39,6 +39,9 @@ SRTGenericMinorServoImpl_CFLAGS = -std=c++17 -fconcepts
 SRTProgramTrackMinorServoImpl_OBJECTS = SRTProgramTrackMinorServoImpl SRTBaseMinorServoImpl
 SRTProgramTrackMinorServoImpl_LIBS = IRALibrary SRTMinorServoStubs MinorServoErrors MinorServoDefinitionsStubs SRTMinorServoCommandLibrary SRTMinorServoSocketLibrary DiscosVersion
 SRTProgramTrackMinorServoImpl_CFLAGS = -std=c++17 -fconcepts
+SRTDerotatorImpl_OBJECTS = SRTDerotatorImpl
+SRTDerotatorImpl_LIBS = IRALibrary SRTMinorServoStubs MinorServoErrors MinorServoDefinitionsStubs SRTMinorServoCommandLibrary SRTMinorServoSocketLibrary GenericDerotatorStubs SRTDerotatorStubs DerotatorErrors DiscosVersion
+SRTDerotatorImpl_CFLAGS = -std=c++17 -fconcepts
 
 
 # ----------------------------------------------------------------------

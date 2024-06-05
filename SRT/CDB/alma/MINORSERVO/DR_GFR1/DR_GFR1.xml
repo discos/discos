@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+   Authors: Giuseppe Carboni giuseppe.carboni@inaf.it
+-->
+<SRTDerotator
+    xmlns="urn:schemas-cosylab-com:SRTMinorServo:1.0"
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    physical_axes="1"
+    virtual_axes="1"
+    max_speed="3.276"
+    acceleration="2.67"
+    min_range="-105.5"
+    max_range="105.5"
+    tracking_delta="0.1">
+
+    <enabled description="All physical axes enabled" />
+    <drive_cabinet_status description="Drive cabinet status" />
+    <block description="Minor servo in block status" />
+    <operative_mode description="Minor servo operating mode" />
+    <physical_axes description="Number of physical axes" />
+    <physical_axes_enabled description="Sequence, physical axes enabled" />
+    <physical_positions description="Sequence, physical axes positions" />
+    <virtual_axes description="Number of virtual axes" />
+    <plain_virtual_positions description="Sequence, plain virtual axes positions, with offsets" />
+    <virtual_positions description="Sequence, virtual axes positions, without offsets" />
+    <virtual_offsets description="Sequence, sum of user and system virtual axis offsets" />
+    <tracking description="Boolean indicating whether the servo is tracking the given coordinates" />
+    <trajectory_id description="Unsigned int, the UNIX Epoch * 1000 indicating the start time of the current trajectory" />
+    <total_trajectory_points description="Number of points sent for the current trajectory" />
+    <remaining_trajectory_points description="Remaining points of the current trahectory" />
+    <actPosition/>
+    <cmdPosition/>
+    <positionDiff/>
+    <status/>
+
+</SRTDerotator>
