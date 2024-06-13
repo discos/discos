@@ -26,9 +26,8 @@
              Moon="IDL:alma/Antenna/Moon:1.0"
              Satellite=""
              SolarSystemBody=""
-             Otf="IDL:alma/Antenna/OTF:1.0"
-             CoordinatesFilename="/tmp/coordinates.txt">
-             
+             Otf="IDL:alma/Antenna/OTF:1.0">
+
 <target/>
 <targetRightAscension/>
 <targetDeclination/>
