@@ -1,0 +1,57 @@
+<!--
+    Author: Giuseppe Carboni, giuseppe.carboni@inaf.it
+-->
+<xs:schema
+    targetNamespace="urn:schemas-cosylab-com:SRTMinorServoBoss:1.0"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns="urn:schemas-cosylab-com:SRTMinorServoBoss:1.0"
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:mng="urn:schemas-cosylab-com:Managment:1.0"
+    xmlns:ms="urn:schemas-cosylab-com:SRTMinorServoCommon:1.0"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+
+    <xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd" />
+    <xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd" />
+    <xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
+    <xs:import namespace="urn:schemas-cosylab-com:SRTMinorServoCommon:1.0" schemaLocation="SRTMinorServoCommon.xsd"/>
+
+    <xs:complexType name="SRTMinorServoBossType">
+     <xs:complexContent>
+      <xs:extension base="baci:CharacteristicComponent">
+       <xs:sequence>
+        <xs:element name="connected" type="mng:BooleanType" />
+        <xs:element name="status" type="mng:SystemStatusType" />
+        <xs:element name="actualSetup" type="baci:ROstring" />
+        <xs:element name="motionInfo" type="baci:ROstring" />
+        <xs:element name="ready" type="mng:BooleanType" />
+        <xs:element name="starting" type="mng:BooleanType" />
+        <xs:element name="asConfiguration" type="mng:BooleanType" />
+        <xs:element name="elevationTrack" type="mng:BooleanType" />
+        <xs:element name="scanActive" type="mng:BooleanType" />
+        <xs:element name="scanning" type="mng:BooleanType" />
+        <xs:element name="tracking" type="mng:BooleanType" />
+        <xs:element name="current_configuration" type="ms:SRTMinorServoFocalConfigurationType" />
+        <xs:element name="simulation_enabled" type="mng:BooleanType" />
+        <xs:element name="plc_time" type="baci:ROdouble" />
+        <xs:element name="plc_version" type="baci:ROstring" />
+        <xs:element name="control" type="ms:SRTMinorServoControlStatusType" />
+        <xs:element name="power" type="mng:BooleanType" />
+        <xs:element name="emergency" type="mng:BooleanType" />
+        <xs:element name="gregorian_cover" type="ms:SRTMinorServoGregorianCoverStatusType" />
+        <xs:element name="air_blade" type="ms:SRTMinorServoGregorianAirBladeStatusType" />
+        <xs:element name="last_executed_command" type="baci:ROdouble" />
+        <xs:element name="error_code" type="ms:SRTMinorServoErrorType" />
+       </xs:sequence>
+       <xs:attribute name="status_thread_period" type="xs:double" use="required" />
+       <xs:attribute name="active_surface_configuration" type="xs:string" use="required" />
+       <xs:attribute name="elevation_tracking_enabled" type="xs:string" use="required" />
+      </xs:extension>
+     </xs:complexContent>
+    </xs:complexType>
+
+    <xs:element name="SRTMinorServoBoss" type="SRTMinorServoBossType"/>
+
+</xs:schema>

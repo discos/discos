@@ -356,7 +356,7 @@ void CCommonData::reBind()
 	setElevationStatusWord(BRAKE_ERROR,m_elevationStatus->errors().brakeError());
 	setElevationStatusWord(SERVO_ERROR,m_elevationStatus->errors().servoError());
 	setElevationStatusWord(AXIS_READY,m_elevationStatus->axisReady());
-	setElevationStatusWord(ACTIVE,m_azimuthStatus->axisState()==CACUProtocol::STATE_ACTIVE);
+	setElevationStatusWord(ACTIVE,m_elevationStatus->axisState()==CACUProtocol::STATE_ACTIVE);
 	setElevationStatusWord(LOW_POWER_MODE,m_elevationStatus->lowPowerMode());
 	setElevationStatusWord(STOWED,m_elevationStatus->stowed());
 	//bind motors status word

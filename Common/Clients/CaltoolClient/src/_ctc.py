@@ -283,13 +283,13 @@ class Application(Qt.QDialog,calibrationtool_ui.Ui_CalibrationToolDialog):
         if 'SUBR' not in str(scanaxis):
             self.scanAxisLabel.setText('ScanAxis - Pointing')
             xaxis_text="Direction (Deg)"
-            hpbw_label_text='HPBW(arcmim)'
-            peakOffsetLabel_text='PeakOffset(deg)'
+            hpbw_label_text='HPBW (arcmim)'
+            peakOffsetLabel_text='PeakOffset (deg)'
         else:
             self.scanAxisLabel.setText('ScanAxis - Focus')
             xaxis_text="Distance (mm)"
-            hpbw_label_text='HPBW(mm)'
-            peakOffsetLabel_text='PeakOffset(mm)'
+            hpbw_label_text='HPBW (arcmin)'
+            peakOffsetLabel_text='PeakOffset (mm)'
             self.qwtPlot_datax.setAxisTitle(Qwt.QwtPlot.xBottom, xaxis_text)
             self.qwtPlot_datay.setAxisTitle(Qwt.QwtPlot.xBottom, xaxis_text)
             self.hpbw_label.setText(hpbw_label_text)

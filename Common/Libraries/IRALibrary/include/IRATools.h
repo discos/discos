@@ -30,13 +30,22 @@
 /* Andrea Orlati(aorlati@ira.inaf.it)  12/08/2015	  Function to check if a file exists or not */
 /* Andrea Orlati(aorlati@ira.inaf.it)  19/11/2015	  Function timeToStrExtended was added */
 /* Andrea Orlati(aorlati@ira.inaf.it)  12/01/2016	  reviewed the function skyFrequency in order to address also lower side band during down conversion */
+/* Giuseppe Carboni (giuseppe.carboni@inaf.it) 07/12/2021 added the getUNIXEpoch, ACSTime2UNIXEpoch and UNIXEpoch2ACSTime functions */
+
+#include <Cplusplus11Helper.h>
 
 #include <time.h>
 #include <sys/time.h>
+C11_IGNORE_WARNING_PUSH
+C11_IGNORE_WARNING("-Wdeprecated-declarations")
+C11_IGNORE_WARNING("-Wmisleading-indentation")
+C11_IGNORE_WARNING("-Wcatch-value=")
 #include <baciDB.h>
 #include <maciContainerServices.h>
 #include <acstimeEpochHelper.h>
 #include <acstimeDurationHelper.h>
+C11_IGNORE_WARNING_POP
+
 #include <maciSimpleClient.h>
 #include <AntennaDefinitionsC.h>
 
@@ -136,6 +145,23 @@ public:
 	 * @return the ACS::Time variable containing the current time
 	*/
 	static ACS::Time getACSTime();
+	/**
+	 * Call this function to get the current UNIX epoch
+	 * @return a double containing the current UNIX epoch
+	*/
+	static double getUNIXEpoch();
+	/**
+	 * Call this function in order to get the UNIX Epoch of the given ACS::Time
+	 * @param acs_time the given ACS::Time
+	 * @return a double containing the UNIX epoch of the given ACS::Time
+	*/
+	static double ACSTime2UNIXEpoch(ACS::Time acs_time);
+	/**
+	 * Call this function in order to get the ACS::Time of the given UNIX Epoch
+	 * @param unix_epoch the given UNIX Epoch (double)
+	 * @return a ACS::Time object of the given UNIX Epoch
+	*/
+	static ACS::Time UNIXEpoch2ACSTime(double unix_epoch);
 	/** 
 	 * This function performs the copy of an epoch
 	 * @param dst destination epoch

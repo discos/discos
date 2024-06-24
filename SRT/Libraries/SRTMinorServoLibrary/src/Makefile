@@ -23,7 +23,7 @@ USER_CFLAGS = -Wall
 #
 # additional include and library search paths
 # USER_INC = /usr/local/include
-USER_LIB = -lgsl -lgslcblas -lm
+# USER_LIB =
 
 #
 # MODULE CODE DESCRIPTION:
@@ -35,11 +35,15 @@ USER_LIB = -lgsl -lgslcblas -lm
 # C programs (public and local)
 # -----------------------------
 EXECUTABLES     =
-EXECUTABLES_L   = 
+EXECUTABLES_L   =
+
+xxxxx_OBJECTS   =
+xxxxx_CFLAGS    =
+xxxxx_LIBS      =
 
 #
 # <brief description of xxxxx program>
-xxxxx_OBJECTS   =	
+xxxxx_OBJECTS   =
 xxxxx_LDFLAGS   =
 xxxxx_LIBS      =
 
@@ -50,15 +54,24 @@ xxxxx_LIBS      =
 #
 # Includes (.h) files (public only)
 # ---------------------------------
-INCLUDES        = hexlib.h
+INCLUDES        = SRTMinorServoCommandLibrary.h SRTMinorServoSocket.h SRTMinorServoTestingSocket.h SRTMinorServoUtils.h SRTMinorServoContainers.h #hexlib.h
 
 #
 # Libraries (public and local)
 # ----------------------------
-LIBRARIES       = SRTMinorServoLibrary
+LIBRARIES       = SRTMinorServoCommandLibrary SRTMinorServoSocketLibrary PySRTMinorServoCommandLibrary #SRTMinorServoLibrary
 LIBRARIES_L     =
-SRTMinorServoLibrary_OBJECTS = hexlib
-SRTMinorServoLibrary_LIBS = 
+#SRTMinorServoLibrary_OBJECTS = hexlib
+#SRTMinorServoLibrary_LIBS = gsl gslcblas m
+SRTMinorServoCommandLibrary_OBJECTS = SRTMinorServoCommandLibrary
+SRTMinorServoCommandLibrary_CFLAGS = -std=c++17 -fconcepts
+SRTMinorServoCommandLibrary_LIBS = pthread IRALibrary
+PySRTMinorServoCommandLibrary_OBJECTS = PySRTMinorServoCommandLibrary
+PySRTMinorServoCommandLibrary_CFLAGS = -std=c++17 -fconcepts
+PySRTMinorServoCommandLibrary_LIBS = SRTMinorServoCommandLibrary boost_python3
+SRTMinorServoSocketLibrary_OBJECTS = SRTMinorServoSocket
+SRTMinorServoSocketLibrary_LIBS = IRALibrary ComponentErrors MinorServoErrors SRTMinorServoCommandLibrary
+SRTMinorServoSocket_CFLAGS = -std=c++17 -fconcepts
 
 #
 # <brief description of lllll library>
@@ -85,7 +98,7 @@ PY_SCRIPTS_L       =
 PY_MODULES         =
 PY_MODULES_L       =
 
-PY_PACKAGES        =
+PY_PACKAGES        = SRTMinorServoCommandLibrary
 PY_PACKAGES_L      =
 pppppp_MODULES	   =
 

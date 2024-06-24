@@ -24,11 +24,16 @@ public:
 	typedef typename conditional<CONST_SPEC,const_func_type,normal_func_type>::type func_type;
 	
 	function0(OBJ *object, func_type func) : _SP_FUNCTOR(object,0), m_func(func) {};
-	return_type operator()() const throw (ACSErr::ACSbaseExImpl) {
+   /*
+   * @throw (ACSErr::ACSbaseExImpl)
+   */	
+	return_type operator()() const  {
 		return (*_SP_FUNCTOR::m_obj.*m_func)( ); //can throw a generic exception
 	}
-	void call(IRA::CString *params,const WORD& parLen) throw (
-			ParserErrors::ConversionErrorExImpl,ACSErr::ACSbaseExImpl) {
+	/*
+   * @throw (ACSErr::ACSbaseExImpl, ParserErrors::ConversionErrorExImpl)
+   */
+	void call(IRA::CString *params,const WORD& parLen) {
 		retVal=(*_SP_FUNCTOR::m_obj.*m_func)(); //can throw a generic exception
 	}
 	WORD get(IRA::CString *params)  {
@@ -50,11 +55,16 @@ public:
 	typedef typename conditional<CONST_SPEC,const_func_type,normal_func_type>::type func_type;
 	
 	function0(OBJ *object, func_type func) : _SP_FUNCTOR(object,0), m_func(func) { };
-	void  operator()() const throw (ACSErr::ACSbaseExImpl) {
+ 	/*
+   * @throw (ACSErr::ACSbaseExImpl)
+   */			
+	void  operator()() const {
 		(*_SP_FUNCTOR::m_obj.*m_func)(); //can throw a generic exception
 	}
-	void call(IRA::CString *params,const WORD& parLen) throw (
-			ParserErrors::ConversionErrorExImpl,ACSErr::ACSbaseExImpl) {
+	/*
+   * @throw (ACSErr::ACSbaseExImpl, ParserErrors::ConversionErrorExImpl)
+   */	
+	void call(IRA::CString *params,const WORD& parLen)  {
 		(*_SP_FUNCTOR::m_obj.*m_func)(); //can throw a generic exception
 	}
 	WORD get(IRA::CString *params)  {

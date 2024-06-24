@@ -32,7 +32,7 @@
 #define CIRCLES 7
 #define ACTUATORS 48
 #define firstUSD 1
-#define lastUSD 264
+#define lastUSD 268
 #define LOOPTIME 100000 // 0,10 sec
 #define CDBPATH std::string(getenv("ACS_CDB")) + "/CDB/"
 #define USDTABLE (CDBPATH + "alma/AS/tab_convUSD.txt").c_str()
@@ -169,6 +169,8 @@ public:
 
     void setProfile (const ActiveSurface::TASProfile& profile) throw (ComponentErrors::ComponentErrorsExImpl);
 
+    void asSetLUT (const char* newlut);
+    
 private:
     std::map<int, std::string> m_error_strings;
     ContainerServices* m_services;
@@ -223,6 +225,10 @@ private:
     bool m_profileSetted;
 
     bool m_ASup;
+
+    bool m_newlut;
+
+    const char* m_lut;
 };
 
 #endif /*MEDICINAACTIVESURFACEBOSSCORE_H_*/

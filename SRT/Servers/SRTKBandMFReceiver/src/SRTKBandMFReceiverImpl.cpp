@@ -531,8 +531,6 @@ void SRTKBandMFReceiverImpl::getIFOutput(
 }
             
 
-
-
 CORBA::Long SRTKBandMFReceiverImpl::getFeeds(
         ACS::doubleSeq_out X,
         ACS::doubleSeq_out Y,
@@ -612,7 +610,8 @@ void SRTKBandMFReceiverImpl::turnLNAsOn() throw (
         )
 {
     try {
-        m_core.lnaOn();
+		  // commented out in order to cope with the LNA control board substitution 	        
+        //m_core.lnaOn();
     }
     catch (ComponentErrors::ComponentErrorsExImpl& ex) {
         ex.log(LM_DEBUG);
@@ -637,7 +636,8 @@ void SRTKBandMFReceiverImpl::turnLNAsOff() throw (
         )
 {
     try {
-        m_core.lnaOff();
+    	  // commented out in order to cope with the LNA control board substitution  
+        //m_core.lnaOff();
     }
     catch (ComponentErrors::ComponentErrorsExImpl& ex) {
         ex.log(LM_DEBUG);

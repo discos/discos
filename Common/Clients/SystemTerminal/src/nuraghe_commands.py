@@ -2,6 +2,9 @@ from __future__ import print_function
 # Marco Buttu <mbuttu@oa-cagliari.inaf.it> 
 # Doctrings from the "Observing at the SRT with Nuraghe, Issue n.8, 21/10/14",
 # by Simona Righini and Andrea Orlati"
+# 21/05/2024 G. Carboni: commands prependend with SRT_, Medicina_, Noto_ are
+# only added to the operator input according to the STATION environment
+# variable
 
 
 def antennaPark():
@@ -538,6 +541,12 @@ def servoSetup():
     (CCB, KKG, LLP, PLP, PPP) configures the minor servos in ordet to put on focus the receiver
     """
 
+def SRT_servoReset():
+    """
+    servoReset
+    sends the emergency and alarm reset command to OR7 VBrain server, SRT only
+    """
+
 def setAttenuation():
     """
     setAttenuation=sect,att 
@@ -582,6 +591,29 @@ def setServoOffset():
 
     For instance, the following command sets an offset of 5mm in the x (virtual) axis of the in the SRP:
         setServoOffset=SRP_TY,5
+    """
+
+def SRT_setGregorianCoverPosition():
+    """
+    setGregorianCoverPosition=POSITION
+    It sets the gregorian cover position
+    Allowed POSITIONs
+        CLOSED, closed
+        OPEN, open
+    """
+
+def SRT_setGregorianAirBladeStatus():
+    """
+    setGregorianAirBladeStatus=STATUS
+    It sets the gregorian air blade status
+    Allowed STATUSes:
+        AUTO, auto
+        OFF, off
+        ON, on
+    If a ON status is commanded, the air blade stays on for 30 seconds.
+    It can be toggled off manually.
+    Sending setGregorianAirBladeStatus=ON again will toggle the air blade to
+    turn on again.
     """
 
 def setupCCB():
@@ -694,6 +726,9 @@ def wx():
     atmospheric pressure (hPa), wind speed (km/h).
     """
 
+stations = ['SRT', 'Medicina', 'Noto']
+import os
+station = os.environ.get('STATION')
 import copy
 myself =  __import__(__name__)
 # Create the commands dictionary
@@ -701,10 +736,14 @@ commands = myself.__dict__.copy() # Shallow copy, but we do not mind
 for cmd in list(commands.keys()):
     if cmd.startswith('__'):
         del commands[cmd]
+    elif any(cmd.startswith(s) for s in stations):
+        command = commands.pop(cmd)
+        s, cmd = cmd.split('_')
+        if s == station:
+            commands[cmd] = command
 
 # Make the setupXXX.__doc__
 for cmd in commands:
     if cmd.startswith('setup'):
         setupXXX = getattr(myself, cmd)
         setupXXX.__doc__ = setupCCB.__doc__
-

@@ -2,7 +2,7 @@
 #include <Definitions.h>
 #include <cstdio>
 
-int actuatorsInCircle[] = {0,24,48,48,48,48,48};
+int actuatorsInCircle[] = {0,24,48,48,48,48,48,4};
 
 CMedicinaActiveSurfaceBossCore::CMedicinaActiveSurfaceBossCore(ContainerServices *service, acscomponent::ACSComponentImpl *me) :
     m_services(service),
@@ -55,6 +55,7 @@ void CMedicinaActiveSurfaceBossCore::initialize()
     }
     m_profileSetted = false;
     m_ASup = false;
+    m_newlut = false;
 }
 
 void CMedicinaActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetComponentExImpl)
@@ -1334,6 +1335,12 @@ void CMedicinaActiveSurfaceBossCore::workingActiveSurface() throw (ComponentErro
     }
 }
 
+void CMedicinaActiveSurfaceBossCore::asSetLUT(const char *newlut)
+{
+    m_lut= (CDBPATH + "alma/AS/" + newlut).c_str();
+    m_newlut = true;
+}
+
 void CMedicinaActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newProfile) throw (ComponentErrors::ComponentErrorsExImpl)
 {
     bool all_sectors = true;
@@ -1342,12 +1349,17 @@ void CMedicinaActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile&
         if(!m_sector[i]) all_sectors = false;
     }
 
+    if (m_newlut == false)
+        m_lut = USDTABLECORRECTIONS;
+
     if(all_sectors) // USD tables has not been loaded yet
     {
-        ifstream usdCorrections (USDTABLECORRECTIONS);
+        ifstream usdCorrections (m_lut);
+        //ifstream usdCorrections (USDTABLECORRECTIONS);
         if(!usdCorrections)
         {
-            ACS_SHORT_LOG ((LM_INFO, "File %s not found", USDTABLECORRECTIONS));
+            ACS_SHORT_LOG ((LM_INFO, "File %s not found", m_lut));
+            //ACS_SHORT_LOG ((LM_INFO, "File %s not found", USDTABLECORRECTIONS));
             exit(-1);
         }
         actuatorsCorrections.length(NPOSITIONS);

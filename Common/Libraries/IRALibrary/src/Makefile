@@ -36,7 +36,7 @@ USER_CFLAGS =
 INCLUDES = Definitions.h String.h IRATools.h Error.h SecureArea.h SerialPort.h Lecom.h FastQueue.h\
  Socket.h DataField.h DBTable.h LogFilter.h Site.h DateTime.h Timer.h SkySource.h TimeTaggedCircularArray.h \
  ScheduleTimer.h TimeoutSync.h MicroControllerBoard.h ReceiverControl.h MicroControllerBoardDef.h \
- SourceFlux.h CustomLoggerUtils.h LogDike.h FrequencyTracking.h BaseConverter.h IRA
+ SourceFlux.h CustomLoggerUtils.h LogDike.h FrequencyTracking.h BaseConverter.h Cplusplus11Helper.h IRA
 
 #
 # Libraries (public and local)
@@ -53,7 +53,7 @@ PY_SCRIPTS =
 
 EXECUTABLES     = 
 EXECUTABLES_L   = Test1 Test2 TestDBTable TestTypes TestMicroControllerBoard TestReceiverControl TestLogDike TestTimeTaggedCircularArray  \
-				  TestFlux TestTimer TestRounding
+				  TestFlux TestTimer TestRounding TestCommandRXBoard
 
 #
 # <brief description of xxxxx program>
@@ -74,6 +74,10 @@ TestMicroControllerBoard_LIBS      = IRALibrary
 
 TestReceiverControl_OBJECTS   = TestReceiverControl
 TestReceiverControl_LIBS      = IRALibrary
+
+TestCommandRXBoard_OBJECTS   = TestCommandRXBoard
+TestCommandRXBoard_LIBS      = IRALibrary
+
 
 TestLogDike_OBJECTS = TestDike
 TestLogDike_LIBS      = IRALibrary ClientErrors

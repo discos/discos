@@ -780,7 +780,6 @@ ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,BackendsErrors::Mal
     	bool m_SC00;
     	bool m_SL00;
     	bool m_SP00;
-    	bool m_SC00S;
     	bool m_SL00S;
     	bool m_SP00S;
     	bool m_SCC00;
@@ -793,8 +792,7 @@ ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,BackendsErrors::Mal
 
     	bool m_stokes;
     	bool m_CK;
-	bool m_SardaraInitialized;
-	
+      bool m_SardaraInitialized;
 };
 
 #endif /*_COMMANDLINE_H_*/

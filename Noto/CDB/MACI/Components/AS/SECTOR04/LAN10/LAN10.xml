@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<HierarchicalComponent  xmlns="urn:schemas-cosylab-com:HierarchicalComponent:1.0"
+       xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" 
+       xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" 
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       Name="LAN10"    Code="lanImpl"  Type="IDL:alma/ActiveSurface/lan:1.0"	Container="NotoActiveSurfaceContainer04" ImplLang="cpp">
+      <e Name="USD02"  Code="ActiveSurfaceUSDImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="NotoActiveSurfaceContainer04" ImplLang="cpp"/>
+      <e Name="USD03"  Code="ActiveSurfaceUSDImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="NotoActiveSurfaceContainer04" ImplLang="cpp"/>
+      <e Name="USD04"  Code="ActiveSurfaceUSDImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="NotoActiveSurfaceContainer04" ImplLang="cpp"/>
+      <e Name="USD05"  Code="ActiveSurfaceUSDImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="NotoActiveSurfaceContainer04" ImplLang="cpp"/>
+      <e Name="USD06"  Code="ActiveSurfaceUSDImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="NotoActiveSurfaceContainer04" ImplLang="cpp"/>
+
+</HierarchicalComponent>

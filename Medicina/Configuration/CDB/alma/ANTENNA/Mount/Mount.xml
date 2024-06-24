@@ -17,9 +17,9 @@
                RepetitionExpireTime="5000000"
                CheckMode="false"
                CheckOscillation="true"
-			   OscillationThreshold="0.025"
+			   OscillationThreshold="0.030"
 			   OscillationAlarmDuration="2000000"	
-			   OscillationNumberThreshold="4"	
+			   OscillationNumberThreshold="5"	
 			   OscillationRecoverWaitTime="3000000">
                
 	<azimuth description="Azimuth drive position" 

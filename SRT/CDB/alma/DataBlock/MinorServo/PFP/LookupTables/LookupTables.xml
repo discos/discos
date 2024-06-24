@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+   - Author: Giuseppe Carboni
+   - History:
+ 	- 14-03-23 Created
+-->
+
+<SRTMinorServoLookupTable xmlns="urn:schemas-cosylab-com:SRTMinorServoLookupTable:1.0" 
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <LLP>           <axis>TX</axis>     <coefficients>0                                                                              </coefficients></LLP>
+    <LLP>           <axis>TZ</axis>     <coefficients>0                                                                              </coefficients></LLP>
+    <LLP>           <axis>RTHETA</axis> <coefficients>0                                                                              </coefficients></LLP>
+
+    <PPP>           <axis>TX</axis>     <coefficients>0                                                                              </coefficients></PPP>
+    <PPP>           <axis>TZ</axis>     <coefficients>0                                                                              </coefficients></PPP>
+    <PPP>           <axis>RTHETA</axis> <coefficients>0                                                                              </coefficients></PPP>
+
+    <PLP>           <axis>TX</axis>     <coefficients>0                                                                              </coefficients></PLP>
+    <PLP>           <axis>TZ</axis>     <coefficients>0                                                                              </coefficients></PLP>
+    <PLP>           <axis>RTHETA</axis> <coefficients>0                                                                              </coefficients></PLP>
+
+    <HHP>           <axis>TX</axis>     <coefficients>0                                                                              </coefficients></HHP>
+    <HHP>           <axis>TZ</axis>     <coefficients>0                                                                              </coefficients></HHP>
+    <HHP>           <axis>RTHETA</axis> <coefficients>0                                                                              </coefficients></HHP>
+
+    <XKP>           <axis>TX</axis>     <coefficients>0                                                                              </coefficients></XKP>
+    <XKP>           <axis>TZ</axis>     <coefficients>0                                                                              </coefficients></XKP>
+    <XKP>           <axis>RTHETA</axis> <coefficients>0                                                                              </coefficients></XKP>
+
+</SRTMinorServoLookupTable>

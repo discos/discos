@@ -361,7 +361,7 @@
         </size>
        </property>
        <property name="text">
-        <string>PeakOffset(deg)</string>
+        <string>PeakOffset (deg)</string>
        </property>
       </widget>
      </item>

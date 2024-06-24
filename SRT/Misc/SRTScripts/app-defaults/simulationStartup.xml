@@ -47,15 +47,6 @@
             <remoteAccount>discos</remoteAccount>
         </container>
         <container>
-            <name>DerotatorContainer</name>
-            <type>py</type>
-            <heapSizeMB></heapSizeMB>
-            <useDedicatedSettings>true</useDedicatedSettings>
-            <scriptBase>0</scriptBase>
-            <remoteHost>MASTERHOST</remoteHost>
-            <remoteAccount>discos</remoteAccount>
-        </container>
-        <container>
             <name>DerotatorPositionerContainer</name>
             <type>py</type>
             <heapSizeMB></heapSizeMB>
@@ -128,15 +119,6 @@
             <remoteAccount>discos</remoteAccount>
         </container>
         <container>
-            <name>MinorServoBossContainer</name>
-            <type>cpp</type>
-            <heapSizeMB></heapSizeMB>
-            <useDedicatedSettings>true</useDedicatedSettings>
-            <scriptBase>0</scriptBase>
-            <remoteHost>MASTERHOST</remoteHost>
-            <remoteAccount>discos</remoteAccount>
-        </container>
-        <container>
             <name>MinorServoContainer</name>
             <type>cpp</type>
             <heapSizeMB></heapSizeMB>
@@ -192,6 +174,15 @@
         </container>
         <container>
             <name>SRT7GHzContainer</name>
+            <type>cpp</type>
+            <heapSizeMB></heapSizeMB>
+            <useDedicatedSettings>true</useDedicatedSettings>
+            <scriptBase>0</scriptBase>
+            <remoteHost>MASTERHOST</remoteHost>
+            <remoteAccount>discos</remoteAccount>
+        </container>
+        <container>
+            <name>SRT5GHzContainer</name>
             <type>cpp</type>
             <heapSizeMB></heapSizeMB>
             <useDedicatedSettings>true</useDedicatedSettings>
