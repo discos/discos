@@ -120,8 +120,8 @@ class MyWorker(QThread):
                 self.emit(Qt.SIGNAL("scanAxis"),scanaxis)
                 (azOffset,_)=self.azimuthOffset.get_sync()
                 (elOffset,_)=self.elevationOffset.get_sync()
-                self.emit(Qt.SIGNAL("azoffset"),f'{azOffset/math.pi*180:.6f}')
-                self.emit(Qt.SIGNAL("eloffset"),f'{elOffset/math.pi*180:.6f}')
+                self.emit(Qt.SIGNAL("azoffset"),f'{azOffset/math.pi*180:.3f}')
+                self.emit(Qt.SIGNAL("eloffset"),f'{elOffset/math.pi*180:.3f}')
 
                 rec= self.caltool.isRecording()
                 if rec==True:
