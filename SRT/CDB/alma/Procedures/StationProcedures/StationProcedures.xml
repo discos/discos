@@ -134,6 +134,21 @@
 </body>
 </Procedure>
 
+<Procedure name="setupQQG" args="0">
+<body>
+	antennaSetup=QQG
+	servoSetup=QQG
+	receiversSetup=QQG
+	receiversMode=SINGLEDISH
+	chooseBackend=TotalPower
+	initialize=QQG
+	device=0
+	calOff
+	restFrequency=0
+	azelOffsets=0d,0d
+</body>
+</Procedure>
+
 <Procedure name="telescopePark" args="0">
 <body>
 	goTo=*,89.8d

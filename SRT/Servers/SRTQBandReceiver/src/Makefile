@@ -56,7 +56,7 @@ INCLUDES        = QBandBaseCore.h QBandBaseUtils.h QBandBaseConf.h
 #
 # Libraries (public and local)
 # ----------------------------
-LIBRARIES       = SRTQBandReceiverImpl SRTQBandDerotatorImpl QBandCore
+LIBRARIES       = SRTQBandReceiverImpl
 LIBRARIES_L     = 
 
 #
@@ -111,7 +111,7 @@ tttlll_OBJECTS  =
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS = SRTQBandReceiver SRTQBandDerotator
+CDB_SCHEMAS = SRTQBandReceiver
 
 # 
 # IDL Files and flags

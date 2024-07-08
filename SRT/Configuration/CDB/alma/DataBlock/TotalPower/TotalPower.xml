@@ -20,6 +20,20 @@
 </Configuration>
 
 <Configuration>
+	<configurationID>QQG</configurationID>
+	<sections>4</sections>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<inputPort>PRIMARY</inputPort>
+	<inputPortDB>7</inputPortDB>
+ 	<inputPortBW>2350</inputPortBW>
+	<beams>2</beams>
+	<section_boards>6 7 8 9</section_boards>
+	<polarizations>L R L R</polarizations>
+	<feed>0 0 1 1</feed>
+	<IF>0 1 0 1</IF>
+</Configuration>
+
+<Configuration>
 	<configurationID>CCB</configurationID>
  	<sections>2</sections>
  	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
