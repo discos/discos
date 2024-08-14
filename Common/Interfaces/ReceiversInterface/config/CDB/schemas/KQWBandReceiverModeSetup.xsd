@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+    - Author: Andrea Orlati
+    -
+    - History:
+    -   08-08-2024  Created
+-->
+
+<xs:schema
+    targetNamespace="urn:schemas-cosylab-com:KQWBandReceiverModeSetup:1.0"
+    xmlns="urn:schemas-cosylab-com:KQWBandReceiverModeSetup:1.0"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"   
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+
+<xs:complexType name="KQWBandReceiverModeType">
+    <!-- Mode name or mode mnemonic code -->
+    <xs:attribute name="Mode" type="xs:string" use="required"/>
+    <!-- represent the lower value (MHZ) of the sky radio frequency band of the K band receiver (0..IFs) -->
+    <xs:attribute name="KBandRFMin" type="xs:string" use="required"/>
+    <!-- represent the lower value (MHZ) of the sky radio frequency band of the Q band receiver (0..IFs) -->
+    <xs:attribute name="QBandRFMin" type="xs:string" use="required"/>
+    <!-- represent the lower value (MHZ) of the sky radio frequency band of the first W band receiver (0..IFs) -->
+    <xs:attribute name="W1BandRFMin" type="xs:string" use="required"/>
+    <!-- represent the lower value (MHZ) of the sky radio frequency band of the second W band receiver (0..IFs) -->
+    <xs:attribute name="W2BandRFMin" type="xs:string" use="required"/>  
+    
+    <!-- represent the upper value (MHZ) of the sky radio frequency band of the K band receiver (0..IFs) -->
+    <xs:attribute name="KBandRFMax" type="xs:string" use="required"/>
+    <!-- represent the upper value (MHZ) of the sky radio frequency band of the Q band receiver (0..IFs) -->
+    <xs:attribute name="QBandRFMax" type="xs:string" use="required"/>
+    <!-- represent the upper value (MHZ) of the sky radio frequency band of the first W band receiver (0..IFs) -->
+    <xs:attribute name="W1BandRFMax" type="xs:string" use="required"/>
+    <!-- represent the upper value (MHZ) of the sky radio frequency band of the second W band receiver (0..IFs) -->
+    <xs:attribute name="W2BandRFMax" type="xs:string" use="required"/>  
+    
+    
+    <!-- represent the lower value (MHZ) of the Intermediate Frequency band of the K band receiver (0..IFs)-->
+    <xs:attribute name="KBandIFMin" type="xs:string" use="required"/>
+    <!-- represent the lower value (MHZ) of the Intermediate Frequency band of the Q band receiver (0..IFs)-->
+    <xs:attribute name="QBandIFMin" type="xs:string" use="required"/>
+    <!-- represent the lower value (MHZ) of the Intermediate Frequency band of the W1 band receiver (0..IFs)-->
+    <xs:attribute name="W1BandIFMin" type="xs:string" use="required"/>
+    <!-- represent the lower value (MHZ) of the Intermediate Frequency band of the W2 band receiver (0..IFs)-->
+    <xs:attribute name="W2BandIFMin" type="xs:string" use="required"/>
+    
+    <!-- represent the upper value (MHZ) of the Intermediate Frequency band of the K band receiver (0..IFs)-->
+    <xs:attribute name="KBandIFMax" type="xs:string" use="required"/>
+    <!-- represent the lower value (MHZ) of the Intermediate Frequency band of the Q band receiver (0..IFs)-->
+    <xs:attribute name="QBandIFMax" type="xs:string" use="required"/>
+    <!-- represent the lower value (MHZ) of the Intermediate Frequency band of the W1 band receiver (0..IFs)-->
+    <xs:attribute name="W1BandIFMax" type="xs:string" use="required"/>
+    <!-- represent the lower value (MHZ) of the Intermediate Frequency band of the W2 band receiver (0..IFs)-->
+    <xs:attribute name="W2BandIFMax" type="xs:string" use="required"/>
+    
+    
+    <!-- number of virtual feeds -->
+    <xs:attribute name="Feeds" type="xs:unsignedLong" use="required"/>
+    <!-- number of IFs for each virtual feed-->
+    <xs:attribute name="IFs" type="xs:unsignedLong" use="required"/>
+ 
+ 
+    <!-- blank separated list of the polarization relative to each of the IF for the K, Q, W1, and W2 band receiver respectively -->
+    <!-- the first entry is relative to IF 0. Accepted character are L or R  -->
+    <xs:attribute name="IFBandPolarizations" type="xs:string" use="required"/>
+    
+
+    <!-- Default LO value (MHZ) -->
+    <xs:attribute name="DefaultLO" type="xs:string" use="required"/>
+    <!-- Fixed LO value (MHZ) -->
+    <xs:attribute name="FixedLO2" type="xs:string" use="required"/>
+    <!-- Minimum LO value (MHZ) -->
+    <xs:attribute name="LOMin" type="xs:string" use="required"/>
+    <!-- Maximum LO value (MHZ) -->
+    <xs:attribute name="LOMax" type="xs:string" use="required"/>
+
+</xs:complexType>
+
+<xs:element name="KQWBandReceiverModeSetup" type="KQWBandReceiverModeType"/>
+
+</xs:schema>

@@ -197,7 +197,7 @@ bool CIRATools::getDBValue(maci::SimpleClient *client,CString fieldName,DWORD &V
 		CORBA::Object_var obj=client->getComponent("CDB",0,false);
 		CDB::DAL_var Dal_p=CDB::DAL::_narrow(obj);
 		CDB::DAO_var Dao_p=Dal_p->get_DAO_Servant((const char *)fullName);
-		app=Dao_p->get_long((const char *)fieldName);		
+		app=Dao_p->get_long((const char *)fieldName);
 	}
 	catch (...) {
 		return false;
@@ -230,9 +230,9 @@ bool CIRATools::getDBValue(maci::SimpleClient *client,CString fieldName,CString 
 	try {			
 		CORBA::Object_var obj=client->getComponent("CDB",0,false);
 		CDB::DAL_var Dal_p=CDB::DAL::_narrow(obj);
-		CDB::DAO_var Dao_p=Dal_p->get_DAO_Servant((const char *)fullName);
+		CDB::DAO_var Dao_p=Dal_p->get_DAO_Servant((const char *)fullName);	
 		CORBA::String_var dbstr=Dao_p->get_string((const char *)fieldName);
-		Val=CString((const char *)dbstr);
+		Val=CString((const char *)dbstr);	
 	}
 	catch (...) {
 		return false;

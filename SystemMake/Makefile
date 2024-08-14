@@ -89,7 +89,7 @@ ifeq ($(STATION),SRT)
 		SRTActiveSurfaceGUIClient SRTMountTextClient MinorServoBossTextClient \
 		Plotter KStars SRTScripts 
 
-	IDL_DOC:=Managment Antenna Backends SRTActiveSurface WeatherStation
+	IDL_DOC:=Managment Antenna Backends SRTActiveSurface WeatherStation Receivers
 	CPP_DOC:=Libraries AntennaImplementation SRTActiveSurfaceImplementation BackendsImplementation ReceiversImplementation WeatherStationImplementation MinorServoImplementation
 
 	Managment_MODULES:=ManagmentInterface
