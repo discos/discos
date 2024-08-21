@@ -140,8 +140,12 @@
         <xs:attribute name="RepetitionExpireTime" type="xs:unsignedLong" use="required" />
         <!-- Instance of the associated device that will set the local oscillator -->
         <xs:attribute name="DefaultMode" type="xs:string" use="required"/>
-        <!-- Name of the LocalOscillator component -->
-        <xs:attribute name="LocalOscillatorInstance" type="xs:string" use="required"/>
+        <!-- Name of the LocalOscillator component serving the K band -->
+        <xs:attribute name="LocalOscillator_K_Instance" type="xs:string" use="required"/>
+        <!-- Name of the LocalOscillator component serving the Q band -->
+        <xs:attribute name="LocalOscillator_Q_Instance" type="xs:string" use="required"/>
+        <!-- Name of the LocalOscillator component serving the W band -->
+        <xs:attribute name="LocalOscillator_W_Instance" type="xs:string" use="required"/>
 
       </xs:extension>
      </xs:complexContent>

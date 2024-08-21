@@ -25,7 +25,9 @@
     RepetitionExpireTime="10000000"
     ReceiverName="KQWBand"
     DefaultMode="Normal"
-    LocalOscillatorInstance="RECEIVERS/LO_LP"
+    LocalOscillator_K_Instance="DummyK"
+    LocalOscillator_Q_Instance="DummyQ"
+    LocalOscillator_W_Instance="DummyW"
 >
     <LO description="Sequence of local oscillator values for each IF chain" />
     <feeds description="Number of feeds of the receiver" />

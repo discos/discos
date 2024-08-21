@@ -53,15 +53,15 @@ INCLUDES        =
 #
 # Libraries (public and local)
 # ----------------------------
-LIBRARIES       = 
-#KQWBandReceiverImpl
+LIBRARIES       = KQWBandReceiverImpl
 LIBRARIES_L     = 
 
 #
 # <brief description of lllll library>
-#KQWBandReceiverImpl_OBJECTS   =  Configuration SRTLPBandReceiverImpl ComponentCore SRTLPBandCore MonitorThread utils
-#KQWBandReceiverImpl_LIBS = IRALibrary ComponentErrors ManagementErrors ReceiversErrors CommonReceiverInterfaceStubs \
-						     GenericReceiverStubs SRTLPBandStubs \
+KQWBandReceiverImpl_OBJECTS   =  Configuration ComponentCore KQWBandReceiverImpl MonitorThread
+#SRTLPBandReceiverImpl  SRTLPBandCore MonitorThread utils
+KQWBandReceiverImpl_LIBS = IRALibrary ComponentErrors ManagementErrors ReceiversErrors CommonReceiverInterfaceStubs \
+						     GenericReceiverStubs KQWBandStubs \
                              LocalOscillatorInterfaceStubs ReceiversDefinitionsStubs ManagmentDefinitionsStubs
 
 #

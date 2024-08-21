@@ -121,7 +121,7 @@ public:
 	/**
 	 * @return the IP port of the board that controls the dewar
 	 */
-	inline const WORD& getDewarPort() const { return m_dewarPort; }
+	inline const DWORD& getDewarPort() const { return m_dewarPort; }
 
 	/**
 	 * @return the IP address of the board that controls the receiver LNA
@@ -167,7 +167,7 @@ public:
 	 * @param len used to return the length of the mark values array
 	 * @return the size of the output vectors
 	 */
-	DWORD getLeftMarkTable(double *& freq,double *& markValuel, short feed) const;
+	DWORD getLeftMarkTable(ACS::doubleSeq& freq,ACS::doubleSeq& markValue,short feed) const;
 
 	/**
 	 * Allows to get the table of mark values relative to left polarization
@@ -176,7 +176,7 @@ public:
 	 * @param len used to return the length of the mark values array
 	 * @return the size of the output vectors
 	 */
-	DWORD getRightMarkTable(double *& freq,double *& markValue, short feed) const;
+	DWORD getRightMarkTable(ACS::doubleSeq& freq,ACS::doubleSeq& markValue,short feed) const;
 
 	/**
 	 * @return the instance of the local oscillator component  that the receiver will use to drive the set its LO
@@ -230,6 +230,17 @@ public:
 	 * @throw (ComponentErrors::CDBAccessExImpl, ReceiversErrors::ModeErrorExImpl)
 	 */
     void setMode(const char * mode); 
+    
+    /** 
+     * @return the index of the dedicated arrays where the relative information are located 
+    */ 
+    inline const DWORD getArrayIndex(const long& feed, const long& ifs) const { return feed*2+ifs; }
+
+    /** 
+     * @return the length of the dedicated arrays where the relative information are located 
+    */ 
+    inline const DWORD getArrayLen() const { return m_feeds*m_IFs; }
+    
 
 	/**
 	 * @return the lower limit of the RF coming from the K,Q,W1 and W2 band feed (MHz)
@@ -267,9 +278,21 @@ public:
 	inline const  DWORD& getFeeds() const { return m_feeds; }
 
 	/**
-	 * @return the default frequency for the synthesizer  (MHz)
+	 * @return the default frequency for the local oscillators (MHz)
 	 */
 	inline double const * const  getDefaultLO()  const { return m_DefaultLO; }
+	
+	/**
+	 * @return the current frequency for local Oscillator (MHz)
+	 */
+	inline double const * const  getCurrentLOValue()  const { return m_currentLOValue; }
+	
+	/**
+	 * @return the current frequency for local Oscillator (MHz)
+	 */
+	void setCurrentLOValue(const ACS::doubleSeq& lo);
+	
+	void setCurrentLOValue(const double& val,const long& pos);
 
 	/**
 	 * @return the value of the fixed synthesizer used for the second conversion (MHz)
@@ -285,6 +308,11 @@ public:
 	 * @return upper limit for  the  synthesizer tuning (MHz)
 	 */
 	inline double const * const  getLOMax() const { return  m_LOMax; }
+	
+	/*
+	 * @return if the lan bypass mode has to be commanded to the receiver or not
+	 */
+	inline bool getLNABypass() const { return m_lnaBypass; }
 
 	/**
     * This member function is used to configure component by reading the configuration parameter from the CDB.
@@ -296,20 +324,7 @@ public:
 	 * @param comp_name name of the component 
 	*/
 	void init(T *Services,IRA::CString comp_name=""); 
-	
 
- /*   std::vector<double> getLBandRFMaxFromMode(IRA::CString cmdMode) throw (
-            ComponentErrors::CDBAccessExImpl,
-            ComponentErrors::MemoryAllocationExImpl, 
-            ReceiversErrors::ModeErrorExImpl);
- 
-
-    std::vector<double> getLBandRFMinFromMode(IRA::CString cmdMode) throw (
-            ComponentErrors::CDBAccessExImpl,
-            ComponentErrors::MemoryAllocationExImpl, 
-            ReceiversErrors::ModeErrorExImpl);*/
-
-    
 private:
 	IRA::CString m_dewarIPAddress;
 	DWORD m_dewarPort;
@@ -330,20 +345,14 @@ private:
 	double *m_BandIFBandwidth;
    double *m_DefaultLO;
    double *m_FixedLO2;
+   double *m_currentLOValue;
    double *m_LOMin;
    double *m_LOMax;
-   //double *m_LowpassFilterMin;
-   //double *m_LowpassFilterMax;
 	DWORD m_IFs;
-	//DWORD m_LBandFilterID;
-	//DWORD m_PBandFilterID;
+	bool m_lnaBypass;
 	Receivers::TPolarization *m_BandPolarizations;
-	//Receivers::TPolarization *m_PBandPolarizations;
-   //IRA::CString m_LBandPolarization;
-   //IRA::CString m_PBandPolarization;
 	DWORD m_feeds;
-	//double *m_LBandLO;
-	//double *m_PBandLO;
+
 
 	IRA::CDBTable *m_markTable;
 	IRA::CDBTable *m_loTable;
@@ -357,6 +366,8 @@ private:
 	TTaperValue * m_taperVector;
 	DWORD m_taperVectorLen;
 	TFeedValue * m_feedVector; // length given by m_feeds
+	
+	void updateBandWith(const long& pos);
 };
 
 template <class T>
@@ -365,7 +376,7 @@ CConfiguration<T>::CConfiguration()
     m_markVector = NULL;
     m_markVectorLen = 0;
     m_markTable=NULL;
-    
+    m_mode="";
     m_loTable=NULL;
     m_loVector=NULL;
     m_loVectorLen=0;
@@ -378,9 +389,8 @@ CConfiguration<T>::CConfiguration()
     m_BandRFMin = NULL;
     m_BandRFMax = NULL;
     m_BandIFMin = NULL;
-    //m_LBandLO = m_PBandLO = NULL;
     m_BandIFBandwidth = NULL;
-    m_DefaultLO = m_FixedLO2= m_LOMin = m_LOMax = NULL; 
+    m_DefaultLO = m_FixedLO2= m_currentLOValue= m_LOMin = m_LOMax = NULL; 
 }
 
 template <class T>
@@ -419,8 +429,14 @@ CConfiguration<T>::~CConfiguration()
     if (m_BandRFMax) {
         delete [] m_BandRFMax;
     }
+    if (m_BandIFMin) {
+        delete [] m_BandIFMin;
+    }
     if (m_BandIFBandwidth) {
         delete [] m_BandIFBandwidth;
+    }
+    if (m_currentLOValue) {
+        delete [] m_currentLOValue;
     }
     if (m_DefaultLO) {
         delete [] m_DefaultLO;
@@ -449,6 +465,7 @@ void CConfiguration<T>::init(T *Services,IRA::CString comp_name)
     m_services = Services;
     IRA::CError error;
     IRA::CString field;
+    IRA::CString mode;
     WORD len;
     // read component configuration
     _GET_STRING_ATTRIBUTE(m_services,"DewarIPAddress","Dewar IP address:",m_dewarIPAddress,comp_name);
@@ -466,38 +483,21 @@ void CConfiguration<T>::init(T *Services,IRA::CString comp_name)
     const IRA::CString DEFAULTMODE_PATH = CONFIG_PATH"/Modes/" + m_defaultMode;
     
     // now read the receiver configuration
-    _GET_STRING_ATTRIBUTE(m_services,"Mode","mode name:", m_mode, DEFAULTMODE_PATH);
+    _GET_STRING_ATTRIBUTE(m_services,"Mode","mode name:", mode, DEFAULTMODE_PATH);
     _GET_DWORD_ATTRIBUTE(m_services,"Feeds","Number of feeds:", m_feeds, DEFAULTMODE_PATH);
     _GET_DWORD_ATTRIBUTE(m_services,"IFs","Number of IFs for each feed:", m_IFs, DEFAULTMODE_PATH);
 
-	/*double *m_BandRFMin;
-	double *m_BandRFMax;
-	double *m_BandIFMin;
-	double *m_BandIFBandwidth;
-   double *m_DefaultLO;
-   double *m_FixedLO2;
-   double *m_LOMin;
-   double *m_LOMax;*/
-
-
     try {
         m_BandPolarizations = new Receivers::TPolarization[m_IFs*m_feeds];
-
-        /*m_BandRFMin = new double[m_IFs];
-
-        m_BandRFMax = new double[m_IFs];
-
-        m_PBandIFMin = new double[m_IFs];
-
-        m_BandLO = new double[m_IFs];
-
-        m_BandIFBandwidth = new double[m_IFs];
-
-        m_DefaultLO = new double[m_IFs];
-        m_FixedLO2 = new double[m_IFs];
-        m_LOMin = new double[m_IFs];
-        m_LOMax = new double[m_IFs];*/
-
+        m_BandRFMin = new double[m_IFs*m_feeds];
+        m_BandRFMax = new double[m_IFs*m_feeds];
+        m_BandIFMin = new double[m_IFs*m_feeds];
+        m_BandIFBandwidth = new double[m_IFs*m_feeds];
+        m_DefaultLO = new double[m_IFs*m_feeds];
+        m_currentLOValue = new double[m_IFs*m_feeds];
+        m_FixedLO2 = new double[m_IFs*m_feeds];
+        m_LOMin = new double[m_IFs*m_feeds];
+        m_LOMax = new double[m_IFs*m_feeds];      
     }
     catch (std::bad_alloc& ex) {
         _EXCPT(ComponentErrors::MemoryAllocationExImpl, dummy, "CConfiguration::init()");
@@ -505,7 +505,7 @@ void CConfiguration<T>::init(T *Services,IRA::CString comp_name)
     }
 
     // Set the default operating mode
-    setMode(m_mode);
+    setMode(mode);
 
     // The noise mark
     try {
@@ -710,6 +710,34 @@ void CConfiguration<T>::init(T *Services,IRA::CString comp_name)
     m_taperTable = NULL;
 }
 
+template <class T>
+void CConfiguration<T>::setCurrentLOValue(const ACS::doubleSeq& lo)
+{
+	for (WORD k=0;k<MIN(lo.length(),getArrayLen());k++) {
+		if (lo[k]>=0.0) {
+			m_currentLOValue[k]=lo[k];
+			updateBandWith(k);
+		}
+	}	
+}
+
+template <class T>
+void CConfiguration<T>::setCurrentLOValue(const double& val,const long& pos)
+{
+	if ((pos>=0) && (pos<=getArrayLen())) {
+		if (val>=0.0) {
+			m_currentLOValue[pos]=val;
+			updateBandWith(pos);
+		}
+	}
+}
+
+template <class T>
+void CConfiguration<T>::updateBandWith(const long& pos)
+{
+	m_BandIFBandwidth[pos]=m_BandRFMax[pos]-(m_BandIFMin[pos]+m_currentLOValue[pos]);
+}
+
 /*
 * throw (ComponentErrors::CDBAccessExImpl, ReceiversErrors::ModeErrorExImpl) 
 */
@@ -720,29 +748,21 @@ void CConfiguration<T>::setMode(const char * mode)
     IRA::CError error;
     IRA::CString cmdMode(mode);
 
-    if(!m_mode.IsEmpty()){
-        if(cmdMode.GetLength() != m_mode.GetLength()) {
-            _EXCPT(ReceiversErrors::ModeErrorExImpl, impl, 
-                    "CConfiguration::setMode(): Wrong number of characters in the commanded mode.");
-            ACS_LOG(LM_FULL_INFO, "CConfiguration::init()", (LM_DEBUG, "Wrong number of characters in " + m_mode));
-            throw impl; 
-        }
-    }
-
-    if(cmdMode.Find('*') != -1) {
-        for (WORD k=0; k<m_mode.GetLength(); k++) {
-            if(cmdMode[k] == '*') {
-                cmdMode.SetAt(k, m_mode[k]); // Do not change this configuration
-            }
-        }
-    }
+	 if (cmdMode==m_mode) return;
+    if(!m_mode.IsEmpty()) {
+    	  if (cmdMode=="*") return;
+    }    
     
     CString MODE_PATH((std::string(CONFIG_PATH) + std::string("/Modes/") + std::string(cmdMode)).c_str());
     _GET_DWORD_ATTRIBUTE(m_services,"Feeds","Number of feeds:",m_feeds,MODE_PATH);
+    _GET_DWORD_ATTRIBUTE(m_services,"IFs","Number of feeds:",m_IFs,MODE_PATH);
+    _GET_STRING_ATTRIBUTE(m_services,"ActivateBypass","Set LNA bypass mode:",value,MODE_PATH); 
+    value.MakeUpper();
+    if (value=="TRUE") m_lnaBypass=true;
+    else m_lnaBypass=false;											  
+    
 
-
-    _GET_STRING_ATTRIBUTE(m_services,"IFBandPolarizations","IF polarizations:",value,MODE_PATH);
-    											  
+    _GET_STRING_ATTRIBUTE(m_services,"IFBandPolarizations","IF polarizations:",value,MODE_PATH); 											  
     int start=0;
     for (WORD k=0;k<m_IFs*m_feeds;k++) {
         if (!IRA::CIRATools::getNextToken(value,start,' ',token)) {
@@ -764,93 +784,64 @@ void CConfiguration<T>::setMode(const char * mode)
         }
     }
 
-   /* _GET_STRING_ATTRIBUTE("LBandRFMin", "L band RF lower limit (MHz):", value, MODE_PATH);
+    _GET_STRING_ATTRIBUTE(m_services,"RFMin", "RF lower limit (MHz):",value,MODE_PATH);
     start = 0;
-    for (WORD k=0; k<m_IFs; k++) {
-        if (!IRA::CIRATools::getNextToken(value, start, ' ', token)) {
+    for (WORD k=0; k<m_IFs*m_feeds; k++) {
+        if (!IRA::CIRATools::getNextToken(value,start,' ',token)) {
             _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
-            dummy.setFieldName("LBandRFMin");
+            dummy.setFieldName("RFMin");
             throw dummy;
         }
-        m_LBandRFMin[k] = token.ToDouble();
+        m_BandRFMin[k] = token.ToDouble();
     }
 
-    _GET_STRING_ATTRIBUTE("LBandRFMax", "L band RF upper limit (MHz):", value, MODE_PATH);
+    _GET_STRING_ATTRIBUTE(m_services,"RFMax", "RF upper limit (MHz):",value,MODE_PATH);
     start = 0;
-    for (WORD k=0; k<m_IFs; k++) {
+    for (WORD k=0;k<m_IFs*m_feeds;k++) {
         if (!IRA::CIRATools::getNextToken(value, start, ' ', token)) {
             _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
-            dummy.setFieldName("LBandRFMax");
+            dummy.setFieldName("RFMax");
             throw dummy;
         }
-        m_LBandRFMax[k] = token.ToDouble();
+        m_BandRFMax[k] = token.ToDouble();
     }
-
-    for (WORD k=0; k<m_IFs; k++)
-        m_LBandIFBandwidth[k] = m_LBandRFMax[k] - m_LBandRFMin[k];
     
-    _GET_STRING_ATTRIBUTE("PBandRFMin", "P band RF lower limit (MHz):", value, MODE_PATH);
-    start = 0;
-    for (WORD k=0; k<m_IFs; k++) {
-        if (!IRA::CIRATools::getNextToken(value, start, ' ', token)) {
+    _GET_STRING_ATTRIBUTE(m_services,"IFMin", "IF lower limit (MHz):",value,MODE_PATH);
+    start=0;
+    for (WORD k=0; k<m_IFs*m_feeds; k++) {
+        if (!IRA::CIRATools::getNextToken(value,start,' ',token)) {
             _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
-            dummy.setFieldName("PBandRFMin");
+            dummy.setFieldName("IFMin");
             throw dummy;
         }
-        m_PBandRFMin[k] = token.ToDouble();
+        m_BandIFMin[k] = token.ToDouble();
     }
 
-    _GET_STRING_ATTRIBUTE("PBandRFMax", "P band RF upper limit (MHz):", value, MODE_PATH);
+    _GET_STRING_ATTRIBUTE(m_services,"IFMax","IF upper limit (MHz):",value,MODE_PATH);
     start = 0;
-    for (WORD k=0; k<m_IFs; k++) {
-        if (!IRA::CIRATools::getNextToken(value, start, ' ', token)) {
-            _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
-            dummy.setFieldName("PBandRFMax");
+    for (WORD k=0;k<m_IFs*m_feeds;k++) {
+        if (!IRA::CIRATools::getNextToken(value,start,' ',token)) {
+            _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl,dummy,error);
+            dummy.setFieldName("RFMax");
             throw dummy;
         }
-        m_PBandRFMax[k] = token.ToDouble();
+        m_BandIFBandwidth[k]=token.ToDouble()-m_BandIFMin[k];
     }
-
-    for (WORD k=0; k<m_IFs; k++)
-        m_PBandIFBandwidth[k] = m_PBandRFMax[k] - m_PBandRFMin[k];
-
-    _GET_STRING_ATTRIBUTE("LBandIFMin","L band IF start frequency (MHz):", value, MODE_PATH);
-    start = 0;
-    for (WORD k=0; k<m_IFs; k++) {
-        if (!IRA::CIRATools::getNextToken(value, start, ' ', token)) {
-            _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
-            dummy.setFieldName("LBandIFMin");
-            throw dummy;
-        }
-        m_LBandIFMin[k] = token.ToDouble();
-    }
-
-    _GET_STRING_ATTRIBUTE("PBandIFMin","P band IF start frequency (MHz):", value, MODE_PATH);
-    start = 0;
-    for (WORD k=0; k<m_IFs; k++) {
-        if (!IRA::CIRATools::getNextToken(value, start, ' ', token)) {
-            _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
-            dummy.setFieldName("PBandIFMin");
-            throw dummy;
-        }
-        m_PBandIFMin[k] = token.ToDouble();
-    }
-
-    _GET_STRING_ATTRIBUTE("DefaultLO", "Default LO Value (MHz):", value, MODE_PATH);
-    start = 0;
-    for (WORD k=0; k<m_IFs; k++) {
+    
+    _GET_STRING_ATTRIBUTE(m_services,"DefaultLO","Default LO Value (MHz):",value,MODE_PATH);
+    start=0;
+    for (WORD k=0; k<m_IFs*m_feeds; k++) {
         if (!IRA::CIRATools::getNextToken(value, start, ' ', token)) {
             _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
             dummy.setFieldName("DefaultLO");
             throw dummy;
         }
-        m_DefaultLO[k] = token.ToDouble();
+        m_DefaultLO[k]=token.ToDouble();
     }
 
-
-    _GET_STRING_ATTRIBUTE("FixedLO2", "LO2 Value (MHz):", value, MODE_PATH);
+    _GET_STRING_ATTRIBUTE(m_services,"FixedLO2", "LO2 Value (MHz):", value, MODE_PATH);
     start = 0;
-    for (WORD k=0; k<m_IFs; k++) {
+    for (WORD k=0;k<m_IFs*m_feeds;k++) {
         if (!IRA::CIRATools::getNextToken(value, start, ' ', token)) {
             _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
             dummy.setFieldName("FixedLO2");
@@ -859,10 +850,9 @@ void CConfiguration<T>::setMode(const char * mode)
         m_FixedLO2[k] = token.ToDouble();
     }
 
-
-    _GET_STRING_ATTRIBUTE("LOMin", "Minumum LO Value (MHz):", value, MODE_PATH);
+    _GET_STRING_ATTRIBUTE(m_services,"LOMin", "Minimum LO Value (MHz):", value, MODE_PATH);
     start = 0;
-    for (WORD k=0; k<m_IFs; k++) {
+    for (WORD k=0; k<m_IFs*m_feeds; k++) {
         if (!IRA::CIRATools::getNextToken(value, start, ' ', token)) {
             _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
             dummy.setFieldName("LOMin");
@@ -871,10 +861,9 @@ void CConfiguration<T>::setMode(const char * mode)
         m_LOMin[k] = token.ToDouble();
     }
 
-
-    _GET_STRING_ATTRIBUTE("LOMax", "Maximum LO Value (MHz):", value, MODE_PATH);
+    _GET_STRING_ATTRIBUTE(m_services,"LOMax","Maximum LO Value (MHz):", value, MODE_PATH);
     start = 0;
-    for (WORD k=0; k<m_IFs; k++) {
+    for (WORD k=0; k<m_IFs*m_feeds; k++) {
         if (!IRA::CIRATools::getNextToken(value, start, ' ', token)) {
             _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
             dummy.setFieldName("LOMax");
@@ -882,97 +871,8 @@ void CConfiguration<T>::setMode(const char * mode)
         }
         m_LOMax[k] = token.ToDouble();
     }
-
-    _GET_STRING_ATTRIBUTE("LowpassFilterMin", "Minimum lowpass filter value (MHz):", value, MODE_PATH);
-    start = 0;
-    for (WORD k=0; k<m_IFs; k++) {
-        if (!IRA::CIRATools::getNextToken(value, start, ' ', token)) {
-            _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
-            dummy.setFieldName("LowpassFilterMin");
-            throw dummy;
-        }
-        m_LowpassFilterMin[k] = token.ToDouble();
-    }
-
-    _GET_STRING_ATTRIBUTE("LowpassFilterMax", "Maximum lowpass filter value (MHz):", value, MODE_PATH);
-    start = 0;
-    for (WORD k=0; k<m_IFs; k++) {
-        if (!IRA::CIRATools::getNextToken(value, start, ' ', token)) {
-            _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
-            dummy.setFieldName("LowpassFilterMax");
-            throw dummy;
-        }
-        m_LowpassFilterMax[k] = token.ToDouble();
-    }
-
-
-    // TODO: commented during the LO integration (27 oct 2015)
-    // for (WORD k=0; k<m_IFs; k++)
-    //     m_LBandLO[k] = m_LBandRFMin[k] - m_LBandIFMin[k];
-
-    // for (WORD k=0; k<m_IFs; k++)
-    //     m_PBandLO[k] = m_PBandRFMin[k] - m_PBandIFMin[k];
-
-
-    _GET_DWORD_ATTRIBUTE("LBandFilterID", "L band filter ID:", m_LBandFilterID, MODE_PATH);
-    _GET_DWORD_ATTRIBUTE("PBandFilterID", "P band filter ID:", m_PBandFilterID, MODE_PATH);
-
-    // for (WORD k=0; k<cmdMode.GetLength(); k++)
-    //     m_mode.SetAt(k, cmdMode[k]); */
     m_mode = cmdMode;
 }
-
-
-/*std::vector<double> CConfiguration::getLBandRFMinFromMode(IRA::CString cmdMode) throw (
-        ComponentErrors::CDBAccessExImpl,
-        ComponentErrors::MemoryAllocationExImpl, 
-        ReceiversErrors::ModeErrorExImpl)
-{
-    CString MODE_PATH((std::string(CONFIG_PATH) + std::string("/Modes/") + std::string(cmdMode)).c_str());
-
-    std::vector<double> rfMin;
-    IRA::CString value, token;
-
-    maci::ContainerServices *Services = m_services;
-    _GET_STRING_ATTRIBUTE("LBandRFMin", "L band RF lower limit (MHz):", value, MODE_PATH);
-    int start = 0;
-    IRA::CError error;
-    for (WORD k=0; k<m_IFs; k++) {
-        if (!IRA::CIRATools::getNextToken(value, start, ' ', token)) {
-            _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
-            dummy.setFieldName("LBandRFMin");
-            throw dummy;
-        }
-        rfMin.push_back(token.ToDouble());
-    }
-    return rfMin;
-}*/
-
-
-/*std::vector<double> CConfiguration::getLBandRFMaxFromMode(IRA::CString cmdMode) throw (
-        ComponentErrors::CDBAccessExImpl,
-        ComponentErrors::MemoryAllocationExImpl, 
-        ReceiversErrors::ModeErrorExImpl)
-{
-    CString MODE_PATH((std::string(CONFIG_PATH) + std::string("/Modes/") + std::string(cmdMode)).c_str());
-
-    std::vector<double> rfMax;
-    IRA::CString value, token;
-
-    maci::ContainerServices *Services = m_services;
-    _GET_STRING_ATTRIBUTE("LBandRFMax", "L band RF upper limit (MHz):", value, MODE_PATH);
-    int start = 0;
-    IRA::CError error;
-    for (WORD k=0; k<m_IFs; k++) {
-        if (!IRA::CIRATools::getNextToken(value, start, ' ', token)) {
-            _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
-            dummy.setFieldName("LBandRFMax");
-            throw dummy;
-        }
-        rfMax.push_back(token.ToDouble());
-    }
-    return rfMax;
-}*/
 
 template <class T>
 DWORD CConfiguration<T>::getSynthesizerTable(double * &freq,double *&power) const
@@ -989,24 +889,24 @@ DWORD CConfiguration<T>::getSynthesizerTable(double * &freq,double *&power) cons
 template <class T>
 DWORD CConfiguration<T>::getTaperTable(double * &freq,double *&taper, short feed) const
 {
-    freq = new double [m_taperVectorLen];
-    taper = new double [m_taperVectorLen];
+   freq = new double [m_taperVectorLen];
+   taper = new double [m_taperVectorLen];
 	DWORD count=0;
-    for (DWORD j=0; j<m_taperVectorLen; j++) {
+   for (DWORD j=0; j<m_taperVectorLen; j++) {
 		if (m_taperVector[j].feed==feed) {
-            freq[count] = m_taperVector[j].frequency;
-            taper[count] = m_taperVector[j].taper;
+      	freq[count] = m_taperVector[j].frequency;
+         taper[count] = m_taperVector[j].taper;
 			count++;
-        }
-    }
-    return count;
+    	}
+	}
+   return count;
 }
 
 template <class T>
-DWORD CConfiguration<T>::getLeftMarkTable(double *& freq, double *& markValue, short feed) const
+DWORD CConfiguration<T>::getLeftMarkTable(ACS::doubleSeq& freq,ACS::doubleSeq& markValue,short feed) const
 {
-	freq = new double [m_markVectorLen];
-	markValue = new double [m_markVectorLen];
+	freq.length(m_markVectorLen);
+	markValue.length(m_markVectorLen);
 	DWORD count=0;
 	for (DWORD j=0;j<m_markVectorLen;j++) {
 		if (m_markVector[j].polarization==Receivers::RCV_LCP && m_markVector[j].feed==feed) {
@@ -1019,10 +919,10 @@ DWORD CConfiguration<T>::getLeftMarkTable(double *& freq, double *& markValue, s
 }
 
 template <class T>
-DWORD CConfiguration<T>::getRightMarkTable(double *& freq,double *& markValue, short feed) const
+DWORD CConfiguration<T>::getRightMarkTable(ACS::doubleSeq& freq,ACS::doubleSeq& markValue,short feed) const
 {
-	freq= new double [m_markVectorLen];
-	markValue=new double [m_markVectorLen];
+	freq.length(m_markVectorLen);
+	markValue.length(m_markVectorLen);
 	DWORD count=0;
 	for (DWORD j=0;j<m_markVectorLen;j++) {
 		if (m_markVector[j].polarization==Receivers::RCV_RCP && m_markVector[j].feed==feed) {
