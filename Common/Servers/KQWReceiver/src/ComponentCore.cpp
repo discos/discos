@@ -1,6 +1,7 @@
+//#include "utils.h"
 #include "ComponentCore.h"
 #include <LogFilter.h>
-#include "utils.h"
+
 
 _IRA_LOGFILTER_IMPORT;
 
@@ -30,6 +31,9 @@ void CComponentCore::initialize(maci::ContainerServices* services)
     m_statusWord = 0;
     m_ioMarkError = false;
     m_calDiode=false;
+    m_vdStageValues = std::vector<IRA::ReceiverControl::StageValues>(NUMBER_OF_STAGES);
+    m_idStageValues = std::vector<IRA::ReceiverControl::StageValues>(NUMBER_OF_STAGES);
+    m_vgStageValues = std::vector<IRA::ReceiverControl::StageValues>(NUMBER_OF_STAGES);
 }
 
 /*throw (
@@ -43,13 +47,13 @@ CConfiguration<maci::ContainerServices> const * const  CComponentCore::execute()
 {
     m_configuration.init(m_services);  // Throw (ComponentErrors::CDBAccessExImpl);
     try {
-    	m_control=new IRA::ReceiverControl(
+    	m_control=new CKQWReceiverControl(
                 (const char *)m_configuration.getDewarIPAddress(),
                 m_configuration.getDewarPort(),
                 (const char *)m_configuration.getLNAIPAddress(),
                 m_configuration.getLNAPort(),
                 m_configuration.getLNASamplingTime(),
-                m_configuration.getFeeds());
+                PHYSICAL_FEEDS);
     }
     catch (std::bad_alloc& ex) {
         _EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CComponentCore::execute()");
@@ -664,6 +668,7 @@ double CComponentCore::getTaper(
  * ReceiversErrors::LocalOscillatorErrorExImpl
  * ComponentErrors::CDBAccessExImpl
  * ReceiversErrors::ModeErrorExImpl
+ * ReceiversErrors::ReceiverControlBoardErrorExImpl
 */
 void CComponentCore::setMode(const char * mode) {
     baci::ThreadSyncGuard guard(&m_mutex);
@@ -680,6 +685,34 @@ void CComponentCore::setMode(const char * mode) {
 	            //       ComponentErrors::CouldntGetComponentExImpl, ComponentErrors::CORBAProblemExImpl,
 	            //       ReceiversErrors::LocalOscillatorErrorExImpl)
     m_calDiode=false;
+    if (m_configuration.getLNABypass()) {
+    	try {
+    		/************************************************************
+    		* Verificare
+    		*/
+   		//m_control->enableBypass();// throw IRA::ReceiverControlEx
+   	}
+   	catch (IRA::ReceiverControlEx& ex) {
+      	_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::setMode()");
+        impl.setDetails(ex.what().c_str());
+        setStatusBit(CONNECTIONERROR);
+        throw impl;
+   	}
+    }
+    else {
+	 	try {
+    		/************************************************************
+    		* Verificare
+    		*/
+   		//m_control->disableBypass();// throw IRA::ReceiverControlEx
+   	}
+   	catch (IRA::ReceiverControlEx& ex) {
+      	_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::setMode()");
+        impl.setDetails(ex.what().c_str());
+        setStatusBit(CONNECTIONERROR);
+        throw impl;
+   	}
+    }
     ACS_LOG(LM_FULL_INFO,"CComponentCore::setMode()",(LM_NOTICE,"RECEIVER_MODE %s",mode));	
 
 }
@@ -732,6 +765,105 @@ void CComponentCore::updateComponent()
         setComponentStatus(Management::MNG_FAILURE);
         _IRA_LOGFILTER_LOG(LM_CRITICAL,"CComponentCore::updateComponent()","LOCAL_OSCILLATOR_NOT_LOCKED");
     }
+}
+
+ACS::doubleSeq CComponentCore::getStageValues(const IRA::ReceiverControl::FetValue& control, DWORD ifs, DWORD stage)
+{
+    baci::ThreadSyncGuard guard(&m_mutex);
+
+    ACS::doubleSeq values;
+    values.length(getFeeds());
+    for(size_t i=0; i<getFeeds(); i++)
+        values[i] = 0.0;
+    
+
+    if (ifs >= m_configuration.getIFs() || stage > NUMBER_OF_STAGES || stage < 1)
+        return values;
+
+    // Left Channel
+    if(ifs == (long)Receivers::RCV_LCP) {
+        if (control == IRA::ReceiverControl::DRAIN_VOLTAGE) {
+            for(size_t i=0; i<getFeeds(); i++)
+                values[i] = (m_vdStageValues[stage-1]).left_channel[i];
+        }
+        else {
+            if (control == IRA::ReceiverControl::DRAIN_CURRENT) {
+                for(size_t i=0; i<getFeeds(); i++)
+                    values[i] = (m_idStageValues[stage-1]).left_channel[i];
+            }
+            else {
+                for(size_t i=0; i<getFeeds(); i++)
+                    values[i] = (m_vgStageValues[stage-1]).left_channel[i];
+            }
+        }
+    }
+
+    // Right Channel
+    if (ifs == (long)Receivers::RCV_RCP) {
+        if (control==IRA::ReceiverControl::DRAIN_VOLTAGE)
+            for(size_t i=0; i<getFeeds(); i++)
+                values[i] = (m_vdStageValues[stage-1]).right_channel[i];
+        else 
+            if (control == IRA::ReceiverControl::DRAIN_CURRENT) 
+                for(size_t i=0; i<getFeeds(); i++)
+                    values[i] = (m_idStageValues[stage-1]).right_channel[i];
+            else 
+                for(size_t i=0; i<getFeeds(); i++)
+                    values[i] = (m_vgStageValues[stage-1]).right_channel[i];
+    }
+
+    return values;
+}
+
+// throw ReceiversErrors::ReceiverControlBoardErrorExImpl
+void CComponentCore::updateVgLNAControls() 
+{
+    // Not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
+    try {
+        for(size_t i=0; i<NUMBER_OF_STAGES; i++)
+            m_vgStageValues[i] = m_control->stageValues(IRA::ReceiverControl::GATE_VOLTAGE, i+1, CComponentCore::voltageConverter);
+    }
+    catch (IRA::ReceiverControlEx& ex) {
+        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl, impl, "CComponentCore::updateVgLNAControls()");
+        impl.setDetails(ex.what().c_str());
+        setStatusBit(CONNECTIONERROR);
+        throw impl;
+    }
+    clearStatusBit(CONNECTIONERROR); // The communication was ok so clear the CONNECTIONERROR bit
+}
+
+// throw ReceiversErrors::ReceiverControlBoardErrorExImpl
+void CComponentCore::updateVdLNAControls()
+{
+    // Not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
+    try {
+        for(size_t i=0; i<NUMBER_OF_STAGES; i++)
+            m_vdStageValues[i] = m_control->stageValues(IRA::ReceiverControl::DRAIN_VOLTAGE, i+1, CComponentCore::voltageConverter);
+    }
+    catch (IRA::ReceiverControlEx& ex) {
+        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl, "CComponentCore::updateVdLNAControls()");
+        impl.setDetails(ex.what().c_str());
+        setStatusBit(CONNECTIONERROR);
+        throw impl;
+    }
+    clearStatusBit(CONNECTIONERROR); // The communication was ok so clear the CONNECTIONERROR bit
+}
+
+// throw ReceiversErrors::ReceiverControlBoardErrorExImpl
+void CComponentCore::updateIdLNAControls()
+{
+    // Not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
+    try {
+        for(size_t i=0; i<NUMBER_OF_STAGES; i++)
+            m_idStageValues[i] = m_control->stageValues(IRA::ReceiverControl::DRAIN_CURRENT, i+1, CComponentCore::currentConverter);
+    }
+    catch (IRA::ReceiverControlEx& ex) {
+        _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl, impl, "CComponentCore::updateIdLNAControls()");
+        impl.setDetails(ex.what().c_str());
+        setStatusBit(CONNECTIONERROR);
+        throw impl;
+    }
+    clearStatusBit(CONNECTIONERROR); // The communication was ok so clear the CONNECTIONERROR bit
 }
 
 //throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
@@ -1022,27 +1154,38 @@ void CComponentCore::loadLocalOscillator()
     }
     if (CORBA::is_nil(m_localOscillatorDevice)) {  // Only if it has not been retrieved yet
         try {
-            m_localOscillatorDevice=m_services->getComponent<Receivers::LocalOscillator>(
-                    (const char*)m_configuration.getLocalOscillatorInstance()
-            );
+        	   /*******************************************************************************************
+        	   * Verificare
+        	   */
+            //m_localOscillatorDevice=m_services->getComponent<Receivers::LocalOscillator>(
+            //        (const char*)m_configuration.getLocalOscillatorInstance());
             ACS_LOG(LM_FULL_INFO,"CCore::loadAntennaBoss()",(LM_INFO,"LOCAL_OSCILLATOR_OBTAINED"))
             m_localOscillatorFault=false;
         }
         catch (maciErrType::CannotGetComponentExImpl& ex) {
             _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CComponentCore::loadLocalOscillator()");
-            Impl.setComponentName((const char*)m_configuration.getLocalOscillatorInstance());
+       	   /*******************************************************************************************
+        	   * Verificare
+        	   */
+            //Impl.setComponentName((const char*)m_configuration.getLocalOscillatorInstance());
             m_localOscillatorDevice=Receivers::LocalOscillator::_nil();
             throw Impl;
         }
         catch (maciErrType::NoPermissionExImpl& ex) {
             _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CComponentCore::loadLocalOscillator()");
-            Impl.setComponentName((const char*)m_configuration.getLocalOscillatorInstance());
+        	   /*******************************************************************************************
+        	   * Verificare
+        	   */
+            //Impl.setComponentName((const char*)m_configuration.getLocalOscillatorInstance());
             m_localOscillatorDevice=Receivers::LocalOscillator::_nil();
             throw Impl;
         }
         catch (maciErrType::NoDefaultComponentExImpl& ex) {
             _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CComponentCore::loadLocalOscillator()");
-            Impl.setComponentName((const char*)m_configuration.getLocalOscillatorInstance());
+        	   /*******************************************************************************************
+        	   * Verificare
+        	   */
+            //Impl.setComponentName((const char*)m_configuration.getLocalOscillatorInstance());
             m_localOscillatorDevice=Receivers::LocalOscillator::_nil();
             throw Impl;
         }
@@ -1057,7 +1200,10 @@ void CComponentCore::unloadLocalOscillator()
         }
         catch (maciErrType::CannotReleaseComponentExImpl& ex) {
             _ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CComponentCore::unloadLocalOscillator()");
-            Impl.setComponentName((const char *)m_configuration.getLocalOscillatorInstance());
+        	   /*******************************************************************************************
+        	   * Verificare
+        	   */
+            //Impl.setComponentName((const char *)m_configuration.getLocalOscillatorInstance());
             Impl.log(LM_WARNING);
         }
         catch (...) {
@@ -1164,3 +1310,253 @@ double CComponentCore::linearFit(double *X, double *Y, const WORD& size, double 
     }
     else return 0.0; // This will never happen if size!=0
 }
+
+// throw ReceiverControlEx
+bool CKQWReceiverControl::enableBypass() 
+{
+	bool check1,check2;
+	check1=check2=false;
+   pthread_mutex_lock(&m_dewar_mutex);
+   try {
+   	//set O0=0
+   	makeRequest(
+        m_dewar_board_ptr,     // Pointer to the dewar board
+        MCB_CMD_SET_DATA,      // Command to send
+        4,                     // Number of parameters
+        MCB_CMD_DATA_TYPE_B01,
+        MCB_PORT_TYPE_DIO,
+        MCB_PORT_NUMBER_00,
+        0x00);
+    }
+    catch(MicroControllerBoardEx& ex) {
+    	  pthread_mutex_unlock(&m_dewar_mutex); 
+        std::string error_msg = "CKQWReceiverControl::enableBypass(): error while enabling bypass().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+    try {
+   	//set O1=0
+   	makeRequest(
+        m_dewar_board_ptr,     // Pointer to the dewar board
+        MCB_CMD_SET_DATA,      // Command to send
+        4,                     // Number of parameters
+        MCB_CMD_DATA_TYPE_B01,
+        MCB_PORT_TYPE_DIO,
+        MCB_PORT_NUMBER_01,
+        0x00);
+    }
+    catch(MicroControllerBoardEx& ex) {
+    	  pthread_mutex_unlock(&m_dewar_mutex); 
+        std::string error_msg = "CKQWReceiverControl::enableBypass(): error while enabling bypass().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+    pthread_mutex_unlock(&m_dewar_mutex); 
+    usleep(2*SETMODE_SLEEP_TIME);
+    //*************************************************************************
+    // now read back parameters to check if the switches are properly configured
+    //*************************************************************************
+    pthread_mutex_lock(&m_dewar_mutex);
+    try {
+   	//set O2=0
+   	makeRequest(
+        m_dewar_board_ptr,     // Pointer to the dewar board
+        MCB_CMD_SET_DATA,      // Command to send
+        4,                     // Number of parameters
+        MCB_CMD_DATA_TYPE_B01,
+        MCB_PORT_TYPE_DIO,
+        MCB_PORT_NUMBER_02,
+        0x00);
+    }
+    catch(MicroControllerBoardEx& ex) {
+    	  pthread_mutex_unlock(&m_dewar_mutex); 
+        std::string error_msg = "CKQWReceiverControl::enableBypass(): error while enabling bypass().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+    usleep(2*SETMODE_SLEEP_TIME);
+    try {
+        std::vector<BYTE> parameters = makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_GET_DATA,      // Command to send
+                3,                     // Number of parameters
+                MCB_CMD_DATA_TYPE_B08,
+                MCB_PORT_TYPE_DIO,
+                MCB_PORT_NUMBER_16_23
+        );
+
+        if(parameters.size()!=1) {
+            pthread_mutex_unlock(&m_dewar_mutex);	
+            throw ReceiverControlEx("CKQWReceiverControl::enableBypass(): answer size differs from what expected.");
+        }
+        check1=((parameters.front()&0b1001)==0b1001);
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "CKQWReceiverControl::enableBypass(): error while checking the switches status().\n";
+        pthread_mutex_unlock(&m_dewar_mutex); 
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+    try {
+   	//set O2=1
+   	makeRequest(
+        m_dewar_board_ptr,     // Pointer to the dewar board
+        MCB_CMD_SET_DATA,      // Command to send
+        4,                     // Number of parameters
+        MCB_CMD_DATA_TYPE_B01,
+        MCB_PORT_TYPE_DIO,
+        MCB_PORT_NUMBER_02,
+        0x01);
+    }
+    catch(MicroControllerBoardEx& ex) {
+    	  pthread_mutex_unlock(&m_dewar_mutex); 
+        std::string error_msg = "CKQWReceiverControl::enableBypass(): error while enabling bypass().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+    usleep(2*SETMODE_SLEEP_TIME);
+    try {
+        std::vector<BYTE> parameters = makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_GET_DATA,      // Command to send
+                3,                     // Number of parameters
+                MCB_CMD_DATA_TYPE_B08,
+                MCB_PORT_TYPE_DIO,
+                MCB_PORT_NUMBER_16_23
+        );
+
+        if(parameters.size()!=1) {
+        		pthread_mutex_unlock(&m_dewar_mutex);
+            throw ReceiverControlEx("CKQWReceiverControl::enableBypass(): answer size differs from what expected.");
+        }
+        check2=((parameters.front()&0b0110)==0b0110);
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "CKQWReceiverControl::enableBypass(): error while checking the switches status().\n";
+        pthread_mutex_unlock(&m_dewar_mutex); 
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+    pthread_mutex_unlock(&m_dewar_mutex);
+    return (check1&&check2);
+}
+
+// throw ReceiverControlEx
+bool CKQWReceiverControl::disableBypass()
+{
+	bool check1,check2;
+	check1=check2=false;
+   pthread_mutex_lock(&m_dewar_mutex);
+   try {
+   	//set O0=1
+   	makeRequest(
+        m_dewar_board_ptr,     // Pointer to the dewar board
+        MCB_CMD_SET_DATA,      // Command to send
+        4,                     // Number of parameters
+        MCB_CMD_DATA_TYPE_B01,
+        MCB_PORT_TYPE_DIO,
+        MCB_PORT_NUMBER_00,
+        0x01);
+    }
+    catch(MicroControllerBoardEx& ex) {
+    	  pthread_mutex_unlock(&m_dewar_mutex); 
+        std::string error_msg = "CKQWReceiverControl::enableBypass(): error while enabling bypass().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+    try {
+   	//set O1=0
+   	makeRequest(
+        m_dewar_board_ptr,     // Pointer to the dewar board
+        MCB_CMD_SET_DATA,      // Command to send
+        4,                     // Number of parameters
+        MCB_CMD_DATA_TYPE_B01,
+        MCB_PORT_TYPE_DIO,
+        MCB_PORT_NUMBER_01,
+        0x00);
+    }
+    catch(MicroControllerBoardEx& ex) {
+    	  pthread_mutex_unlock(&m_dewar_mutex); 
+        std::string error_msg = "CKQWReceiverControl::enableBypass(): error while enabling bypass().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+    pthread_mutex_unlock(&m_dewar_mutex); 
+    usleep(2*SETMODE_SLEEP_TIME);
+    //*************************************************************************
+    // now read back parameters to check if the switches are properly configured
+    //*************************************************************************
+    pthread_mutex_lock(&m_dewar_mutex);
+    try {
+   	//set O2=0
+   	makeRequest(
+        m_dewar_board_ptr,     // Pointer to the dewar board
+        MCB_CMD_SET_DATA,      // Command to send
+        4,                     // Number of parameters
+        MCB_CMD_DATA_TYPE_B01,
+        MCB_PORT_TYPE_DIO,
+        MCB_PORT_NUMBER_02,
+        0x00);
+    }
+    catch(MicroControllerBoardEx& ex) {
+    	  pthread_mutex_unlock(&m_dewar_mutex); 
+        std::string error_msg = "CKQWReceiverControl::enableBypass(): error while enabling bypass().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+    usleep(2*SETMODE_SLEEP_TIME);
+    try {
+        std::vector<BYTE> parameters = makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_GET_DATA,      // Command to send
+                3,                     // Number of parameters
+                MCB_CMD_DATA_TYPE_B08,
+                MCB_PORT_TYPE_DIO,
+                MCB_PORT_NUMBER_16_23
+        );
+
+        if(parameters.size()!=1) {
+            pthread_mutex_unlock(&m_dewar_mutex);	
+            throw ReceiverControlEx("CKQWReceiverControl::enableBypass(): answer size differs from what expected.");
+        }
+        check1=((parameters.front()&0b0110)==0b0110);
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "CKQWReceiverControl::enableBypass(): error while checking the switches status().\n";
+        pthread_mutex_unlock(&m_dewar_mutex); 
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+    try {
+   	//set O2=1
+   	makeRequest(
+        m_dewar_board_ptr,     // Pointer to the dewar board
+        MCB_CMD_SET_DATA,      // Command to send
+        4,                     // Number of parameters
+        MCB_CMD_DATA_TYPE_B01,
+        MCB_PORT_TYPE_DIO,
+        MCB_PORT_NUMBER_02,
+        0x01);
+    }
+    catch(MicroControllerBoardEx& ex) {
+    	  pthread_mutex_unlock(&m_dewar_mutex); 
+        std::string error_msg = "CKQWReceiverControl::enableBypass(): error while enabling bypass().\n";
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+    usleep(2*SETMODE_SLEEP_TIME);
+    try {
+        std::vector<BYTE> parameters = makeRequest(
+                m_dewar_board_ptr,     // Pointer to the dewar board
+                MCB_CMD_GET_DATA,      // Command to send
+                3,                     // Number of parameters
+                MCB_CMD_DATA_TYPE_B08,
+                MCB_PORT_TYPE_DIO,
+                MCB_PORT_NUMBER_16_23
+        );
+
+        if(parameters.size()!=1) {
+        		pthread_mutex_unlock(&m_dewar_mutex);
+            throw ReceiverControlEx("CKQWReceiverControl::enableBypass(): answer size differs from what expected.");
+        }
+        check2=((parameters.front()&0b1001)==0b1001);
+    }
+    catch(MicroControllerBoardEx& ex) {
+        std::string error_msg = "CKQWReceiverControl::enableBypass(): error while checking the switches status().\n";
+        pthread_mutex_unlock(&m_dewar_mutex); 
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+    pthread_mutex_unlock(&m_dewar_mutex);
+    return (check1&&check2);
+}
+
+

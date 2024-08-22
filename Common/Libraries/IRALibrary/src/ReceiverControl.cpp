@@ -7,11 +7,6 @@ using IRA::ReceiverControlEx;
 // using IRA::ReceiverControl::StageValues;
 using IRA::any2string;
 
-// SETMODE_SLEEP_TIME is the time to wait until the bit commutation is stable
-const unsigned int SETMODE_SLEEP_TIME = 100000; // 0.1 seconds
-const unsigned int SWITCH_SLEEP_TIME = 100000; // 0.1 seconds
-
-
 ReceiverControl::ReceiverControl(
         const std::string dewar_ip,
         const unsigned short dewar_port, 

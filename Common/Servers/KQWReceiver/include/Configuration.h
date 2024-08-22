@@ -181,7 +181,7 @@ public:
 	/**
 	 * @return the instance of the local oscillator component  that the receiver will use to drive the set its LO
 	 */
-	inline const IRA::CString& getLocalOscillatorInstance() const { return m_localOscillatorInstance; }
+	//inline const IRA::CString& getLocalOscillatorInstance() const { return m_localOscillatorInstance; }
 
 	/**
 	 * @param freq vector with the synthesizer frequencies. It must be freed by caller.
@@ -335,7 +335,11 @@ private:
 	DWORD m_LNASamplingTime;
 	DWORD m_repetitionCacheTime;
 	DWORD m_repetitionExpireTime;
-	IRA::CString m_localOscillatorInstance;
+	IRA::CString m_localOscillator_K_Instance;
+	IRA::CString m_localOscillator_Q_Instance;
+	IRA::CString m_localOscillator_W1_Instance;
+	IRA::CString m_localOscillator_W2_Instance;
+	
    T* m_services;
 	IRA::CString m_mode;
 	IRA::CString m_defaultMode;
@@ -470,8 +474,11 @@ void CConfiguration<T>::init(T *Services,IRA::CString comp_name)
     // read component configuration
     _GET_STRING_ATTRIBUTE(m_services,"DewarIPAddress","Dewar IP address:",m_dewarIPAddress,comp_name);
     _GET_STRING_ATTRIBUTE(m_services,"LNAIPAddress", "LNA IP address:",m_LNAIPAddress,comp_name);
-	 _GET_STRING_ATTRIBUTE(m_services,"LocalOscillatorInstance","Local oscillator instance:",m_localOscillatorInstance,comp_name);
-    _GET_DWORD_ATTRIBUTE(m_services,"DewarPort","Dewar port:",m_dewarPort,comp_name);
+	 _GET_STRING_ATTRIBUTE(m_services,"LocalOscillator_K_Instance","Local oscillator for K band:",m_localOscillator_K_Instance,comp_name);
+	 _GET_STRING_ATTRIBUTE(m_services,"LocalOscillator_Q_Instance","Local oscillator for Q band:",m_localOscillator_Q_Instance,comp_name);
+	 _GET_STRING_ATTRIBUTE(m_services,"LocalOscillator_W1_Instance","Local oscillator for W1 band:",m_localOscillator_W1_Instance,comp_name);
+	 _GET_STRING_ATTRIBUTE(m_services,"LocalOscillator_W2_Instance","Local oscillator for W2 band:",m_localOscillator_W2_Instance,comp_name);
+	 _GET_DWORD_ATTRIBUTE(m_services,"DewarPort","Dewar port:",m_dewarPort,comp_name);
     _GET_DWORD_ATTRIBUTE(m_services,"LNAPort","LNA port:",m_LNAPort,comp_name);
     _GET_DWORD_ATTRIBUTE(m_services,"WatchDogResponseTime","Response time of watch dog thread (uSec):",m_watchDogResponseTime,comp_name);
     _GET_DWORD_ATTRIBUTE(m_services,"WatchDogSleepTime","Sleep time of the watch dog thread (uSec):",m_watchDogSleepTime,comp_name);

@@ -4,11 +4,11 @@
 #define _CPLUSPLUS11_PORTING_
 
 #include "KQWBandReceiverImpl.h"
-/*
+
 
 #include "DevIOLNAControls.h"
 
-*/
+
 #include "DevIOFeeds.h"
 #include "DevIOVacuum.h"
 #include "DevIOLocalOscillator.h"
@@ -113,46 +113,47 @@ void KQWBandReceiverImpl::execute()
         m_pbandWidth=new baci::ROdoubleSeq(getContainerServices()->getName()+":bandWidth",getComponent(),new DevIOBandWidth(&m_core),true);
 
         // Drain Voltage
-       // DevIOLNAControls *p=new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_VOLTAGE, 0, 1);
-        //m_pvdKL=new baci::ROdouble(getContainerServices()->getName() + ":vdKL",getComponent(),p,true);
-        /*m_pvdKR=new baci::ROdouble(getContainerServices()->getName() + ":vdKR", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_VOLTAGE, 1, 1), true);
+        
+        m_pvdKL=new baci::ROdouble(getContainerServices()->getName() + ":vdKL",getComponent(),
+        			 new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_VOLTAGE, 0, KBAND_FEED),true);
+        m_pvdKR=new baci::ROdouble(getContainerServices()->getName() + ":vdKR", getComponent(),
+                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_VOLTAGE, 1, KBAND_FEED), true);
         m_pvdQL=new baci::ROdouble(getContainerServices()->getName() + ":vdQL", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_VOLTAGE, 0, 2), true);
+                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_VOLTAGE, 0, QBAND_FEED), true);
         m_pvdQR=new baci::ROdouble(getContainerServices()->getName() + ":vdQR", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_VOLTAGE, 1, 2), true);
+                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_VOLTAGE, 1, QBAND_FEED), true);
         m_pvdWL=new baci::ROdouble(getContainerServices()->getName() + ":vdWL", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_VOLTAGE, 0, 3), true);
+                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_VOLTAGE, 0, WBAND_FEED), true);
         m_pvdWR=new baci::ROdouble(getContainerServices()->getName() + ":vdWR", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_VOLTAGE, 1, 3), true);
+                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_VOLTAGE, 1, WBAND_FEED), true);
 
         // Drain Current
         m_pidKL=new baci::ROdouble(getContainerServices()->getName() + ":idKL", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_CURRENT, 0, 1), true);
+                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_CURRENT, 0, KBAND_FEED), true);
         m_pidKR=new baci::ROdouble(getContainerServices()->getName() + ":idKR", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_CURRENT, 1, 1), true);
+                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_CURRENT, 1, KBAND_FEED), true);
         m_pidQL=new baci::ROdouble(getContainerServices()->getName() + ":idQL", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_CURRENT, 0, 2), true);
+                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_CURRENT, 0, QBAND_FEED), true);
         m_pidQR=new baci::ROdouble(getContainerServices()->getName() + ":idQR", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_CURRENT, 1, 2), true);
+                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_CURRENT, 1, QBAND_FEED), true);
         m_pidWL=new baci::ROdouble(getContainerServices()->getName() + ":idWL", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_CURRENT, 0, 3), true);
+                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_CURRENT, 0, WBAND_FEED), true);
         m_pidWR=new baci::ROdouble(getContainerServices()->getName() + ":idWR", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_CURRENT, 1, 3), true);
+                new DevIOLNAControls(&m_core, IRA::ReceiverControl::DRAIN_CURRENT, 1, WBAND_FEED), true);
 
         // Gate Voltage
         m_pvgKL=new baci::ROdouble(getContainerServices()->getName() + ":vgKL", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::GATE_VOLTAGE, 0, 1), true);
+                new DevIOLNAControls(&m_core, IRA::ReceiverControl::GATE_VOLTAGE, 0, KBAND_FEED), true);
         m_pvgKR=new baci::ROdouble(getContainerServices()->getName() + ":vgKR", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::GATE_VOLTAGE, 1, 1), true);
+                new DevIOLNAControls(&m_core, IRA::ReceiverControl::GATE_VOLTAGE, 1, KBAND_FEED), true);
         m_pvgQL=new baci::ROdouble(getContainerServices()->getName() + ":vgQL", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::GATE_VOLTAGE, 0, 2), true);
+                new DevIOLNAControls(&m_core, IRA::ReceiverControl::GATE_VOLTAGE, 0, QBAND_FEED), true);
         m_pvgQR=new baci::ROdouble(getContainerServices()->getName() + ":vgQR", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::GATE_VOLTAGE, 1, 2), true);
+                new DevIOLNAControls(&m_core, IRA::ReceiverControl::GATE_VOLTAGE, 1, QBAND_FEED), true);
         m_pvgWL=new baci::ROdouble(getContainerServices()->getName() + ":vgWL", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::GATE_VOLTAGE, 0, 3), true);
+                new DevIOLNAControls(&m_core, IRA::ReceiverControl::GATE_VOLTAGE, 0, WBAND_FEED), true);
         m_pvgWR=new baci::ROdouble(getContainerServices()->getName() + ":vgWR", getComponent(),
-                new DevIOLNAControls(&m_core, IRA::ReceiverControl::GATE_VOLTAGE, 1, 3), true);*/
+                new DevIOLNAControls(&m_core, IRA::ReceiverControl::GATE_VOLTAGE, 1, WBAND_FEED), true);
 
         m_pcryoTemperatureCoolHead = new baci::ROdouble(getContainerServices()->getName() + ":cryoTemperatureCoolHead", \
                 getComponent(), new DevIOCryoTemperatureCoolHead(&m_core),true);

@@ -1,11 +1,3 @@
-/*******************************************************************************\
- *  Author Infos
- *  ============
- *  Name:         Marco Buttu
- *  E-mail:       mbuttu@oa-cagliari.inaf.it
- *  Personal Web: http://www.pypeople.com/
-\*******************************************************************************/
-
 #ifndef __UTILS_H__
 #define __UTILS_H__
 
@@ -14,7 +6,7 @@
 #include <ComponentErrors.h>
 #include <IRA>
 
-#define BYTE unsigned char
+//#define BYTE char
 #define NEXT_FUTURE_DELTA 100000 // In one hundred ns (10ms)
 
 #define __UTILS_STREAM_PREC__ 16

@@ -19,7 +19,7 @@
  * @author <a href=mailto:andrea.orlati@inaf.it>Andrea Orlati</a>,
  * Istituto di Radioastronomia, Italia<br>
 */
-class DevIOLNAControls : public virtual DevIO<ACS::double>
+class DevIOLNAControls : public virtual DevIO<CORBA::Double>
 {
 public:
 
@@ -27,15 +27,10 @@ public:
 	 * Constructor
 	 * @param core pointer to the boss core
 	*/
-	DevIOLNAControls(            
-            CComponentCore* core,
-            const IRA::ReceiverControl::FetValue& control,
-            const DWORD ifs,
-            const DWORD stage
-    ) :  m_pCore(core), m_control(control), m_ifs(ifs), m_stage(stage)
+	DevIOLNAControls(CComponentCore* core,const IRA::ReceiverControl::FetValue& control,const DWORD& ifs,const DWORD& RealFeed) :  m_pCore(core), m_control(control), 
+	  m_ifs(ifs), m_pFeed(RealFeed)
 	{
 		AUTO_TRACE("DevIOLNAControls::DevIOLNAControls()");
-        m_val.length(m_pCore->getFeeds());
 	}
 
 	/**
@@ -60,30 +55,30 @@ public:
 	 * @param timestamp epoch when the operation completes
 	 * @throw ACSErr::ACSbaseExImpl
 	*/
-	ACS::double read(ACS::Time& timestamp)
+	CORBA::Double read(ACS::Time& timestamp)
 	{
-        // In pCore I need a method to get the vector of values (An extension, so I can ereditate from ComponentCore)
-      // Da verificare........*******************************************
-		//m_val=m_pCore->getStageValues(m_control, m_ifs, m_stage);
+		ACS::doubleSeq ret;
+		ret=m_pCore->getStageValues(m_control, m_ifs, 1);
 		timestamp=getTimeStamp();  // Completion time
+		m_val=ret[m_pFeed];
 		return m_val;
 	}
 	/**
 	 * It writes values into controller. Unused because the properties are read-only.
 	 * @throw ACSErr::ACSbaseExImpl
 	*/
-	void write(const ACS::double& value, ACS::Time& timestamp)
+	void write(const CORBA::Double& value, ACS::Time& timestamp)
 	{
 		timestamp=getTimeStamp();
 		return;
 	}
 
 private:
-	SRTLPBandCore* m_pCore;
-    ACS::double  m_val;
+	CComponentCore* m_pCore;
+   CORBA::Double m_val;
 	IRA::ReceiverControl::FetValue m_control;
 	DWORD m_ifs;
-    DWORD m_stage;
+   DWORD m_pFeed;
 };
 
 #endif

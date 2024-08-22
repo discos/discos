@@ -16,6 +16,9 @@
 #include "MicroControllerBoard.h"
 #include <pthread.h>
 
+// SETMODE_SLEEP_TIME is the time to wait until the bit commutation is stable
+const unsigned int SETMODE_SLEEP_TIME = 100000; // 0.1 seconds
+const unsigned int SWITCH_SLEEP_TIME = 100000; // 0.1 seconds
 
 namespace IRA {
 
@@ -909,7 +912,7 @@ public:
     );
 
 
-private:
+protected:
     
 	/** Send the request to the board and receive the answer
      * @param board_ptr pointer to the board (dewar of LNA board)

@@ -5,7 +5,7 @@
  IRA Istituto di Radioastronomia                                 
  This code is under GNU General Public License (GPL).          
                                                               
- Andrea Orlati (aorlati@ira.inaf.it): Author
+ Andrea Orlati (andrea.orlati@inaf.it): Author
 \***********************************************************************/
 
 #include "Configuration.h"
@@ -13,11 +13,42 @@
 #include <LocalOscillatorInterfaceC.h>
 #include <ReceiversErrors.h>
 #include <ManagmentDefinitionsC.h>
-#include "utils.h"
+
+#define NUMBER_OF_STAGES 1
+#define PHYSICAL_FEEDS 3
+#define KBAND_FEED 0
+#define QBAND_FEED 1
+#define WBAND_FEED 2
+
+/**
+ * This class extends the ReceiverControl class in order to include the bypass activation on the Wband RF chain to enable Sun observations
+ * @author <a href=mailto:andrea.orlati@inaf.it>Andrea Orlati</a>,
+ * Istituto di Radioastronomia, Italia
+ * <br>  
+*/
+
+class CKQWReceiverControl: public virtual IRA::ReceiverControl {
+public:
+	CKQWReceiverControl(const std::string dewar_ip,
+                       const unsigned short dewar_port, 
+                       const std::string lna_ip, 
+                       const unsigned short lna_port, 
+                       const unsigned int guard_time=250000, 
+                       const unsigned short number_of_feeds=1) :  ReceiverControl(dewar_ip,dewar_port,lna_ip,guard_time,number_of_feeds) {}
+	virtual ~CKQWReceiverControl() {}
+	/**
+	* @throw ReceiverControlEx
+	*/
+	bool enableBypass();
+	/**
+	* @throw ReceiverControlEx
+	*/
+	bool disableBypass();
+};
 
 /**
  * This class contains the code of almost all the features  of the component
- * @author <a href=mailto:a.orlati@ira.cnr.it>Andrea Orlati</a>,
+ * @author <a href=mailto:andrea.orlati@inaf.it>Andrea Orlati</a>,
  * Istituto di Radioastronomia, Italia
  * <br>
   */
@@ -395,7 +426,6 @@ public:
     void getPolarizations(ACS::longSeq& pol);
 
     /** 
-     * This is a pure virtual function, so you must write it in your derived class.
      * It allows to change the operating mode of the receiver. 
      * If the mode does not correspond to a valid mode an error is thrown.
      * @param  mode mode code as a string
@@ -406,8 +436,30 @@ public:
      * @throw ReceiversErrors::LocalOscillatorErrorExImpl
      * @throw ComponentErrors::CDBAccessExImpl
      * @throw ReceiversErrors::ModeErrorExImpl
+     * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
     virtual void setMode(const char * mode);
+    
+    /*  
+     * This method will update the last readout of the gate voltage parameters of the LNAs    
+     * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
+    */
+	 void updateVgLNAControls();
+
+
+	 /*  
+     * This method will update the last readout of the drain voltage parameters of the LNAs    
+     * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
+    */
+	 void updateVdLNAControls();
+
+	    /*  
+     * This method will update the last readout of the drain current parameters of the LNAs    
+     * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
+    */	
+	 void updateIdLNAControls();
+	 
+	 ACS::doubleSeq getStageValues(const IRA::ReceiverControl::FetValue& control, DWORD ifs, DWORD stage);
 
 
 protected:
@@ -483,7 +535,7 @@ protected:
 
 
     CConfiguration<maci::ContainerServices> m_configuration;
-    IRA::ReceiverControl *m_control; // This object is thread safe
+    CKQWReceiverControl *m_control; // This object is thread safe
     BACIMutex m_mutex;
     //IRA::CString m_actualMode;
     //IRA::CString m_setupMode; 
@@ -501,6 +553,9 @@ private:
     CConfiguration<maci::ContainerServices>::BoardValue m_cryoLNA;
     CConfiguration<maci::ContainerServices>::BoardValue m_cryoLNAWin;
     CConfiguration<maci::ContainerServices>::BoardValue m_envTemperature;
+    std::vector<IRA::ReceiverControl::StageValues> m_vdStageValues;
+    std::vector<IRA::ReceiverControl::StageValues> m_idStageValues;
+    std::vector<IRA::ReceiverControl::StageValues> m_vgStageValues;
     double m_vacuumDefault;
     bool m_calDiode;
     IRA::ReceiverControl::FetValues m_fetValues;

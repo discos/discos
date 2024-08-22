@@ -27,7 +27,8 @@
     DefaultMode="Normal"
     LocalOscillator_K_Instance="DummyK"
     LocalOscillator_Q_Instance="DummyQ"
-    LocalOscillator_W_Instance="DummyW"
+    LocalOscillator_W1_Instance="DummyW1"
+    LocalOscillator_W2_Instance="DummyW2"
 >
     <LO description="Sequence of local oscillator values for each IF chain" />
     <feeds description="Number of feeds of the receiver" />

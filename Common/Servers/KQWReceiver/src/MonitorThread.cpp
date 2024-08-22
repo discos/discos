@@ -70,9 +70,8 @@ void CMonitorThread::onStart()
              break;
         }
         case LNA_VD: {
-        	   /***************************Verificare ***/ 
             try {
-                 //m_core->updateVdLNAControls();
+                 m_core->updateVdLNAControls();
             }
             catch (ACSErr::ACSbaseExImpl& ex) {
                  _ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl, impl, ex, "CMonitorThread::runLoop");
@@ -82,9 +81,8 @@ void CMonitorThread::onStart()
             break;
          }
          case LNA_ID: {
-         	/***************************Verificare ***/ 
             try {
-                 //m_core->updateIdLNAControls();
+                 m_core->updateIdLNAControls();
             }
             catch (ACSErr::ACSbaseExImpl& ex) {
                 _ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl, impl, ex, "CMonitorThread::runLoop");
@@ -94,9 +92,8 @@ void CMonitorThread::onStart()
             break;
          }
          case LNA_VG: {
-         	/***************************Verificare ***/ 
             try {
-                 //m_core->updateVgLNAControls();
+                 m_core->updateVgLNAControls();
             }
             catch (ACSErr::ACSbaseExImpl& ex) {
                 _ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl, impl, ex, "CMonitorThread::runLoop");
@@ -209,7 +206,6 @@ void CMonitorThread::onStart()
             m_currentStage = ENVTEMP;
             break;
         }
-
         case ENVTEMP: {
             m_currentStage = VACUUM;
             try {
