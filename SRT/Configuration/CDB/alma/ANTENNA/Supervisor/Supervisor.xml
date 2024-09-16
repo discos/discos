@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<Supervisor
+    xmlns="urn:schemas-cosylab-com:Supervisor:1.0" 
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" 
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    WindLimit="30.0"
+    SunLimitDEFAULT="2.0"
+    SunLimitLLP="3.0"
+>
+    <status
+        description="integer that represents the Supervisor status" 
+    />
+
+</Supervisor>
