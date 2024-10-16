@@ -69,8 +69,8 @@ NT_DOC:=NTDox
 NT_ERRORS:= #ActiveSurfaceErrors NotoActiveSurfaceErrors
 NT_INTERFACES:=NotoAntennaInterface NotoReceiversInterface NotoWeatherStationInterface NotoActiveSurfaceInterface \
 NT_LIBRARIES:=
-NT_SERVERS:= NotoReceivers NotoMount NotoWeatherStation NotoActiveSurface NotoMinorServo NotoPyLocalOscillator NotoPyIfDistributor
-NT_CLIENTS:=NotoMountTextClient 
+NT_SERVERS:= NotoReceivers NotoMount NotoWeatherStation NotoActiveSurfaceBoss NotoMinorServo NotoPyLocalOscillator NotoPyIfDistributor
+NT_CLIENTS:=NotoMountTextClient NotoActiveSurfaceGUIClient
 NT_MISC:=NotoScripts
 
 ifeq ($(STATION),SRT)
@@ -140,6 +140,7 @@ ifeq ($(STATION),Medicina)
 	BackendsImplementation_MODULES:=TotalPower NoiseGenerator XBackend
 	ReceiversImplementation_MODULES:=ReceiversBoss
 	WeatherStationImplementation_MODULES:=MedWeatherStation Metrology
+	MedicinaActiveSurfaceImplementation_MODULES:=MedicinaActiveSurfaceBoss
 	
 	CDB_SVN_LOCATION="Medicina/Configuration/CDB"
 	SYSTEM_SVN_MODULES=Common Medicina
@@ -152,7 +153,7 @@ ifeq ($(STATION),Noto)
 		NotoAntennaInterface \
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary PyTestingLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
-		TotalPower NotoMount CustomLogger NotoMinorServo\
+		TotalPower NotoMount CustomLogger NotoMinorServo NotoActiveSurfaceBoss \
 		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal SchedulerTextClient MinorServoBossTextClient\
 		NotoMountTextClient CustomLoggingClient Scripts
 
@@ -168,6 +169,7 @@ ifeq ($(STATION),Noto)
 	ManagementImplementation_MODULES:=Scheduler CalibrationTool FitsWriter ExternalClients
 	BackendsImplementation_MODULES:=TotalPower
 	ReceiversImplementation_MODULES:=ReceiversBoss
+	NotoActiveSurfaceImplementation_MODULES:=NotoActiveSurfaceBoss
 	
 	CDB_SVN_LOCATION="Noto/Configuration/CDB"
 	SYSTEM_SVN_MODULES=Common Medicina Noto
