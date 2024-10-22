@@ -35,10 +35,16 @@ class CDBESMCommand
         inline static string comm_set_dbeatt(string out_dbe, string att_val){return Commands::m_set_dbeatt + " " + out_dbe + " " + att_val + TAIL;}
         inline static string comm_get_dbeatt(string out_dbe){return Commands::m_get_dbeatt + " " + out_dbe + TAIL;}
         inline static string comm_get_firm(string b_addr){return Commands::m_get_firm + " BOARD " + b_addr + TAIL;}
+        inline static string comm_set_dbeamp(string out_dbe, string amp_val){return Commands::m_set_dbeamp + " " + out_dbe + " " + amp_val + TAIL;}
+        inline static string comm_get_dbeamp(string out_dbe){return Commands::m_get_dbeamp + " " + out_dbe + TAIL;}
+        inline static string comm_set_dbeeq(string out_dbe, string eq_val){return Commands::m_set_dbeeq + " " + out_dbe + " " + eq_val + TAIL;}
+        inline static string comm_get_dbeeq(string out_dbe){return Commands::m_get_dbeeq + " " + out_dbe + TAIL;}
+        inline static string comm_set_dbebpf(string out_dbe, string bpf_val){return Commands::m_set_dbebpf + " " + out_dbe + " " + bpf_val + TAIL;}
+        inline static string comm_get_dbebpf(string out_dbe){return Commands::m_get_dbebpf + " " + out_dbe + TAIL;}
         
     private:
         /*
-        * Commands
+        * Commandsf
         */
         struct Commands{
             inline static const string m_set_all {"DBE SETALLMODE"};
@@ -47,13 +53,19 @@ class CDBESMCommand
             inline static const string m_delete_file { "DBE DELETEFILE" };
             inline static const string m_get_status { "DBE GETSTATUS" };
             inline static const string m_set_att { "DBE SETATT" };
-            //inline static const string m_get_diag_all { "DBE ReadALLReadDIAG" };
+            //inline static const string m_get_diag_all { "DBE ReadALLDIAG" };
             inline static const string m_get_diag { "DBE ReadDIAG" };
             inline static const string m_get_comp { "DBE GETCOMP" };
             inline static const string m_get_cfg { "DBE GETCFG" };
             inline static const string m_set_dbeatt { "DBE SETDBEATT" };
             inline static const string m_get_dbeatt { "DBE GETDBEATT" };
-            inline static const string m_get_firm { "DBE FIRM" };
+            inline static const string m_get_firm { "DBE GETFIRM" };
+            inline static const string m_set_dbeamp { "DBE SETDBEAMP" };
+            inline static const string m_get_dbeamp { "DBE GETDBEAMP" };
+            inline static const string m_set_dbeeq { "DBE SETDBEEQ" };
+            inline static const string m_get_dbeeq { "DBE GETDBEEQ" };
+            inline static const string m_set_dbebpf { "DBE SETDBEBPF" };
+            inline static const string m_get_dbebpf { "DBE GETDBEBPF" };
     };    
 }; //class CDBESMCommand
 

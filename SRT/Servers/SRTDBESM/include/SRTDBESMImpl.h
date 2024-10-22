@@ -89,6 +89,18 @@ public:
  	virtual void get_firm(short b_addr);
  	
  	virtual void handle_addr(short * b_addr);
+ 	
+ 	virtual void set_dbeampconst char * out_dbe, const char * amp_val); //throw (BackendsErrors::BackendsErrorsEx);
+ 	
+ 	virtual void get_dbeamp(const char * out_dbe); //throw (BackendsErrors::BackendsErrorsEx);
+ 	
+ 	virtual void set_dbeeq(const char * out_dbe, const char * eq_val); //throw (BackendsErrors::BackendsErrorsEx);
+ 	
+ 	virtual void get_dbeeq(const char * out_dbe); //throw (BackendsErrors::BackendsErrorsEx);
+ 	
+ 	virtual void set_dbebpf(const char * out_dbe, const char * bpf_val); //throw (BackendsErrors::BackendsErrorsEx);
+ 	
+ 	virtual void get_dbebpf(const char * out_dbe); //throw (BackendsErrors::BackendsErrorsEx);
 
 	/** 
 	 * Returns a reference to addr_1.

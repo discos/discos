@@ -144,6 +144,17 @@ private:
 	
 	string get_firm_command(short b_addr);
 	
+	string set_dbeamp_command(const char * out_dbe, const char * amp_val);
+	
+	string get_dbeamp_command(const char * out_dbe);	
+	
+	string set_dbeeq_command(const char * out_dbe, const char * eq_val);
+	
+	string get_dbeeq_command(const char * out_dbe);	
+	
+	string set_dbebpf_command(const char * out_dbe, const char * bpf_val);
+	
+	string get_dbebpf_command(const char * out_dbe);	
 };
 
 #endif /*COMMANDSOCKET_H_*/

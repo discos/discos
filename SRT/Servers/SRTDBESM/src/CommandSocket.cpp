@@ -583,7 +583,7 @@ string CCommandSocket::get_dbeatt_command(const char * out_dbe) //throw (Backend
 	   }
 	 else if (response.find("ERR") != string::npos) {
 		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::get_dbeatt_command()");
-		impl.setReason("Error in setting dbesm output attenuation, check parameters");
+		impl.setReason("Error in getting dbesm output attenuation, check parameters");
 		throw impl;
 	  }
 	return response;  
@@ -612,4 +612,123 @@ string CCommandSocket::get_firm_command(short b_addr) //throw (BackendsErrors::B
 		throw impl;
 	}
     return response;
+}
+
+string CCommandSocket::set_dbeamp_command(const char * out_dbe, const char * amp_val) //throw (BackendsErrors::BackendsErrorsEx)
+{
+    string response;
+    string msg = CDBESMCommand::comm_set_dbeamp(out_dbe, amp_val);
+    //cout << "Message to send is: " << msg << endl;
+    sendCommand(msg, &response, 0);
+
+    if (response.find("unreachable") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::set_dbeamp_command()");
+		impl.setReason("DBESM board unreachable, timeout error");
+		throw impl;
+	   }
+	 else if (response.find("ERR") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::set_dbeamp_command()");
+		impl.setReason("Error in setting dbesm output amplification, check parameters");
+		throw impl;
+	  }
+    return response;
+}
+
+string CCommandSocket::get_dbeamp_command(const char * out_dbe) //throw (BackendsErrors::BackendsErrorsEx)
+{
+    string response;
+    string msg = CDBESMCommand::comm_get_dbeamp(out_dbe);
+    //cout << "Message to send is: " << msg << endl;
+    sendCommand(msg, &response, 0);
+
+    if (response.find("unreachable") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::get_dbeamp_command()");
+		impl.setReason("DBESM board unreachable, timeout error");
+		throw impl;
+	   }
+	 else if (response.find("ERR") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::get_dbeamp_command()");
+		impl.setReason("Error in getting dbesm output amplification, check parameters");
+		throw impl;
+	  }
+	return response;  
+}
+
+string CCommandSocket::set_dbeeq_command(const char * out_dbe, const char * eq_val) //throw (BackendsErrors::BackendsErrorsEx)
+{
+    string response;
+    string msg = CDBESMCommand::comm_set_dbeeq(out_dbe, eq_val);
+    //cout << "Message to send is: " << msg << endl;
+    sendCommand(msg, &response, 0);
+
+    if (response.find("unreachable") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::set_dbeeq_command()");
+		impl.setReason("DBESM board unreachable, timeout error");
+		throw impl;
+	   }
+	 else if (response.find("ERR") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::set_dbeeq_command()");
+		impl.setReason("Error in setting dbesm output equalization, check parameters");
+		throw impl;
+	  }
+    return response;
+}
+
+string CCommandSocket::get_dbeeq_command(const char * out_dbe) //throw (BackendsErrors::BackendsErrorsEx)
+{
+    string response;
+    string msg = CDBESMCommand::comm_get_dbeeq(out_dbe);
+    //cout << "Message to send is: " << msg << endl;
+    sendCommand(msg, &response, 0);
+
+    if (response.find("unreachable") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::get_dbeeq_command()");
+		impl.setReason("DBESM board unreachable, timeout error");
+		throw impl;
+	   }
+	 else if (response.find("ERR") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::get_dbeeq_command()");
+		impl.setReason("Error in getting dbesm output equalization, check parameters");
+		throw impl;
+	  }
+	return response;
+
+string CCommandSocket::set_dbebpf_command(const char * out_dbe, const char * bpf_val) //throw (BackendsErrors::BackendsErrorsEx)
+{
+    string response;
+    string msg = CDBESMCommand::comm_set_dbebpf(out_dbe, bpf_val);
+    //cout << "Message to send is: " << msg << endl;
+    sendCommand(msg, &response, 0);
+
+    if (response.find("unreachable") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::set_dbebpf_command()");
+		impl.setReason("DBESM board unreachable, timeout error");
+		throw impl;
+	   }
+	 else if (response.find("ERR") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::set_dbebpf_command()");
+		impl.setReason("Error in setting dbesm output equalization, check parameters");
+		throw impl;
+	  }
+    return response;
+}
+
+string CCommandSocket::get_dbebpf_command(const char * out_dbe) //throw (BackendsErrors::BackendsErrorsEx)
+{
+    string response;
+    string msg = CDBESMCommand::comm_get_dbebpf(out_dbe);
+    //cout << "Message to send is: " << msg << endl;
+    sendCommand(msg, &response, 0);
+
+    if (response.find("unreachable") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::get_dbebpf_command()");
+		impl.setReason("DBESM board unreachable, timeout error");
+		throw impl;
+	   }
+	 else if (response.find("ERR") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::get_dbebpf_command()");
+		impl.setReason("Error in getting dbesm output equalization, check parameters");
+		throw impl;
+	  }
+	return response; 
 }
