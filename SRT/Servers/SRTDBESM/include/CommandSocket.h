@@ -86,9 +86,23 @@ public:
    
    void parse_double_response(string status_str, string start, string end, double* val); //throw (BackendsErrors::BackendsErrorsEx);
    
-   void CCommandSocket::parse_string_response(string status_str, string start, string end, string* val);
+   void CCommandSocket::parse_long_response(string status_str, string start, string end, long* val); //throw (BackendsErrors::BackendsErrorsEx)
+   
+   void parse_string_response(string status_str, string start, string end, string* val);
    
    string get_firm(short b_addr);
+   
+   string set_dbeamp(const char * out_dbe, const char * amp_val);
+   
+   string get_dbeamp(const char * out_dbe);
+
+   string set_dbeeq(const char * out_dbe, const char * eq_val);
+   
+   string get_dbeeq(const char * out_dbe);
+
+   string set_dbebpf(const char * out_dbe, const char * bpf_val);
+   
+   string get_dbebpf(const char * out_dbe);
       
 protected:
 	/**

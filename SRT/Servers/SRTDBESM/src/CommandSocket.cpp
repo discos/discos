@@ -138,7 +138,7 @@ string CCommandSocket::set_dbeatt(const char * out_dbe, const char * att_val) //
 
 string CCommandSocket::get_dbeatt(const char * out_dbe) //throw (BackendsErrors::BackendsErrorsEx)
 {
-       return get_dbeatt_command(out_dbe);
+    return get_dbeatt_command(out_dbe);
 }
 
 string CCommandSocket::get_firm(short b_addr) //throw (BackendsErrors::BackendsErrorsEx)
@@ -146,6 +146,35 @@ string CCommandSocket::get_firm(short b_addr) //throw (BackendsErrors::BackendsE
     return get_firm_command(b_addr);
 }
 
+string CCommandSocket::set_dbeamp(const char * out_dbe, const char * amp_val) //throw (BackendsErrors::BackendsErrorsEx)
+{
+    return set_dbeamp_command(out_dbe, amp_val);
+}
+
+string CCommandSocket::get_dbeamp(const char * out_dbe) //throw (BackendsErrors::BackendsErrorsEx)
+{
+    return get_dbeamp_command(out_dbe);
+}
+
+string CCommandSocket::set_dbeeq(const char * out_dbe, const char * eq_val) //throw (BackendsErrors::BackendsErrorsEx)
+{
+    return set_dbeeq_command(out_dbe, eq_val);
+}
+
+string CCommandSocket::get_dbeeq(const char * out_dbe) //throw (BackendsErrors::BackendsErrorsEx)
+{
+    return get_dbeeq_command(out_dbe);
+}
+
+string CCommandSocket::set_dbebpf(const char * out_dbe, const char * bpf_val) //throw (BackendsErrors::BackendsErrorsEx)
+{
+    return set_dbebpf_command(out_dbe, bpf_val);
+}
+
+string CCommandSocket::get_dbebpf(const char * out_dbe) //throw (BackendsErrors::BackendsErrorsEx)
+{
+    return get_dbebpf_command(out_dbe);
+}
 void CCommandSocket::parse_longSeq_response(string status_str, string start, string end, ACS::longSeq* vals) //throw (BackendsErrors::BackendsErrorsEx)
 {
    unsigned start_pos = status_str.find(start);
@@ -198,6 +227,23 @@ void CCommandSocket::parse_double_response(string status_str, string start, stri
    try {
    stringstream in(status_str.substr(start_pos + start.length(), end_pos - (start_pos + start.length())));
    double temp;
+      in >> temp;
+      *val=temp;
+   }    
+   catch (std::out_of_range outofrange) { //if the index is out of range
+   throw outofrange;                      //throw this exception
+   }
+
+}
+
+void CCommandSocket::parse_long_response(string status_str, string start, string end, long* val) //throw (BackendsErrors::BackendsErrorsEx)
+{
+   unsigned start_pos = status_str.find(start);
+   unsigned end_pos = status_str.find(end);
+
+   try {
+   stringstream in(status_str.substr(start_pos + start.length(), end_pos - (start_pos + start.length())));
+   long temp;
       in >> temp;
       *val=temp;
    }    
@@ -692,6 +738,7 @@ string CCommandSocket::get_dbeeq_command(const char * out_dbe) //throw (Backends
 		throw impl;
 	  }
 	return response;
+}
 
 string CCommandSocket::set_dbebpf_command(const char * out_dbe, const char * bpf_val) //throw (BackendsErrors::BackendsErrorsEx)
 {

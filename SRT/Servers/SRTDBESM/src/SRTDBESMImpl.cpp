@@ -689,7 +689,7 @@ void SRTDBESMImpl::get_cfg()
     for (int j=0; j< newlines; j++) {
     	
 	 	string new_str;
-	 	ACS::Time timestamp, timestamp2, timestamp3;
+	 	ACS::Time timestamp, timestamp2;
 	 	double b_addr=0;
 	   string str = "BOARD xx";
 	   
@@ -709,22 +709,22 @@ void SRTDBESMImpl::get_cfg()
        	
     		if (b_addr == m_paddr_1->getDevIO()->read(timestamp)) 
    		 	{
-    			 	m_pcfg_1->getDevIO()->write(d,timestamp3);
+    			 	m_pcfg_1->getDevIO()->write(d,timestamp2);
       	 	}
        
    	 	else if (b_addr == m_paddr_2->getDevIO()->read(timestamp)) 
    		 	{
-    			 	m_pcfg_2->getDevIO()->write(d,timestamp3);
+    			 	m_pcfg_2->getDevIO()->write(d,timestamp2);
       	 	}
        
     		else if (b_addr == m_paddr_3->getDevIO()->read(timestamp)) 
    		 	{
-    			 	m_pcfg_3->getDevIO()->write(d,timestamp3);
+    			 	m_pcfg_3->getDevIO()->write(d,timestamp2);
       	 	}
        
     		else if (b_addr == m_paddr_4->getDevIO()->read(timestamp)) 
    		 	{
-    			 	m_pcfg_4->getDevIO()->write(d,timestamp3);
+    			 	m_pcfg_4->getDevIO()->write(d,timestamp2);
       	 	}  
       	     
     		}
@@ -969,14 +969,15 @@ void SRTDBESMImpl::get_dbeamp(const char * out_dbe)
     		 }
     
     for (int j=0; j< newlines; j++) {
-	 	ACS::doubleSeq new_seq;
+	 	ACS::longSeq new_seq;
 	 	ACS::Time timestamp, timestamp2, timestamp3;
-	 	double b_addr=0, att_ch=0, new_att_val=0;
-	 
+	 	double b_addr=0, amp_ch=0;
+	 	long new_amp_val=0;
+
     	try {
    	 	m_commandSocket.parse_double_response(out_dbe_message.substr(v[j],v[j+1]), "BOARD ", " AMP", &b_addr);
-   	 	m_commandSocket.parse_double_response(out_dbe_message.substr(v[j],v[j+1]), "AMP ", " VALUE", &att_ch);
-   	 	m_commandSocket.parse_double_response(out_dbe_message.substr(v[j],v[j+1]), "VALUE ", "\n", &new_att_val);
+   	 	m_commandSocket.parse_double_response(out_dbe_message.substr(v[j],v[j+1]), "AMP ", " VALUE", &amp_ch);
+   	 	m_commandSocket.parse_long_response(out_dbe_message.substr(v[j],v[j+1]), "VALUE ", "\n", &new_amp_val);
     		 }
     		catch (std::out_of_range) {
 			_EXCPT(BackendsErrors::MalformedAnswerExImpl,impl,"SRTDBESMImpl::get_dbeamp()");
@@ -1094,14 +1095,14 @@ void SRTDBESMImpl::get_dbeeq(const char * out_dbe)
     		 }
     
     for (int j=0; j< newlines; j++) {
-	 	ACS::doubleSeq new_seq;
+	 	ACS::longSeq new_seq;
 	 	ACS::Time timestamp, timestamp2, timestamp3;
-	 	double b_addr=0, att_ch=0, new_att_val=0;
+	 	double b_addr=0, eq_ch=0, new_eq_val=0;
 	 
     	try {
    	 	m_commandSocket.parse_double_response(out_dbe_message.substr(v[j],v[j+1]), "BOARD ", " EQ", &b_addr);
-   	 	m_commandSocket.parse_double_response(out_dbe_message.substr(v[j],v[j+1]), "AMP ", " VALUE", &att_ch);
-   	 	m_commandSocket.parse_double_response(out_dbe_message.substr(v[j],v[j+1]), "VALUE ", "\n", &new_att_val);
+   	 	m_commandSocket.parse_double_response(out_dbe_message.substr(v[j],v[j+1]), "AMP ", " VALUE", &eq_ch);
+   	 	m_commandSocket.parse_double_response(out_dbe_message.substr(v[j],v[j+1]), "VALUE ", "\n", &new_eq_val);
     		 }
     		catch (std::out_of_range) {
 			_EXCPT(BackendsErrors::MalformedAnswerExImpl,impl,"SRTDBESMImpl::get_dbeeq()");
@@ -1220,14 +1221,14 @@ void SRTDBESMImpl::get_dbebpf(const char * out_dbe)
     		 }
     
     for (int j=0; j< newlines; j++) {
-	 	ACS::doubleSeq new_seq;
+	 	ACS::longSeq new_seq;
 	 	ACS::Time timestamp, timestamp2, timestamp3;
-	 	double b_addr=0, att_ch=0, new_att_val=0;
+	 	double b_addr=0, bpf_ch=0, new_bpf_val=0;
 	 
     	try {
    	 	m_commandSocket.parse_double_response(out_dbe_message.substr(v[j],v[j+1]), "BOARD ", " BPF", &b_addr);
-   	 	m_commandSocket.parse_double_response(out_dbe_message.substr(v[j],v[j+1]), "BPF ", " VALUE", &att_ch);
-   	 	m_commandSocket.parse_double_response(out_dbe_message.substr(v[j],v[j+1]), "VALUE ", "\n", &new_att_val);
+   	 	m_commandSocket.parse_double_response(out_dbe_message.substr(v[j],v[j+1]), "BPF ", " VALUE", &bpf_ch);
+   	 	m_commandSocket.parse_double_response(out_dbe_message.substr(v[j],v[j+1]), "VALUE ", "\n", &new_bpf_val);
     		 }
     		catch (std::out_of_range) {
 			_EXCPT(BackendsErrors::MalformedAnswerExImpl,impl,"SRTDBESMImpl::get_dbebpf()");
@@ -1275,6 +1276,7 @@ void SRTDBESMImpl::get_dbebpf(const char * out_dbe)
 		
     CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::get_dbebpf()",(LM_INFO,c));
 }
+
 GET_PROPERTY_REFERENCE(ACS::ROlong,m_paddr_1,addr_1);
 GET_PROPERTY_REFERENCE(ACS::ROlong,m_paddr_2,addr_2);
 GET_PROPERTY_REFERENCE(ACS::ROlong,m_paddr_3,addr_3);

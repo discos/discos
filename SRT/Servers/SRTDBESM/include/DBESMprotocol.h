@@ -41,7 +41,7 @@ class CDBESMCommand
         inline static string comm_get_dbeeq(string out_dbe){return Commands::m_get_dbeeq + " " + out_dbe + TAIL;}
         inline static string comm_set_dbebpf(string out_dbe, string bpf_val){return Commands::m_set_dbebpf + " " + out_dbe + " " + bpf_val + TAIL;}
         inline static string comm_get_dbebpf(string out_dbe){return Commands::m_get_dbebpf + " " + out_dbe + TAIL;}
-        
+      
     private:
         /*
         * Commandsf

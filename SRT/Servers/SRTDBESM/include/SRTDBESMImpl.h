@@ -89,8 +89,8 @@ public:
  	virtual void get_firm(short b_addr);
  	
  	virtual void handle_addr(short * b_addr);
- 	
- 	virtual void set_dbeampconst char * out_dbe, const char * amp_val); //throw (BackendsErrors::BackendsErrorsEx);
+
+ 	virtual void set_dbeamp(const char * out_dbe, const char * amp_val); //throw (BackendsErrors::BackendsErrorsEx);
  	
  	virtual void get_dbeamp(const char * out_dbe); //throw (BackendsErrors::BackendsErrorsEx);
  	

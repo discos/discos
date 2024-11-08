@@ -122,7 +122,33 @@ module Backends {
 	 get single DBESM board firmware version info 
         */
 	void get_firm(in short b_addr) raises (BackendsErrors::BackendsErrorsEx);
-	
+        /*
+	 set one or more amplifiers depending on which output is requested
+        */
+        void set_dbeamp(in string out_dbe, in string amp_val) raises (BackendsErrors::BackendsErrorsEx);
+
+        /*
+	get one or more amplifier values depending on which output is requested
+        */
+        void get_dbeamp(in string out_dbe) raises (BackendsErrors::BackendsErrorsEx);
+        /*
+	// set one or more equalizers depending on which output is requested
+        */
+        void set_dbeeq(in string out_dbe, in string eq_val) raises (BackendsErrors::BackendsErrorsEx);
+
+        /*
+	 get one or more equalizer values depending on which output is requested
+        */
+        void get_dbeeq(in string out_dbe) raises (BackendsErrors::BackendsErrorsEx);
+        /*
+	 set one or more band-pass filters depending on which output is requested
+        */
+        void set_dbebpf(in string out_dbe, in string bpf_val) raises (BackendsErrors::BackendsErrorsEx);
+
+        /*
+	 get one or more band-pass filter values depending on which output is requested
+        */
+        void get_dbebpf(in string out_dbe) raises (BackendsErrors::BackendsErrorsEx);
 };
 
 };
