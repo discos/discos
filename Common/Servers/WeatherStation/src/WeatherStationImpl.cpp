@@ -16,9 +16,9 @@ WeatherStationImpl::WeatherStationImpl(
     m_autoParkThreshold(this)
 {
     m_containerServices = containerServices;
-    m_scheduler.setComponentName("IDL:alma/Management/Scheduler:1.0");
+    m_scheduler.setComponentInterface("IDL:alma/Management/Scheduler:1.0");
     m_scheduler.setContainerServices(m_containerServices);
-    m_antennaBoss.setComponentName("IDL:alma/Antenna/AntennaBoss:1.0");
+    m_antennaBoss.setComponentInterface("IDL:alma/Antenna/AntennaBoss:1.0");
     m_antennaBoss.setContainerServices(m_containerServices);
 
     m_parameters.temperature = 0.0;
@@ -377,7 +377,7 @@ void WeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
             throw dummy;
         }
         // "IDL:alma/Antenna/SRTMount:1.0"
-        m_mount.setComponentName((const char *)mountInterface);
+        m_mount.setComponentInterface((const char *)mountInterface);
         m_mount.setContainerServices(getContainerServices());
         m_property=m_mount->elevationMode(); //throw ComponentErrors::CouldntGetComponentExImpl
         //m_elevationStatus=m_property->get_sync(completion)

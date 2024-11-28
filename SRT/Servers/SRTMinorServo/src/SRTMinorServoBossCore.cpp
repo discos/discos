@@ -162,6 +162,15 @@ void SRTMinorServoBossCore::setup(std::string commanded_setup)
 {
     AUTO_TRACE("SRTMinorServoBossCore::setup()");
 
+    if(m_error_code.load() != ERROR_NO_ERROR)
+    {
+        _EXCPT(ManagementErrors::ConfigurationErrorExImpl, ex, "SRTMinorServoBossCore::setup()");
+        ex.setSubsystem("MinorServo");
+        ex.setReason("The system is in error state. Reset the errors first with the 'servoReset' command.");
+        ex.log(LM_DEBUG);
+        throw ex.getConfigurationErrorEx();
+    }
+
     try
     {
         checkLineStatus();
@@ -282,6 +291,15 @@ void SRTMinorServoBossCore::setup(std::string commanded_setup)
 void SRTMinorServoBossCore::park()
 {
     AUTO_TRACE("SRTMinorServoBossCore::park()");
+
+    if(m_error_code.load() != ERROR_NO_ERROR)
+    {
+        _EXCPT(ManagementErrors::ParkingErrorExImpl, ex, "SRTMinorServoBossCore::park()");
+        ex.setSubsystem("MinorServo");
+        ex.setReason("The system is in error state. Reset the errors first with the 'servoReset' command.");
+        ex.log(LM_DEBUG);
+        throw ex.getParkingErrorEx();
+    }
 
     try
     {
