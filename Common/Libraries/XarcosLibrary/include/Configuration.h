@@ -40,7 +40,7 @@ public:
 	 * @throwCDBAccess
 	 * @param Services pointer to the container services object
 	*/
-	void init(maci::ContainerServices *Services) throw (ComponentErrors::CDBAccessExImpl);
+	void init(maci::ContainerServices *Services) throw (ComponentErrors::CDBAccessExImpl, ComponentErrors::MemoryAllocationExImpl);
 
 	/**
 	 * @return the port number

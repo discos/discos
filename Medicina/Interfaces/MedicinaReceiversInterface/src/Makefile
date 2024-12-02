@@ -26,11 +26,12 @@ MAKE_PDF = ON
 
 # IDL Files and flags
 # 
-IDL_FILES  = MedicinaKBandDualF
+IDL_FILES  = MedicinaKBandDualF MedicinaCBand
 IDL_TAO_FLAGS =
 USER_IDL =
 
 MedicinaKBandDualFStubs_LIBS = baciStubs ComponentErrorsStubs GenericReceiverStubs
+MedicinaCBandStubs_LIBS= baciStubs ComponentErrorsStubs GenericReceiverStubs
 
 #
 # list of all possible C-sources (used to create automatic dependencies)

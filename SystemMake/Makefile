@@ -24,19 +24,19 @@ COMMON_DOC:=
 COMMON_ERRORS:=ClientErrors ComponentErrors AntennaErrors ParserErrors \
                BackendsErrors ManagementErrors ReceiversErrors \
                MetrologyErrors MinorServoErrors XBackendErrors \
-			   ActiveSurfaceErrors
+               ActiveSurfaceErrors
 COMMON_INTERFACES:=CommonInterface ManagmentInterface AntennaInterface ReceiversInterface \
                    BackendsInterface MinorServoInterface \
                    WeatherStationInterface ActiveSurfaceInterface \
                    XBackendInterface
 COMMON_LIBRARIES:=SlaLibrary IRALibrary DiscosVersion TextWindowLibrary ParserLibrary \
                   XarcosLibrary ModbusChannel ComponentProxy DiscosLocals \
-				  DiscosBackendProtocol PyTestingLibrary \
+                  DiscosBackendProtocol PyTestingLibrary \
 COMMON_SERVERS:=AntennaBoss Observatory OTF PointingModel Refraction SkySource \
                 Moon FitsWriter Scheduler ReceiversBoss ExternalClients \
                 CalibrationTool TotalPower NoiseGenerator CustomLogger \
                 XBackend PyDewarPositioner Sardara PyLocalOscillator MFKBandBaseReceiver PyCalmux \
-				ActiveSurfaceLan ActiveSurfaceUSD
+                ActiveSurfaceLan ActiveSurfaceUSD
 COMMON_CLIENTS:=AntennaBossTextClient ObservatoryTextClient \
                 GenericBackendTextClient ReceiversBossTextClient \
                 SystemTerminal CaltoolClient CustomLoggingClient \

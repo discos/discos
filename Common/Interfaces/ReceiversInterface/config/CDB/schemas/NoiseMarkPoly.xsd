@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+	- Author: Matteo De Biaggi
+	-
+	- History:
+	-   04-08-2011  Created 
+-->
+
+<xs:schema
+  targetNamespace="urn:schemas-cosylab-com:NoiseMarkPoly:1.0"
+  xmlns="urn:schemas-cosylab-com:NoiseMarkPoly:1.0"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+  xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified">
+	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+
+	<xs:complexType name="NoiseMarkPolyAttr">
+		<xs:attribute name="LCoeffs" type="xs:string" use="required"/>
+		<xs:attribute name="RCoeffs" type="xs:string" use="required"/>
+	</xs:complexType>
+
+	<xs:element name="NoiseMarkPoly" type="NoiseMarkPolyAttr"/>
+
+</xs:schema>
