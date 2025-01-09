@@ -30,11 +30,10 @@
 #include <ManagementErrors.h>
 #include "SRTActiveSurfaceBossCore.h"
 #include "SRTActiveSurfaceBossWorkingThread.h"
-#include "SRTActiveSurfaceBossSectorThread.h"
+#include "SRTActiveSurfaceBossInitializationThread.h"
 #include <SP_parser.h>
 
 #define LOOPSTATUSTIME 10000000 // 1.0 second
-#define SECTORTIME 1000000 // 0.1 seconds
 
 #define _SET_CDB(PROP,LVAL,ROUTINE) {	\
 	maci::ContainerServices* cs=getContainerServices();\
@@ -213,7 +212,7 @@ class SRTActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl, publ
 
 	CSRTActiveSurfaceBossWorkingThread *m_workingThread;
 
-	std::vector<CSRTActiveSurfaceBossSectorThread*> m_sectorThread;
+	CSRTActiveSurfaceBossInitializationThread *m_initializationThread;
 
 	SimpleParser::CParser<CSRTActiveSurfaceBossCore> *m_parser;
 

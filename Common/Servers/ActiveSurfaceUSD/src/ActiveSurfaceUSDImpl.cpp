@@ -144,6 +144,7 @@ void USDImpl::initialize() throw (ACSErr::ACSbaseExImpl)
             _SET_LDEF(acc,   "USDImpl::initialize()");
             _SET_LDEF(uBits, "USDImpl::initialize()");
         }
+        _GET_PROP(status,m_status,"usdImpl::initialize()")
     }
     catch (ASErrors::ASErrorsEx& ex)
     {

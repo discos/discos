@@ -125,25 +125,18 @@ void SRTActiveSurfaceBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
         _THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"SRTActiveSurfaceBossImpl::initialize()");
     }
 
-    for(int sector = 0; sector < SECTORS; sector++)
+    try
     {
-        std::stringstream threadName;
-        threadName << "SRTACTIVESURFACEBOSSSECTOR";
-        threadName << sector+1;
-        try
-        {
-            CSRTActiveSurfaceBossSectorThread* sectorThread = getContainerServices()->getThreadManager()->create<CSRTActiveSurfaceBossSectorThread,CSRTActiveSurfaceBossCore *> (threadName.str().c_str(), boss);
-            m_sectorThread.push_back(sectorThread);
-        }
-        catch (acsthreadErrType::acsthreadErrTypeExImpl& ex)
-        {
-            _ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,_dummy,ex,"SRTActiveSurfaceBossImpl::initialize()");
-            throw _dummy;
-        }
-        catch (...)
-        {
-            _THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"SRTActiveSurfaceBossImpl::initialize()");
-        }
+        m_initializationThread=getContainerServices()->getThreadManager()->create<CSRTActiveSurfaceBossInitializationThread,CSRTActiveSurfaceBossCore *>("SRTACTIVESURFACEBOSSINITTHREAD",boss);
+    }
+    catch (acsthreadErrType::acsthreadErrTypeExImpl& ex)
+    {
+        _ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,_dummy,ex,"SRTActiveSurfaceBossImpl::initialize()");
+        throw _dummy;
+    }
+    catch (...)
+    {
+        _THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"SRTActiveSurfaceBossImpl::initialize()");
     }
 
     // configure the parser.....
@@ -170,12 +163,7 @@ void SRTActiveSurfaceBossImpl::execute() throw (ACSErr::ACSbaseExImpl)
         throw _dummy;
     }
     m_workingThread->resume();
-
-    for(unsigned int i = 0; i < m_sectorThread.size(); i++)
-    {
-        m_sectorThread[i]->setSleepTime(SECTORTIME);
-        m_sectorThread[i]->resume();
-    }
+    m_initializationThread->resume();
 
     ACS_LOG(LM_FULL_INFO,"SRTActiveSurfaceBossImpl::execute()",(LM_INFO,"SRTActiveSurfaceBossImpl::COMPSTATE_OPERATIONAL"));
 }
@@ -188,13 +176,10 @@ void SRTActiveSurfaceBossImpl::cleanUp()
         m_workingThread->suspend();
         getContainerServices()->getThreadManager()->destroy(m_workingThread);
     }
-    for(unsigned int i = 0; i < m_sectorThread.size(); i++)
+    if (m_initializationThread!=NULL)
     {
-        if(m_sectorThread[i] != NULL)
-        {
-            m_sectorThread[i]->suspend();
-            getContainerServices()->getThreadManager()->destroy(m_sectorThread[i]);
-        }
+        m_initializationThread->suspend();
+        getContainerServices()->getThreadManager()->destroy(m_initializationThread);
     }
     ACS_LOG(LM_FULL_INFO,"SRTActiveSurfaceBossImpl::cleanUp()",(LM_INFO,"SRTActiveSurfaceBossImpl::THREADS_TERMINATED"));
     if (m_parser!=NULL) delete m_parser;

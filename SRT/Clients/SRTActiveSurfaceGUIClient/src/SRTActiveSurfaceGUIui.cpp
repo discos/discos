@@ -12,7 +12,7 @@ SRTActiveSurfaceGUI::SRTActiveSurfaceGUI(QWidget *parent) : QWidget(parent)
 {
     setupUi(this);
 
-    QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIActuatorColor(int,int,bool,bool)), this, SLOT(changeGUIActuatorColor(int,int,bool,bool)));
+    QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIActuatorColor(int,int,bool,bool,bool)), this, SLOT(changeGUIActuatorColor(int,int,bool,bool,bool)));
     QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIAllActuators(bool)), this, SLOT(changeGUIAllActuators(bool)));
     QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIcircleORradius(bool)), this, SLOT(changeGUIcircleORradius(bool)));
     QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIActuator(bool)), this, SLOT(changeGUIActuator(bool)));
@@ -526,7 +526,7 @@ void SRTActiveSurfaceGUI::recoverUSD()
     }
 }
 
-void SRTActiveSurfaceGUI::changeGUIActuatorColor(int tcircle, int tactuator, bool active, bool fromRun)
+void SRTActiveSurfaceGUI::changeGUIActuatorColor(int tcircle, int tactuator, bool active, bool statusColor, bool fromRun)
 {
     if (!fromRun)
     {
@@ -542,13 +542,17 @@ void SRTActiveSurfaceGUI::changeGUIActuatorColor(int tcircle, int tactuator, boo
 
     QPushButton* ActuatorButton = this->findChild<QPushButton*>(ActuatorButtonName.str().c_str());
 
-    if(active)
+    if(active == true && statusColor == false) // attivo e calibrato
     {
-        ActuatorButton->setStyleSheet("background-color: rgb(85, 255, 0)");
+        ActuatorButton->setStyleSheet("background-color: rgb(85, 255, 0)"); // verde
+    }
+    else if (active == true && statusColor == true) // attivo e scalibrato
+    {
+        ActuatorButton->setStyleSheet("background-color: rgb(255, 255, 0)"); // giallo
     }
     else
     {
-        ActuatorButton->setStyleSheet("background-color: rgb(255, 0, 0)");
+        ActuatorButton->setStyleSheet("background-color: rgb(255, 0, 0)"); // rosso
     }
 }
 
