@@ -17,12 +17,18 @@
 #include <SkarabS.h>
 #include <TotalPowerS.h>
 #include <GenericIFDistributorS.h>
+#include <ReceiversBossC.h>
+#include <SchedulerC.h>
 #include <string>
 #include <sstream>
 #include <DiscosBackendProtocol>
 #include "Common.h"
 //#include "Protocol.h"
 #include "Configuration.h"
+
+#define GAVINO "MANAGEMENT/Gavino"
+#define PALMIRO "MANAGEMENT/Palmiro"
+#define DUCEZIO "MANAGEMENT/Ducezio"
 
 using namespace maci;
 using namespace DiscosBackend;
@@ -224,6 +230,8 @@ public:
 	 * @param integration new integration time in milliseconds. A negative value has no effect.
 	 */
 	void setIntegration(const long& integration) throw (BackendsErrors::BackendBusyExImpl, ComponentErrors::ValueOutofRangeExImpl);
+
+	void setShift(const long& shift) throw (BackendsErrors::BackendBusyExImpl);
 	
 	/**
 	 * This methos will changes the current value of the <i>m_enabled</i> array.
@@ -231,7 +239,7 @@ public:
 	 * @param en new values sequence for the <i>m_enabled</i> elements. A value grater than zero correspond to a true,
 	 *                a zero match to a false, while a negative will keep the things unchanged.
 	 */ 
-	void setEnabled(const ACS::longSeq& en) throw (BackendsErrors::BackendBusyExImpl);
+	void setEnabled(const ACS::longSeq& en) throw (BackendsErrors::BackendBusyExImpl,  BackendsErrors::ConfigurationErrorExImpl, ComponentErrors::ValueOutofRangeExImpl);
 	
 	/**
 	 * This function can be called in order to load an initial setup for the backend. Some parameter are fixed and cannot be changed during normal
@@ -250,6 +258,9 @@ public:
 	void setTargetFileName(const char *conf);
 	
     void sendTargetFileName() throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl, ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl);
+
+    void endSchedule() throw (BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
+			ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::NotAllowedExImpl,BackendsErrors::BackendFailExImpl);
 
 	/**
 	 * This function can be used to set up an input of the backend. The input is identified by its numeric value. If a configuration
@@ -378,6 +389,8 @@ public:
 	void getRms(ACS::doubleSeq& rms) throw (ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
 			ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,BackendsErrors::MalformedAnswerExImpl,BackendsErrors::BackendBusyExImpl);
 
+	void getKelvinCountsRatio(ACS::doubleSeq& kcr) const;
+
 	/**
 	 * This a wrapper function of the <i>getSample()</i> method. In this case the sample correspond the power measurment in each channel with full attenuation.
 	 * @throw ComponentErrors::SocketErrorExImpl
@@ -442,6 +455,10 @@ public:
 	void setTsysRange(const double& freq, const double& bw)  throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,BackendsErrors::NakExImpl,
 			ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl);
 
+    void backendPark() throw (BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
+		ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::NotAllowedExImpl,BackendsErrors::BackendFailExImpl);
+
+
 	/**
 	 * Called by the component to fill the <i>Backends::TMainHeader</i> with the proper informations.
 	 * @param bkd the stucture that contains the required information.
@@ -480,9 +497,9 @@ public:
 	static bool resultingSampleRate(const long& integration,const double& sr,long& result);
 
 	//int getConfiguration(char* configuration);
-	void getConfiguration(char* configuration);
+	char* getConfiguration();
 
-	int getCommProtVersion(CORBA::String_out version);
+	char* getCommProtVersion();
 
     IRA::CString m_targetFileName;
 
@@ -503,6 +520,10 @@ private:
     ContainerServices* m_services;
     Backends::TotalPower_var m_totalPower;
     //Receivers::GenericIFDistributor_var m_ifDistributor;
+    /** This is the reference to the receiver boss component */
+    Receivers::ReceiversBoss_var m_receiversBoss;
+    Management::Scheduler_var m_Scheduler;
+    char superVisorName[20];
 
 	/**
 	 * List the fields of the backend status 
@@ -669,6 +690,7 @@ private:
 	double m_tpiZero[MAX_SECTION_NUMBER];
 
     long m_inputsNumber;
+    long m_inputsNumberTP;
 
     double m_filter;
 
@@ -780,6 +802,11 @@ private:
     bool m_SKARAB_4S;
     bool m_SKARAB_5;
     bool m_SKARAB_5S;
+    bool m_SKARAB_7;
+    bool m_SKARAB_11;
+    bool m_SKARAB_11S;
+    bool m_SKARAB_12;
+    bool m_SKARAB_12S;
 
     bool m_stationSRT;
     bool m_stationMED;
@@ -787,6 +814,12 @@ private:
     bool m_SkarabInitialized;
 
     bool m_stokes;
+
+    bool m_kkg77;
+
+    IRA::CString m_recstr;
+    ACS::ROstring_var m_receiverRef;
+	CORBA::String_var m_receiver;
 	
 };
 

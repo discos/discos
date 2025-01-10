@@ -784,6 +784,12 @@ void CScheduleExecutor::cleanSchedule(bool error)
 		ex.log(LM_WARNING);
 	}
 	try {
+		m_core->endSchedule();
+	}
+	catch (ACSErr::ACSbaseExImpl& ex) {
+		ex.log(LM_WARNING);
+	}
+	try {
 		m_core->closeScan(false);
 	}
 	catch (ACSErr::ACSbaseExImpl& ex) {

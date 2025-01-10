@@ -46,7 +46,7 @@ void CRecvBossCore::initialize(maci::ContainerServices* services,CConfiguration 
 		_THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"CRecvBossCore::initialize()");
 	}
 	m_calMux_proxy.setContainerServices(services);
-   m_calMux_proxy.setComponentName("IDL:alma/Backends/CalMux:1.0");
+   m_calMux_proxy.setComponentInterface("IDL:alma/Backends/CalMux:1.0");
 	ACS_LOG(LM_FULL_INFO,"CRecvBossCore::initialize()",(LM_INFO,"ReceiversBoss notification channel open"));
 }
 

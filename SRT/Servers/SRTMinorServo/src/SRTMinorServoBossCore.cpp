@@ -162,6 +162,15 @@ void SRTMinorServoBossCore::setup(std::string commanded_setup)
 {
     AUTO_TRACE("SRTMinorServoBossCore::setup()");
 
+    if(m_error_code.load() != ERROR_NO_ERROR)
+    {
+        _EXCPT(ManagementErrors::ConfigurationErrorExImpl, ex, "SRTMinorServoBossCore::setup()");
+        ex.setSubsystem("MinorServo");
+        ex.setReason("The system is in error state. Reset the errors first with the 'servoReset' command.");
+        ex.log(LM_DEBUG);
+        throw ex.getConfigurationErrorEx();
+    }
+
     try
     {
         checkLineStatus();
@@ -283,6 +292,15 @@ void SRTMinorServoBossCore::park()
 {
     AUTO_TRACE("SRTMinorServoBossCore::park()");
 
+    if(m_error_code.load() != ERROR_NO_ERROR)
+    {
+        _EXCPT(ManagementErrors::ParkingErrorExImpl, ex, "SRTMinorServoBossCore::park()");
+        ex.setSubsystem("MinorServo");
+        ex.setReason("The system is in error state. Reset the errors first with the 'servoReset' command.");
+        ex.log(LM_DEBUG);
+        throw ex.getParkingErrorEx();
+    }
+
     try
     {
         checkLineStatus();
@@ -339,7 +357,8 @@ void SRTMinorServoBossCore::park()
     m_current_servos.clear();
     m_current_tracking_servos.clear();
 
-    try
+    // Skipping this because of the cover not always engaging the limit switch
+    /*try
     {
         // Send the STOW command to close the gregorian cover
         if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::stow("GREGORIAN_CAP", COVER_STATUS_CLOSED)).checkOutput())
@@ -358,7 +377,7 @@ void SRTMinorServoBossCore::park()
         ex.setReason("Error while sending the STOW command to the gregorian cover.");
         ex.log(LM_DEBUG);
         throw ex.getParkingErrorEx();
-    }
+    }*/
 
     // Send the STOP command to all the servos
     for(const auto& [servo_name, servo] : m_servos)

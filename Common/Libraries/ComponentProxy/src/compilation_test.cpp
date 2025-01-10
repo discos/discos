@@ -20,7 +20,7 @@ int main()
     Backends::Holography_proxy m_holographyProxy;
     Backends::NoiseGenerator_proxy m_noiseProxy;
     Backends::TotalPower_proxy m_totalPowerProxy;
-    ActiveSurface::ActiveSurfaceBoss_proxy m_acitveSurfaceBossProxy;
+    ActiveSurface::ActiveSurfaceBoss_proxy m_activeSurfaceBossProxy;
     MinorServo::MinorServoBoss_proxy m_minorservoBossProxy;
     MinorServo::WPServo_proxy m_wpServoProxy;
     Receivers::ReceiversBoss_proxy m_receiversBossProxy;
@@ -29,7 +29,12 @@ int main()
     Weather::GenericWeatherStation_proxy m_genericWeatherStationProxy;
     Antenna::Mount_proxy m_mount;
 
-    m_totalPowerProxy.setComponentName("Backends/TotalPower");
+    ActiveSurface::lan_proxy m_asLANProxy;
+    m_asLANProxy.setComponentName("AS/SECTOR01/LAN01");
+    ActiveSurface::USD_proxy m_asUSDProxy;
+    m_asUSDProxy.setComponentName("AS/SECTOR01/LAN01/USD03");
+
+    m_totalPowerProxy.setComponentInterface("BACKENDS/TotalPower");
     m_totalPowerProxy->calOn();
     return 0;
 }

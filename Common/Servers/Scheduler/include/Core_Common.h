@@ -166,6 +166,8 @@ void enableDataTransfer() throw (ComponentErrors::OperationErrorExImpl,Component
  */
 void stopDataTransfer() throw (ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,ComponentErrors::CouldntGetComponentExImpl);
 
+void endSchedule() throw (ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,ComponentErrors::CouldntGetComponentExImpl);
+
 /**
  * This static method inquiries the DataReceiver to check if the data transfer is still active or not.
  * @throw ComponentErrors::OperationErrorExImpl

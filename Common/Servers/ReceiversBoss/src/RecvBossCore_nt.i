@@ -48,7 +48,7 @@ void CRecvBossCore::initialize(maci::ContainerServices* services,CConfiguration 
 	catch (...) {
 		_THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"CRecvBossCore::initialize()");
 	}
-        m_totalPower_proxy.setComponentName("Backends/TotalPower");
+        m_totalPower_proxy.setComponentInterface("Backends/TotalPower");
         //m_totalPower_proxy.setContainerServices(m_services);
 }
 

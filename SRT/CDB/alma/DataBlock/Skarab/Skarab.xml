@@ -1,0 +1,158 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<SkarabSetup xmlns="urn:schemas-cosylab-com:SkarabSetup:1.0"
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<Configuration>
+	<configurationID>SKARAB_1</configurationID>
+    <sections>2</sections>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<inputPort>GREGORIAN</inputPort>
+	<beams>1</beams>
+ 	<bandWidth>1400.0</bandWidth>
+ 	<attenuation>7.0</attenuation>		
+	<section_boards>0 1</section_boards>
+	<polarizations>L R</polarizations>
+	<feed>0 0</feed>
+	<IF>0 1</IF>
+	<bins>2048</bins>
+</Configuration>
+
+<Configuration>
+	<configurationID>SKARAB_1S</configurationID>
+	<sections>2</sections>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<inputPort>GREGORIAN</inputPort>
+	<beams>1</beams>
+ 	<bandWidth>1400.0</bandWidth>
+ 	<attenuation>7.0</attenuation>		
+	<section_boards>0 1 2 3</section_boards>
+	<polarizations>S S</polarizations>
+	<feed>0 0</feed>
+	<IF>0 1</IF>
+	<bins>2048</bins>
+</Configuration>
+
+<Configuration>
+	<configurationID>SKARAB_2</configurationID>
+    <sections>2</sections>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<inputPort>GREGORIAN</inputPort>
+	<beams>1</beams>
+ 	<bandWidth>187.5</bandWidth>
+ 	<attenuation>7.0</attenuation>		
+	<section_boards>0 1</section_boards>
+	<polarizations>L R</polarizations>
+	<feed>0 0</feed>
+	<IF>0 1</IF>
+	<bins>32768</bins>
+</Configuration>
+
+<Configuration>
+	<configurationID>SKARAB_2S</configurationID>
+	<sections>2</sections>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<inputPort>GREGORIAN</inputPort>
+	<beams>1</beams>
+ 	<bandWidth>187.5</bandWidth>
+ 	<attenuation>7.0</attenuation>		
+	<section_boards>0 1 2 3</section_boards>
+	<polarizations>S S</polarizations>
+	<feed>0 0</feed>
+	<IF>0 1</IF>
+	<bins>32768</bins>
+</Configuration>
+
+<Configuration>
+	<configurationID>SKARAB_3</configurationID>
+    <sections>2</sections>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<inputPort>GREGORIAN</inputPort>
+	<beams>1</beams>
+ 	<bandWidth>187.5</bandWidth>
+ 	<attenuation>7.0</attenuation>		
+	<section_boards>0 1</section_boards>
+	<polarizations>L R</polarizations>
+	<feed>0 0</feed>
+	<IF>0 1</IF>
+	<bins>65536</bins>
+</Configuration>
+
+<Configuration>
+	<configurationID>SKARAB_3S</configurationID>
+	<sections>2</sections>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<inputPort>GREGORIAN</inputPort>
+	<beams>1</beams>
+ 	<bandWidth>187.5</bandWidth>
+ 	<attenuation>7.0</attenuation>		
+	<section_boards>0 1 2 3</section_boards>
+	<polarizations>S S</polarizations>
+	<feed>0 0</feed>
+	<IF>0 1</IF>
+	<bins>65536</bins>
+</Configuration>
+
+<Configuration>
+	<configurationID>SKARAB_4</configurationID>
+    <sections>2</sections>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<inputPort>GREGORIAN</inputPort>
+	<beams>1</beams>
+ 	<bandWidth>93.75</bandWidth>
+ 	<attenuation>7.0</attenuation>		
+	<section_boards>0 1</section_boards>
+	<polarizations>L R</polarizations>
+	<feed>0 0</feed>
+	<IF>0 1</IF>
+	<bins>32768</bins>
+</Configuration>
+
+<Configuration>
+	<configurationID>SKARAB_4S</configurationID>
+	<sections>2</sections>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<inputPort>GREGORIAN</inputPort>
+	<beams>1</beams>
+ 	<bandWidth>93.75</bandWidth>
+ 	<attenuation>7.0</attenuation>		
+	<section_boards>0 1 2 3</section_boards>
+	<polarizations>S S</polarizations>
+	<feed>0 0</feed>
+	<IF>0 1</IF>
+	<bins>32768</bins>
+</Configuration>
+
+<Configuration>
+	<configurationID>SKARAB_5</configurationID>
+    <sections>2</sections>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<inputPort>GREGORIAN</inputPort>
+	<beams>1</beams>
+ 	<bandWidth>93.75</bandWidth>
+ 	<attenuation>7.0</attenuation>		
+	<section_boards>0 1</section_boards>
+	<polarizations>L R</polarizations>
+	<feed>0 0</feed>
+	<IF>0 1</IF>
+	<bins>65536</bins>
+</Configuration>
+
+<Configuration>
+	<configurationID>SKARAB_5S</configurationID>
+	<sections>2</sections>
+	<calSwitchingEnabled>TRUE</calSwitchingEnabled>
+	<inputPort>GREGORIAN</inputPort>
+	<beams>1</beams>
+ 	<bandWidth>93.75</bandWidth>
+ 	<attenuation>7.0</attenuation>		
+	<section_boards>0 1 2 3</section_boards>
+	<polarizations>S S</polarizations>
+	<feed>0 0</feed>
+	<IF>0 1</IF>
+	<bins>65536</bins>
+</Configuration>
+
+</SkarabSetup>
