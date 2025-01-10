@@ -160,7 +160,7 @@ void CNotoActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetCom
     {
         m_status=Management::MNG_FAILURE;
     }
-
+*/
     m_antennaBoss = Antenna::AntennaBoss::_nil();
     try
     {
@@ -173,7 +173,7 @@ void CNotoActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetCom
         m_status=Management::MNG_WARNING;
         throw Impl;
     }
-*/
+
     m_enable = true;
     ACS_LOG(LM_FULL_INFO, "CNotoActiveSurfaceBossCore::execute()", (LM_INFO,"CNotoActiveSurfaceBossCore::NotoActiveSurfaceBoss_LOCATED"));
 }
@@ -1366,10 +1366,13 @@ void CNotoActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& new
         {
             for (int l = 1; l <= actuatorsInCircle[i]; l++)
             {
+                //printf("i = %d, l = %d, ",i,l);
                 for (int s = 0; s < NPOSITIONS; s++)
                 {
                     usdCorrections >> actuatorsCorrections[s];
+                //    printf("corr = %f ", actuatorsCorrections[s]);
                 }
+                //printf("\n");
                 if(!CORBA::is_nil(usd[i][l]))
                 {
                     usd[i][l]->posTable(actuatorsCorrections, NPOSITIONS, DELTAEL, THRESHOLDPOS);

@@ -635,6 +635,13 @@ void CCore::stopDataTransfer() throw (ComponentErrors::OperationErrorExImpl,Mana
 	CCore::stopDataTransfer(m_defaultBackend,m_defaultBackendError,m_streamStarted,m_streamPrepared,m_streamConnected);
 }
 
+void CCore::endSchedule() throw (ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,ComponentErrors::CouldntGetComponentExImpl)
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
+	loadDefaultBackend();// throw (ComponentErrors::CouldntGetComponentExImpl);
+	CCore::endSchedule(m_defaultBackend,m_defaultBackendError);
+}
+
 bool CCore::checkRecording() throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);

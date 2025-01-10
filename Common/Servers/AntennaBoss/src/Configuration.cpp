@@ -97,7 +97,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	_GET_STRING_ATTRIBUTE("SkydipElevationRange","The skydip elevation range is (degrees):",temp);
 	_GET_STRING_ATTRIBUTE("CoordinatesFilename", "The text file path in which the received coordinates will be written:", m_coordinatesFile);
 
-	if (sscanf((const char *)temp,"%lf-%lf",&m_skydipElDown,&m_skydipElUp)!=2) {
+	if (sscanf((const char *)temp,"%lf %lf",&m_skydipElDown,&m_skydipElUp)!=2) {
 		_EXCPT(ComponentErrors::CDBAccessExImpl,dummy,"CConfiguration::Init()");
 		dummy.setFieldName("SkydipElevationRange");
 		throw dummy;

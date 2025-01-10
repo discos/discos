@@ -66,7 +66,7 @@ void SRTMinorServoSetupThread::runLoop()
 
     if(IRA::CIRATools::getUNIXEpoch() - m_start_time >= SETUP_TIMEOUT)
     {
-        ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::runLoop()", (LM_CRITICAL, "Timeout while performing a setup operation."));
+        ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::runLoop()", (LM_CRITICAL, std::string("Timeout while configuring the system. Stopped at status " + std::to_string(m_status)).c_str()));
         m_core.setError(ERROR_CONFIG_ERROR);
         this->setStopped();
         return;

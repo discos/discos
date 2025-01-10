@@ -61,7 +61,6 @@ void CSenderThread::closeSocket()
 void CSenderThread::runLoop()
 {
 	IRA::CError err;
-	int res;
 	IRA::CSecAreaResourceWrapper<CCommandLine> cmd=m_commandLine->Get();
 	if (cmd->m_reiniting) {
 		cmd->m_reiniting=false;

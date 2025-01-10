@@ -142,9 +142,11 @@
 	servoPark
 	asPark
 	receiversPark
+	backendPark
 	wait=1
 	antennaPark
 	logMessage=Telescope is now parked
+	project=Maintenance
 </body>
 </Procedure>
 

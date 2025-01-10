@@ -258,9 +258,9 @@ public:
 	 */
     virtual CORBA::Boolean command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException);
 
-    virtual void getConfiguration (CORBA::String_out configuration) throw (CORBA::SystemException);
+    virtual char* getConfiguration () throw (CORBA::SystemException);
 
-    virtual void getCommProtVersion (CORBA::String_out version) throw (CORBA::SystemException);
+    virtual char* getCommProtVersion () throw (CORBA::SystemException);
 
     /**
      * This method is related to the implementation of the genericBackend interface
@@ -319,6 +319,8 @@ public:
     
     virtual ACS::doubleSeq * getRms () throw (CORBA::SystemException,
     		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+
+    virtual void endSchedule() throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, BackendsErrors::BackendsErrorsEx) {AUTO_TRACE("SardaraImpl::endSchedule()"); };
 
     /**
      * Call this function in order to get a total power measure for each input channel. The measure is done when the inputs are directly
