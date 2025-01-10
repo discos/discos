@@ -79,11 +79,11 @@ namespace MinorServo
     using DiscosConfigurationNameTableType = std::map<std::string, std::pair<SRTMinorServoFocalConfiguration, bool>>;
     const DiscosConfigurationNameTableType DiscosConfigurationNameTable =
     {
-        {"LLP",     std::make_pair(CONFIGURATION_PRIMARY,    false)},
-        {"PPP",     std::make_pair(CONFIGURATION_PRIMARY,    false)},
-        {"PLP",     std::make_pair(CONFIGURATION_PRIMARY,    false)},
-        {"HHP",     std::make_pair(CONFIGURATION_PRIMARY,    false)},
-        {"XKP",     std::make_pair(CONFIGURATION_PRIMARY,    false)},
+        //{"LLP",     std::make_pair(CONFIGURATION_PRIMARY,    false)},
+        //{"PPP",     std::make_pair(CONFIGURATION_PRIMARY,    false)},
+        //{"PLP",     std::make_pair(CONFIGURATION_PRIMARY,    false)},
+        //{"HHP",     std::make_pair(CONFIGURATION_PRIMARY,    false)},
+        //{"XKP",     std::make_pair(CONFIGURATION_PRIMARY,    false)},
         {"CCG",     std::make_pair(CONFIGURATION_GREGORIAN1, true )},
         {"KKG",     std::make_pair(CONFIGURATION_GREGORIAN2, true )},
         {"WWG",     std::make_pair(CONFIGURATION_GREGORIAN3, true )},
@@ -92,6 +92,7 @@ namespace MinorServo
         {"MISTRAL", std::make_pair(CONFIGURATION_GREGORIAN6, true )},
         {"CCB",     std::make_pair(CONFIGURATION_BWG1,       true )},
         {"XB",      std::make_pair(CONFIGURATION_BWG3,       true )},
+        {"CABINET", std::make_pair(CONFIGURATION_GREGORIAN7, false)},
     };
 
     /**
