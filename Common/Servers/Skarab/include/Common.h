@@ -17,7 +17,7 @@
 //#define BKD_DEBUG 
 
 // some hard coded, hardware dependant constants
-#define STARTFREQUENCY 0.0 // this is the start frequency of all IF inputs
+#define STARTFREQUENCY 1000.0 // this is the start frequency of all IF inputs
 #define MIN_FREQUENCY 0.0 // min frequency of all IF inputs
 #define MAX_FREQUENCY 1500.0 // max frequency of all IF inputs
 #define BINSNUMBER 1000

@@ -7,5 +7,6 @@
 
 <BackendEntry><Backend>DBBC</Backend><Channel>6</Channel><Polarity>0</Polarity></BackendEntry>
 <BackendEntry><Backend>DFB</Backend><Channel>7</Channel><Polarity>0</Polarity></BackendEntry>
+<BackendEntry><Backend>SKARAB</Backend><Channel>8</Channel><Polarity>0</Polarity></BackendEntry>
 
 </CalMuxTable>

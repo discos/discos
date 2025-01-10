@@ -209,6 +209,7 @@ void CCore::execute() throw(ComponentErrors::TimerErrorExImpl, ComponentErrors::
 	m_parser->add("calSwitch", "backend", 3, &CCore::remoteCall);
 	m_parser->add("getRms", "backend", 3, &CCore::remoteCall);
 	m_parser->add("setTsysRange","backend",3,&CCore::remoteCall);
+	m_parser->add("backendPark","backend",3,&CCore::remoteCall);
 
 	// minor servo
 	m_parser->add("servoSetup", "minorservo", 4, &CCore::remoteCall);
