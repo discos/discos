@@ -19,6 +19,34 @@
 #include <SStringfwd.h>
 
 namespace IRA {
+	
+class CString;
+
+CString operator +(const CString& s1,const CString & s2);	
+CString operator +(const CString & s1, char ch);		
+CString operator +(const CString & s1, const char *str);		
+CString operator +(char ch, const CString & s2);
+CString operator +(const char *str, const CString & s2);
+bool operator ==(const CString & s1, const CString & s2);		
+bool operator ==(const CString & s1, const char *s2);
+bool operator ==(const char *s1, const CString & s2);
+bool operator !=(const CString & s1, const CString & s2);
+bool operator !=(const CString & s1, const char *s2);
+bool operator !=(const char *s1, const CString & s2);
+bool operator < (const CString & s1, const CString & s2);
+bool operator < (const CString & s1, const char *s2);
+bool operator < (const char *s1, const CString & s2);
+bool operator > (const CString & s1, const CString & s2);
+bool operator > (const CString & s1, const char *s2);
+bool operator > (const char *s1, const CString & s2);
+bool operator <=(const CString & s1, const CString & s2);
+bool operator <=(const CString & s1, const char *s2);
+bool operator <=(const char *s1, const CString & s2);
+bool operator >=(const CString & s1, const CString & s2);
+bool operator >=(const CString & s1, const char *s2);
+bool operator >=(const char *s1, const CString & s2);
+ 		
+
 
 /** 
  * This class allow to manage strings easier than standard C/CPP methods
@@ -364,27 +392,6 @@ public: // Operations
 	const CString & operator =(const CString& src);
 	const CString & operator =(char ch);
 	const CString & operator =(const char* str);
-	// have to be friend so we can use char and char* as first arguments
-	/**
-	 * Friend operator, used to concatenate.
-	*/ 	
-	friend CString operator +(const CString& s1,const CString & s2);
-	/**
-	 * Friend operator, used to concatenate.
-	*/ 		
-	friend CString operator +(const CString & s1, char ch);
-	/**
-	 * Friend operator, used to concatenate.
-	*/ 		
-	friend CString operator +(const CString & s1, const char *str);
-	/**
-	 * Friend operator, used to concatenate.
-	*/ 		
-	friend CString operator +(char ch, const CString & s2);
-	/**
-	 * Friend operator, used to concatenate.
-	*/ 		
-	friend CString operator +(const char *str, const CString & s2);
 	/**
 	 * Operator used to concatenate the string with another one.
 	*/ 	
@@ -397,82 +404,101 @@ public: // Operations
 	 * Operator used to concatenate the string with another one.
 	*/ 		
 	const CString & operator +=(const char *str);
+	// have to be friend so we can use char and char* as first arguments
+	/**
+	 * Friend operator, used to concatenate.
+	*/ 	
+	friend CString IRA::operator +(const CString& s1,const CString & s2);
+	/**
+	 * Friend operator, used to concatenate.
+	*/ 		
+	friend CString IRA::operator +(const CString & s1, char ch);
+	/**
+	 * Friend operator, used to concatenate.
+	*/ 		
+	friend CString IRA::operator +(const CString & s1, const char *str);
+	/**
+	 * Friend operator, used to concatenate.
+	*/ 		
+	friend CString IRA::operator +(char ch, const CString & s2);
+	/**
+	 * Friend operator, used to concatenate.
+	*/ 		
+	friend CString IRA::operator +(const char *str, const CString & s2);
+
 	// compare
 	/**
-	 * Frind operator used to compare strings
+	 * Friend operator used to compare strings
 	*/ 	
-	friend bool operator ==(const CString & s1, const CString & s2);
+	friend bool IRA::operator ==(const CString & s1, const CString & s2);
 	/**
-	 * Frind operator used to compare strings
+	 * Friend operator used to compare strings
 	*/ 		
-	friend bool operator ==(const CString & s1, const char *s2);
+	friend bool IRA::operator ==(const CString & s1, const char *s2);
 	/**
-	 * Frind operator used to compare strings
+	 * Friend operator used to compare strings
 	*/ 		
-	friend bool operator ==(const char *s1, const CString & s2);
+	friend bool IRA::operator ==(const char *s1, const CString & s2);
 	/**
-	 * Frind operator used to compare strings
+	 * Friend operator used to compare strings
 	*/ 		
-	friend bool operator !=(const CString & s1, const CString & s2);
+	friend bool IRA::operator !=(const CString & s1, const CString & s2);
 	/**
-	 * Frind operator used to compare strings
+	 * Friend operator used to compare strings
 	*/ 		
-	friend bool operator !=(const CString & s1, const char *s2);
+	friend bool IRA::operator !=(const CString & s1, const char *s2);
 	/**
-	 * Frind operator used to compare strings
+	 * Friend operator used to compare strings
 	*/ 		
-	friend bool operator !=(const char *s1, const CString & s2);
+	friend bool IRA::operator !=(const char *s1, const CString & s2);
 	/**
-	 * Frind operator used to compare strings
+	 * Friend operator used to compare strings
 	*/ 		
-	friend bool operator < (const CString & s1, const CString & s2);
+	friend bool IRA::operator < (const CString & s1, const CString & s2);
 	/**
-	 * Frind operator used to compare strings
+	 * Friend operator used to compare strings
 	*/ 		
-	friend bool operator < (const CString & s1, const char *s2);
+	friend bool IRA::operator < (const CString & s1, const char *s2);
 	/**
-	 * Frind operator used to compare strings
+	 * Friend operator used to compare strings
 	*/ 		
-	friend bool operator < (const char *s1, const CString & s2);
+	friend bool IRA::operator < (const char *s1, const CString & s2);
 	/**
-	 * Frind operator used to compare strings
+	 * Friend operator used to compare strings
 	*/ 		
-	friend bool operator > (const CString & s1, const CString & s2);
+	friend bool IRA::operator > (const CString & s1, const CString & s2);
 	/**
-	 * Frind operator used to compare strings
+	 * Friend operator used to compare strings
 	*/ 		
-	friend bool operator > (const CString & s1, const char *s2);
+	friend bool IRA::operator > (const CString & s1, const char *s2);
 	/**
-	 * Frind operator used to compare strings
+	 * Friend operator used to compare strings
 	*/ 		
-	friend bool operator > (const char *s1, const CString & s2);
+	friend bool IRA::operator > (const char *s1, const CString & s2);
 	/**
-	 * Frind operator used to compare strings
+	 * Friend operator used to compare strings
 	*/ 		
-	friend bool operator <=(const CString & s1, const CString & s2);
+	friend bool IRA::operator <=(const CString & s1, const CString & s2);
 	/**
-	 * Frind operator used to compare strings
+	 * Friend operator used to compare strings
 	*/ 		
 	friend bool operator <=(const CString & s1, const char *s2);
 	/**
-	 * Frind operator used to compare strings
+	 * Friend operator used to compare strings
 	*/ 		
-	friend bool operator <=(const char *s1, const CString & s2);
+	friend bool IRA::operator <=(const char *s1, const CString & s2);
 	/**
-	 * Frind operator used to compare strings
+	 * Friend operator used to compare strings
 	*/ 		
-	friend bool operator >=(const CString & s1, const CString & s2);
+	friend bool IRA::operator >=(const CString & s1, const CString & s2);
 	/**
-	 * Frind operator used to compare strings
+	 * Friend operator used to compare strings
 	*/ 		
-	friend bool operator >=(const CString & s1, const char *s2);
+	friend bool IRA::operator >=(const CString & s1, const char *s2);
 	/**
-	 * Frind operator used to compare strings
+	 * Friend operator used to compare strings
 	*/ 		
-	friend bool operator >=(const char *s1, const CString & s2);
-	/**
-	 * Frind operator used to compare strings
-	*/ 		
+	friend bool IRA::operator >=(const char *s1, const CString & s2);		
 protected:
 	int m_iSize;
 	char *m_cpString;

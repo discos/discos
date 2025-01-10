@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 """
 Author: Marco Buttu <mbuttu@oa-cagliari.inaf.it>
 Licence: GPL 2.0 <http://www.gnu.org/licenses/gpl-2.0.html>
@@ -39,10 +40,10 @@ if __name__ == '__main__':
             upper_freq=170.6, # Backend upper frequency (MHz)
             calibrations=10, # Percentage of calibrations (10 means 10% of cycles)
             ) 
-    except (TypeError, AttributeError), e:
+    except (TypeError, AttributeError) as e:
         print('CONFIGURATION ERROR: %s' %e)
         sys.exit(1)
-    except Exception, e:
+    except Exception as e:
         import traceback
         print('UNEXPECTED ERROR: %s' %e)
         traceback.print_tb(sys.exc_info()[2])

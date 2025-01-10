@@ -80,7 +80,7 @@ void CSubScanBinder::peaker(const IRA::CString& axis,const double& span,const AC
 		antennaSpan*=-1.0;
 	}
 	if (antennaSpan>0) {
-		OTFC(Antenna::ANT_EQUATORIAL,geom,Antenna::ANT_HORIZONTAL,direction,antennaSpan,duration,sec);
+		otfc(Antenna::ANT_EQUATORIAL,geom,Antenna::ANT_HORIZONTAL,direction,antennaSpan,duration,sec);
 	}
 	else {
 		if (sec==NULL) { // in this case the current target is kept!
@@ -106,7 +106,7 @@ void CSubScanBinder::peaker(const IRA::CString& axis,const double& span,const AC
 	m_subScanConf->signal=Management::MNG_SIGNAL_NONE;
 }
 
-void CSubScanBinder::OTFC(const Antenna::TCoordinateFrame& coordFrame,const Antenna::TsubScanGeometry& geometry,
+void CSubScanBinder::otfc(const Antenna::TCoordinateFrame& coordFrame,const Antenna::TsubScanGeometry& geometry,
 	const Antenna::TCoordinateFrame& subScanFrame,const Antenna::TsubScanDirection& direction,
 	const double& span,const ACS::TimeInterval& subScanDuration,const Antenna::TTrackingParameters * const sec)
 {

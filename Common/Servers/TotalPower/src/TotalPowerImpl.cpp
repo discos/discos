@@ -180,6 +180,7 @@ void TotalPowerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	m_parser->add("getZero",new function1<CCommandLine,non_constant,void_type,O<doubleSeq_type> >(line,&CCommandLine::getZero),0 );
 	m_parser->add("getTime",new function1<CCommandLine,non_constant,void_type,O<time_type> >(line,&CCommandLine::getTime),0 );
 	m_parser->add("initialize",new function1<CCommandLine,non_constant,void_type,I<string_type> >(line,&CCommandLine::setup),1 );
+	m_parser->add("backendPark", new function0<CCommandLine,non_constant, void_type>(line,&CCommandLine::backendPark),0 );
 		
 	threadPar.sender=this;
 	threadPar.command=m_commandLine;

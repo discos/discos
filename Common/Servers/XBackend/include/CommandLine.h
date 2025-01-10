@@ -358,6 +358,8 @@ public:
 			BackendsErrors::ConnectionExImpl,ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,
 			BackendsErrors::MalformedAnswerExImpl,BackendsErrors::BackendBusyExImpl);
 
+	void backendPark() throw (BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
+		ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::NotAllowedExImpl,BackendsErrors::BackendFailExImpl);
 	/**
 	 * Called by the component to fill the <i>Backends::TMainHeader</i> with the proper informations.
 	 * @param bkd the stucture that contains the required information.

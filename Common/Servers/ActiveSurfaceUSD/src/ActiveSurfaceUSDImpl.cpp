@@ -321,7 +321,7 @@ void USDImpl::reset() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 
     try
     {
-        _SET_CDB(calibrate, m_calibrate, "::USDImpl::reset()")
+        //_SET_CDB(calibrate, m_calibrate, "::USDImpl::reset()")
         action(RESET);
 
         //* restore defaults *//
@@ -589,7 +589,7 @@ void USDImpl::update(CORBA::Double elevation) throw (CORBA::SystemException, ASE
         updatePos = std::min(updatePos, m_top);
         if(updatePos == m_lastCmdStep)
             return;
-        _GET_PROP(status, m_status, "usdImpl::calibrate()")
+        _GET_PROP(status, m_status, "usdImpl::update()")
         bool running = m_status&MRUN;
         if(running)
             return;

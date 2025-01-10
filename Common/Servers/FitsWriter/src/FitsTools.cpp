@@ -60,7 +60,7 @@ CCfits::Table *CFitsTools::createTable(CCfits::FITS *const fits,const IRA::CStri
 	CCfits::Table *table;
 	if (!fits) {
 		errorMessage="fits file is not created";
-		return false;
+		return NULL;
 	}
 	try {
 		table=fits->addTable((const char *)name,0,colName,colForm,colUnit);

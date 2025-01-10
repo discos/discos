@@ -78,10 +78,12 @@
 /* define name and component interface */
 /* ********************************** */
 #define COMPONENT_NAME "MINORSERVO/Boss"              /* the name of the instantiation of the component */
-#define COMPONENT_INTERFACE_TPYE "IDL:alma/MinorServo/MinorServoBoss:1.0"  /* the type of the interface */
 #define COMPONENT_IDL_MODULE MinorServo	/* the IDL module that contains the component interface */
 #define COMPONENT_IDL_INTERFACE MinorServoBoss  /* the IDL interface of the component */
 #define COMPONENT_SMARTPOINTER MinorServoBoss_var /* the component type */
+#ifndef COMPONENT_INTERFACE_TPYE
+    #define COMPONENT_INTERFACE_TPYE "IDL:alma/MinorServo/MinorServoBoss:1.0"
+#endif
 /* ********************************** */
 
 /* define user input command style */

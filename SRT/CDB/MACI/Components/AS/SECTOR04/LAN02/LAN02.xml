@@ -4,14 +4,14 @@
        xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" 
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        Name="LAN02"    Code="lanImpl"  Type="IDL:alma/ActiveSurface/lan:1.0"	Container="SRTActiveSurfaceContainer04" ImplLang="cpp">
-      <_ Name="USD07"  Code="ActiveSurfaceUSDImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer04" ImplLang="cpp"/>
-      <_ Name="USD08"  Code="ActiveSurfaceUSDImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer04" ImplLang="cpp"/>
-      <_ Name="USD09"  Code="ActiveSurfaceUSDImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer04" ImplLang="cpp"/>
-      <_ Name="USD10"  Code="ActiveSurfaceUSDImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer04" ImplLang="cpp"/>
-      <_ Name="USD11"  Code="ActiveSurfaceUSDImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer04" ImplLang="cpp"/>
-      <_ Name="USD12"  Code="ActiveSurfaceUSDImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer04" ImplLang="cpp"/>
-      <_ Name="USD13"  Code="ActiveSurfaceUSDImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer04" ImplLang="cpp"/>
-      <_ Name="USD14"  Code="ActiveSurfaceUSDImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer04" ImplLang="cpp"/>
-      <_ Name="USD15"  Code="ActiveSurfaceUSDImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer04" ImplLang="cpp"/>
+      <e Name="USD07"  Code="ActiveSurfaceUSDImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer04" ImplLang="cpp"/>
+      <e Name="USD08"  Code="ActiveSurfaceUSDImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer04" ImplLang="cpp"/>
+      <e Name="USD09"  Code="ActiveSurfaceUSDImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer04" ImplLang="cpp"/>
+      <e Name="USD10"  Code="ActiveSurfaceUSDImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer04" ImplLang="cpp"/>
+      <e Name="USD11"  Code="ActiveSurfaceUSDImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer04" ImplLang="cpp"/>
+      <e Name="USD12"  Code="ActiveSurfaceUSDImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer04" ImplLang="cpp"/>
+      <e Name="USD13"  Code="ActiveSurfaceUSDImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer04" ImplLang="cpp"/>
+      <e Name="USD14"  Code="ActiveSurfaceUSDImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer04" ImplLang="cpp"/>
+      <e Name="USD15"  Code="ActiveSurfaceUSDImpl"  Type="IDL:alma/ActiveSurface/USD:1.0"	Container="SRTActiveSurfaceContainer04" ImplLang="cpp"/>
 
 </HierarchicalComponent>

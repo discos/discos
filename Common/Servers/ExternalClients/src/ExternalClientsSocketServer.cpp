@@ -17,8 +17,7 @@ using namespace ComponentErrors;
 using namespace ManagementErrors;
 
 CExternalClientsSocketServer::CExternalClientsSocketServer (ContainerServices * service):CSocket (),
-m_services
-(service)
+m_services (service), m_logDike(_IRA_LOGDIKE_GETLOGGER), m_peerAddress(""), m_peerPort(0)
 {
   AUTO_TRACE ("CExternalClientsSocketServer::CExternalClientsSocketServer()");
   setExternalClientSocketStatus (ExternalClientSocketStatus_NOTCNTD);
@@ -231,6 +230,9 @@ CExternalClientsSocketServer::cmdToScheduler ()
 	}
       if (Res == WOULDBLOCK)
 	setSockMode (m_Error, BLOCKING);
+
+      newExternalClientsSocketServer.getPeerName(m_peerAddress, m_peerPort);
+      ACS_LOG(LM_FULL_INFO, "CExternalClientsSocketServer::cmdToScheduler()", (LM_NOTICE, std::string("Got connection from " + std::string(m_peerAddress) + " " + std::to_string(m_peerPort)).c_str()));
     }
   m_accept = true;
 
@@ -308,7 +310,8 @@ CExternalClientsSocketServer::cmdToScheduler ()
 	  {
 	    _EXCPT (ComponentErrors::UnexpectedExImpl, impl,
 		    "CExternalClientsSocketServer::cmdToScheduler()");
-	    impl.log (LM_ERROR);
+	    _IRA_LOGDIKE_EXCEPTION(m_logDike,impl,LM_ERROR);
+	    //impl.log (LM_ERROR);
 	    status_val = "NA";
 	  }
 	  out.Concat (status_val);
@@ -322,7 +325,8 @@ CExternalClientsSocketServer::cmdToScheduler ()
 	  {
 	    _EXCPT (ComponentErrors::UnexpectedExImpl, impl,
 		    "CExternalClientsSocketServer::cmdToScheduler()");
-	    impl.log (LM_ERROR);
+	    _IRA_LOGDIKE_EXCEPTION(m_logDike,impl,LM_ERROR);
+	    //impl.log (LM_ERROR);
 	    target = "NA";
 	  }
 	  out.Concat (target);
@@ -350,7 +354,8 @@ CExternalClientsSocketServer::cmdToScheduler ()
 	  {
 	    _EXCPT (ComponentErrors::UnexpectedExImpl, impl,
 		    "CExternalClientsSocketServer::cmdToScheduler()");
-	    impl.log (LM_ERROR);
+	    _IRA_LOGDIKE_EXCEPTION(m_logDike,impl,LM_ERROR);
+	    //impl.log (LM_ERROR);
 	    azStr = "NA";
 	    elStr = "NA";
 	    raStr = "NA";
@@ -385,7 +390,8 @@ CExternalClientsSocketServer::cmdToScheduler ()
 	  {
 	    _EXCPT (ComponentErrors::UnexpectedExImpl, impl,
 		    "CExternalClientsSocketServer::cmdToScheduler()");
-	    impl.log (LM_ERROR);
+	    _IRA_LOGDIKE_EXCEPTION(m_logDike,impl,LM_ERROR);
+	    //impl.log (LM_ERROR);
 	    azErr = 0.0;
 	  }
 	  out.Concat (azErr);
@@ -399,7 +405,8 @@ CExternalClientsSocketServer::cmdToScheduler ()
 	  {
 	    _EXCPT (ComponentErrors::UnexpectedExImpl, impl,
 		    "CExternalClientsSocketServer::cmdToScheduler()");
-	    impl.log (LM_ERROR);
+	    _IRA_LOGDIKE_EXCEPTION(m_logDike,impl,LM_ERROR);
+	    //impl.log (LM_ERROR);
 	    elErr = 0.0;
 	  }
 	  out.Concat (elErr);
@@ -413,7 +420,8 @@ CExternalClientsSocketServer::cmdToScheduler ()
 	  {
 	    _EXCPT (ComponentErrors::UnexpectedExImpl, impl,
 		    "CExternalClientsSocketServer::cmdToScheduler()");
-	    impl.log (LM_ERROR);
+	    _IRA_LOGDIKE_EXCEPTION(m_logDike,impl,LM_ERROR);
+	    //impl.log (LM_ERROR);
 	    pointingAzCorr = 0.0;
 	  }
 	  out.Concat (pointingAzCorr);
@@ -428,7 +436,8 @@ CExternalClientsSocketServer::cmdToScheduler ()
 	  {
 	    _EXCPT (ComponentErrors::UnexpectedExImpl, impl,
 		    "CExternalClientsSocketServer::cmdToScheduler()");
-	    impl.log (LM_ERROR);
+	    _IRA_LOGDIKE_EXCEPTION(m_logDike,impl,LM_ERROR);
+	    //impl.log (LM_ERROR);
 	    pointingElCorr = 0.0;
 	  }
 	  out.Concat (pointingElCorr);
@@ -442,7 +451,8 @@ CExternalClientsSocketServer::cmdToScheduler ()
 	  {
 	    _EXCPT (ComponentErrors::UnexpectedExImpl, impl,
 		    "CExternalClientsSocketServer::cmdToScheduler()");
-	    impl.log (LM_ERROR);
+	    _IRA_LOGDIKE_EXCEPTION(m_logDike,impl,LM_ERROR);
+	    //impl.log (LM_ERROR);
 	    refractionCorr = 0.0;
 	  }
 	  out.Concat (refractionCorr);
@@ -456,7 +466,8 @@ CExternalClientsSocketServer::cmdToScheduler ()
 	  {
 	    _EXCPT (ComponentErrors::UnexpectedExImpl, impl,
 		    "CExternalClientsSocketServer::cmdToScheduler()");
-	    impl.log (LM_ERROR);
+	    _IRA_LOGDIKE_EXCEPTION(m_logDike,impl,LM_ERROR);
+	    //impl.log (LM_ERROR);
 	    azOff = 0.0;
 	    elOff = 0.0;
 	    raOff = 0.0;
@@ -485,7 +496,8 @@ CExternalClientsSocketServer::cmdToScheduler ()
 	  {
 	    _EXCPT (ComponentErrors::UnexpectedExImpl, impl,
 		    "CExternalClientsSocketServer::cmdToScheduler()");
-	    impl.log (LM_ERROR);
+	    _IRA_LOGDIKE_EXCEPTION(m_logDike,impl,LM_ERROR);
+	    //impl.log (LM_ERROR);
 	    receiver = "NA";
 	  }
 	  out.Concat (receiver);
@@ -500,7 +512,8 @@ CExternalClientsSocketServer::cmdToScheduler ()
 	  {
 	    _EXCPT (ComponentErrors::UnexpectedExImpl, impl,
 		    "CExternalClientsSocketServer::cmdToScheduler()");
-	    impl.log (LM_ERROR);
+	    _IRA_LOGDIKE_EXCEPTION(m_logDike,impl,LM_ERROR);
+	    //impl.log (LM_ERROR);
 	    lo[0] = 0.0;
 	  }
 	  out.Concat (lo[0]);
@@ -522,7 +535,8 @@ CExternalClientsSocketServer::cmdToScheduler ()
 	  {
 	    _EXCPT (ComponentErrors::UnexpectedExImpl, impl,
 		    "CExternalClientsSocketServer::cmdToScheduler()");
-	    impl.log (LM_ERROR);
+	    _IRA_LOGDIKE_EXCEPTION(m_logDike,impl,LM_ERROR);
+	    //impl.log (LM_ERROR);
 	    trackingStr = "NA";
 	  }
 	  out.Concat (trackingStr);
@@ -549,7 +563,8 @@ CExternalClientsSocketServer::cmdToScheduler ()
 	  {
 	    _EXCPT (ComponentErrors::UnexpectedExImpl, impl,
 		    "CExternalClientsSocketServer::cmdToScheduler()");
-	    impl.log (LM_ERROR);
+	    _IRA_LOGDIKE_EXCEPTION(m_logDike,impl,LM_ERROR);
+	    //impl.log (LM_ERROR);
 	    ret_val = "Unexpected Error";
 	    out = IRA::CString (ret_val);
 	  }
@@ -560,17 +575,24 @@ CExternalClientsSocketServer::cmdToScheduler ()
 	      printf("dentro ans==false\n");
 	    }*/
 	}
+	out.ReplaceAll('\n','-');
+	/*out.Replace('\n','-');
 	out.Replace('\n','-');
+	out.Replace('\n','-');
+	out.Replace('\n','-');*/
       Len = out.GetLength ();
       int i;
-      for (i = 0; i < Len; i++)
-	{
-	  outBuffer[i] = out.CharAt (i);
-	}
+      for (i = 0; i < Len; i++) {
+	//if (out.CharAt(i)=='\n')
+	  // break;	
+	outBuffer[i] = out.CharAt (i);
+      }
       out.Empty();
       outBuffer[Len] = '\n';
+      //outBuffer[i] = '\n';
       //printf ("Command returned = %s", outBuffer);
       Res = sendBuffer (outBuffer, Len + 1);
+      //Res = sendBuffer (outBuffer, i + 1);
       if (Res == WOULDBLOCK || Res == FAIL)
 	{
 	  _EXCPT (SocketErrorExImpl, impl,
@@ -583,7 +605,10 @@ CExternalClientsSocketServer::cmdToScheduler ()
     }
   else
     {
+      ACS_LOG(LM_FULL_INFO, "CExternalClientsSocketServer::cmdToScheduler()", (LM_NOTICE, std::string("Closed connection from " + std::string(m_peerAddress) + " " + std::to_string(m_peerPort)).c_str()));
       newExternalClientsSocketServer.Close (m_Error);
+      m_peerAddress = "";
+      m_peerPort = 0;
       m_accept = false;
     }
 }

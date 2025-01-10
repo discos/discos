@@ -68,7 +68,7 @@ void test3Unary(const int& i,const int& j,const int& k) {
 	int y=i+j+k;
 	printf("'Test3Unary': %d\n",y);
 }
-void Error() throw (ComponentErrors::MemoryAllocationExImpl) {
+void Error() /*throw (ComponentErrors::MemoryAllocationExImpl)*/ {
 	_THROW_EXCPT(ComponentErrors::MemoryAllocationExImpl,"CProva::Error()");
 }
 void testRadHourAngle(double& ra) {

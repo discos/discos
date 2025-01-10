@@ -1,17 +1,38 @@
+
 #*******************************************************************************
-# E.S.O. - ACS project
+# PPPPPPPP
 #
-# "@(#) $Id: Makefile,v 1.1 2010-07-26 12:35:35 c.migoni Exp $"
+# "@(#) $Id$"
 #
-# Makefile of USD
+# Makefile of ........
 #
 # who       when      what
 # --------  --------  ----------------------------------------------
-# almaprog  04/08/04  created
+# discos  23/02/21  created
 #
 
+# ALMA - Atacama Large Millimeter Array
+# Copyright (c) ESO - European Southern Observatory, 2014
+# (in the framework of the ALMA collaboration).
+# All rights reserved.
+# 
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 #*******************************************************************************
-# This Makefile follows VLT Standards (see Makefile(5) for more).
+
+#*******************************************************************************
+# This Makefile follows ALMA/ACS Standards (see Makefile(5) for more).
 #*******************************************************************************
 # REMARKS
 #    None
@@ -24,29 +45,7 @@
 #
 # additional include and library search paths
 #USER_INC = 
-USER_LIB = 	-lACE \
-			-lTAO \
-			-lTAO_DsLogAdmin \
-			-lTAO_CosNaming \
-			-lTAO_IORTable \
-			-lTAO_PortableServer \
-			-lTAO_Svc_Utils \
-			-lTAO_CosTrading \
-        	-lTAO_CosNotification \
-			-lTAO_DynamicAny \
-			-lTAO_IFR_Client \
-        	-lTAO_CosProperty \
-			-lacsutil \
-			-lcdb \
-			-llogging \
-	        -lacscomponent \
-			-lbaci \
-			-lmaci \
-			-lmaciClient \
-			-lacserr \
-			-lm \
-            -lloki \
-            -lACSErrTypeCommon 
+#USER_LIB = 
 
 #
 # MODULE CODE DESCRIPTION:
@@ -57,12 +56,14 @@ USER_LIB = 	-lACE \
 #
 # C programs (public and local)
 # -----------------------------
-EXECUTABLES     =   
-EXECUTABLES_L   =  
+EXECUTABLES     =
+EXECUTABLES_L   = 
 
 #
 # <brief description of xxxxx program>
+xxxxx_OBJECTS   =	
 xxxxx_LDFLAGS   =
+xxxxx_LIBS      =
 
 #
 # special compilation flags for single c sources
@@ -70,17 +71,19 @@ xxxxx_LDFLAGS   =
 
 #
 # Includes (.h) files (public only)
-INCLUDES        = 
+# ---------------------------------
+INCLUDES        =
 
 #
 # Libraries (public and local)
 # ----------------------------
 LIBRARIES       =
 LIBRARIES_L     =
+
 #
 # <brief description of lllll library>
-#lllll_OBJECTS =
-#lllll_LIBS=
+lllll_OBJECTS   =
+
 #
 # Scripts (public and local)
 # ----------------------------
@@ -125,25 +128,24 @@ tttlll_OBJECTS  =
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS =
+CDB_SCHEMAS = NotoActiveSurfaceBoss usd 
 
-#
+# 
 # IDL Files and flags
 # 
-#IDL_FILES = lan usd SRTActiveSurfaceBoss
 IDL_FILES = NotoActiveSurfaceBoss
-IDL_TAO_FLAGS =
+TAO_IDLFLAGS =
 USER_IDL =
-
 NotoActiveSurfaceBossStubs_LIBS = baciStubs ComponentErrorsStubs ASErrorsStubs \
-    ManagmentDefinitionsStubs ActiveSurfaceBossStubs
-
+					ManagmentDefinitionsStubs ActiveSurfaceBossStubs ActiveSurfaceCommonStubs
 #
 # Jarfiles and their directories
 #
 JARFILES= 
 jjj_DIRS=
-jjj_EXTRAS= 
+jjj_EXTRAS=
+# For expressing dependencies between jarfiles (parallel builds)
+jjj_JLIBS= 
 #
 # java sources in Jarfile on/off
 DEBUG= 
@@ -201,20 +203,11 @@ CSOURCENAMES = \
 #
 # INCLUDE STANDARDS
 # -----------------
-ifdef ACSROOT
-    MAKEDIR  = $(shell if [ -f $(INTROOT)/include/acsMakefile ];  then \
-                     echo $(INTROOT)/include; \
-	           else \
-	             echo $(ACSROOT)/include; \
-		   fi;)
-    include $(MAKEDIR)/acsMakefile
-else
-    MAKEDIR  = $(shell if [ -f $(INTROOT)/include/vltMakefile ];  then \
-                     echo $(INTROOT)/include; \
-	           else \
-	             echo $(VLTROOT)/include; \
-		   fi;)
-    include $(MAKEDIR)/vltMakefile
+
+MAKEDIRTMP := $(shell searchFile include/acsMakefile)
+ifneq ($(MAKEDIRTMP),\#error\#)
+   MAKEDIR := $(MAKEDIRTMP)/include
+   include $(MAKEDIR)/acsMakefile
 endif
 
 #
@@ -235,12 +228,5 @@ man   : do_man
 install : install_all
 	@echo " . . . installation done"
 
-db : db_all
-	@echo " . . . ../DB done"
-
-cln~ :
-	find ../ -name "*~" -exec rm -i '{}' \;
-
 
 #___oOo___
-	

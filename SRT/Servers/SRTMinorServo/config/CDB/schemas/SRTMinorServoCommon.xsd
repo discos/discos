@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+    Author: Giuseppe Carboni, giuseppe.carboni@inaf.it
+-->
+<xs:schema
+    targetNamespace="urn:schemas-cosylab-com:SRTMinorServoCommon:1.0"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns="urn:schemas-cosylab-com:SRTMinorServoCommon:1.0"
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:mng="urn:schemas-cosylab-com:Managment:1.0"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+
+    <xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd" />
+    <xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd" />
+    <xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
+
+    <xs:complexType name="SRTMinorServoFocalConfigurationType">
+     <xs:complexContent>
+      <xs:restriction base="baci:ROEnum">
+       <xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
+       <xs:attribute name="graph_max" type="xs:int" use="optional" default="13" />
+       <xs:attribute name="statesDescription" type="xs:string" use="optional" default="CONFIGURATION_UNKNOWN" />
+      </xs:restriction>
+     </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="SRTMinorServoGregorianCoverStatusType">
+     <xs:complexContent>
+      <xs:restriction base="baci:ROEnum">
+       <xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
+       <xs:attribute name="graph_max" type="xs:int" use="optional" default="2" />
+       <xs:attribute name="statesDescription" type="xs:string" use="optional" default="COVER_STATUS_UNKNOWN" />
+      </xs:restriction>
+     </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="SRTMinorServoGregorianAirBladeStatusType">
+     <xs:complexContent>
+      <xs:restriction base="baci:ROEnum">
+       <xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
+       <xs:attribute name="graph_max" type="xs:int" use="optional" default="2" />
+       <xs:attribute name="statesDescription" type="xs:string" use="optional" default="AIR_BLADE_STATUS_OFF" />
+      </xs:restriction>
+     </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="SRTMinorServoControlStatusType">
+     <xs:complexContent>
+      <xs:restriction base="baci:ROEnum">
+       <xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
+       <xs:attribute name="graph_max" type="xs:int" use="optional" default="1" />
+       <xs:attribute name="statesDescription" type="xs:string" use="optional" default="CONTROL_DISCOS" />
+      </xs:restriction>
+     </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="SRTMinorServoCabinetStatusType">
+     <xs:complexContent>
+      <xs:restriction base="baci:ROEnum">
+       <xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
+       <xs:attribute name="graph_max" type="xs:int" use="optional" default="2" />
+       <xs:attribute name="statesDescription" type="xs:string" use="optional" default="DRIVE_CABINET_OK" />
+      </xs:restriction>
+     </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="SRTMinorServoOperativeModeType">
+     <xs:complexContent>
+      <xs:restriction base="baci:ROEnum">
+       <xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
+       <xs:attribute name="graph_max" type="xs:int" use="optional" default="5" />
+       <xs:attribute name="statesDescription" type="xs:string" use="optional" default="OPERATIVE_MODE_UNKNOWN" />
+      </xs:restriction>
+     </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="SRTMinorServoErrorType">
+     <xs:complexContent>
+      <xs:restriction base="baci:ROEnum">
+       <xs:attribute name="graph_min" type="xs:int" use="optional" default="0" />
+       <xs:attribute name="graph_max" type="xs:int" use="optional" default="7" />
+       <xs:attribute name="statesDescription" type="xs:string" use="optional" default="ERROR_NO_ERROR" />
+      </xs:restriction>
+     </xs:complexContent>
+    </xs:complexType>
+
+</xs:schema>

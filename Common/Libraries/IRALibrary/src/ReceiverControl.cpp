@@ -28,7 +28,7 @@ ReceiverControl::ReceiverControl(
         const BYTE switch_madd,
         const BYTE switch_sadd,
         bool reliable_comm
-) throw (ReceiverControlEx) : 
+): 
     m_dewar_ip(dewar_ip),
     m_dewar_port(dewar_port),
     m_lna_ip(lna_ip),
@@ -76,7 +76,7 @@ void ReceiverControl::setCalibrationOn(
         const BYTE port_type, 
         const BYTE port_number, 
         const BYTE value
-        ) throw (ReceiverControlEx)
+        )
 {
     try {
         makeRequest(
@@ -101,7 +101,7 @@ void ReceiverControl::setCalibrationOff(
         const BYTE port_type, 
         const BYTE port_number, 
         const BYTE value
-        ) throw (ReceiverControlEx)
+        )
 {
     try {
         makeRequest(
@@ -125,7 +125,7 @@ bool ReceiverControl::isCalibrationOn(
         const BYTE data_type, 
         const BYTE port_type, 
         const BYTE port_number
-        ) throw (ReceiverControlEx)
+        )
 {
     try {
         std::vector<BYTE> parameters = makeRequest(
@@ -155,7 +155,7 @@ void ReceiverControl::setExtCalibrationOn(
         const BYTE port_type, 
         const BYTE port_number, 
         const BYTE value
-        ) throw (ReceiverControlEx)
+        )
 {
     try {
         makeRequest(
@@ -180,7 +180,7 @@ void ReceiverControl::setExtCalibrationOff(
         const BYTE port_type, 
         const BYTE port_number, 
         const BYTE value
-        ) throw (ReceiverControlEx)
+        )
 {
     try {
         makeRequest(
@@ -204,7 +204,7 @@ bool ReceiverControl::isExtCalibrationOn(
         const BYTE data_type, 
         const BYTE port_type, 
         const BYTE port_number
-        ) throw (ReceiverControlEx)
+        )
 {
     try {
         std::vector<BYTE> parameters = makeRequest(
@@ -235,7 +235,7 @@ double ReceiverControl::vacuum(
         const BYTE port_type,    
         const BYTE port_number, 
         const size_t raw_index
-        ) throw (ReceiverControlEx) 
+        )
 {
     try {
 
@@ -265,7 +265,7 @@ double ReceiverControl::vertexTemperature(
         const BYTE port_type,       
         const BYTE port_number,  
         const size_t raw_index                      
-        ) throw (ReceiverControlEx)
+        )
 {
     try {
 
@@ -295,7 +295,7 @@ double ReceiverControl::cryoTemperature(
         const BYTE data_type,     
         const BYTE port_type,    
         const BYTE port_number
-        ) throw (ReceiverControlEx) 
+        )
 {
 
     const size_t raw_index = temperature_id;
@@ -333,7 +333,7 @@ void ReceiverControl::setCoolHeadOn(
             const BYTE port_type,
             const BYTE port_number,
             const BYTE value
-            ) throw (ReceiverControlEx) 
+            )
 {
     try {
         makeRequest(
@@ -358,7 +358,7 @@ void ReceiverControl::setCoolHeadOff(
             const BYTE port_type,
             const BYTE port_number,
             const BYTE value
-            ) throw (ReceiverControlEx) 
+            )
 {
     try {
         makeRequest(
@@ -382,7 +382,7 @@ bool ReceiverControl::isCoolHeadSetOn(
             const BYTE data_type,
             const BYTE port_type,
             const BYTE port_number
-            ) throw (ReceiverControlEx)
+            )
 {
     try {
         std::vector<BYTE> parameters = makeRequest(
@@ -411,7 +411,7 @@ bool ReceiverControl::isCoolHeadOn(
             const BYTE data_type,
             const BYTE port_type,
             const BYTE port_number
-            ) throw (ReceiverControlEx)
+            )
 {
     try {
         std::vector<BYTE> parameters = makeRequest(
@@ -441,7 +441,7 @@ void ReceiverControl::setVacuumSensorOn(
             const BYTE port_type,
             const BYTE port_number,
             const BYTE value
-            ) throw (ReceiverControlEx) 
+            )
 {
     try {
         makeRequest(
@@ -466,7 +466,7 @@ void ReceiverControl::setVacuumSensorOff(
             const BYTE port_type,
             const BYTE port_number,
             const BYTE value
-            ) throw (ReceiverControlEx) 
+            )
 {
     try {
         makeRequest(
@@ -490,7 +490,7 @@ bool ReceiverControl::isVacuumSensorOn(
             const BYTE data_type,
             const BYTE port_type,
             const BYTE port_number
-            ) throw (ReceiverControlEx)
+            )
 {
     try {
         std::vector<BYTE> parameters = makeRequest(
@@ -520,7 +520,7 @@ void ReceiverControl::setVacuumPumpOn(
             const BYTE port_type,
             const BYTE port_number,
             const BYTE value
-            ) throw (ReceiverControlEx) 
+            )
 {
     try {
         makeRequest(
@@ -545,7 +545,7 @@ void ReceiverControl::setVacuumPumpOff(
             const BYTE port_type,
             const BYTE port_number,
             const BYTE value
-            ) throw (ReceiverControlEx) 
+            )
 {
     try {
         makeRequest(
@@ -569,7 +569,7 @@ bool ReceiverControl::isVacuumPumpOn(
             const BYTE data_type,
             const BYTE port_type,
             const BYTE port_number
-            ) throw (ReceiverControlEx)
+            )
 {
     try {
         std::vector<BYTE> parameters = makeRequest(
@@ -598,7 +598,7 @@ bool ReceiverControl::hasVacuumPumpFault(
         const BYTE data_type,
         const BYTE port_type,
         const BYTE port_number
-        ) throw (ReceiverControlEx)
+        )
 {
     try {
         std::vector<BYTE> parameters = makeRequest(
@@ -628,7 +628,7 @@ void ReceiverControl::setVacuumValveOn(
             const BYTE port_type,
             const BYTE port_number,
             const BYTE value
-            ) throw (ReceiverControlEx) 
+            )
 {
     try {
         makeRequest(
@@ -653,7 +653,7 @@ void ReceiverControl::setVacuumValveOff(
             const BYTE port_type,
             const BYTE port_number,
             const BYTE value
-            ) throw (ReceiverControlEx) 
+            )
 {
     try {
         makeRequest(
@@ -677,7 +677,7 @@ bool ReceiverControl::isVacuumValveOn(
             const BYTE data_type,
             const BYTE port_type,
             const BYTE port_number
-            ) throw (ReceiverControlEx)
+            )
 {
     try {
         std::vector<BYTE> parameters = makeRequest(
@@ -706,7 +706,7 @@ bool ReceiverControl::isRemoteOn(
             const BYTE data_type,
             const BYTE port_type,
             const BYTE port_number
-            ) throw (ReceiverControlEx)
+            )
 {
     try {
         std::vector<BYTE> parameters = makeRequest(
@@ -736,7 +736,7 @@ void ReceiverControl::selectLO1(
             const BYTE port_type,
             const BYTE port_number,
             const BYTE value
-            ) throw (ReceiverControlEx)
+            )
 {
     try {
         makeRequest(
@@ -760,7 +760,7 @@ bool ReceiverControl::isLO1Selected(
             const BYTE data_type,
             const BYTE port_type,
             const BYTE port_number
-            ) throw (ReceiverControlEx)
+            )
 {
     try {
         std::vector<BYTE> parameters = makeRequest(
@@ -790,7 +790,7 @@ void ReceiverControl::selectLO2(
             const BYTE port_type,
             const BYTE port_number,
             const BYTE value
-            ) throw (ReceiverControlEx) 
+            )
 {
     try {
         makeRequest(
@@ -814,7 +814,7 @@ bool ReceiverControl::isLO2Selected(
             const BYTE data_type,
             const BYTE port_type,
             const BYTE port_number
-            ) throw (ReceiverControlEx) 
+            )
 {
     try {
         std::vector<BYTE> parameters = makeRequest(
@@ -843,7 +843,7 @@ bool ReceiverControl::isLO2Locked(
             const BYTE data_type,
             const BYTE port_type,
             const BYTE port_number
-            ) throw (ReceiverControlEx) 
+            )
 {
     try {
         std::vector<BYTE> parameters = makeRequest(
@@ -875,7 +875,7 @@ void ReceiverControl::setSingleDishMode(
             const BYTE port_number_vlbi,
             const BYTE value_sd,
             const BYTE value_vlbi
-            ) throw (ReceiverControlEx) 
+            )
 {
     try {
         pthread_mutex_lock(&m_dewar_mutex); 
@@ -889,7 +889,7 @@ void ReceiverControl::setSingleDishMode(
                 port_number_vlbi,
                 value_vlbi
         );
-                
+
         // Turn OFF the single dish mode on port number 13
         makeRequest(
                 m_dewar_board_ptr,     // Pointer to the dewar board
@@ -901,8 +901,8 @@ void ReceiverControl::setSingleDishMode(
                 !value_sd
         );
 
-        // Now the bits 13 and 14 are set to 1
-        // We need to set the bit 13 to 0, wait a bit and set it to 1
+        // Now the bits 13 and 14 are set to 1, meaning no current is now traversing any switch magnet and no mode is currently selected
+        // We need to set the bit 13 to 0, which will send a TTL impulse to the desired magnet switch, selecting the desired mode
         
         usleep(3 * SETMODE_SLEEP_TIME);
         // Turn ON the single dish mode on port number 13
@@ -915,7 +915,8 @@ void ReceiverControl::setSingleDishMode(
                 port_number_sd,
                 value_sd
         );
-        
+
+        // We can switch off the TTL impulse after some time, setting the relative bit to 1 again
         usleep(3 * SETMODE_SLEEP_TIME);
         // Turn OFF the single dish mode on port number 13
         makeRequest(
@@ -928,8 +929,6 @@ void ReceiverControl::setSingleDishMode(
                 !value_sd
         );
         pthread_mutex_unlock(&m_dewar_mutex); 
-
-        // Now the bits 13 and 14 are set, respectively, to 0 and 1
     }
     catch(MicroControllerBoardEx& ex) {
         pthread_mutex_unlock(&m_dewar_mutex); 
@@ -943,7 +942,7 @@ bool ReceiverControl::isSingleDishModeOn(
             const BYTE data_type,
             const BYTE port_type,
             const BYTE port_number
-            ) throw (ReceiverControlEx) 
+            )
 {
     try {
         std::vector<BYTE> parameters = makeRequest(
@@ -975,7 +974,7 @@ void ReceiverControl::setVLBIMode(
             const BYTE port_number_sd,
             const BYTE value_vlbi,
             const BYTE value_sd
-            ) throw (ReceiverControlEx) 
+            )
 {
     try {
         pthread_mutex_lock(&m_dewar_mutex); 
@@ -989,6 +988,7 @@ void ReceiverControl::setVLBIMode(
                 port_number_sd,
                 value_sd
         );
+
         // Turn OFF the VLBI mode on port number 14
         makeRequest(
                 m_dewar_board_ptr,     // Pointer to the dewar board
@@ -1000,11 +1000,10 @@ void ReceiverControl::setVLBIMode(
                 !value_vlbi
         );
 
-        // Now the bits 13 and 14 are set to 1
-        // We need to set the bit 13 to 1, wait a bit and set again it to 0
+        // Now the bits 13 and 14 are set to 1, meaning no current is now traversing any switch magnet and no mode is currently selected
+        // We need to set the bit 14 to 0, which will send a TTL impulse to the desired magnet switch, selecting the desired mode
         
         usleep(3 * SETMODE_SLEEP_TIME);
-        
         // Turn ON the VLBI mode on port number 14
         makeRequest(
                 m_dewar_board_ptr,     // Pointer to the dewar board
@@ -1015,7 +1014,8 @@ void ReceiverControl::setVLBIMode(
                 port_number_vlbi,
                 value_vlbi
         );
-       
+
+        // We can switch off the TTL impulse after some time, setting the relative bit to 1 again
         usleep(3 * SETMODE_SLEEP_TIME);
         // Turn OFF the VLBI mode on port number 14
         makeRequest(
@@ -1028,7 +1028,6 @@ void ReceiverControl::setVLBIMode(
                 !value_vlbi
         );
         pthread_mutex_unlock(&m_dewar_mutex); 
-
     }
     catch(MicroControllerBoardEx& ex) {
         pthread_mutex_unlock(&m_dewar_mutex); 
@@ -1042,7 +1041,7 @@ bool ReceiverControl::isVLBIModeOn(
             const BYTE data_type,
             const BYTE port_type,
             const BYTE port_number
-            ) throw (ReceiverControlEx) 
+            )
 {
     try {
         std::vector<BYTE> parameters = makeRequest(
@@ -1067,7 +1066,7 @@ bool ReceiverControl::isVLBIModeOn(
 }
 
 
-void ReceiverControl::openConnection(void) throw (ReceiverControlEx)
+void ReceiverControl::openConnection(void)
 {
     try {
         m_dewar_board_ptr = new MicroControllerBoard(m_dewar_ip, m_dewar_port, m_dewar_madd, m_dewar_sadd);
@@ -1139,7 +1138,7 @@ ReceiverControl::FetValues ReceiverControl::fetValues(
         unsigned short stage_number,
         double (*currentConverter)(double voltage),
         double (*voltageConverter)(double voltage)
-        ) throw (ReceiverControlEx)
+        )
 {
     std::string column_selector;           // EN03: the signal that addresses the column multiplexing of AD24
     std::string vd_selector;               // A03: it allows to select the value requested for a given stadium
@@ -1363,7 +1362,7 @@ ReceiverControl::StageValues ReceiverControl::stageValues(
         FetValue quantity, 
         unsigned short stage_number,
         double (*converter)(double voltage)
-        ) throw (ReceiverControlEx)
+        )
 {
 	IRA::CString quant;
     // Each item is a EN03 value: the signal that addresses the column multiplexing of AD24
@@ -1547,7 +1546,7 @@ void ReceiverControl::turnLeftLNAsOn(
             const BYTE port_type,
             const BYTE port_number,
             const BYTE value
-            ) throw (ReceiverControlEx)
+            )
 {
     try {
         makeRequest(
@@ -1572,7 +1571,7 @@ void ReceiverControl::turnLeftLNAsOff(
             const BYTE port_type,
             const BYTE port_number,
             const BYTE value
-            ) throw (ReceiverControlEx)
+            )
 {
     try {
         makeRequest(
@@ -1597,7 +1596,7 @@ void ReceiverControl::turnRightLNAsOn(
             const BYTE port_type,
             const BYTE port_number,
             const BYTE value
-            ) throw (ReceiverControlEx)
+            )
 {
     try {
         makeRequest(
@@ -1622,7 +1621,7 @@ void ReceiverControl::turnRightLNAsOff(
             const BYTE port_type,
             const BYTE port_number,
             const BYTE value
-            ) throw (ReceiverControlEx)
+            )
 {
     try {
         makeRequest(
@@ -1647,7 +1646,7 @@ void ReceiverControl::setPath(
         const BYTE port_number, 
         const size_t width,
         const std::vector<BYTE> parameters
-        ) throw (ReceiverControlEx)
+        )
 {
     if(parameters.size() % width != 0)
         throw ReceiverControlEx("ReceiverControl: wrong number of parameters.\n");
@@ -1686,7 +1685,7 @@ void ReceiverControl::setColdLoadPath(
         const BYTE data_type, 
         const BYTE port_type, 
         const BYTE port_number
-        ) throw (ReceiverControlEx) 
+        )
 {
     try {
         const BYTE two_high_bits = 0x03; // Binary value 11
@@ -1748,7 +1747,7 @@ void ReceiverControl::setSkyPath(
         const BYTE data_type, 
         const BYTE port_type, 
         const BYTE port_number
-        ) throw (ReceiverControlEx) 
+        )
 {
     try {
         const BYTE two_high_bits = 0x03; // Binary value 11
@@ -1804,9 +1803,7 @@ void ReceiverControl::setSkyPath(
 }
 
 
-
 std::vector<BYTE> ReceiverControl::makeRequest(MicroControllerBoard *board_ptr, BYTE command, size_t len, ...) 
-    throw (MicroControllerBoardEx)
 {
     pthread_mutex_lock(&m_request_mutex); 
     va_list parameters; // A place to store the list of arguments

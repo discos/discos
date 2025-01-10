@@ -12,10 +12,17 @@
 #ifndef SCHEDULETIMER_H_
 #define SCHEDULETIMER_H_
 
+#include <Cplusplus11Helper.h>
+
 #include <ace/Timer_Heap_T.h>
 #include <ace/Timer_Queue_Adapters.h>
 #include <Event_Handler_Handle_Timeout_Upcall.h>
+C11_IGNORE_WARNING_PUSH
+C11_IGNORE_WARNING("-Wdeprecated-declarations")
+C11_IGNORE_WARNING("-Wmisleading-indentation")
+C11_IGNORE_WARNING("-Wcatch-value=")
 #include <acstimeTimeUtil.h>
+C11_IGNORE_WARNING_POP
 #include <vector>
 
 namespace IRA {

@@ -1,4 +1,4 @@
-from __future__ import division
+from __future__ import division, print_function
 __all__ = ['antenna', 'Recorder', 'mount', 'receiver', 'scheduler', 'ato', 'ANT_J2000', 'ACU_NEUTRAL']
 
 __credits__ = """Author: Marco Buttu <mbuttu@oa-cagliari.inaf.it>
@@ -98,7 +98,7 @@ class Recorder(object):
             mkdir(cycle_type_datadir)
         else:
             logging.error('Dir %s already exists')
-            print 'WARNING: Dir %s already exists'
+            print('WARNING: Dir %s already exists')
         self.scanSetup.scanTag += 1
         utc = datetime.datetime.utcnow()
         self.scanSetup.path = abspath(cycle_type_datadir)
@@ -127,7 +127,7 @@ try:
     mount = client.getComponent('ANTENNA/Mount')
     # If the backend rounds the time to a next upper value, set a negative `ato` 
     ato = -5 # Offset to add to the backend acquisition time
-except Exception, e:
+except Exception as e:
     logging.exception('Cannot get the ACS modules and components')
     print('ERROR: Cannot get the ACS modules and components')
     raise

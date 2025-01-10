@@ -32,6 +32,7 @@ CSRTActiveSurfaceBossCore::CSRTActiveSurfaceBossCore(ContainerServices *service,
     m_error_strings[ASErrors::USDStillRunning   ] = "USDStillRunning";
     m_error_strings[ASErrors::USDunCalibrated   ] = "USDunCalibrated";
     m_error_strings[ASErrors::CannotGetUSD      ] = "CannotGetUSD";
+    m_error_strings[ASErrors::UnknownProfile    ] = "UnknownProfile";
 }
 
 CSRTActiveSurfaceBossCore::~CSRTActiveSurfaceBossCore()
@@ -54,6 +55,7 @@ void CSRTActiveSurfaceBossCore::initialize()
     }
     m_profileSetted = false;
     m_ASup = false;
+    m_newlut = false;
 }
 
 void CSRTActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetComponentExImpl)
@@ -65,8 +67,8 @@ void CSRTActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetComp
     char * value2;
 
     //s_usdTable = getenv ("ACS_CDB");
-    //strcat(s_usdTable,USDTABLE);
-    value2 = USDTABLE;
+    //strcat(s_usdTable,USDTABLE.c_str());
+    value2 = USDTABLE.c_str();
     //ifstream usdTable(s_usdTable);
     ifstream usdTable(value2);
     if(!usdTable)
@@ -76,7 +78,7 @@ void CSRTActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetComp
         exit(-1);
     }
 
-    value = USDTABLECORRECTIONS;
+    value = USDTABLECORRECTIONS.c_str();
     ifstream usdCorrections (value);
     if(!usdCorrections)
     {
@@ -1356,6 +1358,12 @@ void CSRTActiveSurfaceBossCore::workingActiveSurface() throw (ComponentErrors::C
     }
 }
 
+void CSRTActiveSurfaceBossCore::asSetLUT(const char *newlut)
+{
+    m_lut = std::string(CDBPATH + "alma/AS/" + newlut);
+    m_newlut = true;
+}
+
 void CSRTActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newProfile) throw (ComponentErrors::ComponentErrorsExImpl)
 {
     bool all_sectors = true;
@@ -1364,13 +1372,16 @@ void CSRTActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newP
         if(!m_sector[i]) all_sectors = false;
     }
 
+    if (m_newlut == false)
+        m_lut = USDTABLECORRECTIONS;
+
     if(all_sectors) // USD tables has not been loaded yet
     {
-        ifstream usdCorrections (USDTABLECORRECTIONS);
+        ifstream usdCorrections(m_lut);
         if(!usdCorrections)
         {
-            ACS_SHORT_LOG ((LM_INFO, "File %s not found", USDTABLECORRECTIONS));
-            exit(-1);
+            ACS_SHORT_LOG ((LM_INFO, "File %s not found", m_lut.c_str()));
+            return;
         }
         actuatorsCorrections.length(NPOSITIONS);
         for (int i = 1; i <= CIRCLES; i++)
@@ -1391,7 +1402,6 @@ void CSRTActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newP
         usdCounter = 0;
         for(unsigned int i = 0; i < SECTORS; i++)
         {
-            m_sector[i] = false;
             usdCounter += usdCounters[i];
         }
 

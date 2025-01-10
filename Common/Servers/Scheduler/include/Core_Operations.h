@@ -185,10 +185,11 @@ void _haltSchedule();
  * @throw ManagementErrors::LogFileErrorExImpl
  * @thorw ManagementErrors::ScheduleNotExistExImpl
  * @throw ManagementErrors::CannotClosePendingTaskExImpl
+ * @throw ManagementErrors::ScheduleProjectNotMatchExImpl
 */
 void _startSchedule(const char* scheduleFile,const char * startSubScan) throw (ManagementErrors::ScheduleErrorExImpl,ManagementErrors::AlreadyRunningExImpl,
 		ComponentErrors::MemoryAllocationExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
-		ManagementErrors::LogFileErrorExImpl,ManagementErrors::ScheduleNotExistExImpl,ManagementErrors::CannotClosePendingTaskExImpl);
+		ManagementErrors::LogFileErrorExImpl,ManagementErrors::ScheduleNotExistExImpl,ManagementErrors::CannotClosePendingTaskExImpl,ManagementErrors::ScheduleProjectNotMatchExImpl);
 
 /**
  * It allows to change the backend elected as default backend, the default backend is the device used for all operation (for example tsys) when a schedule is not running.
@@ -223,7 +224,7 @@ void _logMessage(const char *message);
  * @throw ManagementErrors::WeatherStationErrorExImpl
  * @throw ComponentErrors::CORBAProblemExImpl
  */
-void _getWeatherStationParameters(double &temp,double& hum,double& pres, double& wind)  throw (ComponentErrors::CouldntGetComponentExImpl,ManagementErrors::WeatherStationErrorExImpl,ComponentErrors::CORBAProblemExImpl);
+void _getWeatherStationParameters(double &temp,double& hum,double& pres,double& wind,double& windDir)  throw (ComponentErrors::CouldntGetComponentExImpl,ManagementErrors::WeatherStationErrorExImpl,ComponentErrors::CORBAProblemExImpl);
 
 /**
  * initialize the writing of the data

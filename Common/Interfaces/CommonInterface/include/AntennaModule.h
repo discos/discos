@@ -100,7 +100,7 @@ public:
 			frame=Antenna::ANT_LGROUP;
 			return true;
 		}
-		else if (strcasecmp(str,"UNDEF")==0) {
+		else if (strcasecmp(str,"NULL")==0) {
 			frame=Antenna::ANT_UNDEF_FRAME;
 			return true;
 		}
@@ -129,7 +129,7 @@ public:
 			return "LGRP";
 		}
 		else { //if (frame==Antenna::ANT_UNDEF_FRAME) {
-			return "UNDEF";
+			return "NULL";
 		}
 	};
 
@@ -146,7 +146,7 @@ public:
 			frame=Antenna::ANT_REDSHIFT;
 			return true;
 		}
-		else if (strcasecmp(str,"UNDEF")==0) {
+		else if (strcasecmp(str,"NULL")==0) {
 			frame=Antenna::ANT_UNDEF_DEF;
 			return true;
 		}
@@ -154,7 +154,6 @@ public:
 			return false;
 		}
 	};
-
 	static const char *map(const TVradDefinition& frame) {
 		if (frame==Antenna::ANT_RADIO) {
 			return "RD";
@@ -166,11 +165,25 @@ public:
 			return "Z";
 		}
 		else { // if (frame==Antenna::ANT_UNDEF_DEF) {
-			return "UNDEF";
+			return "NULL";
 		}
 	};
-};
+	static const char *map(const TGeneratorType& gen) {
+		if (gen==Antenna::ANT_SIDEREAL) {
+			return "SIDEREAL";
+		}
+		else if (gen==Antenna::ANT_MOON) {
+			return "MOON";
+		}
+		else if (gen==Antenna::ANT_OTF) {
+			return "OTF";
+		}
+		else { // All other cases.....should be completed when further generators are supported.
+			return "UNKNOWN";
+		}
+	};
 
+};
 };
 
 

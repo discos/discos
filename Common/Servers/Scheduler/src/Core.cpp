@@ -133,7 +133,7 @@ void CCore::execute() throw(ComponentErrors::TimerErrorExImpl, ComponentErrors::
 	m_parser->add("peakerScan", new function3<CCore, non_constant, void_type, I<string_type>, I<double_type>, I<interval_type> >(this, &CCore::peakerScan), 3);
 	m_parser->add("log", new function1<CCore, non_constant, void_type, I<string_type> >(this, &CCore::_changeLogFile), 1);
 	m_parser->add("logMessage", new function1<CCore, non_constant, void_type, I<string_type> >(this, &CCore::_logMessage), 1);
-	m_parser->add("wx", new function4<CCore, non_constant, void_type, O<double_type>, O<double_type>, O<double_type>, O<double_type> >(this, &CCore::_getWeatherStationParameters), 0);
+	m_parser->add("wx", new function5<CCore, non_constant, void_type, O<double_type>, O<double_type>, O<double_type>, O<double_type>, O<double_type> >(this, &CCore::_getWeatherStationParameters), 0);
 	m_parser->add("project", new function2<CCore, non_constant, void_type, I<string_type>, O<longString_type> >(this, &CCore::_setProjectCode), 1);
 	// no range checks because * is allowed
 	m_parser->add("skydip", new function3<CCore, non_constant, void_type, I<elevation_type<rad, false> >, I<elevation_type<rad, false> >, I<interval_type> >(this, &CCore::skydip), 3);
@@ -209,6 +209,8 @@ void CCore::execute() throw(ComponentErrors::TimerErrorExImpl, ComponentErrors::
 	m_parser->add("initialize", "backend", 3, &CCore::remoteCall);
 	m_parser->add("calSwitch", "backend", 3, &CCore::remoteCall);
 	m_parser->add("getRms", "backend", 3, &CCore::remoteCall);
+	m_parser->add("setTsysRange","backend",3,&CCore::remoteCall);
+	m_parser->add("backendPark","backend",3,&CCore::remoteCall);
 
 	// minor servo
 	m_parser->add("servoSetup", "minorservo", 4, &CCore::remoteCall);
@@ -217,12 +219,16 @@ void CCore::execute() throw(ComponentErrors::TimerErrorExImpl, ComponentErrors::
 	m_parser->add("setServoASConfiguration", "minorservo", 4, &CCore::remoteCall);
 	m_parser->add("clearServoOffsets", "minorservo", 4, &CCore::remoteCall);
 	m_parser->add("setServoOffset", "minorservo", 4, &CCore::remoteCall);
+	m_parser->add("servoReset", "_servoReset", 0, "SRT");
+	m_parser->add("setGregorianCoverPosition", "_cover", 1, "SRT");
+	m_parser->add("setGregorianAirBladeStatus", "_airBlade", 1, "SRT");
 
 	// active surface
 	m_parser->add("asSetup", "activesurface", 5, &CCore::remoteCall);
 	m_parser->add("asPark", "activesurface", 5, &CCore::remoteCall);
 	m_parser->add("asOn", "activesurface", 5, &CCore::remoteCall);
 	m_parser->add("asOff", "activesurface", 5, &CCore::remoteCall);
+	m_parser->add("asSetLUT", "activesurface", 5, &CCore::remoteCall);
 
 	// procedures
 	loadProcedures(m_config->getDefaultProceduresFile()); // throws ManagementErrors::ProcedureFileLoadingErrorExImpl

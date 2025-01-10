@@ -258,9 +258,9 @@ public:
 	 */
     virtual CORBA::Boolean command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException);
 
-    virtual void getConfiguration (CORBA::String_out configuration) throw (CORBA::SystemException);
+    virtual char* getConfiguration () throw (CORBA::SystemException);
 
-    virtual void getCommProtVersion (CORBA::String_out version) throw (CORBA::SystemException);
+    virtual char* getCommProtVersion () throw (CORBA::SystemException);
 
     /**
      * This method is related to the implementation of the genericBackend interface
@@ -320,6 +320,8 @@ public:
     virtual ACS::doubleSeq * getRms () throw (CORBA::SystemException,
     		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
 
+    virtual void endSchedule() throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, BackendsErrors::BackendsErrorsEx) {AUTO_TRACE("SardaraImpl::endSchedule()"); };
+
     /**
      * Call this function in order to get a total power measure for each input channel. The measure is done when the inputs are directly
      * connected to the 50 Ohm.
@@ -353,6 +355,16 @@ public:
      */
     virtual void setAttenuation(CORBA::Long input,CORBA::Double att) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
     
+    /**
+     * This method is used to set a range in the bandwith of the backend where calculate the Tsys.
+     * @throw CORBA::SystemException
+     * @throw ComponentErrors::ComponentErrorsEx
+     * @throw BackendsErrors::BackendsErrorsEx
+     * @param freq starting frequency.
+     * @param bw bandwidth interval.
+     */
+    virtual void setTsysRange(CORBA::Double freq,CORBA::Double bw) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+
     /**
      * In order  to get the inputs definition in just one call. The returned argument contains the configuration sequentially, the first element corresponds to the first input and so on.
      * @throw CORBA::SystemException

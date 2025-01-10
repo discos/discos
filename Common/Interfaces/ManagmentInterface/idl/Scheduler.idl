@@ -97,12 +97,14 @@ module Management {
 		 * @param temperature external temperature in °C
 		 * @param humidity relative humidity (0..100)
 		 * @param pressure atmospheric pressure (mbar)
-		 * @param wind wind speed (Km/s) 
+		 * @param wind wind speed (Km/s)
+		 * @param windDir direction (azimuth) of the wind 
 		 * @throw CORBA::SystemException
 		 * @throw ComponentErrors::ComponentErrorsEx
 		 * @throw ManagementErrors::ManagementErrorsEx
 		 */		
-		void weatherParamenters(out double temperature, out double humidity,out double pressure,out double wind)  raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+		void weatherParamenters(out double temperature, out double humidity,out double pressure,out double wind,
+		  out double windDir)  raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 		
 		/**
 		 * Performs the computation of the system temperature. The operation is executed by using the currently in use backend and the currently configured frontend. It could also be the default one.

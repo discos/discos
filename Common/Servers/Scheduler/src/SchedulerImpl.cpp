@@ -122,10 +122,12 @@ void SchedulerImpl::aboutToAbort()
 	_IRA_LOGFILTER_FLUSH;
 }
 
-void SchedulerImpl::weatherParamenters (CORBA::Double_out temperature,CORBA::Double_out humidity,CORBA::Double_out pressure,CORBA::Double_out wind)
+void SchedulerImpl::weatherParamenters (CORBA::Double_out temperature,CORBA::Double_out humidity,
+  CORBA::Double_out pressure,CORBA::Double_out wind,CORBA::Double_out windDir) 
+  throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx)
 {
 	try {
-		m_core->_getWeatherStationParameters(temperature,humidity,pressure,wind) ;
+		m_core->_getWeatherStationParameters(temperature,humidity,pressure,wind,windDir) ;
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);

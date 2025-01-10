@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+    Author: Giuseppe Carboni, giuseppe.carboni@inaf.it
+-->
+<xs:schema
+    targetNamespace="urn:schemas-cosylab-com:SRTMinorServo:1.0"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns="urn:schemas-cosylab-com:SRTMinorServo:1.0"
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:mng="urn:schemas-cosylab-com:Managment:1.0"
+    xmlns:ms="urn:schemas-cosylab-com:SRTMinorServoCommon:1.0"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+
+    <xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd" />
+    <xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd" />
+    <xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
+    <xs:import namespace="urn:schemas-cosylab-com:SRTMinorServoCommon:1.0" schemaLocation="SRTMinorServoCommon.xsd"/>
+
+    <xs:complexType name="SRTBaseMinorServoType">
+     <xs:complexContent>
+      <xs:extension base="baci:CharacteristicComponent">
+       <xs:sequence>
+        <xs:element name="enabled" type="mng:BooleanType" />
+        <xs:element name="drive_cabinet_status" type="ms:SRTMinorServoCabinetStatusType" />
+        <xs:element name="block" type="mng:BooleanType" />
+        <xs:element name="operative_mode" type="ms:SRTMinorServoOperativeModeType" />
+        <xs:element name="physical_axes" type="baci:ROlong" /> 
+        <xs:element name="physical_axes_enabled" type="baci:RObooleanSeq" /> 
+        <xs:element name="physical_positions" type="baci:ROdoubleSeq" /> 
+        <xs:element name="virtual_axes" type="baci:ROlong" /> 
+        <xs:element name="plain_virtual_positions" type="baci:ROdoubleSeq" /> 
+        <xs:element name="virtual_positions" type="baci:ROdoubleSeq" /> 
+        <xs:element name="virtual_offsets" type="baci:ROdoubleSeq" /> 
+        <xs:element name="virtual_user_offsets" type="baci:ROdoubleSeq" /> 
+        <xs:element name="virtual_system_offsets" type="baci:ROdoubleSeq" /> 
+        <xs:element name="commanded_virtual_positions" type="baci:ROdoubleSeq" />
+        <xs:element name="in_use" type="mng:BooleanType" />
+        <xs:element name="current_setup" type="baci:ROstring" />
+        <xs:element name="error_code" type="ms:SRTMinorServoErrorType" />
+       </xs:sequence>
+       <xs:attribute name="physical_axes" type="xs:unsignedShort" use="required" />
+       <xs:attribute name="virtual_axes" type="xs:unsignedShort" use="required" />
+       <xs:attribute name="max_speed" type="xs:string" use="required" />
+       <xs:attribute name="acceleration" type="xs:string" use="required" />
+       <xs:attribute name="min_range" type="xs:string" use="required" />
+       <xs:attribute name="max_range" type="xs:string" use="required" />
+      </xs:extension>
+     </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="SRTProgramTrackMinorServoType">
+     <xs:complexContent>
+      <xs:extension base="SRTBaseMinorServoType">
+       <xs:sequence>
+        <xs:element name="tracking" type="mng:BooleanType" />
+        <xs:element name="trajectory_id" type="baci:ROlong" />
+        <xs:element name="total_trajectory_points" type="baci:ROlong" />
+        <xs:element name="remaining_trajectory_points" type="baci:ROlong" />
+        <xs:element name="tracking_error" type="baci:ROdoubleSeq" />
+       </xs:sequence>
+       <xs:attribute name="tracking_delta" type="xs:string" use="required" />
+      </xs:extension>
+     </xs:complexContent>
+    </xs:complexType>
+
+    <xs:element name="SRTGenericMinorServo" type="SRTBaseMinorServoType" />
+    <xs:element name="SRTProgramTrackMinorServo" type="SRTProgramTrackMinorServoType" />
+
+</xs:schema>

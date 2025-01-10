@@ -170,9 +170,13 @@ void CComponentCore::activate() throw (
     m_calDiode=false; 
     guard.release();
     
-	lnaOn(); // Throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
-    //externalCalOff();
-
+    try {
+	 	lnaOn(); // Throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
+    	//externalCalOff();
+	 }
+	 catch (ReceiversErrors::ReceiversErrorsExImpl& E) {
+	 	ACS_LOG(LM_FULL_INFO,"CComponentCore::activate()",(LM_WARNING,"LNA control board is showing some issues"));
+	 }	 
     bool answer;
     try {
         answer=m_control->isRemoteOn();
@@ -616,7 +620,8 @@ void CComponentCore::getCalibrationMark(
     }
 
     double f1,f2;
-    double integral;
+    vector<double> integral_vect;
+    double integral = 0;
     double mark=0;
     for (unsigned i=0;i<stdLen;i++) {
         if (m_polarization[ifs[i]]==(long)Receivers::RCV_LCP) {
@@ -636,9 +641,15 @@ void CComponentCore::getCalibrationMark(
             f1=realFreq;
             f2=f1+realBw;
             f1/=1000.0; f2/=1000.0; //frequencies in giga Hertz
-            integral=(leftMarkCoeffs[feeds[i]][0]/4)*(f2*f2*f2*f2-f1*f1*f1*f1)+(leftMarkCoeffs[feeds[i]][1]/3) * \
-                     (f2*f2*f2-f1*f1*f1)+(leftMarkCoeffs[feeds[i]][2]/2)*(f2*f2-f1*f1)+leftMarkCoeffs[feeds[i]][3]*(f2-f1);               
-            mark=integral/(f2-f1);              
+				for (vector<double>::size_type j=0; j<leftMarkCoeffs[feeds[i]].size(); j++){ //integrate
+					int degree = ((leftMarkCoeffs[feeds[i]].size()) - j); //degree of the polynomial inside the integral
+					integral_vect.push_back((leftMarkCoeffs[feeds[i]][j]/degree)*(pow(f2, degree) - pow(f1, degree)));
+					}
+            for(vector<double>::iterator it = integral_vect.begin(); it != integral_vect.end(); it++)
+               integral += *it;
+            mark=integral/(f2-f1);
+            integral_vect.clear();
+            integral = 0;
         }
         else if (m_polarization[ifs[i]]==(long)Receivers::RCV_RCP) {
             // take the real observed bandwidth....the correlation between detectro device and the band provided by the receiver
@@ -651,9 +662,15 @@ void CComponentCore::getCalibrationMark(
             f1= realFreq;
             f2=f1+realBw;
             f1/=1000.0; f2/=1000.0; //frequencies in giga Hertz
-            integral=(rightMarkCoeffs[feeds[i]][0]/4)*(f2*f2*f2*f2-f1*f1*f1*f1)+(rightMarkCoeffs[feeds[i]][1]/3) * \
-                     (f2*f2*f2-f1*f1*f1)+(rightMarkCoeffs[feeds[i]][2]/2)*(f2*f2-f1*f1)+rightMarkCoeffs[feeds[i]][3]*(f2-f1);             
+				for (vector<double>::size_type j=0; j<rightMarkCoeffs[feeds[i]].size(); j++){ //integrate
+					int degree = ((rightMarkCoeffs[feeds[i]].size()) - j); //degree of the polynomial inside the integral
+					integral_vect.push_back((rightMarkCoeffs[feeds[i]][j]/degree)*(pow(f2, degree) - pow(f1, degree)));
+					}
+            for(vector<double>::iterator it = integral_vect.begin(); it != integral_vect.end(); it++)
+               integral += *it;
             mark=integral/(f2-f1);
+            integral_vect.clear();
+            integral = 0;
         }
         result[i]=mark;
         resFreq[i]=realFreq;

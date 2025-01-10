@@ -1,7 +1,14 @@
 #ifndef CUSTOM_LOGGER_UTILS_H
 #define CUSTOM_LOGGER_UTILS_H
 
+#include <Cplusplus11Helper.h>
+
+C11_IGNORE_WARNING_PUSH
+C11_IGNORE_WARNING("-Wdeprecated-declarations")
+C11_IGNORE_WARNING("-Wmisleading-indentation")
+C11_IGNORE_WARNING("-Wcatch-value=")
 #include <logging.h>
+C11_IGNORE_WARNING_POP
 #include <ManagmentDefinitionsS.h>
 
 #define CUSTOM_LOGGING_DATA_NAME "source"

@@ -1,7 +1,7 @@
 #include "MedicinaKBandDualFCore.h"
 #include <MedicinaVertex.h>
 
-#define NUMBER_OF_STAGES 5 // Amplification stages
+#define NUMBER_OF_STAGES 1 // Amplification stages
 
 MedicinaKBandDualFCore::MedicinaKBandDualFCore() {
     voltage2mbar=voltage2mbarF;
@@ -44,9 +44,8 @@ ACS::doubleSeq MedicinaKBandDualFCore::getStageValues(const IRA::ReceiverControl
         if (control == IRA::ReceiverControl::DRAIN_VOLTAGE) {
         		if (getFeeds()>m_vdStageValues[stage-1].left_channel.size())
     				return values;
-            for(size_t i=0; i<getFeeds(); i++) {
+            for(size_t i=0; i<getFeeds(); i++)
             	values[i] = (m_vdStageValues[stage-1]).left_channel[i];
-            }
         }
         else {
             if (control == IRA::ReceiverControl::DRAIN_CURRENT) {
@@ -136,7 +135,7 @@ void MedicinaKBandDualFCore::setMode(const char * mode) throw (
 	setLO(lo); 
 	if (m_medConfig.getVertexCommand()!="") {
 		int size=m_medConfig.getVertexCommand().GetLength();
-		if (!vertex.sendTo((const char *)m_medConfig.getVertexCommand(),size)) {
+		if (!vertex.sendTo(m_medConfig.getVertexCommand(),size)) {
 			ACS_LOG(LM_FULL_INFO,"MedicinaKBandDualFCore::setMode()",
 			  (LM_ERROR,"Vertex Communication Error: %s",(const char *)vertex.getLastErrorMessage()));
 			CUSTOM_LOG(LM_FULL_INFO,"MedicinaKBandDualFCore::setMode()",

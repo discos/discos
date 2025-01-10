@@ -6,12 +6,12 @@
 	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:log="urn:schemas-cosylab-com:LoggingConfig:1.0"
-	Timeout="600.0"
+	Timeout="180.0"
 	ImplLang="cpp"
 	ServerThreads="5">
 
 	<Autoload>
-		<cdb:_ string="baci" />
+		<cdb:e string="baci" />
 	</Autoload>
 
 	<LoggingConfig

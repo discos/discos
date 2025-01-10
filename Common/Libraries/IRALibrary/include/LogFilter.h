@@ -13,11 +13,18 @@
 /* Andrea Orlati(aorlati@ira.inaf.it) 17/03/2008      Fixed a bug in ErrorWrapper that  causes the component to crash      */
 /* Andrea Orlati(aorlati@ira.inaf.it) 12/02/2010      Added the destroy method that should guarantee a smoother close up      */
 
+#include <Cplusplus11Helper.h>
+
 #include "Definitions.h"
 #include "String.h"
 #include <vector>
+C11_IGNORE_WARNING_PUSH
+C11_IGNORE_WARNING("-Wdeprecated-declarations")
+C11_IGNORE_WARNING("-Wmisleading-indentation")
+C11_IGNORE_WARNING("-Wcatch-value=")
 #include <acstimeEpochHelper.h>
 #include <acstimeDurationHelper.h>
+C11_IGNORE_WARNING_POP
 #include <baciThread.h>
 #include <acserr.h>
 

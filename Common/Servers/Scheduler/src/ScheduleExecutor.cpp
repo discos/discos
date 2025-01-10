@@ -4,9 +4,11 @@
 
 using namespace baci;
 
-#define NORMAL_RECORDING (m_currentScan.backendProc!=_SCHED_NULLTARGET) && (m_currentScan.duration>0.0)
+#define BCKEND_CONFIG (m_currentScan.backendProc!=_SCHED_NULLTARGET)
+#define NORMAL_RECORDING BCKEND_CONFIG && (m_currentScan.duration>0.0)
 #define NO_RECORDING m_currentScan.duration<=0.0
 #define DRY_RUN (m_currentScan.backendProc==_SCHED_NULLTARGET) && (m_currentScan.duration>0.0)
+ 
 
 CScheduleExecutor::CScheduleExecutor(const ACE_CString& name,CCore *param, 
 			const ACS::TimeInterval& responseTime,const ACS::TimeInterval& sleepTime) : ACS::Thread(name,responseTime,sleepTime)
@@ -142,7 +144,7 @@ void CScheduleExecutor::runLoop()
 				catch (ACSErr::ACSbaseExImpl& ex) {
 					_ADD_BACKTRACE(ManagementErrors::SubscanErrorExImpl,impl,ex,"CScheduleExecutor::runLoop()");
 					impl.setSubScanID(m_scheduleCounter);
-					impl.setReason("cannot check scan against telescope");
+					impl.setReason("scan cannot be validated");
 					m_core->changeSchedulerStatus(Management::MNG_FAILURE);
 					//impl.log(LM_ERROR);
 					CUSTOM_EXCPT_LOG(impl,LM_ERROR);
@@ -178,7 +180,7 @@ void CScheduleExecutor::runLoop()
 							if (m_schedule->getSchedReps()>0) { // if negative the schedule is repeated continuosly
 								if (m_repetition>=(DWORD)m_schedule->getSchedReps()) { // END OF SCHEDULE
 									CUSTOM_LOG(LM_FULL_INFO,"CScheduleExecutor::runLoop()",
-									  (LM_NOTICE,"All repetions are completed, schedule will be halted"));
+									  (LM_NOTICE,"All repetitions are completed, schedule will be halted"));
 									cleanSchedule(false);
 									break;
 								}
@@ -556,7 +558,7 @@ void CScheduleExecutor::initialize(maci::ContainerServices *services,const doubl
 void CScheduleExecutor::startSchedule(const char* scheduleFile,const char * subScanidentifier) throw (
  		ManagementErrors::ScheduleErrorExImpl, ManagementErrors::AlreadyRunningExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::CouldntGetComponentExImpl,
  		ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl,ManagementErrors::ScheduleNotExistExImpl,
- 		ManagementErrors::CannotClosePendingTaskExImpl)
+ 		ManagementErrors::CannotClosePendingTaskExImpl,ManagementErrors::ScheduleProjectNotMatchExImpl)
 {
  	baci::ThreadSyncGuard guard(&m_mutex);
  	bool projectChanged;
@@ -782,6 +784,12 @@ void CScheduleExecutor::cleanSchedule(bool error)
 		ex.log(LM_WARNING);
 	}
 	try {
+		m_core->endSchedule();
+	}
+	catch (ACSErr::ACSbaseExImpl& ex) {
+		ex.log(LM_WARNING);
+	}
+	try {
 		m_core->closeScan(false);
 	}
 	catch (ACSErr::ACSbaseExImpl& ex) {
@@ -894,7 +902,7 @@ void CScheduleExecutor::prepareFileWriting(/*const CSchedule::TRecord& rec*/) th
  			m_core->disableDataTransfer();
 		}
 	}
- 	if (NORMAL_RECORDING) { // if the writing has been disabled
+ 	if (BCKEND_CONFIG) { // if the writing has been disabled
  	 	if (m_currentScan.backendProc!=m_currentBackendProcedure) {
  	 		ACS_LOG(LM_FULL_INFO,"CScheduleExecutor::prepareFileWriting()",(LM_DEBUG,"NEW_BACKEND_PROCEDURE"));
  	 		if (!m_schedule->getBackendList()->getBackend(m_currentScan.backendProc,bckInstance,command)) {
@@ -908,7 +916,7 @@ void CScheduleExecutor::prepareFileWriting(/*const CSchedule::TRecord& rec*/) th
  	 		m_currentBackendProcedure=m_currentScan.backendProc;
  	 	}
 	 	m_core->_chooseDefaultDataRecorder(m_currentScan.writerInstance); //CouldntGetComponentExImpl ComponentErrors::UnexpectedExImpl
- 	 	m_core->enableDataTransfer();
+ 	 	if (NORMAL_RECORDING) m_core->enableDataTransfer();
  	}
  	else {
  		m_currentBackendProcedure=_SCHED_NULLTARGET;

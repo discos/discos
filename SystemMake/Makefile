@@ -34,9 +34,9 @@ COMMON_LIBRARIES:=SlaLibrary IRALibrary DiscosVersion TextWindowLibrary ParserLi
 				  DiscosBackendProtocol PyTestingLibrary \
 COMMON_SERVERS:=AntennaBoss Observatory OTF PointingModel Refraction SkySource SolarSystem \
                 Moon FitsWriter Scheduler ReceiversBoss ExternalClients \
-                CalibrationTool TotalPower NoiseGenerator CustomLogger \
-                XBackend PyDewarPositioner Sardara PyLocalOscillator MFKBandBaseReceiver PyCalmux \
-				ActiveSurfaceLan
+                CalibrationTool TotalPower CustomLogger \
+                PyDewarPositioner Sardara Skarab PyLocalOscillator MFKBandBaseReceiver PyCalmux \
+				ActiveSurfaceLan ActiveSurfaceUSD XBackend
 COMMON_CLIENTS:=AntennaBossTextClient ObservatoryTextClient \
                 GenericBackendTextClient ReceiversBossTextClient \
                 SystemTerminal CaltoolClient CustomLoggingClient \
@@ -49,62 +49,63 @@ COMMON_SIMULATORS:= TCPGenericProtocolSim ReceiverBoardSim
 SRT_DOC:=SRTDox
 SRT_ERRORS:=
 SRT_INTERFACES:=SRTAntennaInterface SRTActiveSurfaceInterface \
-                SRTReceiversInterface
+                SRTMinorServoInterface SRTReceiversInterface
 SRT_LIBRARIES:=SRTMinorServoLibrary
 SRT_SERVERS:=SRTMount SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver \
-             SRT7GHzReceiver SRTLPBandReceiver SRTPyIFDistributor WeatherStation
+             SRT7GHzReceiver SRT5GHzReceiver SRTLPBandReceiver SRTPyIFDistributor WeatherStation
 SRT_CLIENTS:=SRTActiveSurfaceGUIClient SRTMountTextClient \
              MinorServoBossTextClient
 SRT_MISC:=SRTScripts
 
 MED_DOC:=MEDDox
 MED_ERRORS:=
-MED_INTERFACES:=MedicinaAntennaInterface MedicinaReceiversInterface
+MED_INTERFACES:=MedicinaAntennaInterface MedicinaReceiversInterface MedicinaActiveSurfaceInterface
 MED_LIBRARIES:=MedicinaVertexLibrary
-MED_SERVERS:=MedicinaMount MedicinaMinorServo WeatherStation MedicinaPyDMed MedicinaKBandDualFReceiver
-MED_CLIENTS:=MedicinaMountTextClient
+MED_SERVERS:=MedicinaMount MedicinaMinorServo WeatherStation MedicinaPyDMed MedicinaKBandDualFReceiver MedicinaActiveSurfaceBoss
+MED_CLIENTS:=MedicinaMountTextClient MedicinaActiveSurfaceGUIClient
 MED_MISC:=MedScripts
 
 NT_DOC:=NTDox
-NT_ERRORS:=NotoActiveSurfaceErrors
+NT_ERRORS:= #ActiveSurfaceErrors NotoActiveSurfaceErrors
 NT_INTERFACES:=NotoAntennaInterface NotoReceiversInterface NotoWeatherStationInterface NotoActiveSurfaceInterface \
 NT_LIBRARIES:=
-NT_SERVERS:= NotoReceivers NotoMount NotoWeatherStation NotoActiveSurface NotoMinorServo NotoPyLocalOscillator NotoPyIfDistributor
-NT_CLIENTS:=NotoMountTextClient 
+NT_SERVERS:= NotoReceivers NotoMount NotoWeatherStation NotoActiveSurfaceBoss NotoMinorServo NotoPyLocalOscillator NotoPyIfDistributor
+NT_CLIENTS:=NotoMountTextClient NotoActiveSurfaceGUIClient
 NT_MISC:=NotoScripts
 
 ifeq ($(STATION),SRT)
 	#Add all modules included in the SRT system  in this sequence
 	#Doc, (Errors, Interfacies, Libraries, Servers, Clients, Misc)
 	MODULES:=SRTDox \
-		ClientErrors ComponentErrors AntennaErrors ParserErrors BackendsErrors ManagementErrors ReceiversErrors MetrologyErrors MinorServoErrors XBackendErrors \
+		ClientErrors ComponentErrors AntennaErrors ParserErrors BackendsErrors ManagementErrors ReceiversErrors MetrologyErrors MinorServoErrors \
 		ActiveSurfaceErrors \
-		CommonInterface ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface XBackendInterface \
+		CommonInterface ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface \
 		SRTAntennaInterface SRTActiveSurfaceInterface SRTWeatherStationInterface SRTReceiversInterface \
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary XarcosLibrary SRTMinorServoLibrary ComponentProxy ModbusChannel PyTestingLibrary \
-		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool TotalPower NoiseGenerator DBBC CustomLogger XBackend \
-		SRTMount SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver PyDewarPositioner \
+		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool TotalPower CustomLogger \
+		SRTMount SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver \
+		SRT5GHzReceiver PyDewarPositioner \
 		SRTPyIFDistributor AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient CustomLoggingClient SchedulerTextClient \
 		SRTActiveSurfaceGUIClient SRTMountTextClient MinorServoBossTextClient \
-		Plotter KStars SRTScripts 
+		Plotter KStars SRTScripts
 
 	IDL_DOC:=Managment Antenna Backends SRTActiveSurface WeatherStation
 	CPP_DOC:=Libraries AntennaImplementation SRTActiveSurfaceImplementation BackendsImplementation ReceiversImplementation WeatherStationImplementation MinorServoImplementation
 
 	Managment_MODULES:=ManagmentInterface
 	Antenna_MODULES:=AntennaInterface SRTAntennaInterface
-	Backends_MODULES:=BackendsInterface XBackendInterface
+	Backends_MODULES:=BackendsInterface
 	WeatherStation_MODULES:=WeatherStationInterface SRTWeatherStationInterface
 	Receivers_MODULES:=ReceiversInterface
 	MinorServo_MODULES:=MinorServoInterface
 	SRTActiveSurface_MODULES:=SRTActiveSurfaceInterface
-	Libraries_MODULES:=IRALibrary SlaLibrary TextWindowLibrary ParserLibrary XarcosLibrary SRTMinorServoLibrary PyTestingLibrary
+	Libraries_MODULES:=IRALibrary SlaLibrary TextWindowLibrary ParserLibrary SRTMinorServoLibrary PyTestingLibrary
 	AntennaImplementation_MODULES:=Observatory SkySource OTF Moon PointingModel Refraction AntennaBoss SRTMount
 	ManagementImplementation_MODULES:=Scheduler CalibrationTool FitsWriter ExternalClients
-	BackendsImplementation_MODULES:=TotalPower NoiseGenerator XBackend
+	BackendsImplementation_MODULES:=TotalPower
 	ReceiversImplementation_MODULES:=ReceiversBoss SRTKBandMFReceiver SRT7GHzReceiver SRTLPBandReceiver
 	WeatherStationImplementation_MODULES:=SRTWeatherStation
-	SRTActiveSurfaceImplementation_MODULES:=ActiveSurfaceUSDServer SRTActiveSurfaceBoss
+	SRTActiveSurfaceImplementation_MODULES:=SRTActiveSurfaceBoss
 	MinorServoImplementation_MODULES:=SRTMinorServo
 	
 	CDB_SVN_LOCATION="SRT/Configuration/CDB"
@@ -120,10 +121,10 @@ ifeq ($(STATION),Medicina)
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary ComponentProxy ModbusChannel XarcosLibrary \
 	    PyTestingLibrary MedicinaVertexLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
-		TotalPower NoiseGenerator MedicinaMount MedicinaPyLocalOscillator MedicinaPyDMed CustomLogger XBackend MedicinaMinorServo\
+		TotalPower MedicinaMount MedicinaPyLocalOscillator MedicinaPyDMed CustomLogger MedicinaMinorServo MedicinaActiveSurfaceBoss \
 		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient SchedulerTextClient MinorServoBossTextClient\
-		MedicinaMountTextClient CustomLoggingClient\
-		Plotter KStars Scripts MedScripts
+		MedicinaActiveSurfaceGUIClient MedicinaMountTextClient CustomLoggingClient\
+		Plotter KStars Scripts MedScripts XBackend
 
 	IDL_DOC:=Managment Antenna Backends WeatherStation Receivers
 	CPP_DOC:=Libraries AntennaImplementation ManagementImplementation BackendsImplementation WeatherStationImplementation
@@ -136,9 +137,10 @@ ifeq ($(STATION),Medicina)
 	Libraries_MODULES:=IRALibrary SlaLibrary TextWindowLibrary ParserLibrary PyTestingLibrary
 	AntennaImplementation_MODULES:=Observatory SkySource OTF Moon PointingModel Refraction AntennaBoss MedicinaMount
 	ManagementImplementation_MODULES:=Scheduler CalibrationTool FitsWriter ExternalClients
-	BackendsImplementation_MODULES:=TotalPower NoiseGenerator XBackend
+	BackendsImplementation_MODULES:=TotalPower XBackend
 	ReceiversImplementation_MODULES:=ReceiversBoss
 	WeatherStationImplementation_MODULES:=MedWeatherStation Metrology
+	MedicinaActiveSurfaceImplementation_MODULES:=MedicinaActiveSurfaceBoss
 	
 	CDB_SVN_LOCATION="Medicina/Configuration/CDB"
 	SYSTEM_SVN_MODULES=Common Medicina
@@ -146,12 +148,12 @@ else
 ifeq ($(STATION),Noto)
 	#Add all modules included in the Noto system in this sequence
 	#Doc, (Errors, Interfacies, Libraries, Servers, Clients, Misc)
-	MODULES:= ClientErrors ComponentErrors AntennaErrors ParserErrors BackendsErrors ManagementErrors ReceiversErrors MetrologyErrors MinorServoErrors \
+	MODULES:= ActiveSurfaceErrors ClientErrors ComponentErrors AntennaErrors ParserErrors BackendsErrors ManagementErrors ReceiversErrors MetrologyErrors MinorServoErrors \
 		ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface \
 		NotoAntennaInterface \
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary PyTestingLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
-		TotalPower NotoMount CustomLogger NotoMinorServo\
+		TotalPower NotoMount CustomLogger NotoMinorServo NotoActiveSurfaceBoss \
 		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal SchedulerTextClient MinorServoBossTextClient\
 		NotoMountTextClient CustomLoggingClient Scripts
 
@@ -167,6 +169,7 @@ ifeq ($(STATION),Noto)
 	ManagementImplementation_MODULES:=Scheduler CalibrationTool FitsWriter ExternalClients
 	BackendsImplementation_MODULES:=TotalPower
 	ReceiversImplementation_MODULES:=ReceiversBoss
+	NotoActiveSurfaceImplementation_MODULES:=NotoActiveSurfaceBoss
 	
 	CDB_SVN_LOCATION="Noto/Configuration/CDB"
 	SYSTEM_SVN_MODULES=Common Medicina Noto

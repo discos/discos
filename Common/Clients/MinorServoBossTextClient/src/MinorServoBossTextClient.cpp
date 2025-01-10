@@ -216,21 +216,16 @@ int main(int argc, char *argv[]) {
     // Change the style of the main frame 
     window.setTitleStyle(CStyle(TITLE_COLOR_PAIR,TITLE_STYLE));
     
-    if (window.colorReady()) {
-        window.defineColor(GRAY_COLOR,255,255,255);     
-        window.defineColorPair(BLUE_GRAY,CColor::BLUE,GRAY_COLOR);
-        window.defineColorPair(GRAY_BLUE,GRAY_COLOR,CColor::BLUE);      
-    }
-    else {
-        window.defineColorPair(BLUE_GRAY,CColor::BLUE,CColor::WHITE);
-        window.defineColorPair(GRAY_BLUE,CColor::WHITE,CColor::BLUE);   
-        window.defineColorPair(BLACK_RED,CColor::BLACK,CColor::RED);    
-        window.defineColorPair(BLACK_GREEN,CColor::BLACK,CColor::GREEN);    
-        window.defineColorPair(BLACK_YELLOW,CColor::BLACK,CColor::YELLOW);  
-        window.defineColorPair(BLACK_BLUE,CColor::BLACK,CColor::BLUE);      
-        window.defineColorPair(BLACK_MAGENTA,CColor::BLACK,CColor::MAGENTA);    
-        window.defineColorPair(BLACK_WHITE,CColor::BLACK,CColor::WHITE  );          
-    }
+    window.defineColor(GRAY_COLOR,500,500,500);
+    window.defineColorPair(BLUE_GRAY,CColor::BLUE,CColor::WHITE);
+    window.defineColorPair(GRAY_BLUE,CColor::WHITE,CColor::BLUE);
+    window.defineColorPair(BLACK_RED,CColor::BLACK,CColor::RED);
+    window.defineColorPair(BLACK_GREEN,CColor::BLACK,CColor::GREEN);
+    window.defineColorPair(BLACK_YELLOW,CColor::BLACK,CColor::YELLOW);
+    window.defineColorPair(BLACK_BLUE,CColor::BLACK,CColor::BLUE);
+    window.defineColorPair(BLACK_MAGENTA,CColor::BLACK,CColor::MAGENTA);
+    window.defineColorPair(BLACK_WHITE,CColor::BLACK,CColor::WHITE);
+
     ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::FRAME_INITIALIZED"));
     ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::GET_DEFAULT_COMPONENENT: %s",COMPONENT_INTERFACE_TPYE));
     try {
@@ -284,7 +279,7 @@ int main(int argc, char *argv[]) {
         userInput=new TW::CInputCommand();
         
         /** setting up the properties of the components of the frame controls */
-        _TW_SET_COMPONENT(actualSetup_field,18,0,12,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+        _TW_SET_COMPONENT(actualSetup_field,18,0,20,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
         tracking_display->setPosition(CPoint(18,1));
         tracking_display->setOrientation(TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>::HORIZONTAL);
         tracking_display->setFormatFunction(boolFormat,NULL);
@@ -294,7 +289,7 @@ int main(int argc, char *argv[]) {
 		status_box->setStatusLook(Management::MNG_OK,CStyle(BLACK_GREEN,CStyle::BOLD));
 		status_box->setStatusLook(Management::MNG_WARNING,CStyle(BLACK_YELLOW,CStyle::BOLD));
 		status_box->setStatusLook(Management::MNG_FAILURE,CStyle(BLACK_RED,CStyle::BOLD));
-        _TW_SET_COMPONENT(motionInfo_field,18,3,23,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+        _TW_SET_COMPONENT(motionInfo_field,18,3,40,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 
         /* ****************************************************************** */
         _TW_SET_COMPONENT(userInput,0,WINDOW_HEIGHT-6,WINDOW_WIDTH-1,1,USER_INPUT_COLOR_PAIR,USER_INPUT_STYLE,NULL);

@@ -6,7 +6,7 @@
 <Procedure name="setupCCB" args="0">
 <body>
 	antennaSetup=CCB
-    servoSetup=CCB
+	servoSetup=CCB
 	receiversSetup=CCB
 	chooseBackend=TotalPower
 	initialize=CCB
@@ -17,10 +17,24 @@
 </body>
 </Procedure>
 
+<Procedure name="setupCCG" args="0">
+<body>
+	antennaSetup=CCG
+	servoSetup=CCG
+	receiversSetup=CCG
+	chooseBackend=TotalPower
+	initialize=CCG
+	device=0
+	calOff
+	restFrequency=0
+	azelOffsets=0d,0d
+</body>
+</Procedure>
+
 <Procedure name="setupKKG" args="0">
 <body>
 	antennaSetup=KKG
-    servoSetup=KKG
+	servoSetup=KKG
 	receiversSetup=KKG
 	receiversMode=SINGLEDISH
 	chooseBackend=TotalPower
@@ -35,7 +49,7 @@
 <Procedure name="setupLLP" args="0">
 <body>
 	antennaSetup=LP
-    servoSetup=LLP
+	servoSetup=LLP
 	receiversSetup=LLP
 	receiversMode=XXC4
 	chooseBackend=TotalPower
@@ -50,7 +64,7 @@
 <Procedure name="setupPPP" args="0">
 <body>
 	antennaSetup=LP
-    servoSetup=PPP
+	servoSetup=PPP
 	receiversSetup=PPP
 	receiversMode=C3XX
 	chooseBackend=TotalPower
@@ -65,7 +79,7 @@
 <Procedure name="setupPLP" args="0">
 <body>
 	antennaSetup=LP
-    servoSetup=PLP
+	servoSetup=PLP
 	receiversSetup=PLP
 	receiversMode=C3C4
 	chooseBackend=TotalPower
@@ -80,42 +94,59 @@
 <Procedure name="setupXB" args="0">
 <body>
 	antennaSetup=XB
-    servoSetup=XB
+	servoSetup=XB
 	receiversSetup=CCB
 	chooseBackend=TotalPower
 	initialize=XB
 	device=0
 	restFrequency=0
-    setLO=7500
+	setLO=7500
 	azelOffsets=0d,0d
 </body>
 </Procedure>
 
 <Procedure name="setupSSP" args="0">
 <body>
-    antennaSetup=LP
-    servoSetup=SSP
-    receiversSetup=CCB
-    chooseBackend=TotalPower
-    initialize=PPP
-    device=0
-    calOff
-    restFrequency=0
-    azelOffsets=0d,0d
+	antennaSetup=LP
+	servoSetup=SSP
+	receiversSetup=CCB
+	chooseBackend=TotalPower
+	initialize=PPP
+	device=0
+	calOff
+	restFrequency=0
+	azelOffsets=0d,0d
+</body>
+</Procedure>
+
+<Procedure name="setupMISTRAL" args="0">
+<body>
+	antennaSetup=MISTRAL
+	servoSetup=MISTRAL
+	receiversSetup=KKG
+	receiversMode=SINGLEDISH
+	chooseBackend=TotalPower
+	initialize=CCG
+	device=0
+	calOff
+	restFrequency=0
+	azelOffsets=0d,0d
 </body>
 </Procedure>
 
 <Procedure name="telescopePark" args="0">
 <body>
-	goTo=180d,89.8d
+	goTo=*,89.8d
 	waitOnSource
 	antennaStop
-	wait=1
-	antennaPark
-	receiversPark
 	servoPark
 	asPark
+	receiversPark
+	backendPark
+	wait=1
+	antennaPark
 	logMessage=Telescope is now parked
+	project=Maintenance
 </body>
 </Procedure>
 

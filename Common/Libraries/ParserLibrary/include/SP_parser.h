@@ -104,8 +104,9 @@ namespace SimpleParser {
 /**
  * Prototype of a remote function, it will accept the full command, the extra parameter and the name of the package.
  * It could throw a remote package error
+ * @throw throw (ParserErrors::PackageErrorExImpl)
  */
-#define _SP_REMOTECALL(X) bool (OBJ::*X)(const IRA::CString& command,const IRA::CString& package,const long& param,IRA::CString& out)  throw (ParserErrors::PackageErrorExImpl)
+#define _SP_REMOTECALL(X) bool (OBJ::*X)(const IRA::CString& command,const IRA::CString& package,const long& param,IRA::CString& out)
 /**
  * Prototype of the callback function, invoked when a injected procedure has completed. If accepts the name of the procedure and the execution result
  */
@@ -342,7 +343,7 @@ public:
 	 * @param command string that stores the command to be executed.
 	 * @param out  the result of the requested command
 	 */
-	void run(const IRA::CString& command,IRA::CString& out) throw (ParserErrors::ParserErrorsExImpl,ACSErr::ACSbaseExImpl);
+	void run(const IRA::CString& command,IRA::CString& out);
 
 	/**
 	 * This function parses and executes a command asynchronously independently if the command is a simple procedure, a simple command with or without the time mark character.
@@ -352,7 +353,7 @@ public:
 	 * @param callBack callback function to be invoked as soon as the operation completes
 	 * @param callBackParam parameter to passed to the callback function as argument
 	 */
-	void runAsync(const IRA::CString& command,_SP_CALLBACK(callBack),const void * callBackParam)  throw (ParserErrors::ParserErrorsExImpl);
+	void runAsync(const IRA::CString& command,_SP_CALLBACK(callBack),const void * callBackParam);
 
 	/**
 	 * Call in order to know the command delimiter char that the parser is using 
@@ -487,10 +488,7 @@ private:
 	 * @return the output of the command, if more than one value has to be returned (for example in case of more than one output
 	 *               arguments), the list is separated by the <i>answerDelimiter</i>. In case of exception the value is not meaningful.
 	 */
-	IRA::CString executeCommand(const IRA::CString& command,IRA::CString& instr) throw (ParserErrors::SyntaxErrorExImpl,ParserErrors::CommandNotFoundExImpl,
-			ParserErrors::NotEnoughParametersExImpl,ParserErrors::SystemCommandErrorExImpl,ParserErrors::ProcedureErrorExImpl,ParserErrors::TimeFormatErrorExImpl,ParserErrors::ParserTimerErrorExImpl,
-			ParserErrors::NotSupportedErrorExImpl,ParserErrors::TooManyParametersExImpl,ParserErrors::ConversionErrorExImpl,ParserErrors::PackageErrorExImpl,ParserErrors::RemoteCommandErrorExImpl,
-			ACSErr::ACSbaseExImpl);
+	IRA::CString executeCommand(const IRA::CString& command,IRA::CString& instr);
 	
 	/**
 	 * Format an output string that summarizes the time based commands that are in the execution queue.
@@ -555,10 +553,7 @@ private:
 	 * @param execInterval execution interval
 	 * @return the pointer to the element that defines the command
 	 */
-	TRule *checkCommand(const IRA::CString& line,IRA::CString& instr, IRA::CString* inParams,WORD& parNum,bool& timeTagged,IRA::CString& timeCommand,ACS::Time& execTime,ACS::TimeInterval& execInterval)  throw (
-			ParserErrors::SyntaxErrorExImpl,ParserErrors::CommandNotFoundExImpl,ParserErrors::NotEnoughParametersExImpl,ParserErrors::TimeFormatErrorExImpl,ParserErrors::NotSupportedErrorExImpl,
-			ParserErrors::TooManyParametersExImpl);
-
+	TRule *checkCommand(const IRA::CString& line,IRA::CString& instr, IRA::CString* inParams,WORD& parNum,bool& timeTagged,IRA::CString& timeCommand,ACS::Time& execTime,ACS::TimeInterval& execInterval);
 	/**
 	 * This function searches the execution rules to find if a command has been defined.
 	 * @param instr name of the command to look for.
@@ -585,8 +580,7 @@ private:
 	 * @param procPrm list of procedure parameters
 	 * @param parNumber number of parameters of the procedure
 	*/
-	void pushProcedure(const IRA::CString& name,const ACS::stringSeq& procedure,IRA::CString *procPrm=NULL,WORD& parNumber=0,_SP_CALLBACK(callBack)=NULL,const void* parameter=NULL) throw (
-			ParserErrors::ProcedureErrorExImpl);
+	void pushProcedure(const IRA::CString& name,const ACS::stringSeq& procedure,IRA::CString *procPrm=NULL,WORD& parNumber=0,_SP_CALLBACK(callBack)=NULL,const void* parameter=NULL);
 	
 	/**
 	 * Pop a command form the begging of the command list

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 
 """
 This script reads from the command line a list of directories and tries to find
@@ -122,9 +123,9 @@ def console_app():
         scan_list.sort(key=lambda x:x.start_time)
 
     if scan_list:
-        print "N\tSCANID\tSNAME\t\tREC\tSUBSCANS\tSTART TIME"
+        print("N\tSCANID\tSNAME\t\tREC\tSUBSCANS\tSTART TIME")
         for i,scan in enumerate(scan_list):
-            print str(i) + '\t' + str(scan)
+            print(str(i) + '\t' + str(scan))
 
 if __name__ == "__main__":
     console_app()

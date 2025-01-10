@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
                 "",
                 0,
                 0x7C,
-                0x01,
+                0x7F,
                 0x7C,
                 0x7D,
                 0x7C,

@@ -17,38 +17,38 @@ def main():
 	if	getManager():
 		simpleClient = PySimpleClient()
 	else:
-		print "Control software is off line"
+		print("Control software is off line")
 		sys.exit(1)
 
 	command=""
 	
 	try:
 		command=sys.argv[1]
-	except Exception, ex:
+	except Exception as ex:
 		newEx = ClientErrorsImpl.InvalidArgumentExImpl( exception=ex, create=1 )
 		newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR)
 		sys.exit(1)
 
 	try:
 		sched=simpleClient.getDefaultComponent("IDL:alma/Management/Scheduler:1.0")
-	except Exception, ex:
+	except Exception as ex:
 		newEx = ClientErrorsImpl.CouldntAccessComponentExImpl(exception=ex,create=1)
 		newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR)
 		sys.exit(1)
     
 	try:
 		answer=sched.command(command)
-	except Exception, ex:
+	except Exception as ex:
 		newEx = ClientErrorsImpl.CORBAProblemExImpl(exception=ex,create=1)
 		newEx.log(simpleClient.getLogger(),ACSLog.ACS_LOG_ERROR)
 		sys.exit(1)
 
-	print answer[1]
+	print(answer[1])
 
 	if sched!=None:
 		try:
 			simpleClient.releaseComponent(sched.getName())
-		except Exception,ex:
+		except Exception as ex:
 			pass
 		finally:
 			sched=None            

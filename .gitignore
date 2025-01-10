@@ -15,6 +15,7 @@ Common/Libraries/SlaLibrary
 Common/Clients/CaltoolClient/src/calibrationtool_ui.py
 Common/Clients/CaltoolClient/src/calibrationtool_ui.pye
 Common/Errors/AntennaErrors/idl/AntennaErrors.idl
+Common/Errors/ActiveSurfaceErrors/idl/ASErrors.idl
 Common/Errors/BackendsErrors/idl/BackendsErrors.idl
 Common/Errors/ClientErrors/idl/ClientErrors.idl
 Common/Errors/ComponentErrors/idl/ComponentErrors.idl
@@ -35,7 +36,11 @@ Common/Interfaces/AntennaInterface/idl/Mount.idl
 Common/Interfaces/AntennaInterface/idl/OTF.idl
 Common/Interfaces/AntennaInterface/idl/Observatory.idl
 Common/Interfaces/AntennaInterface/idl/SkySource.idl
+<<<<<<< HEAD
 Common/Interfaces/AntennaInterface/idl/SolarSystemBody.idl
+=======
+Common/Interfaces/ActiveSurfaceInterface/idl/ActiveSurfaceCommon.idl
+>>>>>>> fc2c1f1b26e8290a1c5e684ca914a4d84d66d0e7
 Common/Interfaces/CommonInterface/idl/AntennaDefinitions.idl
 Common/Interfaces/CommonInterface/idl/BackendsDefinitions.idl
 Common/Interfaces/CommonInterface/idl/ManagmentDefinitions.idl
@@ -44,17 +49,22 @@ Common/Interfaces/CommonInterface/idl/ReceiversDefinitions.idl
 Common/Interfaces/ManagmentInterface/idl/CustomLogger.idl
 Common/Interfaces/ReceiversInterface/idl/DewarPositionerDefinitions.idl
 Common/Interfaces/XBackendInterface/idl/XBackends.idl
+Common/Interfaces/ActiveSurfaceInterface/idl/ActiveSurfaceCommon.idl
 Common/Misc/PMUpdate/src/PMUpdate_gui.py
+Medicina/Interfaces/MedicinaActiveSurfaceInterface/idl/MedicinaActiveSurfaceBoss.idl
 Noto/Errors/NotoActiveSurfaceErrors/idl/ASErrors.idl
 Noto/Interfaces/NotoActiveSurfaceInterface/idl/NotoActiveSurfaceBoss.idl
 SRT/Clients/SRTActiveSurfaceGUIClient/include/SRTActiveSurfaceGUI.h
 SRT/Clients/SRTActiveSurfaceGUIClient/src/moc_SRTActiveSurfaceCore.cpp
 SRT/Clients/SRTActiveSurfaceGUIClient/src/moc_SRTActiveSurfaceGUIui.cpp
-SRT/Errors/SRTActiveSurfaceErrors/idl/ASErrors.idl
 SRT/Interfaces/SRTActiveSurfaceInterface/idl/SRTActiveSurfaceBoss.idl
+<<<<<<< HEAD
 <<<<<<< HEAD
 Common/Libraries/build.log
 =======
 SRT/Interfaces/SRTActiveSurfaceInterface/idl/SRTActiveSurfaceCommon.idl
 .DS_Store
 >>>>>>> origin/master
+=======
+.vscode/settings.json
+>>>>>>> fc2c1f1b26e8290a1c5e684ca914a4d84d66d0e7

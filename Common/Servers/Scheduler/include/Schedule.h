@@ -25,6 +25,7 @@
 
 #define _SCHED_NULLTARGET "NULL"
 #define SEPARATOR '\t'
+#define MAX_SCHED_NAME_LEN 37
 
 /**
  * This namespace contains all the classes and symbol that are needed to parse and execute the schedules
@@ -52,7 +53,7 @@ public:
 			const Antenna::TCoordinateFrame& subScanFrame,const Antenna::TsubScanDescription& description,
 			const Antenna::TsubScanDirection& direction,const ACS::TimeInterval& subScanDuration);
 
-	void OTFC(const Antenna::TCoordinateFrame& coordFrame,const Antenna::TsubScanGeometry& geometry,
+	void otfc(const Antenna::TCoordinateFrame& coordFrame,const Antenna::TsubScanGeometry& geometry,
 		const Antenna::TCoordinateFrame& subScanFrame,const Antenna::TsubScanDirection& direction,
 		const double& span,const ACS::TimeInterval& subScanDuration,const Antenna::TTrackingParameters * const sec);
 
@@ -470,6 +471,12 @@ public:
 	virtual bool getScan(const DWORD& id,TRecord& rec);
 	
 	/**
+	* It outputs to standard out the definitions of the requested subscan
+	* @param id id identifier of the subscan
+	*/
+	virtual bool printScan(const DWORD& id);
+	
+	/**
 	 * Checks the existence of a scan by its identifier
 	 * @param id identifier of the scan we are checking
 	 * @return true if the scan exists, false if it doesn't.
@@ -493,27 +500,26 @@ private:
 	 * @param scan pointer to the structure
 	 */
 	void resetTrackingParameters(Antenna::TTrackingParameters *scan);
-	
-	/**
-	 * parse the list of parameters of an OTF.
-	 * @param val line to parse
-	 * @param scan structure containing the OTF parameters
-	 * @param id numeral identifier of the scan
-	 * @param errMsg error specification string in case of unsuccessful operation
-	 * @return the result of the parse
-	 */
-	bool parseOTF(const IRA::CString& val,Antenna::TTrackingParameters *scan,DWORD& id,IRA::CString& errMsg);
-
+	 
 	/**
 	 * parse the list of parameters of an OTFC scan.
 	 * @param val line to parse
 	 * @param scan structure containing the OTF parameters
-	 * @param scanSec structure containing the parameters of the secondary scan which is the scan used to compute the center of the scan
 	 * @param id numeral identifier of the scan
 	 * @param errMsg error specification string in case of unsuccessful operation
 	 * @return the result of the parse
-	 */	
-	bool parseOTFC(const IRA::CString& val,Antenna::TTrackingParameters *scan,Antenna::TTrackingParameters *secScan,DWORD& id,IRA::CString& errMsg);
+	 */ 
+	bool parseOTF(const IRA::CString& val,Antenna::TTrackingParameters *scan,DWORD& id,IRA::CString& errMsg);
+
+	/**
+	 * parse the list of parameters of an OTF.
+	 * @param val line to parse
+	 * @param id numeral identifier of the scan
+	 * @param errMsg error specification string in case of unsuccessful operation
+	 * @pram binder binder (to subscan description structure) object
+	 * @return the result of the parse
+	 */
+	bool parseOTFC(const IRA::CString& val,DWORD& id,IRA::CString& errMsg,CSubScanBinder& binder);
 
 	/**
 	 * parse the list of parameters of a SKYDIP scan.
@@ -529,12 +535,12 @@ private:
 	/**
 	 * Parse the list of parameters of sidereal tracking.
 	 * @param val line to parse
-	 * @param otf structure containing the ORF parameters
 	 * @param id numeral identifier of the scan
 	 * @param errMsg error specification string in case of unsuccessful operation
+	 * @pram binder binder (to subscan description structure) object
 	 * @return the result of the parse
 	 */
-	bool parseSidereal(const IRA::CString& val,Antenna::TTrackingParameters *scan,DWORD& id,IRA::CString& errMsg);
+	//bool parseSidereal(const IRA::CString& val,Antenna::TTrackingParameters *scan,DWORD& id,IRA::CString& errMsg);
 	
 	bool parseSidereal2(const IRA::CString& val,DWORD& id,IRA::CString& errMsg,CSubScanBinder& binder);
 
@@ -569,6 +575,36 @@ private:
 	 * @return the result of the parsing
 	 */
 	bool parseVRADSwitch(const IRA::CString& val,int& start,double& vrad,Antenna::TReferenceFrame& frame,Antenna::TVradDefinition& ref,IRA::CString& errMsg);
+
+	 /**
+	 * Parse the input string looking for a vRAD switch in order to configure a radial velocity
+	 * @param val line to parse
+	 * @param start point inside the line where to start parsing
+	 * @param vrad output radial velocity
+	 * @param frame output radial velocity frame
+	 * @param ref radial velocity definition
+	 * @param result true if the offset switch has been identified 
+	 * @errMsg error message in case of errors
+	 * @return the result of the parsing
+	 */
+	bool parseVRADSwitch(const IRA::CString& val,int& start,double& vrad,Antenna::TReferenceFrame& frame,
+	  Antenna::TVradDefinition& ref,bool& result,IRA::CString& errMsg);
+
+	/**
+	 * Parse teh input string looking for the OFF switches in order to configure a subscan offset
+	 * @param val line to parse
+	 * @param start point inside the line where to start parsing
+	 * @param sw token containing the specific OFF token.
+	 * @param offsetFrame frame of the offset
+	 * @param lonoff longitude offset in radians
+	 * @param latoff latitude offset in radians
+	 * @param result true if the offset switch has been identified 
+	 * @errMsg error message in case of errors
+	 * @return the result of the parsing is correct or not
+	 */
+	bool parseOffsetSwitch(const IRA::CString& val,int& start,Antenna::TCoordinateFrame& offsetFrame,
+	  double& lonoff,double& latoff,bool& result,IRA::CString& errMsg);
+
 
 	/**
 	 * This method is called by the parser in order to read the scan list of a main schedule
@@ -731,6 +767,11 @@ public:
 	 * @return true if the subscan can be returned
 	 */
 	bool getSubScan(const DWORD& counter,TRecord& rec);
+	
+	/** 
+	 * Print all significant information from a schedule
+	*/
+	bool printAll();	
 	
 	/**
 	 * Can be called to know the subscan counter given the scanid and the subscanid.
@@ -942,6 +983,11 @@ private:
 	 * @return false if the line contains parsing errors
 	 */
 	virtual bool parseScans(const IRA::CString& line,const DWORD& lnNumber,IRA::CString& errorMsg);
+	/**
+	 * Prints the subscan
+	 * @param rec subscan record to be printed
+	 */	
+	bool printSubScan(const TRecord& rec);
 
 };
 

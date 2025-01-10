@@ -45,6 +45,8 @@ void CRecvBossCore::initialize(maci::ContainerServices* services,CConfiguration 
 	catch (...) {
 		_THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"CRecvBossCore::initialize()");
 	}
+	m_calMux_proxy.setContainerServices(services);
+   m_calMux_proxy.setComponentInterface("IDL:alma/Backends/CalMux:1.0");
 	ACS_LOG(LM_FULL_INFO,"CRecvBossCore::initialize()",(LM_INFO,"ReceiversBoss notification channel open"));
 }
 
@@ -67,7 +69,7 @@ void CRecvBossCore::calOn() throw (ComponentErrors::ValidationErrorExImpl,Compon
 {
 	//IRA::CError err;
 	baci::ThreadSyncGuard guard(&m_mutex);
-	if (m_currentRecvCode=="KKC") {
+	/*if (m_currentRecvCode=="KKC") {
 		loadReceiver(); //  ComponentErrors::CouldntGetComponentExImpl
 		try {
 			m_currentRecv->calOn();
@@ -99,22 +101,24 @@ void CRecvBossCore::calOn() throw (ComponentErrors::ValidationErrorExImpl,Compon
 			throw impl;
 		}
 	}
-	else if ((m_currentRecvCode=="CCC") || (m_currentRecvCode=="CHC")){
-		char buffer [14] = {'s','e','t',' ','m','a','r','c','a','c',' ','o','n','\n' };
-		if (!sendToRecvControl((const void *)buffer,14)) {
-			_EXCPT(ComponentErrors::SocketErrorExImpl,impl,"CRecvBossCore::calOn()");
-			m_status=Management::MNG_FAILURE;
-			throw impl;
+	else */
+	if ((m_currentRecvCode=="XXP") || (m_currentRecvCode=="CCC") || (m_currentRecvCode=="CHC") || (m_currentRecvCode=="KKC"))  {
+		try {
+			m_calMux_proxy->calOn();
 		}
-	}
-	else if (m_currentRecvCode=="XXP") {
+		catch (ComponentErrors::ComponentErrorsEx& ex) {
+			_ADD_BACKTRACE(ReceiversErrors::UnavailableReceiverOperationExImpl,impl,ex,"CRecvBossCore::calOn()");
+			impl.setReceiverCode((const char *)m_currentRecvCode);
+			changeBossStatus(Management::MNG_FAILURE);
+			throw impl;			
+		}
 		// turn the marca on through the FS
-		IRA::CString fsBuffer("calon\n");
+		/*IRA::CString fsBuffer("calon\n");
 		if (!sendToFS((const void *)fsBuffer,fsBuffer.GetLength())) {
 			_EXCPT(ComponentErrors::SocketErrorExImpl,impl,"CRecvBossCore::calOn()");
 			m_status=Management::MNG_FAILURE;
 			throw impl;
-		}
+		}*/
 	}
 	else {
 		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::calOn()");
@@ -131,7 +135,7 @@ void CRecvBossCore::calOff() throw (ComponentErrors::ValidationErrorExImpl,Compo
 {
 	//IRA::CError err;
 	baci::ThreadSyncGuard guard(&m_mutex);
-	if (m_currentRecvCode=="KKC") {
+	/*if (m_currentRecvCode=="KKC") {
 		loadReceiver(); //  ComponentErrors::CouldntGetComponentExImpl
 		try {
 			m_currentRecv->calOff();
@@ -163,22 +167,24 @@ void CRecvBossCore::calOff() throw (ComponentErrors::ValidationErrorExImpl,Compo
 			throw impl;
 		}
 	}
-	else if ((m_currentRecvCode=="CCC") || (m_currentRecvCode=="CHC")) {
-		char buffer [15] = {'s','e','t',' ','m','a','r','c','a','c',' ','o','f','f','\n' };
-		if (!sendToRecvControl((const void *)buffer,15)) {
-			_EXCPT(ComponentErrors::SocketErrorExImpl,impl,"CRecvBossCore::calOff()");
-			m_status=Management::MNG_FAILURE;
-			throw impl;
-		}
-	}
-	else if (m_currentRecvCode=="XXP") {
+	else*/ 
+	if ((m_currentRecvCode=="XXP") || (m_currentRecvCode=="CCC") || (m_currentRecvCode=="CHC") || (m_currentRecvCode=="KKC")) {
 		// turn the marca on through thr FS
-		IRA::CString fsBuffer("caloff\n");
+		/*IRA::CString fsBuffer("caloff\n");
 		if (!sendToFS((const void *)fsBuffer,fsBuffer.GetLength())) {
 			_EXCPT(ComponentErrors::SocketErrorExImpl,impl,"CRecvBossCore::calOff()");
 			m_status=Management::MNG_FAILURE;
 			throw impl;
-		}				
+		}*/
+		try {
+			m_calMux_proxy->calOff();
+		}
+		catch (ComponentErrors::ComponentErrorsEx& ex) {
+			_ADD_BACKTRACE(ReceiversErrors::UnavailableReceiverOperationExImpl,impl,ex,"CRecvBossCore::calOff()");
+			impl.setReceiverCode((const char *)m_currentRecvCode);
+			changeBossStatus(Management::MNG_FAILURE);
+			throw impl;			
+		}	
 	}
 	else {
 		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CRecvBossCore::calOff()");
@@ -283,7 +289,9 @@ void CRecvBossCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::Vali
 	IRA::CIRATools::Wait(0,500000);  //wait half a second to settle things down
 }
 
-void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketErrorExImpl,ComponentErrors::ValidationErrorExImpl)
+void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketErrorExImpl,ComponentErrors::ValidationErrorExImpl,
+  ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,
+  ComponentErrors::OperationErrorExImpl)
 {
 	IRA::CError err;
 	IRA::CString rec(code);
@@ -369,8 +377,8 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 		m_pols[1]=Receivers::RCV_RCP;
 		m_startFreq[0]=100.0;
 		m_startFreq[1]=100.0;
-		m_bandWidth[0]=400.0;
-		m_bandWidth[1]=400.0;
+		m_bandWidth[0]=800.0;
+		m_bandWidth[1]=800.0;
 		m_currentRecvCode="CCC";
 		m_currentOperativeMode="NORMAL";
 	}
@@ -397,8 +405,8 @@ void CRecvBossCore::setup(const char * code) throw (ComponentErrors::SocketError
 		m_pols[1]=Receivers::RCV_RCP;
 		m_startFreq[0]=100.0;
 		m_startFreq[1]=100.0;
-		m_bandWidth[0]=400.0;
-		m_bandWidth[1]=400.0;
+		m_bandWidth[0]=800.0;
+		m_bandWidth[1]=800.0;
 		m_currentRecvCode="CHC";
 		m_currentOperativeMode="NORMAL";
 	}

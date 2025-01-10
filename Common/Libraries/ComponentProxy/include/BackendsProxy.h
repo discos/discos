@@ -6,6 +6,7 @@
 #include <HolographyC.h>
 #include <NoiseGeneratorC.h>
 #include <TotalPowerC.h>
+#include <CalMuxC.h>
 
 #include "ComponentProxy.h"
 
@@ -16,6 +17,7 @@ namespace Backends
     PROXY_COMPONENT(Holography);
     PROXY_COMPONENT(NoiseGenerator);
     PROXY_COMPONENT(TotalPower);
+    PROXY_COMPONENT(CalMux);
 };
 
 #endif

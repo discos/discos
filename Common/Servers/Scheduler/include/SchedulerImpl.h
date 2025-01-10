@@ -180,11 +180,14 @@ public:
 	 * @param humidity relative humidity
 	 * @param pressure value of the pressure (mBar)
 	 * @param wind speed of wind (no direction) in Km/s
+	 * @param windDir wind direction (azimuth angle)
 	 * @throw CORBA::SystemException
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * @throw ManagementErrors::ManagementErrorsEx
 	 */
-	virtual void weatherParamenters (CORBA::Double_out temperature,CORBA::Double_out humidity,CORBA::Double_out pressure,CORBA::Double_out wind);
+	 virtual void weatherParamenters(CORBA::Double_out temperature,CORBA::Double_out humidity,
+      CORBA::Double_out pressure,CORBA::Double_out wind,CORBA::Double_out windDir) 
+      throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 
 	/**
 	 * This method can load a new schedule file. After a succesfull parse of the schedule the itself is started

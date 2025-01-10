@@ -1,4 +1,5 @@
 # coding: utf-8
+from __future__ import print_function
 import os
 from shutil import copy2
 from utility import convert_time_doy_to_string_format
@@ -67,19 +68,19 @@ def load_error_file_on_xml(errorfilename, pointingxmlfilename, receivername):
             return (7, "errorfilename: new model section too short")
 
 
-        if len(errorfilename_rows[0]) <> 7 or  \
-                len(errorfilename_rows[1]) <> 31 or \
-                len(errorfilename_rows[2]) <> 5 or \
-                len(errorfilename_rows[3]) <> 5 or \
-                len(errorfilename_rows[4]) <> 5 or \
-                len(errorfilename_rows[5]) <> 5 or \
-                len(errorfilename_rows[6]) <> 5 or \
-                len(errorfilename_rows[7]) <> 5:
+        if len(errorfilename_rows[0]) != 7 or  \
+                len(errorfilename_rows[1]) != 31 or \
+                len(errorfilename_rows[2]) != 5 or \
+                len(errorfilename_rows[3]) != 5 or \
+                len(errorfilename_rows[4]) != 5 or \
+                len(errorfilename_rows[5]) != 5 or \
+                len(errorfilename_rows[6]) != 5 or \
+                len(errorfilename_rows[7]) != 5:
             return (8, "errorfilename: not enough parameters in new model section")
 
         try:
             newmodel_date = convert_time_doy_to_string_format(errorfilename_rows[0])
-        except RuntimeError, e:
+        except RuntimeError as e:
             return (1001, "DOY convertion error: " + e.message)
         phi = errorfilename_rows[1][0]
 

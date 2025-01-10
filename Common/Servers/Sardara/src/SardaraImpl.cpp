@@ -122,8 +122,7 @@ void SardaraImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	// command parser configuration
 	m_parser->add("integration",new function1<CCommandLine,non_constant,void_type,I<long_type> >(line,&CCommandLine::setIntegration),1);
 	m_parser->add("calSwitch",new function1<CCommandLine,non_constant,void_type,I<long_type> >(line,&CCommandLine::activateCalSwitching),1 );
-	m_parser->add("setSection", new function7<CCommandLine,non_constant,void_type,I<long_type>,I<double_type>,I<double_type>,I<long_type>,I<enum_type<PolarizationToString> >,I<double_type>,I<long_type> >
-			(line,&CCommandLine::setConfiguration),7 );
+	m_parser->add("setSection", new function7<CCommandLine,non_constant,void_type,I<long_type>,I<double_type>,I<double_type>,I<long_type>,I<enum_type<PolarizationToString> >,I<double_type>,I<long_type> >(line,&CCommandLine::setConfiguration),7 );
 	m_parser->add("setAttenuation", new function2<CCommandLine,non_constant,void_type,I<long_type>,I<double_type> >(line,&CCommandLine::setAttenuation),2 );
 	m_parser->add("enable",new function1<CCommandLine,non_constant,void_type,I<longSeq_type> >(line,&CCommandLine::setEnabled),1 );
 	m_parser->add("getIntegration",new function1<CCommandLine,constant,void_type,O<long_type> >(line,&CCommandLine::getIntegration),0 );
@@ -138,6 +137,8 @@ void SardaraImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	m_parser->add("getTime",new function1<CCommandLine,non_constant,void_type,O<time_type> >(line,&CCommandLine::getTime),0 );
 	m_parser->add("initialize",new function1<CCommandLine,non_constant,void_type,I<string_type> >(line,&CCommandLine::setup),1 );
 	m_parser->add("getRms",new function1<CCommandLine,non_constant,void_type,O<doubleSeq_type> >(line,&CCommandLine::getRms),0 );
+	m_parser->add("setTsysRange", new function2<CCommandLine,non_constant,void_type,I<double_type>,I<double_type> >(line,&CCommandLine::setTsysRange),2 );
+	m_parser->add("backendPark", new function0<CCommandLine,non_constant, void_type>(line,&CCommandLine::backendPark),0 );
 		
 	threadPar.sender=this;
 	threadPar.command=m_commandLine;
@@ -668,6 +669,28 @@ void SardaraImpl::setAttenuation(CORBA::Long input,CORBA::Double att) throw (COR
 	}
 }
 
+void SardaraImpl::setTsysRange(CORBA::Double freq,CORBA::Double bw) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx)
+{
+	AUTO_TRACE("SardaraImpl::setTsysRange()");
+	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
+	try {
+		line->setTsysRange(freq,bw);
+	}
+	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getComponentErrorsEx();
+	}
+	catch (BackendsErrors::BackendsErrorsExImpl& ex) {
+		ex.log(LM_DEBUG);
+		throw ex.getBackendsErrorsEx();
+	}
+	catch (...) {
+		_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"SardaraImpl::setTsysRange()");
+		dummy.log(LM_DEBUG);
+		throw dummy.getComponentErrorsEx();
+	}
+}
+
 CORBA::Long SardaraImpl::getInputs(ACS::doubleSeq_out freq,ACS::doubleSeq_out bandWidth,ACS::longSeq_out feed,ACS::longSeq_out ifNumber) throw (CORBA::SystemException,
 		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx)
 {
@@ -758,12 +781,12 @@ void SardaraImpl::setIntegration(CORBA::Long Integration) throw (CORBA::SystemEx
 	}		
 }
 
-void SardaraImpl::getConfiguration (CORBA::String_out configuration) throw (CORBA::SystemException)
+char* SardaraImpl::getConfiguration() throw (CORBA::SystemException)
 {
 	AUTO_TRACE("SardaraImpl::getIntegration()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 	try {
-		line->getConfiguration(configuration);
+		return line->getConfiguration();
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -780,12 +803,12 @@ void SardaraImpl::getConfiguration (CORBA::String_out configuration) throw (CORB
 	}	
 }
 
-void SardaraImpl::getCommProtVersion (CORBA::String_out version) throw (CORBA::SystemException)
+char* SardaraImpl::getCommProtVersion() throw (CORBA::SystemException)
 {
 	AUTO_TRACE("SardaraImpl::getCommProtVersion()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 	try {
-		line->getCommProtVersion(version);
+		return line->getCommProtVersion();
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
