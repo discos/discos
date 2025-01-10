@@ -14,7 +14,7 @@
     <toolAgainstInterfaceRepository></toolAgainstInterfaceRepository>
     <toolAgainstNameService></toolAgainstNameService>
     <containers>
-        <select>34</select>
+        <select>32</select>
         <againstManagerHost></againstManagerHost>
         <againstManagerPort></againstManagerPort>
         <againstCDB></againstCDB>
@@ -64,7 +64,7 @@
             <remoteHost>MASTERHOST</remoteHost>
             <remoteAccount>discos</remoteAccount>
         </container>
-        <container>
+        <!--container>
             <name>LocalOscillatorLPContainer</name>
             <type>py</type>
             <heapSizeMB></heapSizeMB>
@@ -72,7 +72,7 @@
             <scriptBase>0</scriptBase>
             <remoteHost>MASTERHOST</remoteHost>
             <remoteAccount>discos</remoteAccount>
-        </container>
+        </container-->
         <container>
             <name>LocalOscillatorCContainer</name>
             <type>py</type>
@@ -164,6 +164,15 @@
             <remoteAccount>discos</remoteAccount>
         </container>
         <container>
+            <name>SkarabContainer</name>
+            <type>cpp</type>
+            <heapSizeMB></heapSizeMB>
+            <useDedicatedSettings>true</useDedicatedSettings>
+            <scriptBase>0</scriptBase>
+            <remoteHost>MASTERHOST</remoteHost>
+            <remoteAccount>discos</remoteAccount>
+        </container>
+        <container>
             <name>SRT7GHzContainer</name>
             <type>cpp</type>
             <heapSizeMB></heapSizeMB>
@@ -190,7 +199,7 @@
             <remoteHost>MASTERHOST</remoteHost>
             <remoteAccount>discos</remoteAccount>
         </container>
-        <container>
+        <!--container>
             <name>SRTLPBandContainer</name>
             <type>cpp</type>
             <heapSizeMB></heapSizeMB>
@@ -198,7 +207,7 @@
             <scriptBase>0</scriptBase>
             <remoteHost>MASTERHOST</remoteHost>
             <remoteAccount>discos</remoteAccount>
-        </container>
+        </container-->
         <container>
             <name>TotalPowerContainer</name>
             <type>cpp</type>
@@ -210,15 +219,6 @@
         </container>
         <container>
             <name>WeatherStationContainer</name>
-            <type>cpp</type>
-            <heapSizeMB></heapSizeMB>
-            <useDedicatedSettings>true</useDedicatedSettings>
-            <scriptBase>0</scriptBase>
-            <remoteHost>MASTERHOST</remoteHost>
-            <remoteAccount>discos</remoteAccount>
-        </container>
-        <container>
-            <name>XContainer</name>
             <type>cpp</type>
             <heapSizeMB></heapSizeMB>
             <useDedicatedSettings>true</useDedicatedSettings>

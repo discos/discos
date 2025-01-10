@@ -50,6 +50,10 @@ CCommandLine::CCommandLine(ContainerServices *service): CSocket(),
 
 	// SRT configurations
 	m_SK00=false; m_SK00S=false;
+	m_SK01=false; m_SK01S=false;
+	m_SK04=false; m_SK04S=false;
+	m_SK03=false; m_SK03S=false;
+	m_SK06=false; m_SK06S=false;
 	m_SK77=false; m_SK77S=false;
 	m_SCC00=false; m_SCC00S=false;
 	m_SCH00=false; m_SCH00S=false;
@@ -204,6 +208,12 @@ void CCommandLine::stopDataAcquisition() throw (BackendsErrors::ConnectionExImpl
 	ACS_LOG(LM_FULL_INFO,"CCommandLine::stopDataAcquisition()",(LM_NOTICE,"TRANSFER_JOB_STOPPED"));
 	clearStatusField(CCommandLine::BUSY); // unsets the component status to busy
 	clearStatusField(CCommandLine::SUSPEND); // unsets the component status to transfer job suspended......
+}
+
+void CCommandLine::backendPark() throw (BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
+		ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::NotAllowedExImpl,BackendsErrors::BackendFailExImpl)
+{
+	ACS_LOG(LM_FULL_INFO,"CCommandLine::backendPark()",(LM_NOTICE,"backendPark"));
 }
 
 void CCommandLine::stopDataAcquisitionForced() throw (BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
@@ -369,8 +379,8 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 		throw impl;
 		}*/
 		if (inputId>=0) {  //check the section id is in valid ranges
-			//if (inputId>=m_sectionsNumber) {
-			if (inputId>m_sectionsNumber) {
+			if (inputId>=m_sectionsNumber) {
+			//if (inputId>m_sectionsNumber) {
 				_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCommandLine::setConfiguration()");
 				impl.setReason("the section identifier is out of range");
 				throw impl;
@@ -519,9 +529,23 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 							if (newBW[i]==2300.00)
 								filter=2350.00;
 							if (newBW[i] == 420.00 || newBW[i] == 1500.00 || newBW[i] == 2300.00) {
-								for (j=0; j<m_inputsNumber; j++)
-									m_totalPower->setSection(j,-1, filter, -1, -1, -1, -1);
-									ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"TOTALPOWER_FILTER_CONFIGURED %ld,FILTER=%lf",i,filter));
+                                if(m_stokes)
+                                {
+                                    // Configure the TotalPower sections corresponding to the selected Sardara section (should be equivalent to the feed)
+                                    // e.g.: if the selected Sardara section is 0 we will configure TotalPower 0 and 1 sections
+                                    //       if the selected Sardara section is 1 we will configure TotalPower 2 and 3 sections
+                                    //       ...
+									m_totalPower->setSection(i * 2, -1, filter, -1, -1, -1, -1);
+								    ACS_LOG(LM_FULL_INFO, "CCommandLine::setConfiguration()", (LM_NOTICE, "TOTALPOWER_FILTER_CONFIGURED %ld, FILTER=%lf", i*2, filter));
+									m_totalPower->setSection((i * 2) + 1, -1, filter, -1, -1, -1, -1);
+								    ACS_LOG(LM_FULL_INFO, "CCommandLine::setConfiguration()", (LM_NOTICE, "TOTALPOWER_FILTER_CONFIGURED %ld, FILTER=%lf", (i*2)+1, filter));
+                                }
+                                else
+                                {
+                                    // Use the same section identifier for TotalPower
+									m_totalPower->setSection(i, -1, filter, -1, -1, -1, -1);
+								    ACS_LOG(LM_FULL_INFO, "CCommandLine::setConfiguration()", (LM_NOTICE, "TOTALPOWER_FILTER_CONFIGURED %ld, FILTER=%lf", i, filter));
+                                }
 							}
 						}
 						/*if ((m_SL00==true || m_SL00S==true) && m_stationSRT == true) {
@@ -592,10 +616,23 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 							if (newBW[i]==2300.00)
 								filter=2350.00;
 							if (newBW[i] == 420.00 || newBW[i] == 1500.00 || newBW[i] == 2300.00) {
-								for (j=0; j<m_inputsNumber; j++) {
-									m_totalPower->setSection(j,-1, filter, -1, -1, -1, -1);
-									ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"TOTALPOWER_FILTER_CONFIGURED %ld,FILTER=%lf",i,filter));
-								}
+                                if(m_stokes)
+                                {
+                                    // Configure the TotalPower sections corresponding to the selected Sardara section (should be equivalent to the feed)
+                                    // e.g.: if the selected Sardara section is 0 we will configure TotalPower 0 and 1 sections
+                                    //       if the selected Sardara section is 1 we will configure TotalPower 2 and 3 sections
+                                    //       ...
+									m_totalPower->setSection(i * 2, -1, filter, -1, -1, -1, -1);
+								    ACS_LOG(LM_FULL_INFO, "CCommandLine::setConfiguration()", (LM_NOTICE, "TOTALPOWER_FILTER_CONFIGURED %ld, FILTER=%lf", i*2, filter));
+									m_totalPower->setSection((i * 2) + 1, -1, filter, -1, -1, -1, -1);
+								    ACS_LOG(LM_FULL_INFO, "CCommandLine::setConfiguration()", (LM_NOTICE, "TOTALPOWER_FILTER_CONFIGURED %ld, FILTER=%lf", (i*2)+1, filter));
+                                }
+                                else
+                                {
+                                    // Use the same section identifier for TotalPower
+									m_totalPower->setSection(i, -1, filter, -1, -1, -1, -1);
+								    ACS_LOG(LM_FULL_INFO, "CCommandLine::setConfiguration()", (LM_NOTICE, "TOTALPOWER_FILTER_CONFIGURED %ld, FILTER=%lf", i, filter));
+                                }
 							}
 						}
 					}
@@ -799,6 +836,10 @@ void CCommandLine::setDefaultConfiguration(const IRA::CString & config) throw (C
     if (m_stationSRT==true) {
         m_SK77=m_SK77S=false;
         m_SK00=m_SK00S=false;
+        m_SK01=m_SK01S=false;
+        m_SK04=m_SK04S=false;
+        m_SK03=m_SK03S=false;
+        m_SK06=m_SK06S=false;
         m_SCC00=m_SCC00S=false;
         m_SCH00=m_SCH00S=false;
         m_SL00=m_SL00S=false;
@@ -815,6 +856,30 @@ void CCommandLine::setDefaultConfiguration(const IRA::CString & config) throw (C
             m_filter=1250.0;
             m_inputsNumber=m_sectionsNumber;
             m_SK00=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK01")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK01=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK04")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK04=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK03")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK03=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK06")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK06=true;
             m_CK=true;
         }
         if (config.Compare("SCC00")==0) {
@@ -1770,30 +1835,37 @@ CCommandLine::sendBackendCommand(Message request)
 	return reply;
 }
 
-//int CCommandLine::getConfiguration(char* configuration)
-void CCommandLine::getConfiguration(char* configuration)
+char* CCommandLine::getConfiguration()
 {
     Message request = Command::getConfiguration();
     try {
         Message reply = sendBackendCommand(request);
         if(reply.is_success_reply())
         {
-		    strcpy(configuration, reply.get_argument<string>(0).c_str());
+            return CORBA::string_dup(reply.get_argument<string>(0).c_str());
         }
     }
     catch (...) {
-    
     }
+
+    return CORBA::string_dup("");
 }
 
-int CCommandLine::getCommProtVersion(CORBA::String_out version)
+char* CCommandLine::getCommProtVersion()
 {
     Message request = Command::version();
-    Message reply = sendBackendCommand(request);
-    string _version = reply.get_argument<string>(0);
-    if(reply.is_success_reply())
-        strcpy(version, _version.c_str());
-    return _version.length();
+    try
+    {
+        Message reply = sendBackendCommand(request);
+        if(reply.is_success_reply())
+        {
+            return CORBA::string_dup(reply.get_argument<string>(0).c_str());
+        }
+    }
+    catch(...) {
+    }
+
+    return CORBA::string_dup("");
 }
 
 bool CCommandLine::checkConnection()

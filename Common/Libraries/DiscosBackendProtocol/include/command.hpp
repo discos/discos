@@ -27,7 +27,11 @@ namespace DiscosBackend{
             static Message setFilename(string filename);
             static Message convertData(){return Message(REQUEST, "convert-data");};
             static Message getRms(){return Message(REQUEST, "get-rms");};
+            static Message getDDCoffset(){return Message(REQUEST, "get-ddcoffset");};
             static Message setEnable(int feed1, int feed2);
+            static Message endSchedule(){return Message(REQUEST, "end-schedule");};
+            static Message backendPark(){return Message(REQUEST, "backend-park");};
+            static Message setShift(int shift);
     }; //class Command
 }; //namespace DiscosBackend
 

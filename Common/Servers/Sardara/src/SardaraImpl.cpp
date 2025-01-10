@@ -138,6 +138,7 @@ void SardaraImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	m_parser->add("initialize",new function1<CCommandLine,non_constant,void_type,I<string_type> >(line,&CCommandLine::setup),1 );
 	m_parser->add("getRms",new function1<CCommandLine,non_constant,void_type,O<doubleSeq_type> >(line,&CCommandLine::getRms),0 );
 	m_parser->add("setTsysRange", new function2<CCommandLine,non_constant,void_type,I<double_type>,I<double_type> >(line,&CCommandLine::setTsysRange),2 );
+	m_parser->add("backendPark", new function0<CCommandLine,non_constant, void_type>(line,&CCommandLine::backendPark),0 );
 		
 	threadPar.sender=this;
 	threadPar.command=m_commandLine;
@@ -780,12 +781,12 @@ void SardaraImpl::setIntegration(CORBA::Long Integration) throw (CORBA::SystemEx
 	}		
 }
 
-void SardaraImpl::getConfiguration (CORBA::String_out configuration) throw (CORBA::SystemException)
+char* SardaraImpl::getConfiguration() throw (CORBA::SystemException)
 {
 	AUTO_TRACE("SardaraImpl::getIntegration()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 	try {
-		line->getConfiguration(configuration);
+		return line->getConfiguration();
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);
@@ -802,12 +803,12 @@ void SardaraImpl::getConfiguration (CORBA::String_out configuration) throw (CORB
 	}	
 }
 
-void SardaraImpl::getCommProtVersion (CORBA::String_out version) throw (CORBA::SystemException)
+char* SardaraImpl::getCommProtVersion() throw (CORBA::SystemException)
 {
 	AUTO_TRACE("SardaraImpl::getCommProtVersion()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
 	try {
-		line->getCommProtVersion(version);
+		return line->getCommProtVersion();
 	}
 	catch (ComponentErrors::ComponentErrorsExImpl& ex) {
 		ex.log(LM_DEBUG);

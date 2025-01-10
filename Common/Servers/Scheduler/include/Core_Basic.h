@@ -99,6 +99,8 @@ static void startDataTansfer(Backends::GenericBackend_ptr backend,bool& backendE
  static void stopDataTransfer(Backends::GenericBackend_ptr backend,bool& backendError,bool& streamStarted,bool& streamPrepared,bool& streamConnected) throw (ComponentErrors::OperationErrorExImpl,
 		ManagementErrors::BackendNotAvailableExImpl);
 
+ static void endSchedule(Backends::GenericBackend_ptr backend,bool& backendError) throw (ComponentErrors::OperationErrorExImpl, ManagementErrors::BackendNotAvailableExImpl);
+
  /**
   * This static method will call the <i>stopScan()</i> of the DataReceiver interface in order to inform the current data receiver component that a scan has to be finalized.
   * @param writer reference to the writer or data recorder or data dealer
