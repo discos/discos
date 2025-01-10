@@ -17,8 +17,6 @@
 
 <TaperEntry><Feed>2</Feed><Frequency>80000.0</Frequency><Taper>-12.0</Taper></TaperEntry>
 <TaperEntry><Feed>2</Feed><Frequency>98000.0</Frequency><Taper>-13.0</Taper></TaperEntry>
-
-<TaperEntry><Feed>2</Feed><Frequency>98000.0</Frequency><Taper>-13.0</Taper></TaperEntry>
 <TaperEntry><Feed>2</Feed><Frequency>116000.0</Frequency><Taper>-9.8</Taper></TaperEntry>
 
 
