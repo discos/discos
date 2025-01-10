@@ -14,9 +14,9 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     actionThreadStackSize="2048"
     monitoringThreadStackSize="4096"
-    DewarIPAddress="192.168.1.1"
+    DewarIPAddress="192.168.200.181"
     DewarPort="5002"
-    LNAIPAddress="192.168.1.2"
+    LNAIPAddress="192.168.200.182"
     LNAPort="5002"      
     WatchDogResponseTime="10000000"
     WatchDogSleepTime="10000000"
@@ -25,10 +25,10 @@
     RepetitionExpireTime="10000000"
     ReceiverName="KQWBand"
     DefaultMode="Normal"
-    LocalOscillator_K_Instance="DummyK"
-    LocalOscillator_Q_Instance="DummyQ"
-    LocalOscillator_W1_Instance="DummyW1"
-    LocalOscillator_W2_Instance="DummyW2"
+    LocalOscillator_K_Instance="LO_KBAND"
+    LocalOscillator_Q_Instance="LO_KQW_Q"
+    LocalOscillator_W1_Instance="LO_KQW_WLOW"
+    LocalOscillator_W2_Instance="LO_KQW_WHIGH"
 >
     <LO description="Sequence of local oscillator values for each IF chain" />
     <feeds description="Number of feeds of the receiver" />
