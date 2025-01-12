@@ -313,18 +313,24 @@ typedef enum {
         
         } else
        {
-      //    THROW_EX(AntennaErrors, SourceNotFound, "WPServoImpl::initialize(): 'new' failure", false);
+          // THROW_EX(AntennaErrors, SourceNotFoundExImpl, "SolarSystemBodyImpl::setBodyName", false);
       
-      		_EXCPT(AntennaErrors::SourceNotFoundExImpl, __dummy,"SkySourceImpl::loadSourceFromCatalog()");
-      		__dummy.setSourceName(bodyName);
-		      CUSTOM_EXCPT_LOG(__dummy,LM_DEBUG);
-	      	//throw __dummy.getAntennaErrorsEx();
-
+           _EXCPT(AntennaErrors::SourceNotFoundExImpl, __dummy,"SkySourceImpl::loadSourceFromCatalog()");
+           __dummy.setSourceName(bodyName);
+	//	       CUSTOM_EXCPT_LOG(__dummy,LM_DEBUG);
         
+	         	throw __dummy.getAntennaErrorsEx();
+        
+      		
          	 
         }
         
+
+//_EXCPT(AntennaErrors::SourceNotFoundExImpl, __dummy,"SkySourceImpl::loadSourceFromCatalog()");
+      		//__dummy.setSourceName(bodyName);
+	//	       CUSTOM_EXCPT_LOG(__dummy,LM_DEBUG);
         
+	  //     	throw __dummy.getAntennaErrorsEx();
         
 
 }

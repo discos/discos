@@ -269,6 +269,7 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 	}
 	try {
 		currentGenerator->setOffsets(lonOffTmp,latOffTmp,offFrameTmp); //could throw an AntennaErrorsEx exception
+				ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"currentGenerator SET OFFSET"));
 	}
 	catch (CORBA::SystemException& ex) {
 		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CBossCore::prepareScan()");
@@ -393,6 +394,21 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 			//velDef=Antenna::ANT_UNDEF_DEF;
 			axis=Management::MNG_NO_AXIS;
 		}
+		catch(AntennaErrors::AntennaErrorsEx& ex) {
+			_ADD_BACKTRACE(AntennaErrors::ScanErrorExImpl,impl,ex,"CBossCore::prepareScan()");
+			impl.setReason("Unable to load the scan configuration into the generator");
+			throw impl;
+		}
+		catch (ComponentErrors::ComponentErrorsEx& ex) {
+			_ADD_BACKTRACE(AntennaErrors::ScanErrorExImpl,impl,ex,"CBossCore::prepareScan()");
+			impl.setReason("Unable to load the scan configuration into the generator");
+			throw impl;
+		}
+		catch (...) {
+			_THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"CBossCore::prepareScan()");
+		}
+		
+		
 		vrad=primary.RadialVelocity;
 		velFrame=primary.VradFrame;
 		velDef=primary.VradDefinition;
@@ -402,8 +418,16 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 		// moon has nothing to do...no configuration
 		Antenna::SolarSystemBody_var tracker;
 		tracker=Antenna::SolarSystemBody::_narrow(currentGenerator);
-      tracker->setBodyName(primary.targetName);  //
+		try{
 
+             tracker->setBodyName(primary.targetName);  //
+   
+      } catch(AntennaErrors::AntennaErrorsEx& ex) {
+
+   	 		 _ADD_BACKTRACE(AntennaErrors::ScanErrorExImpl,impl,ex,"CBossCore::prepareScan()");
+ 			    impl.setReason("Unable to load the scan configuration into the generator");
+			    throw impl;
+		}
 
 		//copy the current track and store it
 		copyTrack(lastPar,primary);
@@ -421,7 +445,9 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 		try {
 			Antenna::SolarSystemBodyAttributes_var att;
 			tracker->getAttributes(att);
+         ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"GOT ATTRIBUTES"))
 			ra=att->J2000RightAscension;
+			
 			dec=att->J2000Declination;
 			lon=att->gLongitude;
 			lat=att->gLatitude;
@@ -432,16 +458,24 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 			sourceName=IRA::CString(att->sourceID);
 			currentGeneratorFlux=currentGenerator; // the flux computer is the moon generator itself...make a deep copy
 		}
-      
-
-		catch (CORBA::SystemException& ex) {
-			sourceName=IRA::CString("????");
-			ra=dec=0.0; // in that case I do not want to rise an error
-			//vrad=0.0;
-			//velFrame=Antenna::ANT_UNDEF_FRAME;
-			//velDef=Antenna::ANT_UNDEF_DEF;
-			axis=Management::MNG_NO_AXIS;
+		catch(AntennaErrors::AntennaErrorsEx& ex) {
+			_ADD_BACKTRACE(AntennaErrors::ScanErrorExImpl,impl,ex,"CBossCore::prepareScan()");
+			impl.setReason("Unable to load the scan configuration into the generator");
+			throw impl;
 		}
+		catch (...) {
+			_THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"CBossCore::prepareScan()");
+		}      
+
+		//catch (CORBA::SystemException& ex) {
+		//	sourceName=IRA::CString("????");
+		//	ra=dec=0.0; // in that case I do not want to rise an error
+		//	//vrad=0.0;
+		//	//velFrame=Antenna::ANT_UNDEF_FRAME;
+		//	//velDef=Antenna::ANT_UNDEF_DEF;
+		//	axis=Management::MNG_NO_AXIS;
+	//	}
+
 		vrad=primary.RadialVelocity;
 		velFrame=primary.VradFrame;
 		velDef=primary.VradDefinition;
