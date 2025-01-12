@@ -406,6 +406,23 @@ public:
 	*/
 	virtual void sun() throw (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
 
+
+	/**
+	 * It allows to immediately start a tracking of a sidereal source, given its equatorial coordinates
+	 * @param name  or identifier of the planed
+ 	 * @throw CORBA::SystemExcpetion
+	 * @throw ComponentErrors::ComponentErrorsEx
+	 * @throw ManagementErrors::ManagementErrorsEx
+	 */
+
+
+
+
+
+
+    virtual void planet(const char * name) throw (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx,CORBA::SystemException);
+
+
 	/**
 	 * It allows to immediately start a tracking of a sidereal source, given its equatorial coordinates
 	 * @param targetName name or identifier of the source

@@ -300,6 +300,33 @@ bool CScanList::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CS
 			break;
 		}
 		case Management::MNG_SOLARSYTEMBODY: {
+			
+  DWORD id;
+			Antenna::TTrackingParameters *prim=new Antenna::TTrackingParameters;
+			if (!parseSun(line,prim,id,errMsg)) {
+				if (prim) delete prim;
+				return false; // errMsg already set by previous call
+			}
+			Antenna::TTrackingParameters *sec=new Antenna::TTrackingParameters;
+			resetTrackingParameters(sec);
+			TRecord *rec=new TRecord;
+			rec->id=id;
+			rec->type=type;
+			rec->primaryParameters=(void *)prim;
+			rec->secondaryParameters=(void *)sec;
+			// **************************************
+			// Da modificare come MNG_PEAKER
+			CSubScanBinder binder(getConfiguration(),false);
+			rec->receieversParsmeters=(void *)binder.getReceivers();
+			rec->servoParameters=(void *)binder.getServo();
+			rec->subScanConfiguration=binder.getSubScanConfiguration();
+			// **************************************
+
+			//rec->target="";
+			rec->line=lnNumber;
+			m_schedule.push_back(rec);
+			break;			
+			
 			break;
 		}
 		case Management::MNG_OTF: {

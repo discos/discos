@@ -301,6 +301,17 @@ module Management {
 		 */
 		void sun() raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
 
+      /**
+		 *  It allows to immediately start a tracking of the Sun.
+		 * @throw CORBA::SystemExcpetion
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw ManagementErrors::ManagementErrorsEx
+		 */
+		 
+		 
+		void planet(in string name) raises (ComponentErrors::ComponentErrorsEx,ManagementErrors::ManagementErrorsEx);
+
+
 		 /**
 		  * It allows to immediately go to a fixed horizontal position (beampark).
 		  * @param az azimuth in radians. It could be -1, in that case the current position is taken

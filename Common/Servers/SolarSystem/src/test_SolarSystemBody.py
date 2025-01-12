@@ -93,26 +93,18 @@ if hwRef != None:
     #Do something useful with the reference.
      
     try:
-    	name='Neptuune'
-        hwRef.setBodyName(name)
-     
+      name='Neptuune'
+      hwRef.setBodyName(name)
     except AntennaErrors.SourceNotFoundEx,  ex:
-    	
-   
         newex=AntennaErrorsImpl.SourceNotFoundExImpl(ex)
-        
         logger.logError('source %s not found' % ex)
         logger.logError(newex.log())
-        #ACS_LOG_ERROR
-  #   newEx.log() 
         simpleClient.disconnect()
         sys.exit(-1)   
     except ValueError:
-    	print('zzz')
-    	sys.exit(-1)    
-    
+        print('zzz')
+        sys.exit(-1)    
     sourceID = J2000RightAscension=  J2000Declination= rightAscension= declination= julianEpoch= gLongitude= gLatitude= azimuth= elevation= parallacticAngle=0.
-    
     userAzimuthOffset=userElevationOffset= userRightAscensionOffset= userDeclinationOffset= userLongitudeOffset= userLatitudeOffset=axis=angularSize=0.
     distance= radialVelocity= vradFrame= vradDefinition=0.
 #    hwRef.getAttributes(sourceID, J2000RightAscension, J2000Declination, rightAscension, declination, julianEpoch, gLongitude, gLatitude, azimuth, elevation, parallacticAngle, userAzimuthOffset, userElevationOffset, userRightAscensionOffset,
@@ -125,14 +117,10 @@ if hwRef != None:
 
 #    print ("az,el",degrees(az),degrees(el))
     print ("ra,dec",degrees(ra),degrees(dec))
-    
-    
     att=hwRef.getAttributes()
     dec2000=att.J2000Declination 
     ra2000=att.J2000RightAscension
     print(degrees(ra2000),degrees(dec2000))
-    
-
     simpleClient.getLogger().logInfo("Method of dynamic component successfully invoked. Have a nice day!")
 else:
     simpleClient.getLogger().logAlert("Bad reference retrieved from manager")

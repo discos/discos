@@ -37,11 +37,13 @@ class SunPositionTest(unittest.TestCase):
 
     def test_equatorialApparent(self):
     	
-    	 az,el,ra,dec,l,lon,lat =self.hwRef.getAllCoordinates(self.acstime.value)
+         az,el,ra,dec,l,lon,lat =self.hwRef.getAllCoordinates(self.acstime.value)
+         print('type az',type(az))
          self.assertAlmostEqual(degrees(ra),309.986231168 , delta=1e-4)   	 
          self.assertAlmostEqual(degrees(dec),-18.376456126 , delta=1e-4)  
-    def test_horizontalApparent(self):
-    	 az,el,ra,dec,l,lon,lat =self.hwRef.getAllCoordinates(self.acstime.value)
+#    def test_horizontalApparent(self):
+#         az,el,ra,dec,l,lon,lat =self.hwRef.getAllCoordinates(self.acstime.value)
+         print ('az,el=',degrees(az),degrees(el)) 
          self.assertAlmostEqual(degrees(az),   210.403368369   , delta=5e-4)   	 
          self.assertAlmostEqual(degrees(el),  26.276295555  , delta=5e-4)  
     

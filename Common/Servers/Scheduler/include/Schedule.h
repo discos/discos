@@ -65,6 +65,7 @@ public:
 	void track(const char *targetName);
 	void moon();
 	void sun();
+	void planet(const char * planetName);
 	void sidereal(const char * targetName,const double& ra,const double& dec,const Antenna::TSystemEquinox& eq,const Antenna::TSections& section);
 	void sidereal(const char * targetName,const Antenna::TCoordinateFrame& frame,double *parameters,const long& paramNumber,
 			const Antenna::TSystemEquinox& eq);

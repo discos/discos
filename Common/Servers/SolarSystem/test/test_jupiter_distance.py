@@ -29,7 +29,7 @@ class JupiterDistanceTest(unittest.TestCase):
          distance=self.hwRef.getDistance(self.acstime.value)
          time.sleep(1)
 
-         print(distance)
+         print('distance',distance)
          
           
          self.assertAlmostEqual(distance,  5.49776341649024, delta=5e-5)

@@ -25,7 +25,7 @@
              Sun="IDL:alma/Antenna/SolarSystemBody:1.0"
          	 Moon="IDL:alma/Antenna/Moon:1.0"
          	 Satellite=""
-         	 SolarSystemBody=""
+             SolarSystemBody="IDL:alma/Antenna/SolarSystemBody:1.0"
          	 Otf="IDL:alma/Antenna/OTF:1.0">
              
 <target/>

@@ -11,7 +11,7 @@
 //#include <SkySource.h>
 #include <iostream>
 //#include <Site.h>
-
+#include <exception>
 #define R2D 57.29577951308232
 
 using namespace ComponentErrors;
@@ -51,6 +51,7 @@ void SolarSystemBodyImpl::cleanUp()
 {
         AUTO_TRACE("SolarSystemBodyImpl::cleanUp()");
         delete m_sitex;
+        delete m_body_xephem;
         ACSComponentImpl::cleanUp();
 }
 
@@ -76,7 +77,7 @@ void SolarSystemBodyImpl::execute() throw (ACSErr::ACSbaseExImpl)
 	            throw Impl;
 	     }
 	
-	     ACS_LOG(LM_FULL_INFO,"MoonImpl::execute()", (LM_INFO, (const char *)CString(m_componentName+"::OBSERVATORY_LOCATED")));
+	     ACS_LOG(LM_FULL_INFO,"SolarSystemBodyImpl::execute()", (LM_INFO, (const char *)CString(m_componentName+"::OBSERVATORY_LOCATED")));
 	     try {
 		        site=observatory->getSiteSummary();
 	     }
@@ -87,7 +88,7 @@ void SolarSystemBodyImpl::execute() throw (ACSErr::ACSbaseExImpl)
 		         throw _dummy;
 	     }
          m_site=CSite(site.out());
-         m_source=IRA::CSkySource();  // dummy obj for coordiante conversion
+         m_source=IRA::CSkySource();  // dummy obj for coordinate conversion
          
 	     m_dut1=site->DUT1;
 	     m_longitude=site->longitude;
@@ -95,8 +96,10 @@ void SolarSystemBodyImpl::execute() throw (ACSErr::ACSbaseExImpl)
 	     m_height=site->height;
 	     std::cout << "Site:" << site->longitude *R2D << " " << m_latitude ;
 	     m_sitex= new xephemlib::Site();
-	     m_sitex-> setCoordinate(site->longitude,site->latitude,site->height); //coordinates in degres.
-		
+	     m_sitex-> setCoordinate(site->longitude,site->latitude,site->height); //coordinates in degrees.
+        m_body_xephem =   new xephemlib::SolarSystemBody();
+        		  
+		   
 	     try {
 		          getContainerServices()->releaseComponent((const char*)observatory->name());
          	 }
@@ -116,14 +119,19 @@ void SolarSystemBodyImpl::getAttributes(Antenna::SolarSystemBodyAttributes_out a
         AUTO_TRACE("SolarSystemBodyImpl::getAttributes()");
 
 
+	     baci::ThreadSyncGuard guard(&m_mutex);
 TIMEVALUE now;
+
 	IRA::CIRATools::getTime(now);
+
 	BodyPosition(now);
 				
 	/* Returns the julian epoch of the date.
 	 * @return the epoch which is the year with the fracional part of the year.
 	 */
 	double JulianEpoch; 
+	
+	BodyPosition(now);
 	IRA::CDateTime currentTime(now,m_dut1);
 	JulianEpoch = currentTime.getJulianEpoch();
 		
@@ -282,18 +290,38 @@ typedef enum {
         PLCode  code;
         
         code=xephemlib::SolarSystemBody::getPlanetCodeFromName(bodyName);
+                std::cout << "SetBodyName:" << bodyName <<std::endl;
+        std::cout << "SetBodyName code:" << code <<std::endl;
         if (code !=0){
-             m_body_xephem =   new xephemlib::SolarSystemBody(code);
-             std::cout << "name:" << bodyName <<std::endl;
+//             m_body_xephem =   new xephemlib::SolarSystemBody(code);
+             try{
+             m_body_xephem ->setObject(code);
+             }
+         
+             
+             catch (std::exception& e)
+             {
+                       std::cout << e.what() << '\n';
+             }
+              catch (...)
+             {std::cout << "except" << std::endl;}
+             
+             
+             
+             std::cout << "Body name:" << bodyName <<std::endl;
              std::cout << "code:" << code <<std::endl;
         
         } else
-        
-        {
+       {
       //    THROW_EX(AntennaErrors, SourceNotFound, "WPServoImpl::initialize(): 'new' failure", false);
-         	
-        	_EXCPT(AntennaErrors::SourceNotFoundExImpl,impl,"SolarSystemBodyImpl::setOffsets()");
-		throw impl.getAntennaErrorsEx();	
+      
+      		_EXCPT(AntennaErrors::SourceNotFoundExImpl, __dummy,"SkySourceImpl::loadSourceFromCatalog()");
+      		__dummy.setSourceName(bodyName);
+		      CUSTOM_EXCPT_LOG(__dummy,LM_DEBUG);
+	      	throw __dummy.getAntennaErrorsEx();
+
+        
+         	 
         }
         
         
@@ -352,16 +380,17 @@ void SolarSystemBodyImpl::BodyPosition(TIMEVALUE &time)
        
 
        
-       double ra,dec,eph,az,el,lone,late;
+       double ra,dec,eph,az,el,range,lone,late;
 
 //   Site *site = new Site(59319.5,degrad(9.5),degrad(39.5),600);
 
         m_sitex -> setTime(time_utc) ;  
         m_body_xephem->compute( m_sitex );
         m_body_xephem->report();
-        m_ra2000 = m_body_xephem->ra;
-        m_dec2000= m_body_xephem->dec;
-        m_distance=m_body_xephem->range;
+        m_body_xephem->getCoordinates(ra,dec,az,el,range);
+        m_ra2000 = ra;
+        m_dec2000= dec;
+        m_distance=range;
         m_source.setInputEquatorial(m_ra2000, m_dec2000, IRA::CSkySource::SS_J2000);
                 // IRA::CSkySource m_source;   // dummy CSkySource onj for coordinate conversion  
         m_source.process(date,m_site);	       

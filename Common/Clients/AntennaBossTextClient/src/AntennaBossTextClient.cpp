@@ -396,7 +396,7 @@ int main(int argc, char *argv[]) {
 		generatorType_box->setStatusLook(Antenna::ANT_SIDEREAL);
 		generatorType_box->setStatusLook(Antenna::ANT_MOON); 
 		generatorType_box->setStatusLook(Antenna::ANT_SUN); 
-		generatorType_box->setStatusLook(Antenna::ANT_SOLARSYTEMBODY); 
+		generatorType_box->setStatusLook(Antenna::ANT_SOLARSYSTEMBODY); 
 		generatorType_box->setStatusLook(Antenna::ANT_SATELLITE); 
 		generatorType_box->setStatusLook(Antenna::ANT_OTF); 
 		

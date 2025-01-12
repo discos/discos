@@ -398,7 +398,7 @@ Antenna::EphemGenerator_ptr CBossCore::prepareScan(
 		velDef=primary.VradDefinition;
 		timeToStop=0;
 	}
-else if (primary.type==Antenna::ANT_SUN) {
+   else if (primary.type==Antenna::ANT_SUN || primary.type==Antenna::ANT_SOLARSYSTEMBODY ) {
 		// moon has nothing to do...no configuration
 		Antenna::SolarSystemBody_var tracker;
 		tracker=Antenna::SolarSystemBody::_narrow(currentGenerator);
@@ -409,7 +409,15 @@ else if (primary.type==Antenna::ANT_SUN) {
 		copyTrack(lastPar,primary);
 		lastPar.applyOffsets=false;
 		lastPar.secondary=false;
-		ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"SUN_TRACKING"));
+		if (primary.type==Antenna::ANT_SUN  )
+		{
+		     ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"SUN_TRACKING"));
+		} else
+		{
+		     ACS_LOG(LM_FULL_INFO,"CBossCore::prepareScan()",(LM_DEBUG,"PLANET_TRACKING"));
+		
+		}
+		
 		try {
 			Antenna::SolarSystemBodyAttributes_var att;
 			tracker->getAttributes(att);
@@ -518,9 +526,15 @@ else if (primary.type==Antenna::ANT_SUN) {
 	}
 	else if (primary.type==Antenna::ANT_SATELLITE) {
 	}
-	else if (primary.type==Antenna::ANT_SOLARSYTEMBODY) {
+	
+	
+	else if (primary.type==Antenna::ANT_SOLARSYSTEMBODY) {
+   	
+	
 	}
 	else if (primary.type==Antenna::ANT_SUN) { 
+	
+	   // useless? 
 	}
 	// if everything looks ok....return back the offsets.....
 	/*
@@ -530,6 +544,8 @@ else if (primary.type==Antenna::ANT_SUN) {
 	generatorFlux=currentGeneratorFlux._retn();
 	return currentGenerator._retn();
 }
+
+
 
 Antenna::EphemGenerator_ptr CBossCore::prepareOTFSecondary(const bool& useInternal,const Antenna::TTrackingParameters& sec,IRA::CString& sourceName,double& ra,double& dec,double& lon,
 		double& lat,double& vrad,Antenna::TReferenceFrame& velFrame,Antenna::TVradDefinition& velDef,bool& result)

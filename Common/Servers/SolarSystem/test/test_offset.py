@@ -33,7 +33,7 @@ class SetOffsetTest(unittest.TestCase):
          dec_offs=radians(1)
          
          self.hwRef.setOffsets(ra_offs,dec_offs,Antenna.ANT_EQUATORIAL) 
-         az,el,ra,dec,l,lon,lat =self.hwRef.getAllCoordinates(self.acstime.value)
+         _,_,ra,dec,l,lon,lat =self.hwRef.getAllCoordinates(self.acstime.value)
          self.assertAlmostEqual(degrees(ra), degrees(ra_ref+ra_offs/cos(dec_ref+dec_offs)) , delta=1e-4)   	 
          self.assertAlmostEqual(degrees(dec), degrees(dec_ref+dec_offs)  , delta=1e-4)  
     def test_horizontalOffset(self):
@@ -42,7 +42,7 @@ class SetOffsetTest(unittest.TestCase):
          az_offs=radians(1)
          el_offs=radians(1)
          self.hwRef.setOffsets(az_offs,el_offs,Antenna.ANT_HORIZONTAL) 
-         az,el,ra,dec,l,lon,lat =self.hwRef.getAllCoordinates(self.acstime.value)
+         az,el,_,_,l,lon,lat =self.hwRef.getAllCoordinates(self.acstime.value)
          self.assertAlmostEqual(degrees(az),degrees( az_ref+az_offs/cos(el_ref+el_offs))  , delta=5e-4)   	 
          self.assertAlmostEqual(degrees(el), degrees( el_ref+el_offs) , delta=5e-4)  
     

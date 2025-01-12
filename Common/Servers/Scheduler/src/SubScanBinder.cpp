@@ -347,6 +347,27 @@ void CSubScanBinder::sun()
 	// The other subsystems can stay with defaults
 }
 
+void CSubScanBinder::planet(const char * planetName)
+{
+	m_secondary->type=Antenna::ANT_NONE;
+	m_secondary->secondary=false;
+	m_secondary->applyOffsets=false;
+	m_secondary->paramNumber=0;
+	m_secondary->enableCorrection=true;
+	m_primary->type=Antenna::ANT_SOLARSYSTEMBODY;
+	m_primary->secondary=false;
+	m_primary->targetName=CORBA::string_dup(planetName);
+	m_primary->applyOffsets=false;
+	m_primary->section=Antenna::ACU_NEUTRAL;
+	m_primary->enableCorrection=true;
+    m_servo->is_empty_scan=true;
+    m_servo->axis_code=CORBA::string_dup("");
+    m_servo->range=0;
+    m_servo->total_time=0;
+    m_subScanConf->signal=Management::MNG_SIGNAL_SIGNAL;
+	// The other subsystems can stay with defaults
+}
+
 void CSubScanBinder::track(const char *targetName)
 {
 	m_secondary->type=Antenna::ANT_NONE;

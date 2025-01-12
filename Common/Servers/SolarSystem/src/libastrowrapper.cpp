@@ -63,22 +63,53 @@ double Site::getMjd()
     
 }
 
-SolarSystemBody::SolarSystemBody(PLCode code)
+SolarSystemBody::SolarSystemBody()
 {
-    obj=new Obj();
+   obj=new Obj();
+   
 
+};
+
+void SolarSystemBody::setObject(PLCode code){
     
-    obj->any.co_type=PLANET;
-    strncpy(obj->any.co_name,planetnames[code],10);
-    obj->
-    pl.plo_code=code;
+        
+    
+//    obj=new Obj();   
+      _code=code;
+       
+    
+  //  obj->any.co_type=PLANET;
+    strncpy(obj->any.co_name,planetnames[_code],10);
+//    obj->
+ //   pl.plo_code=code;
 #ifdef DEBUG    
     std::cout << "Code: " << code << std::endl;
     std::cout << "Name: " << planetnames[code] << std::endl;
-    std::cout << "Name: " << obj->any.co_name << std::endl;
+ //   std::cout << "Name: " << obj->any.co_name << std::endl;
 #endif
     
-    pref_set(PREF_EQUATORIAL,PREF_TOPO);
+//    pref_set(PREF_EQUATORIAL,PREF_TOPO);
+
+        std::cout << "exit after pref_set: " << obj->any.co_name << std::endl;
+
+};
+  
+SolarSystemBody::SolarSystemBody(PLCode code)
+{
+    //obj=new Obj();
+
+    _code=code;
+    
+//    obj->any.co_type=PLANET;
+  //  strncpy(obj->any.co_name,planetnames[_code],10);
+  //  obj->pl.plo_code=code;
+#ifdef DEBUG    
+    std::cout << "Code: " << code << std::endl;
+    std::cout << "Name: " << planetnames[code] << std::endl;
+//    std::cout << "Name: " << obj->any.co_name << std::endl;
+#endif
+    
+  //  pref_set(PREF_EQUATORIAL,PREF_TOPO);
 
     
     
@@ -127,16 +158,45 @@ std::string  SolarSystemBody::getPlanetNameFromCode(PLCode code ){
 }
 
 
+void SolarSystemBody::getCoordinates(double& ra, double& dec,double& az,double& el, double& range)
+{
+   ra=_ra;
+   dec=_dec;
+   az=_az;
+   el=_el;
+   range=_range;
+
+
+};
+
 
 void  SolarSystemBody::compute(Site* site){
-     //   std::cout << "Compute " <<std::endl;
+    
+    Obj* obj=new Obj();
+    
+    
+    
+    obj->any.co_type=PLANET;
+    strncpy(obj->any.co_name,planetnames[_code],10);
+    obj->
+    pl.plo_code=_code;
+#ifdef DEBUG    
+    std::cout << "Code: " << _code << std::endl;
+    std::cout << "Name: " << planetnames[_code] << std::endl;
+    std::cout << "Name: " << obj->any.co_name << std::endl;
+#endif    
+     pref_set(PREF_EQUATORIAL,PREF_TOPO);
+
+    
+    std::cout << "Compute " <<std::endl;
     obj_cir (site, obj);
 
-    ra=obj->any.co_ra;
-    dec=obj->any.co_dec;
-    az=obj->any.co_az;
-    el=obj->any.co_alt;
-    range=obj->anyss.so_edist;
+    _ra=obj->any.co_ra;
+    _dec=obj->any.co_dec;
+    _az=obj->any.co_az;
+    _el=obj->any.co_alt;
+    _range=obj->anyss.so_edist;
+    delete obj;
     
 }
 
@@ -157,11 +217,11 @@ aberration.*/
 
 
 
-    std::cout << "Ra : " << ra << std::endl;
-    std::cout << "Dec: " << dec << std::endl;
-    std::cout << "Az : " << az << std::endl;
-    std::cout << "El : " << el << std::endl;
-    std::cout << "Range : " << range << std::endl;
+    std::cout << "Ra : " << _ra << std::endl;
+    std::cout << "Dec: " << _dec << std::endl;
+    std::cout << "Az : " << _az << std::endl;
+    std::cout << "El : " << _el << std::endl;
+    std::cout << "Range : " << _range << std::endl;
 
     
     

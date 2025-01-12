@@ -51,20 +51,25 @@ class SolarSystemBody   {
 public:
       
       
-     
       SolarSystemBody(PLCode code);
       ~SolarSystemBody(){ delete obj;}
-      double ra,dec,range,az,el;
+    
       static std::string getPlanetNameFromCode(PLCode code);
       static PLCode  getPlanetCodeFromName(std::string  name);
       void compute (Site* site);
-      SolarSystemBody() {};
+      SolarSystemBody();
+      void setObject(PLCode code);
+       
+ 
       Obj* getObject();
       void report();
       static std::map<std::string,PLCode> plan;
-      
+      void getCoordinates(double& ra, double& dec,double& az,double& el, double& range);      
       private:
-      
+            
+            double _ra,_dec,_range,_az,_el;
+            PLCode _code;
+            
     
     
 protected:
