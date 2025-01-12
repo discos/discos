@@ -118,11 +118,21 @@ SolarSystemBody::SolarSystemBody(PLCode code)
 PLCode  SolarSystemBody::getPlanetCodeFromName(std::string  str)
 {
      std::locale loc;
-    for (std::string::size_type i=0; i<str.length(); ++i)
+    for (std::string::size_type i=0; i<str.length(); ++i){
            str[i]=std::toupper(str[i],loc);
- 
+     }
+      if (planet.find(str) != planet.end()) 
+      { std::cout <<str << " is in the map." << std::endl;
+      return SolarSystemBody::planet[str]; } 
+      else { 
+      
+      std::cout << str << " is not in the map." << std::endl;
+      return NOBJ;
+       }
 
-     return SolarSystemBody::plan[str];
+      
+
+     
      
 		
 		
@@ -136,9 +146,8 @@ std::string  SolarSystemBody::getPlanetNameFromCode(PLCode code ){
 
 
 
-
     std::string name;
-    for (std::map<std::string,PLCode>::iterator it=SolarSystemBody::plan.begin(); it!=SolarSystemBody::plan.end(); ++it)
+    for (std::map<std::string,PLCode>::iterator it=SolarSystemBody::planet.begin(); it!=SolarSystemBody::planet.end(); ++it)
     {       
 #ifdef DEBUG        
          //   std::cout << it->first << " => " << it->second << '\n';
@@ -228,7 +237,7 @@ aberration.*/
     
 }
 
-std::map<std::string,PLCode>SolarSystemBody::plan;  //definition of static variable
+std::map<std::string,PLCode>SolarSystemBody::planet;  //definition of static variable
 
 
  bool  createMap() // function to initialize static map 
@@ -248,17 +257,17 @@ typedef enum {
 } PLCode;
 */
    
-         SolarSystemBody::plan["MERCURY"]=MERCURY;
-         SolarSystemBody::plan["VENUS"]=VENUS ; 
-         SolarSystemBody::plan["MARS"]=MARS ;          
-         SolarSystemBody::plan["JUPITER"]=JUPITER;
-         SolarSystemBody::plan["SATURN"]=SATURN ; 
-         SolarSystemBody::plan["URANUS"]=URANUS ; 
-         SolarSystemBody::plan["NEPTUNE"]=NEPTUNE ;        
-         SolarSystemBody::plan["PLUTO"]=PLUTO ;   
-         SolarSystemBody::plan["SUN"]=SUN ;                          
-         SolarSystemBody::plan["MOON"]=MOON ;   
-         SolarSystemBody::plan["NOBJ"]=NOBJ ;                                            
+         SolarSystemBody::planet["MERCURY"]=MERCURY;
+         SolarSystemBody::planet["VENUS"]=VENUS ; 
+         SolarSystemBody::planet["MARS"]=MARS ;          
+         SolarSystemBody::planet["JUPITER"]=JUPITER;
+         SolarSystemBody::planet["SATURN"]=SATURN ; 
+         SolarSystemBody::planet["URANUS"]=URANUS ; 
+         SolarSystemBody::planet["NEPTUNE"]=NEPTUNE ;        
+         SolarSystemBody::planet["PLUTO"]=PLUTO ;   
+         SolarSystemBody::planet["SUN"]=SUN ;                          
+         SolarSystemBody::planet["MOON"]=MOON ;   
+         SolarSystemBody::planet["NOBJ"]=NOBJ ;                                            
 	      return 0;
 }
 

@@ -63,7 +63,7 @@ public:
  
       Obj* getObject();
       void report();
-      static std::map<std::string,PLCode> plan;
+      static std::map<std::string,PLCode> planet;
       void getCoordinates(double& ra, double& dec,double& az,double& el, double& range);      
       private:
             

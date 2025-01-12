@@ -292,7 +292,7 @@ typedef enum {
         code=xephemlib::SolarSystemBody::getPlanetCodeFromName(bodyName);
                 std::cout << "SetBodyName:" << bodyName <<std::endl;
         std::cout << "SetBodyName code:" << code <<std::endl;
-        if (code !=0){
+        if (code!=NOBJ){
 //             m_body_xephem =   new xephemlib::SolarSystemBody(code);
              try{
              m_body_xephem ->setObject(code);
@@ -318,7 +318,7 @@ typedef enum {
       		_EXCPT(AntennaErrors::SourceNotFoundExImpl, __dummy,"SkySourceImpl::loadSourceFromCatalog()");
       		__dummy.setSourceName(bodyName);
 		      CUSTOM_EXCPT_LOG(__dummy,LM_DEBUG);
-	      	throw __dummy.getAntennaErrorsEx();
+	      	//throw __dummy.getAntennaErrorsEx();
 
         
          	 
