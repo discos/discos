@@ -740,6 +740,9 @@ void SRTActiveSurfaceGUI::changeGUIActuatorStatusLabels()
 
     ActuatorStatusCammLabel->clear();
     switch (mySRTActiveSurfaceCore.ActuatorStatusCammLabelCode) {
+        case (0):
+            ActuatorStatusCammLabel->setText("");
+            break;
         case (-1):
             ActuatorStatusCammLabel->setText("NO CAMM");
             break;
@@ -750,6 +753,9 @@ void SRTActiveSurfaceGUI::changeGUIActuatorStatusLabels()
 
     ActuatorStatusLoopLabel->clear();
     switch (mySRTActiveSurfaceCore.ActuatorStatusLoopLabelCode) {
+        case (0):
+            ActuatorStatusLoopLabel->setText("");
+            break;
         case (-1):
             ActuatorStatusLoopLabel->setText("NO LOOP");
             break;
@@ -760,6 +766,9 @@ void SRTActiveSurfaceGUI::changeGUIActuatorStatusLabels()
      
     ActuatorStatusCalLabel->clear();
     switch (mySRTActiveSurfaceCore.ActuatorStatusCalLabelCode) {
+        case (0):
+            ActuatorStatusCalLabel->setText("");
+            break;
         case (-1):
             ActuatorStatusCalLabel->setText("UNCALIBRATED");
             break;

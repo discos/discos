@@ -361,6 +361,11 @@ void SRTActiveSurfaceCore::setactuator(int circle, int actuator)
     else {
         active = false;
         statusColor = true;
+        ActuatorStatusRunLabelCode = -1;
+        ActuatorStatusEnblLabelCode = -1;
+        ActuatorStatusCammLabelCode = 0;
+        ActuatorStatusLoopLabelCode = 0;
+        ActuatorStatusCalLabelCode = 0;
     }
     emit setGUIActuatorStatusLabels();
     emit setGUIActuatorColor(circle, actuator, active, statusColor, false);
