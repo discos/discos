@@ -82,6 +82,7 @@ class SRTActiveSurfaceCore : public QThread
         int setGUIActuatorStatusLabels();
         int setGUIasStatusCode(int);
         int setGUIasProfileCode(int);
+        int setGUIasLUTFileName(QString);
         
 	private:
 	    ActiveSurface::SRTActiveSurfaceBoss_var tASBoss;

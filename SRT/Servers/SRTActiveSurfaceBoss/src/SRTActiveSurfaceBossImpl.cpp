@@ -6,6 +6,7 @@
 #include "DevIOEnable.h"
 #include "DevIOProfile.h"
 #include "DevIOTracking.h"
+#include "DevIOLUT.h"
 
 static char const *rcsId="@(#) $Id: SRTActiveSurfaceBossImpl.cpp,v 1.2 2010-07-26 12:37:07 c.migoni Exp $";
 static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
@@ -58,6 +59,7 @@ SRTActiveSurfaceBossImpl::SRTActiveSurfaceBossImpl(const ACE_CString &CompName, 
     m_penabled(this),
     m_pprofile(this),
     m_ptracking(this),
+    m_pLUT_filename(this),
     m_core(NULL)
 {
     AUTO_TRACE("SRTActiveSurfaceBossImpl::SRTActiveSurfaceBossImpl()");
@@ -86,6 +88,7 @@ void SRTActiveSurfaceBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
             (getContainerServices()->getName()+":pprofile",getComponent(),new SRTActiveSurfaceBossImplDevIOProfile(m_core),true);
         m_ptracking=new ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean>
             (getContainerServices()->getName()+":tracking",getComponent(),new SRTActiveSurfaceBossImplDevIOTracking(m_core),true);
+        m_pLUT_filename=new ROstring(getContainerServices()->getName()+":LUT_filename",getComponent(),new SRTActiveSurfaceBossImplDevIOLUT(m_core),true);
 
         // create the parser for command line execution
         m_parser = new SimpleParser::CParser<CSRTActiveSurfaceBossCore>(boss,10);
@@ -604,6 +607,7 @@ _PROPERTY_REFERENCE_CPP(SRTActiveSurfaceBossImpl,Management::ROTSystemStatus,m_p
 _PROPERTY_REFERENCE_CPP(SRTActiveSurfaceBossImpl,Management::ROTBoolean,m_penabled,enabled);
 _PROPERTY_REFERENCE_CPP(SRTActiveSurfaceBossImpl,ActiveSurface::ROTASProfile,m_pprofile,pprofile);
 _PROPERTY_REFERENCE_CPP(SRTActiveSurfaceBossImpl,Management::ROTBoolean,m_ptracking,tracking);
+_PROPERTY_REFERENCE_CPP(SRTActiveSurfaceBossImpl,ACS::ROstring,m_pLUT_filename,LUT_filename);
 /* --------------- [ MACI DLL support functions ] -----------------*/
 #include <maciACSComponentDefines.h>
 MACI_DLL_SUPPORT_FUNCTIONS(SRTActiveSurfaceBossImpl)

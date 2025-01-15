@@ -147,6 +147,8 @@ public:
 
     inline bool getTracking() const { return m_tracking; }
 
+    inline std::string getLUTfilename() const { return m_lut.substr(m_lut.find_last_of('/') + 1); }
+
     /**
      * Sets the <i>AutoUpdate</i> flag to false, i.e. the component will not update automatically the surface.
     */

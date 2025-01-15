@@ -45,6 +45,7 @@ void CSRTActiveSurfaceBossCore::initialize()
     m_enable = false;
     m_tracking = false;
     m_status = Management::MNG_WARNING;
+    m_lut = USDTABLECORRECTIONS;
     AutoUpdate = false;
     actuatorcounter = circlecounter = totacts = 1;
     for(int i = 0; i < SECTORS; i++)
@@ -1364,9 +1365,6 @@ void CSRTActiveSurfaceBossCore::asSetLUT(const char *newlut)
 
 void CSRTActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newProfile) throw (ComponentErrors::ComponentErrorsExImpl)
 {
-    if (m_newlut == false)
-        m_lut = USDTABLECORRECTIONS;
-
     if(m_initialized) // USD tables has not been loaded yet
     {
         ifstream usdCorrections(m_lut);

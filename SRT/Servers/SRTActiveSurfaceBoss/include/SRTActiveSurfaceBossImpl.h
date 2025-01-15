@@ -129,6 +129,12 @@ class SRTActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl, publ
 	virtual Management::ROTBoolean_ptr tracking() throw (CORBA::SystemException);
 
 	/**
+	 * Returns a reference to the tracking property implementation of IDL interface.
+	 * @return pointer to read-only ACS::ROString property enabled
+	*/
+	virtual ACS::ROstring_ptr LUT_filename() throw (CORBA::SystemException);
+
+	/**
 	 *  This method can be called in order to disable the automatic update of the surface.
 	 * @throw CORBA::SystemException 
 	*/	
@@ -221,6 +227,7 @@ class SRTActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl, publ
 	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>  > m_penabled;
 	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(ActiveSurface::TASProfile), POA_ActiveSurface::ROTASProfile> > m_pprofile;
 	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean> > m_ptracking;
+	SmartPropertyPointer<ROstring> m_pLUT_filename;
 	IRA::CSecureArea<CSRTActiveSurfaceBossCore> *m_core;
 
 	/* *

@@ -59,6 +59,7 @@ void SRTActiveSurfaceCore::run(void)
 
     Management::ROTSystemStatus_var bossStatus_var;
     ActiveSurface::ROTASProfile_var asProfile_var;
+    ACS::ROstring_var asLUTFileName_var;
 
     while (monitor == true)
     {
@@ -71,6 +72,9 @@ void SRTActiveSurfaceCore::run(void)
 
         asProfile_var = tASBoss->pprofile();
         emit setGUIasProfileCode((int)asProfile_var->get_sync(completion.out()));
+
+        asLUTFileName_var = tASBoss->LUT_filename();
+        emit setGUIasLUTFileName(QString(asLUTFileName_var->get_sync(completion.out())));
 
         ACS::longSeq_var asStatus;
         tASBoss->asStatus4GUIClient(asStatus);
@@ -218,7 +222,8 @@ void SRTActiveSurfaceCore::setactuator(int circle, int actuator)
         impl.log();
     }
 
-    if (active == true) {
+    if (active == true)
+    {
         //if ((status & ENBL) == 0) {
         /*qApp->lock();
         tGUI->ActuatorStatusEnblLabel->clear();
@@ -293,7 +298,8 @@ void SRTActiveSurfaceCore::setactuator(int circle, int actuator)
                 //tGUI->ActuatorStatusRunLabel->clear();
                 //tGUI->ActuatorStatusRunLabel->setText("RUNNING");
             }
-            if ((status & ENBL) == 0) {
+            ActuatorStatusEnblLabelCode = 1;
+            /*if ((status & ENBL) == 0) {
                 ActuatorStatusEnblLabelCode = -1;
                 //tGUI->ActuatorStatusEnblLabel->clear();
                 //tGUI->ActuatorStatusEnblLabel->setText("UNABLED");
@@ -302,7 +308,7 @@ void SRTActiveSurfaceCore::setactuator(int circle, int actuator)
                 ActuatorStatusEnblLabelCode = 1;
                 //tGUI->ActuatorStatusEnblLabel->clear();
                 //tGUI->ActuatorStatusEnblLabel->setText("ENABLED");
-            }
+            }*/
             if ((status & CAMM) == 0) {
                 ActuatorStatusCammLabelCode = -1;
                 //tGUI->ActuatorStatusCammLabel->clear();
@@ -323,7 +329,8 @@ void SRTActiveSurfaceCore::setactuator(int circle, int actuator)
                 //tGUI->ActuatorStatusLoopLabel->clear();
                 //tGUI->ActuatorStatusLoopLabel->setText("LOOP");
             }
-            if ((status & CAL) == 0) {
+            if ((status & CAL) == 0)
+            {
                 ActuatorStatusCalLabelCode = -1;
                 statusColor = true;
                 //tGUI->ActuatorStatusCalLabel->clear();
@@ -361,7 +368,7 @@ void SRTActiveSurfaceCore::setactuator(int circle, int actuator)
     else {
         active = false;
         statusColor = true;
-        ActuatorStatusRunLabelCode = -1;
+        ActuatorStatusRunLabelCode = 0;
         ActuatorStatusEnblLabelCode = -1;
         ActuatorStatusCammLabelCode = 0;
         ActuatorStatusLoopLabelCode = 0;

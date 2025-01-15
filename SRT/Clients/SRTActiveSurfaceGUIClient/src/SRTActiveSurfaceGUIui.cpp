@@ -21,6 +21,7 @@ SRTActiveSurfaceGUI::SRTActiveSurfaceGUI(QWidget *parent) : QWidget(parent)
     QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIActuatorStatusLabels()), this, SLOT(changeGUIActuatorStatusLabels()));
     QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIasStatusCode(int)), this, SLOT(changeGUIasStatusCode(int)));
     QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIasProfileCode(int)), this, SLOT(changeGUIasProfileCode(int)));
+    QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIasLUTFileName(QString)), this, SLOT(changeGUIasLUTFileName(QString)));
 
 #ifdef MANAGEMENT
     buttonGroup1->setEnabled(true);
@@ -716,10 +717,18 @@ void SRTActiveSurfaceGUI::changeGUIasProfileCode(int asProfileCode)
     ProfilelineEdit_2->setText(QApplication::translate("SRTActiveSurfaceGUI", asProfileString.c_str(), 0, QApplication::UnicodeUTF8));
 }
 
+void SRTActiveSurfaceGUI::changeGUIasLUTFileName(QString filename)
+{
+    LUTLabelFileName->setText(filename);
+}
+
 void SRTActiveSurfaceGUI::changeGUIActuatorStatusLabels()
 {
     ActuatorStatusRunLabel->clear();
     switch (mySRTActiveSurfaceCore.ActuatorStatusRunLabelCode) {
+        case (0):
+            ActuatorStatusRunLabel->setText("");
+            break;
         case (-1):
             ActuatorStatusRunLabel->setText("STOPPED");
             break;
