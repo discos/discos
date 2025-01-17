@@ -19,6 +19,7 @@
 #include "Configuration.h"
 #include "ACUProtocol.h"
 #include <LogFilter.h>
+#include "ZMQPublisher.hpp"
 
 /**
  * This class is inherited from the IRA::CSocket class. It takes charge of the management of the socket used by the component in order to get from remote interface of  the SRT ACU the status messages.. 
@@ -39,7 +40,7 @@ public:
 	virtual ~CStatusSocket();
 	
 	/**
-     * This member function is used to enstablish and configure the communication channel to the ACU. 
+	 * This member function is used to enstablish and configure the communication channel to the ACU. 
 	 * This must be the first call before using any other function of this class.
 	 * @param config pointer to the component configuration data structure
 	 * @param data pointer to the ACU data structure
@@ -99,6 +100,8 @@ private:
 	 * Creates and setup the socket in charge of receiving status data from the ACU
 	 */ 
 	void createSocket() throw (ComponentErrors::SocketErrorExImpl);
+
+	ZMQPublisher m_zmqPublisher;
 };
 
 #endif /*STATUSSOCKET_H_*/

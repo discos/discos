@@ -2,18 +2,20 @@
 #define COMMONDATA_H_
 
 /* **************************************************************************************************** */
-/* IRA Istituto di Radioastronomia                                                               */
-/* $Id: CommonData.h,v 1.9 2011-06-03 18:02:49 a.orlati Exp $																								            */
-/*                                                                                                                    */
-/* This code is under GNU General Public Licence (GPL).                        */
-/*                                                                                                      				*/
-/* Who                                when            What                                              */
-/* Andrea Orlati(aorlati@ira.inaf.it)  30/09/2009      Creation                 */
+/* IRA Istituto di Radioastronomia                                                                      */
+/* $Id: CommonData.h,v 1.9 2011-06-03 18:02:49 a.orlati Exp $                                           */
+/*                                                                                                      */
+/* This code is under GNU General Public Licence (GPL).                                                 */
+/*                                                                                                      */
+/* Who                                          when            What                                    */
+/* Andrea Orlati(aorlati@ira.inaf.it)           30/09/2009      Creation                                */
+/* Giuseppe Carboni(giuseppe.carboni@inaf.it)   09/05/2024      Added ZMQPublisher                      */
 
 #include <AntennaDefinitionsS.h>
 #include <ManagmentDefinitionsS.h>
 #include <TimeTaggedCircularArray.h>
 #include "ACUProtocol.h"
+#include "ZMQPublisher.hpp"
 
 using namespace IRA;
 
@@ -292,6 +294,8 @@ public:
 	inline const DWORD& getElevationStatusWord() const { return m_elevationStatusWord; }
 	 
 	inline const Management::TSystemStatus& getMountStatus() const { return m_mountStatus; }
+
+	ZMQDictionary getZMQDictionary();
 		
 private:
 	/**

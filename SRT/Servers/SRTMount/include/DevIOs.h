@@ -275,7 +275,7 @@ public:
 						break;
 					}
 					case TIME : {
-						m_value=(T)data->pointingStatus()->actualTime();
+						m_value=(T)data->pointingStatus()->actualACSTime();
 						break;
 					}
 					case STATUSLINESTATUS : {

@@ -8,7 +8,7 @@ using namespace ComponentErrors;
 
 _IRA_LOGFILTER_IMPORT;
 
-CStatusSocket::CStatusSocket()
+CStatusSocket::CStatusSocket() : m_zmqPublisher("mount")
 {
 	m_pConfiguration=NULL;
 	m_pData=NULL;
@@ -48,11 +48,13 @@ void CStatusSocket::onReceive(DWORD Counter,bool &Boost)
 		data->clearStatusWord(CCommonData::STATUS_LINE_ERROR);
 		if (!m_btransferStarted) m_btransferStarted=true;
 		m_wtimeOuts=0;
+
 		if ((len=m_protocol.syncBuffer(buffer,res,data->getStatusBuffer()))>0) {
 			data->clearStatusWord(CCommonData::STATUS_MESSAGE_SYNC_ERROR);
 			//Boost=true;
 			if (m_customBind==NULL) {
 				data->reBind();
+				m_zmqPublisher.publish(data->getZMQDictionary());
 			}
 			else {
 				m_customBind((const CCommonData *)data);

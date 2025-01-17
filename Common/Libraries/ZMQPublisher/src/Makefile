@@ -1,23 +1,9 @@
 #*******************************************************************************
-# PPPPPPPP
-#
-# "@(#) $Id: Makefile,v 1.6 2011-06-03 18:02:49 a.orlati Exp $"
-#
-# Makefile of ........
-#
-# who       when      what
-# --------  --------  ----------------------------------------------
-# andrea  28/09/09  created
-#
-
-#*******************************************************************************
 # This Makefile follows VLT Standards (see Makefile(5) for more).
 #*******************************************************************************
 # REMARKS
 #    None
 #------------------------------------------------------------------------
-
-MAKE_PDF=ON
 
 #
 # user definable C-compilation flags
@@ -25,8 +11,8 @@ MAKE_PDF=ON
 
 #
 # additional include and library search paths
-#USER_INC = 
-#USER_LIB = 
+#USER_INC =
+USER_LIB = /usr/local/lib64/libzmq.so
 
 #
 # MODULE CODE DESCRIPTION:
@@ -37,43 +23,34 @@ MAKE_PDF=ON
 #
 # C programs (public and local)
 # -----------------------------
-EXECUTABLES     =
-EXECUTABLES_L     = testACU statusLineTest
+EXECUTABLES =
+EXECUTABLES_L =
 
-testACU_OBJECTS = ACUProtocol CommandSocket StatusSocket Configuration CommonData testACU 
-testACU_LIBS = IRALibrary ComponentErrors AntennaErrors ZMQPublisher
 
-statusLineTest_OBJECTS = ACUProtocol StatusSocket Configuration CommonData statusLineTest 
-statusLineTest_LIBS = IRALibrary ComponentErrors ZMQPublisher
+PY_PACKAGES = ZMQPublisher
+#PY_SCRIPTS =
 
 
 #
-# special compilation flags for single c sources
-#yyyyy_CFLAGS   = 
+# <brief description of xxxxx program>
+
 
 #
 # Includes (.h) files (public only)
 # ---------------------------------
-INCLUDES        =
+INCLUDES = ZMQDictionary.hpp ZMQPublisher.hpp PyZMQPublisher.hpp
 
 #
 # Libraries (public and local)
 # ----------------------------
-LIBRARIES       = SRTMountImpl
-#LIBRARIES_L     =
-SRTMountImpl_OBJECTS = ACUProtocol CommandSocket StatusSocket Configuration CommonData SRTMountImpl WatchDog
-SRTMountImpl_LIBS = SRTMountStubs MountStubs IRALibrary AntennaDefinitionsStubs ComponentErrors AntennaErrors ManagementErrors ManagmentDefinitionsStubs ZMQPublisher
+LIBRARIES = ZMQPublisher PyZMQPublisher
+LIBRARIES_L =
 
-#
-# Configuration Database Files
-# ----------------------------
-CDB_SCHEMAS = SRTMount
+ZMQPublisher_OBJECTS = ZMQPublisher
 
-#
-# Python stuff (public and local)
-# ----------------------------
-PY_SCRIPTS         =
-PY_SCRIPTS_L       = testTracking setTime stressTest
+PyZMQPublisher_OBJECTS = PyZMQPublisher
+PyZMQPublisher_LIBS = ZMQPublisher boost_python3
+
 
 #
 # list of all possible C-sources (used to create automatic dependencies)
