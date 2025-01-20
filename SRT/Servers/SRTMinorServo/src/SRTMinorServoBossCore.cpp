@@ -357,7 +357,8 @@ void SRTMinorServoBossCore::park()
     m_current_servos.clear();
     m_current_tracking_servos.clear();
 
-    try
+    // Skipping this because of the cover not always engaging the limit switch
+    /*try
     {
         // Send the STOW command to close the gregorian cover
         if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::stow("GREGORIAN_CAP", COVER_STATUS_CLOSED)).checkOutput())
@@ -376,7 +377,7 @@ void SRTMinorServoBossCore::park()
         ex.setReason("Error while sending the STOW command to the gregorian cover.");
         ex.log(LM_DEBUG);
         throw ex.getParkingErrorEx();
-    }
+    }*/
 
     // Send the STOP command to all the servos
     for(const auto& [servo_name, servo] : m_servos)
@@ -681,9 +682,11 @@ void SRTMinorServoBossCore::clearUserOffsets(std::string servo_name)
         for(const auto& [servo_name, servo] : m_current_servos)
         {
             servo->clearUserOffsets();
-            if(motion_status == MOTION_STATUS_CONFIGURED)
+            if(motion_status == MOTION_STATUS_CONFIGURED || m_tracking_servos.find(servo_name) == m_tracking_servos.end())
             {
-                // We are not tracking but we need to update the servo position to load the offsets
+                // We get here in 2 different scenarios
+                // 1) The system is configured and is not tracking the elevation, therefore we ALWAYS need to update the position of the servo we just set the offset
+                // 2) The servo we set the offset is not a program track servo, therefore we need to update its position manually
                 servo->preset(ACS::doubleSeq());
             }
         }
@@ -701,9 +704,11 @@ void SRTMinorServoBossCore::clearUserOffsets(std::string servo_name)
     {
         auto servo = m_current_servos.at(servo_name);
         servo->clearUserOffsets();
-        if(motion_status == MOTION_STATUS_CONFIGURED)
+        if(motion_status == MOTION_STATUS_CONFIGURED || m_tracking_servos.find(servo_name) == m_tracking_servos.end())
         {
-            // We are not tracking but we need to update the servo position to load the offsets
+            // We get here in 2 different scenarios
+            // 1) The system is configured and is not tracking the elevation, therefore we ALWAYS need to update the position of the servo we just set the offset
+            // 2) The servo we set the offset is not a program track servo, therefore we need to update its position manually
             servo->preset(ACS::doubleSeq());
         }
     }
@@ -763,9 +768,11 @@ void SRTMinorServoBossCore::setUserOffset(std::string servo_axis_name, double of
         }
         servo->setUserOffset(axis_name.c_str(), offset);
 
-        if(m_motion_status.load() == MOTION_STATUS_CONFIGURED)
+        if(m_motion_status.load() == MOTION_STATUS_CONFIGURED || m_tracking_servos.find(servo_name) == m_tracking_servos.end())
         {
-            // We are not tracking but we need to update the servo position to load the offsets
+            // We get here in 2 different scenarios
+            // 1) The system is configured and is not tracking the elevation, therefore we ALWAYS need to update the position of the servo we just set the offset
+            // 2) The servo we set the offset is not a program track servo, therefore we need to update its position manually
             servo->preset(ACS::doubleSeq());
         }
     }
@@ -834,9 +841,11 @@ void SRTMinorServoBossCore::clearSystemOffsets(std::string servo_name)
         for(const auto& [servo_name, servo] : m_current_servos)
         {
             servo->clearSystemOffsets();
-            if(motion_status == MOTION_STATUS_CONFIGURED)
+            if(motion_status == MOTION_STATUS_CONFIGURED || m_tracking_servos.find(servo_name) == m_tracking_servos.end())
             {
-                // We are not tracking but we need to update the servo position to load the offsets
+                // We get here in 2 different scenarios
+                // 1) The system is configured and is not tracking the elevation, therefore we ALWAYS need to update the position of the servo we just set the offset
+                // 2) The servo we set the offset is not a program track servo, therefore we need to update its position manually
                 servo->preset(ACS::doubleSeq());
             }
         }
@@ -854,9 +863,11 @@ void SRTMinorServoBossCore::clearSystemOffsets(std::string servo_name)
     {
         auto servo = m_current_servos.at(servo_name);
         servo->clearSystemOffsets();
-        if(motion_status == MOTION_STATUS_CONFIGURED)
+        if(motion_status == MOTION_STATUS_CONFIGURED || m_tracking_servos.find(servo_name) == m_tracking_servos.end())
         {
-            // We are not tracking but we need to update the servo position to load the offsets
+            // We get here in 2 different scenarios
+            // 1) The system is configured and is not tracking the elevation, therefore we ALWAYS need to update the position of the servo we just set the offset
+            // 2) The servo we set the offset is not a program track servo, therefore we need to update its position manually
             servo->preset(ACS::doubleSeq());
         }
     }
@@ -912,9 +923,11 @@ void SRTMinorServoBossCore::setSystemOffset(std::string servo_axis_name, double 
         auto servo = m_current_servos.at(servo_name);
         servo->setSystemOffset(axis_name.c_str(), offset);
 
-        if(m_motion_status.load() == MOTION_STATUS_CONFIGURED)
+        if(m_motion_status.load() == MOTION_STATUS_CONFIGURED || m_tracking_servos.find(servo_name) == m_tracking_servos.end())
         {
-            // We are not tracking but we need to update the servo position to load the offsets
+            // We get here in 2 different scenarios
+            // 1) The system is configured and is not tracking the elevation, therefore we ALWAYS need to update the position of the servo we just set the offset
+            // 2) The servo we set the offset is not a program track servo, therefore we need to update its position manually
             servo->preset(ACS::doubleSeq());
         }
     }

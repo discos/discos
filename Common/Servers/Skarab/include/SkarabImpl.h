@@ -238,6 +238,8 @@ public:
     virtual void enableChannels(const ACS::longSeq& enable) throw (CORBA::SystemException,
     		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
         
+    virtual void endSchedule() throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, BackendsErrors::BackendsErrorsEx);
+
 	/**
 	 * Sets the current integration time.
      * @throw CORBA::SystemException
@@ -245,9 +247,9 @@ public:
 	 * @thorw BackendsErrors::BackendsErrorsEx
 	 * @param integration new integration value in milliseconds. A zero disables this feature, whilst a negative has not effect.
 	 */
-    virtual void setIntegration(CORBA::Long Integration) throw (CORBA::SystemException, 
-    		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+    virtual void setIntegration(CORBA::Long Integration) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
 
+    virtual void setShift(CORBA::Long Shift) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
 	/**
 	 * This method allows the client to interface the component by sending text commands. The command is parsed and executed according the
 	 * defined command syntax and grammar. This method is required to implement the <i>Management::CommandInterpreter</i> interface.
@@ -258,9 +260,9 @@ public:
 	 */
     virtual CORBA::Boolean command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException);
 
-    virtual void getConfiguration (CORBA::String_out configuration) throw (CORBA::SystemException);
+    virtual char* getConfiguration() throw (CORBA::SystemException);
 
-    virtual void getCommProtVersion (CORBA::String_out version) throw (CORBA::SystemException);
+    virtual char* getCommProtVersion() throw (CORBA::SystemException);
 
     /**
      * This method is related to the implementation of the genericBackend interface
@@ -362,7 +364,7 @@ public:
      * @param bw bandwidth interval.
      */
     virtual void setTsysRange(CORBA::Double freq,CORBA::Double bw) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
-    
+
     /**
      * In order  to get the inputs definition in just one call. The returned argument contains the configuration sequentially, the first element corresponds to the first input and so on.
      * @throw CORBA::SystemException

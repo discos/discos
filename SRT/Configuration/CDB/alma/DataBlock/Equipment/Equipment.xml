@@ -24,5 +24,6 @@
 	<AvailableBackend alias="XArcos" backend="BACKENDS/XBackends" noData="false" dataPath="" />
 	<AvailableBackend alias="Sardara" backend="BACKENDS/Sardara" noData="true" dataPath="/roach2_nuraghe/data/" />
 	<AvailableBackend alias="Holograpy" backend="BACKENDS/Holography" noData="true" dataPath="" />
+	<AvailableBackend alias="Skarab" backend="BACKENDS/Skarab" noData="true" dataPath="" />
 	
 </TelescopeEquipment>

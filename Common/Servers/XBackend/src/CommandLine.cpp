@@ -99,6 +99,12 @@ void CCommandLine::stopDataAcquisition() throw (BackendsErrors::ConnectionExImpl
 	m_busy=false;
 }
 
+void CCommandLine::backendPark() throw (BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
+		ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::NotAllowedExImpl,BackendsErrors::BackendFailExImpl)
+{
+	ACS_LOG(LM_FULL_INFO,"CCommandLine::backendPark()",(LM_NOTICE,"backendPark"));
+}
+
 void CCommandLine::startDataAcquisition() 
 	throw (BackendsErrors::BackendBusyExImpl,BackendsErrors::ConnectionExImpl,XBackendsErrors::NoSettingExImpl)
 {

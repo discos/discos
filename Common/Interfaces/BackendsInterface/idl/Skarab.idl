@@ -128,9 +128,9 @@ module Backends {
 
 		void initialize(in string configuration) raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
 
-		void getConfiguration(out string configuration);
+		string getConfiguration();
 
-		void getCommProtVersion(out string version);
+		string getCommProtVersion();
 	};
 	
 };

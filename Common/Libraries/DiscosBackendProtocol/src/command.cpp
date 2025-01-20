@@ -19,6 +19,14 @@ Command::setIntegration(int integration)
 }
 
 Message
+Command::setShift(int shift)
+{
+    Message command(REQUEST, "set-shift");
+    command.add_argument<int>(shift);
+    return command;
+}
+
+Message
 Command::getTpi(double frequency, double bandwidth)
 {
     Message command(REQUEST, "get-tpi");

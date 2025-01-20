@@ -44,6 +44,7 @@
       <xs:element name="CCB_ASACTIVE"       type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
       <xs:element name="XB"                 type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
       <xs:element name="XB_ASACTIVE"        type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="CABINET"            type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
      </xs:sequence>
     </xs:complexType>
 

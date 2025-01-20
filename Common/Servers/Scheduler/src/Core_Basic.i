@@ -565,6 +565,26 @@ void CCore::stopDataTransfer(Backends::GenericBackend_ptr backend,bool& backendE
 	}
 }
 
+void CCore::endSchedule(Backends::GenericBackend_ptr backend,bool& backendError) throw (ComponentErrors::OperationErrorExImpl, ManagementErrors::BackendNotAvailableExImpl)
+{
+	if (!CORBA::is_nil(backend)) {
+		try {
+			backend->endSchedule();
+			ACS_STATIC_LOG(LM_FULL_INFO,"CCore::endSchedule()",(LM_NOTICE,"COMMAND endSCHEDULE FOR BACKEND"));
+		}
+		catch (...) {
+			_EXCPT(ComponentErrors::OperationErrorExImpl,impl,"CCore::endSchedule()");
+			impl.setReason("backend could not stop data acquisition");
+			backendError=true;
+			throw impl;
+		}
+	}
+	else {
+		_EXCPT(ManagementErrors::BackendNotAvailableExImpl,impl,"CCore::endSchedule()");
+		throw impl;
+	}
+}
+
 void CCore::startDataTansfer(Backends::GenericBackend_ptr backend,bool& backendError,const ACS::Time& startTime,bool& streamStarted,bool& streamPrepared,bool& streamConnected) throw (
 		ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ManagementErrors::BackendNotAvailableExImpl,ManagementErrors::DataTransferSetupErrorExImpl)
 {
