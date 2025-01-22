@@ -29,17 +29,11 @@ jobs:
           sudo apt install ./virtualbox-7.0_7.0.14-161095~Ubuntu~jammy_amd64.deb
       - name: Clone the repository
         uses: actions/checkout@v4
-        with:
-          repository: 'discos/deployment'
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3'
           check-latest: true
-      - name: Install deployment package and dependencies
-        run: |
-          python -m pip install -r requirements.txt
-          pip install .
       - name: Download the provisioned virtual machine from Google Drive
         run: |
           pip install -r .github/utils/gdrive_requirements.txt
@@ -55,6 +49,14 @@ jobs:
           sed -i "s/$(cat id)/$(vboxmanage list vms | grep 'discos_manager' | grep -oP '(?<=\{)[0-9a-fA-F-]+(?=\})')/" action_provision
           sed -i "s/$(cat id)/$(vboxmanage list vms | grep 'discos_manager' | grep -oP '(?<=\{)[0-9a-fA-F-]+(?=\})')/" id
         working-directory: /home/runner/.deployment/.vagrant/machines/manager/virtualbox/
+      - name: Clone the deployment repository
+        uses: actions/checkout@v4
+        with:
+          repository: 'discos/deployment'
+      - name: Install deployment package and dependencies
+        run: |
+          python -m pip install -r requirements.txt
+          pip install .
       - name: Deploy DISCOS
         run: |
           discos-deploy manager:development --no-vagrant --deploy-only -s srt -b centos_7_compatibility
