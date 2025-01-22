@@ -1,6 +1,7 @@
 name: DISCOS deployment and build
 
 on:
+  push:
   workflow_dispatch:
 
 jobs:
