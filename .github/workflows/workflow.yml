@@ -50,6 +50,7 @@ jobs:
           tar -xzvf vagrant.tar.gz
         working-directory: /home/runner
       - name: Add the virtual machine to Vagrant
+        run: |
           sed -i "s/$(cat id)/$(vboxmanage list vms | grep 'discos_manager' | grep -oP '(?<=\{)[0-9a-fA-F-]+(?=\})')/" action_provision
           sed -i "s/$(cat id)/$(vboxmanage list vms | grep 'discos_manager' | grep -oP '(?<=\{)[0-9a-fA-F-]+(?=\})')/" id
         working-directory: /home/runner/.deployment/.vagrant/machines/manager/virtualbox/
