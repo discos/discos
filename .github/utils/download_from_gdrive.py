@@ -7,7 +7,7 @@ import os
 import io
 
 TOKEN_FILE = 'token.json'
-VM_FILE_PATH = '/home/runner/discos-manager.ova'
+VM_FILE_PATH = '/home/runner/discos_manager.ova'
 ARCHIVE_FILE_PATH = '/home/runner/vagrant.tar.gz'
 SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
 
