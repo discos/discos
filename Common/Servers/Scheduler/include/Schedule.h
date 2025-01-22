@@ -564,6 +564,17 @@ private:
 	 * @return the result of the parse
 	 */
 	bool parseMoon(const IRA::CString& val,Antenna::TTrackingParameters *scan,DWORD& id,IRA::CString& errMsg);
+	
+		/**
+	 * Parse the list of parameters for moon tracking
+	 * @param val line to parse
+	 * @param otf structure containing the ORF parameters
+	 * @param id numeral identifier of the scan
+	 * @param errMsg error specification string in case of unsuccessful operation
+	 * @return the result of the parse
+	 */
+	bool parsePlanet(const IRA::CString& val,Antenna::TTrackingParameters *scan,DWORD& id,IRA::CString& errMsg);
+
 
 	/**
 	 * Parse the vRAD switch in order to configure a radial velocity
