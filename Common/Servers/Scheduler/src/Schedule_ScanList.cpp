@@ -508,7 +508,7 @@ bool CScanList::parsePlanet(const IRA::CString& val,Antenna::TTrackingParameters
 		return false;
 	}
 	scan->targetName=CORBA::string_dup(planetName);
-	scan->type=Antenna::ANT_SUN;
+	scan->type=Antenna::ANT_SOLARSYSTEMBODY;
 	scan->paramNumber=0;
 	scan->secondary=false;
 	scan->VradFrame=Antenna::ANT_UNDEF_FRAME;
