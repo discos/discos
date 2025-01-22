@@ -59,7 +59,7 @@ jobs:
           pip install .
       - name: Deploy DISCOS
         run: |
-          discos-deploy manager:development --no-vagrant --deploy-only -s srt -b centos_7_compatibility
+          discos-deploy manager:development --deploy-only -s srt -b centos_7_compatibility
       - name: Shutdown the virtual machine
         run: |
           discos-vms stop
