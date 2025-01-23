@@ -13,8 +13,9 @@ jobs:
       PROVISIONED_VM_GDRIVE_ID: "${{ secrets.PROVISIONED_VM_GDRIVE_ID }}"
       PROVISIONED_ARCHIVE_GDRIVE_ID: "${{ secrets.PROVISIONED_ARCHIVE_GDRIVE_ID }}"
     strategy:
+      fail-fast: false
       matrix:
-        station: ['srt', 'medicina', 'noto']
+        station: ['SRT', 'Medicina', 'Noto']
     runs-on: ubuntu-22.04
     steps:
       - name: Free up space
