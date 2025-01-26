@@ -6,6 +6,7 @@
 #include <SkySourceC.h>
 #include <OTFC.h>
 #include <MoonC.h>
+#include <SolarSystemBodyC.h>
 #include <ManagementErrors.h>
 #include <acsncSimpleConsumer.h>
 #include <fstream>
