@@ -74,38 +74,30 @@ void SolarSystemBody::setObject(PLCode code){
     
         
     
-//    obj=new Obj();   
+
       _code=code;
-       
-    
-  //  obj->any.co_type=PLANET;
-    strncpy(obj->any.co_name,planetnames[_code],10);
+      strncpy(obj->any.co_name,planetnames[_code],10);
 //    obj->
  //   pl.plo_code=code;
-#ifdef DEBUG    
-    std::cout << "Code: " << code << std::endl;
-    std::cout << "Name: " << planetnames[code] << std::endl;
- //   std::cout << "Name: " << obj->any.co_name << std::endl;
+#ifdef __DEBUG    
+//    std::cout << "Code: " << code << std::endl;
+//    std::cout << "Name: " << planetnames[code] << std::endl;
+//   std::cout << "Name: " << obj->any.co_name << std::endl;
 #endif
     
 //    pref_set(PREF_EQUATORIAL,PREF_TOPO);
 
-        std::cout << "exit after pref_set: " << obj->any.co_name << std::endl;
+//        std::cout << "exit after pref_set: " << obj->any.co_name << std::endl;
 
 };
   
 SolarSystemBody::SolarSystemBody(PLCode code)
 {
-    //obj=new Obj();
-
     _code=code;
     
-//    obj->any.co_type=PLANET;
-  //  strncpy(obj->any.co_name,planetnames[_code],10);
-  //  obj->pl.plo_code=code;
 #ifdef DEBUG    
-    std::cout << "Code: " << code << std::endl;
-    std::cout << "Name: " << planetnames[code] << std::endl;
+//    std::cout << "Code: " << code << std::endl;
+//    std::cout << "Name: " << planetnames[code] << std::endl;
 //    std::cout << "Name: " << obj->any.co_name << std::endl;
 #endif
     
@@ -121,13 +113,15 @@ PLCode  SolarSystemBody::getPlanetCodeFromName(std::string  str)
     for (std::string::size_type i=0; i<str.length(); ++i){
            str[i]=std::toupper(str[i],loc);
      }
+
       if (planet.find(str) != planet.end()) 
-      { std::cout <<str << " is in the map." << std::endl;
-      return SolarSystemBody::planet[str]; } 
+      { 
+      //   std::cout <<str << " is in the map." << std::endl;
+         return SolarSystemBody::planet[str]; } 
       else { 
       
-      std::cout << str << " is not in the map." << std::endl;
-      return NOBJ;
+      //   std::cout << str << " is not in the map." << std::endl;
+         return NOBJ;
        }
 
       
@@ -149,9 +143,7 @@ std::string  SolarSystemBody::getPlanetNameFromCode(PLCode code ){
     std::string name;
     for (std::map<std::string,PLCode>::iterator it=SolarSystemBody::planet.begin(); it!=SolarSystemBody::planet.end(); ++it)
     {       
-#ifdef DEBUG        
-         //   std::cout << it->first << " => " << it->second << '\n';
-#endif
+
             if (it->second == code)
             name=it->first;
             
@@ -189,7 +181,7 @@ void  SolarSystemBody::compute(Site* site){
     strncpy(obj->any.co_name,planetnames[_code],10);
     obj->
     pl.plo_code=_code;
-#ifdef DEBUG    
+#ifdef __DEBUG    
     std::cout << "Code: " << _code << std::endl;
     std::cout << "Name: " << planetnames[_code] << std::endl;
     std::cout << "Name: " << obj->any.co_name << std::endl;
@@ -197,7 +189,7 @@ void  SolarSystemBody::compute(Site* site){
      pref_set(PREF_EQUATORIAL,PREF_TOPO);
 
     
-    std::cout << "Compute " <<std::endl;
+//    std::cout << "Compute " <<std::endl;
     obj_cir (site, obj);
 
     _ra=obj->any.co_ra;
