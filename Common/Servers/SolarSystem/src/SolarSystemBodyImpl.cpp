@@ -4,6 +4,7 @@
 #include <ObservatoryS.h>
 #include <slamac.h>
 #include <slalib.h>
+#include <LogFilter.h>
 //#include <baci.h>
 //#include <acstimeEpochHelper.h>
 //#include <Site.h>
@@ -94,8 +95,7 @@ void SolarSystemBodyImpl::execute() throw (ACSErr::ACSbaseExImpl)
 	     m_longitude=site->longitude;
 	     m_latitude=site->latitude;
 	     m_height=site->height;
-	     //ACS_LOG(LM_FULL_INFO,"CBossCore::startScan()",(LM_NOTICE,"NEW_SCAN_WILL_START_AT: %s",(const char *)out))
-	     ACS_LOG(LM_FULL_INFO, "SolarSystemBodyImpl::execute()", (LM_DEBUG, "SITE: Longitude %f Latitude %f",site->longitude *R2D,site->latitude*R2D));
+	   //  std::cout << "Site:" << site->longitude *R2D << " " << m_latitude ;
 	     m_sitex= new xephemlib::Site();
 	     m_sitex-> setCoordinate(site->longitude,site->latitude,site->height); //coordinates in degrees.
         m_body_xephem =   new xephemlib::SolarSystemBody();
@@ -291,37 +291,49 @@ typedef enum {
         PLCode  code;
         
         code=xephemlib::SolarSystemBody::getPlanetCodeFromName(bodyName);
-	     ACS_LOG(LM_FULL_INFO, "SolarSystemBodyImpl::setBodyName()", (LM_INFO, "Solar System Body Name: %s",(char *)bodyName));        
-	     ACS_LOG(LM_FULL_INFO, "SolarSystemBodyImpl::setBodyName()", (LM_DEBUG, "Solar System Body Xephem code: %d",(int)code));        
+        CUSTOM_LOG(LM_FULL_INFO,"SolarSystemBodyImpl::setBodyName()",
+					  (LM_INFO,"Solar System body name:%s",(const char *)m_bodyName));             
+
+
         if (code!=NOBJ){
+//             m_body_xephem =   new xephemlib::SolarSystemBody(code);
              try{
-                m_body_xephem ->setObject(code);
+             m_body_xephem ->setObject(code);
              }
          
              
              catch (std::exception& e)
              {
-
-                ACS_SHORT_LOG((LM_WARNING, "std exception in setting body name"));  
                        std::cout << e.what() << '\n';
              }
               catch (...)
-             {
-                ACS_SHORT_LOG((LM_WARNING, "An error is occurred in setting Solar System body "));}
-                ACS_LOG(LM_FULL_INFO, "SolarSystemBodyImpl::setBodyName()", (LM_DEBUG, "Solar System Body Name: %s",(char *)bodyName));        
-	             ACS_LOG(LM_FULL_INFO, "SolarSystemBodyImpl::setBodyName()", (LM_DEBUG, "Solar System Body Xephem code: %d",(int)code));                     
+             {std::cout << "except" << std::endl;}
              
              
+             
+            // std::cout << "Body name:" << bodyName <<std::endl;
+           //  std::cout << "code:" << code <<std::endl;
         
         } else
        {
-              _EXCPT(AntennaErrors::SourceNotFoundExImpl, __dummy,"SkySourceImpl::loadSourceFromCatalog()");
-              __dummy.setSourceName(bodyName);
+          // THROW_EX(AntennaErrors, SourceNotFoundExImpl, "SolarSystemBodyImpl::setBodyName", false);
+      
+           _EXCPT(AntennaErrors::SourceNotFoundExImpl, __dummy,"SkySourceImpl::loadSourceFromCatalog()");
+           __dummy.setSourceName(bodyName);
+	         CUSTOM_EXCPT_LOG(__dummy,LM_DEBUG);
+        
 	         	throw __dummy.getAntennaErrorsEx();
         
       		
          	 
         }
+        
+
+//_EXCPT(AntennaErrors::SourceNotFoundExImpl, __dummy,"SkySourceImpl::loadSourceFromCatalog()");
+      		//__dummy.setSourceName(bodyName);
+	//	       CUSTOM_EXCPT_LOG(__dummy,LM_DEBUG);
+        
+	  //     	throw __dummy.getAntennaErrorsEx();
         
 
 }
@@ -335,12 +347,13 @@ void SolarSystemBodyImpl::computeFlux(CORBA::Double freq, CORBA::Double fwhm, CO
 
 void SolarSystemBodyImpl::getDistance(ACS::Time time,CORBA::Double_out distance) throw (CORBA::SystemException)
 {
-       AUTO_TRACE("SolarSystemBodyImpl::getDistance()");
+    AUTO_TRACE("SolarSystemBodyImpl::getDistance()");
+	     double azi,ele;
        TIMEVALUE val(time);
-	    IRA::CDateTime ctime(val,m_dut1);
-	    baci::ThreadSyncGuard guard(&m_mutex);
-     	 BodyPosition(val);
-     	 distance=m_distance;
+	     IRA::CDateTime ctime(val,m_dut1);
+	     baci::ThreadSyncGuard guard(&m_mutex);
+     	BodyPosition(val);
+     	distance=m_distance;
 
 }
 
@@ -351,8 +364,10 @@ void SolarSystemBodyImpl::BodyPosition(TIMEVALUE &time)
 
         AUTO_TRACE("SolarSystemBodyImpl::BodyPosition()");
         double TDB,time_utc,TT;
+#ifdef DEBUG
 //        std::cout <<time.year() << " " << time.month() << " " <<time.day() ;
 //        std::cout <<time.hour() << " " << time.minute() << " " <<time.second()  << std::endl  ;
+#endif
 
         baci::ThreadSyncGuard guard(&m_mutex);	
        
@@ -369,16 +384,18 @@ void SolarSystemBodyImpl::BodyPosition(TIMEVALUE &time)
 	   TT = TT - 2400000.5;     
         
        time_utc=  CDateTime::julianEpoch2JulianDay (date.getJulianEpoch());
-       time_utc = time_utc - 2400000.5;     
-//       std::cout << time_utc-(int)time_utc << "    " <<TDB << std::endl;
+       	   time_utc = time_utc - 2400000.5;     
+       //std::cout << time_utc-(int)time_utc << "    " <<TDB << std::endl;
        
 
        
        double ra,dec,eph,az,el,range,lone,late;
 
+//   Site *site = new Site(59319.5,degrad(9.5),degrad(39.5),600);
+
         m_sitex -> setTime(time_utc) ;  
         m_body_xephem->compute( m_sitex );
-//        m_body_xephem->report();
+  //      m_body_xephem->report();
         m_body_xephem->getCoordinates(ra,dec,az,el,range);
         m_ra2000 = ra;
         m_dec2000= dec;
