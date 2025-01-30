@@ -34,7 +34,7 @@ public:
                        const std::string lna_ip, 
                        const unsigned short lna_port, 
                        const unsigned int guard_time=250000, 
-                       const unsigned short number_of_feeds=1) :  ReceiverControl(dewar_ip,dewar_port,lna_ip,guard_time,number_of_feeds) {}
+                       const unsigned short number_of_feeds=1) :  ReceiverControl(dewar_ip,dewar_port,lna_ip,lna_port,guard_time,number_of_feeds) {}
 	virtual ~CKQWReceiverControl() {}
 	/**
 	* @throw ReceiverControlEx
