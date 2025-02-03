@@ -45,7 +45,7 @@ class SRTActiveSurfaceGUI : public QWidget, public Ui_SRTActiveSurfaceGUI
         void setactuator();
 
     private slots:
-        void changeGUIActuatorColor(int, int, bool, bool);
+        void changeGUIActuatorColor(int, int, bool, bool, bool);
         void changeGUIAllActuators(bool callfromfunction = false);
         void changeGUIcircleORradius(bool callfromfunction = false);
         void changeGUIActuator(bool callfromfunction = false);
@@ -54,6 +54,7 @@ class SRTActiveSurfaceGUI : public QWidget, public Ui_SRTActiveSurfaceGUI
         void changeGUIActuatorStatusLabels();
         void changeGUIasStatusCode(int);
         void changeGUIasProfileCode(int);
+        void changeGUIasLUTFileName(QString);
 
     private:
         SRTActiveSurfaceCore mySRTActiveSurfaceCore;

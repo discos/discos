@@ -2,11 +2,9 @@
 #include <Definitions.h>
 #include <cstdio>
 
-int actuatorsInCircle[] = {0,24,24,48,48,48,48,96,96,96,96,96,96,96,96,96,8,4};
-
 CSRTActiveSurfaceBossCore::CSRTActiveSurfaceBossCore(ContainerServices *service, acscomponent::ACSComponentImpl *me) :
     m_services(service),
-    m_thisIsMe(me)
+    actuatorsInCircle{0,24,24,48,48,48,48,96,96,96,96,96,96,96,96,96,8,4}
 {
     m_error_strings[ASErrors::NoError           ] = "NoError";
     m_error_strings[ASErrors::USDCalibrated     ] = "USD calibrated";
@@ -43,14 +41,15 @@ void CSRTActiveSurfaceBossCore::initialize()
 {
     ACS_LOG(LM_FULL_INFO,"CSRTActiveSurfaceBossCore::initialize()",(LM_INFO,"CSRTActiveSurfaceBossCore::initialize"));
 
+    m_initialized = false;
     m_enable = false;
     m_tracking = false;
     m_status = Management::MNG_WARNING;
+    m_lut = USDTABLECORRECTIONS;
     AutoUpdate = false;
     actuatorcounter = circlecounter = totacts = 1;
     for(int i = 0; i < SECTORS; i++)
     {
-        m_sector.push_back(false);
         usdCounters.push_back(0);
     }
     m_profileSetted = false;
@@ -1366,16 +1365,7 @@ void CSRTActiveSurfaceBossCore::asSetLUT(const char *newlut)
 
 void CSRTActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newProfile) throw (ComponentErrors::ComponentErrorsExImpl)
 {
-    bool all_sectors = true;
-    for(unsigned int i = 0; i < SECTORS; i++)
-    {
-        if(!m_sector[i]) all_sectors = false;
-    }
-
-    if (m_newlut == false)
-        m_lut = USDTABLECORRECTIONS;
-
-    if(all_sectors) // USD tables has not been loaded yet
+    if(m_initialized) // USD tables has not been loaded yet
     {
         ifstream usdCorrections(m_lut);
         if(!usdCorrections)
@@ -1640,7 +1630,8 @@ void CSRTActiveSurfaceBossCore::asStatus4GUIClient(ACS::longSeq& status) throw (
     {
         for (int actuator = 1; actuator <= actuatorsInCircle[circle]; actuator++)
         {
-            int usdStatus = 0;
+            // Initialize the status word as component unavailable. If the component is available it will be overwritten
+            int usdStatus = UNAV;
 
             if(!CORBA::is_nil(usd[circle][actuator]))
             {
