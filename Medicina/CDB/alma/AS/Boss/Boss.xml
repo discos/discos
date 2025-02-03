@@ -22,7 +22,7 @@
    -   Wed Mar 17 13:51:15 UTC 2021 modified by jDAL
    -   Wed Mar 17 13:52:12 UTC 2021 modified by jDAL
 -->
-<MedicinaActiveSurfaceBoss xmlns="urn:schemas-cosylab-com:MedicinaActiveSurfaceBoss:1.0" xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" WatchingThreadTime="200000" RepetitionCacheTime="2000000" RepetitionExpireTime="5000000" profile="2">
+<MedicinaActiveSurfaceBoss xmlns="urn:schemas-cosylab-com:MedicinaActiveSurfaceBoss:1.0" xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" WatchingThreadTime="200000" WorkingThreadTime="500000" RepetitionCacheTime="2000000" RepetitionExpireTime="5000000" profile="4">
 	<status />
 	<enabled />
 	<pprofile />
