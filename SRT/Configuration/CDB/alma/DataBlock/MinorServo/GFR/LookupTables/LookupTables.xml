@@ -14,6 +14,7 @@
     <CCG_ASACTIVE>      <axis>ROTATION</axis> <coefficients>-88.70659   </coefficients></CCG_ASACTIVE>
     <KKG>               <axis>ROTATION</axis> <coefficients>-159.8899   </coefficients></KKG>
     <KKG_ASACTIVE>      <axis>ROTATION</axis> <coefficients>-159.8899   </coefficients></KKG_ASACTIVE>
+    <KBAND_TEST>        <axis>ROTATION</axis> <coefficients>-159.8899   </coefficients></KBAND_TEST>
     <WWG>               <axis>ROTATION</axis> <coefficients>90.971610   </coefficients></WWG>
     <WWG_ASACTIVE>      <axis>ROTATION</axis> <coefficients>90.971610   </coefficients></WWG_ASACTIVE>
     <QQG>               <axis>ROTATION</axis> <coefficients>162.771     </coefficients></QQG>

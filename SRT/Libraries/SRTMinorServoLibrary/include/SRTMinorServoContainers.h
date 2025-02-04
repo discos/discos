@@ -86,6 +86,7 @@ namespace MinorServo
         //{"XKP",     std::make_pair(CONFIGURATION_PRIMARY,    false)},
         {"CCG",     std::make_pair(CONFIGURATION_GREGORIAN1, true )},
         {"KKG",     std::make_pair(CONFIGURATION_GREGORIAN2, true )},
+        {"KBAND_TEST",   std::make_pair(CONFIGURATION_GREGORIAN2, false)},
         {"WWG",     std::make_pair(CONFIGURATION_GREGORIAN3, true )},
         {"QQG",     std::make_pair(CONFIGURATION_GREGORIAN4, true )},
         {"TRI",     std::make_pair(CONFIGURATION_GREGORIAN5, true )},

@@ -38,6 +38,13 @@
     <KKG_ASACTIVE>      <axis>RY</axis><coefficients>-0.036111111111111108                                                                                              </coefficients></KKG_ASACTIVE>
     <KKG_ASACTIVE>      <axis>RZ</axis><coefficients>0                                                                                                                  </coefficients></KKG_ASACTIVE>
 
+    <KBAND_TEST>        <axis>TX</axis><coefficients>-1.5                                                                                                               </coefficients></KBAND_TEST>
+    <KBAND_TEST>        <axis>TY</axis><coefficients>0.0                                                                                                                </coefficients></KBAND_TEST>
+    <KBAND_TEST>        <axis>TZ</axis><coefficients>-15.6669651675,1.9293068324,-0.0628990613,0.0007771141,-0.0000032940                                               </coefficients></KBAND_TEST>
+    <KBAND_TEST>        <axis>RX</axis><coefficients>-0.0055555555555569409, 0.00014822163433269445, 0.000027586713698, -0.000000077732053                              </coefficients></KBAND_TEST>
+    <KBAND_TEST>        <axis>RY</axis><coefficients>-0.036111111111111108                                                                                              </coefficients></KBAND_TEST>
+    <KBAND_TEST>        <axis>RZ</axis><coefficients>0                                                                                                                  </coefficients></KBAND_TEST>
+
     <WWG>               <axis>TX</axis><coefficients>0                                                                                                                  </coefficients></WWG>
     <WWG>               <axis>TY</axis><coefficients>0                                                                                                                  </coefficients></WWG>
     <WWG>               <axis>TZ</axis><coefficients>0                                                                                                                  </coefficients></WWG>
