@@ -32,7 +32,7 @@ class CommandLine:
    
 	def initialize(self):
 		#raises an error.....
-		self.create()   
+		return self.create()   
    
 	def configure(self,ip,port):
 		'''
@@ -42,12 +42,13 @@ class CommandLine:
 		self.ip=ip
 		self.port=port
 		#raises an error.....
-		self.connect() 
+		return self.connect() 
 			
 	def create(self):
 		try:
 			if self.sock==None:
 				self.sock=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+				print ("socket creato")
 		except socket.error as msg:
 			self.sock=None
 			return False
@@ -63,10 +64,17 @@ class CommandLine:
 	def connect(self):
 		try:
 			if self.connected==False:
+				#print ("PRovo la connessione")
 				self.sock.connect((self.ip,self.port))
+				#print ("Conessione ok")
 				self.connected=True
-				self.sock.sendall('*CLS\n;SYST:ERR?\n++read\n')
+				cmd="*CLS\n;SYST:ERR?\n++read\n"
+				#print ("mando stringa di inizializzazione")
+				self.sock.sendall(cmd.encode())
+				#print ("mandata")
 				msg=self.sock.recv(1024)
+				#print ("ricevuta risposta :")
+				#print (msg)
 		except socket.error as msg:
 			self.close()
 			return False
@@ -169,7 +177,7 @@ class CommandLine:
 		msg=""
 		if self.check():			
 			try:
-				self.sock.sendall(cmd)
+				self.sock.sendall(cmd.encode())
 			except socket.error as msg:
 				self.close()
 				return False,msg
@@ -181,7 +189,8 @@ class CommandLine:
 		msg=""
 		if self.check():			
 			try:
-				self.sock.sendall(cmd+'\n++read\n')
+				buff=cmd+'\n++read\n'
+				self.sock.sendall(cmd.encode())
 			except socket.error as msg:
 				self.close()
 				return False,msg
