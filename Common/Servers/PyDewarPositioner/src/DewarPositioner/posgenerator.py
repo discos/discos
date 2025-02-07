@@ -31,7 +31,7 @@ class PosGenerator(object):
         try:
             latitude = siteInfo['latitude']
         except (KeyError, TypeError) as ex:
-            raise PosGeneratorError('cannot get the latitude: %s' %ex.message)
+            raise PosGeneratorError('cannot get the latitude: %s' %ex)
         except Exception as ex:
             raeson = 'unexpected exception getting the site latitude' 
             logger.logNotice(raeson)
@@ -61,7 +61,7 @@ class PosGenerator(object):
                 raise 
             except Exception as ex:
                 raeson = 'cannot get the %s (az, el)  values' %source._get_name()
-                logger.logNotice('%s: %s' %(raeson, ex.message))
+                logger.logNotice('%s: %s' %(raeson, ex))
                 raise PosGeneratorError(raeson)
 
     def galacticParallactic(self, source, siteInfo):
@@ -69,7 +69,7 @@ class PosGenerator(object):
         try:
             latitude = siteInfo['latitude']
         except (KeyError, TypeError) as ex:
-            raise PosGeneratorError('cannot get the latitude: %s' %ex.message)
+            raise PosGeneratorError('cannot get the latitude: %s' %ex)
         except Exception as ex:
             raeson = 'unexpected exception getting the site latitude' 
             logger.logNotice(raeson)
@@ -99,7 +99,7 @@ class PosGenerator(object):
                 raise 
             except Exception as ex:
                 raeson = 'cannot get the %s (az, el)  values' %source._get_name()
-                logger.logNotice('%s: %s' %(raeson, ex.message))
+                logger.logNotice('%s: %s' %(raeson, ex))
                 raise PosGeneratorError(raeson)
 
     @staticmethod

@@ -60,9 +60,9 @@ class Positioner(object):
             self._start(self.posgen.goto, setupPosition)
             time.sleep(0.1) # Give the thread the time to finish
         except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx) as ex:
-            raise PositionerError("cannot set the position: %s" %ex.message)
+            raise PositionerError("cannot set the position: %s" %ex)
         except Exception as ex:
-            raise PositionerError(ex.message)
+            raise PositionerError(ex)
         finally:
             Positioner.generalLock.release()
 
@@ -120,7 +120,7 @@ class Positioner(object):
                 # Set the initialPosition, in order to add it to the dynamic one
                 self.control.user_position = position
             except Exception as ex:
-                raise PositionerError('cannot set the position: %s' %ex.message)
+                raise PositionerError('cannot set the position: %s' %ex)
 
 
     def _setPosition(self, position):
@@ -130,11 +130,11 @@ class Positioner(object):
                 self.device.setPosition(self.control.target)
             except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx) as ex:
                 raeson = "cannot set the %s position" %self.device._get_name()
-                logger.logError('%s: %s' %(raeson, ex.message))
+                logger.logError('%s: %s' %(raeson, ex))
                 raise PositionerError(raeson)
             except Exception as ex:
                 raeson = "unknown exception setting the %s position" %self.device._get_name()
-                logger.logError('%s: %s' %(raeson, ex.message))
+                logger.logError('%s: %s' %(raeson, ex))
                 raise PositionerError(raeson)
         else:
             raise OutOfRangeError("position %.2f out of range {%.2f, %.2f}" 
@@ -207,7 +207,7 @@ class Positioner(object):
                         self._start(posgen, self.source, self.siteInfo)
                     self.control.mustUpdate = True
                 except Exception as ex:
-                    raise PositionerError('configuration problem: %s' %ex.message)
+                    raise PositionerError('configuration problem: %s' %ex)
         finally:
             Positioner.generalLock.release()
 
@@ -242,7 +242,7 @@ class Positioner(object):
                         self._setPosition(target) # _setPosition() will add the offset
                         time.sleep(float(self.conf.getAttribute('UpdatingTime')))
                     except OutOfRangeError as ex:
-                        logger.logInfo(ex.message)
+                        logger.logInfo(ex)
                         self.control.isRewindingRequired = True
                         if self.control.modes['rewinding'] == 'AUTO':
                             try:
@@ -250,7 +250,7 @@ class Positioner(object):
                             except Exception as ex:
                                 # In case of wrong autoRewindingSteps
                                 self.control.isRewindingRequired = True
-                                logger.logError('cannot rewind: %s' %ex.message)
+                                logger.logError('cannot rewind: %s' %ex)
                                 break
                         else:
                             if self.control.modes['rewinding'] == 'MANUAL':
@@ -262,16 +262,16 @@ class Positioner(object):
                             else:
                                 logger.logError('wrong rewinding mode: %s' %self.control.modes['rewinding'])
                     except Exception as ex:
-                        logger.logError(ex.message)
+                        logger.logError(ex)
                         break
             self.control.mustUpdate = False
         except KeyboardInterrupt:
             logger.logInfo('stopping Positioner._updatePosition() due to KeyboardInterrupt')
         except AttributeError as ex:
             logger.logError('Positioner._updatePosition(): attribute error')
-            logger.logDebug('Positioner._updatePosition(): %s' %ex.message)
+            logger.logDebug('Positioner._updatePosition(): %s' %ex)
         except PositionerError as ex:
-            logger.logError('Positioner._updatePosition(): %s' %ex.message)
+            logger.logError('Positioner._updatePosition(): %s' %ex)
         except Exception as ex:
             logger.logError('unexcpected exception in Positioner._updatePosition(): %s' %ex)
         finally:
@@ -315,7 +315,7 @@ class Positioner(object):
             self.control.isRewindingRequired = False
         except Exception as ex:
             self.control.isRewindingRequired = True
-            raise PositionerError(ex.message)
+            raise PositionerError(ex)
         finally:
             self.control.isRewinding = False
             Positioner.rewindingLock.release()
@@ -613,12 +613,12 @@ class Positioner(object):
             try:
                 status_obj = self.device._get_status()
             except Exception as ex:
-                raise PositionerError('cannot get the device status property: %s' %ex.message)
+                raise PositionerError('cannot get the device status property: %s' %ex)
 
             try:
                 device_status, compl = status_obj.get_sync()
             except Exception as ex:
-                raise PositionerError('cannot get the device status value: %s' %ex.message)
+                raise PositionerError('cannot get the device status value: %s' %ex)
 
             if compl.code:
                 raise PositionerError('the device status value is not valid')
@@ -641,7 +641,7 @@ class Positioner(object):
                 try:
                     binrepr = Status.dec2bin(device_status, 6) # A string of 6 values 
                 except Exception as ex:
-                    raise PositionerError('error in Status.dec2bin(): %s' %ex.message)
+                    raise PositionerError('error in Status.dec2bin(): %s' %ex)
 
                 po, f, ce, nr, s, w = [bool(int(item)) for item in reversed(binrepr)]
                 if po:
@@ -665,7 +665,7 @@ class Positioner(object):
         except NotAllowedError as ex:
             return '000000' # Not ready
         except Exception as ex:
-            logger.logError(ex.message)
+            logger.logError(ex)
             return '100000' # Failure
         finally:
             Positioner.generalLock.release()
