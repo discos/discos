@@ -48,7 +48,6 @@ class CommandLine:
 		try:
 			if self.sock==None:
 				self.sock=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-				print ("socket creato")
 		except socket.error as msg:
 			self.sock=None
 			return False
