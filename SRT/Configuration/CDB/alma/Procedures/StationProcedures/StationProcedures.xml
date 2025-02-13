@@ -51,7 +51,7 @@
 
 <Procedure name="setupKBANDTEST" args="0">
 <body>
-	antennaSetup=KKG
+	antennaSetup=KBANDTEST
 	servoSetup=KBAND_TEST
 	receiversSetup=KKG
 	receiversMode=SINGLEDISH
@@ -147,6 +147,22 @@
 <body>
 	antennaSetup=MISTRAL
 	servoSetup=MISTRAL
+	receiversSetup=KKG
+	receiversMode=SINGLEDISH
+	chooseBackend=TotalPower
+	initialize=CCG
+	device=0
+	calOff
+	restFrequency=0
+	azelOffsets=0d,0d
+	asSetLUT=LT_lut_20240917_2.txt
+</body>
+</Procedure>
+
+<Procedure name="setupMISTRALOLD" args="0">
+<body>
+	antennaSetup=MISTRAL_OLD
+	servoSetup=MISTRAL_OLD
 	receiversSetup=KKG
 	receiversMode=SINGLEDISH
 	chooseBackend=TotalPower

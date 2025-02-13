@@ -91,6 +91,7 @@ namespace MinorServo
         {"QQG",     std::make_pair(CONFIGURATION_GREGORIAN4, true )},
         {"TRI",     std::make_pair(CONFIGURATION_GREGORIAN5, true )},
         {"MISTRAL", std::make_pair(CONFIGURATION_GREGORIAN6, true )},
+        {"MISTRAL_OLD", std::make_pair(CONFIGURATION_GREGORIAN6, true )},
         {"CCB",     std::make_pair(CONFIGURATION_BWG1,       true )},
         {"XB",      std::make_pair(CONFIGURATION_BWG3,       true )},
         {"CABINET", std::make_pair(CONFIGURATION_GREGORIAN7, false)},
