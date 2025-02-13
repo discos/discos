@@ -66,6 +66,11 @@ module ActiveSurface {
 		*/
 		readonly attribute Management::ROTBoolean tracking;
 
+        /*
+         * This attribute shows the filename of the currently loaded lookup table
+         */
+        readonly attribute ACS::ROstring LUT_filename;
+
         /**
 		 *  This method can be called in order to disable the component. That
          *  means that the activesurface subsystem cannot be commanded any more via the

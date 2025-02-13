@@ -144,6 +144,7 @@ void USDImpl::initialize() throw (ACSErr::ACSbaseExImpl)
             _SET_LDEF(acc,   "USDImpl::initialize()");
             _SET_LDEF(uBits, "USDImpl::initialize()");
         }
+        _GET_PROP(status,m_status,"usdImpl::initialize()")
     }
     catch (ASErrors::ASErrorsEx& ex)
     {
@@ -323,6 +324,8 @@ void USDImpl::reset() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
     {
         //_SET_CDB(calibrate, m_calibrate, "::USDImpl::reset()")
         action(RESET);
+
+        CIRATools::Wait(0, 200000); // 0.2 secs, guard time to wait after a reset command
 
         //* restore defaults *//
         _SET_LDEF(delay, "USDImpl::reset()");

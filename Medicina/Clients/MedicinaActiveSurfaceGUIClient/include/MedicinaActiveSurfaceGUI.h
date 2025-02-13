@@ -1,10 +1,9 @@
 /********************************************************************************
-** Form generated from reading ui file 'MedicinaActiveSurfaceGUI.ui'
+** Form generated from reading UI file 'MedicinaActiveSurfaceGUI.ui'
 **
-** Created: Wed Dec 7 09:22:24 2022
-**      by: Qt User Interface Compiler version 4.5.2
+** Created by: Qt User Interface Compiler version 4.8.7
 **
-** WARNING! All changes made in this file will be lost when recompiling ui file!
+** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
 
 #ifndef MEDICINAACTIVESURFACEGUI_H
@@ -17675,9 +17674,6 @@ public:
         buttonGroup1->setEnabled(false);
         buttonGroup1->setGeometry(QRect(970, 448, 288, 291));
         CalibrateButton = new QPushButton(buttonGroup1);
-        QButtonGroup *buttonGroup = new QButtonGroup(MedicinaActiveSurfaceGUI);
-        buttonGroup->setObjectName(QString::fromUtf8("buttonGroup"));
-        buttonGroup->addButton(CalibrateButton);
         CalibrateButton->setObjectName(QString::fromUtf8("CalibrateButton"));
         CalibrateButton->setGeometry(QRect(192, 45, 90, 35));
         QPalette palette321;
@@ -17731,7 +17727,6 @@ public:
         palette321.setBrush(QPalette::Disabled, QPalette::LinkVisited, brush10);
         CalibrateButton->setPalette(palette321);
         StopButton = new QPushButton(buttonGroup1);
-        buttonGroup->addButton(StopButton);
         StopButton->setObjectName(QString::fromUtf8("StopButton"));
         StopButton->setGeometry(QRect(4, 5, 90, 35));
         QPalette palette322;
@@ -17785,7 +17780,6 @@ public:
         palette322.setBrush(QPalette::Disabled, QPalette::LinkVisited, brush10);
         StopButton->setPalette(palette322);
         ResetButton = new QPushButton(buttonGroup1);
-        buttonGroup->addButton(ResetButton);
         ResetButton->setObjectName(QString::fromUtf8("ResetButton"));
         ResetButton->setGeometry(QRect(98, 5, 90, 35));
         QPalette palette323;
@@ -17839,7 +17833,6 @@ public:
         palette323.setBrush(QPalette::Disabled, QPalette::LinkVisited, brush10);
         ResetButton->setPalette(palette323);
         RefPosButton = new QPushButton(buttonGroup1);
-        buttonGroup->addButton(RefPosButton);
         RefPosButton->setObjectName(QString::fromUtf8("RefPosButton"));
         RefPosButton->setGeometry(QRect(4, 45, 90, 35));
         QPalette palette324;
@@ -17893,7 +17886,6 @@ public:
         palette324.setBrush(QPalette::Disabled, QPalette::LinkVisited, brush10);
         RefPosButton->setPalette(palette324);
         TopButton = new QPushButton(buttonGroup1);
-        buttonGroup->addButton(TopButton);
         TopButton->setObjectName(QString::fromUtf8("TopButton"));
         TopButton->setGeometry(QRect(5, 125, 90, 35));
         QPalette palette325;
@@ -17947,7 +17939,6 @@ public:
         palette325.setBrush(QPalette::Disabled, QPalette::LinkVisited, brush10);
         TopButton->setPalette(palette325);
         StowButton = new QPushButton(buttonGroup1);
-        buttonGroup->addButton(StowButton);
         StowButton->setObjectName(QString::fromUtf8("StowButton"));
         StowButton->setGeometry(QRect(98, 45, 90, 35));
         QPalette palette326;
@@ -18001,7 +17992,6 @@ public:
         palette326.setBrush(QPalette::Disabled, QPalette::LinkVisited, brush10);
         StowButton->setPalette(palette326);
         BottomButton = new QPushButton(buttonGroup1);
-        buttonGroup->addButton(BottomButton);
         BottomButton->setObjectName(QString::fromUtf8("BottomButton"));
         BottomButton->setGeometry(QRect(98, 125, 90, 35));
         QPalette palette327;
@@ -18055,7 +18045,6 @@ public:
         palette327.setBrush(QPalette::Disabled, QPalette::LinkVisited, brush10);
         BottomButton->setPalette(palette327);
         SetupButton = new QPushButton(buttonGroup1);
-        buttonGroup->addButton(SetupButton);
         SetupButton->setObjectName(QString::fromUtf8("SetupButton"));
         SetupButton->setGeometry(QRect(192, 5, 90, 35));
         QPalette palette328;
@@ -18109,7 +18098,6 @@ public:
         palette328.setBrush(QPalette::Disabled, QPalette::LinkVisited, brush10);
         SetupButton->setPalette(palette328);
         DownButton = new QPushButton(buttonGroup1);
-        buttonGroup->addButton(DownButton);
         DownButton->setObjectName(QString::fromUtf8("DownButton"));
         DownButton->setGeometry(QRect(98, 85, 90, 35));
         QPalette palette329;
@@ -18163,7 +18151,6 @@ public:
         palette329.setBrush(QPalette::Disabled, QPalette::LinkVisited, brush10);
         DownButton->setPalette(palette329);
         UpButton = new QPushButton(buttonGroup1);
-        buttonGroup->addButton(UpButton);
         UpButton->setObjectName(QString::fromUtf8("UpButton"));
         UpButton->setGeometry(QRect(4, 85, 90, 35));
         QPalette palette330;
@@ -18217,7 +18204,6 @@ public:
         palette330.setBrush(QPalette::Disabled, QPalette::LinkVisited, brush10);
         UpButton->setPalette(palette330);
         MoveButton = new QPushButton(buttonGroup1);
-        buttonGroup->addButton(MoveButton);
         MoveButton->setObjectName(QString::fromUtf8("MoveButton"));
         MoveButton->setGeometry(QRect(5, 165, 90, 35));
         QPalette palette331;
@@ -18279,7 +18265,6 @@ public:
         ActuatorMovelineEdit->setAlignment(Qt::AlignRight);
         ActuatorMovelineEdit->setReadOnly(false);
         CorrectionButton = new QPushButton(buttonGroup1);
-        buttonGroup->addButton(CorrectionButton);
         CorrectionButton->setObjectName(QString::fromUtf8("CorrectionButton"));
         CorrectionButton->setGeometry(QRect(5, 205, 90, 35));
         QPalette palette332;
@@ -18339,7 +18324,6 @@ public:
         ActuatorCorrectionlineEdit->setAlignment(Qt::AlignRight);
         ActuatorCorrectionlineEdit->setReadOnly(false);
         UpdateButton = new QPushButton(buttonGroup1);
-        buttonGroup->addButton(UpdateButton);
         UpdateButton->setObjectName(QString::fromUtf8("UpdateButton"));
         UpdateButton->setGeometry(QRect(5, 245, 90, 35));
         QPalette palette333;
@@ -20676,7 +20660,6 @@ public:
         StatuslineEdit_2->setText(QString());
         StatuslineEdit->setStyleSheet(QApplication::translate("MedicinaActiveSurfaceGUI", "background-color: rgb(0, 85, 255);", 0, QApplication::UnicodeUTF8));
         StatuslineEdit->setText(QApplication::translate("MedicinaActiveSurfaceGUI", "STATUS", 0, QApplication::UnicodeUTF8));
-        Q_UNUSED(MedicinaActiveSurfaceGUI);
     } // retranslateUi
 
 };

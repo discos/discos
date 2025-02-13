@@ -9,4 +9,5 @@
 	<enabled />
 	<pprofile />
 	<tracking />
+	<LUT_filename />
 </SRTActiveSurfaceBoss>
