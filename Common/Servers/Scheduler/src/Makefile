@@ -38,12 +38,15 @@ RESTRICT_PERMS=_tp_agc
 # C programs (public and local)
 # -----------------------------
 EXECUTABLES     = scheduleChecker
-EXECUTABLES_L   = testSched testLSTtoUT
+EXECUTABLES_L   = testSched testSchedules testLSTtoUT
 
 #
 # <brief description of xxxxx program>
 testSched_OBJECTS   = testSchedule Schedule SubScanBinder Schedule_ScanList Configuration
 testSched_LIBS      = IRALibrary ComponentErrors
+
+testSchedules_OBJECTS   = testSchedules Schedule SubScanBinder Schedule_ScanList Configuration
+testSchedules_LIBS      = IRALibrary ComponentErrors boost_system boost_filesystem
 
 testLSTtoUT_OBJECTS = testLST2UT
 testLSTtoUT_LIBS = IRALibrary ComponentErrors

@@ -143,12 +143,12 @@ bool CScanList::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CS
 	IRA::CString ret;
 	Management::TScanTypes type;
 	// get the second item.....
-	if (!IRA::CIRATools::getNextToken(line,start,SEPARATOR,ret)) {
+	if (!IRA::CIRATools::getNextToken(line,start,SEPARATORS,ret,false)) {
 		errMsg="format error";
 		return false;
 	}
 	//...the scan type
-	if (!IRA::CIRATools::getNextToken(line,start,SEPARATOR,ret)) {
+	if (!IRA::CIRATools::getNextToken(line,start,SEPARATORS,ret,false)) {
 		errMsg="could not read scan type";
 		return false;
 	}
@@ -399,7 +399,7 @@ bool CScanList::parseSidereal2(const IRA::CString& val,DWORD& id,IRA::CString& e
 	Antenna::TSystemEquinox scanEquinox;
 
 	// get the second item.....
-	if (!IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {  // id
+	if (!IRA::CIRATools::getNextToken(val,start,SEPARATORS,token,false)) {  // id
 		errMsg="cannot read scan identifier";
 		return false;
 	}
@@ -408,12 +408,12 @@ bool CScanList::parseSidereal2(const IRA::CString& val,DWORD& id,IRA::CString& e
 		errMsg="scan identifier cannot be zero";
 		return false;
 	}
-	if (!IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {  // type
+	if (!IRA::CIRATools::getNextToken(val,start,SEPARATORS,token,false)) {  // type
 		errMsg="cannot read scan type";
 		return false;
 	}
 	//scan->type=Antenna::ANT_SIDEREAL;   //already know it is a sidereal
-	if (!IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {  // name
+	if (!IRA::CIRATools::getNextToken(val,start,SEPARATORS,token,false)) {  // name
 		errMsg="cannot read source name";
 		return false;
 	}
@@ -433,7 +433,7 @@ bool CScanList::parseSidereal2(const IRA::CString& val,DWORD& id,IRA::CString& e
 	//scan->VradDefinition=Antenna::ANT_UNDEF_DEF;
 	//scan->RadialVelocity=0.0;
 	frame=Antenna::ANT_EQUATORIAL;
-	while (IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {  //get the next token...it represents the frame in which the coordinates are expressed
+	while (IRA::CIRATools::getNextToken(val,start,SEPARATORS,token,false)) {  //get the next token...it represents the frame in which the coordinates are expressed
 		bool ok=IRA::CIRATools::strToCoordinateFrame(token,frame);
 		if ((frame==Antenna::ANT_EQUATORIAL) && (ok)) {
 			if (frameOpen || offFrameOpen) {
@@ -706,7 +706,7 @@ bool CScanList::parseSidereal2(const IRA::CString& val,DWORD& id,IRA::CString& e
 	IRA::CString token;
 	Antenna::TCoordinateFrame frame;
 	// get the second item.....
-	if (!IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {  // id
+	if (!IRA::CIRATools::getNextToken(val,start,SEPARATORS,token,false)) {  // id
 		errMsg="cannot read scan identifier";
 		return false;
 	}
@@ -715,12 +715,12 @@ bool CScanList::parseSidereal2(const IRA::CString& val,DWORD& id,IRA::CString& e
 		errMsg="scan identifier cannot be zero";
 		return false;
 	}
-	if (!IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {  // type
+	if (!IRA::CIRATools::getNextToken(val,start,SEPARATORS,token,false)) {  // type
 		errMsg="cannot read scan type";
 		return false;
 	}
 	scan->type=Antenna::ANT_SIDEREAL;   //already know it is a sidereal
-	if (!IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {  // name
+	if (!IRA::CIRATools::getNextToken(val,start,SEPARATORS,token,false)) {  // name
 		errMsg="cannot read source name";
 		return false;
 	}
@@ -739,7 +739,7 @@ bool CScanList::parseSidereal2(const IRA::CString& val,DWORD& id,IRA::CString& e
 	scan->VradDefinition=Antenna::ANT_UNDEF_DEF;
 	scan->RadialVelocity=0.0;
 	frame=Antenna::ANT_EQUATORIAL;
-	while (IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {  //get the next token...it represents the frame in which the coordinates are expressed
+	while (IRA::CIRATools::getNextToken(val,start,SEPARATORS,token,false)) {  //get the next token...it represents the frame in which the coordinates are expressed
 		bool ok=IRA::CIRATools::strToCoordinateFrame(token,frame);
 		if ((frame==Antenna::ANT_EQUATORIAL) && (ok)) {
 			if (frameOpen || offFrameOpen) {
@@ -993,14 +993,14 @@ bool CScanList::parseOffsetSwitch(const IRA::CString& val,int& start,
 	IRA::CString lontoken,lattoken,token;
 	errMsg="";
 	res=false;
-	while (IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {
+	while (IRA::CIRATools::getNextToken(val,start,SEPARATORS,token,false)) {
 		if (strcmp(token,OFFFRAMEEQ)==0) {
 			offsetFrame=Antenna::ANT_EQUATORIAL;
-			if (!IRA::CIRATools::getNextToken(val,start,SEPARATOR,lontoken)) {
+			if (!IRA::CIRATools::getNextToken(val,start,SEPARATORS,lontoken,false)) {
 				errMsg="not enough parameters for equatorial offset switch";
 				return false;
 			}	
-			if (!IRA::CIRATools::getNextToken(val,start,SEPARATOR,lattoken)) {
+			if (!IRA::CIRATools::getNextToken(val,start,SEPARATORS,lattoken,false)) {
 				errMsg="not enough parameters for equatorial offset switch";
 				return false;
 			}
@@ -1017,11 +1017,11 @@ bool CScanList::parseOffsetSwitch(const IRA::CString& val,int& start,
 		}
 		else if (strcmp(token,OFFFRAMEHOR)==0) {
 			offsetFrame=Antenna::ANT_HORIZONTAL;
-			if (!IRA::CIRATools::getNextToken(val,start,SEPARATOR,lontoken)) {
+			if (!IRA::CIRATools::getNextToken(val,start,SEPARATORS,lontoken,false)) {
 				errMsg="not enough parameters for horizontal offset switch";
 				return false;
 			}	
-			if (!IRA::CIRATools::getNextToken(val,start,SEPARATOR,lattoken)) {
+			if (!IRA::CIRATools::getNextToken(val,start,SEPARATORS,lattoken,false)) {
 				errMsg="not enough parameters for horizontal offset switch";
 				return false;
 			}
@@ -1038,11 +1038,11 @@ bool CScanList::parseOffsetSwitch(const IRA::CString& val,int& start,
 		}
 		else if (strcmp(token,OFFFRAMEGAL)==0) {
 			offsetFrame=Antenna::ANT_GALACTIC;
-			if (!IRA::CIRATools::getNextToken(val,start,SEPARATOR,lontoken)) {
+			if (!IRA::CIRATools::getNextToken(val,start,SEPARATORS,lontoken,false)) {
 				errMsg="not enough parameters for galactic offset switch";
 				return false;
 			}	
-			if (!IRA::CIRATools::getNextToken(val,start,SEPARATOR,lattoken)) {
+			if (!IRA::CIRATools::getNextToken(val,start,SEPARATORS,lattoken,false)) {
 				errMsg="not enough parameters for galactic offset switch";
 				return false;
 			}
@@ -1067,7 +1067,7 @@ bool CScanList::parseVRADSwitch(const IRA::CString& val,int& start,double& vrad,
 	IRA::CString token;
 	errMsg="";
 	result=false;
-	while (IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {
+	while (IRA::CIRATools::getNextToken(val,start,SEPARATORS,token,false)) {
 		if (strcmp(token,RVEL)==0) {
 			if (parseVRADSwitch(val,start,vrad,frame,ref,errMsg)) {
 				result=true;
@@ -1084,14 +1084,14 @@ bool CScanList::parseVRADSwitch(const IRA::CString& val,int& start,double& vrad,
 bool CScanList::parseVRADSwitch(const IRA::CString& val,int& start,double& vrad,Antenna::TReferenceFrame& frame,Antenna::TVradDefinition& ref,IRA::CString& errMsg)
 {
 	IRA::CString token;
-	if (IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {
+	if (IRA::CIRATools::getNextToken(val,start,SEPARATORS,token,false)) {
 		vrad=token.ToDouble();
 	}
 	else {
 		errMsg="not enough parameters for the radial velocity switch";
 		return false;
 	}
-	if (IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {
+	if (IRA::CIRATools::getNextToken(val,start,SEPARATORS,token,false)) {
 		if (!Antenna::Definitions::map(token,frame)) {
 			errMsg="the reference frame of the radial velocity is incorrect";
 			return false;
@@ -1101,7 +1101,7 @@ bool CScanList::parseVRADSwitch(const IRA::CString& val,int& start,double& vrad,
 		errMsg="not enough parameters for the radial velocity switch";
 		return false;
 	}
-	if (IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {
+	if (IRA::CIRATools::getNextToken(val,start,SEPARATORS,token,false)) {
 		if (!Antenna::Definitions::map(token,ref)) {
 			errMsg="the radial velocity definition is incorrect";
 			return false;

@@ -354,10 +354,23 @@ public:
 	 * @param start position inside the string from which to start the next token, if a new token has been found
 	 *                it points to the character immediately after the localized token
 	 * @param delimiter this is the character that separates the token
-	 * @param it returns the next token in the string
+	 * @param ret it returns the next token in the string
+	 * @param stopAtFirst immediately returns (true) if the first character found is one of the delimiters, otherwise it goes further inside str
 	 * @return true if a token has been found
 	 */
-	static bool getNextToken(const IRA::CString& str,int &start,char delimiter,IRA::CString &ret);
+	static bool getNextToken(const IRA::CString& str,int &start,const char& delimiter,IRA::CString &ret, const bool& stopAtFirst=true);
+
+	/**
+	 * Use this function to divide a string into  separated tokens. Multiple token delimiters can be specified.
+	 * @param str string to be divided into tokens
+	 * @param start position inside the string from which to start the next token, if a new token has been found
+	 *                it points to the character immediately after the localized token
+	 * @param delimiters vector that contains characters that separate the token
+	 * @param ret it returns the next token in the string
+	 * @param stopAtFirst immediately returns (true) if the first character found is one of the delimiters, otherwise it goes further inside str
+	 * @return true if a token has been found
+	 */
+	static bool getNextToken(const IRA::CString& str,int &start,const std::vector<char>& delimiters,IRA::CString &ret, const bool& stopAtFirst=true);
 	
 	/**
 	 * Computes the normalized (+/-PI) difference between two angles expressed in radians(a-b). For example 359°-1°=-2°,1°-359°=2°, 179°-360°=179° and so on.
