@@ -38,6 +38,9 @@ SRTMinorServoBossCore::SRTMinorServoBossCore(SRTMinorServoBossImpl& component) :
     m_tracking_servos{
         //{ "PFP", m_component.getContainerServices()->getComponent<SRTProgramTrackMinorServo>("MINORSERVO/PFP") },
         { "SRP", m_component.getContainerServices()->getComponent<SRTProgramTrackMinorServo>("MINORSERVO/SRP") }
+    },
+    m_derotators{
+        { "DR_GFR1", m_component.getContainerServices()->getComponent<SRTDerotator>("MINORSERVO/DR_GFR1") }
     }
 {
     AUTO_TRACE("SRTMinorServoBossCore::SRTMinorServoBossCore()");
@@ -153,6 +156,11 @@ bool SRTMinorServoBossCore::status()
     else
     {
         m_tracking.store(Management::MNG_FALSE);
+    }
+
+    for(const auto& [name, derotator] : m_derotators)
+    {
+        derotator->updateStatus();
     }
 
     return true;

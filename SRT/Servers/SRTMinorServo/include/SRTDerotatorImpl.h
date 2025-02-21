@@ -15,12 +15,14 @@
 #include <baciRObooleanSeq.h>
 #include <baciROdoubleSeq.h>
 #include <baciROstring.h>
+#include <baciROdouble.h>
+#include <baciRWdouble.h>
 #include <enumpropROImpl.h>
 #include <SRTMinorServoS.h>
 #include <maciACSComponentDefines.h>
 #include <ManagmentDefinitionsS.h>
 #include "ManagementErrors.h"
-#include "MinorServoErrors.h"
+#include "DerotatorErrors.h"
 #include "SRTMinorServoSocket.h"
 #include "MSDevIOs.h"
 //#include "SRTMinorServoContainers.h"
@@ -85,7 +87,7 @@ public:
     void setPosition(CORBA::Double position);
 
     // TODO easy implementation, return last commanded preset or programTrack position
-    double getCmdPosition() { return 0.0; };
+    double getCmdPosition() { return m_commanded_position.load(); };
 
     // TODO return current position, just read the devio or the AnswerMap
     double getActPosition() { return getPositionFromHistory(0); };
@@ -100,11 +102,11 @@ public:
     double getPositionFromHistory(ACS::Time acs_time);
 
     // TODO: easy implementation, return the min and max values read from the CDB
-    double getMinLimit();
-    double getMaxLimit();
+    double getMinLimit() { return m_min; };
+    double getMaxLimit() { return m_max; };
 
     // TODO: degrees between 2 lateral feeds. How to implement this with new receivers?
-    double getStep() {return 0.0;};
+    double getStep() { return m_step; };
 
     // TODO: easy implementation
     bool isReady();
@@ -117,16 +119,14 @@ public:
     bool isTracking() { return m_tracking.load() == Management::MNG_TRUE; }
 
     /**
-     * Loads a set of tracking coordinates to the minor servo system.
-     * @param trajectory_id the ID of the trajectory. This defaults to UNIX Epoch * 1000 (milliseconds precision) of the starting time of the trajectory.
-     * @param point_id the ID of the point inside the current trajectory.
-     * @param point_time the timestamp associated with the given set of tracking coordinates.
-     * @coordinates the given set of tracking coordinates.
-     * @throw MinorServoErrors::MinorServoErrorsEx if the length of the coordinates sequence doesn't match the number of virtual axes of the servo,
-     *        if the resulting position summing the offsets would go outside the accepted range of the servo,
-     *        if there has been a communication error or if the command was not accepted.
+     * This method loads a position that has to be tracked by the derotator
+     * @param point_time an ACS::Time object indicating the time associated with the coordinates to be tracked.
+     *        Only the start time is sent to the derotator and the points after are always spaced by the same amount of time from one another.
+     *        It is still necessary to fill this field in order to associate a time to the coordinates inside the component.
+     * @param position the position to track at the given time
+     * @param restart flag that restarts the tracking with a new trajectory
      */
-    void programTrack(CORBA::Long trajectory_id, CORBA::Long point_id, ACS::Time point_time, const ACS::doubleSeq& coordinates);
+    void loadTrackingPoint(ACS::Time point_time, CORBA::Double position, CORBA::Boolean restart);
 
     /**
      * Asks the component to calculate the servo system position starting from the given elevation.
@@ -299,6 +299,11 @@ public:
 
 private:
     /**
+     * Updates the status of the component by asking the hardware its status.
+     */
+    bool updateStatus();
+
+    /**
      * Checks if the socket is connected and if the minor servo system is in a good state.
      * @throw MinorServoErrors::MinorServoErrorsEx when the socket is not connected or when the minor servo system is blocked or the drive cabinet is in error state.
      */
@@ -340,27 +345,27 @@ private:
     /**
      * Number of virtual axes of the servo system.
      */
-    /*const*/ size_t m_virtual_axes;
+    const size_t m_virtual_axes;
 
     /**
      * Number of physical axes of the servo system.
      */
-    /*const*/ size_t m_physical_axes;
+    const size_t m_physical_axes;
 
     /**
      * Name of the virtual axes of the servo system.
      */
-    /*const*/ std::vector<std::string> m_virtual_axes_names;
+    const std::vector<std::string> m_virtual_axes_names;
 
     /**
      * Units of the virtual axes of the servo system.
      */
-    /*const*/ std::vector<std::string> m_virtual_axes_units;
+    const std::vector<std::string> m_virtual_axes_units;
 
     /**
      * Dictionary containing the last status retrieved form the servo system.
      */
-    //SRTMinorServoStatus m_status;
+    SRTDerotatorStatus m_status;
 
     /**
      * Commanded user offsets for each axis of the servo system.
@@ -378,14 +383,19 @@ private:
     SRTMinorServoPositionsQueue m_positions_queue;
 
     /**
+     * The offset to apply to bring the derotator to the receiver rest position.
+     */
+    const double m_zero_offset;
+
+    /**
      * Minimum ranges of the axes of the servo system.
      */
-    /*const*/ double m_min;
+    const double m_min;
 
     /**
      * Maximum ranges of the axes of the servo system.
      */
-    /*const*/ double m_max;
+    const double m_max;
 
     /**
      * Queue of positions to be assumed by the servo system when tracking a trajectory.
@@ -393,9 +403,14 @@ private:
     SRTMinorServoPositionsQueue m_tracking_queue;
 
     /**
+     * Degrees between 2 adjacent lateral feeds.
+     */
+    const double m_step;
+
+    /**
      * Tracking delta values for all minor servo system virtual axes.
      */
-    /*const*/ std::vector<double> m_tracking_delta;
+    const double m_tracking_delta;
 
     /**
      * Tracking error values for all minor servo system virtual axes.
@@ -421,6 +436,17 @@ private:
      * Remaining trajectory points of the current trajectory.
      */
     std::atomic<unsigned int> m_remaining_trajectory_points;
+
+    std::atomic<double> m_commanded_position;
+
+    std::atomic<double> m_position_difference;
+
+    std::atomic<long> m_status_pattern;
+
+    /**
+     * Current speed of rotation
+     */
+    double m_c_s;
 
     /**
      * Pointer to the enabled property.
@@ -493,19 +519,19 @@ private:
     baci::SmartPropertyPointer<baci::ROlong> m_remaining_trajectory_points_ptr;
 
     baci::SmartPropertyPointer<baci::ROdouble> m_actual_position_ptr;
-    baci::SmartPropertyPointer<baci::ROdouble> m_commanded_position_ptr;
+    baci::SmartPropertyPointer<baci::RWdouble> m_commanded_position_ptr;
     baci::SmartPropertyPointer<baci::ROdouble> m_position_difference_ptr;
     baci::SmartPropertyPointer<baci::ROpattern> m_status_ptr;
 
     /**
      * Configuration of the socket object.
      */
-    //const SRTMinorServoSocketConfiguration& m_socket_configuration;
+    const SRTMinorServoSocketConfiguration& m_socket_configuration;
 
     /**
      * Socket object.
      */
-    //SRTMinorServoSocket& m_socket;
+    SRTMinorServoSocket& m_socket;
 };
 
 #endif

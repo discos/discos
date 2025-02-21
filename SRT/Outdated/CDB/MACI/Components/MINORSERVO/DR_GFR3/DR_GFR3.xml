@@ -5,10 +5,10 @@
     xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               
-    Name="GFR"
-    Code="SRTGenericMinorServoImpl"
+    Name="DR_GFR3"
+    Code="SRTDerotatorImpl"
     ImplLang="cpp"
-    Type="IDL:alma/MinorServo/SRTGenericMinorServo:1.0"
+    Type="IDL:alma/MinorServo/SRTDerotator:1.0"
     Container="MinorServoContainer"
     Default="false"
 />

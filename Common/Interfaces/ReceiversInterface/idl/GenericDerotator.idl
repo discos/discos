@@ -138,6 +138,17 @@ module Receivers {
 
 
         /**
+         * This method loads a position that has to be tracked by the derotator
+         * @param point_time an ACS::Time object indicating the time associated with the coordinates to be tracked.
+         *        Only the start time is sent to the derotator and the points after are always spaced by the same amount of time from one another.
+         *        It is still necessary to fill this field in order to associate a time to the coordinates inside the component.
+         * @param position the position to track at the given time
+         * @param restart flag that says the given point is the first of a new trajectory
+         */
+        void loadTrackingPoint(in ACS::Time point_time, in double position, in boolean restart) raises (DerotatorErrors::DerotatorErrorsEx);
+
+
+        /**
          * @return the cmdPosition property value
          *
          * @throw CORBA::SystemException

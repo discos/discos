@@ -11,8 +11,8 @@
     virtual_axes="1"
     max_speed="3.276"
     acceleration="2.67"
-    min_range="-130"
-    max_range="130"
+    min_range="-127"
+    max_range="127"
     step="60"
     tracking_delta="0.1"
     zero_offset="12.5">
