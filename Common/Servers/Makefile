@@ -42,7 +42,8 @@ MODULES =	AntennaBoss \
 			Scheduler \
 			CalibrationTool \
 			NoiseGenerator \
-			TotalPower
+			TotalPower \
+			PySupervisor \
 
 
 MAKE_FLAGS = "-k"
