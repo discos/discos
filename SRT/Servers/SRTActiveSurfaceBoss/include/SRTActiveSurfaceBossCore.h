@@ -46,6 +46,7 @@
 #define DELTAEL 15.0
 
 // mask pattern for status
+#define UNAV    0xFF000000
 #define MRUN    0x000080
 #define CAMM    0x000100
 #define ENBL    0x002000
@@ -80,6 +81,7 @@ class CSRTActiveSurfaceBossCore {
     //friend class CSRTActiveSurfaceBossWatchingThread;
     friend class CSRTActiveSurfaceBossWorkingThread;
     friend class CSRTActiveSurfaceBossSectorThread;
+    friend class CSRTActiveSurfaceBossInitializationThread;
 public:
     /**
      * Constructor. Default Constructor.
@@ -145,6 +147,8 @@ public:
 
     inline bool getTracking() const { return m_tracking; }
 
+    inline std::string getLUTfilename() const { return m_lut.substr(m_lut.find_last_of('/') + 1); }
+
     /**
      * Sets the <i>AutoUpdate</i> flag to false, i.e. the component will not update automatically the surface.
     */
@@ -188,9 +192,6 @@ private:
     int actuatorcounter, circlecounter, totacts;
     ACS::doubleSeq actuatorsCorrections;
 
-    /** pointer to the component itself */
-    acscomponent::ACSComponentImpl *m_thisIsMe;
-
     /**
      * This represents the status of the whole Active Surface subsystem, it also includes and sammerizes the status of the boss component
      */
@@ -220,15 +221,17 @@ private:
 
     char *s_usdCorrections;
 
-    std::vector<bool> m_sector;
-
     bool m_profileSetted;
 
     bool m_ASup;
     
     bool m_newlut;
 
+    bool m_initialized;
+
     std::string m_lut;
+
+    std::vector<int> actuatorsInCircle;
 };
 
 #endif /*SRTACTIVESURFACEBOSSCORE_H_*/

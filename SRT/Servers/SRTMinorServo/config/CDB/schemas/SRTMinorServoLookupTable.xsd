@@ -32,6 +32,7 @@
       <xs:element name="CCG_ASACTIVE"       type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
       <xs:element name="KKG"                type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
       <xs:element name="KKG_ASACTIVE"       type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="KBAND_TEST"         type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
       <xs:element name="WWG"                type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
       <xs:element name="WWG_ASACTIVE"       type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
       <xs:element name="QQG"                type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
@@ -40,6 +41,8 @@
       <xs:element name="TRI_ASACTIVE"       type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
       <xs:element name="MISTRAL"            type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
       <xs:element name="MISTRAL_ASACTIVE"   type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="MISTRAL_OLD"        type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="MISTRAL_OLD_ASACTIVE"   type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
       <xs:element name="CCB"                type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
       <xs:element name="CCB_ASACTIVE"       type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
       <xs:element name="XB"                 type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />

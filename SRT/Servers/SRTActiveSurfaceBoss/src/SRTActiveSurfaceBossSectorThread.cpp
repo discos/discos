@@ -83,7 +83,6 @@ void CSRTActiveSurfaceBossSectorThread::runLoop()
     }
     else
     {
-        m_boss->m_sector[m_sector] = true;
         this->setStopped();
     }
 }
