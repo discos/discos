@@ -104,6 +104,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/
     issue #619 - Active surface components are now capable of changing look-up tables on the fly via the `asSetLUT` command
     issue #806   Added support for the C-band receiver at the SRT
     project #2 - Completed integration of new SRT Minor Servos
+    issue #2   - Completed integration of solar system planets, sun and moon tracking. Other bodies will be added in the future.
 
 ## Fixed
 ## Changed
