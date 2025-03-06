@@ -36,4 +36,6 @@
 
 <AvailableReceiver Code="PLP" Derotator="false" Component="RECEIVERS/SRTLPBandReceiver"/>
 
+<AvailableReceiver Code="KQW" Derotator="false" Component="RECEIVERS/KQWBandReceiver"/>
+
 </ReceiversBoss>
