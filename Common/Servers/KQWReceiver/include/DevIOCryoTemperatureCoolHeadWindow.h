@@ -55,7 +55,7 @@ public:
 	*/
 	CORBA::Double read(ACS::Time& timestamp)
 	{
-        CConfiguration::BoardValue result = m_pCore->getCryoCoolHeadWin();
+        CConfiguration<maci::ContainerServices>::BoardValue result = m_pCore->getCryoCoolHeadWin();
         m_val = result.temperature;
         timestamp = result.timestamp;
 		return m_val;

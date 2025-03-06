@@ -17,38 +17,38 @@
 #include "utils.h"
 
 #define _GET_DOUBLE_ATTRIBUTE(SERV,ATTRIB,DESCR,FIELD,NAME) { \
-    double tmpd; \
-    if (!CIRATools::getDBValue(SERV,ATTRIB,tmpd,"alma/",NAME)) { \
-        _EXCPT(ComponentErrors::CDBAccessExImpl,dummy,"CConfiguration::Init()"); \
-        dummy.setFieldName(ATTRIB); \
-        throw dummy; \
-    } \
-    else { \
-        FIELD=tmpd; \
-        ACS_DEBUG_PARAM("CConfiguration::Init()",DESCR" %lf",tmpd); \
-    } \
+	double tmpd; \
+	if (!CIRATools::getDBValue(SERV,ATTRIB,tmpd,"alma/",NAME)) { \
+		_EXCPT(ComponentErrors::CDBAccessExImpl,dummy,"CConfiguration::Init()"); \
+		dummy.setFieldName(ATTRIB); \
+		throw dummy; \
+	} \
+	else { \
+		FIELD=tmpd; \
+		ACS_DEBUG_PARAM("CConfiguration::Init()",DESCR" %lf",tmpd); \
+	} \
 }
 
 #define _GET_DWORD_ATTRIBUTE(SERV,ATTRIB,DESCR,FIELD,NAME) { \
-    if (!CIRATools::getDBValue(SERV,ATTRIB,FIELD,"alma/",NAME)) { \
-        _EXCPT(ComponentErrors::CDBAccessExImpl,dummy,"CConfiguration::Init()"); \
-        dummy.setFieldName(ATTRIB); \
-        throw dummy; \
-    } \
-    else { \
-        ACS_DEBUG_PARAM("CConfiguration::Init()",DESCR" %u",FIELD); \
-    } \
+	if (!CIRATools::getDBValue(SERV,ATTRIB,FIELD,"alma/",NAME)) { \
+		_EXCPT(ComponentErrors::CDBAccessExImpl,dummy,"CConfiguration::Init()"); \
+		dummy.setFieldName(ATTRIB); \
+		throw dummy; \
+	} \
+	else { \
+		ACS_DEBUG_PARAM("CConfiguration::Init()",DESCR" %u",FIELD); \
+	} \
 }
 
 #define _GET_STRING_ATTRIBUTE(SERV,ATTRIB,DESCR,FIELD,NAME) { \
-    if (!CIRATools::getDBValue(SERV,ATTRIB,FIELD,"alma/",NAME)) { \
-        _EXCPT(ComponentErrors::CDBAccessExImpl,dummy,"::CConfiguration::Init()"); \
-        dummy.setFieldName(ATTRIB); \
-        throw dummy; \
-    } \
-    else { \
-        ACS_DEBUG_PARAM("CConfiguration::Init()",DESCR" %s",(const char*)FIELD); \
-    } \
+	if (!CIRATools::getDBValue(SERV,ATTRIB,FIELD,"alma/",NAME)) { \
+		_EXCPT(ComponentErrors::CDBAccessExImpl,dummy,"::CConfiguration::Init()"); \
+		dummy.setFieldName(ATTRIB); \
+		throw dummy; \
+	} \
+	else { \
+		ACS_DEBUG_PARAM("CConfiguration::Init()",DESCR" %s",(const char*)FIELD); \
+	} \
 }
 
 #define CONFIG_PATH "DataBlock/KQWReceiver"
@@ -67,7 +67,8 @@ using namespace IRA;
  * configuration database and then are used (read) inside the component.
  * @author <a href=mailto:andrea.orlati@inaf.it>Andrea Orlati</a>, Istituto di Radioastronomia, Italia
  * <br> 
-  */
+ */
+template <class T>
 class CConfiguration {
 public:
 
@@ -98,7 +99,7 @@ public:
 
 	typedef struct {
 		double temperature;
-      ACS::Time timestamp;
+		ACS::Time timestamp;
 	} BoardValue;
 
 
@@ -134,7 +135,7 @@ public:
 
 	/**
 	 * @return the time allowed to the watch dog thread to complete an iteration and 
-     * respond to the thread manager (microseconds)
+	 * respond to the thread manager (microseconds)
 	 */
 	inline const DWORD& getWarchDogResponseTime() const { return m_watchDogResponseTime; }
 
@@ -150,7 +151,7 @@ public:
 
 	/**
 	 * @return the time the repetition log guard will cache new log messages before sending 
-     * to the central logger (microseconds)
+	 * to the central logger (microseconds)
 	 */
 	inline const DWORD& getRepetitionCacheTime() const { return m_repetitionCacheTime; }
 
@@ -197,15 +198,15 @@ public:
 	DWORD getTaperTable(double * &freq,double *&taper,short feed) const;
 
 	/**
-	* @param code feed identification codes. It must be freed by caller.
-	* @param xOffset displacement of the feed with respect to the central one along x axis. 
-	* It must be freed by caller.
-	* @param yOffset displacement of the feed with respect to the central one along y axis. 
-	* It must be freed by caller.
-	* @param relativePower expected percentage of variation of gain with respect to the central one. 
-	* It must be freed by caller.
-	* @return the size of the output vectors
-	*/
+	 * @param code feed identification codes. It must be freed by caller.
+	 * @param xOffset displacement of the feed with respect to the central one along x axis. 
+	 * It must be freed by caller.
+	 * @param yOffset displacement of the feed with respect to the central one along y axis. 
+	 * It must be freed by caller.
+	 * @param relativePower expected percentage of variation of gain with respect to the central one. 
+	 * It must be freed by caller.
+	 * @return the size of the output vectors
+	 */
 	DWORD getFeedInfo(WORD *& code,double *& xOffset,double *& yOffset,double *& relativePower) const;
 
 	 /**
@@ -218,28 +219,28 @@ public:
 	 */
 	 inline const IRA::CString& getDefaultMode() const { return m_defaultMode; }
 
-    /**
-     * @return the markVector
-     */
-    inline const TMarkValue * getMarkVector() const { return m_markVector; }
+	/**
+	 * @return the markVector
+	 */
+	inline const TMarkValue * getMarkVector() const { return m_markVector; }
 
-    inline const DWORD getMarkVectorLen() const { return m_markVectorLen; }
+	inline const DWORD getMarkVectorLen() const { return m_markVectorLen; }
 
 	 /*
 	 * @throw (ComponentErrors::CDBAccessExImpl, ReceiversErrors::ModeErrorExImpl)
 	 */
-    void setMode(const char * mode); 
-    
-    /** 
-     * @return the index of the dedicated arrays where the relative information are located 
-    */ 
-    inline const DWORD getArrayIndex(const long& feed, const long& ifs) const { return feed*2+ifs; }
+	void setMode(const char * mode); 
 
-    /** 
-     * @return the length of the dedicated arrays where the relative information are located 
-    */ 
-    inline const DWORD getArrayLen() const { return m_feeds*m_IFs; }
-    
+	/** 
+	 * @return the index of the dedicated arrays where the relative information are located 
+	 */ 
+	inline const DWORD getArrayIndex(const long& feed, const long& ifs) const { return feed*2+ifs; }
+
+	/** 
+	 * @return the length of the dedicated arrays where the relative information are located 
+	 */ 
+	inline const DWORD getArrayLen() const { return m_feeds*m_IFs; }
+
 
 	/**
 	 * @return the lower limit of the RF coming from the K,Q,W1 and W2 band feed (MHz)
@@ -314,15 +315,15 @@ public:
 	inline bool getLNABypass() const { return m_lnaBypass; }
 
 	/**
-    * This member function is used to configure component by reading the configuration parameter from the CDB.
+	 * This member function is used to configure component by reading the configuration parameter from the CDB.
 	 * This must be the first call before using any other function of this class.
 	 * @throw ComponentErrors::CDBAccessExImpl,
-    * @throw ComponentErrors::MemoryAllocationExImpl,
-    * @thorw ReceiversErrors::ModeErrorExImpl
+	 * @throw ComponentErrors::MemoryAllocationExImpl,
+	 * @thorw ReceiversErrors::ModeErrorExImpl
 	 * @param Services pointer to the container services object or to simpleClient
 	 * @param comp_name name of the component 
 	*/
-	void init(maci::ContainerServices* Services,IRA::CString comp_name="");
+	void init(T* Services,IRA::CString comp_name="");
 
 private:
 	IRA::CString m_dewarIPAddress;
@@ -338,19 +339,19 @@ private:
 	IRA::CString m_localOscillator_Q_Instance;
 	IRA::CString m_localOscillator_W1_Instance;
 	IRA::CString m_localOscillator_W2_Instance;
-	
-    maci::ContainerServices* m_services;
+
+	T* m_services;
 	IRA::CString m_mode;
 	IRA::CString m_defaultMode;
 	double *m_BandRFMin;
 	double *m_BandRFMax;
 	double *m_BandIFMin;
 	double *m_BandIFBandwidth;
-   double *m_DefaultLO;
-   double *m_FixedLO2;
-   double *m_currentLOValue;
-   double *m_LOMin;
-   double *m_LOMax;
+	double *m_DefaultLO;
+	double *m_FixedLO2;
+	double *m_currentLOValue;
+	double *m_LOMin;
+	double *m_LOMax;
 	DWORD m_IFs;
 	bool m_lnaBypass;
 	Receivers::TPolarization *m_BandPolarizations;
@@ -369,8 +370,11 @@ private:
 	TTaperValue * m_taperVector;
 	DWORD m_taperVectorLen;
 	TFeedValue * m_feedVector; // length given by m_feeds
-	
+
 	void updateBandWith(const long& pos);
 };
+
+
+#include "Configuration.tpp"
 
 #endif

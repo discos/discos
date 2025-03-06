@@ -43,7 +43,7 @@ void CComponentCore::initialize(maci::ContainerServices* services)
         ReceiversErrors::ModeErrorExImpl
         )
 */
-CConfiguration const * const  CComponentCore::execute()
+CConfiguration<maci::ContainerServices> const * const  CComponentCore::execute()
 {
     m_configuration.init(m_services);  // Throw (ComponentErrors::CDBAccessExImpl);
     try {

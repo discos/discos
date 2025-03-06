@@ -96,7 +96,7 @@ void KQWBandReceiverImpl::execute()
 {
     AUTO_TRACE("KQWBandReceiverImpl::execute()");
     ACS::Time timestamp;
-    const CConfiguration *config = m_core.execute();
+    const CConfiguration<maci::ContainerServices> *config = m_core.execute();
 
     ACS_LOG(LM_FULL_INFO, "KQWBandReceiverImpl::execute()",(LM_INFO, "ACTIVATING_LOG_REPETITION_FILTER"));
     _IRA_LOGFILTER_ACTIVATE(config->getRepetitionCacheTime(), config->getRepetitionExpireTime());
