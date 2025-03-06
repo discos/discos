@@ -73,7 +73,7 @@ public:
      * @throw (ComponentErrors::CDBAccessExImpl, ComponentErrors::MemoryAllocationExImpl, ComponentErrors::SocketErrorExImpl,
      *       ReceiversErrors::ModeErrorExImpl)
      */
-    virtual CConfiguration<maci::ContainerServices> const * const execute();
+    virtual CConfiguration const * const execute();
     
 
     /**
@@ -345,35 +345,35 @@ public:
      * This is getter method. No need to make it thread safe......
      * @return the current value of the cryogenic temperature at cool head in °K
      */
-    CConfiguration<maci::ContainerServices>::BoardValue getCryoCoolHead() const { return m_cryoCoolHead; }
+    CConfiguration::BoardValue getCryoCoolHead() const { return m_cryoCoolHead; }
 
 
     /**
      * This is getter method. No need to make it thread safe......
      * @return the current value of the cryogenic temperature at cool head window in °K
      */
-    CConfiguration<maci::ContainerServices>::BoardValue getCryoCoolHeadWin() const { return m_cryoCoolHeadWin; }
+    CConfiguration::BoardValue getCryoCoolHeadWin() const { return m_cryoCoolHeadWin; }
 
 
     /**
      * This is getter method. No need to make it thread safe......
       * @return the current value of the cryogenic temperature at LNA in °K
      */
-    CConfiguration<maci::ContainerServices>::BoardValue getCryoLNA() const { return m_cryoLNA; }
+    CConfiguration::BoardValue getCryoLNA() const { return m_cryoLNA; }
 
 
     /**
      * This is getter method. No need to make it thread safe......
      * @return the current value of the cryogenic temperature at LNA  window in °K
      */
-    CConfiguration<maci::ContainerServices>::BoardValue getCryoLNAWin() const { return m_cryoLNAWin; }
+    CConfiguration::BoardValue getCryoLNAWin() const { return m_cryoLNAWin; }
 
 
     /**
      * This is getter method. No need to make it thread safe......
      * @return the current vertex temperature in °K
      */
-    CConfiguration<maci::ContainerServices>::BoardValue getVertexTemperature() const { return m_envTemperature; }
+    CConfiguration::BoardValue getVertexTemperature() const { return m_envTemperature; }
 
 
     /**
@@ -534,7 +534,7 @@ protected:
     inline bool checkStatusBit(TStatusBit bit) { return m_statusWord & (1 << bit); }
 
 
-    CConfiguration<maci::ContainerServices> m_configuration;
+    CConfiguration m_configuration;
     CKQWReceiverControl *m_control; // This object is thread safe
     BACIMutex m_mutex;
     //IRA::CString m_actualMode;
@@ -548,11 +548,11 @@ private:
     bool m_localOscillatorFault;
     //double m_localOscillatorValue;
     double m_vacuum;
-    CConfiguration<maci::ContainerServices>::BoardValue m_cryoCoolHead;
-    CConfiguration<maci::ContainerServices>::BoardValue m_cryoCoolHeadWin;
-    CConfiguration<maci::ContainerServices>::BoardValue m_cryoLNA;
-    CConfiguration<maci::ContainerServices>::BoardValue m_cryoLNAWin;
-    CConfiguration<maci::ContainerServices>::BoardValue m_envTemperature;
+    CConfiguration::BoardValue m_cryoCoolHead;
+    CConfiguration::BoardValue m_cryoCoolHeadWin;
+    CConfiguration::BoardValue m_cryoLNA;
+    CConfiguration::BoardValue m_cryoLNAWin;
+    CConfiguration::BoardValue m_envTemperature;
     std::vector<IRA::ReceiverControl::StageValues> m_vdStageValues;
     std::vector<IRA::ReceiverControl::StageValues> m_idStageValues;
     std::vector<IRA::ReceiverControl::StageValues> m_vgStageValues;

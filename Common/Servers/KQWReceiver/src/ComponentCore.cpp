@@ -43,7 +43,7 @@ void CComponentCore::initialize(maci::ContainerServices* services)
         ReceiversErrors::ModeErrorExImpl
         )
 */
-CConfiguration<maci::ContainerServices> const * const  CComponentCore::execute() 
+CConfiguration const * const  CComponentCore::execute()
 {
     m_configuration.init(m_services);  // Throw (ComponentErrors::CDBAccessExImpl);
     try {
@@ -1221,7 +1221,7 @@ void CComponentCore::getBandwidth(ACS::doubleSeq& bw)
 	p=m_configuration.getBandIFBandwidth();
 	bw.length(m_configuration.getArrayLen());
 	for (long i=0;i<m_configuration.getFeeds();i++) {
-		for (long j=0;i<m_configuration.getIFs();j++) {
+		for (long j=0;j<m_configuration.getIFs();j++) {
 			bw[i]=p[m_configuration.getArrayIndex(i,j)];
 		}
 	}
@@ -1234,7 +1234,7 @@ void CComponentCore::getInitialFreq(ACS::doubleSeq& f)
 	p=m_configuration.getBandIFMin();
 	f.length(m_configuration.getArrayLen());
 	for (long i=0;i<m_configuration.getFeeds();i++) {
-		for (long j=0;i<m_configuration.getIFs();j++) {
+		for (long j=0;j<m_configuration.getIFs();j++) {
 			f[i]=p[m_configuration.getArrayIndex(i,j)];
 		}
 	}
@@ -1247,7 +1247,7 @@ void CComponentCore::getLocalOscillator(ACS::doubleSeq& lo)
 	p=m_configuration.getCurrentLOValue();
 	lo.length(m_configuration.getArrayLen());
 	for (long i=0;i<m_configuration.getFeeds();i++) {
-		for (long j=0;i<m_configuration.getIFs();j++) {
+		for (long j=0;j<m_configuration.getIFs();j++) {
 			lo[i]=p[m_configuration.getArrayIndex(i,j)];
 		}
 	}	
@@ -1260,7 +1260,7 @@ void CComponentCore::getPolarizations(ACS::longSeq& pol)
 	p=m_configuration.getBandPolarizations();
 	pol.length(m_configuration.getArrayLen());
 	for (long i=0;i<m_configuration.getFeeds();i++) {
-		for (long j=0;i<m_configuration.getIFs();j++) {
+		for (long j=0;j<m_configuration.getIFs();j++) {
 			pol[i]=(long)p[m_configuration.getArrayIndex(i,j)];
 		}
 	}	

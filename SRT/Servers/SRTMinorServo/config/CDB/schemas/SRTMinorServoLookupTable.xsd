@@ -37,8 +37,8 @@
       <xs:element name="WWG_ASACTIVE"       type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
       <xs:element name="QQG"                type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
       <xs:element name="QQG_ASACTIVE"       type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
-      <xs:element name="TRI"                type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
-      <xs:element name="TRI_ASACTIVE"       type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="KQW"                type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="KQW_ASACTIVE"       type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
       <xs:element name="MISTRAL"            type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
       <xs:element name="MISTRAL_ASACTIVE"   type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />
       <xs:element name="MISTRAL_OLD"        type="SRTMinorServoCoefficientsType" minOccurs="0" maxOccurs="unbounded" />

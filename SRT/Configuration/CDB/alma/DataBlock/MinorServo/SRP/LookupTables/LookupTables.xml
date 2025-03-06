@@ -73,19 +73,19 @@
     <QQG_ASACTIVE>      <axis>RY</axis><coefficients>0                                                                                                                  </coefficients></QQG_ASACTIVE>
     <QQG_ASACTIVE>      <axis>RZ</axis><coefficients>0                                                                                                                  </coefficients></QQG_ASACTIVE>
 
-    <TRI>               <axis>TX</axis><coefficients>0                                                                                                                  </coefficients></TRI>
-    <TRI>               <axis>TY</axis><coefficients>0                                                                                                                  </coefficients></TRI>
-    <TRI>               <axis>TZ</axis><coefficients>0                                                                                                                  </coefficients></TRI>
-    <TRI>               <axis>RX</axis><coefficients>0                                                                                                                  </coefficients></TRI>
-    <TRI>               <axis>RY</axis><coefficients>0                                                                                                                  </coefficients></TRI>
-    <TRI>               <axis>RZ</axis><coefficients>0                                                                                                                  </coefficients></TRI>
+    <KQW>               <axis>TX</axis><coefficients>-1.5                                                                                                               </coefficients></KQW>
+    <KQW>               <axis>TY</axis><coefficients>28.256852219272844,-0.002707044952,-0.009870218853,0.000031617958                                                  </coefficients></KQW>
+    <KQW>               <axis>TZ</axis><coefficients>9.530113849340003,-0.169826241752,0.000419997047,0.000003985237                                                    </coefficients></KQW>
+    <KQW>               <axis>RX</axis><coefficients>-0.011392527142374848,-0.0001426193499425,0.000039508844799,-0.000000131010010                                     </coefficients></KQW>
+    <KQW>               <axis>RY</axis><coefficients>-0.03611111111111111                                                                                               </coefficients></KQW>
+    <KQW>               <axis>RZ</axis><coefficients>0                                                                                                                  </coefficients></KQW>
 
-    <TRI_ASACTIVE>      <axis>TX</axis><coefficients>0                                                                                                                  </coefficients></TRI_ASACTIVE>
-    <TRI_ASACTIVE>      <axis>TY</axis><coefficients>0                                                                                                                  </coefficients></TRI_ASACTIVE>
-    <TRI_ASACTIVE>      <axis>TZ</axis><coefficients>0                                                                                                                  </coefficients></TRI_ASACTIVE>
-    <TRI_ASACTIVE>      <axis>RX</axis><coefficients>0                                                                                                                  </coefficients></TRI_ASACTIVE>
-    <TRI_ASACTIVE>      <axis>RY</axis><coefficients>0                                                                                                                  </coefficients></TRI_ASACTIVE>
-    <TRI_ASACTIVE>      <axis>RZ</axis><coefficients>0                                                                                                                  </coefficients></TRI_ASACTIVE>
+    <KQW_ASACTIVE>      <axis>TX</axis><coefficients>-1.5                                                                                                               </coefficients></KQW_ASACTIVE>
+    <KQW_ASACTIVE>      <axis>TY</axis><coefficients>-90.4571677,2.06486636,-0.066594993,0.00679193157,-0.000204050966,0.00000233354544,-0.00000000926776063            </coefficients></KQW_ASACTIVE>
+    <KQW_ASACTIVE>      <axis>TZ</axis><coefficients>185.005164,-11.1663042,0.212522011,-0.00131754377                                                                  </coefficients></KQW_ASACTIVE>
+    <KQW_ASACTIVE>      <axis>RX</axis><coefficients>-0.0055555555555569409,0.00014822163433269445,0.000027586713698,-0.000000077732053                                 </coefficients></KQW_ASACTIVE>
+    <KQW_ASACTIVE>      <axis>RY</axis><coefficients>-0.036111111111111108                                                                                              </coefficients></KQW_ASACTIVE>
+    <KQW_ASACTIVE>      <axis>RZ</axis><coefficients>0                                                                                                                  </coefficients></KQW_ASACTIVE>
 
     <MISTRAL>           <axis>TX</axis><coefficients>-1.5                                                                                                               </coefficients></MISTRAL>
     <MISTRAL>           <axis>TY</axis><coefficients>28.256852219272844,-0.002707044952,-0.009870218853,0.000031617958                                                  </coefficients></MISTRAL>

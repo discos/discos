@@ -89,7 +89,7 @@ namespace MinorServo
         {"KBAND_TEST",   std::make_pair(CONFIGURATION_GREGORIAN2, false)},
         {"WWG",     std::make_pair(CONFIGURATION_GREGORIAN3, true )},
         {"QQG",     std::make_pair(CONFIGURATION_GREGORIAN4, true )},
-        {"TRI",     std::make_pair(CONFIGURATION_GREGORIAN5, true )},
+        {"KQW",     std::make_pair(CONFIGURATION_GREGORIAN5, true )},
         {"MISTRAL", std::make_pair(CONFIGURATION_GREGORIAN6, true )},
         {"MISTRAL_OLD", std::make_pair(CONFIGURATION_GREGORIAN6, true )},
         {"CCB",     std::make_pair(CONFIGURATION_BWG1,       true )},

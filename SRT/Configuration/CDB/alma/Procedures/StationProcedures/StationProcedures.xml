@@ -65,6 +65,22 @@
 </body>
 </Procedure>
 
+<Procedure name="setupKQW" args="0">
+<body>
+	antennaSetup=KQW
+	servoSetup=KQW
+	receiversSetup=KQW
+	receiversMode=Normal
+	chooseBackend=TotalPower
+	initialize=KKG
+	device=0
+	calOff
+	restFrequency=0
+	azelOffsets=0d,0d
+	asSetLUT=LT_lut_20240917_2.txt
+</body>
+</Procedure>
+
 <Procedure name="setupLLP" args="0">
 <body>
 	antennaSetup=LP
