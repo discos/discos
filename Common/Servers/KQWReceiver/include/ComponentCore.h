@@ -467,11 +467,11 @@ protected:
     /** Obtain a valid reference to the local oscillator device
 	  * @throw ComponentErrors::CouldntGetComponentExImpl   
      */
-    void loadLocalOscillator();
+    void loadLocalOscillator(Receivers::LocalOscillator_ptr device,bool &fault,const IRA::CString& name);
 
 
     /** Used to free the reference to the local oscillator device */
-    void unloadLocalOscillator();
+    void unloadLocalOscillator(Receivers::LocalOscillator_ptr device,const IRA::CString& name);
 
 
     /************************ CONVERSION FUNCTIONS **************************/
@@ -544,8 +544,15 @@ protected:
 private:
 
     maci::ContainerServices* m_services;
-    Receivers::LocalOscillator_var m_localOscillatorDevice;
-    bool m_localOscillatorFault;
+    Receivers::LocalOscillator_var m_localOscillatorDevice_K;
+    bool m_localOscillatorFault_K;
+    Receivers::LocalOscillator_var m_localOscillatorDevice_Q;
+    bool m_localOscillatorFault_Q;
+    Receivers::LocalOscillator_var m_localOscillatorDevice_WL;
+    bool m_localOscillatorFault_WL;
+    Receivers::LocalOscillator_var m_localOscillatorDevice_WH;
+    bool m_localOscillatorFault_WH;    
+    
     //double m_localOscillatorValue;
     double m_vacuum;
     CConfiguration<maci::ContainerServices>::BoardValue m_cryoCoolHead;

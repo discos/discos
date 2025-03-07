@@ -7,9 +7,9 @@ CConfiguration<T>::CConfiguration()
     m_markVectorLen = 0;
     m_markTable=NULL;
     m_mode="";
-    m_loTable=NULL;
-    m_loVector=NULL;
-    m_loVectorLen=0;
+    m_loTable_K=m_loTable_Q=m_loTable_WL=m_loTable_WH=NULL;
+    m_loVector_K=m_loVector_Q=m_loVector_WL=m_loVector_WH=NULL;
+    m_loVectorLen_K=m_loVectorLen_Q=m_loVectorLen_WL=m_loVectorLen_WH=0;
     m_BandPolarizations = NULL;
     m_feedsTable = NULL;
     m_feedVector = NULL;
@@ -20,7 +20,7 @@ CConfiguration<T>::CConfiguration()
     m_BandRFMax = NULL;
     m_BandIFMin = NULL;
     m_BandIFBandwidth = NULL;
-    m_DefaultLO = m_FixedLO2= m_currentLOValue= m_LOMin = m_LOMax = NULL;
+    m_DefaultLO = m_FixedLO2= m_currentLOValue= m_LOMin = m_LOMax = NULL; 
 }
 
 template <class T>
@@ -29,9 +29,18 @@ CConfiguration<T>::~CConfiguration()
     if (m_markTable) {
         delete m_markTable;
     }
-    if (m_loTable) {
-        delete m_loTable;
+    if (m_loTable_K) {
+    	delete m_loTable_K;
     }
+    if (m_loTable_Q) {
+    	delete m_loTable_Q;
+    }
+    if (m_loTable_WL) {
+        delete m_loTable_WL;
+    }
+    if (m_loTable_WH) {
+        delete m_loTable_WH;
+    } 
     if (m_feedsTable) {
         delete m_feedsTable;
     }
@@ -41,8 +50,17 @@ CConfiguration<T>::~CConfiguration()
     if (m_markVector) {
         delete [] m_markVector;
     }
-    if (m_loVector) {
-        delete [] m_loVector;
+    if (m_loVector_K) {
+        delete [] m_loVector_K;
+    }
+    if (m_loVector_Q) {
+        delete [] m_loVector_Q;
+    }
+    if (m_loVector_WL) {
+        delete [] m_loVector_WL;
+    }
+    if (m_loVector_WH) {
+        delete [] m_loVector_WH;
     }
     if (m_taperVector) {
         delete [] m_taperVector;
@@ -84,6 +102,67 @@ CConfiguration<T>::~CConfiguration()
 
 
 /*
+   @throw (
+   ComponentErrors::CDBAccessExImpl
+   ComponentErrors::MemoryAllocationExImpl
+   ComponentErrors::CDBAccessExImpl)
+*/
+template <class T>
+WORD CConfiguration<T>::openSynthTable(IRA::CDBTable * &table, const IRA::CString &path, TLOValue * &loV)
+{
+	IRA::CError ErrEvent;
+	IRA::CString field;
+	WORD len;
+	try {
+		table=new IRA::CDBTable(m_services,"SynthesizerEntry",path); 
+	}
+    catch (std::bad_alloc& ex) {
+        _EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CConfiguration::openSynthTable()");
+        throw dummy;
+    }
+
+    ErrEvent.Reset();
+    if (!table->addField(ErrEvent,"Frequency",IRA::CDataField::DOUBLE)) {
+        field="Frequency";
+    }
+    else if (!table->addField(ErrEvent,"OutputPower",IRA::CDataField::DOUBLE)) {
+        field="OutputPower";
+    }
+    if (!ErrEvent.isNoError()) {
+        _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl,dummy,ErrEvent);
+        dummy.setFieldName((const char *)field);
+        throw dummy;
+    }
+
+    if (!table->openTable(ErrEvent))   {
+        _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, ErrEvent);
+        throw dummy;
+    }
+    table->First();
+    len=table->recordCount();
+
+    try {
+        loV=new TLOValue[len];
+    }
+    catch (std::bad_alloc& ex) {
+        _EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CConfiguration::openSynthTable()");
+        throw dummy;
+    }
+    ACS_LOG(LM_FULL_INFO,"CConfiguration::openSynthTable()",(LM_DEBUG,"SYNTH_VALUE_ENTRY_NUMBER: %d",len));
+    for (WORD i=0;i<len;i++) {
+        loV[i].frequency=(*table)["Frequency"]->asDouble();
+        loV[i].outputPower=(*table)["OutputPower"]->asDouble();
+        ACS_LOG(LM_FULL_INFO,"CConfiguration::openSynthTable()",(LM_DEBUG,"SYNTH_VALUE_ENTRY: %lf %lf",loV[i].frequency,loV[i].outputPower));
+        table->Next();
+    }
+    table->closeTable();
+    delete table;
+    table=NULL;
+    return len;
+} 
+
+
+/*
    throw (
    ComponentErrors::CDBAccessExImpl,
    ComponentErrors::MemoryAllocationExImpl, 
@@ -102,8 +181,8 @@ void CConfiguration<T>::init(T *Services,IRA::CString comp_name)
     _GET_STRING_ATTRIBUTE(m_services,"LNAIPAddress", "LNA IP address:",m_LNAIPAddress,comp_name);
 	 _GET_STRING_ATTRIBUTE(m_services,"LocalOscillator_K_Instance","Local oscillator for K band:",m_localOscillator_K_Instance,comp_name);
 	 _GET_STRING_ATTRIBUTE(m_services,"LocalOscillator_Q_Instance","Local oscillator for Q band:",m_localOscillator_Q_Instance,comp_name);
-	 _GET_STRING_ATTRIBUTE(m_services,"LocalOscillator_W1_Instance","Local oscillator for W1 band:",m_localOscillator_W1_Instance,comp_name);
-	 _GET_STRING_ATTRIBUTE(m_services,"LocalOscillator_W2_Instance","Local oscillator for W2 band:",m_localOscillator_W2_Instance,comp_name);
+	 _GET_STRING_ATTRIBUTE(m_services,"LocalOscillator_W1_Instance","Local oscillator for W low band:",m_localOscillator_W1_Instance,comp_name);
+	 _GET_STRING_ATTRIBUTE(m_services,"LocalOscillator_W2_Instance","Local oscillator for W high band:",m_localOscillator_W2_Instance,comp_name);
 	 _GET_DWORD_ATTRIBUTE(m_services,"DewarPort","Dewar port:",m_dewarPort,comp_name);
     _GET_DWORD_ATTRIBUTE(m_services,"LNAPort","LNA port:",m_LNAPort,comp_name);
     _GET_DWORD_ATTRIBUTE(m_services,"WatchDogResponseTime","Response time of watch dog thread (uSec):",m_watchDogResponseTime,comp_name);
@@ -139,6 +218,7 @@ void CConfiguration<T>::init(T *Services,IRA::CString comp_name)
 
     // Set the default operating mode
     setMode(mode);
+
 
     // The noise mark
     try {
@@ -190,56 +270,17 @@ void CConfiguration<T>::init(T *Services,IRA::CString comp_name)
         m_markVector[i].markValue));
         m_markTable->Next();
     }
-    
     m_markVectorLen = len;
     m_markTable->closeTable();
     delete m_markTable;
     m_markTable = NULL;
     
     // The synthesizer
-    try {
-        m_loTable=new IRA::CDBTable(Services,"SynthesizerEntry",LOTABLE_PATH);
-    }
-    catch (std::bad_alloc& ex) {
-        _EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CConfiguration::init()");
-        throw dummy;
-    }
-    error.Reset();
-    if (!m_loTable->addField(error,"Frequency",IRA::CDataField::DOUBLE)) {
-        field="Frequency";
-    }
-    else if (!m_loTable->addField(error,"OutputPower",IRA::CDataField::DOUBLE)) {
-        field="OutputPower";
-    }
-    if (!error.isNoError()) {
-        _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl,dummy,error);
-        dummy.setFieldName((const char *)field);
-        throw dummy;
-    }
-    if (!m_loTable->openTable(error))   {
-        _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
-        throw dummy;
-    }
-    m_loTable->First();
-    len=m_loTable->recordCount();
-    try {
-        m_loVector=new TLOValue[len];
-    }
-    catch (std::bad_alloc& ex) {
-        _EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CConfiguration::init()");
-        throw dummy;
-    }
-    ACS_LOG(LM_FULL_INFO,"CConfiguration::init()",(LM_DEBUG,"SYNTH_VALUE_ENTRY_NUMBER: %d",len));
-    for (WORD i=0;i<len;i++) {
-        m_loVector[i].frequency=(*m_loTable)["Frequency"]->asDouble();
-        m_loVector[i].outputPower=(*m_loTable)["OutputPower"]->asDouble();
-        ACS_LOG(LM_FULL_INFO,"CConfiguration::init()",(LM_DEBUG,"SYNTH_VALUE_ENTRY: %lf %lf",m_loVector[i].frequency,m_loVector[i].outputPower));
-        m_loTable->Next();
-    }
-    m_loVectorLen=len;
-    m_loTable->closeTable();
-    delete m_loTable;
-    m_loTable=NULL;
+
+	m_loVectorLen_K=openSynthTable(m_loTable_K,LOTABLE_K_PATH,m_loVector_K);
+	m_loVectorLen_Q=openSynthTable(m_loTable_Q,LOTABLE_Q_PATH,m_loVector_Q);
+	m_loVectorLen_WL=openSynthTable(m_loTable_WL,LOTABLE_WL_PATH,m_loVector_WL);
+	m_loVectorLen_WH=openSynthTable(m_loTable_WH,LOTABLE_WH_PATH,m_loVector_WH);
 
 
     // The feeds
@@ -343,7 +384,7 @@ void CConfiguration<T>::init(T *Services,IRA::CString comp_name)
     m_taperTable = NULL;
 }
 
-template <class T>
+/*template <class T>
 void CConfiguration<T>::setCurrentLOValue(const ACS::doubleSeq& lo)
 {
 	for (WORD k=0;k<MIN(lo.length(),getArrayLen());k++) {
@@ -352,23 +393,24 @@ void CConfiguration<T>::setCurrentLOValue(const ACS::doubleSeq& lo)
 			updateBandWith(k);
 		}
 	}	
-}
+}*/
 
 template <class T>
 void CConfiguration<T>::setCurrentLOValue(const double& val,const long& pos)
 {
-	if ((pos>=0) && (pos<=getArrayLen())) {
+	if ((pos>=0) && (pos<=getFeeds())) {
 		if (val>=0.0) {
-			m_currentLOValue[pos]=val;
-			updateBandWith(pos);
+			m_currentLOValue[getArrayIndex(pos)]=val;
+			m_currentLOValue[getArrayIndex(pos)+1]=val;
+			updateBandWith();
 		}
 	}
 }
 
 template <class T>
-void CConfiguration<T>::updateBandWith(const long& pos)
+void CConfiguration<T>::updateBandWith()
 {
-	m_BandIFBandwidth[pos]=m_BandRFMax[pos]-(m_BandIFMin[pos]+m_currentLOValue[pos]);
+	for (WORD i=0;i<getArrayLen();i++) m_BandIFBandwidth[i]=m_BandRFMax[i]-(m_BandIFMin[i]+m_currentLOValue[i]);
 }
 
 /*
@@ -508,15 +550,51 @@ void CConfiguration<T>::setMode(const char * mode)
 }
 
 template <class T>
-DWORD CConfiguration<T>::getSynthesizerTable(double * &freq,double *&power) const
+DWORD CConfiguration<T>::getSynthesizerTable_K(double * &freq,double *&power) const
 {
-    freq= new double [m_loVectorLen];
-    power=new double [m_loVectorLen];
-    for (DWORD j=0;j<m_loVectorLen;j++) {
-        freq[j]=m_loVector[j].frequency;
-        power[j]=m_loVector[j].outputPower;
+    freq= new double [m_loVectorLen_K];
+    power=new double [m_loVectorLen_K];
+    for (DWORD j=0;j<m_loVectorLen_K;j++) {
+        freq[j]=m_loVector_K[j].frequency;
+        power[j]=m_loVector_K[j].outputPower;
     }
-    return m_loVectorLen;
+    return m_loVectorLen_K;
+}
+
+template <class T>
+DWORD CConfiguration<T>::getSynthesizerTable_Q(double * &freq,double *&power) const
+{
+    freq= new double [m_loVectorLen_Q];
+    power=new double [m_loVectorLen_Q];
+    for (DWORD j=0;j<m_loVectorLen_K;j++) {
+        freq[j]=m_loVector_Q[j].frequency;
+        power[j]=m_loVector_Q[j].outputPower;
+    }
+    return m_loVectorLen_Q;
+}
+
+template <class T>
+DWORD CConfiguration<T>::getSynthesizerTable_WL(double * &freq,double *&power) const
+{
+    freq= new double [m_loVectorLen_WL];
+    power=new double [m_loVectorLen_WL];
+    for (DWORD j=0;j<m_loVectorLen_WL;j++) {
+        freq[j]=m_loVector_WL[j].frequency;
+        power[j]=m_loVector_WL[j].outputPower;
+    }
+    return m_loVectorLen_WL;
+}
+
+template <class T>
+DWORD CConfiguration<T>::getSynthesizerTable_WH(double * &freq,double *&power) const
+{
+    freq= new double [m_loVectorLen_WH];
+    power=new double [m_loVectorLen_WH];
+    for (DWORD j=0;j<m_loVectorLen_WH;j++) {
+        freq[j]=m_loVector_WH[j].frequency;
+        power[j]=m_loVector_WH[j].outputPower;
+    }
+    return m_loVectorLen_WH;
 }
 
 template <class T>

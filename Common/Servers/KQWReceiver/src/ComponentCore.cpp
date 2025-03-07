@@ -63,6 +63,11 @@ CConfiguration<maci::ContainerServices> const * const  CComponentCore::execute()
         _EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CComponentCore::execute()");
         throw dummy;
     }
+    m_localOscillatorDevice_K=Receivers::LocalOscillator::_nil();
+    m_localOscillatorDevice_Q=Receivers::LocalOscillator::_nil();
+    m_localOscillatorDevice_WL=Receivers::LocalOscillator::_nil();
+    m_localOscillatorDevice_WH=Receivers::LocalOscillator::_nil();
+    m_localOscillatorFault_K=m_localOscillatorFault_Q=m_localOscillatorFault_WL=m_localOscillatorFault_WH=false;
     return &m_configuration;
 }
 
@@ -75,6 +80,10 @@ void CComponentCore::cleanup()
         m_control->closeConnection();
         delete m_control;
     }
+    unloadLocalOscillator(m_localOscillatorDevice_K.out(),m_configuration.getLocalOscillatorInstance_K());
+    unloadLocalOscillator(m_localOscillatorDevice_Q.out(),m_configuration.getLocalOscillatorInstance_Q());
+    unloadLocalOscillator(m_localOscillatorDevice_WL.out(),m_configuration.getLocalOscillatorInstance_WL());
+    unloadLocalOscillator(m_localOscillatorDevice_WH.out(),m_configuration.getLocalOscillatorInstance_WH());
 }
 
 const IRA::CString& CComponentCore::getActualMode()
@@ -221,7 +230,7 @@ void CComponentCore::externalCalOff()
 //throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
 void CComponentCore::deactivate() 
 {
-	ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_DEBUG,"Nothing is really required to deactivate the receiver"));
+	ACS_LOG(LM_FULL_INFO,"CComponentCore::deactivate()",(LM_DEBUG,"Nothing is really required to deactivate the receiver"));
 }
 
 /*
@@ -417,45 +426,80 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo)
         impl.setReason("at least one value must be provided");
         throw impl;
     }
-	 if (lo.length()>m_configuration.getArrayLen()) {
+	if (lo.length()>m_configuration.getFeeds()) {
         _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::setLO");
-        impl.setReason("too many values provided");
+        impl.setReason("too many values provided, one for each receiver is required");
         throw impl;
     }
     for (WORD k=0;k<lo.length();k++) {
 	 	// now check if the requested value match the limits
-    	if (lo[k]<m_configuration.getLOMin()[k]) {
-      	_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::setLO");
-      	impl.setValueName("local oscillator lower limit");
-      	impl.setValueLimit(m_configuration.getLOMin()[k]);
-      	throw impl;
+    	if (lo[k]<m_configuration.getLOMin()[m_configuration.getArrayIndex(k)]) {
+      		_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::setLO");
+      		impl.setValueName("local oscillator lower limit");
+      		impl.setValueLimit(m_configuration.getLOMin()[m_configuration.getArrayIndex(k)]);
+      		throw impl;
     	}
-    	else if (lo[k]>m_configuration.getLOMax()[k]) {
-      	_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::setLO");
-      	impl.setValueName("local oscillator upper limit");
-      	impl.setValueLimit(m_configuration.getLOMax()[k]);
-      	throw impl;
+    	else if (lo[k]>m_configuration.getLOMax()[m_configuration.getArrayIndex(k)]) {
+      		_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::setLO");
+      		impl.setValueName("local oscillator upper limit");
+      		impl.setValueLimit(m_configuration.getLOMax()[m_configuration.getArrayIndex(k)]);
+      		throw impl;
     	}
     	else if (lo[k]==-1) {
-      	ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"KEEP_CURRENT_LOCAL_OSCILLATOR %lf",
-      	m_configuration.getCurrentLOValue()[k]));
+      		ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"KEEP_CURRENT_LOCAL_OSCILLATOR %lf",
+      		m_configuration.getCurrentLOValue()[m_configuration.getArrayIndex(k)]));
     	}
     	else {
 			//computes the synthesizer settings
-    		trueValue=lo[k]+m_configuration.getFixedLO2()[k];
-    		size=m_configuration.getSynthesizerTable(freq,power);
+    		trueValue=lo[k]+m_configuration.getFixedLO2()[m_configuration.getArrayIndex(k)];
+    
+    		if (m_configuration.getArrayIndex(k)==CConfiguration<maci::ContainerServices>::KBAND) {
+    			size=m_configuration.getSynthesizerTable_K(freq,power);
+    		} else if (m_configuration.getArrayIndex(k)==CConfiguration<maci::ContainerServices>::QBAND) {
+    			size=m_configuration.getSynthesizerTable_Q(freq,power);
+    		} else if (m_configuration.getArrayIndex(k)==CConfiguration<maci::ContainerServices>::WLBAND) {
+    			size=m_configuration.getSynthesizerTable_WL(freq,power);
+    		}
+    		else { //WHBAND
+    			size=m_configuration.getSynthesizerTable_WH(freq,power);
+    		}
     		amp=round(linearFit(freq,power,size,trueValue));
     		if (power) delete [] power;
     		if (freq) delete [] freq;
     		ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_DEBUG,"SYNTHESIZER_VALUES %lf %lf",trueValue,amp));
     		// make sure the synthesizer component is available
-    		// Da verificare........************************************************* gestione di più OL da fare
-    		//loadLocalOscillator(); // throw (ComponentErrors::CouldntGetComponentExImpl)
-   		try {
-        		//m_localOscillatorDevice->set(amp,trueValue);
+
+			if (m_configuration.getArrayIndex(k)==CConfiguration<maci::ContainerServices>::KBAND) {
+    			loadLocalOscillator(m_localOscillatorDevice_K.out(),m_localOscillatorFault_K,
+    			m_configuration.getLocalOscillatorInstance_K()); 	 // throw (ComponentErrors::CouldntGetComponentExImpl)
+    		} else if (m_configuration.getArrayIndex(k)==CConfiguration<maci::ContainerServices>::QBAND) {
+    			loadLocalOscillator(m_localOscillatorDevice_Q.out(),m_localOscillatorFault_Q,
+    			m_configuration.getLocalOscillatorInstance_Q()); // throw (ComponentErrors::CouldntGetComponentExImpl)
+    		} else if (m_configuration.getArrayIndex(k)==CConfiguration<maci::ContainerServices>::WLBAND) {
+    			loadLocalOscillator(m_localOscillatorDevice_WL.out(),m_localOscillatorFault_WL,
+    			m_configuration.getLocalOscillatorInstance_WL()); // throw (ComponentErrors::CouldntGetComponentExImpl)
+    		}
+    		else { //WHBAND
+    			loadLocalOscillator(m_localOscillatorDevice_WL.out(),m_localOscillatorFault_WL,
+    			m_configuration.getLocalOscillatorInstance_WL()); // throw (ComponentErrors::CouldntGetComponentExImpl)
+    		}
+   			try {
+   				if (m_configuration.getArrayIndex(k)==CConfiguration<maci::ContainerServices>::KBAND) {
+    				m_localOscillatorDevice_K->set(amp,trueValue);
+    				ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"K-Band LOCAL_OSCILLATOR %lf",lo[k]));
+    			} else if (m_configuration.getArrayIndex(k)==CConfiguration<maci::ContainerServices>::QBAND) {
+    				m_localOscillatorDevice_Q->set(amp,trueValue);
+    				ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"Q-Band LOCAL_OSCILLATOR %lf",lo[k]));
+    			} else if (m_configuration.getArrayIndex(k)==CConfiguration<maci::ContainerServices>::WLBAND) {
+    				m_localOscillatorDevice_WL->set(amp,trueValue);
+    				ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"Wlow-Band LOCAL_OSCILLATOR %lf",lo[k]));
+    			}
+    			else { //WHBAND
+					m_localOscillatorDevice_WH->set(amp,trueValue);
+					ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"Whigh-band LOCAL_OSCILLATOR %lf",lo[k]));
+    			}
     		}
     		catch (CORBA::SystemException& ex) {
-        		m_localOscillatorFault=true;
         		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CComponentCore::setLO()");
         		impl.setName(ex._name());
         		impl.setMinor(ex.minor());
@@ -466,7 +510,7 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo)
         		throw impl;
     		}
     		m_configuration.setCurrentLOValue(lo[k],k);
-    		ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"LOCAL_OSCILLATOR %lf",lo[k]));			
+    					
     	}
     }
 }
@@ -673,12 +717,12 @@ double CComponentCore::getTaper(
 void CComponentCore::setMode(const char * mode) {
     baci::ThreadSyncGuard guard(&m_mutex);
     IRA::CString cmdMode(mode);
-	 m_configuration.setMode(mode); //* throw (ComponentErrors::CDBAccessExImpl, ReceiversErrors::ModeErrorExImpl)
+	m_configuration.setMode(mode); //* throw (ComponentErrors::CDBAccessExImpl, ReceiversErrors::ModeErrorExImpl)
 	 
 	 ACS::doubleSeq lo;
-    lo.length(m_configuration.getArrayLen());
-    for (WORD i=0;i<m_configuration.getArrayLen();i++) {
-        lo[i]=m_configuration.getDefaultLO()[i];
+    lo.length(m_configuration.getFeeds());
+    for (WORD i=0;i<m_configuration.getFeeds();i++) {
+        lo[i]=m_configuration.getDefaultLO()[m_configuration.getArrayIndex(i)];
     }
     // the set the default LO for the default LO for the selected mode.....
 	 setLO(lo); // throw ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
@@ -687,31 +731,25 @@ void CComponentCore::setMode(const char * mode) {
     m_calDiode=false;
     if (m_configuration.getLNABypass()) {
     	try {
-    		/************************************************************
-    		* Verificare
-    		*/
-   		//m_control->enableBypass();// throw IRA::ReceiverControlEx
-   	}
-   	catch (IRA::ReceiverControlEx& ex) {
-      	_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::setMode()");
-        impl.setDetails(ex.what().c_str());
-        setStatusBit(CONNECTIONERROR);
-        throw impl;
-   	}
+   			m_control->enableBypass();// throw IRA::ReceiverControlEx
+   		}
+   		catch (IRA::ReceiverControlEx& ex) {
+      		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::setMode()");
+        	impl.setDetails(ex.what().c_str());
+        	setStatusBit(CONNECTIONERROR);
+        	throw impl;
+   		}
     }
     else {
 	 	try {
-    		/************************************************************
-    		* Verificare
-    		*/
-   		//m_control->disableBypass();// throw IRA::ReceiverControlEx
-   	}
-   	catch (IRA::ReceiverControlEx& ex) {
-      	_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::setMode()");
-        impl.setDetails(ex.what().c_str());
-        setStatusBit(CONNECTIONERROR);
-        throw impl;
-   	}
+   			m_control->disableBypass();// throw IRA::ReceiverControlEx
+   		}
+   		catch (IRA::ReceiverControlEx& ex) {
+      		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::setMode()");
+        	impl.setDetails(ex.what().c_str());
+        	setStatusBit(CONNECTIONERROR);
+        	throw impl;
+   		}
     }
     ACS_LOG(LM_FULL_INFO,"CComponentCore::setMode()",(LM_NOTICE,"RECEIVER_MODE %s",mode));	
 
@@ -1141,76 +1179,60 @@ void CComponentCore::updateVertexTemperature()
 }
 
 //throw (ComponentErrors::CouldntGetComponentExImpl)
-void CComponentCore::loadLocalOscillator()
+void CComponentCore::loadLocalOscillator(Receivers::LocalOscillator_ptr device,bool &fault,const IRA::CString& name)
 {
     // If reference was already taken, but an error was found....dispose the reference
-    if ((!CORBA::is_nil(m_localOscillatorDevice)) && (m_localOscillatorFault)) { 
+    if ((!CORBA::is_nil(device)) && (fault)) { 
         try {
-            m_services->releaseComponent((const char*)m_localOscillatorDevice->name());
+            m_services->releaseComponent((const char*)device->name());
         }
         catch (...) { // Dispose silently...if an error...no matter
         }
-        m_localOscillatorDevice=Receivers::LocalOscillator::_nil();
+        device=Receivers::LocalOscillator::_nil();
     }
-    if (CORBA::is_nil(m_localOscillatorDevice)) {  // Only if it has not been retrieved yet
+    if (CORBA::is_nil(device)) {  // Only if it has not been retrieved yet
         try {
-        	   /*******************************************************************************************
-        	   * Verificare
-        	   */
-            //m_localOscillatorDevice=m_services->getComponent<Receivers::LocalOscillator>(
-            //        (const char*)m_configuration.getLocalOscillatorInstance());
-            ACS_LOG(LM_FULL_INFO,"CCore::loadAntennaBoss()",(LM_INFO,"LOCAL_OSCILLATOR_OBTAINED"))
-            m_localOscillatorFault=false;
+        	device=m_services->getComponent<Receivers::LocalOscillator>((const char*)name);
+            ACS_LOG(LM_FULL_INFO,"CCore::loadLocalOscillator()",(LM_INFO,"LOCAL_OSCILLATOR_OBTAINED"))
+            fault=false;
         }
         catch (maciErrType::CannotGetComponentExImpl& ex) {
             _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CComponentCore::loadLocalOscillator()");
-       	   /*******************************************************************************************
-        	   * Verificare
-        	   */
-            //Impl.setComponentName((const char*)m_configuration.getLocalOscillatorInstance());
-            m_localOscillatorDevice=Receivers::LocalOscillator::_nil();
+            Impl.setComponentName((const char*)name);
+            device=Receivers::LocalOscillator::_nil();
             throw Impl;
         }
         catch (maciErrType::NoPermissionExImpl& ex) {
             _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CComponentCore::loadLocalOscillator()");
-        	   /*******************************************************************************************
-        	   * Verificare
-        	   */
-            //Impl.setComponentName((const char*)m_configuration.getLocalOscillatorInstance());
-            m_localOscillatorDevice=Receivers::LocalOscillator::_nil();
+            Impl.setComponentName((const char*)name);
+            device=Receivers::LocalOscillator::_nil();
             throw Impl;
         }
         catch (maciErrType::NoDefaultComponentExImpl& ex) {
             _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CComponentCore::loadLocalOscillator()");
-        	   /*******************************************************************************************
-        	   * Verificare
-        	   */
-            //Impl.setComponentName((const char*)m_configuration.getLocalOscillatorInstance());
-            m_localOscillatorDevice=Receivers::LocalOscillator::_nil();
+            Impl.setComponentName((const char*)name);
+            device=Receivers::LocalOscillator::_nil();
             throw Impl;
         }
     }
 }
 
-void CComponentCore::unloadLocalOscillator()
+void CComponentCore::unloadLocalOscillator(Receivers::LocalOscillator_ptr device,const IRA::CString& name)
 {
-    if (!CORBA::is_nil(m_localOscillatorDevice)) {
+    if (!CORBA::is_nil(device)) {
         try {
-            m_services->releaseComponent((const char*)m_localOscillatorDevice->name());
+            m_services->releaseComponent((const char*)device->name());
         }
         catch (maciErrType::CannotReleaseComponentExImpl& ex) {
             _ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CComponentCore::unloadLocalOscillator()");
-        	   /*******************************************************************************************
-        	   * Verificare
-        	   */
-            //Impl.setComponentName((const char *)m_configuration.getLocalOscillatorInstance());
+            Impl.setComponentName((const char *)name);
             Impl.log(LM_WARNING);
         }
         catch (...) {
             _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CComponentCore::unloadLocalOscillator()");
             impl.log(LM_WARNING);
         }
-        m_localOscillatorDevice=Receivers::LocalOscillator::_nil();
+        device=Receivers::LocalOscillator::_nil();
     }
 }
 

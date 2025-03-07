@@ -41,11 +41,29 @@ public:
 		
 		::testing::Test::RecordProperty("Records number of the Noise Mark Table",conf.getMarkVectorLen());
 
-		::testing::Test::RecordProperty("Records number of the Synth Table",conf.getSynthesizerTable(loFreq,loPower));
-		::testing::Test::RecordProperty("Synth[0].freq",loFreq[0]);
-		::testing::Test::RecordProperty("Synth[0].power",loPower[0]);
+		::testing::Test::RecordProperty("Records number of the K-band Synth Table",conf.getSynthesizerTable_K(loFreq,loPower));
+		::testing::Test::RecordProperty("Synth_K[0].freq",loFreq[0]);
+		::testing::Test::RecordProperty("Synth_K[0].power",loPower[0]);
 		delete [] loFreq;
 		delete [] loPower;
+		
+		::testing::Test::RecordProperty("Records number of the Q-band Synth Table",conf.getSynthesizerTable_Q(loFreq,loPower));
+		::testing::Test::RecordProperty("Synth_Q[0].freq",loFreq[0]);
+		::testing::Test::RecordProperty("Synth_Q[0].power",loPower[0]);
+		delete [] loFreq;
+		delete [] loPower;
+		
+		::testing::Test::RecordProperty("Records number of the WL-band Synth Table",conf.getSynthesizerTable_WL(loFreq,loPower));
+		::testing::Test::RecordProperty("Synth_WL[0].freq",loFreq[0]);
+		::testing::Test::RecordProperty("Synth_WL[0].power",loPower[0]);
+		delete [] loFreq;
+		delete [] loPower;
+		
+				::testing::Test::RecordProperty("Records number of the WH-band Synth Table",conf.getSynthesizerTable_WH(loFreq,loPower));
+		::testing::Test::RecordProperty("Synth_WH[0].freq",loFreq[0]);
+		::testing::Test::RecordProperty("Synth_WH[0].power",loPower[0]);
+		delete [] loFreq;
+		delete [] loPower;		
 
 		::testing::Test::RecordProperty("Records number of the Taper Table (feed=1)",conf.getTaperTable(freq,taper,1));
 		::testing::Test::RecordProperty("Taper[feed=1,i=0].freq",freq[0]);
