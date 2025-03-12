@@ -1108,6 +1108,18 @@ void CCommandLine::setEnabled(const ACS::longSeq& en) throw (BackendsErrors::Bac
                     throw impl;
                 }
             }
+            if ((m_recstr.Compare("CCB")==0) || (m_recstr.Compare("CCG")==0)) {
+                if (en[0] != 0) {
+                    _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setEnabled()");
+                    impl.setValueName("feed");
+                    throw impl;
+                }
+                if (en[1] != 0) {
+                    _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setEnabled()");
+                    impl.setValueName("feed");
+                    throw impl;
+                }
+            }
             if (en[0] == en[1]) { // central feed
                 m_inputsNumber = 2;
                 if (m_stokes == false)
@@ -1136,7 +1148,7 @@ void CCommandLine::setEnabled(const ACS::longSeq& en) throw (BackendsErrors::Bac
         Message reply = sendBackendCommand(request);
         if (reply.is_success_reply()) {
             // TBD
-            ACS_LOG(LM_FULL_INFO,"CCommandLine::setEnabled()",(LM_NOTICE,"NODDING enabled"));
+            ACS_LOG(LM_FULL_INFO,"CCommandLine::setEnabled()",(LM_NOTICE,"FEEDS enabled"));
         }
     }
     else {
@@ -1427,7 +1439,7 @@ void CCommandLine::fillChannelHeader(Backends::TSectionHeader *chHr,const long& 
                 chHr[index].frequency=m_frequency[i];
                 chHr[index].attenuation[0]=m_attenuation[i];
                 chHr[index].attenuation[1]=m_attenuation[i];
-                chHr[index].sampleRate=/*m_sampleRate[i];*/m_commonSampleRate;
+                chHr[index].sampleRate=m_sampleRate[i];
                 if (m_stokes==true) {
                     chHr[index].inputs=2;
                     chHr[index].feed=m_feedNumber[2*i];
@@ -1809,8 +1821,12 @@ bool CCommandLine::initializeConfiguration(const IRA::CString & config) throw (C
     m_commonSampleRate=DEFAULT_SAMPLE_RATE;
     m_calPeriod=DEFAULT_DIODE_SWITCH_PERIOD;
     for (i=0;i<m_sectionsNumber;i++) {
-        m_sampleRate[i]=DEFAULT_SAMPLE_RATE;
-        m_frequency[i]=STARTFREQUENCY-m_bandWidth[i]/2.;
+        //m_sampleRate[i]=DEFAULT_SAMPLE_RATE;
+        m_sampleRate[i]=2*m_bandWidth[i];
+        if (m_bandWidth[i] == 1400.0)
+            m_frequency[i] = 0.0;
+        else
+            m_frequency[i]=STARTFREQUENCY-m_bandWidth[i]/2.;
         //m_bins[i]=BINSNUMBER;
         m_enabled[i]=true;
         m_tsys[i]=0.0;
