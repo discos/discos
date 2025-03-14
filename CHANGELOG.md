@@ -111,3 +111,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/
 	issue #689 - The dataset provided by weather station has been enlarged by the wind direction. The correctponding RAL 'wx' command will noe provided wind direction readout, as well
     issue #621 - The maximum number of chars of the schedule file name is now 37 (extension included). This is done for fits file and archive issue with the lenght of the schedule name.
     issue #853 - The setSection command can now accept a wildcard (*) as section identifier. This will allow to configure all backend sections with a single command
+    issue #895 - FitZilla version 1.23 released, the rest frequency is also added in the header of the Section table
