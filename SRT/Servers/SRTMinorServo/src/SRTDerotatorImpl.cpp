@@ -362,7 +362,7 @@ void SRTDerotatorImpl::loadTrackingPoint(ACS::Time point_time, CORBA::Double pos
 
     m_trajectory_id.store(trajectory_id);
     m_tracking_queue.put(point_time, { position });
-    m_total_trajectory_points.store(m_tracking_queue.size());
+    m_total_trajectory_points.store(point_id + 1);
 }
 
 
