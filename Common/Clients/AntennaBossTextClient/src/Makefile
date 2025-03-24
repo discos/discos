@@ -66,7 +66,7 @@ EXECUTABLES_L   =
 _tui_AntennaBossTextClient_OBJECTS   =   AntennaBossTextClient
 _tui_AntennaBossTextClient_LIBS = AntennaBossStubs IRALibrary \
   ManagmentDefinitionsStubs TextWindowLibrary ClientErrors ComponentErrors ManagementErrors \
-  AntennaErrors AntennaDefinitionsStubs EphemGeneratorStubs SkySourceStubs OTFStubs MoonStubs acsnc
+  AntennaErrors AntennaDefinitionsStubs EphemGeneratorStubs SkySourceStubs OTFStubs MoonStubs SolarSystemBodyStubs acsnc
 
 
 SCRIPTS         = antennaBossTui

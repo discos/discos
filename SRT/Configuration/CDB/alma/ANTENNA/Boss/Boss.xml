@@ -22,10 +22,10 @@
              PointingModelInstance="ANTENNA/PointingModel"
              RefractionInstance="ANTENNA/Refraction"
              Sidereal="IDL:alma/Antenna/SkySource:1.0"
-             Sun=""
-             Moon="IDL:alma/Antenna/Moon:1.0"
-             Satellite=""
-             SolarSystemBody=""
+             Sun="IDL:alma/Antenna/SolarSystemBody:1.0"
+         	 Moon="IDL:alma/Antenna/Moon:1.0"
+         	 Satellite=""
+             SolarSystemBody="IDL:alma/Antenna/SolarSystemBody:1.0"
              Otf="IDL:alma/Antenna/OTF:1.0">
 
 <target/>

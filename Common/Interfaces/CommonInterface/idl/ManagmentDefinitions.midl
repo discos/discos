@@ -62,11 +62,12 @@ module Management  {
 		MNG_SUN,               /*!< tracks the sun  */     
 		MNG_MOON,              /*!< tracks the moon  */     
 		MNG_SATELLITE,         /*!< tracks an artificial sattelite  */     
+		MNG_PLANET,            /*!< tracks a planet */
 		MNG_SOLARSYTEMBODY,    /*!< tracks a body of the solar system */
-		MNG_OTF,			   /*!< perform a On the Fly Scan */
+		MNG_OTF,			        /*!< perform a On the Fly Scan */
 		MNG_OTFC,              /*!< this is a wrapper of the otf, it allows the system to compute the center of the on-the-fly */  
-		MNG_PEAKER,             /*!< perform a peaker measurement, involving the subreflector or minor servo systems */
-		MNG_SKYDIP,			 /*!< perform a skydip scan */
+		MNG_PEAKER,            /*!< perform a peaker measurement, involving the subreflector or minor servo systems */
+		MNG_SKYDIP,			     /*!< perform a skydip scan */
 		MNG_NONE               /*!< no action */
 	};
 	
