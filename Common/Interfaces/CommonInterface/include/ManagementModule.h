@@ -40,6 +40,10 @@ public:
 			mode=Management::MNG_SOLARSYTEMBODY;
 			return true;
 		}
+		else if (strcasecmp(strScan,"PLANET")==0) {
+			mode=Management::MNG_PLANET;
+			return true;
+		}
 		else if (strcasecmp(strScan,"OTF")==0) {
 			mode=Management::MNG_OTF;
 			return true;

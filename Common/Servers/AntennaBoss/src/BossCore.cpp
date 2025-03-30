@@ -1551,7 +1551,7 @@ Antenna::EphemGenerator_ptr CBossCore::loadInternalGenerator(const Antenna::TGen
 			ref=Antenna::EphemGenerator::_duplicate(m_satelliteGenerator);
 			break;
 		}
-		case Antenna::ANT_SOLARSYTEMBODY : {
+		case Antenna::ANT_SOLARSYSTEMBODY : {
 			if (CORBA::is_nil(m_solarBodyGenerator)) {
 				m_solarBodyGenerator=loadGenerator(type); // could throw exceptions
 			}
@@ -1605,7 +1605,7 @@ Antenna::EphemGenerator_ptr CBossCore::loadPrimaryGenerator(const Antenna::TGene
 			ref=Antenna::EphemGenerator::_duplicate(m_primarySatelliteGenerator);
 			break;
 		}
-		case Antenna::ANT_SOLARSYTEMBODY : {
+		case Antenna::ANT_SOLARSYSTEMBODY : {
 			if (CORBA::is_nil(m_primarySolarBodyGenerator)) {
 				m_primarySolarBodyGenerator=loadGenerator(type); // could throw exceptions
 			}
@@ -1652,7 +1652,7 @@ Antenna::EphemGenerator_ptr CBossCore::loadGenerator(const Antenna::TGeneratorTy
 			cSpec->component_type = CORBA::string_dup((const char*)m_config->getSatelliteInterface());    //IDL interface implemented by the component
 			break;
 		}
-		case Antenna::ANT_SOLARSYTEMBODY : {
+		case Antenna::ANT_SOLARSYSTEMBODY : {
 			cSpec->component_type = CORBA::string_dup((const char*)m_config->getSolarSystemBodyInterface());    //IDL interface implemented by the component
 			break;
 		}

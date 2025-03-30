@@ -6,6 +6,7 @@
 #include <SkySourceC.h>
 #include <OTFC.h>
 #include <MoonC.h>
+#include <SolarSystemBodyC.h>
 #include <ManagementErrors.h>
 #include <acsncSimpleConsumer.h>
 #include <fstream>
@@ -396,7 +397,7 @@ int main(int argc, char *argv[]) {
 		generatorType_box->setStatusLook(Antenna::ANT_SIDEREAL);
 		generatorType_box->setStatusLook(Antenna::ANT_MOON); 
 		generatorType_box->setStatusLook(Antenna::ANT_SUN); 
-		generatorType_box->setStatusLook(Antenna::ANT_SOLARSYTEMBODY); 
+		generatorType_box->setStatusLook(Antenna::ANT_SOLARSYSTEMBODY); 
 		generatorType_box->setStatusLook(Antenna::ANT_SATELLITE); 
 		generatorType_box->setStatusLook(Antenna::ANT_OTF); 
 		
@@ -433,6 +434,8 @@ int main(int argc, char *argv[]) {
 		#if USE_OUTPUT_FIELD >=1 
 			_TW_SET_COMPONENT(output_label,0,WINDOW_HEIGHT-(OUTPUT_FIELD_HEIGHT+1),WINDOW_WIDTH-1,OUTPUT_FIELD_HEIGHT,OUTPUT_FIELD_COLOR_PAIR,OUTPUT_FIELD_STYLE,NULL);	
 		#endif 
+		
+		
 		
 		// Monitors
 		ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::MONITORS_INSTALLATION"));
