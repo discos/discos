@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         station: ['SRT', 'Medicina', 'Noto']
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Free up space
         uses: jlumbroso/free-disk-space@main
@@ -29,8 +29,7 @@ jobs:
           sudo apt update && sudo apt install vagrant
       - name: Install VirtualBox
         run: |
-          wget https://download.virtualbox.org/virtualbox/7.0.14/virtualbox-7.0_7.0.14-161095~Ubuntu~jammy_amd64.deb
-          sudo apt install ./virtualbox-7.0_7.0.14-161095~Ubuntu~jammy_amd64.deb
+          sudo apt install virtualbox
       - name: Clone the repository
         uses: actions/checkout@v4
       - name: Set up Python
