@@ -6,11 +6,12 @@ on:
     types: [update-vm]
 
 concurrency:
-  group: discos
+  group: download
   cancel-in-progress: false
 
 jobs:
   download-vm:
+    name: Download the latest virtual machine
     runs-on: ubuntu-latest
     env:
       REPOSITORY_TOKEN: "${{ secrets.DEPENDENCIES_TOKEN }}"
