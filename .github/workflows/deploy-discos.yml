@@ -1,6 +1,7 @@
 name: DISCOS deployment and build
 
 on:
+  push:
   pull_request:
 
 jobs:
@@ -69,9 +70,16 @@ jobs:
           sed -i "s/$(cat id)/$(vboxmanage list vms | grep 'discos_manager' | grep -oP '(?<=\{)[0-9a-fA-F-]+(?=\})')/" action_provision
           sed -i "s/$(cat id)/$(vboxmanage list vms | grep 'discos_manager' | grep -oP '(?<=\{)[0-9a-fA-F-]+(?=\})')/" id
         working-directory: /home/runner/.deployment/.vagrant/machines/manager/virtualbox/
+      - name: Set the branch name
+        run: |
+          if [ "${{ github.event_name }}" == "push" ]; then
+            echo "BRANCH_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
+          elif [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "BRANCH_NAME=${{ github.head_ref }}" >> $GITHUB_ENV
+          fi
       - name: Deploy DISCOS
         run: |
-          discos-deploy manager:development --deploy-only -s ${{ matrix.station }} -b ${{ github.head_ref }}
+          discos-deploy manager:development --deploy-only -s ${{ matrix.station }} -b ${{ env.BRANCH_NAME }}
       - name: Shutdown the virtual machine
         run: |
           discos-vms stop
