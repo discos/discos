@@ -35,7 +35,7 @@ jobs:
       - name: Save the downloaded VM to cache
         uses: actions/cache/save@v4
         with:
-          key: "discos-manager-vm"
+          key: discos-manager-vm
           path: |
-            "/home/runner/discos_manager.ova"
-            "/home/runner/vagrant.tar.gz"
+            /home/runner/discos_manager.ova
+            /home/runner/vagrant.tar.gz
