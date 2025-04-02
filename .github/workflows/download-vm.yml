@@ -4,9 +4,10 @@ on:
   workflow_dispatch:
   repository_dispatch:
     types: [update-vm]
-  push:
-    branches:
-      - 'continuous-integration'
+
+concurrency:
+  group: discos
+  cancel-in-progress: false
 
 jobs:
   download-vm:
