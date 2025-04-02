@@ -14,7 +14,7 @@ jobs:
       - name: Go on with deployment
         run: true
   deploy-discos:
-    name: Deploy DISCOS on the virtual machine
+    name: Deploy DISCOS
     runs-on: ubuntu-latest
     needs: wait-for-download
     env:
