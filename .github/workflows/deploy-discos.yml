@@ -71,7 +71,7 @@ jobs:
         working-directory: /home/runner/.deployment/.vagrant/machines/manager/virtualbox/
       - name: Deploy DISCOS
         run: |
-          discos-deploy manager:development --deploy-only -s ${{ matrix.station }} -b ${{ github.ref_name }}
+          discos-deploy manager:development --deploy-only -s ${{ matrix.station }} -b ${{ github.head_ref }}
       - name: Shutdown the virtual machine
         run: |
           discos-vms stop
