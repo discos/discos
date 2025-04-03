@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+    Author: Giuseppe Carboni, giuseppe.carboni@inaf.it
+-->
+<xs:schema
+    targetNamespace="urn:schemas-cosylab-com:SRTMinorServoCoefficients:1.0"
+    xmlns="urn:schemas-cosylab-com:SRTMinorServoCoefficients:1.0"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+
+    <xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd" />
+    <xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd" />
+
+    <xs:complexType name="SRTMinorServoConfigurationType">
+     <xs:sequence>
+      <xs:element name="n" type="xs:string" /> <!--name-->
+      <xs:element name="a" type="xs:string" /> <!--axis-->
+      <xs:element name="p" type="xs:string" /> <!--polynomial-->
+     </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="SRTMinorServoCoefficientsTableType">
+     <xs:sequence>
+      <xs:element name="configuration" type="SRTMinorServoConfigurationType" minOccurs="0" maxOccurs="unbounded" />
+     </xs:sequence>
+    </xs:complexType>
+
+    <xs:element name="SRTMinorServoCoefficientsTable" type="SRTMinorServoCoefficientsTableType" />
+
+</xs:schema>

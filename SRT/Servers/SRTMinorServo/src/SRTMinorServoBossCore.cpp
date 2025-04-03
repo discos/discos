@@ -38,7 +38,8 @@ SRTMinorServoBossCore::SRTMinorServoBossCore(SRTMinorServoBossImpl& component) :
     m_tracking_servos{
         //{ "PFP", m_component.getContainerServices()->getComponent<SRTProgramTrackMinorServo>("MINORSERVO/PFP") },
         { "SRP", m_component.getContainerServices()->getComponent<SRTProgramTrackMinorServo>("MINORSERVO/SRP") }
-    }
+    },
+    m_DISCOS_2_LDO_configurations(loadConfigurations())
 {
     AUTO_TRACE("SRTMinorServoBossCore::SRTMinorServoBossCore()");
 
@@ -196,17 +197,16 @@ void SRTMinorServoBossCore::setup(std::string commanded_setup)
 
     std::transform(commanded_setup.begin(), commanded_setup.end(), commanded_setup.begin(), ::toupper);
 
-    std::pair<SRTMinorServoFocalConfiguration, bool> cmd_configuration;
     SRTMinorServoFocalConfiguration commanded_configuration;
 
     try
     {
-        cmd_configuration = DiscosConfigurationNameTable.at(commanded_setup);
-        commanded_configuration = cmd_configuration.first;
+        std::string LDO_configuration = m_DISCOS_2_LDO_configurations.at(commanded_setup);
+        commanded_configuration = LDOConfigurationNameTable.right.at(LDO_configuration);
 
-        if(m_as_configuration.load() == Management::MNG_TRUE && cmd_configuration.second)
+        if(m_as_configuration.load() == Management::MNG_FALSE)
         {
-            commanded_setup += "_ASACTIVE";
+            commanded_setup += "_AS_OFF";
         }
     }
     catch(std::out_of_range& oor)
@@ -234,8 +234,6 @@ void SRTMinorServoBossCore::setup(std::string commanded_setup)
             return;
         }
     }
-
-    ACS_LOG(LM_FULL_INFO, "servoSetup", (LM_NOTICE, ("SETTING UP '" + commanded_setup + "' CONFIGURATION").c_str()));
 
     m_commanded_configuration.store(commanded_configuration);
     m_commanded_setup = commanded_setup;
@@ -335,8 +333,6 @@ void SRTMinorServoBossCore::park()
         ACS_LOG(LM_FULL_INFO, "servoPark", (LM_NOTICE, "MINOR SERVOS ALREADY PARKED"));
         return;
     }
-
-    ACS_LOG(LM_FULL_INFO, "servoPark", (LM_NOTICE, "PARKING"));
 
     m_commanded_configuration.store(CONFIGURATION_PARK);
     m_commanded_setup = "Park";
@@ -504,7 +500,7 @@ void SRTMinorServoBossCore::setASConfiguration(std::string configuration)
     }
 
     // Should reload the correct setup if the system was already configured or was about to be
-    if(!m_commanded_setup.empty())
+    if(!m_commanded_setup.empty() && m_motion_status.load() != MOTION_STATUS_PARKED)
     {
         configuration = m_commanded_setup.substr(0, m_commanded_setup.find("_"));
         try
@@ -1458,6 +1454,49 @@ void SRTMinorServoBossCore::reset(bool force)
     m_subsystem_status.store(Management::MNG_WARNING);
     m_motion_status.store(MOTION_STATUS_UNCONFIGURED);
     m_error_code.store(ERROR_NO_ERROR);
+}
+
+std::map<std::string, std::string> SRTMinorServoBossCore::loadConfigurations()
+{
+    AUTO_TRACE("SRTMinorServoBossCore::loadConfigurations()");
+
+    IRA::CDBTable table(m_component.getContainerServices(), "configuration", std::string("DataBlock/MinorServo/Boss").c_str());
+    IRA::CError error;
+    error.Reset();
+
+    if(!table.addField(error, "DISCOS", IRA::CDataField::STRING))
+    {
+        error.setExtra("Error adding field DISCOS", 0);
+    }
+    if(!table.addField(error, "LDO", IRA::CDataField::STRING))
+    {
+        error.setExtra("Error adding field LDO", 0);
+    }
+    if(!error.isNoError())
+    {
+        _EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl, ex, error);
+        ex.setCode(error.getErrorCode());
+        ex.setDescription((const char *)error.getDescription());
+        ex.log(LM_DEBUG);
+        throw ex.getComponentErrorsEx();
+    }
+    if(!table.openTable(error))
+    {
+        _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, ex, error);
+        ex.log(LM_DEBUG);
+        throw ex.getComponentErrorsEx();
+    }
+
+    std::map<std::string, std::string> map;
+
+    table.First();
+    for(unsigned int i = 0; i < table.recordCount(); i++, table.Next())
+    {
+        map[std::string(table["DISCOS"]->asString())] = std::string(table["LDO"]->asString());
+    }
+    table.closeTable();
+
+    return map;
 }
 
 Management::TBoolean SRTMinorServoBossCore::getCDBConfiguration(std::string which_configuration)

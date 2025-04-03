@@ -105,10 +105,11 @@ public:
     /**
      * Asks the servo system to load the commanded configuration table.
      * @param configuration_name the configuration the servo system should assume.
+     * @param as_off a boolean indicating whether the servo should use a _AS_OFF configuration
      * @throw ComponentErrors::ComponentErrorsEx when there is an error while trying to load the table for the given configuration.
      * @return true if the servo is in use with the current configuration, false otherwise
      */
-    bool setup(const char* configuration_name = "");
+    bool setup(const char* configuration_name = "", CORBA::Boolean as_off = false);
 
     /**
      * Asks the component to calculate the servo system position starting from the given elevation.
@@ -524,7 +525,7 @@ private:
     /**
      * Table containing the coefficients for the positions calculations.
      */
-    SRTMinorServoLookupTable m_current_lookup_table;
+    SRTMinorServoCoefficientsTable m_current_coefficients_table;
 
     /**
      * Configuration of the socket object.
@@ -616,7 +617,7 @@ public:
     /**
      * Setup method definition. It simply calls the SRTBaseMinorServoImpl method.
      */
-    bool setup(const char* configuration_name = "")                                             { return SRTBaseMinorServoImpl::setup(configuration_name);              }
+    bool setup(const char* configuration_name = "", CORBA::Boolean as_off = false)              { return SRTBaseMinorServoImpl::setup(configuration_name, as_off);      }
 
     /**
      * Declaration of all the other inherited methods.
@@ -667,7 +668,7 @@ public:
      * @param configuration_name the configuration the servo system should assume.
      * @throw ComponentErrors::ComponentErrorsEx when there is an error while trying to load the table for the given configuration.
      */
-    bool setup(const char* configuration_name = "");
+    bool setup(const char* configuration_name = "", CORBA::Boolean as_off = false);
 
     /**
      * Declaration of all the other inherited methods.
