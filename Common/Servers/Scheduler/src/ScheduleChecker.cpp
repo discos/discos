@@ -3,6 +3,7 @@
 #include "Schedule.h"
 #include <getopt.h>
 #include <libgen.h>
+#include <pwd.h>
 
 using namespace IRA;
 
@@ -80,6 +81,13 @@ int main(int argc, char *argv[])
 		exit(-1);
 	}
 	if (sched.isComplete()) {
+		if(getpwuid(getuid())->pw_name != sched.getProjectName())
+		{
+			CString err;
+			err.Format("Error found: Schedule PROJECT keyword does not match with active project!\n");
+			printMessage((const char*)err);
+			exit(-1);
+		}
 		CString msg;
 		msg.Format("%u subscans were successfully parsed!\n",sched.getSubScansNumber());
 		printMessage((const char *)msg);
