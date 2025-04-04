@@ -2,10 +2,22 @@ name: DISCOS deployment and build
 
 on:
   push:
-  workflow_dispatch:
+  pull_request:
 
 jobs:
+  wait-for-download:
+    name: Wait for any pending download
+    runs-on: ubuntu-latest
+    concurrency:
+      group: download
+      cancel-in-progress: false
+    steps:
+      - name: Go on with deployment
+        run: true
   deploy-discos:
+    name: Deploy DISCOS
+    runs-on: ubuntu-latest
+    needs: wait-for-download
     env:
       REPOSITORY_TOKEN: "${{ secrets.DEPENDENCIES_TOKEN }}"
       GH_TOKEN: "${{ secrets.GH_WORKFLOWS_TOKEN }}"
@@ -16,32 +28,37 @@ jobs:
       fail-fast: false
       matrix:
         station: ['SRT', 'Medicina', 'Noto']
-    runs-on: ubuntu-latest
     steps:
       - name: Free up space
         uses: jlumbroso/free-disk-space@main
         with:
           tool-cache: true
-      - name: Install Vagrant
+      - name: Install Vagrant and VirtualBox
         run: |
           wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
           echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
           sudo apt update && sudo apt install vagrant
-      - name: Install VirtualBox
-        run: |
           sudo apt install virtualbox
-      - name: Clone the repository
-        uses: actions/checkout@v4
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3'
           check-latest: true
-      - name: Download the provisioned virtual machine from Google Drive
+      - name: Clone the deployment repository
+        uses: actions/checkout@v4
+        with:
+          repository: 'discos/deployment'
+      - name: Install deployment package and dependencies
         run: |
-          pip install -r .github/utils/gdrive_requirements.txt
-          python .github/utils/download_from_gdrive.py
-          gh secret set GOOGLE_DRIVE_TOKEN --org discos --visibility selected --repos discos,deployment < token.json
+          python -m pip install -r requirements.txt
+          pip install .
+      - name: Retrieve the VM from cache
+        uses: actions/cache/restore@v4
+        with:
+          key: discos-manager-vm
+          path: |
+            /home/runner/discos_manager.ova
+            /home/runner/vagrant.tar.gz
       - name: Install the virtual machine
         run: |
           vboxmanage import discos_manager.ova --vsys 0 --options keepallmacs
@@ -53,17 +70,16 @@ jobs:
           sed -i "s/$(cat id)/$(vboxmanage list vms | grep 'discos_manager' | grep -oP '(?<=\{)[0-9a-fA-F-]+(?=\})')/" action_provision
           sed -i "s/$(cat id)/$(vboxmanage list vms | grep 'discos_manager' | grep -oP '(?<=\{)[0-9a-fA-F-]+(?=\})')/" id
         working-directory: /home/runner/.deployment/.vagrant/machines/manager/virtualbox/
-      - name: Clone the deployment repository
-        uses: actions/checkout@v4
-        with:
-          repository: 'discos/deployment'
-      - name: Install deployment package and dependencies
+      - name: Set the branch name
         run: |
-          python -m pip install -r requirements.txt
-          pip install .
+          if [ "${{ github.event_name }}" == "push" ]; then
+            echo "BRANCH_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
+          elif [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "BRANCH_NAME=${{ github.head_ref }}" >> $GITHUB_ENV
+          fi
       - name: Deploy DISCOS
         run: |
-          discos-deploy manager:development --deploy-only -s ${{ matrix.station }} -b ${{ github.ref_name }}
+          discos-deploy manager:development --deploy-only -s ${{ matrix.station }} -b ${{ env.BRANCH_NAME }}
       - name: Shutdown the virtual machine
         run: |
           discos-vms stop
