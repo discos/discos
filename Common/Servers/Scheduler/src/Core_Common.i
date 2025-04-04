@@ -36,6 +36,7 @@ bool CCore::checkScan(ACS::Time& ut,const Antenna::TTrackingParameters *const pr
 	try {
 		//antennaUT will stores the estimated start time from the antenna for all kind of subscans
 		antennaAnswer=m_antennaBoss->checkScan(ut,*prim,*sec,minEl,maxEl,m_antennaRTime.out());
+				ACS_LOG(LM_FULL_INFO,"CCore::checkScan()",(LM_DEBUG,"MIN EL %f :",(float)minEl));
 		ACS_LOG(LM_FULL_INFO,"CCore::checkScan()",(LM_DEBUG,"SLEWING_TIME %llu :",(unsigned long long)m_antennaRTime->slewingTime));
 	}
 	catch (ComponentErrors::ComponentErrorsEx& ex) {

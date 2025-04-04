@@ -22,14 +22,14 @@ void SRTMinorServoParkThread::onStart()
 
     m_status = 0;
 
-    ACS_LOG(LM_FULL_INFO, "SRTMinorServoParkThread::onStart()", (LM_NOTICE, "PARK THREAD STARTED"));
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoParkThread::onStart()", (LM_NOTICE, "Parking MinorServos..."));
 }
 
 void SRTMinorServoParkThread::onStop()
 {
     AUTO_TRACE("SRTMinorServoParkThread::onStop()");
 
-    ACS_LOG(LM_FULL_INFO, "SRTMinorServoParkThread::onStop()", (LM_NOTICE, "PARK THREAD STOPPED"));
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoParkThread::onStop()", (LM_NOTICE, "MinorServos parked"));
 }
 
 void SRTMinorServoParkThread::runLoop()
@@ -80,7 +80,7 @@ void SRTMinorServoParkThread::runLoop()
         {
             for(const auto& [name, servo] : m_core.m_servos)
             {
-                servo->setup("");
+                servo->setup("", false);
             }
 
             m_core.m_actual_setup = m_core.m_commanded_setup;

@@ -135,10 +135,11 @@ module MinorServo
         /**
          * This method loads from the CDB the positioning coefficients related to the given configuration
          * @param configuration the string representing the name of the table from which the coefficients will be loaded
+         * @param as_off a boolean indicating whether the servo requires a _AS_OFF configuration
          * @throw ComponentErrors::ComponentErrorsEx when there is an error while trying to load the table for the given configuration
          * @return true if the servo is in use with the current configuration, false otherwise
          */
-        boolean setup(in string configuration) raises (ComponentErrors::ComponentErrorsEx);
+        boolean setup(in string configuration, in boolean as_off) raises (ComponentErrors::ComponentErrorsEx);
 
         /**
          * This method calculates the servo coordinates for a given elevation

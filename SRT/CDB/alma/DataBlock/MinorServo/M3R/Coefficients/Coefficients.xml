@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+   - Author: Giuseppe Carboni
+   - History:
+ 	- 14-03-23 Created
+-->
+
+<SRTMinorServoCoefficientsTable xmlns="urn:schemas-cosylab-com:SRTMinorServoCoefficients:1.0" 
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <!-- n stands for name, a stands for axis, p stands for polynomial -->
+
+    <configuration><n>CCB</n><a>ROTATION</a><p>44.95999544939037931     </p></configuration>
+
+    <configuration><n>XB</n> <a>ROTATION</a><p>135.003886290282340384   </p></configuration>
+
+</SRTMinorServoCoefficientsTable>
