@@ -288,6 +288,11 @@ private:
     void reset(bool force=false);
 
     /**
+     * Method that loads the focal configurations names when the boss is started
+     */
+    std::map<std::string, std::string> loadConfigurations();
+
+    /**
      * Method used to retrieve a configuration value from the CDB.
      * @param configuration the name of the value to be read from the CDB.
      */
@@ -448,6 +453,11 @@ private:
      * Map that will dynamically be updated containing the current configuration's tracking minor servos.
      */
     std::map<std::string, SRTProgramTrackMinorServo_ptr> m_current_tracking_servos;
+
+    /**
+     * Map that contains the possible focal configurations
+     */
+    const std::map<std::string, std::string> m_DISCOS_2_LDO_configurations;
 
     /**
      * Current scan parameters.

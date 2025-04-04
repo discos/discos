@@ -920,48 +920,48 @@ bool CSchedule::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CS
 {
 	int start=0;
 	IRA::CString ret;
-	if (!IRA::CIRATools::getNextToken(line,start,SEPARATOR,ret)) {
+	if (!IRA::CIRATools::getNextToken(line,start,SEPARATORS,ret,false)) {
 		return false;
 	}
 	else { // token could be extracted
 		ret.MakeUpper();
 		if (ret==PROJECT) {
-			if (!IRA::CIRATools::getNextToken(line,start,SEPARATOR,m_projectName)) {
+			if (!IRA::CIRATools::getNextToken(line,start,SEPARATORS,m_projectName,false)) {
 				errorMsg="cannot parse project name";
 				return false;
 			}
 			else return true;
 		}
 		else if (ret==OBSERVER) {
-			if (!IRA::CIRATools::getNextToken(line,start,SEPARATOR,m_observer)) {
+			if (!IRA::CIRATools::getNextToken(line,start,SEPARATORS,m_observer,false)) {
 				errorMsg="cannot parse observer name";
 				return false;
 			}
 			else return true;			
 		}
 		else if (ret==SCANLIST) {
-			if (!IRA::CIRATools::getNextToken(line,start,SEPARATOR,m_scanList)) {
+			if (!IRA::CIRATools::getNextToken(line,start,SEPARATORS,m_scanList,false)) {
 				errorMsg="cannot parse scan list file name";
 				return false;
 			}
 			else return true;
 		}
 		else if (ret==PROCLIST) {
-			if (!IRA::CIRATools::getNextToken(line,start,SEPARATOR,m_configList)) {
+			if (!IRA::CIRATools::getNextToken(line,start,SEPARATORS,m_configList,false)) {
 				errorMsg="cannot parse procedure list file name";
 				return false;
 			}
 			else return true;
 		}
 		else if (ret==BACKENDLIST) {
-			if (!IRA::CIRATools::getNextToken(line,start,SEPARATOR,m_backendList)) {
+			if (!IRA::CIRATools::getNextToken(line,start,SEPARATORS,m_backendList,false)) {
 				errorMsg="cannot parse backend configurations file name";
 				return false;
 			}
 			else return true;
 		}
 		else if (ret==SCANLAYOUT) {
-			if (!IRA::CIRATools::getNextToken(line,start,SEPARATOR,m_layoutFile)) {
+			if (!IRA::CIRATools::getNextToken(line,start,SEPARATORS,m_layoutFile,false)) {
 				errorMsg="cannot parse scan layouts  file name";
 				return false;
 			}
@@ -969,14 +969,14 @@ bool CSchedule::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CS
 		}
 		else if (ret==MODE) {
 			IRA::CString mode,rep,startTime;
-			if (!IRA::CIRATools::getNextToken(line,start,SEPARATOR,mode)) {
+			if (!IRA::CIRATools::getNextToken(line,start,SEPARATORS,mode,false)) {
 				errorMsg="cannot parse schedule mode";
 				return false;
 			}
 			else {
 				m_modeDone=true;
 				if (mode==LSTMODE) {
-					if (!IRA::CIRATools::getNextToken(line,start,SEPARATOR,rep)) {
+					if (!IRA::CIRATools::getNextToken(line,start,SEPARATORS,rep,false)) {
 						errorMsg="cannot parse repetitions number for  LST mode";
 						return false;
 					}
@@ -989,7 +989,7 @@ bool CSchedule::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CS
 					}
 				}
 				else if (mode==SEQMODE) {
-					if (!IRA::CIRATools::getNextToken(line,start,SEPARATOR,startTime)) {
+					if (!IRA::CIRATools::getNextToken(line,start,SEPARATORS,startTime,false)) {
 						m_mode=SEQ; //if it has not an extra argument the sequential is pure
 						return true;
 					}
@@ -1011,11 +1011,11 @@ bool CSchedule::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CS
 		}
 		else if (ret==ELEVATIONLIMITS) {
 			IRA::CString minEl,maxEl;
-			if (!IRA::CIRATools::getNextToken(line,start,SEPARATOR,minEl)) {
+			if (!IRA::CIRATools::getNextToken(line,start,SEPARATORS,minEl,false)) {
 				errorMsg="elevation lower limit missing or not correct";
 				return false;
 			}
-			if (!IRA::CIRATools::getNextToken(line,start,SEPARATOR,maxEl)) {
+			if (!IRA::CIRATools::getNextToken(line,start,SEPARATORS,maxEl,false)) {
 				errorMsg="elevation upper limit missing or not correct";
 				return false;
 			}
@@ -1039,7 +1039,7 @@ bool CSchedule::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CS
 		}
 		else if (ret==SCANTAG) {
 			IRA::CString scanTag;
-			if (!IRA::CIRATools::getNextToken(line,start,SEPARATOR,scanTag)) {
+			if (!IRA::CIRATools::getNextToken(line,start,SEPARATORS,scanTag,false)) {
 				errorMsg="cannot parse scan tag";
 				return false;
 			}			
@@ -1049,7 +1049,7 @@ bool CSchedule::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CS
 			return true;
 		}
 		else if (ret==INITPROC) {
-			if (!IRA::CIRATools::getNextToken(line,start,SEPARATOR,m_initProc)) {
+			if (!IRA::CIRATools::getNextToken(line,start,SEPARATORS,m_initProc,false)) {
 				errorMsg="cannot parse schedule initialization procedure";
 				return false;
 			}
@@ -1080,7 +1080,7 @@ bool CSchedule::parseScans(const IRA::CString& line,const DWORD& lnNumber,IRA::C
 	//ACS::Time ut;
 	TRecord *p;
 	start=0;
-	if (!IRA::CIRATools::getNextToken(line,start,SEPARATOR,ret)) {
+	if (!IRA::CIRATools::getNextToken(line,start,SEPARATORS,ret,false)) {
 		errorMsg="schedule format error";
 		return false;
 	}
@@ -1088,7 +1088,7 @@ bool CSchedule::parseScans(const IRA::CString& line,const DWORD& lnNumber,IRA::C
 		ret.MakeUpper();
 		if (ret==SCAN_START) {  //process scan definition
 			m_currentScanDef.valid=false;
-			if (!IRA::CIRATools::getNextToken(line,start,SEPARATOR,ret)) { // scan id
+			if (!IRA::CIRATools::getNextToken(line,start,SEPARATORS,ret,false)) { // scan id
 				errorMsg="scan identifier cannot be found";
 				return false;
 			}
@@ -1104,14 +1104,14 @@ bool CSchedule::parseScans(const IRA::CString& line,const DWORD& lnNumber,IRA::C
 				}
 				m_currentScanDef.id=tempId;
 			}
-			if (!IRA::CIRATools::getNextToken(line,start,SEPARATOR,ret)) { //suffix
+			if (!IRA::CIRATools::getNextToken(line,start,SEPARATORS,ret,false)) { //suffix
 				errorMsg="scan suffix cannot be found";
 				return false;
 			}
 			else {
 				m_currentScanDef.suffix=ret;
 			}
-			if (!IRA::CIRATools::getNextToken(line,start,SEPARATOR,ret)) { //backend:datawriter
+			if (!IRA::CIRATools::getNextToken(line,start,SEPARATORS,ret,false)) { //backend:datawriter
 				errorMsg="backend/datawriter cannot be found";
 				return false;
 			}
@@ -1131,7 +1131,7 @@ bool CSchedule::parseScans(const IRA::CString& line,const DWORD& lnNumber,IRA::C
 					m_currentScanDef.writerInstance=_SCHED_NULLTARGET;
 				}
 			}
-			if (IRA::CIRATools::getNextToken(line,start,SEPARATOR,ret)) { //layout...not mandatory
+			if (IRA::CIRATools::getNextToken(line,start,SEPARATORS,ret,false)) { //layout...not mandatory
 				if (m_layoutFile=="") {  // if the layout file has not been given
 					errorMsg="scan layout without providing the scan layouts file";
 					return false;

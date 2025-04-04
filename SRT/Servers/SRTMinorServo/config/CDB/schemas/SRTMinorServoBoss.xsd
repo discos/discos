@@ -18,6 +18,19 @@
     <xs:import namespace="urn:schemas-cosylab-com:Managment:1.0" schemaLocation="Managment.xsd"/>
     <xs:import namespace="urn:schemas-cosylab-com:SRTMinorServoCommon:1.0" schemaLocation="SRTMinorServoCommon.xsd"/>
 
+    <xs:complexType name="SRTMinorServoBossConfigurationType">
+     <xs:sequence>
+      <xs:element name="DISCOS" type="xs:string" />
+      <xs:element name="LDO" type="xs:string" />
+     </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="SRTMinorServoBossConfigurationsTableType">
+     <xs:sequence>
+      <xs:element name="configuration" type="SRTMinorServoBossConfigurationType" minOccurs="0" maxOccurs="unbounded" />
+     </xs:sequence>
+    </xs:complexType>
+
     <xs:complexType name="SRTMinorServoBossType">
      <xs:complexContent>
       <xs:extension base="baci:CharacteristicComponent">
@@ -53,5 +66,6 @@
     </xs:complexType>
 
     <xs:element name="SRTMinorServoBoss" type="SRTMinorServoBossType"/>
+    <xs:element name="SRTMinorServoBossConfigurationsTable" type="SRTMinorServoBossConfigurationsTableType" />
 
 </xs:schema>

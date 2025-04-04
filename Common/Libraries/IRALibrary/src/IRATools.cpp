@@ -40,13 +40,13 @@ void CIRATools::Wait(long long micro)
 DDWORD CIRATools::timeMicroSeconds(TIMEDIFFERENCE& time)
 {
 	DDWORD tmp;
-	tmp=((((time.day()*24+time.hour())*60LL+time.minute())*60+time.second())*1000000+time.microSecond());	
+	tmp=((((time.day()*24+time.hour())*60LL+time.minute())*60+time.second())*1000000+time.microSecond());
 	return tmp;
 }
 
 void CIRATools::getTime(TIMEVALUE& Now)
 {
-	Now.value(TimeUtil::ace2epoch(ACE_OS::gettimeofday()));	
+	Now.value(TimeUtil::ace2epoch(ACE_OS::gettimeofday()));
 }
 
 ACS::Time CIRATools::getACSTime()
@@ -89,7 +89,7 @@ DDWORD CIRATools::timeDifference(TIMEVALUE& First,TIMEVALUE& Last)
 		diff=Last.difference(First.value());
 	}
 	DurationHelper diffHelper(diff);
-	return timeMicroSeconds(diffHelper);	
+	return timeMicroSeconds(diffHelper);
 }
 
 long long CIRATools::timeSubtract(const TIMEVALUE& First,const TIMEVALUE& Second)
@@ -114,7 +114,7 @@ bool CIRATools::getDBValue(maci::ContainerServices *Services,CString fieldName,d
 	try {
 		CDB::DAL_var Dal_p=Services->getCDB();
 		CDB::DAO_var Dao_p=Dal_p->get_DAO_Servant((const char *)fullName);
-		Val=Dao_p->get_double((const char *)fieldName);	
+		Val=Dao_p->get_double((const char *)fieldName);
 	}
 	catch (...) {
 		return false;
@@ -130,7 +130,7 @@ bool CIRATools::getDBValue(maci::SimpleClient *client,CString fieldName,double &
 		CORBA::Object_var obj=client->getComponent("CDB",0,false);
 		CDB::DAL_var Dal_p=CDB::DAL::_narrow(obj);
 		CDB::DAO_var Dao_p=Dal_p->get_DAO_Servant((const char *)fullName);
-		Val=Dao_p->get_double((const char *)fieldName);	
+		Val=Dao_p->get_double((const char *)fieldName);
 	}
 	catch (...) {
 		return false;
@@ -146,7 +146,7 @@ bool CIRATools::getDBValue(maci::ContainerServices *Services,CString fieldName,l
 	try {
 		CDB::DAL_var Dal_p=Services->getCDB();
 		CDB::DAO_var Dao_p=Dal_p->get_DAO_Servant((const char *)fullName);
-		Val=Dao_p->get_long((const char *)fieldName);		
+		Val=Dao_p->get_long((const char *)fieldName);
 	}
 	catch (...) {
 		return false;
@@ -162,7 +162,7 @@ bool CIRATools::getDBValue(maci::SimpleClient *client,CString fieldName,long &Va
 		CORBA::Object_var obj=client->getComponent("CDB",0,false);
 		CDB::DAL_var Dal_p=CDB::DAL::_narrow(obj);
 		CDB::DAO_var Dao_p=Dal_p->get_DAO_Servant((const char *)fullName);
-		Val=Dao_p->get_long((const char *)fieldName);		
+		Val=Dao_p->get_long((const char *)fieldName);
 	}
 	catch (...) {
 		return false;
@@ -179,13 +179,13 @@ bool CIRATools::getDBValue(maci::ContainerServices *Services,CString fieldName,D
 	try {
 		CDB::DAL_var Dal_p=Services->getCDB();
 		CDB::DAO_var Dao_p=Dal_p->get_DAO_Servant((const char *)fullName);
-		app=Dao_p->get_long((const char *)fieldName);		
+		app=Dao_p->get_long((const char *)fieldName);
 	}
 	catch (...) {
 		return false;
 	}
 	Val=(DWORD)app;
-	return true;	
+	return true;
 }
 
 bool CIRATools::getDBValue(maci::SimpleClient *client,CString fieldName,DWORD &Val,CString Domain,CString name)
@@ -197,13 +197,13 @@ bool CIRATools::getDBValue(maci::SimpleClient *client,CString fieldName,DWORD &V
 		CORBA::Object_var obj=client->getComponent("CDB",0,false);
 		CDB::DAL_var Dal_p=CDB::DAL::_narrow(obj);
 		CDB::DAO_var Dao_p=Dal_p->get_DAO_Servant((const char *)fullName);
-		app=Dao_p->get_long((const char *)fieldName);		
+		app=Dao_p->get_long((const char *)fieldName);
 	}
 	catch (...) {
 		return false;
 	}
 	Val=(DWORD)app;
-	return true;	
+	return true;
 }
 
 bool CIRATools::getDBValue(maci::ContainerServices *Services,CString fieldName,CString &Val,CString Domain,CString name)
@@ -227,7 +227,7 @@ bool CIRATools::getDBValue(maci::SimpleClient *client,CString fieldName,CString 
 {
 	CString fullName;
 	fullName=Domain+name;
-	try {			
+	try {
 		CORBA::Object_var obj=client->getComponent("CDB",0,false);
 		CDB::DAL_var Dal_p=CDB::DAL::_narrow(obj);
 		CDB::DAO_var Dao_p=Dal_p->get_DAO_Servant((const char *)fullName);
@@ -249,7 +249,7 @@ bool CIRATools::setDBValue(maci::ContainerServices* Services,CString fieldName,c
 		CDB::DAL_var Dal_p=Services->getCDB();
 		CDB::WDAL_var wDal_p=CDB::WDAL::_narrow(Dal_p);
 		CDB::WDAO_var wDao_p=wDal_p->get_WDAO_Servant((const char *)fullName);
-		wDao_p->set_double((const char *)fieldName,Val);		
+		wDao_p->set_double((const char *)fieldName,Val);
 	}
 	catch (...) {
 		return false;
@@ -266,7 +266,7 @@ bool CIRATools::setDBValue(maci::ContainerServices* Services,CString fieldName,c
 		CDB::DAL_var Dal_p=Services->getCDB();
 		CDB::WDAL_var wDal_p=CDB::WDAL::_narrow(Dal_p);
 		CDB::WDAO_var wDao_p=wDal_p->get_WDAO_Servant((const char *)fullName);
-		wDao_p->set_long((const char *)fieldName,Val);		
+		wDao_p->set_long((const char *)fieldName,Val);
 	}
 	catch (...) {
 		return false;
@@ -283,12 +283,12 @@ bool CIRATools::setDBValue(maci::ContainerServices* Services,CString fieldName,c
 		CDB::DAL_var Dal_p=Services->getCDB();
 		CDB::WDAL_var wDal_p=CDB::WDAL::_narrow(Dal_p);
 		CDB::WDAO_var wDao_p=wDal_p->get_WDAO_Servant((const char *)fullName);
-		wDao_p->set_long((const char *)fieldName,Val);		
+		wDao_p->set_long((const char *)fieldName,Val);
 	}
 	catch (...) {
 		return false;
 	}
-	return true;	
+	return true;
 }
 
 bool CIRATools::setDBValue(maci::ContainerServices* Services,CString fieldName,const CString &Val,CString Domain,CString name)
@@ -300,7 +300,7 @@ bool CIRATools::setDBValue(maci::ContainerServices* Services,CString fieldName,c
 		CDB::DAL_var Dal_p=Services->getCDB();
 		CDB::WDAL_var wDal_p=CDB::WDAL::_narrow(Dal_p);
 		CDB::WDAO_var wDao_p=wDal_p->get_WDAO_Servant((const char *)fullName);
-		wDao_p->set_string((const char *)fieldName,(const char*)Val);		
+		wDao_p->set_string((const char *)fieldName,(const char*)Val);
 	}
 	catch (...) {
 		return false;
@@ -340,11 +340,11 @@ double CIRATools::getHWAzimuth(const double& current,const double& dest,const do
 		}
 		if (d1<=d2) {
 			newOne=tmpCurrent+d1;
-			if ((newOne>tmpMaxAz) || (newOne<tmpMinAz)) newOne=tmpCurrent-d2; 
+			if ((newOne>tmpMaxAz) || (newOne<tmpMinAz)) newOne=tmpCurrent-d2;
 		}
 		else {
 			newOne=tmpCurrent-d2;
-			if ((newOne>tmpMaxAz) || (newOne<tmpMinAz)) newOne=tmpCurrent+d1; 
+			if ((newOne>tmpMaxAz) || (newOne<tmpMinAz)) newOne=tmpCurrent+d1;
 		}
 	}
 	else if (section>0) { //CW (typically 180...450
@@ -369,7 +369,7 @@ double CIRATools::getHWAzimuth(const double& current,const double& dest,const do
 			}
 			else {  // not reachable in this sector (typically 180..270
 				newOne=tmpDest;
-			}			
+			}
 	}
 	return newOne;
 }
@@ -397,7 +397,12 @@ bool CIRATools::skyFrequency(const double& bf,const double& bbw,const double& rf
 	}*/
 }
 
-bool CIRATools::getNextToken(const IRA::CString& str,int &start,char delimiter,IRA::CString &ret)
+bool CIRATools::getNextToken(const IRA::CString& str,int &start,const char& delimiter,IRA::CString &ret, const bool& stopAtFirst)
+{
+		return getNextToken(str, start, std::vector<char>{ delimiter }, ret, stopAtFirst);
+}
+
+bool CIRATools::getNextToken(const IRA::CString& str,int &start,const std::vector<char>& delimiters,IRA::CString &ret, const bool& stopAtFirst)
 {
 		int i;
 		bool ok=false;
@@ -406,22 +411,24 @@ bool CIRATools::getNextToken(const IRA::CString& str,int &start,char delimiter,I
 		token=new char[i+1];
 		i=0;
 		while (str[start]!=0) {
+			char c = str[start];
 			ok=true;
-			if ((str[start]==delimiter)) {
-				start++;
+			start++;
+			if (std::any_of(delimiters.begin(), delimiters.end(), [c](char d){ return c == d; })) {
+				// We still have not found any meaningful character, stop if stopAtFirst or continue skipping a delimiter
+				if(!stopAtFirst && i==0)
+					continue;
 				break;
 			}
 			else {
-				token[i]=str[start];
-				start++;
+				token[i]=c;
 				i++;
 			}
 		}
 		token[i]=0;
 		ret=IRA::CString(token);
 		delete []token;
-		if (!ok) return false;
-		else return true;
+		return ok;
 }
 
 double CIRATools::differenceBetweenAnglesRad(const double& a,const double& b)
@@ -504,7 +511,7 @@ bool CIRATools::strToInterval(const IRA::CString& durationString,ACS::TimeInterv
 		else {
 			hour=0;
 			minute=0;
-			second=timeToken[0].ToDouble();			
+			second=timeToken[0].ToDouble();
 		}
 	}
 	else if (dCounter==2) {
@@ -522,7 +529,7 @@ bool CIRATools::strToInterval(const IRA::CString& durationString,ACS::TimeInterv
 	else if (dCounter==3) {
 		hour=timeToken[0].ToLong();
 		minute=timeToken[1].ToLong();
-		second=timeToken[2].ToDouble();		
+		second=timeToken[2].ToDouble();
 	}
 	if ((hour<0) || (hour>23)) return false;
 	if ((minute<0) || (minute>59)) return false;
@@ -541,7 +548,7 @@ bool CIRATools::strToInterval(const IRA::CString& durationString,ACS::TimeInterv
 	usec=(long)(second*1000000.0);
 	period.hour(hour); period.minute(minute); period.second(sec); period.microSecond(usec);
 	interval=period.value().value;
-	return true;	
+	return true;
 }
 
 bool CIRATools::intervalToStr(const ACS::TimeInterval& interval,IRA::CString& outString,char dateDelimiter,char timeDelimiter)
@@ -565,7 +572,7 @@ bool CIRATools::strToTime(const IRA::CString& timeString,ACS::Time& time,bool co
 	IRA::CIRATools::getTime(now);
 	int p,i=0,dCounter=0;
 	IRA::CDateTime dt;
-	
+
 	while (((p=timeString.Find(dateDelimiter,i))>0) && (dCounter<2)) {
 		dateToken[dCounter]=timeString.Mid(i,p-i);
 		dCounter++;
@@ -582,25 +589,25 @@ bool CIRATools::strToTime(const IRA::CString& timeString,ACS::Time& time,bool co
 	}
 	else {
 		year=dateToken[0].ToLong();
-		doy=dateToken[1].ToLong();				
+		doy=dateToken[1].ToLong();
 	}
 	if (getNextToken(timeString,i,timeDelimiter,token)) {  //now read all three fields of the time representation
 		hour=token.ToLong();
 		if (getNextToken(timeString,i,timeDelimiter,token)) {
 			minute=token.ToLong();
-			if (getNextToken(timeString,i,timeDelimiter,token)) { 
+			if (getNextToken(timeString,i,timeDelimiter,token)) {
 				second=token.ToDouble();
 			}
 			else {
 				if (complete) return false;
 				second=0.0;
-			}					
+			}
 		}
 		else {
 			if (complete) return false;
 			minute=0;
 			second=0.0;
-		}				
+		}
 	}
 	else {
 		return false;
@@ -631,7 +638,7 @@ bool CIRATools::timeToStr(const ACS::Time& time,IRA::CString& outString,char dat
 	TIMEVALUE timeE(time);
 	outString.Format("%04lu%c%03ld%c%02ld%c%02ld%c%02ld.%03ld",(unsigned long)timeE.year(),dateDelimiter,(long)timeE.dayOfYear(),dateDelimiter,(long)timeE.hour(),
 			timeDelimiter,(long)timeE.minute(),timeDelimiter,(long)timeE.second(),(long)timeE.microSecond()/1000);
-	return true;	
+	return true;
 }
 
 bool CIRATools::timeToStrExtended(const ACS::Time& time,IRA::CString& outString,char dateDelimiter,char timeDelimiter)
@@ -676,7 +683,7 @@ bool CIRATools::longSeqToStr(const ACS::longSeq& val,IRA::CString& outString,cha
 
 bool CIRATools::hourAngleToRad(const IRA::CString& angle,double& rad,bool complete,char delimiter)
 {
-	int p,i=0,dCounter=0; 
+	int p,i=0,dCounter=0;
 	long hour=0,minute=0;
 	double second=0.0;
 	bool sign;
@@ -704,7 +711,7 @@ bool CIRATools::hourAngleToRad(const IRA::CString& angle,double& rad,bool comple
 	else if (dCounter==3) {
 		hour=token[0].ToLong();
 		minute=token[1].ToLong();
-		second=token[2].ToDouble();		
+		second=token[2].ToDouble();
 	}
 	if (token[0][0]=='-') {
 		sign=true;
@@ -720,8 +727,8 @@ bool CIRATools::hourAngleToRad(const IRA::CString& angle,double& rad,bool comple
 	rad=slaDranrm(rad);
 	if (sign) {
 		rad*=-1;
-	}	
-	return true;	
+	}
+	return true;
 }
 
 bool CIRATools::radToHourAngle(const double& rad,IRA::CString& outString,char delimiter)
@@ -741,7 +748,7 @@ bool CIRATools::radToHourAngle(const double& rad,IRA::CString& outString,char de
 
 bool CIRATools::sexagesimalAngleToRad(const IRA::CString& angle,double& rad,bool complete,char delimiter)
 {
-	int p,i=0,dCounter=0; 
+	int p,i=0,dCounter=0;
 	long deg=0,arcminute=0;
 	double arcsecond=0.0;
 	bool sign;
@@ -769,14 +776,14 @@ bool CIRATools::sexagesimalAngleToRad(const IRA::CString& angle,double& rad,bool
 	else if (dCounter==3) {
 		deg=token[0].ToLong();
 		arcminute=token[1].ToLong();
-		arcsecond=token[2].ToDouble();		
+		arcsecond=token[2].ToDouble();
 	}
 	//degrees could also be negative......
 	if (token[0][0]=='-') {
 		sign=true;
 		deg*=-1;
 	}
-	else { 
+	else {
 		sign=false;
 	}
 	if ((arcminute<0) || (arcminute>59)) return false;
@@ -786,16 +793,16 @@ bool CIRATools::sexagesimalAngleToRad(const IRA::CString& angle,double& rad,bool
 	if (sign) {
 		rad*=-1;
 	}
-	return true;		
+	return true;
 }
 
 bool CIRATools::radToSexagesimalAngle(const double& rad,IRA::CString& outString,char delimiter)
 {
 	char sign;
-	int dmsf[4]; 
+	int dmsf[4];
 	double ranged=dmod(rad,D2PI); // put the angle in the range -2PI..2PI
 	// convert it into hour minute second anf fraction..keeping track of the sign
-	slaDr2af(3,ranged,&sign,dmsf); 
+	slaDr2af(3,ranged,&sign,dmsf);
 	if (sign=='+') {
 		outString.Format("%02d%c%02d%c%02d.%03d",dmsf[0],delimiter,dmsf[1],delimiter,dmsf[2],dmsf[3]);
 	}
@@ -810,7 +817,7 @@ bool CIRATools::angleToRad(const IRA::CString& angle,double& rad)
 	double deg=angle.ToDouble();
 	rad=deg*DD2R;
 	rad=dmod(rad,D2PI);
-	return true;		
+	return true;
 }
 
 bool CIRATools::radToAngle(const double& rad,IRA::CString& outString)
@@ -866,7 +873,7 @@ bool CIRATools::latitudeToRad(const IRA::CString& lat,double& rad,bool complete,
 bool CIRATools::rightAscensionToRad(const IRA::CString& ra,double& rad,bool complete,char delimiter)
 {
 	//long len=ra.GetLength();
-	int len=ra.GetLength();	
+	int len=ra.GetLength();
 	bool res;
 	if (len==0) return false;
 	if (ra[len-1]=='d') {
@@ -926,7 +933,7 @@ bool CIRATools::azimuthToRad(const IRA::CString& az,double& rad,bool complete)
 	}
 	else return res;
 }
- 	 
+
 bool CIRATools::elevationToRad(const IRA::CString& el,double& rad,bool complete)
 {
 	bool res=angleToRad(el,rad);
@@ -1140,13 +1147,13 @@ bool CIRATools::makeDirectory(const IRA::CString& pathName)
 bool CIRATools::directoryExists(const IRA::CString& path)
 {
 	DIR *dir;
-    bool exists=false;
-    dir=opendir((const char *)path);
-    if (dir!=NULL) {
-    	exists=true;
-    	closedir(dir);
-    }
-    return exists;
+	bool exists=false;
+	dir=opendir((const char *)path);
+	if (dir!=NULL) {
+		exists=true;
+		closedir(dir);
+	}
+	return exists;
 }
 
 bool CIRATools::fileExists(const IRA::CString& file)
@@ -1178,27 +1185,27 @@ bool CIRATools::deleteFile(const IRA::CString& file)
 
 bool CIRATools::copyFile(const IRA::CString& src,const IRA::CString& dst)
 {
-    std::ifstream in ((const char *)src);
-    if (in.fail()) return false;
-    std::ofstream out ((const char *)dst);
-    if (out.fail()) return false;
-    out << in.rdbuf();
-    out.close();
-    in.close();
-    return true;
+	std::ifstream in ((const char *)src);
+	if (in.fail()) return false;
+	std::ofstream out ((const char *)dst);
+	if (out.fail()) return false;
+	out << in.rdbuf();
+	out.close();
+	in.close();
+	return true;
 }
 
 bool CIRATools::extractFileName(const IRA::CString& fullPath,IRA::CString& baseDir,IRA::CString& baseName,
 		 IRA::CString& extension)
 {
-    char *dirc, *basec;
-    dirc=strdup((const char *)fullPath); // the APIs called below might change the content of the input string
-    basec=strdup((const char *)fullPath);
-    baseDir=IRA::CString(dirname(dirc));
-    baseName=IRA::CString(basename(basec));
-    if ((baseDir.GetLength()==0) || (baseName.GetLength()==0)) {
-    	return false;
-    }
+	char *dirc, *basec;
+	dirc=strdup((const char *)fullPath); // the APIs called below might change the content of the input string
+	basec=strdup((const char *)fullPath);
+	baseDir=IRA::CString(dirname(dirc));
+	baseName=IRA::CString(basename(basec));
+	if ((baseDir.GetLength()==0) || (baseName.GetLength()==0)) {
+		return false;
+	}
 	int pos=baseName.Find('.');
 	if (pos<0) { // not found
 		extension="";
@@ -1297,9 +1304,9 @@ bool CIRATools::matchRegExp(const IRA::CString& input,const IRA::CString& expr,s
 				std::string out(what[i].first,what[i].second);
 				res.push_back(out.c_str());
 			}
-			start=what[0].second;      
-      	//flags|=boost::match_prev_avail;
-      	//flags|=boost::match_not_bob;
+			start=what[0].second;
+	  	//flags|=boost::match_prev_avail;
+	  	//flags|=boost::match_not_bob;
 		}
 		return true;
 	}
