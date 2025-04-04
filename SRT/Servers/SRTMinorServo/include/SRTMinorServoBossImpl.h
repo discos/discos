@@ -106,8 +106,8 @@ public:
     virtual CORBA::Boolean isStarting();
 
     /**
-     * Method that tells if the system is using ASACTIVE lookup tables or not.
-     * @return a CORBA::Boolean indicating if the system is configured to use ASACTIVE lookup tables or not.
+     * Method that tells if the system is using AS coefficients or not.
+     * @return a CORBA::Boolean indicating if the system is configured to use AS coefficients or not.
      */
     virtual CORBA::Boolean isASConfiguration();
 

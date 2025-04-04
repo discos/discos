@@ -47,7 +47,7 @@ SRTBaseMinorServoImpl::SRTBaseMinorServoImpl(const ACE_CString& component_name, 
     m_in_use_ptr(this),
     m_current_setup_ptr(this),
     m_error_code_ptr(this),
-    m_current_lookup_table(),
+    m_current_coefficients_table(),
     m_socket_configuration(SRTMinorServoSocketConfiguration::getInstance(container_services)),
     m_socket(SRTMinorServoSocket::getInstance(m_socket_configuration.m_ip_address, m_socket_configuration.m_port, m_socket_configuration.m_timeout))
 {
@@ -254,11 +254,11 @@ void SRTBaseMinorServoImpl::preset(const ACS::doubleSeq& virtual_coords)
     std::copy(coordinates.begin(), coordinates.end(), m_commanded_virtual_positions.begin());
 }
 
-bool SRTBaseMinorServoImpl::setup(const char* configuration_name)
+bool SRTBaseMinorServoImpl::setup(const char* configuration_name, CORBA::Boolean as_off)
 {
     AUTO_TRACE(m_servo_name + "::setup()");
     m_in_use.store(Management::MNG_FALSE);
-    m_current_lookup_table.clear();
+    m_current_coefficients_table.clear();
 
     m_current_setup = "";
     std::string setup_name(configuration_name);
@@ -269,17 +269,21 @@ bool SRTBaseMinorServoImpl::setup(const char* configuration_name)
         return false;
     }
 
-    IRA::CDBTable table(getContainerServices(), setup_name.c_str(), std::string("DataBlock/MinorServo/" + m_servo_name).c_str());
+    IRA::CDBTable table(getContainerServices(), "configuration", std::string("DataBlock/MinorServo/" + m_servo_name).c_str());
     IRA::CError error;
     error.Reset();
 
-    if(!table.addField(error, "axis", IRA::CDataField::STRING))
+    if(!table.addField(error, "n", IRA::CDataField::STRING))
+    {
+        error.setExtra("Error adding field name", 0);
+    }
+    if(!table.addField(error, "a", IRA::CDataField::STRING))
     {
         error.setExtra("Error adding field axis", 0);
     }
-    if(!table.addField(error, "coefficients", IRA::CDataField::STRING))
+    if(!table.addField(error, "p", IRA::CDataField::STRING))
     {
-        error.setExtra("Error adding field coefficients", 0);
+        error.setExtra("Error adding field polynomial", 0);
     }
     if(!error.isNoError())
     {
@@ -296,27 +300,52 @@ bool SRTBaseMinorServoImpl::setup(const char* configuration_name)
         throw ex.getComponentErrorsEx();
     }
 
-    table.First();
-    for(unsigned int i = 0; i < table.recordCount(); i++, table.Next())
+    // We should try to retrieve the _AS_OFF configuration if requested. If is not found, fallback to the normal one
+    std::string config_name = setup_name;
+    if(as_off)
+        config_name += "_AS_OFF";
+
+    for(size_t j = 0; j < (as_off ? 2 : 1); j++)
     {
-        std::string axis = std::string(table["axis"]->asString());
-
-        std::vector<double> coefficients;
-
-        std::string coefficient_str;
-        std::stringstream stream(std::string(table["coefficients"]->asString()));
-
-        while(std::getline(stream, coefficient_str, ','))
+        table.First();
+        for(unsigned int i = 0; i < table.recordCount(); i++, table.Next())
         {
-            coefficients.push_back(std::stod(std::regex_replace(coefficient_str, std::regex("\\s+"), "")));
+            std::string name = std::string(table["n"]->asString());
+            if(name != config_name)
+                continue;
+
+            std::string axis = std::string(table["a"]->asString());
+
+            std::vector<double> coefficients;
+
+            std::string coefficient_str;
+            std::stringstream stream(std::string(table["p"]->asString()));
+
+            while(std::getline(stream, coefficient_str, ','))
+            {
+                coefficients.push_back(std::stod(std::regex_replace(coefficient_str, std::regex("\\s+"), "")));
+            }
+
+            m_current_coefficients_table[axis] = coefficients;
         }
 
-        m_current_lookup_table[axis] = coefficients;
+        if(m_current_coefficients_table.size() > 0)
+        {
+            // Configuration found, exit the loop
+            break;
+        }
+        else
+        {
+            // Reset the configuration name to the default one
+            config_name = setup_name;
+        }
     }
     table.closeTable();
 
-    if(m_current_lookup_table.size() > 0)
+    if(m_current_coefficients_table.size() > 0)
     {
+        if(as_off)
+            setup_name += "_AS_OFF";
         m_current_setup = setup_name;
         clearUserOffsets();
         clearSystemOffsets();
@@ -344,7 +373,7 @@ ACS::doubleSeq* SRTBaseMinorServoImpl::calcCoordinates(double elevation)
 
         for(size_t axis = 0; axis < m_virtual_axes; axis++)
         {
-            std::vector<double> coefficients = m_current_lookup_table.at(m_virtual_axes_names[axis]);
+            std::vector<double> coefficients = m_current_coefficients_table.at(m_virtual_axes_names[axis]);
 
             double coordinate = 0;
 

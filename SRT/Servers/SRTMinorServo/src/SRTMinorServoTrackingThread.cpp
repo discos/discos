@@ -22,16 +22,16 @@ void SRTMinorServoTrackingThread::onStart()
     m_point_id = 0;
     m_point_time = 0;
 
-    ACS_LOG(LM_FULL_INFO, "SRTMinorServoTrackingThread::onStart()", (LM_NOTICE, "TRACKING THREAD STARTED"));
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoTrackingThread::onStart()", (LM_DEBUG, "TRACKING THREAD STARTED"));
 }
 
 void SRTMinorServoTrackingThread::onStop()
 {
     AUTO_TRACE("SRTMinorServoTrackingThread::onStop()");
 
-    ACS_LOG(LM_FULL_INFO, "SRTMinorServoTrackingThread::onStop()", (LM_NOTICE, "TRACKING THREAD STOPPED"));
-
     m_core.m_elevation_tracking.store(Management::MNG_FALSE);
+
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoTrackingThread::onStop()", (LM_DEBUG, "TRACKING THREAD STOPPED"));
 }
 
 void SRTMinorServoTrackingThread::runLoop()
