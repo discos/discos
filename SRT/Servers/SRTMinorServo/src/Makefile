@@ -13,7 +13,7 @@ PY_SCRIPTS = _cover _airBlade _servoReset
 
 # On-Line Database Files
 # ----------------------
-CDB_SCHEMAS = SRTMinorServoCommon SRTMinorServoBoss SRTMinorServo SRTMinorServoSocketConfiguration SRTMinorServoVBrainConfiguration SRTMinorServoProperties SRTMinorServoLookupTable
+CDB_SCHEMAS = SRTMinorServoCommon SRTMinorServoBoss SRTMinorServo SRTMinorServoSocketConfiguration SRTMinorServoVBrainConfiguration SRTMinorServoProperties SRTMinorServoCoefficients
 
 # ----------------------------
 # Libraries (public and local)

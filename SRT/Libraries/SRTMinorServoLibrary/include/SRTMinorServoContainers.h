@@ -71,33 +71,6 @@ namespace MinorServo
     };
 
     /**
-     * This dictionary contains information regarding the possibile focal configurations.
-     * The key indicates the configuration as known by DISCOS.
-     * The value is a pair, the first element of the pair is the DISCOS enumeration for the relative Leonardo configuration,
-     * the second element of the pair indicates whether the configuration has a ASACTIVE twin configuraiton.
-     */
-    using DiscosConfigurationNameTableType = std::map<std::string, std::pair<SRTMinorServoFocalConfiguration, bool>>;
-    const DiscosConfigurationNameTableType DiscosConfigurationNameTable =
-    {
-        //{"LLP",     std::make_pair(CONFIGURATION_PRIMARY,    false)},
-        //{"PPP",     std::make_pair(CONFIGURATION_PRIMARY,    false)},
-        //{"PLP",     std::make_pair(CONFIGURATION_PRIMARY,    false)},
-        //{"HHP",     std::make_pair(CONFIGURATION_PRIMARY,    false)},
-        //{"XKP",     std::make_pair(CONFIGURATION_PRIMARY,    false)},
-        {"CCG",     std::make_pair(CONFIGURATION_GREGORIAN1, true )},
-        {"KKG",     std::make_pair(CONFIGURATION_GREGORIAN2, true )},
-        {"KBAND_TEST",   std::make_pair(CONFIGURATION_GREGORIAN2, false)},
-        {"WWG",     std::make_pair(CONFIGURATION_GREGORIAN3, true )},
-        {"QQG",     std::make_pair(CONFIGURATION_GREGORIAN4, true )},
-        {"TRI",     std::make_pair(CONFIGURATION_GREGORIAN5, true )},
-        {"MISTRAL", std::make_pair(CONFIGURATION_GREGORIAN6, true )},
-        {"MISTRAL_OLD", std::make_pair(CONFIGURATION_GREGORIAN6, true )},
-        {"CCB",     std::make_pair(CONFIGURATION_BWG1,       true )},
-        {"XB",      std::make_pair(CONFIGURATION_BWG3,       true )},
-        {"CABINET", std::make_pair(CONFIGURATION_GREGORIAN7, false)},
-    };
-
-    /**
      * This dictionary contains the Leonardo focal configurations DISCOS enumerations, alongside their name inside the Leonardo minor servo system.
      */
     using LDOConfigurationNameTableType = boost::bimap<SRTMinorServoFocalConfiguration, std::string>;
@@ -136,7 +109,7 @@ namespace MinorServo
         (CONFIGURATION_BWG3,        23)
         (CONFIGURATION_BWG4,        24);
 
-    using SRTMinorServoLookupTable = std::map<std::string, std::vector<double>>;
+    using SRTMinorServoCoefficientsTable = std::map<std::string, std::vector<double>>;
 
     /**
      * This class implements a queue of time tagged positions. it extends a simple std::map with some specific methods.

@@ -24,7 +24,7 @@
 #include "Configuration.h"
 
 #define _SCHED_NULLTARGET "NULL"
-#define SEPARATOR '\t'
+#define SEPARATORS std::vector<char>{'\t', ' '}
 #define MAX_SCHED_NAME_LEN 37
 
 /**

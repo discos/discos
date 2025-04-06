@@ -1,0 +1,106 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+   - Author: Giuseppe Carboni
+   - History:
+ 	- 14-03-23 Created
+-->
+
+<SRTMinorServoCoefficientsTable xmlns="urn:schemas-cosylab-com:SRTMinorServoCoefficients:1.0" 
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <!-- n stands for name, a stands for axis, p stands for polynomial -->
+
+    <configuration><n>CCG</n>        <a>TX</a><p>-1.5                                                                                                                       </p></configuration>
+    <configuration><n>CCG</n>        <a>TY</a><p>29.556666666666498, 0.263472663139432, -0.018206701940039, 0.000072373113855                                               </p></configuration>
+    <configuration><n>CCG</n>        <a>TZ</a><p>-15.6669651675, 1.9293068324, -0.0628990613, 0.0007771141, -0.0000032940                                                   </p></configuration>
+    <configuration><n>CCG</n>        <a>RX</a><p>-0.0055555555555569409, 0.00014822163433269445, 0.000027586713698, -0.000000077732053                                      </p></configuration>
+    <configuration><n>CCG</n>        <a>RY</a><p>-0.036111111111111108                                                                                                      </p></configuration>
+    <configuration><n>CCG</n>        <a>RZ</a><p>0                                                                                                                          </p></configuration>
+
+    <configuration><n>CCG_AS_OFF</n> <a>TX</a><p>-1.5                                                                                                                       </p></configuration>
+    <configuration><n>CCG_AS_OFF</n> <a>TY</a><p>28.256852219272844, -0.002707044952, -0.009870218853, 0.000031617958                                                       </p></configuration>
+    <configuration><n>CCG_AS_OFF</n> <a>TZ</a><p>9.530113849340003, -0.169826241752, 0.000419997047, 0.000003985237                                                         </p></configuration>
+    <configuration><n>CCG_AS_OFF</n> <a>RX</a><p>-0.011392527142374848, -0.0001426193499425, 0.000039508844799, -0.000000131010010                                          </p></configuration>
+    <configuration><n>CCG_AS_OFF</n> <a>RY</a><p>-0.03611111111111111                                                                                                       </p></configuration>
+    <configuration><n>CCG_AS_OFF</n> <a>RZ</a><p>0                                                                                                                          </p></configuration>
+
+    <configuration><n>KKG</n>        <a>TX</a><p>-1.5                                                                                                                       </p></configuration>
+    <configuration><n>KKG</n>        <a>TY</a><p>29.556666666666498, 0.263472663139432, -0.018206701940039, 0.000072373113855                                               </p></configuration>
+    <configuration><n>KKG</n>        <a>TZ</a><p>-15.6669651675, 1.9293068324, -0.0628990613, 0.0007771141, -0.0000032940                                                   </p></configuration>
+    <configuration><n>KKG</n>        <a>RX</a><p>-0.0055555555555569409, 0.00014822163433269445, 0.000027586713698, -0.000000077732053                                      </p></configuration>
+    <configuration><n>KKG</n>        <a>RY</a><p>-0.036111111111111108                                                                                                      </p></configuration>
+    <configuration><n>KKG</n>        <a>RZ</a><p>0                                                                                                                          </p></configuration>
+
+    <configuration><n>KKG_AS_OFF</n> <a>TX</a><p>-1.5                                                                                                                       </p></configuration>
+    <configuration><n>KKG_AS_OFF</n> <a>TY</a><p>28.256852219272844, -0.002707044952, -0.009870218853, 0.000031617958                                                       </p></configuration>
+    <configuration><n>KKG_AS_OFF</n> <a>TZ</a><p>9.530113849340003, -0.169826241752, 0.000419997047, 0.000003985237                                                         </p></configuration>
+    <configuration><n>KKG_AS_OFF</n> <a>RX</a><p>-0.011392527142374848, -0.0001426193499425, 0.000039508844799, -0.000000131010010                                          </p></configuration>
+    <configuration><n>KKG_AS_OFF</n> <a>RY</a><p>-0.03611111111111111                                                                                                       </p></configuration>
+    <configuration><n>KKG_AS_OFF</n> <a>RZ</a><p>0                                                                                                                          </p></configuration>
+
+    <configuration><n>WWG</n>        <a>TX</a><p>0                                                                                                                          </p></configuration>
+    <configuration><n>WWG</n>        <a>TY</a><p>0                                                                                                                          </p></configuration>
+    <configuration><n>WWG</n>        <a>TZ</a><p>0                                                                                                                          </p></configuration>
+    <configuration><n>WWG</n>        <a>RX</a><p>0                                                                                                                          </p></configuration>
+    <configuration><n>WWG</n>        <a>RY</a><p>0                                                                                                                          </p></configuration>
+    <configuration><n>WWG</n>        <a>RZ</a><p>0                                                                                                                          </p></configuration>
+                                                                                                                                                                            
+    <configuration><n>QQG</n>        <a>TX</a><p>0                                                                                                                          </p></configuration>
+    <configuration><n>QQG</n>        <a>TY</a><p>0                                                                                                                          </p></configuration>
+    <configuration><n>QQG</n>        <a>TZ</a><p>0                                                                                                                          </p></configuration>
+    <configuration><n>QQG</n>        <a>RX</a><p>0                                                                                                                          </p></configuration>
+    <configuration><n>QQG</n>        <a>RY</a><p>0                                                                                                                          </p></configuration>
+    <configuration><n>QQG</n>        <a>RZ</a><p>0                                                                                                                          </p></configuration>
+                                                                                                                                                                            
+    <configuration><n>CTR</n>        <a>TX</a><p>0                                                                                                                          </p></configuration>
+    <configuration><n>CTR</n>        <a>TY</a><p>0                                                                                                                          </p></configuration>
+    <configuration><n>CTR</n>        <a>TZ</a><p>0                                                                                                                          </p></configuration>
+    <configuration><n>CTR</n>        <a>RX</a><p>0                                                                                                                          </p></configuration>
+    <configuration><n>CTR</n>        <a>RY</a><p>0                                                                                                                          </p></configuration>
+    <configuration><n>CTR</n>        <a>RZ</a><p>0                                                                                                                          </p></configuration>
+
+    <configuration><n>MISTRAL</n>    <a>TX</a><p>-1.5                                                                                                                       </p></configuration>
+    <configuration><n>MISTRAL</n>    <a>TY</a><p>-90.4571677, 2.06486636, -0.066594993, 0.00679193157, -0.000204050966, 0.00000233354544, -0.00000000926776063              </p></configuration>
+    <configuration><n>MISTRAL</n>    <a>TZ</a><p>185.005164, -11.1663042, 0.212522011, -0.00131754377                                                                       </p></configuration>
+    <configuration><n>MISTRAL</n>    <a>RX</a><p>-0.0055555555555569409, 0.00014822163433269445, 0.000027586713698, -0.000000077732053                                      </p></configuration>
+    <configuration><n>MISTRAL</n>    <a>RY</a><p>-0.036111111111111108                                                                                                      </p></configuration>
+    <configuration><n>MISTRAL</n>    <a>RZ</a><p>0                                                                                                                          </p></configuration>
+                                                                                                                                                                            
+    <configuration><n>MISTRAL_OLD</n><a>TX</a><p>-1.5                                                                                                                       </p></configuration>
+    <configuration><n>MISTRAL_OLD</n><a>TY</a><p>29.556666666666498, 0.263472663139432, -0.018206701940039, 0.000072373113855                                               </p></configuration>
+    <configuration><n>MISTRAL_OLD</n><a>TZ</a><p>-15.6669651675, 1.9293068324, -0.0628990613, 0.0007771141, -0.0000032940                                                   </p></configuration>
+    <configuration><n>MISTRAL_OLD</n><a>RX</a><p>-0.0055555555555569409, 0.00014822163433269445, 0.000027586713698, -0.000000077732053                                      </p></configuration>
+    <configuration><n>MISTRAL_OLD</n><a>RY</a><p>-0.036111111111111108                                                                                                      </p></configuration>
+    <configuration><n>MISTRAL_OLD</n><a>RZ</a><p>0                                                                                                                          </p></configuration>
+
+    <configuration><n>CCB</n>        <a>TX</a><p>-1.5                                                                                                                       </p></configuration>
+    <configuration><n>CCB</n>        <a>TY</a><p>29.556666666666498, 0.263472663139432, -0.018206701940039, 0.000072373113855                                               </p></configuration>
+    <configuration><n>CCB</n>        <a>TZ</a><p>91.5590595452, -16.4202062811, 1.16941963489, -0.040640240455, 0.000733782714288, -6.62393455442e-06, 2.36410838911e-08    </p></configuration>
+    <configuration><n>CCB</n>        <a>RX</a><p>-0.0055555555555569409, 0.00014822163433269445, 0.000027586713698, -0.000000077732053                                      </p></configuration>
+    <configuration><n>CCB</n>        <a>RY</a><p>-0.036111111111111108                                                                                                      </p></configuration>
+    <configuration><n>CCB</n>        <a>RZ</a><p>0                                                                                                                          </p></configuration>
+
+    <configuration><n>CCB_AS_OFF</n> <a>TX</a><p>-1.5                                                                                                                       </p></configuration>
+    <configuration><n>CCB_AS_OFF</n> <a>TY</a><p>28.256852219272844,-0.002707044952,-0.009870218853,0.000031617958                                                          </p></configuration>
+    <configuration><n>CCB_AS_OFF</n> <a>TZ</a><p>9.530113849340003,-0.169826241752,0.000419997047,0.000003985237                                                            </p></configuration>
+    <configuration><n>CCB_AS_OFF</n> <a>RX</a><p>-0.011392527142374848,-0.0001426193499425,0.000039508844799,-0.000000131010010                                             </p></configuration>
+    <configuration><n>CCB_AS_OFF</n> <a>RY</a><p>-0.03611111111111111                                                                                                       </p></configuration>
+    <configuration><n>CCB_AS_OFF</n> <a>RZ</a><p>0                                                                                                                          </p></configuration>
+                                                                                                                                                                            
+    <configuration><n>XB</n>         <a>TX</a><p>-1.5                                                                                                                       </p></configuration>
+    <configuration><n>XB</n>         <a>TY</a><p>29.556666666666498, 0.263472663139432, -0.018206701940039, 0.000072373113855                                               </p></configuration>
+    <configuration><n>XB</n>         <a>TZ</a><p>-38.3143893309, 4.30888128547, -0.18265795755, 0.00350049382452, -3.17057523513e-05, 1.11006707448e-07                     </p></configuration>
+    <configuration><n>XB</n>         <a>RX</a><p>-0.0055555555555569409, 0.00014822163433269445, 0.000027586713698, -0.000000077732053                                      </p></configuration>
+    <configuration><n>XB</n>         <a>RY</a><p>-0.036111111111111108                                                                                                      </p></configuration>
+    <configuration><n>XB</n>         <a>RZ</a><p>0                                                                                                                          </p></configuration>
+
+    <configuration><n>XB_AS_OFF</n>  <a>TX</a><p>-1.5                                                                                                                       </p></configuration>
+    <configuration><n>XB_AS_OFF</n>  <a>TY</a><p>28.256852219272844,-0.002707044952,-0.009870218853,0.000031617958                                                          </p></configuration>
+    <configuration><n>XB_AS_OFF</n>  <a>TZ</a><p>7.92754535681,-1.73279985542,0.147346047014,-0.00516934108597,7.69094654954e-05,-4.0697957632e-07                          </p></configuration>
+    <configuration><n>XB_AS_OFF</n>  <a>RX</a><p>-0.011392527142374848,-0.0001426193499425,0.000039508844799,-0.000000131010010                                             </p></configuration>
+    <configuration><n>XB_AS_OFF</n>  <a>RY</a><p>-0.03611111111111111                                                                                                       </p></configuration>
+    <configuration><n>XB_AS_OFF</n>  <a>RZ</a><p>0                                                                                                                          </p></configuration>
+
+</SRTMinorServoCoefficientsTable>
