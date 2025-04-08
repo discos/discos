@@ -25,9 +25,10 @@
 #include "DerotatorErrors.h"
 #include "SRTMinorServoSocket.h"
 #include "MSDevIOs.h"
-//#include "SRTMinorServoContainers.h"
-//#include "SRTMinorServoCommon.h"
+#include "SRTDerotatorStatusThread.h"
 #include <SRTDerotatorS.h>
+
+class SRTDerotatorStatusThread;
 
 
 using namespace MinorServo;
@@ -38,6 +39,8 @@ using namespace MinorServo;
  */
 class SRTDerotatorImpl : public baci::CharacteristicComponentImpl, public virtual POA_MinorServo::SRTDerotator
 {
+    friend class SRTDerotatorStatusThread;
+
 public:
     /**
      * Constructor.
@@ -532,6 +535,11 @@ private:
      * Socket object.
      */
     SRTMinorServoSocket& m_socket;
+
+    /**
+     * Pointer to the status thread.
+     */
+    SRTDerotatorStatusThread* m_status_thread;
 };
 
 #endif

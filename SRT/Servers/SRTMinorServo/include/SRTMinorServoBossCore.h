@@ -15,7 +15,6 @@
 #include <enumpropROImpl.h>
 #include <SRTMinorServoBossS.h>
 #include <SRTMinorServoS.h>
-#include <SRTDerotatorS.h>
 #include <AntennaProxy.h>
 #include <ManagmentDefinitionsS.h>
 #include <thread>
@@ -438,11 +437,6 @@ private:
      * Map containing all the tracking servos in the minor servo system.
      */
     const std::map<std::string, SRTProgramTrackMinorServo_ptr> m_tracking_servos;
-
-    /**
-     * Map containing all the derotators. It is only used to update the derotators statuses.
-     */
-    const std::map<std::string, SRTDerotator_ptr> m_derotators;
 
     /**
      * Map that will dynamically be updated containing the current configuration's minor servos.

@@ -60,6 +60,12 @@ SRTDerotatorImpl::SRTDerotatorImpl(const ACE_CString& component_name, maci::Cont
 SRTDerotatorImpl::~SRTDerotatorImpl()
 {
     AUTO_TRACE(m_servo_name + "::~SRTDerotatorImpl()");
+
+    if(m_status_thread != nullptr)
+    {
+        m_status_thread->terminate();
+        getContainerServices()->getThreadManager()->destroy(m_status_thread);
+    }
 }
 
 void SRTDerotatorImpl::initialize()
@@ -127,6 +133,21 @@ void SRTDerotatorImpl::initialize()
 void SRTDerotatorImpl::execute()
 {
     AUTO_TRACE(m_servo_name + "::execute()");
+
+    try
+    {
+        m_status_thread = getContainerServices()->getThreadManager()->create<SRTDerotatorStatusThread, SRTDerotatorImpl&>((m_component_name + "StatusThread").c_str(), *this);
+        m_status_thread->setSleepTime(getCDBValue<double>(getContainerServices(), "status_thread_period") * 10000000);
+        m_status_thread->resume();
+    }
+    catch(acsthreadErrType::CanNotSpawnThreadExImpl& impl)
+    {
+        // The thread failed to start for some reason
+        _ADD_BACKTRACE(ComponentErrors::CanNotStartThreadExImpl, ex, impl, (m_component_name + "::startThread()").c_str());
+        ex.setThreadName((m_component_name + "StatusThread").c_str());
+        ex.log(LM_DEBUG);
+        throw ex.getComponentErrorsEx();
+    }
 }
 
 void SRTDerotatorImpl::cleanUp()

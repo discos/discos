@@ -88,6 +88,7 @@
         <xs:element name="positionDiff" type="baci:ROdouble" />
         <xs:element name="status" type="baci:ROpattern" />
        </xs:sequence>
+       <xs:attribute name="status_thread_period" type="xs:double" use="optional" default="0.05" />
        <xs:attribute name="step" type="xs:string" use="required" />
        <xs:attribute name="tracking_delta" type="xs:string" use="required" />
        <xs:attribute name="zero_offset" type="xs:string" use="optional" default="0.0" />
