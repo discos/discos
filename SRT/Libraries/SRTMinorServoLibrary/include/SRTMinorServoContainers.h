@@ -583,7 +583,7 @@ namespace MinorServo
         const std::string getPlainCommand() const
         {
             std::shared_lock<std::shared_mutex> lock(m_mutex);
-            return this->get<std::string>("PLAIN_COMMAND");
+            return this->count("PLAIN_COMMAND") > 0 ? this->get<std::string>("PLAIN_COMMAND") : "";
         }
 
         /**
@@ -593,7 +593,7 @@ namespace MinorServo
         const std::string getPlainAnswer() const
         {
             std::shared_lock<std::shared_mutex> lock(m_mutex);
-            return this->get<std::string>("PLAIN_ANSWER");
+            return this->count("PLAIN_ANSWER") > 0 ? this->get<std::string>("PLAIN_ANSWER") : "";
         }
 
     protected:
@@ -882,6 +882,25 @@ namespace MinorServo
          * The labels for the offsets of each virtual axis.
          */
         const std::vector<std::string> m_virtual_offsets;
+    };
+
+    /**
+     * This class is a specialization of the SRTMinorServoStatus for a derotator of the Leonardo Minor Servo System.
+     */
+    class SRTDerotatorStatus : public SRTMinorServoStatus
+    {
+    public:
+        using SRTMinorServoStatus::SRTMinorServoStatus;
+
+        /**
+         * This method returns the current derotator position. There is a sign inversion since the LDO derotator sign is opposite to the required one.
+         * @return the current derotator position
+         */
+        double getActualPosition() const
+        {
+            double position = getVirtualPositions()[0];
+            return position == 0 ? position : -position;
+        }
     };
 }
 
