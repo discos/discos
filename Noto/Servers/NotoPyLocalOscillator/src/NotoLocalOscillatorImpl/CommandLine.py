@@ -1,3 +1,4 @@
+from __future__ import print_function
 import socket
 import time
 import decimal
@@ -31,7 +32,7 @@ class CommandLine:
    
 	def initialize(self):
 		#raises an error.....
-		self.create()   
+		return self.create()   
    
 	def configure(self,ip,port):
 		'''
@@ -41,13 +42,13 @@ class CommandLine:
 		self.ip=ip
 		self.port=port
 		#raises an error.....
-		self.connect() 
+		return self.connect() 
 			
 	def create(self):
 		try:
 			if self.sock==None:
 				self.sock=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		except socket.error,msg:
+		except socket.error as msg:
 			self.sock=None
 			return False
 		return True
@@ -62,11 +63,18 @@ class CommandLine:
 	def connect(self):
 		try:
 			if self.connected==False:
+				#print ("PRovo la connessione")
 				self.sock.connect((self.ip,self.port))
+				#print ("Conessione ok")
 				self.connected=True
-				self.sock.sendall('*CLS\n;SYST:ERR?\n++read\n')
+				cmd="*CLS\n;SYST:ERR?\n++read\n"
+				#print ("mando stringa di inizializzazione")
+				self.sock.sendall(cmd.encode())
+				#print ("mandata")
 				msg=self.sock.recv(1024)
-		except socket.error, msg:
+				#print ("ricevuta risposta :")
+				#print (msg)
+		except socket.error as msg:
 			self.close()
 			return False
 		return True
@@ -149,13 +157,13 @@ class CommandLine:
 		try:
            
 			msg=self.query(QUERYERROR)
-			print "query err",msg
+			print("query err",msg)
 			if msg != '0,\"No error\"\n': 
-					print "exception",msg
+					print("exception",msg)
 					raise CommandLineError(msg)   
 			return msg
-		except socket.error , msg:
-			print "connect error: " ,msg
+		except socket.error as msg:
+			print("connect error: " ,msg)
 			return msg
           
 	def rfOn(self):
@@ -168,8 +176,8 @@ class CommandLine:
 		msg=""
 		if self.check():			
 			try:
-				self.sock.sendall(cmd)
-			except socket.error,msg:
+				self.sock.sendall(cmd.encode())
+			except socket.error as msg:
 				self.close()
 				return False,msg
 			return True,msg				        
@@ -180,13 +188,14 @@ class CommandLine:
 		msg=""
 		if self.check():			
 			try:
-				self.sock.sendall(cmd+'\n++read\n')
-			except socket.error,msg:
+				buff=cmd+'\n++read\n'
+				self.sock.sendall(cmd.encode())
+			except socket.error as msg:
 				self.close()
 				return False,msg
 			try:
 				msg=self.sock.recv(1024)
-			except socket.error,msg:
+			except socket.error as msg:
 				self.close()
 				return False,msg
 			if	len(msg)==0:

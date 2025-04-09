@@ -255,7 +255,7 @@ double CLecom::Answer(WORD Code,BYTE SubCode,CError& Err)
 	bool Sync=false;
 	double Val;
 	sprintf((char *)(C),"%04X",Code);
-	sprintf((char *)(C+4),"%02X",SubCode);
+	sprintf((char *)(C+4),"%c",SubCode);
 	while (!Ok) {
 		if ((Rx(&m_ucBuffer[BytesRead],1,Err))>0) {
 			if (!Err.isNoError()) {

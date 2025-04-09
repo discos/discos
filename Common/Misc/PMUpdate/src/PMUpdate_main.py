@@ -144,14 +144,14 @@ class Editor(QtGui.QMainWindow):
                 qmsg.setText("errorfilename: new model section too short")
                 qmsg.show()
 
-            if len(errorfilename_rows[0]) <> 7 or \
-                    len(errorfilename_rows[1]) <> 31 or \
-                    len(errorfilename_rows[2]) <> 5 or \
-                    len(errorfilename_rows[3]) <> 5 or \
-                    len(errorfilename_rows[4]) <> 5 or \
-                    len(errorfilename_rows[5]) <> 5 or \
-                    len(errorfilename_rows[6]) <> 5 or \
-                    len(errorfilename_rows[7]) <> 5:
+            if len(errorfilename_rows[0]) != 7 or \
+                    len(errorfilename_rows[1]) != 31 or \
+                    len(errorfilename_rows[2]) != 5 or \
+                    len(errorfilename_rows[3]) != 5 or \
+                    len(errorfilename_rows[4]) != 5 or \
+                    len(errorfilename_rows[5]) != 5 or \
+                    len(errorfilename_rows[6]) != 5 or \
+                    len(errorfilename_rows[7]) != 5:
                 self.pdplt_file_status = False
                 qmsg = QtGui.QMessageBox()
                 qmsg.setIcon(QtGui.QMessageBox.Critical)

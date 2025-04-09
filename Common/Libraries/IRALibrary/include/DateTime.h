@@ -16,7 +16,14 @@
 #ifndef DATETIME_H
 #define DATETIME_H
 
+#include <Cplusplus11Helper.h>
+
+C11_IGNORE_WARNING_PUSH
+C11_IGNORE_WARNING("-Wdeprecated-declarations")
+C11_IGNORE_WARNING("-Wmisleading-indentation")
+C11_IGNORE_WARNING("-Wcatch-value=")
 #include <acstimeEpochHelper.h>
+C11_IGNORE_WARNING_POP
 #include "Definitions.h"
 #include "IRATools.h"
 #include "Site.h"

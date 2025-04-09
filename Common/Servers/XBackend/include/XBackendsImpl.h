@@ -322,6 +322,7 @@ public:
      */
     virtual void initialize(const char * configuration) 
     	throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+    virtual void endSchedule() throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, BackendsErrors::BackendsErrorsEx) {AUTO_TRACE("TotalPowerImpl::endSchedule()"); };
     
    /**
      * @thorw CORBA::SystemException

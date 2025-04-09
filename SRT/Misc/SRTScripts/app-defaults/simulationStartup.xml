@@ -14,7 +14,7 @@
     <toolAgainstInterfaceRepository></toolAgainstInterfaceRepository>
     <toolAgainstNameService></toolAgainstNameService>
     <containers>
-        <select>34</select>
+        <select>31</select>
         <againstManagerHost></againstManagerHost>
         <againstManagerPort></againstManagerPort>
         <againstCDB></againstCDB>
@@ -47,15 +47,6 @@
             <remoteAccount>discos</remoteAccount>
         </container>
         <container>
-            <name>DerotatorContainer</name>
-            <type>py</type>
-            <heapSizeMB></heapSizeMB>
-            <useDedicatedSettings>true</useDedicatedSettings>
-            <scriptBase>0</scriptBase>
-            <remoteHost>MASTERHOST</remoteHost>
-            <remoteAccount>discos</remoteAccount>
-        </container>
-        <container>
             <name>DerotatorPositionerContainer</name>
             <type>py</type>
             <heapSizeMB></heapSizeMB>
@@ -73,7 +64,7 @@
             <remoteHost>MASTERHOST</remoteHost>
             <remoteAccount>discos</remoteAccount>
         </container>
-        <container>
+        <!--container>
             <name>LocalOscillatorLPContainer</name>
             <type>py</type>
             <heapSizeMB></heapSizeMB>
@@ -81,7 +72,7 @@
             <scriptBase>0</scriptBase>
             <remoteHost>MASTERHOST</remoteHost>
             <remoteAccount>discos</remoteAccount>
-        </container>
+        </container-->
         <container>
             <name>LocalOscillatorCContainer</name>
             <type>py</type>
@@ -111,15 +102,6 @@
         </container>
         <container>
             <name>ManagementContainer</name>
-            <type>cpp</type>
-            <heapSizeMB></heapSizeMB>
-            <useDedicatedSettings>true</useDedicatedSettings>
-            <scriptBase>0</scriptBase>
-            <remoteHost>MASTERHOST</remoteHost>
-            <remoteAccount>discos</remoteAccount>
-        </container>
-        <container>
-            <name>MinorServoBossContainer</name>
             <type>cpp</type>
             <heapSizeMB></heapSizeMB>
             <useDedicatedSettings>true</useDedicatedSettings>
@@ -191,7 +173,7 @@
             <remoteAccount>discos</remoteAccount>
         </container>
         <container>
-            <name>SRTKBandContainer</name>
+            <name>SRT5GHzContainer</name>
             <type>cpp</type>
             <heapSizeMB></heapSizeMB>
             <useDedicatedSettings>true</useDedicatedSettings>
@@ -200,7 +182,7 @@
             <remoteAccount>discos</remoteAccount>
         </container>
         <container>
-            <name>SRTLPBandContainer</name>
+            <name>SRTKBandContainer</name>
             <type>cpp</type>
             <heapSizeMB></heapSizeMB>
             <useDedicatedSettings>true</useDedicatedSettings>
@@ -208,6 +190,15 @@
             <remoteHost>MASTERHOST</remoteHost>
             <remoteAccount>discos</remoteAccount>
         </container>
+        <!--container>
+            <name>SRTLPBandContainer</name>
+            <type>cpp</type>
+            <heapSizeMB></heapSizeMB>
+            <useDedicatedSettings>true</useDedicatedSettings>
+            <scriptBase>0</scriptBase>
+            <remoteHost>MASTERHOST</remoteHost>
+            <remoteAccount>discos</remoteAccount>
+        </container-->
         <container>
             <name>TotalPowerContainer</name>
             <type>cpp</type>

@@ -30,7 +30,7 @@ CDB_SCHEMAS = Mount Station PointingModel
 # IDL Files and flags
 # 
 IDL_FILES = Observatory Mount PointingModel EphemGeneratorMACRO_include \
-EphemGenerator SkySource OTF Refraction AntennaBoss Moon
+EphemGenerator SkySource OTF Refraction AntennaBoss Moon SolarSystemBody
 IDL_TAO_FLAGS =
 USER_IDL =
 ObservatoryStubs_LIBS = baciStubs maciStubs AntennaDefinitionsStubs ComponentErrorsStubs
@@ -48,7 +48,7 @@ AntennaBossStubs_LIBS = baciStubs maciStubs ManagmentDefinitionsStubs Management
                         EphemGeneratorStubs ComponentErrorsStubs AntennaErrorsStubs \
                         AntennaDefinitionsStubs
 MoonStubs_LIBS = baciStubs maciStubs EphemGeneratorStubs
-
+SolarSystemBodyStubs_LIBS = baciStubs maciStubs EphemGeneratorStubs
 
 #
 # list of all possible C-sources (used to create automatic dependencies)

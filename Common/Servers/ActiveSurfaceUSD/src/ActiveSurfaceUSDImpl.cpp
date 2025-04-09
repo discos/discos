@@ -144,6 +144,7 @@ void USDImpl::initialize() throw (ACSErr::ACSbaseExImpl)
             _SET_LDEF(acc,   "USDImpl::initialize()");
             _SET_LDEF(uBits, "USDImpl::initialize()");
         }
+        _GET_PROP(status,m_status,"usdImpl::initialize()")
     }
     catch (ASErrors::ASErrorsEx& ex)
     {
@@ -321,8 +322,10 @@ void USDImpl::reset() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 
     try
     {
-        _SET_CDB(calibrate, m_calibrate, "::USDImpl::reset()")
+        //_SET_CDB(calibrate, m_calibrate, "::USDImpl::reset()")
         action(RESET);
+
+        CIRATools::Wait(0, 200000); // 0.2 secs, guard time to wait after a reset command
 
         //* restore defaults *//
         _SET_LDEF(delay, "USDImpl::reset()");
@@ -589,7 +592,7 @@ void USDImpl::update(CORBA::Double elevation) throw (CORBA::SystemException, ASE
         updatePos = std::min(updatePos, m_top);
         if(updatePos == m_lastCmdStep)
             return;
-        _GET_PROP(status, m_status, "usdImpl::calibrate()")
+        _GET_PROP(status, m_status, "usdImpl::update()")
         bool running = m_status&MRUN;
         if(running)
             return;

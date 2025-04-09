@@ -167,6 +167,12 @@ void CCommandLine::stopDataAcquisition() throw (BackendsErrors::ConnectionExImpl
 	}
 }
 
+void CCommandLine::backendPark() throw (BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
+		ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::NotAllowedExImpl,BackendsErrors::BackendFailExImpl)
+{
+	ACS_LOG(LM_FULL_INFO,"CCommandLine::backendPark()",(LM_NOTICE,"backendPark"));
+}
+
 void CCommandLine::stopDataAcquisitionForced() throw (BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
 		ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::NotAllowedExImpl)
 {
@@ -488,7 +494,10 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 	WORD len;
 	char sBuff[SENDBUFFERSIZE];
 	char rBuff[RECBUFFERSIZE];
-	double newBW,newAtt,newSR;
+	std::vector<double> newBW(m_sectionsNumber);
+	std::vector<double> newAtt(m_sectionsNumber);
+	std::vector<double> newSR(m_sectionsNumber);
+	size_t minSection, maxSection;
 	if (getIsBusy()) {
 		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::setConfiguration()");
 		throw impl;
@@ -499,94 +508,108 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 			impl.setReason("the section identifier is out of range");
 			throw impl;
 		}
+		minSection=inputId;
+		maxSection=minSection+1;
+	}
+	else if (inputId==-1)
+	{
+		minSection=0;
+		maxSection=m_sectionsNumber;
 	}
 	else {
 		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCommandLine::setConfiguration()");
 		impl.setReason("the section identifier is out of range");
 		throw impl;
 	}
-	if (bw>=0) { // the user ask for a new value
-		if (bw<MIN_BAND_WIDTH)  {
-			_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setConfiguration()");
-			impl.setValueName("bandWidth");
-			impl.setValueLimit(MIN_BAND_WIDTH);
-			throw impl;			
+
+	for(size_t i=minSection; i<maxSection; i++)
+	{
+		if (bw>=0) { // the user ask for a new value
+			if (bw<MIN_BAND_WIDTH)  {
+				_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setConfiguration()");
+				impl.setValueName("bandWidth");
+				impl.setValueLimit(MIN_BAND_WIDTH);
+				throw impl;
+			}
+			else if (bw>MAX_BAND_WIDTH) {
+				_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setConfiguration()");
+				impl.setValueName("bandWidth");
+				impl.setValueLimit(MAX_BAND_WIDTH);
+				throw impl;
+			}
+			newBW[i]=bw;
 		}
-		else if (bw>MAX_BAND_WIDTH) {
-			_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setConfiguration()");
-			impl.setValueName("bandWidth");
-			impl.setValueLimit(MAX_BAND_WIDTH);
-			throw impl;						
+		else { // else keep the present value
+			newBW[i]=m_bandWidth[i];
 		}
-		newBW=bw;
-	}
-	else { // else keep the present value
-		newBW=m_bandWidth[inputId];
-	}
-	if (sr>=0) {// the user ask for a new value
-		if (sr>MAX_SAMPLE_RATE) {
-			_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setConfiguration()");
-			impl.setValueName("sampleRate");
-			impl.setValueLimit(MAX_SAMPLE_RATE);
-			throw impl;			
+		if (sr>=0) {// the user ask for a new value
+			if (sr>MAX_SAMPLE_RATE) {
+				_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setConfiguration()");
+				impl.setValueName("sampleRate");
+				impl.setValueLimit(MAX_SAMPLE_RATE);
+				throw impl;
+			}
+			newSR[i]=sr;
 		}
-		newSR=sr;
+		else {
+			newSR[i]=m_sampleRate[i];
+		}
+		newAtt[i]=m_attenuation[i];
 	}
-	else {
-		newSR=m_sampleRate[inputId];
-	}
-	newAtt=m_attenuation[inputId];
 	if (!checkConnection()) {
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setConfiguration()");
 	}
-	len=CProtocol::setConfiguration(sBuff,inputId,m_input[inputId],newAtt,newBW,m_boards); // get the buffer
-	if ((res=sendBuffer(sBuff,len))==SUCCESS) {
-		res=receiveBuffer(rBuff,RECBUFFERSIZE);
-	}
-	if (res>0) { // operation was ok.
-		if (!CProtocol::isAck(rBuff)) {
-			_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::setConfiguration()");
-		} 
-		m_bandWidth[inputId]=newBW;
-		for (int j=0;j<m_sectionsNumber;j++) m_sampleRate[j]=newSR; //the given sample rate is taken also for all the others
-		m_commonSampleRate=newSR;
-		m_integration=0;
-		// log warning about configuration that are ignored.
-		if (freq>=0) {
-			ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_WARNING,"CANNOT_CHANGE_FREQUENCY"));
+	for(size_t i=minSection; i<maxSection; i++)
+	{
+		len=CProtocol::setConfiguration(sBuff,i,m_input[i],newAtt[i],newBW[i],m_boards); // get the buffer
+		if ((res=sendBuffer(sBuff,len))==SUCCESS) {
+			res=receiveBuffer(rBuff,RECBUFFERSIZE);
 		}
-		if (feed>=0) {
-			ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_WARNING,"CANNOT_CHANGE_FEED"));			
-		}		
-		if (bins>=0) {
-			ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_WARNING,"CANNOT_CHANGE_BINS_NUMBER"));			
+		if (res>0) { // operation was ok.
+			if (!CProtocol::isAck(rBuff)) {
+				_THROW_EXCPT(BackendsErrors::NakExImpl,"CCommandLine::setConfiguration()");
+			}
+			m_bandWidth[i]=newBW[i];
+			for (int j=0;j<m_sectionsNumber;j++) m_sampleRate[j]=newSR[i]; //the given sample rate is taken also for all the others
+			m_commonSampleRate=newSR[i];
+			m_integration=0;
+			// log warning about configuration that are ignored.
+			if (freq>=0) {
+				ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_WARNING,"CANNOT_CHANGE_FREQUENCY"));
+			}
+			if (feed>=0) {
+				ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_WARNING,"CANNOT_CHANGE_FEED"));
+			}
+			if (bins>=0) {
+				ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_WARNING,"CANNOT_CHANGE_BINS_NUMBER"));
+			}
+			if (pol>=0) {
+				ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_WARNING,"CANNOT_CHANGE_POLARIZATION"));
+			}
+			IRA::CString temp;
+			if (m_polarization[i]==Backends::BKND_LCP) {  //FULL STOKE not possible....
+				temp="LCP";
+			}
+			else {
+				temp="RCP";
+			}
+			ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"SECTION_CONFIGURED %ld,FREQ=%lf,BW=%lf,FEED=%ld,POL=%s,SR=%lf,BINS=%ld",i,m_frequency[i],newBW[i],m_feedNumber[i],
+					(const char *)temp,newSR[i],m_bins[i]));
 		}
-		if (pol>=0) {
-			ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_WARNING,"CANNOT_CHANGE_POLARIZATION"));
+		else if (res==FAIL) {
+			_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
+			dummy.setCode(m_Error.getErrorCode());
+			dummy.setDescription((const char*)m_Error.getDescription());
+			m_Error.Reset();
+			_THROW_EXCPT_FROM_EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CCommandLine::setConfiguration()");
 		}
-		IRA::CString temp;
-		if (m_polarization[inputId]==Backends::BKND_LCP) {  //FULL STOKE not possible....
-			temp="LCP";
+		else if (res==WOULDBLOCK) {
+			_THROW_EXCPT(ComponentErrors::TimeoutExImpl,"CCommandLine::setConfiguration()");
 		}
 		else {
-			temp="RCP";
+			_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setConfiguration()");
 		}
-		ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"SECTION_CONFIGURED %ld,FREQ=%lf,BW=%lf,FEED=%ld,POL=%s,SR=%lf,BINS=%ld",inputId,m_frequency[inputId],newBW,m_feedNumber[inputId],
-				(const char *)temp,newSR,m_bins[inputId]));		
 	}
-	else if (res==FAIL) {
-		_EXCPT_FROM_ERROR(ComponentErrors::IRALibraryResourceExImpl,dummy,m_Error);
-		dummy.setCode(m_Error.getErrorCode());
-		dummy.setDescription((const char*)m_Error.getDescription());
-		m_Error.Reset();
-		_THROW_EXCPT_FROM_EXCPT(ComponentErrors::SocketErrorExImpl,dummy,"CCommandLine::setConfiguration()");
-	}
-	else if (res==WOULDBLOCK) {
-		_THROW_EXCPT(ComponentErrors::TimeoutExImpl,"CCommandLine::setConfiguration()");
-	}
-	else {
-		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setConfiguration()");
-	}	
 }
 
 void CCommandLine::getZeroTPI(DWORD *tpi) throw (ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,

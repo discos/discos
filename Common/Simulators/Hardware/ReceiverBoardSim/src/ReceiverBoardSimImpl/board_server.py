@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # Author: Marco Buttu <m.buttu@oa-cagliari.inaf.it>
+from __future__ import print_function
 """
 This module defines a dummy server. 
 
@@ -99,9 +100,9 @@ class BoardServer:
         self.s.bind((self.host, self.port))
         self.s.listen(1)
         # Display a welcome message
-        print "*"*40
-        print "BoardServer - Waiting for connections..."
-        print "*"*40
+        print("*"*40)
+        print("BoardServer - Waiting for connections...")
+        print("*"*40)
 
         # Number of connections counter
         counter = 0
@@ -111,7 +112,7 @@ class BoardServer:
             try:
                 connection, clientaddr = self.s.accept()
                 counter += 1 
-                print "\n%d. Got connection from %s" %(counter, connection.getpeername())
+                print("\n%d. Got connection from %s" %(counter, connection.getpeername()))
             except KeyboardInterrupt:
                 raise
             except:
@@ -148,8 +149,8 @@ class BoardServer:
                         if(data):
                             if len(data) > 1:
                                 for c in data:
-                                    print hex(ord(c)),
-                                print
+                                    print(hex(ord(c)))
+                                print()
                             # print "\nReceived message from %s: %r" % (connection.getpeername(), 
                             # binhex.binascii.hexlify(data))
                             # Initialize the answer with a wrong message
@@ -159,7 +160,7 @@ class BoardServer:
                             if CMD_TYPE_MIN_EXT > data[CMD_IDX] or data[CMD_IDX] > CMD_TYPE_MAX_ABB:
                                 # The last byte, 0x01, is the execution result of an "unknow command"
                                 answer = "".join([CMD_STX, data[2], data[1], data[3], data[4], chr(0x01)])
-                                print "Sending message: %r" %binhex.binascii.hexlify(answer)
+                                print("Sending message: %r" %binhex.binascii.hexlify(answer))
                                 connection.send(answer)
                                 continue
                             elif data[CMD_IDX] >= CMD_TYPE_MIN_ABB:
@@ -204,7 +205,7 @@ class BoardServer:
                                 answer += chr(checksum)
                                 answer += CMD_ETX
                             
-                            print "Sending message: %r" %binhex.binascii.hexlify(answer)
+                            print("Sending message: %r" %binhex.binascii.hexlify(answer))
                             connection.send(answer)
                 except:
                     raise
@@ -238,7 +239,7 @@ class BoardServer:
                     break
             except:
                 break
-            print "Reaped process %d" % result[0]
+            print("Reaped process %d" % result[0])
 
 
 if __name__ == "__main__":

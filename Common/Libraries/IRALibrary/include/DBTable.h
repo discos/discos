@@ -11,8 +11,15 @@
 /* Andrea Orlati(aorlati@ira.inaf.it) 22/06/2006      Creation                                          */
 /* Andrea Orlati(aorlati@ira.inaf.it) 15/04/2010      Now the table also suppport calls from maci simple clients   */
 
+#include <Cplusplus11Helper.h>
+
 #include <vector>
+C11_IGNORE_WARNING_PUSH
+C11_IGNORE_WARNING("-Wdeprecated-declarations")
+C11_IGNORE_WARNING("-Wmisleading-indentation")
+C11_IGNORE_WARNING("-Wcatch-value=")
 #include <baciValue.h>
+C11_IGNORE_WARNING_POP
 #include "IRA"
 #include "DataField.h"
 #include <expat.h>

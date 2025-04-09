@@ -32,4 +32,4 @@
 
 #MASTERHOST will be replaced by make file @installation time with proper server address
 
-ssh -f -l discos MASTERHOST "/bin/bash --login -c 'echo Shutting down.... && killACS && echo ....it is all over'"
+ssh -f -l discos MASTERHOST "/bin/bash --login -c 'echo Shutting down.... && killACS && acsStop && echo ....it is all over'"

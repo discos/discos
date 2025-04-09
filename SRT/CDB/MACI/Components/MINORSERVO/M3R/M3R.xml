@@ -5,11 +5,10 @@
     xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               
-    Name="M3R"    
-    Code="WPServoImpl"
+    Name="M3R"
+    Code="SRTGenericMinorServoImpl"
     ImplLang="cpp"
-    Type="IDL:alma/MinorServo/WPServo:1.0"
+    Type="IDL:alma/MinorServo/SRTGenericMinorServo:1.0"
     Container="MinorServoContainer"
-	Default="true"
-
+    Default="false"
 />

@@ -99,16 +99,12 @@ class NotoLocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComponen
 		except Exception:
 			exc=ComponentErrorsImpl.CDBAccessExImpl()
 			raise exc
-		try:
-			self.cl.initialize()
-		except CommandLineError as ex:
+		if not self.cl.initialize():
 			exc=ComponentErrorsImpl.SocketErrorExImpl()
 			exc.setData('Reason',ex.__str__)
 			raise exc
-		try:
-			self.cl.configure(IP,PORT)
-		except CommandLineError as ex:
-			msg="cannot connect to synthesiser, IP %s, error message is %s" %(IP,ex.__str__)
+		if not self.cl.configure(IP,PORT):
+			msg="cannot connect to synthesiser, IP %s, PORT %s" %(IP,PORT)
 			exc=ComponentErrorsImpl.SocketErrorExImpl()
 			exc.setData('Reason',msg)
 			raise exc	

@@ -11,7 +11,7 @@
 	ImplLang="cpp">
 
 	<Autoload>
-		<cdb:_ string="baci" />
+		<cdb:e string="baci" />
 	</Autoload>
 
 	<LoggingConfig
@@ -22,6 +22,5 @@
 		flushPeriodSeconds="1"
 	>
 	</LoggingConfig>
-	
 </Container>
 

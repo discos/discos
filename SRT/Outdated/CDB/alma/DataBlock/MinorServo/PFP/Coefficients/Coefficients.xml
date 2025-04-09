@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+   - Author: Giuseppe Carboni
+   - History:
+ 	- 14-03-23 Created
+-->
+
+<SRTMinorServoCoefficientsTable xmlns="urn:schemas-cosylab-com:SRTMinorServoCoefficients:1.0" 
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <!-- n stands for name, a stands for axis, p stands for polynomial -->
+
+    <configuration><n>LLP</n><a>TX</a>      <p>0</p></configuration>
+    <configuration><n>LLP</n><a>TZ</a>      <p>0</p></configuration>
+    <configuration><n>LLP</n><a>RTHETA</a>  <p>0</p></configuration>
+
+    <configuration><n>PPP</n><a>TX</a>      <p>0</p></configuration>
+    <configuration><n>PPP</n><a>TZ</a>      <p>0</p></configuration>
+    <configuration><n>PPP</n><a>RTHETA</a>  <p>0</p></configuration>
+
+    <configuration><n>PLP</n><a>TX</a>      <p>0</p></configuration>
+    <configuration><n>PLP</n><a>TZ</a>      <p>0</p></configuration>
+    <configuration><n>PLP</n><a>RTHETA</a>  <p>0</p></configuration>
+
+    <configuration><n>HHP</n><a>TX</a>      <p>0</p></configuration>
+    <configuration><n>HHP</n><a>TZ</a>      <p>0</p></configuration>
+    <configuration><n>HHP</n><a>RTHETA</a>  <p>0</p></configuration>
+
+    <configuration><n>XKP</n><a>TX</a>      <p>0</p></configuration>
+    <configuration><n>XKP</n><a>TZ</a>      <p>0</p></configuration>
+    <configuration><n>XKP</n><a>RTHETA</a>  <p>0</p></configuration>
+
+</SRTMinorServoCoefficientsTable>

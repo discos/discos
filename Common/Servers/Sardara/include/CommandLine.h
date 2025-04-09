@@ -425,6 +425,9 @@ public:
 	 */
 	void setAttenuation(const long&inputId, const double& attenuation)  throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,BackendsErrors::NakExImpl,
 			ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl);
+
+    void backendPark() throw (BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
+		ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::NotAllowedExImpl,BackendsErrors::BackendFailExImpl);
 	
 	/**
 	 * Called to configure a range where compute a Tsys.
@@ -480,9 +483,9 @@ public:
 	static bool resultingSampleRate(const long& integration,const double& sr,long& result);
 
 	//int getConfiguration(char* configuration);
-	void getConfiguration(char* configuration);
+	char* getConfiguration();
 
-	int getCommProtVersion(CORBA::String_out version);
+	char* getCommProtVersion();
 
     IRA::CString m_targetFileName;
 
@@ -774,13 +777,18 @@ ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,BackendsErrors::Mal
     	bool m_SK77;
     	bool m_SK00;
     	bool m_SK01;
+    	bool m_SK04;
+    	bool m_SK03;
+    	bool m_SK06;
     	bool m_SK77S;
     	bool m_SK00S;
     	bool m_SK01S;
+    	bool m_SK04S;
+    	bool m_SK03S;
+    	bool m_SK06S;
     	bool m_SC00;
     	bool m_SL00;
     	bool m_SP00;
-    	bool m_SC00S;
     	bool m_SL00S;
     	bool m_SP00S;
     	bool m_SCC00;

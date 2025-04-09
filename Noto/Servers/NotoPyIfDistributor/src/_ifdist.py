@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 
 # This is a python script that can be used to configure the IF distributor. 
 # The script is adapted from DMED. 
@@ -30,12 +31,12 @@ def send_command(ip, port, command):
 		s.connect((ip,int(port)))
 	except socket.error:
 		return "Fail"
-	s.sendall(command)
+	s.sendall(command.encode())
 	time.sleep(0.1)
 	response=s.recv(1024)
 	s.close()
-	response=response.strip().split('\n')
-	return response
+	res=response.decode().strip().split('\n')
+	return res
 
 def cdb(xmlstr):
 	root=ET.fromstring(xmlstr)
@@ -149,7 +150,7 @@ def main(argv):
 			userLogger.logNotice( "Answer: %s"%(answer))
 	
 	
-	print >> sys.stderr, answerstr.replace(","," ")
+	print(answerstr.replace(","," "), file=sys.stderr)
 
 
 if __name__=="__main__":

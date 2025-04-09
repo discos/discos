@@ -7,7 +7,7 @@ class TestProcedures(unittest.TestCase):
     def setUp(self):
         dal = ACSCorba.cdb()
         dao = dal.get_DAO('alma/Procedures/StationProcedures')
-        self.procedures = ElementTree.fromstring(dao).getchildren()
+        self.procedures = list(ElementTree.fromstring(dao))
 
     def test_reset_not_allowed_in_setup(self):
         """Vefify the setup does not execute the antennaReset command"""

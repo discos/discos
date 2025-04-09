@@ -37,7 +37,7 @@ void CComponentCore::initialize(maci::ContainerServices* services) throw (Compon
     m_setupMode="";
     m_setup="";
     m_totalPower_proxy.setContainerServices(m_services);
-    m_totalPower_proxy.setComponentName((const char *)m_configuration.getFocusSelctorInterface());
+    m_totalPower_proxy.setComponentInterface((const char *)m_configuration.getFocusSelctorInterface());
 }
 
 void CComponentCore::cleanup()

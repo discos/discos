@@ -6,6 +6,7 @@
 #include <SkySourceC.h>
 #include <OTFC.h>
 #include <MoonC.h>
+#include <SolarSystemBodyC.h>
 #include <ManagementErrors.h>
 #include <acsncSimpleConsumer.h>
 #include <fstream>
@@ -201,21 +202,16 @@ int main(int argc, char *argv[]) {
 	// Change the style of the main frame 
 	window.setTitleStyle(CStyle(TITLE_COLOR_PAIR,TITLE_STYLE));
 	
-	if (window.colorReady()) {
-		window.defineColor(GRAY_COLOR,255,255,255);		
-		window.defineColorPair(BLUE_GRAY,CColor::BLUE,GRAY_COLOR);
-		window.defineColorPair(GRAY_BLUE,GRAY_COLOR,CColor::BLUE);		
-	}
-	else {
-		window.defineColorPair(BLUE_GRAY,CColor::BLUE,CColor::WHITE);
-		window.defineColorPair(GRAY_BLUE,CColor::WHITE,CColor::BLUE);	
-		window.defineColorPair(BLACK_RED,CColor::BLACK,CColor::RED);	
-		window.defineColorPair(BLACK_GREEN,CColor::BLACK,CColor::GREEN);	
-		window.defineColorPair(BLACK_YELLOW,CColor::BLACK,CColor::YELLOW);	
-		window.defineColorPair(BLACK_BLUE,CColor::BLACK,CColor::BLUE);		
-		window.defineColorPair(BLACK_MAGENTA,CColor::BLACK,CColor::MAGENTA);	
-		window.defineColorPair(BLACK_WHITE,CColor::BLACK,CColor::WHITE	);			
-	}
+	window.defineColor(GRAY_COLOR,500,500,500);
+	window.defineColorPair(BLUE_GRAY,CColor::BLUE,CColor::WHITE);
+	window.defineColorPair(GRAY_BLUE,CColor::WHITE,CColor::BLUE);
+	window.defineColorPair(BLACK_RED,CColor::BLACK,CColor::RED);
+	window.defineColorPair(BLACK_GREEN,CColor::BLACK,CColor::GREEN);
+	window.defineColorPair(BLACK_YELLOW,CColor::BLACK,CColor::YELLOW);
+	window.defineColorPair(BLACK_BLUE,CColor::BLACK,CColor::BLUE);
+	window.defineColorPair(BLACK_MAGENTA,CColor::BLACK,CColor::MAGENTA);
+	window.defineColorPair(BLACK_WHITE,CColor::BLACK,CColor::WHITE);
+
 	ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::FRAME_INITIALIZED"));
 	ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::GET_DEFAULT_COMPONENENT: %s",COMPONENT_INTERFACE_TPYE));
 	
@@ -401,7 +397,7 @@ int main(int argc, char *argv[]) {
 		generatorType_box->setStatusLook(Antenna::ANT_SIDEREAL);
 		generatorType_box->setStatusLook(Antenna::ANT_MOON); 
 		generatorType_box->setStatusLook(Antenna::ANT_SUN); 
-		generatorType_box->setStatusLook(Antenna::ANT_SOLARSYTEMBODY); 
+		generatorType_box->setStatusLook(Antenna::ANT_SOLARSYSTEMBODY); 
 		generatorType_box->setStatusLook(Antenna::ANT_SATELLITE); 
 		generatorType_box->setStatusLook(Antenna::ANT_OTF); 
 		
@@ -438,6 +434,8 @@ int main(int argc, char *argv[]) {
 		#if USE_OUTPUT_FIELD >=1 
 			_TW_SET_COMPONENT(output_label,0,WINDOW_HEIGHT-(OUTPUT_FIELD_HEIGHT+1),WINDOW_WIDTH-1,OUTPUT_FIELD_HEIGHT,OUTPUT_FIELD_COLOR_PAIR,OUTPUT_FIELD_STYLE,NULL);	
 		#endif 
+		
+		
 		
 		// Monitors
 		ACS_LOG(LM_FULL_INFO,MODULE_NAME"::Main()",(LM_INFO,MODULE_NAME"::MONITORS_INSTALLATION"));

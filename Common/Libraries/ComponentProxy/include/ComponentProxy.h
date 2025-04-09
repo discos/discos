@@ -3,8 +3,6 @@
 
 #include <string>
 
-#include <boost/shared_ptr.hpp>
-
 #include <acsContainerServices.h>
 #include <ComponentErrors.h>
 
@@ -30,10 +28,10 @@ typedef ComponentProxy<COMPONENT_TYPE,                                 \
  * m_antennaBoss->yourAntennaBossMethod(methodParameters); 
  * 
  * The Proxy operator '.' permits access to proxy methods:
- * .setComponentName();
+ * .setComponentInterface();
  * .setError();
  * .resetError();
- * .loadDefault();
+ * .load();
  * .unload();
  * .getComponentVar();
  *
@@ -48,195 +46,212 @@ typedef ComponentProxy<COMPONENT_TYPE,                                 \
  * Defining new proxies should follow the simple AntennaBoss example and should
  * be done in this module.
  */
-template <typename ComponentClass, typename ComponentVar>
-class ComponentProxy
+template <typename ComponentClass, typename ComponentVar> class ComponentProxy
 {
     public:
         ComponentProxy();
-        ComponentProxy(const char*, maci::ContainerServices*);
+        ComponentProxy(const char* interface, maci::ContainerServices* container_services);
+        ComponentProxy(const char* interface, maci::ContainerServices* container_services, const char* name);
         virtual ~ComponentProxy();
-        void loadDefault() throw (ComponentErrors::CouldntGetComponentExImpl);
-        void unload();
-        //ComponentVar getComponentVar(){ return m_component_var;};
-        ComponentVar& operator->() throw (ComponentErrors::CouldntGetComponentExImpl);
-        void setError(){ m_error = true;};
-        void resetError(){ m_error = false;};
-        bool isError(){ return m_error;};
-        void setComponentName(const char*);
+        void load() const;
+        void unload() const;
+        //ComponentVar getComponentVar(){ return m_component_var; };
+        ComponentVar& operator->() const; //throw (ComponentErrors::CouldntGetComponentExImpl);
+        void setError() const { m_error = true; };
+        void resetError() const { m_error = false; };
+        bool isError() const { return m_error; };
+        void setComponentInterface(const char*);
         void setContainerServices(maci::ContainerServices*);
+        void setComponentName(const char*);
     private:
         // We only allow to create an instance via factory methods or explicit
         // constructor thus we disable copy contructor and assignment operator
-        ComponentProxy(const ComponentProxy&);
-        ComponentProxy& operator=(const ComponentProxy&);
-        std::string m_name; 
-        maci::ContainerServices *m_services;
-        ComponentVar m_component_var;
-        bool m_error;
+        ComponentProxy(const ComponentProxy&) = delete;
+        ComponentProxy& operator=(const ComponentProxy&) = delete;
+
+        std::string m_IDL;
+        mutable std::string m_name;
+        maci::ContainerServices* m_services;
+        mutable bool m_error;
+        mutable ComponentVar m_component_var;
 };
 
-template <typename ComponentClass, typename ComponentVar>
-ComponentProxy<ComponentClass, ComponentVar>::ComponentProxy() :
-                                 m_name(""),
-                                 m_services(NULL),
-                                 m_error(false)
+template <typename ComponentClass, typename ComponentVar> ComponentProxy<ComponentClass, ComponentVar>::ComponentProxy() :
+    m_IDL(""),
+    m_name(""),
+    m_services(nullptr),
+    m_error(false),
+    m_component_var(ComponentClass::_nil())
 {
-    m_component_var = ComponentClass::_nil();
 }
 
-template <typename ComponentClass, typename ComponentVar>
-ComponentProxy<ComponentClass, ComponentVar>::ComponentProxy(const char * name,
-                                 maci::ContainerServices * services) :
-                                 m_name(name),
-                                 m_services(services),
-                                 m_error(false)
+template <typename ComponentClass, typename ComponentVar> ComponentProxy<ComponentClass, ComponentVar>::ComponentProxy(const char* interface, maci::ContainerServices * services) :
+    m_IDL(interface),
+    m_name(""),
+    m_services(services),
+    m_error(false),
+    m_component_var(ComponentClass::_nil())
 {
-    m_component_var = ComponentClass::_nil();
 }
 
-template <typename ComponentClass, typename ComponentVar>
-ComponentProxy<ComponentClass, ComponentVar>::~ComponentProxy()
+template <typename ComponentClass, typename ComponentVar> ComponentProxy<ComponentClass, ComponentVar>::ComponentProxy(const char* interface, maci::ContainerServices * services, const char* name) :
+    m_IDL(interface),
+    m_name(name),
+    m_services(services),
+    m_error(false),
+    m_component_var(ComponentClass::_nil())
 {
-    this->unload();
 }
 
-template <typename ComponentClass, typename ComponentVar>
-void
-ComponentProxy<ComponentClass, ComponentVar>::loadDefault()
-throw (ComponentErrors::CouldntGetComponentExImpl)
+template <typename ComponentClass, typename ComponentVar> ComponentProxy<ComponentClass, ComponentVar>::~ComponentProxy()
 {
-    if(m_name == "")
+    unload();
+}
+
+template <typename ComponentClass, typename ComponentVar> void ComponentProxy<ComponentClass, ComponentVar>::load() const
+{
+    if(m_services == nullptr)
     {
-        CUSTOM_LOG(LM_FULL_INFO, 
-                   "ComponentLoader::loadDefault",
-                   (LM_WARNING, "Trying to load component without name " )
-                   );
-        _EXCPT(ComponentErrors::CouldntGetComponentExImpl, impl,
-                   "ComponentLoader::loadDefault()");
+        CUSTOM_LOG(LM_FULL_INFO, "ComponentLoader::load", (LM_WARNING, "Trying to load component without Container Services"));
+        _EXCPT(ComponentErrors::CouldntGetComponentExImpl, impl, "ComponentLoader::load()");
         throw impl;
-        return;
     }
-    if(m_services == NULL)
+    if(!CORBA::is_nil(m_component_var) && isError())
     {
-        CUSTOM_LOG(LM_FULL_INFO, 
-                   "ComponentLoader::loadDefault",
-                   (LM_WARNING, "Trying to load component without Container Services " )
-                   );
-        _EXCPT(ComponentErrors::CouldntGetComponentExImpl, impl,
-                   "ComponentLoader::loadDefault()");
-        throw impl;
-        return;
-    }
-    if ((!CORBA::is_nil(m_component_var)) && (m_error)) { 
-    // if reference was already taken, but an error was found 
-    // dispose the reference
-        try {
+        // if reference was already taken, but an error was found, dispose the reference
+        try
+        {
             m_services->releaseComponent((const char*)m_component_var->name());
-            CUSTOM_LOG(LM_FULL_INFO, 
-                       "ComponentLoader::loadDefault",
-                       (LM_DEBUG, ("released " + this->m_name).c_str())
-                       );
-        }catch (...) { //dispose silently...if an error...no matter
+            CUSTOM_LOG(LM_FULL_INFO, "ComponentLoader::load", (LM_DEBUG, ("released " + m_name).c_str()));
+        }
+        catch(...)
+        {
+            //dispose silently...if there is an error it does not matter
         }
         m_component_var = ComponentClass::_nil();
     }
-    if (CORBA::is_nil(m_component_var)) {
-    //only if it has not been retrieved yet
-        try {
-            m_component_var = m_services->getDefaultComponent<ComponentClass>(m_name.c_str());
-            CUSTOM_LOG(LM_FULL_INFO, 
-                       "ComponentLoader::loadDefault",
-                       (LM_DEBUG, ("loaded " + this->m_name).c_str())
-                       );
-            m_error = false;
-        } catch (maciErrType::CannotGetComponentExImpl& ex) {
-            _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,
-                           Impl, ex, "ComponentLoader::loadDefault()");
+
+    if(CORBA::is_nil(m_component_var))
+    {
+        //only if it has not been retrieved yet
+        try
+        {
+            if(m_name != "")
+            {
+                m_component_var = m_services->getComponent<ComponentClass>(m_name.c_str());
+            }
+            else if(m_IDL != "")
+            {
+                // No name but IDL type was set, use getDefaultComponent and set name
+                m_component_var = m_services->getDefaultComponent<ComponentClass>(m_IDL.c_str());
+                m_name = m_component_var->name();
+            }
+            else
+            {
+                // No name and no interface found, cannot proceed
+                CUSTOM_LOG(LM_FULL_INFO, "ComponentLoader::load", (LM_WARNING, "Trying to load component without name or interface type"));
+                _EXCPT(ComponentErrors::CouldntGetComponentExImpl, impl, "ComponentLoader::load()");
+                throw impl;
+            }
+
+            CUSTOM_LOG(LM_FULL_INFO, "ComponentLoader::load", (LM_DEBUG, ("loaded " + m_name).c_str()));
+            resetError();
+        }
+        catch(maciErrType::CannotGetComponentExImpl& ex)
+        {
+            _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl, Impl, ex, "ComponentLoader::load()");
             Impl.setComponentName(m_name.c_str());
             m_component_var = ComponentClass::_nil();
-            throw Impl;     
-        } catch (maciErrType::NoPermissionExImpl& ex) {
-            _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,
-                           Impl, ex, "ComponentLoader::loadDefault()");
+            setError();
+            throw Impl;
+        }
+        catch(maciErrType::NoPermissionExImpl& ex)
+        {
+            _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl, Impl, ex, "ComponentLoader::load()");
             Impl.setComponentName(m_name.c_str());
             m_component_var = ComponentClass::_nil();
-            throw Impl;     
-        } catch (maciErrType::NoDefaultComponentExImpl& ex) {
-            _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,
-                           Impl, ex, "ComponentLoader::loadDefault()");
+            setError();
+            throw Impl;
+        }
+        catch(maciErrType::NoDefaultComponentExImpl& ex)
+        {
+            _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl, Impl, ex, "ComponentLoader::load()");
             Impl.setComponentName(m_name.c_str());
             m_component_var = ComponentClass::_nil();
-            throw Impl;     
+            setError();
+            throw Impl;
         }
     }
 }
 
-template <typename ComponentClass, typename ComponentVar>
-void
-ComponentProxy<ComponentClass, ComponentVar>::unload()
+template <typename ComponentClass, typename ComponentVar> void ComponentProxy<ComponentClass, ComponentVar>::unload() const
 {
-    if (!CORBA::is_nil(m_component_var)) { 
-        try {
-            m_services->releaseComponent((const char*)m_component_var->name());
-            CUSTOM_LOG(LM_FULL_INFO, 
-                       "ComponentLoader::loadDefault",
-                       (LM_DEBUG, ("releasing " + this->m_name).c_str())
-                       );
-        }catch (maciErrType::CannotReleaseComponentExImpl& ex) {
-            _ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,
-                           Impl,ex,"ComponentLoader::unload()");
+    if(!CORBA::is_nil(m_component_var))
+    {
+        try
+        {
+            m_services->releaseComponent(m_name.c_str());
+            CUSTOM_LOG(LM_FULL_INFO, "ComponentLoader::unload", (LM_DEBUG, ("releasing " + m_name).c_str()));
+        }
+        catch(maciErrType::CannotReleaseComponentExImpl& ex)
+        {
+            _ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl, Impl, ex, "ComponentLoader::unload()");
             Impl.setComponentName(m_name.c_str());
             CUSTOM_EXCPT_LOG(Impl, LM_WARNING);
-        }catch (...) { 
-            _EXCPT(ComponentErrors::UnexpectedExImpl, impl,
-                   "ComponentLoader::unload()");
+        }
+        catch(...)
+        {
+            _EXCPT(ComponentErrors::UnexpectedExImpl, impl, "ComponentLoader::unload()");
             CUSTOM_EXCPT_LOG(impl, LM_WARNING);
         }
+
         m_component_var = ComponentClass::_nil();
     } 
 }
 
-template <typename ComponentClass, typename ComponentVar>
-void
-ComponentProxy<ComponentClass, ComponentVar>::setComponentName(const char* name)
+template <typename ComponentClass, typename ComponentVar> void ComponentProxy<ComponentClass, ComponentVar>::setComponentInterface(const char* interface)
+{
+    if(m_IDL == "")
+    {
+        m_IDL = std::string(interface);
+    }
+    else
+    {
+        //TODO: throw exception?
+        CUSTOM_LOG(LM_FULL_INFO, "ComponentLoader::setComponentInterface", (LM_DEBUG, ("ComponentInterface already defined: " + m_IDL).c_str()));
+    }
+}
+
+template <typename ComponentClass, typename ComponentVar> void ComponentProxy<ComponentClass, ComponentVar>::setContainerServices(maci::ContainerServices* services)
+{
+    if(m_services == nullptr)
+    {
+        m_services = services;
+    }
+    else
+    {
+        //TODO: throw exception?
+        CUSTOM_LOG(LM_FULL_INFO, "ComponentLoader::setContainerServices", (LM_DEBUG, "ContainerServices already defined"));
+    }
+}
+
+template <typename ComponentClass, typename ComponentVar> void ComponentProxy<ComponentClass, ComponentVar>::setComponentName(const char* name)
 {
     if(m_name == "")
+    {
         m_name = std::string(name);
-    else{
+    }
+    else
+    {
         //TODO: throw exception?
-        CUSTOM_LOG(LM_FULL_INFO, 
-                   "ComponentLoader::setComponentName",
-                   (LM_DEBUG, ("ComponentName already defined: " + this->m_name).c_str())
-                   );
+        CUSTOM_LOG(LM_FULL_INFO, "ComponentLoader::setComponentName", (LM_DEBUG, ("Component name already defined: " + m_name).c_str()));
     }
 }
 
-template <typename ComponentClass, typename ComponentVar>
-void
-ComponentProxy<ComponentClass, ComponentVar>::setContainerServices(
-    maci::ContainerServices* services)
+template <typename ComponentClass, typename ComponentVar> ComponentVar& ComponentProxy<ComponentClass, ComponentVar>::operator->() const
 {
-    if(m_services == NULL)
-        m_services = services;
-    else{
-        //TODO: throw exception?
-        CUSTOM_LOG(LM_FULL_INFO, 
-                   "ComponentLoader::setContainerServices",
-                   (LM_DEBUG, "ContainerServices already defined")
-                   );
-    }
-}
-
-template <typename ComponentClass, typename ComponentVar>
-ComponentVar&
-ComponentProxy<ComponentClass, ComponentVar>::operator->()
-throw (ComponentErrors::CouldntGetComponentExImpl)
-{
-    loadDefault();
-    //return m_component_var.out();
+    load();
     return m_component_var;
 }
 
-
 #endif
-

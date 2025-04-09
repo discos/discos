@@ -2,7 +2,9 @@
 #include <Definitions.h>
 #include <cstdio>
 
-int actuatorsInCircle[] = {0,24,48,48,48,48,48,4};
+//int actuatorsInCircle[] = {0,24,48,48,48,48,48,4};
+// SOLO a Noto nel primo giro non ci sono attuatori
+int actuatorsInCircle[] = {0,0,48,48,48,48,48,4};
 
 CNotoActiveSurfaceBossCore::CNotoActiveSurfaceBossCore(ContainerServices *service, acscomponent::ACSComponentImpl *me) :
     m_services(service),
@@ -131,7 +133,7 @@ void CNotoActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetCom
         //CIRATools::Wait(LOOPTIME);
     }
 
-    for (int i = 1; i <= CIRCLES; i++)
+    for (int i = 2; i <= CIRCLES; i++)
     {
         for (int l = 1; l <= actuatorsInCircle[i]; l++)
         {
@@ -158,7 +160,7 @@ void CNotoActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetCom
     {
         m_status=Management::MNG_FAILURE;
     }
-
+*/
     m_antennaBoss = Antenna::AntennaBoss::_nil();
     try
     {
@@ -171,7 +173,7 @@ void CNotoActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetCom
         m_status=Management::MNG_WARNING;
         throw Impl;
     }
-*/
+
     m_enable = true;
     ACS_LOG(LM_FULL_INFO, "CNotoActiveSurfaceBossCore::execute()", (LM_INFO,"CNotoActiveSurfaceBossCore::NotoActiveSurfaceBoss_LOCATED"));
 }
@@ -206,7 +208,6 @@ void CNotoActiveSurfaceBossCore::cleanUp()
             {
                 if(!CORBA::is_nil(usd[circleIndex][usdCircleIndex]))
                 {
-                    printf("releasing usd = %s\n", serial_usd);
                     m_services->releaseComponent((const char*)serial_usd);
                 }
             }
@@ -240,7 +241,7 @@ void CNotoActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius
     if(circle == 0 && actuator == 0 && radius == 0) // ALL
     {
         printf("top.....\n");
-        for (i = 1; i <= CIRCLES; i++)
+        for (i = 2; i <= CIRCLES; i++)
         {
             for (l = 1; l <= actuatorsInCircle[i]; l++)
             {
@@ -261,7 +262,7 @@ void CNotoActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius
         ACE_OS::sleep (90);
 
         printf("move to upper mechanical position.....\n");
-        for (i = 1; i <= CIRCLES; i++)
+        for (i = 2; i <= CIRCLES; i++)
         {
             for (l = 1; l <= actuatorsInCircle[i]; l++)
             {
@@ -282,7 +283,7 @@ void CNotoActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius
         ACE_OS::sleep (5);
 
         /*printf("stop.....\n");
-        for (i = 1; i <= CIRCLES; i++)
+        for (i = 2; i <= CIRCLES; i++)
         {
             for (l = 1; l <= actuatorsInCircle[i]; l++)
             {
@@ -303,7 +304,7 @@ void CNotoActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius
         ACE_OS::sleep (1);*/
 
         printf("calibration.....\n");
-        for (i = 1; i <= CIRCLES; i++)
+        for (i = 2; i <= CIRCLES; i++)
         {
             for (l = 1; l <= actuatorsInCircle[i]; l++)
             {
@@ -324,7 +325,7 @@ void CNotoActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius
         ACE_OS::sleep (15);
 
         /*printf("stop.....\n");
-        for (i = 1; i <= CIRCLES; i++)
+        for (i = 2; i <= CIRCLES; i++)
         {
             for (l = 1; l <= actuatorsInCircle[i]; l++)
             {
@@ -345,7 +346,7 @@ void CNotoActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius
         ACE_OS::sleep (1);*/
 
         printf ("calibration verification.....\n");
-        for (i = 1; i <= CIRCLES; i++)
+        for (i = 2; i <= CIRCLES; i++)
         {
             for (l = 1; l <= actuatorsInCircle[i]; l++)
             {
@@ -366,7 +367,7 @@ void CNotoActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius
         ACE_OS::sleep (150);
 
         /*printf("stop.....\n");
-        for (i = 1; i <= CIRCLES; i++)
+        for (i = 2; i <= CIRCLES; i++)
         {
             for (l = 1; l <= actuatorsInCircle[i]; l++)
             {
@@ -387,7 +388,7 @@ void CNotoActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius
         ACE_OS::sleep (1);*/
 
         printf ("write calibration results.....\n");
-        for (i = 1; i <= CIRCLES; i++)
+        for (i = 2; i <= CIRCLES; i++)
         {
             for (l = 1; l <= actuatorsInCircle[i]; l++)
             {
@@ -824,7 +825,7 @@ void CNotoActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius
     if(circle == 0 && actuator == 0 && radius == 0) // ALL
     {
         int i, l;
-        for (i = 1; i <= CIRCLES; i++)
+        for (i = 2; i <= CIRCLES; i++)
         {
             for (l = 1; l <= actuatorsInCircle[i]; l++)
             {
@@ -963,7 +964,7 @@ void CNotoActiveSurfaceBossCore::calVer (int circle, int actuator, int radius) t
 /*
     if(circle == 0 && actuator == 0 && radius == 0) // ALL
     {
-        for (int i = 1; i <= CIRCLES; i++)
+        for (int i = 2; i <= CIRCLES; i++)
         {
             for (int l = 1; l <= actuatorsInCircle[i]; l++)
             {
@@ -1181,7 +1182,7 @@ void CNotoActiveSurfaceBossCore::onewayAction(ActiveSurface::TASOneWayAction act
 
     if(circle == 0 && actuator == 0 && radius == 0) // ALL
     {
-        for (int i = 1; i <= CIRCLES; i++)
+        for (int i = 2; i <= CIRCLES; i++)
         {
             for (int l = 1; l <= actuatorsInCircle[i]; l++)
             {
@@ -1337,7 +1338,7 @@ void CNotoActiveSurfaceBossCore::workingActiveSurface() throw (ComponentErrors::
 
 void CNotoActiveSurfaceBossCore::asSetLUT(const char *newlut)
 {
-    m_lut= (CDBPATH + "alma/AS/" + newlut).c_str();
+    m_lut= std::string(CDBPATH + "alma/AS/" + newlut);
     m_newlut = true;
 }
 
@@ -1355,22 +1356,23 @@ void CNotoActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& new
     if(all_sectors) // USD tables has not been loaded yet
     {
         ifstream usdCorrections (m_lut);
-        //ifstream usdCorrections (USDTABLECORRECTIONS);
         if(!usdCorrections)
         {
-            ACS_SHORT_LOG ((LM_INFO, "File %s not found", m_lut));
-            //ACS_SHORT_LOG ((LM_INFO, "File %s not found", USDTABLECORRECTIONS));
-            exit(-1);
+            ACS_SHORT_LOG ((LM_INFO, "File %s not found", m_lut.c_str()));
+//            exit(-1);
         }
         actuatorsCorrections.length(NPOSITIONS);
-        for (int i = 1; i <= CIRCLES; i++)
+        for (int i = 2; i <= CIRCLES; i++)
         {
             for (int l = 1; l <= actuatorsInCircle[i]; l++)
             {
+                //printf("i = %d, l = %d, ",i,l);
                 for (int s = 0; s < NPOSITIONS; s++)
                 {
                     usdCorrections >> actuatorsCorrections[s];
+                //    printf("corr = %f ", actuatorsCorrections[s]);
                 }
+                //printf("\n");
                 if(!CORBA::is_nil(usd[i][l]))
                 {
                     usd[i][l]->posTable(actuatorsCorrections, NPOSITIONS, DELTAEL, THRESHOLDPOS);
@@ -1381,7 +1383,7 @@ void CNotoActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& new
         usdCounter = 0;
         for(unsigned int i = 0; i < SECTORS; i++)
         {
-            m_sector[i] = false;
+//          m_sector[i] = false;
             usdCounter += usdCounters[i];
         }
 
@@ -1616,7 +1618,7 @@ void CNotoActiveSurfaceBossCore::asStatus4GUIClient(ACS::longSeq& status) throw 
     status.length(lastUSD);
     unsigned int i = 0;
 
-    for (int circle = 1; circle <= CIRCLES; circle++)
+    for (int circle = 2; circle <= CIRCLES; circle++)
     {
         for (int actuator = 1; actuator <= actuatorsInCircle[circle]; actuator++)
         {

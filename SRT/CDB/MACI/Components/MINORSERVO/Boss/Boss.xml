@@ -6,10 +6,9 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               
     Name="Boss"    
-    Code="MinorServoBossImpl"
+    Code="SRTMinorServoBossImpl"
     ImplLang="cpp"
-    Type="IDL:alma/MinorServo/MinorServoBoss:1.0"
-    Container="MinorServoBossContainer"
-	Default="true"
-
+    Type="IDL:alma/MinorServo/SRTMinorServoBoss:1.0"
+    Container="MinorServoContainer"
+    Default="true"
 />

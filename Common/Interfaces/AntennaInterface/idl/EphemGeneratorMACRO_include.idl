@@ -1,3 +1,6 @@
+#ifndef _EPHEMGENERATORMACRO_IDL_
+#define _EPHEMGENERATORMACRO_IDL_
+
 #include <ManagmentDefinitions.idl>
 
 /** @def DEFATTRIBUTES(NAME)
@@ -43,3 +46,4 @@
 
 #define ENDDEFATTRIBUTES }
 
+#endif

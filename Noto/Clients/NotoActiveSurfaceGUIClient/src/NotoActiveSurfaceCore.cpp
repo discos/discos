@@ -59,8 +59,6 @@ void NotoActiveSurfaceCore::run(void)
     Management::ROTSystemStatus_var bossStatus_var;
     ActiveSurface::ROTASProfile_var asProfile_var;
 
-	ACS_SHORT_LOG((LM_INFO, "NotoActiveSurfaceCore %s ","UNO"));
-
     while (monitor == true)
     {
         TIMEVALUE clock;
@@ -73,10 +71,12 @@ void NotoActiveSurfaceCore::run(void)
         asProfile_var = tASBoss->pprofile();
         emit setGUIasProfileCode((int)asProfile_var->get_sync(completion.out()));
 
-        ACS::longSeq_var asStatus;
-        tASBoss->asStatus4GUIClient(asStatus);
+        //ACS::longSeq_var asStatus;
+        CORBA::Long usdStatus;
+        //tASBoss->asStatus4GUIClient(asStatus);
+        //tASBoss->usdStatus4GUIClient(asStatus);
 
-        for(unsigned int actuator = 1, i, l; actuator < 265; actuator++, l++)
+        for(unsigned int actuator = 1, i, l; actuator < 269; actuator++, l++)
         {
             if (actuator >= 1 && actuator <= 24) // 1 circle
                 i = 1;
@@ -90,27 +90,51 @@ void NotoActiveSurfaceCore::run(void)
                 i = 5;
             if (actuator >= 217 && actuator <= 264) // 6 circle
                 i = 6;
+            if (actuator >= 265 && actuator <= 268) // 7 circle
+                i = 7;
             if (actuator == 1 || actuator == 25 || actuator == 73 ||
-                actuator == 121 || actuator == 169 || actuator == 217)
+                actuator == 121 || actuator == 169 || actuator == 217 || actuator == 265)
             {
                 l = 1;
                 CIRATools::Wait(100000); //100ms
             }
 
-            CORBA::Long status = asStatus[actuator - 1];
+            //CORBA::Long status;
+            //if (i > 1)
+            //    status = asStatus[actuator - 1 - 24];
 
             bool active;
-            if ((status & ENBL) == 0)
+            try {
+                tASBoss->usdStatus4GUIClient(i, l, usdStatus);
+                if ((usdStatus & ENBL) == 0) 
+                    active = false;
+                else
+                    active = true;
+                }
+                catch (ComponentErrors::ComponentNotActiveExImpl& ex) {
+                    active = false;
+                    ex.log(LM_DEBUG);
+                }
+                catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+                    active = false;
+                    ex.log(LM_DEBUG);
+                }
+            catch (CORBA::SystemException& sysEx) {
                 active = false;
-            else
+                _EXCPT(ClientErrors::CORBAProblemExImpl,impl,"NotoActiveSurfaceGUIClient::NotoActiveSurfaceCore::setactuator()");
+                impl.setName(sysEx._name());
+                impl.setMinor(sysEx.minor());
+                impl.log();
+            }
+            catch (...) {
+                active = false;
+                _EXCPT(ClientErrors::UnknownExImpl,impl,"NotoActiveSurfaceGUIClient::NotoActiveSurfaceCore::setactuator()");
+                impl.log();
+            }
+            if (i == 1)
                 active = true;
-
             emit setGUIActuatorColor(i, l, active, true);
-
-	ACS_SHORT_LOG((LM_INFO, "NotoActiveSurfaceCore %s ","DUE"));
         }
-
-	ACS_SHORT_LOG((LM_INFO, "NotoActiveSurfaceCore %s ","TRE"));
 
         /*CIRATools::getTime(clock);
         ACS::Time t1 = clock.value().value;

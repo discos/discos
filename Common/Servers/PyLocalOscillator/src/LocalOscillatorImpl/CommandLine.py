@@ -1,3 +1,4 @@
+from __future__ import print_function
 import socket
 import time
 
@@ -28,8 +29,8 @@ class CommandLine:
      
        try: 
           self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-       except socket.error , msg:
-          print msg
+       except socket.error as msg:
+          print(msg)
           self.sock=None
 
    def __del__(self):
@@ -48,9 +49,9 @@ class CommandLine:
          msg ='OK' 
          self.sendCmd('*CLS\n')
          return msg
-      except socket.error , msg:
-         print msg
-         print "connect error: " ,msg
+      except socket.error as msg:
+         print(msg)
+         print("connect error: " ,msg)
          return msg
    
    def init(self,reply):
@@ -69,8 +70,8 @@ class CommandLine:
             
            return msg,err
            
-       except socket.error , msg:
-          print "connect error: " ,msg
+       except socket.error as msg:
+          print("connect error: " ,msg)
           return msg,False
           self.sock=None
    
@@ -83,19 +84,19 @@ class CommandLine:
           commands=msg.split(';')
           val=int(commands[0])# unit is MHZ,
           err_msg=commands[1]
-          print "query err",msg
+          print("query err",msg)
           if err_msg != '0,\"No error\"\n': 
-                print "exception",err_msg
+                print("exception",err_msg)
                 raise CommandLineError(err_msg)   
           return err_msg,val
    
-       except socket.error , msg:
-          print "connect error: " ,msg
+       except socket.error as msg:
+          print("connect error: " ,msg)
           return msg,-1
           self.sock=None
-       except CommandLineError,msg:
+       except CommandLineError as msg:
           raise
-       except ValueError,msg:
+       except ValueError as msg:
           raise CommandLineError(msg)   
    
      
@@ -111,8 +112,8 @@ class CommandLine:
             
            return msg,err
            
-       except socket.error , msg:
-          print "connect error: " ,msg
+       except socket.error as msg:
+          print("connect error: " ,msg)
           return msg,False
           self.sock=None
    
@@ -125,19 +126,19 @@ class CommandLine:
           commands=msg.split(';')
           val=int(commands[0])/1e6 # unit is MHZ,
           err_msg=commands[1]
-          print "query err",msg
+          print("query err",msg)
           if err_msg != '0,\"No error\"\n': 
-                print "exception",err_msg
+                print("exception",err_msg)
                 raise CommandLineError(err_msg)   
           return err_msg,val
    
-        except socket.error , msg:
-          print "connect error: " ,msg
+        except socket.error as msg:
+          print("connect error: " ,msg)
           return msg,-1
           self.sock=None
-        except CommandLineError,msg:
+        except CommandLineError as msg:
           raise
-        except ValueError,msg:
+        except ValueError as msg:
           raise CommandLineError(msg)   
    
    def readStatus(self):
@@ -147,13 +148,13 @@ class CommandLine:
        try:
            
           msg=self.query(QUERYERROR)
-          print "query err",msg
+          print("query err",msg)
           if msg != '0,\"No error\"\n': 
-                print "exception",msg
+                print("exception",msg)
                 raise CommandLineError(msg)   
           return msg
-       except socket.error , msg:
-          print "connect error: " ,msg
+       except socket.error as msg:
+          print("connect error: " ,msg)
           return msg
           
    def rfOn(self):
@@ -168,11 +169,11 @@ class CommandLine:
    def sendCmd(self,msg):
      
        try:
-           self.sock.sendall(msg)
+           self.sock.sendall(msg.encode())
            return True
        
-       except socket.error , msg:
-          print "connect error: " ,msg
+       except socket.error as msg:
+          print("connect error: " ,msg)
           raise msg
           self.sock=None
           return False
@@ -183,13 +184,13 @@ class CommandLine:
 
    def query(self,cmd):
        try:
-           self.sock.sendall(cmd) 
-           msg = self.sock.recv(1024) 
-           print 'query:received:',msg
+           self.sock.sendall(cmd.encode())
+           msg = self.sock.recv(1024).decode()
+           print('query:received:',msg)
            return msg
        
-       except socket.error , msg:
-          print "connect error: " ,msg
+       except socket.error as msg:
+          print("connect error: " ,msg)
           raise
           return msg
    

@@ -30,6 +30,7 @@
 			<xs:element name="enabled" type="mng:BooleanType" />
 			<xs:element name="pprofile" type="as:ActiveSurfaceProfileType" />	
 			<xs:element name="tracking" type="mng:BooleanType" />
+			<xs:element name="LUT_filename" type="baci:ROstring" />
 		</xs:sequence>
         <!-- sleep time of the watching thread (microseconds), this is the thread that keeps data up to date -->
         <xs:attribute name="WatchingThreadTime" type="xs:unsignedLong" use="required" />

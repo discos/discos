@@ -50,8 +50,13 @@ CCommandLine::CCommandLine(ContainerServices *service): CSocket(),
 
 	// SRT configurations
 	m_SK00=false; m_SK00S=false;
+	m_SK01=false; m_SK01S=false;
+	m_SK04=false; m_SK04S=false;
+	m_SK03=false; m_SK03S=false;
+	m_SK06=false; m_SK06S=false;
 	m_SK77=false; m_SK77S=false;
-	m_SC00=false; m_SC00S=false;
+	m_SCC00=false; m_SCC00S=false;
+	m_SCH00=false; m_SCH00S=false;
 	m_SL00=false; m_SL00S=false;
 	m_SP00=false; m_SP00S=false;
 	m_stationSRT=false;
@@ -205,6 +210,12 @@ void CCommandLine::stopDataAcquisition() throw (BackendsErrors::ConnectionExImpl
 	clearStatusField(CCommandLine::SUSPEND); // unsets the component status to transfer job suspended......
 }
 
+void CCommandLine::backendPark() throw (BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
+		ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::NotAllowedExImpl,BackendsErrors::BackendFailExImpl)
+{
+	ACS_LOG(LM_FULL_INFO,"CCommandLine::backendPark()",(LM_NOTICE,"backendPark"));
+}
+
 void CCommandLine::stopDataAcquisitionForced() throw (BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
 		ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::NotAllowedExImpl)
 {
@@ -352,241 +363,286 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 		BackendsErrors::BackendBusyExImpl)
 {
 	AUTO_TRACE("CCommandLine::setConfiguration()");
-	double newBW,newSR,newFreq;
-	long newBins, newFeed, newPol;
+	std::vector<double> newBW(m_sectionsNumber);
+	std::vector<double> newSR(m_sectionsNumber);
+	std::vector<double> newFreq(m_sectionsNumber);
+	std::vector<long> newBins(m_sectionsNumber);
+	std::vector<long> newFeed(m_sectionsNumber);
+	std::vector<long> newPol(m_sectionsNumber);
 	double filter;
 	int j;
+	size_t minSection, maxSection;
 
-    if (m_SardaraInitialized == true) {
-        /*	if (getIsBusy()) {
+	if (m_SardaraInitialized == true) {
+		/*	if (getIsBusy()) {
 		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::setConfiguration()");
 		throw impl;
-	    }*/
-	    if (inputId>=0) {  //check the section id is in valid ranges
-		    //if (inputId>=m_sectionsNumber) {
-		    if (inputId>m_sectionsNumber) {
-			    _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCommandLine::setConfiguration()");
-		    	impl.setReason("the section identifier is out of range");
-			    throw impl;
-		    }
-	    }
-	    else {
-		    _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCommandLine::setConfiguration()");
-		    impl.setReason("the section identifier is out of range");
-		    throw impl;
-	    }
+		}*/
+		if (inputId>=0) {  //check the section id is in valid ranges
+			if (inputId>=m_sectionsNumber) {
+			//if (inputId>m_sectionsNumber) {
+				_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCommandLine::setConfiguration()");
+				impl.setReason("the section identifier is out of range");
+				throw impl;
+			}
+			minSection=inputId;
+			maxSection=minSection+1;
+		}
+		else if (inputId==-1)
+		{
+			minSection=0;
+			maxSection=m_sectionsNumber;
+		}
+		else {
+			_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCommandLine::setConfiguration()");
+			impl.setReason("the section identifier is out of range");
+			throw impl;
+		}
 
-	    if (bw>=0) { // the user ask for a new value
-		    if (bw<MIN_BAND_WIDTH)  {
-			    _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setConfiguration()");
-			    impl.setValueName("bandWidth");
-			    impl.setValueLimit(MIN_BAND_WIDTH);
-			    throw impl;			
-		    }
-		    else if (bw>MAX_BAND_WIDTH) {
-			    _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setConfiguration()");
-			    impl.setValueName("bandWidth");
-			    impl.setValueLimit(MAX_BAND_WIDTH);
-			    throw impl;						
-		    }
-		    newBW=bw;
-	    }
-	    else { // else keep the present value
-		    newBW=m_bandWidth[inputId];
-	    }
+		for(size_t i=minSection; i<maxSection; i++)
+		{
+			if (bw>=0) { // the user ask for a new value
+				if (bw<MIN_BAND_WIDTH)  {
+					_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setConfiguration()");
+					impl.setValueName("bandWidth");
+					impl.setValueLimit(MIN_BAND_WIDTH);
+					throw impl;
+				}
+				else if (bw>MAX_BAND_WIDTH) {
+					_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setConfiguration()");
+					impl.setValueName("bandWidth");
+					impl.setValueLimit(MAX_BAND_WIDTH);
+					throw impl;
+				}
+				newBW[i]=bw;
+			}
+			else { // else keep the present value
+				newBW[i]=m_bandWidth[i];
+			}
 
-	    if (sr>=0) {// the user ask for a new value
-		    if ((sr > MAX_SAMPLE_RATE) || (sr != 2*newBW)) {
-			    _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setConfiguration()");
-			    impl.setValueName("sampleRate");
-			    impl.setValueLimit(MAX_SAMPLE_RATE);
-			    throw impl;
-		    }
-		    newSR=sr;
-	    }
-	    else {
-		    newSR=m_sampleRate[inputId];
-	    }
+			if (sr>=0) {// the user ask for a new value
+				if ((sr > MAX_SAMPLE_RATE) || (sr != 2*newBW[i])) {
+					_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setConfiguration()");
+					impl.setValueName("sampleRate");
+					impl.setValueLimit(MAX_SAMPLE_RATE);
+					throw impl;
+				}
+				newSR[i]=sr;
+			}
+			else {
+				newSR[i]=m_sampleRate[i];
+			}
 
-    	if (freq >= 0) { // the user ask for a new value
-        	if (freq >= MIN_FREQUENCY && freq <= MAX_FREQUENCY) {
-        		newFreq = freq;
-        	}
-        	else {
-        		_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setConfiguration()");
-			    impl.setValueName("freq");
-			    throw impl;
-        	}
-	    }
-	    else
-        	newFreq = m_frequency[inputId];
+			if (freq >= 0) { // the user ask for a new value
+				if (freq >= MIN_FREQUENCY && freq <= MAX_FREQUENCY) {
+					newFreq[i] = freq;
+				}
+				else {
+					_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setConfiguration()");
+					impl.setValueName("freq");
+					throw impl;
+				}
+			}
+			else
+				newFreq[i] = m_frequency[i];
 
-	    if (feed >= 0) { // the user ask for a new value
-        	if (feed != 0) { // BUT for the moment is it possible to use ONLY feed 0
-        		_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setConfiguration()");
-		    	impl.setValueName("feed");
-			    throw impl;
-        	}
-        	newFeed = feed;
-    	}
-    	else
-        	newFeed = m_feedNumber[inputId];
-    
-	    if (pol >= 0) { // the user ask for a new value
-		    if ((pol == 0) || (pol == 1)) { // LCP or RCP
-			    newPol = pol;
-		    }
-		    if (pol == 2) { // FULL STOKES
-			    newPol = pol;
-		    }
-		    if (pol >= 3) {
-			    _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setConfiguration()");
-		    	impl.setValueName("pol");
-		    	throw impl;
-		    }
-            newPol = pol;
-	    }
-	    else
-		    newPol = m_polarization[inputId];
+			if (feed >= 0) { // the user ask for a new value
+				if (feed != 0) { // BUT for the moment is it possible to use ONLY feed 0
+					_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setConfiguration()");
+					impl.setValueName("feed");
+					throw impl;
+				}
+				newFeed[i] = feed;
+			}
+			else
+				newFeed[i] = m_feedNumber[i];
 
-    	if (bins>=0) { // the user ask for a new value
-	        if (bins != MIN_BINS && bins != MAX_BINS) {
-			    _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setConfiguration()");
-		   	    impl.setValueName("bins");
-                /*if (bins != MIN_BINS)
-		            impl.setValue(MIN_BINS);
-                if (bins != MAX_BINS)
-		            impl.setValue(MAX_BINS);*/
-		    	throw impl;						
-        	}
-        	newBins=bins;
-	    }
-    	else
-        	newBins = m_bins[inputId];
+			if (pol >= 0) { // the user ask for a new value
+				if ((pol == 0) || (pol == 1)) { // LCP or RCP
+					newPol[i] = pol;
+				}
+				if (pol == 2) { // FULL STOKES
+					newPol[i] = pol;
+				}
+				if (pol >= 3) {
+					_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setConfiguration()");
+					impl.setValueName("pol");
+					throw impl;
+				}
+				newPol[i] = pol;
+			}
+			else
+				newPol[i] = m_polarization[i];
 
-	    if (m_stationSRT == true) {
-            try {
-			    Message request = Command::setSection(inputId, newFreq, newBW, newFeed, newPol, newSR, newBins);
-                Message reply = sendBackendCommand(request);
-                if (reply.is_success_reply()) {
-                    for (j=0;j<m_sectionsNumber;j++)
-                        m_sampleRate[j]=newSR; //the given sample rate is taken also for all the others
-                	m_commonSampleRate=newSR;
-                	if (m_stokes==true) {
-					    m_frequency[2*inputId]=newFreq;
-                    	m_frequency[2*inputId+1]=newFreq;
-                    	m_bandWidth[2*inputId]=newBW;
-                    	m_bandWidth[2*inputId+1]=newBW;
-                	}
-                	else {
-                        m_frequency[inputId]=newFreq;
-                    	m_bandWidth[inputId]=newBW;
-                	}
-                	m_feedNumber[inputId]=newFeed;
-                	m_bins[inputId]=newBins;
-                	m_polarization[inputId]=newPol;
-                	IRA::CString temp;
-                	if (m_polarization[inputId]==Backends::BKND_LCP)
-                        temp="LCP";
-                	else if (m_polarization[inputId]==Backends::BKND_RCP)
-                        temp="RCP";
-                	else
-                        temp="FULL_STOKES";
-                	ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"SECTION_CONFIGURED %ld,FREQ=%lf,BW=%lf,FEED=%ld,POL=%s,SR=%lf,BINS=%ld",inputId,m_frequency[inputId],newBW,m_feedNumber[inputId], (const char *)temp,newSR,m_bins[inputId]));		
-                	if (m_CK == true) {
-                        if (newBW==420.00)
-                       	    filter=300.00;
-                        if (newBW==1500.00)
-                       	    filter=1250.00;
-                        if (newBW==2300.00)
-                       	    filter=2350.00;
-                        if (newBW == 420.00 || newBW == 1500.00 || newBW == 2300.00) {
-                       	    for (j=0; j<m_inputsNumber; j++)
-                                m_totalPower->setSection(j,-1, filter, -1, -1, -1, -1);
-                		   		ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"TOTALPOWER_FILTER_CONFIGURED %ld,FILTER=%lf",inputId,filter));
-                        }
-            		}
-                    /*if ((m_SL00==true || m_SL00S==true) && m_stationSRT == true) {
-                        try {
-                            if (newBW==128.00) {
-                                m_ifDistributor->setup("BW-NARROW");
-                                ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"IFDISTRIBUTOR_FILTER_BW-NARROW"));
-                            }
-                            if (newBW==420.00) {
-                                m_ifDistributor->setup("BW-MEDIUM");
-                                ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"IFDISTRIBUTOR_FILTER_BW-MEDIUM"));
-                            }
-                            if (newBW==500.00) {
-                                m_ifDistributor->setup("BW-WIDE");
-                                ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"IFDISTRIBUTOR_FILTER_BW-WIDE"));
-                            }
-                            if (newBW==512.00) {
-                                m_ifDistributor->setup("BW-UNFILTERED");
-                                ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"IFDISTRIBUTOR_FILTER_BW-UNFILTERED"));
-                            }
-                        }
-                        catch (...) {
-	                        _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCommandLine::setAttenuation()");
-		                    impl.log(LM_ERROR);
-	                    }
-                    }*/
-        	    }
-	        }
-            catch (...) {
-                ACS_LOG(LM_FULL_INFO,"CCommandLine::setSection()",(LM_NOTICE,"BACKEND_SARDARA_SET_SECTION ERROR")); 
-            }
-        }
+			if (bins>=0) { // the user ask for a new value
+				if (bins != MIN_BINS && bins != MAX_BINS) {
+					_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setConfiguration()");
+					impl.setValueName("bins");
+					/*if (bins != MIN_BINS)
+						impl.setValue(MIN_BINS);
+					if (bins != MAX_BINS)
+						impl.setValue(MAX_BINS);*/
+					throw impl;
+				}
+				newBins[i]=bins;
+			}
+			else
+				newBins[i] = m_bins[i];
+		}
 
-        if (m_stationMEDNT == true) {
-	        try {
-                Message request = Command::setSection(inputId, newFreq, newBW, newFeed, newPol, newSR, newBins);
-                Message reply = sendBackendCommand(request);
-                if (reply.is_success_reply()) {
-		            for (int j=0;j<m_sectionsNumber;j++)
-                        m_sampleRate[j]=newSR; //the given sample rate is taken also for all the others
-		            m_commonSampleRate=newSR;
-                    if (m_stokes==true) {
-                        m_frequency[2*inputId]=newFreq;
-                        m_frequency[2*inputId+1]=newFreq;
-                        m_bandWidth[2*inputId]=newBW;
-                        m_bandWidth[2*inputId+1]=newBW;
-                    }
-                    else {
-                        m_frequency[inputId]=newFreq;
-                        m_bandWidth[inputId]=newBW;
-                    }
-                    m_feedNumber[inputId]=newFeed;
-                    m_bins[inputId]=newBins;
-		            m_polarization[inputId]=newPol;
-		            IRA::CString temp;
-		            if (m_polarization[inputId]==Backends::BKND_LCP)
-			            temp="LCP";
-                    else if (m_polarization[inputId]==Backends::BKND_RCP)
-			            temp="RCP";
-                    else
-        	            temp="FULL_STOKES";
-		            ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"SECTION_CONFIGURED %ld,FREQ=%lf,BW=%lf,FEED=%ld,POL=%s,SR=%lf,BINS=%ld",inputId,m_frequency[inputId],newBW,m_feedNumber[inputId], (const char *)temp,newSR,m_bins[inputId]));
-                    if (m_CK==true) {
-                        if (newBW==420.00)
-                            filter=300.00;
-                        if (newBW==1500.00)
-                            filter=1250.00;
-                        if (newBW==2300.00)
-                            filter=2350.00;
-                        if (newBW == 420.00 || newBW == 1500.00 || newBW == 2300.00) {
-                       	    for (j=0; j<m_inputsNumber; j++) {
-                                m_totalPower->setSection(j,-1, filter, -1, -1, -1, -1);
-                		   		ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"TOTALPOWER_FILTER_CONFIGURED %ld,FILTER=%lf",inputId,filter));
-                            }
-                        }
-                    }
-                }
-            }
-            catch (...) {
-                ACS_LOG(LM_FULL_INFO,"CCommandLine::setSection()",(LM_NOTICE,"BACKEND_SARDARA_SET_SECTION ERROR")); 
-            }
-        }
-    }
+		for(size_t i=minSection; i<maxSection; i++)
+		{
+			if (m_stationSRT == true) {
+				try {
+					Message request = Command::setSection(i, newFreq[i], newBW[i], newFeed[i], newPol[i], newSR[i], newBins[i]);
+					Message reply = sendBackendCommand(request);
+					if (reply.is_success_reply()) {
+						for (j=0;j<m_sectionsNumber;j++)
+							m_sampleRate[j]=newSR[i]; //the given sample rate is taken also for all the others
+						m_commonSampleRate=newSR[i];
+						if (m_stokes==true) {
+							m_frequency[2*i]=newFreq[i];
+							m_frequency[2*i+1]=newFreq[i];
+							m_bandWidth[2*i]=newBW[i];
+							m_bandWidth[2*i+1]=newBW[i];
+						}
+						else {
+							m_frequency[i]=newFreq[i];
+							m_bandWidth[i]=newBW[i];
+						}
+						m_feedNumber[i]=newFeed[i];
+						m_bins[i]=newBins[i];
+						m_polarization[i]=newPol[i];
+						IRA::CString temp;
+						if (m_polarization[i]==Backends::BKND_LCP)
+							temp="LCP";
+						else if (m_polarization[i]==Backends::BKND_RCP)
+							temp="RCP";
+						else
+							temp="FULL_STOKES";
+						ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"SECTION_CONFIGURED %ld,FREQ=%lf,BW=%lf,FEED=%ld,POL=%s,SR=%lf,BINS=%ld",i,m_frequency[i],newBW[i],m_feedNumber[i], (const char *)temp,newSR[i],m_bins[i]));
+						if (m_CK == true) {
+							if (newBW[i]==420.00)
+								filter=300.00;
+							if (newBW[i]==1500.00)
+								filter=1250.00;
+							if (newBW[i]==2300.00)
+								filter=2350.00;
+							if (newBW[i] == 420.00 || newBW[i] == 1500.00 || newBW[i] == 2300.00) {
+                                if(m_stokes)
+                                {
+                                    // Configure the TotalPower sections corresponding to the selected Sardara section (should be equivalent to the feed)
+                                    // e.g.: if the selected Sardara section is 0 we will configure TotalPower 0 and 1 sections
+                                    //       if the selected Sardara section is 1 we will configure TotalPower 2 and 3 sections
+                                    //       ...
+									m_totalPower->setSection(i * 2, -1, filter, -1, -1, -1, -1);
+								    ACS_LOG(LM_FULL_INFO, "CCommandLine::setConfiguration()", (LM_NOTICE, "TOTALPOWER_FILTER_CONFIGURED %ld, FILTER=%lf", i*2, filter));
+									m_totalPower->setSection((i * 2) + 1, -1, filter, -1, -1, -1, -1);
+								    ACS_LOG(LM_FULL_INFO, "CCommandLine::setConfiguration()", (LM_NOTICE, "TOTALPOWER_FILTER_CONFIGURED %ld, FILTER=%lf", (i*2)+1, filter));
+                                }
+                                else
+                                {
+                                    // Use the same section identifier for TotalPower
+									m_totalPower->setSection(i, -1, filter, -1, -1, -1, -1);
+								    ACS_LOG(LM_FULL_INFO, "CCommandLine::setConfiguration()", (LM_NOTICE, "TOTALPOWER_FILTER_CONFIGURED %ld, FILTER=%lf", i, filter));
+                                }
+							}
+						}
+						/*if ((m_SL00==true || m_SL00S==true) && m_stationSRT == true) {
+							try {
+								if (newBW[i]==128.00) {
+									m_ifDistributor->setup("BW-NARROW");
+									ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"IFDISTRIBUTOR_FILTER_BW-NARROW"));
+								}
+								if (newBW[i]==420.00) {
+									m_ifDistributor->setup("BW-MEDIUM");
+									ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"IFDISTRIBUTOR_FILTER_BW-MEDIUM"));
+								}
+								if (newBW[i]==500.00) {
+									m_ifDistributor->setup("BW-WIDE");
+									ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"IFDISTRIBUTOR_FILTER_BW-WIDE"));
+								}
+								if (newBW[i]==512.00) {
+									m_ifDistributor->setup("BW-UNFILTERED");
+									ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"IFDISTRIBUTOR_FILTER_BW-UNFILTERED"));
+								}
+							}
+							catch (...) {
+								_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCommandLine::setAttenuation()");
+								impl.log(LM_ERROR);
+							}
+						}*/
+					}
+				}
+				catch (...) {
+					ACS_LOG(LM_FULL_INFO,"CCommandLine::setSection()",(LM_NOTICE,"BACKEND_SARDARA_SET_SECTION ERROR"));
+				}
+			}
+
+			if (m_stationMEDNT == true) {
+				try {
+					Message request = Command::setSection(i, newFreq[i], newBW[i], newFeed[i], newPol[i], newSR[i], newBins[i]);
+					Message reply = sendBackendCommand(request);
+					if (reply.is_success_reply()) {
+						for (int j=0;j<m_sectionsNumber;j++)
+							m_sampleRate[j]=newSR[i]; //the given sample rate is taken also for all the others
+						m_commonSampleRate=newSR[i];
+						if (m_stokes==true) {
+							m_frequency[2*i]=newFreq[i];
+							m_frequency[2*i+1]=newFreq[i];
+							m_bandWidth[2*i]=newBW[i];
+							m_bandWidth[2*i+1]=newBW[i];
+						}
+						else {
+							m_frequency[i]=newFreq[i];
+							m_bandWidth[i]=newBW[i];
+						}
+						m_feedNumber[i]=newFeed[i];
+						m_bins[i]=newBins[i];
+						m_polarization[i]=newPol[i];
+						IRA::CString temp;
+						if (m_polarization[i]==Backends::BKND_LCP)
+							temp="LCP";
+						else if (m_polarization[i]==Backends::BKND_RCP)
+							temp="RCP";
+						else
+							temp="FULL_STOKES";
+						ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"SECTION_CONFIGURED %ld,FREQ=%lf,BW=%lf,FEED=%ld,POL=%s,SR=%lf,BINS=%ld",i,m_frequency[i],newBW[i],m_feedNumber[i], (const char *)temp,newSR[i],m_bins[i]));
+						if (m_CK==true) {
+							if (newBW[i]==420.00)
+								filter=300.00;
+							if (newBW[i]==1500.00)
+								filter=1250.00;
+							if (newBW[i]==2300.00)
+								filter=2350.00;
+							if (newBW[i] == 420.00 || newBW[i] == 1500.00 || newBW[i] == 2300.00) {
+                                if(m_stokes)
+                                {
+                                    // Configure the TotalPower sections corresponding to the selected Sardara section (should be equivalent to the feed)
+                                    // e.g.: if the selected Sardara section is 0 we will configure TotalPower 0 and 1 sections
+                                    //       if the selected Sardara section is 1 we will configure TotalPower 2 and 3 sections
+                                    //       ...
+									m_totalPower->setSection(i * 2, -1, filter, -1, -1, -1, -1);
+								    ACS_LOG(LM_FULL_INFO, "CCommandLine::setConfiguration()", (LM_NOTICE, "TOTALPOWER_FILTER_CONFIGURED %ld, FILTER=%lf", i*2, filter));
+									m_totalPower->setSection((i * 2) + 1, -1, filter, -1, -1, -1, -1);
+								    ACS_LOG(LM_FULL_INFO, "CCommandLine::setConfiguration()", (LM_NOTICE, "TOTALPOWER_FILTER_CONFIGURED %ld, FILTER=%lf", (i*2)+1, filter));
+                                }
+                                else
+                                {
+                                    // Use the same section identifier for TotalPower
+									m_totalPower->setSection(i, -1, filter, -1, -1, -1, -1);
+								    ACS_LOG(LM_FULL_INFO, "CCommandLine::setConfiguration()", (LM_NOTICE, "TOTALPOWER_FILTER_CONFIGURED %ld, FILTER=%lf", i, filter));
+                                }
+							}
+						}
+					}
+				}
+				catch (...) {
+					ACS_LOG(LM_FULL_INFO,"CCommandLine::setSection()",(LM_NOTICE,"BACKEND_SARDARA_SET_SECTION ERROR"));
+				}
+			}
+		}
+	}
 }
 
 void CCommandLine::getZeroTPI(DWORD *tpi) throw (ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
@@ -780,7 +836,12 @@ void CCommandLine::setDefaultConfiguration(const IRA::CString & config) throw (C
     if (m_stationSRT==true) {
         m_SK77=m_SK77S=false;
         m_SK00=m_SK00S=false;
-        m_SC00=m_SC00S=false;
+        m_SK01=m_SK01S=false;
+        m_SK04=m_SK04S=false;
+        m_SK03=m_SK03S=false;
+        m_SK06=m_SK06S=false;
+        m_SCC00=m_SCC00S=false;
+        m_SCH00=m_SCH00S=false;
         m_SL00=m_SL00S=false;
         m_SP00=m_SP00S=false;
         m_stokes=false;
@@ -797,10 +858,40 @@ void CCommandLine::setDefaultConfiguration(const IRA::CString & config) throw (C
             m_SK00=true;
             m_CK=true;
         }
-        if (config.Compare("SC00")==0) {
+        if (config.Compare("SK01")==0) {
             m_filter=1250.0;
             m_inputsNumber=m_sectionsNumber;
-            m_SC00=true;
+            m_SK01=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK04")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK04=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK03")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK03=true;
+            m_CK=true;
+        }
+        if (config.Compare("SK06")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SK06=true;
+            m_CK=true;
+        }
+        if (config.Compare("SCC00")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SCC00=true;
+            m_CK=true;
+        }
+        if (config.Compare("SCH00")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_SCH00=true;
             m_CK=true;
         }
         if (config.Compare("SL00")==0) {
@@ -833,11 +924,19 @@ void CCommandLine::setDefaultConfiguration(const IRA::CString & config) throw (C
             m_stokes=true;
             m_CK=true;
         }
-        if (config.Compare("SC00S")==0) {
+        if (config.Compare("SCC00S")==0) {
             m_filter=1250.0;
             m_inputsNumber=m_sectionsNumber;
             m_sectionsNumber=m_sectionsNumber/2;
-            m_SC00S=true;
+            m_SCC00S=true;
+            m_stokes=true;
+            m_CK=true;
+        }
+        if (config.Compare("SCH00S")==0) {
+            m_filter=1250.0;
+            m_inputsNumber=m_sectionsNumber;
+            m_sectionsNumber=m_sectionsNumber/2;
+            m_SCH00S=true;
             m_stokes=true;
             m_CK=true;
         }
@@ -1736,30 +1835,37 @@ CCommandLine::sendBackendCommand(Message request)
 	return reply;
 }
 
-//int CCommandLine::getConfiguration(char* configuration)
-void CCommandLine::getConfiguration(char* configuration)
+char* CCommandLine::getConfiguration()
 {
     Message request = Command::getConfiguration();
     try {
         Message reply = sendBackendCommand(request);
         if(reply.is_success_reply())
         {
-		    strcpy(configuration, reply.get_argument<string>(0).c_str());
+            return CORBA::string_dup(reply.get_argument<string>(0).c_str());
         }
     }
     catch (...) {
-    
     }
+
+    return CORBA::string_dup("");
 }
 
-int CCommandLine::getCommProtVersion(CORBA::String_out version)
+char* CCommandLine::getCommProtVersion()
 {
     Message request = Command::version();
-    Message reply = sendBackendCommand(request);
-    string _version = reply.get_argument<string>(0);
-    if(reply.is_success_reply())
-        strcpy(version, _version.c_str());
-    return _version.length();
+    try
+    {
+        Message reply = sendBackendCommand(request);
+        if(reply.is_success_reply())
+        {
+            return CORBA::string_dup(reply.get_argument<string>(0).c_str());
+        }
+    }
+    catch(...) {
+    }
+
+    return CORBA::string_dup("");
 }
 
 bool CCommandLine::checkConnection()

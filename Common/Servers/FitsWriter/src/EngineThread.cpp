@@ -629,7 +629,7 @@ void CEngineThread::runLoop()
 				ACS::doubleSeq fluxes;
 				ACS::longSeq feedsID;
 				ACS::longSeq ifsID;
-				ACS::doubleSeq atts;
+				ACS::doubleSeq atts,restFreqs;
 				ACS::longSeq sectionsID;
 				ACS::stringSeq axisName,axisUnit;
 
@@ -888,6 +888,39 @@ void CEngineThread::runLoop()
 					impl.setError(m_file->getLastError());
 					impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
 					m_data->setStatus(Management::MNG_FAILURE);
+				}
+				m_info.getRestFreq(restFreqs);
+				if (restFreqs.length()==1) {
+					double rfValue;
+					IRA::CString keyName;
+			    	for (long j=0;j<m_data->getSectionsNumber();j++) {
+						if (restFreqs[0]>0.0) rfValue=restFreqs[0];
+						else rfValue=DOUBLE_DUMMY_VALUE;
+						keyName.Format("RESTFREQ%d",j+1);
+						if (!m_file->setSectionHeaderKey(keyName,rfValue,"Frequency resolution of the Nth section (MHz)")) {
+							_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
+							impl.setFileName((const char *)m_data->getFileName());
+							impl.setError(m_file->getLastError());
+							impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
+							m_data->setStatus(Management::MNG_FAILURE);
+						}
+					}
+				}
+				else {
+					double rfValue;
+					IRA::CString keyName;
+					for (long j=0;j<restFreqs.length();j++) {
+						if (restFreqs[j]>0.0) rfValue=restFreqs[j];
+						else rfValue=DOUBLE_DUMMY_VALUE;
+						keyName.Format("RESTFREQ%d",j+1);
+						if (!m_file->setSectionHeaderKey(keyName,rfValue,"Frequency resolution of the Nth section (MHz)")) {
+							_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::runLoop()");
+							impl.setFileName((const char *)m_data->getFileName());
+							impl.setError(m_file->getLastError());
+							impl.log(LM_ERROR); // not filtered, because the user need to know about the problem immediately
+							m_data->setStatus(Management::MNG_FAILURE);
+						}
+					}	
 				}
 				CFitsWriter::TFeedHeader *feedH=m_info.getFeedHeader();
 				if (!m_file->addFeedTable("FEED TABLE")) {

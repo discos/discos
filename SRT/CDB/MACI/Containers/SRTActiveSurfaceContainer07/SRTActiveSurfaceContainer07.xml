@@ -11,13 +11,13 @@
 	ImplLang="cpp">
 
 	<Autoload>
-		<cdb:_ string="baci" />
+		<cdb:e string="baci" />
 	</Autoload>
 
 	<LoggingConfig
 		minLogLevel="5"
 		minLogLevelLocal="5"
-		dispatchPacketSize="10"
+		dispatchPacketSize="0"
 		immediateDispatchLevel="10"
 		flushPeriodSeconds="1"
 	>

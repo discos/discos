@@ -1,3 +1,4 @@
+from __future__ import print_function
 import socket
 import time
 from MedicinaLocalOscillatorImpl import CommandLineError
@@ -107,7 +108,7 @@ class CommandLine:
 		cmd=RF_ON_CMD
 		#can rise an error....
 		answer=self.sendCmd(cmd)
-		print answer
+		print(answer)
 		if answer!=RF_ON_ANS_OK:
 			nak,err=answer.split()
 			message="an error occurred, the code is %d"%err
@@ -129,14 +130,14 @@ class CommandLine:
 		if self.check():
 			try:
 				self.sock.sendall(msg)
-			except socket.error,msg:
+			except socket.error as msg:
 				slef.close()
 				exc=CommandLineError(msg);
 				raise exc
 			try:
 				ans=self.sock.recv(128)
 				return ans
-			except socket.error,msg:
+			except socket.error as msg:
 				self.close()
 				exc=CommandLineError(msg);
 				raise exc		
@@ -148,7 +149,7 @@ class CommandLine:
 		try:
 			if self.sock==None:
 				self.sock=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		except socket.error,msg:
+		except socket.error as msg:
 			exc=CommandLineError(msg);
 			self.sock=None
 			raise exc	
@@ -165,7 +166,7 @@ class CommandLine:
 			if self.connected==False:
 				self.sock.connect((self.ip,self.port))
 				self.connected=True
-		except socket.error, msg:
+		except socket.error as msg:
 			exc=CommandLineError(msg);
 			raise exc		
 

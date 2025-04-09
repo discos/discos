@@ -14,7 +14,15 @@
 /* Andrea Orlati(aorlati@ira.inaf.it) 08/09/2010      added the averagePoint method */
 /* G. Carboni(giuseppe.carboni@inaf.it) 26/07/2019    the class is now thread safe                      */
 
+
+#include <Cplusplus11Helper.h>
+
+C11_IGNORE_WARNING_PUSH
+C11_IGNORE_WARNING("-Wdeprecated-declarations")
+C11_IGNORE_WARNING("-Wmisleading-indentation")
+C11_IGNORE_WARNING("-Wcatch-value=")
 #include <acstimeEpochHelper.h>
+C11_IGNORE_WARNING_POP
 #include "Definitions.h"
 
 namespace IRA {

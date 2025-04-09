@@ -102,8 +102,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/
                  The syntax for the command is the following: `enable=X;Y` with X and Y representing the 2 feeds the user would like to use for the Nodding observation.
                  This command must be placed in the <schedule_name>.bck file in order to work properly.
     issue #619 - Active surface components are now capable of changing look-up tables on the fly via the `asSetLUT` command
+    issue #806   Added support for the C-band receiver at the SRT
+    project #2 - Completed integration of new SRT Minor Servos
+    issue #2   - Completed integration of solar system planets, sun and moon tracking. Other bodies will be added in the future.
 
 ## Fixed
 ## Changed
 	issue #689 - The dataset provided by weather station has been enlarged by the wind direction. The correctponding RAL 'wx' command will noe provided wind direction readout, as well
     issue #621 - The maximum number of chars of the schedule file name is now 37 (extension included). This is done for fits file and archive issue with the lenght of the schedule name.
+    issue #853 - The setSection command can now accept a wildcard (*) as section identifier. This will allow to configure all backend sections with a single command
+    issue #895 - FitZilla version 1.23 released, the rest frequency is also added in the header of the Section table

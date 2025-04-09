@@ -25,7 +25,9 @@ class Positioner(object):
         The `cdbconf` parameter is a CDBConf instance.
         """
         self.conf = cdbconf
-        self.posgen = PosGenerator()
+        self.updatingTime = int(float(self.conf.getAttribute('UpdatingTime')) * 10**7)
+        self.trackingLeadTime = int(float(self.conf.getAttribute('TrackingLeadTime')) * 10**7)
+        self.posgen = PosGenerator(self.updatingTime, self.trackingLeadTime)
         self._setDefault()
 
 
@@ -57,12 +59,11 @@ class Positioner(object):
             self.is_setup = True
             time.sleep(0.4) # Give the device the time to accomplish the setup
             self.control.updateScanInfo({'iStaticPos': setupPosition})
-            self._start(self.posgen.goto, setupPosition)
-            time.sleep(0.1) # Give the thread the time to finish
-        except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx), ex:
-            raise PositionerError("cannot set the position: %s" %ex.message)
-        except Exception, ex:
-            raise PositionerError(ex.message)
+            self._setPosition(setupPosition)
+        except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx) as ex:
+            raise PositionerError("cannot set the position: %s" %ex)
+        except Exception as ex:
+            raise PositionerError(ex)
         finally:
             Positioner.generalLock.release()
 
@@ -119,8 +120,8 @@ class Positioner(object):
                 self.goTo(position)
                 # Set the initialPosition, in order to add it to the dynamic one
                 self.control.user_position = position
-            except Exception, ex:
-                raise PositionerError('cannot set the position: %s' %ex.message)
+            except Exception as ex:
+                raise PositionerError('cannot set the position: %s' %ex)
 
 
     def _setPosition(self, position):
@@ -128,13 +129,13 @@ class Positioner(object):
         if self.device.getMinLimit() < self.control.target < self.device.getMaxLimit():
             try:
                 self.device.setPosition(self.control.target)
-            except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx), ex:
+            except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx) as ex:
                 raeson = "cannot set the %s position" %self.device._get_name()
-                logger.logError('%s: %s' %(raeson, ex.message))
+                logger.logError('%s: %s' %(raeson, ex))
                 raise PositionerError(raeson)
-            except Exception, ex:
+            except Exception as ex:
                 raeson = "unknown exception setting the %s position" %self.device._get_name()
-                logger.logError('%s: %s' %(raeson, ex.message))
+                logger.logError('%s: %s' %(raeson, ex))
                 raise PositionerError(raeson)
         else:
             raise OutOfRangeError("position %.2f out of range {%.2f, %.2f}" 
@@ -179,22 +180,20 @@ class Positioner(object):
                             dParallacticPos=0,
                             rewindingOffset=0,
                         )
-                        self._start(self.posgen.goto, position)
+                        self._setPosition(position)
+                        self.control.mustUpdate = False
                     else:
                         posgen = getattr(self.posgen, functionName) 
                         angle_mapping = self.posgen.mapping[functionName]
                         getAngleFunction = self.posgen.mapping[functionName]['getAngleFunction']
                         coordinateFrame = self.posgen.mapping[functionName]['coordinateFrame']
                         lat = self.siteInfo['latitude']
-                        try:
-                            if coordinateFrame == 'horizontal':
-                                iParallacticPos = getAngleFunction(lat, az, el)
-                            elif coordinateFrame == 'equatorial':
-                                iParallacticPos = getAngleFunction(lat, az, el, ra, dec)
-                            else:
-                                raise PositionerError('coordinate frame %s unknown' %coordinateFrame)
-                        except ZeroDivisionError:
-                            raise NotAllowedError('zero division error computing p(%.2f, %.2f)' %(az, el))
+                        if coordinateFrame == 'horizontal':
+                            iParallacticPos = getAngleFunction(lat, az, el)
+                        elif coordinateFrame == 'equatorial':
+                            iParallacticPos = getAngleFunction(lat, az, el, ra, dec)
+                        else:
+                            raise PositionerError('coordinate frame %s unknown' %coordinateFrame)
 
                         self.control.setScanInfo(
                             axis=axis, 
@@ -204,15 +203,19 @@ class Positioner(object):
                             dParallacticPos=0,
                             rewindingOffset=0,
                         )
-                        self._start(posgen, self.source, self.siteInfo)
-                    self.control.mustUpdate = True
-                except Exception, ex:
-                    raise PositionerError('configuration problem: %s' %ex.message)
+                        self._start(
+                            posgen,
+                            self.source,
+                            self.siteInfo
+                        )
+                        self.control.mustUpdate = True
+                except Exception as ex:
+                    raise PositionerError('configuration problem: %s' %ex)
         finally:
             Positioner.generalLock.release()
 
 
-    def _updatePosition(self, posgen, vargs):
+    def _updatePosition(self, posgen, source, siteInfo):
         try:
             self.control.isRewindingRequired = False
             self.control.isRewinding = False
@@ -229,28 +232,56 @@ class Positioner(object):
             else:
                 isOptimized = False
 
-            for position in posgen(*vargs):
+            new_trajectory = True
+            while True:
                 if self.control.stop:
                     break
                 else:
                     try:
+                        if new_trajectory:
+                            t = getTimeStamp().value + self.trackingLeadTime
+                        position = posgen(source, siteInfo, t)
                         Pis = self.control.scanInfo['iStaticPos'] + self.control.scanInfo['rewindingOffset'] 
                         Pip = self.control.scanInfo['iParallacticPos']
-                        Pdp = 0 if posgen.__name__ == 'goto' else (position - Pip)
+                        Pdp = position - Pip
                         target = Pis + Pdp if isOptimized else Pis + Pip + Pdp
                         self.control.scanInfo.update({'dParallacticPos': Pdp})
-                        self._setPosition(target) # _setPosition() will add the offset
-                        time.sleep(float(self.conf.getAttribute('UpdatingTime')))
-                    except OutOfRangeError, ex:
-                        logger.logInfo(ex.message)
+
+                        self.control.target = target + self.control.offset
+                        if self.device.getMinLimit() < self.control.target < self.device.getMaxLimit():
+                            try:
+                                self.device.loadTrackingPoint(t, self.control.target, new_trajectory)
+                                new_trajectory = False
+                                t += self.updatingTime
+                            except (DerotatorErrors.PositioningErrorEx, DerotatorErrors.CommunicationErrorEx) as ex:
+                                raeson = "cannot set the %s position" %self.device._get_name()
+                                logger.logError('%s: %s' %(raeson, ex))
+                                raise PositionerError(raeson)
+                            except Exception as ex:
+                                raeson = "unknown exception setting the %s position" %self.device._get_name()
+                                logger.logError('%s: %s' %(raeson, ex))
+                                raise PositionerError(raeson)
+                        else:
+                            raise OutOfRangeError("position %.2f out of range {%.2f, %.2f}" 
+                                %(self.control.target, self.device.getMinLimit(), self.device.getMaxLimit()))
+                        # We calculate the time to sleep
+                        # Next point of the trajectory - TrackingLeadTime - now
+                        # slightly less than UpdatingTime
+                        # The resulting cycle should be around
+                        # TrackingLeadTime seconds before the next point
+                        time_to_sleep = max(0, t - self.trackingLeadTime - getTimeStamp().value)
+                        time.sleep(float(time_to_sleep) / 10**7)
+                    except OutOfRangeError as ex:
+                        new_trajectory = True
+                        logger.logInfo(ex)
                         self.control.isRewindingRequired = True
                         if self.control.modes['rewinding'] == 'AUTO':
                             try:
                                 self.rewind() 
-                            except Exception, ex:
+                            except Exception as ex:
                                 # In case of wrong autoRewindingSteps
                                 self.control.isRewindingRequired = True
-                                logger.logError('cannot rewind: %s' %ex.message)
+                                logger.logError('cannot rewind: %s' %ex)
                                 break
                         else:
                             if self.control.modes['rewinding'] == 'MANUAL':
@@ -261,18 +292,18 @@ class Positioner(object):
                                     time.sleep(0.1) # Wait until the user calls a rewind
                             else:
                                 logger.logError('wrong rewinding mode: %s' %self.control.modes['rewinding'])
-                    except Exception, ex:
-                        logger.logError(ex.message)
+                    except Exception as ex:
+                        logger.logError(ex)
                         break
             self.control.mustUpdate = False
         except KeyboardInterrupt:
             logger.logInfo('stopping Positioner._updatePosition() due to KeyboardInterrupt')
-        except AttributeError, ex:
+        except AttributeError as ex:
             logger.logError('Positioner._updatePosition(): attribute error')
-            logger.logDebug('Positioner._updatePosition(): %s' %ex.message)
-        except PositionerError, ex:
-            logger.logError('Positioner._updatePosition(): %s' %ex.message)
-        except Exception, ex:
+            logger.logDebug('Positioner._updatePosition(): %s' %ex)
+        except PositionerError as ex:
+            logger.logError('Positioner._updatePosition(): %s' %ex)
+        except Exception as ex:
             logger.logError('unexcpected exception in Positioner._updatePosition(): %s' %ex)
         finally:
             self.control.scanInfo.update({'rewindingOffset': 0})
@@ -313,9 +344,9 @@ class Positioner(object):
                 raise PositionerError('%ss exceeded' %self.conf.getAttribute('RewindingTimeout'))
 
             self.control.isRewindingRequired = False
-        except Exception, ex:
+        except Exception as ex:
             self.control.isRewindingRequired = True
-            raise PositionerError(ex.message)
+            raise PositionerError(ex)
         finally:
             self.control.isRewinding = False
             Positioner.rewindingLock.release()
@@ -417,7 +448,7 @@ class Positioner(object):
             try:
                 Positioner.generalLock.acquire()
                 self.control.updateScanInfo({'iStaticPos': parkPosition})
-                self._start(self.posgen.goto, parkPosition)
+                self._setPosition(parkPosition)
             finally:
                 Positioner.generalLock.release()
                 time.sleep(0.5) # Wait the thread stops before to set the defaults
@@ -466,7 +497,7 @@ class Positioner(object):
                 Positioner.generalLock.acquire()
                 self.stopUpdating()
                 self.control.updateScanInfo({'iStaticPos': position})
-                self._start(self.posgen.goto, position)
+                self._setPosition(position)
             finally:
                 Positioner.generalLock.release()
 
@@ -481,7 +512,7 @@ class Positioner(object):
             else:
                 self.stopUpdating()
                 actPosition = self.getPosition()
-                self._start(self.posgen.goto, actPosition)
+                self._setPosition(actPosition)
 
 
     def clearOffset(self):
@@ -569,17 +600,17 @@ class Positioner(object):
     def clearAutoRewindingSteps(self):
         self.control.autoRewindingSteps = None
 
-    def _start(self, posgen, *vargs):
+    def _start(self, posgen, source, siteInfo):
         """Start a new process that computes and sets the position"""
         if self.isSetup():
             # self.stopUpdating() # Raise a PositionerError if the process stills alive
             self.t = ContainerServices.ContainerServices().getThread(
                     name=posgen.__name__, 
                     target=self._updatePosition, 
-                    args=(posgen, vargs)
+                    args=(posgen, source, siteInfo)
             )
             self.t.start()
-            time.sleep(0.10) # In case of goto, take the time to command the position
+            # time.sleep(0.10) # In case of goto, take the time to command the position
         else:
             raise NotAllowedError('not configured: a setConfiguration() is required')
 
@@ -612,13 +643,13 @@ class Positioner(object):
 
             try:
                 status_obj = self.device._get_status()
-            except Exception, ex:
-                raise PositionerError('cannot get the device status property: %s' %ex.message)
+            except Exception as ex:
+                raise PositionerError('cannot get the device status property: %s' %ex)
 
             try:
                 device_status, compl = status_obj.get_sync()
-            except Exception, ex:
-                raise PositionerError('cannot get the device status value: %s' %ex.message)
+            except Exception as ex:
+                raise PositionerError('cannot get the device status value: %s' %ex)
 
             if compl.code:
                 raise PositionerError('the device status value is not valid')
@@ -640,8 +671,8 @@ class Positioner(object):
                 # 16 we want to get the string 010000 instead of 10000
                 try:
                     binrepr = Status.dec2bin(device_status, 6) # A string of 6 values 
-                except Exception, ex:
-                    raise PositionerError('error in Status.dec2bin(): %s' %ex.message)
+                except Exception as ex:
+                    raise PositionerError('error in Status.dec2bin(): %s' %ex)
 
                 po, f, ce, nr, s, w = [bool(int(item)) for item in reversed(binrepr)]
                 if po:
@@ -662,10 +693,10 @@ class Positioner(object):
             status += '1' if self.isTracking() else '0'
             status += '1' if self.isReady() else '0'
             return status
-        except (NotAllowedError), ex:
+        except NotAllowedError as ex:
             return '000000' # Not ready
-        except Exception, ex:
-            logger.logError(ex.message)
+        except Exception as ex:
+            logger.logError(ex)
             return '100000' # Failure
         finally:
             Positioner.generalLock.release()
