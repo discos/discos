@@ -12,7 +12,7 @@
 #
 # additional include and library search paths
 #USER_INC =
-USER_LIB = /usr/local/lib64/libzmq.so
+USER_LIB = /usr/lib64/libzmq.so
 
 #
 # MODULE CODE DESCRIPTION:
