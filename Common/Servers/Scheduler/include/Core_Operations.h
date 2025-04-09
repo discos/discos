@@ -89,6 +89,24 @@ void _moon() throw (ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErro
 		ManagementErrors::CloseTelescopeScanErrorExImpl);
 
 /**
+ * starts the tracking of the sun
+ */
+void _sun() throw (ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
+		ManagementErrors::CloseTelescopeScanErrorExImpl);
+
+
+/**
+ * Starts a sidereal tracking of a source from equatorial coordinates
+ * @param planet  of the source
+ *
+ */
+
+void _planet(const char * planetName) throw (ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
+		ManagementErrors::CloseTelescopeScanErrorExImpl);
+
+
+
+/**
  * Starts a sidereal tracking of a source from equatorial coordinates
  * @param targetName name of the source
  * @param ra right ascension

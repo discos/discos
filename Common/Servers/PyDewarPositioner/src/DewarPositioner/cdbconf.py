@@ -11,6 +11,7 @@ class CDBConf(object):
 
     componentAttributes = (
             'UpdatingTime', 
+            'TrackingLeadTime',
             'RewindingSleepTime', 
             'RewindingTimeout',
             'DefaultConfiguration',

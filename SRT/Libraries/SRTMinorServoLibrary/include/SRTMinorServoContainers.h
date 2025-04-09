@@ -71,33 +71,6 @@ namespace MinorServo
     };
 
     /**
-     * This dictionary contains information regarding the possibile focal configurations.
-     * The key indicates the configuration as known by DISCOS.
-     * The value is a pair, the first element of the pair is the DISCOS enumeration for the relative Leonardo configuration,
-     * the second element of the pair indicates whether the configuration has a ASACTIVE twin configuraiton.
-     */
-    using DiscosConfigurationNameTableType = std::map<std::string, std::pair<SRTMinorServoFocalConfiguration, bool>>;
-    const DiscosConfigurationNameTableType DiscosConfigurationNameTable =
-    {
-        //{"LLP",     std::make_pair(CONFIGURATION_PRIMARY,    false)},
-        //{"PPP",     std::make_pair(CONFIGURATION_PRIMARY,    false)},
-        //{"PLP",     std::make_pair(CONFIGURATION_PRIMARY,    false)},
-        //{"HHP",     std::make_pair(CONFIGURATION_PRIMARY,    false)},
-        //{"XKP",     std::make_pair(CONFIGURATION_PRIMARY,    false)},
-        {"CCG",     std::make_pair(CONFIGURATION_GREGORIAN1, true )},
-        {"KKG",     std::make_pair(CONFIGURATION_GREGORIAN2, true )},
-        {"KBAND_TEST",   std::make_pair(CONFIGURATION_GREGORIAN2, false)},
-        {"WWG",     std::make_pair(CONFIGURATION_GREGORIAN3, true )},
-        {"QQG",     std::make_pair(CONFIGURATION_GREGORIAN4, true )},
-        {"KQW",     std::make_pair(CONFIGURATION_GREGORIAN5, true )},
-        {"MISTRAL", std::make_pair(CONFIGURATION_GREGORIAN6, true )},
-        {"MISTRAL_OLD", std::make_pair(CONFIGURATION_GREGORIAN6, true )},
-        {"CCB",     std::make_pair(CONFIGURATION_BWG1,       true )},
-        {"XB",      std::make_pair(CONFIGURATION_BWG3,       true )},
-        {"CABINET", std::make_pair(CONFIGURATION_GREGORIAN7, false)},
-    };
-
-    /**
      * This dictionary contains the Leonardo focal configurations DISCOS enumerations, alongside their name inside the Leonardo minor servo system.
      */
     using LDOConfigurationNameTableType = boost::bimap<SRTMinorServoFocalConfiguration, std::string>;
@@ -136,7 +109,7 @@ namespace MinorServo
         (CONFIGURATION_BWG3,        23)
         (CONFIGURATION_BWG4,        24);
 
-    using SRTMinorServoLookupTable = std::map<std::string, std::vector<double>>;
+    using SRTMinorServoCoefficientsTable = std::map<std::string, std::vector<double>>;
 
     /**
      * This class implements a queue of time tagged positions. it extends a simple std::map with some specific methods.
@@ -610,7 +583,7 @@ namespace MinorServo
         const std::string getPlainCommand() const
         {
             std::shared_lock<std::shared_mutex> lock(m_mutex);
-            return this->get<std::string>("PLAIN_COMMAND");
+            return this->count("PLAIN_COMMAND") > 0 ? this->get<std::string>("PLAIN_COMMAND") : "";
         }
 
         /**
@@ -620,7 +593,7 @@ namespace MinorServo
         const std::string getPlainAnswer() const
         {
             std::shared_lock<std::shared_mutex> lock(m_mutex);
-            return this->get<std::string>("PLAIN_ANSWER");
+            return this->count("PLAIN_ANSWER") > 0 ? this->get<std::string>("PLAIN_ANSWER") : "";
         }
 
     protected:
@@ -909,6 +882,25 @@ namespace MinorServo
          * The labels for the offsets of each virtual axis.
          */
         const std::vector<std::string> m_virtual_offsets;
+    };
+
+    /**
+     * This class is a specialization of the SRTMinorServoStatus for a derotator of the Leonardo Minor Servo System.
+     */
+    class SRTDerotatorStatus : public SRTMinorServoStatus
+    {
+    public:
+        using SRTMinorServoStatus::SRTMinorServoStatus;
+
+        /**
+         * This method returns the current derotator position. There is a sign inversion since the LDO derotator sign is opposite to the required one.
+         * @return the current derotator position
+         */
+        double getActualPosition() const
+        {
+            double position = getVirtualPositions()[0];
+            return position == 0 ? position : -position;
+        }
     };
 }
 

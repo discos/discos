@@ -27,14 +27,12 @@ void SRTMinorServoSetupThread::onStart()
     m_LDO_configuration = LDOConfigurationNameTable.left.at(commanded_configuration);
     m_gregorian_cover_position = commanded_configuration == CONFIGURATION_PRIMARY ? COVER_STATUS_CLOSED : COVER_STATUS_OPEN;
 
-    ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::onStart()", (LM_NOTICE, ("SETUP THREAD STARTED WITH '" + m_core.m_commanded_setup + "' CONFIGURATION").c_str()));
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::onStart()", (LM_NOTICE, ("Setting up MinorServos with '" + m_core.m_commanded_setup + "' configuration").c_str()));
 }
 
 void SRTMinorServoSetupThread::onStop()
 {
     AUTO_TRACE("SRTMinorServoSetupThread::onStop()");
-
-    ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::onStop()", (LM_NOTICE, "SETUP THREAD STOPPED"));
 
     if(m_core.m_motion_status.load() == MOTION_STATUS_TRACKING)
     {
@@ -47,6 +45,8 @@ void SRTMinorServoSetupThread::onStop()
             ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
         }
     }
+
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::onStop()", (LM_NOTICE, "MinorServos configured"));
 }
 
 void SRTMinorServoSetupThread::runLoop()
@@ -154,7 +154,7 @@ void SRTMinorServoSetupThread::runLoop()
             {
                 try
                 {
-                    if(servo->setup(m_core.m_commanded_setup.c_str()))
+                    if(servo->setup(m_core.m_commanded_setup.c_str(), m_core.m_as_configuration.load() == Management::MNG_TRUE ? false : true))
                     {
                         m_core.m_current_servos[servo_name] = servo;
                         try
@@ -176,7 +176,7 @@ void SRTMinorServoSetupThread::runLoop()
                 }
             }
 
-            if(m_core.m_commanded_setup.find("_ASACTIVE") == std::string::npos)
+            if(m_core.m_as_configuration.load() == Management::MNG_FALSE)
             {
                 // We commanded a configuration which does not use the active surface, therefore we need to send some slightly different coordinates with a preset command
 
@@ -198,7 +198,7 @@ void SRTMinorServoSetupThread::runLoop()
             }
             else
             {
-                // _ASACTIVE configuration, jump directly to state 7
+                // AS configuration, jump directly to state 7
                 m_status = 7;
             }
 

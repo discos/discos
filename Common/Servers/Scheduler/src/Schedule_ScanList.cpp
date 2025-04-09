@@ -13,6 +13,7 @@
 #define SUN "SUN"
 #define MOON "MOON"
 #define SATELLITE "SATELLITE"
+#define PLANET "PLANET"
 #define SOLARSYTEMBODY "SOLARSYTEMBODY"
 #define OTF "OTF"
 #define OTFC "OTFC"
@@ -143,12 +144,12 @@ bool CScanList::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CS
 	IRA::CString ret;
 	Management::TScanTypes type;
 	// get the second item.....
-	if (!IRA::CIRATools::getNextToken(line,start,SEPARATOR,ret)) {
+	if (!IRA::CIRATools::getNextToken(line,start,SEPARATORS,ret,false)) {
 		errMsg="format error";
 		return false;
 	}
 	//...the scan type
-	if (!IRA::CIRATools::getNextToken(line,start,SEPARATOR,ret)) {
+	if (!IRA::CIRATools::getNextToken(line,start,SEPARATORS,ret,false)) {
 		errMsg="could not read scan type";
 		return false;
 	}
@@ -198,6 +199,30 @@ bool CScanList::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CS
 			break;
 		}
 		case Management::MNG_SUN: {
+	      DWORD id;
+			Antenna::TTrackingParameters *prim=new Antenna::TTrackingParameters;
+			if (!parseSun(line,prim,id,errMsg)) {
+				if (prim) delete prim;
+				return false; // errMsg already set by previous call
+			}
+			Antenna::TTrackingParameters *sec=new Antenna::TTrackingParameters;
+			resetTrackingParameters(sec);
+			TRecord *rec=new TRecord;
+			rec->id=id;
+			rec->type=type;
+			rec->primaryParameters=(void *)prim;
+			rec->secondaryParameters=(void *)sec;
+			// **************************************
+			// Da modificare come MNG_PEAKER
+			CSubScanBinder binder(getConfiguration(),false);
+			rec->receieversParsmeters=(void *)binder.getReceivers();
+			rec->servoParameters=(void *)binder.getServo();
+			rec->subScanConfiguration=binder.getSubScanConfiguration();
+			// **************************************
+
+			//rec->target="";
+			rec->line=lnNumber;
+			m_schedule.push_back(rec);
 			break;
 		}
 		case Management::MNG_MOON: {
@@ -275,7 +300,34 @@ bool CScanList::parseLine(const IRA::CString& line,const DWORD& lnNumber,IRA::CS
 		case Management::MNG_SATELLITE: {
 			break;
 		}
-		case Management::MNG_SOLARSYTEMBODY: {
+		case Management::MNG_PLANET: {
+			
+          DWORD id;
+			Antenna::TTrackingParameters *prim=new Antenna::TTrackingParameters;
+			if (!parsePlanet(line,prim,id,errMsg)) {
+				if (prim) delete prim;
+				return false; // errMsg already set by previous call
+			}
+			Antenna::TTrackingParameters *sec=new Antenna::TTrackingParameters;
+			resetTrackingParameters(sec);
+			TRecord *rec=new TRecord;
+			rec->id=id;
+			rec->type=type;
+			rec->primaryParameters=(void *)prim;
+			rec->secondaryParameters=(void *)sec;
+			// **************************************
+			// Da modificare come MNG_PEAKER
+			CSubScanBinder binder(getConfiguration(),false);
+			rec->receieversParsmeters=(void *)binder.getReceivers();
+			rec->servoParameters=(void *)binder.getServo();
+			rec->subScanConfiguration=binder.getSubScanConfiguration();
+			// **************************************
+
+			//rec->target="";
+			rec->line=lnNumber;
+			m_schedule.push_back(rec);
+			break;			
+			
 			break;
 		}
 		case Management::MNG_OTF: {
@@ -379,6 +431,147 @@ bool CScanList::parseMoon(const IRA::CString& val,Antenna::TTrackingParameters *
 	return true;
 }
 
+bool CScanList::parseSun(const IRA::CString& val,Antenna::TTrackingParameters *scan,DWORD& id,IRA::CString& errMsg)
+{
+	char type[32],offFrame[32],lonOff[32],latOff[32];
+	long out;
+	//double lonOff,latOff;
+	out=sscanf((const char *)val,"%u\t%s\t%s\t%s\t%s",&id,type,offFrame,lonOff,latOff);
+	if ((out!=2) && (out!=5)) {
+		errMsg="invalid sun scan definition";
+		return false;
+	}
+	scan->targetName=CORBA::string_dup("Sun");
+	scan->type=Antenna::ANT_SUN;
+	scan->paramNumber=0;
+	scan->secondary=false;
+	scan->VradFrame=Antenna::ANT_UNDEF_FRAME;
+	scan->VradDefinition=Antenna::ANT_UNDEF_DEF;
+	scan->RadialVelocity=0.0;
+	scan->section=Antenna::ACU_NEUTRAL; // no support for section selection in schedule right now
+	scan->enableCorrection=true;
+	if (out==5) {
+		if (strcmp(offFrame,OFFFRAMEEQ)==0) {
+			scan->offsetFrame=Antenna::ANT_EQUATORIAL;
+			if (!IRA::CIRATools::offsetToRad(lonOff,scan->longitudeOffset)) {
+				errMsg="invalid equatorial longitude offset";
+				return false; //ra
+			}
+			if (!IRA::CIRATools::offsetToRad(latOff,scan->latitudeOffset)) {
+				errMsg="invalid equatorial latitude offset";
+				return false;  //dec
+			}
+		}
+		else if (strcmp(offFrame,OFFFRAMEHOR)==0) {
+			scan->offsetFrame=Antenna::ANT_HORIZONTAL;
+			if (!IRA::CIRATools::offsetToRad(lonOff,scan->longitudeOffset)) {
+				errMsg="invalid horizontal longitude offset";
+				return false;  //azimuth...since they are offsets negative values are valid
+			}
+			if (!IRA::CIRATools::offsetToRad(latOff,scan->latitudeOffset)) {
+				errMsg="invalid horizontal latitude offset";
+				return false; //elevation
+			}
+		}
+		else if (strcmp(offFrame,OFFFRAMEGAL)==0) {
+			scan->offsetFrame=Antenna::ANT_GALACTIC;
+			if (!IRA::CIRATools::offsetToRad(lonOff,scan->longitudeOffset)) {
+				errMsg="invalid galactic longitude offset";
+				return false;  //longitude
+			}
+			if (!IRA::CIRATools::offsetToRad(latOff,scan->latitudeOffset)) {
+				errMsg="invalid galactic latitude offset";
+				return false; //latitude
+			}
+		}
+		else {
+			return false;
+		}
+		scan->applyOffsets=true;
+	}
+	else {
+		scan->latitudeOffset=0.0;
+		scan->longitudeOffset=0.0;
+		scan->applyOffsets=false;
+	}
+	return true;
+}
+
+bool CScanList::parsePlanet(const IRA::CString& val,Antenna::TTrackingParameters *scan,DWORD& id,IRA::CString& errMsg)
+{
+	char type[32],offFrame[32],lonOff[32],latOff[32],planetName[32];
+	long out;
+	//double lonOff,latOff;
+	out=sscanf((const char *)val,"%u\t%s\t%s\t%s\t%s\t%s",&id,type,planetName,offFrame,lonOff,latOff);
+	if ((out!=3) && (out!=6)) {
+		errMsg="invalid planet scan definition";
+		return false;
+	}
+	scan->targetName=CORBA::string_dup(planetName);
+	scan->type=Antenna::ANT_SOLARSYSTEMBODY;
+	scan->paramNumber=0;
+	scan->secondary=false;
+	scan->VradFrame=Antenna::ANT_UNDEF_FRAME;
+	scan->VradDefinition=Antenna::ANT_UNDEF_DEF;
+	scan->RadialVelocity=0.0;
+	scan->section=Antenna::ACU_NEUTRAL; // no support for section selection in schedule right now
+	scan->enableCorrection=true;
+	if (out==6) {
+ 
+		if (strcmp(offFrame,OFFFRAMEEQ)==0) {
+			scan->offsetFrame=Antenna::ANT_EQUATORIAL;
+			if (!IRA::CIRATools::offsetToRad(lonOff,scan->longitudeOffset)) {
+				errMsg="invalid equatorial longitude offset";
+				return false; //ra
+			}
+			if (!IRA::CIRATools::offsetToRad(latOff,scan->latitudeOffset)) {
+				errMsg="invalid equatorial latitude offset";
+				return false;  //dec
+			}
+		}
+		else if (strcmp(offFrame,OFFFRAMEHOR)==0) {
+			scan->offsetFrame=Antenna::ANT_HORIZONTAL;
+			if (!IRA::CIRATools::offsetToRad(lonOff,scan->longitudeOffset)) {
+				errMsg="invalid horizontal longitude offset";
+				return false;  //azimuth...since they are offsets negative values are valid
+			}
+			if (!IRA::CIRATools::offsetToRad(latOff,scan->latitudeOffset)) {
+				errMsg="invalid horizontal latitude offset";
+				return false; //elevation
+			}
+		}
+		else if (strcmp(offFrame,OFFFRAMEGAL)==0) {
+			scan->offsetFrame=Antenna::ANT_GALACTIC;
+			if (!IRA::CIRATools::offsetToRad(lonOff,scan->longitudeOffset)) {
+				errMsg="invalid galactic longitude offset";
+				return false;  //longitude
+			}
+			if (!IRA::CIRATools::offsetToRad(latOff,scan->latitudeOffset)) {
+				errMsg="invalid galactic latitude offset";
+				return false; //latitude
+			}
+		}
+		else {
+			return false;
+		}
+		scan->applyOffsets=true;
+	}
+	else {
+		scan->latitudeOffset=0.0;
+		scan->longitudeOffset=0.0;
+		scan->applyOffsets=false;
+	}
+	return true;
+}
+
+
+
+
+
+
+
+
+
 
 // void CSubScanBinder::sidereal(const char * targetName,const double& ra,const double& dec,const Antenna::TSystemEquinox& eq,const Antenna::TSections& section)
 bool CScanList::parseSidereal2(const IRA::CString& val,DWORD& id,IRA::CString& errMsg,CSubScanBinder& binder)
@@ -399,7 +592,7 @@ bool CScanList::parseSidereal2(const IRA::CString& val,DWORD& id,IRA::CString& e
 	Antenna::TSystemEquinox scanEquinox;
 
 	// get the second item.....
-	if (!IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {  // id
+	if (!IRA::CIRATools::getNextToken(val,start,SEPARATORS,token,false)) {  // id
 		errMsg="cannot read scan identifier";
 		return false;
 	}
@@ -408,12 +601,12 @@ bool CScanList::parseSidereal2(const IRA::CString& val,DWORD& id,IRA::CString& e
 		errMsg="scan identifier cannot be zero";
 		return false;
 	}
-	if (!IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {  // type
+	if (!IRA::CIRATools::getNextToken(val,start,SEPARATORS,token,false)) {  // type
 		errMsg="cannot read scan type";
 		return false;
 	}
 	//scan->type=Antenna::ANT_SIDEREAL;   //already know it is a sidereal
-	if (!IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {  // name
+	if (!IRA::CIRATools::getNextToken(val,start,SEPARATORS,token,false)) {  // name
 		errMsg="cannot read source name";
 		return false;
 	}
@@ -433,7 +626,7 @@ bool CScanList::parseSidereal2(const IRA::CString& val,DWORD& id,IRA::CString& e
 	//scan->VradDefinition=Antenna::ANT_UNDEF_DEF;
 	//scan->RadialVelocity=0.0;
 	frame=Antenna::ANT_EQUATORIAL;
-	while (IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {  //get the next token...it represents the frame in which the coordinates are expressed
+	while (IRA::CIRATools::getNextToken(val,start,SEPARATORS,token,false)) {  //get the next token...it represents the frame in which the coordinates are expressed
 		bool ok=IRA::CIRATools::strToCoordinateFrame(token,frame);
 		if ((frame==Antenna::ANT_EQUATORIAL) && (ok)) {
 			if (frameOpen || offFrameOpen) {
@@ -706,7 +899,7 @@ bool CScanList::parseSidereal2(const IRA::CString& val,DWORD& id,IRA::CString& e
 	IRA::CString token;
 	Antenna::TCoordinateFrame frame;
 	// get the second item.....
-	if (!IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {  // id
+	if (!IRA::CIRATools::getNextToken(val,start,SEPARATORS,token,false)) {  // id
 		errMsg="cannot read scan identifier";
 		return false;
 	}
@@ -715,12 +908,12 @@ bool CScanList::parseSidereal2(const IRA::CString& val,DWORD& id,IRA::CString& e
 		errMsg="scan identifier cannot be zero";
 		return false;
 	}
-	if (!IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {  // type
+	if (!IRA::CIRATools::getNextToken(val,start,SEPARATORS,token,false)) {  // type
 		errMsg="cannot read scan type";
 		return false;
 	}
 	scan->type=Antenna::ANT_SIDEREAL;   //already know it is a sidereal
-	if (!IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {  // name
+	if (!IRA::CIRATools::getNextToken(val,start,SEPARATORS,token,false)) {  // name
 		errMsg="cannot read source name";
 		return false;
 	}
@@ -739,7 +932,7 @@ bool CScanList::parseSidereal2(const IRA::CString& val,DWORD& id,IRA::CString& e
 	scan->VradDefinition=Antenna::ANT_UNDEF_DEF;
 	scan->RadialVelocity=0.0;
 	frame=Antenna::ANT_EQUATORIAL;
-	while (IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {  //get the next token...it represents the frame in which the coordinates are expressed
+	while (IRA::CIRATools::getNextToken(val,start,SEPARATORS,token,false)) {  //get the next token...it represents the frame in which the coordinates are expressed
 		bool ok=IRA::CIRATools::strToCoordinateFrame(token,frame);
 		if ((frame==Antenna::ANT_EQUATORIAL) && (ok)) {
 			if (frameOpen || offFrameOpen) {
@@ -993,14 +1186,14 @@ bool CScanList::parseOffsetSwitch(const IRA::CString& val,int& start,
 	IRA::CString lontoken,lattoken,token;
 	errMsg="";
 	res=false;
-	while (IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {
+	while (IRA::CIRATools::getNextToken(val,start,SEPARATORS,token,false)) {
 		if (strcmp(token,OFFFRAMEEQ)==0) {
 			offsetFrame=Antenna::ANT_EQUATORIAL;
-			if (!IRA::CIRATools::getNextToken(val,start,SEPARATOR,lontoken)) {
+			if (!IRA::CIRATools::getNextToken(val,start,SEPARATORS,lontoken,false)) {
 				errMsg="not enough parameters for equatorial offset switch";
 				return false;
 			}	
-			if (!IRA::CIRATools::getNextToken(val,start,SEPARATOR,lattoken)) {
+			if (!IRA::CIRATools::getNextToken(val,start,SEPARATORS,lattoken,false)) {
 				errMsg="not enough parameters for equatorial offset switch";
 				return false;
 			}
@@ -1017,11 +1210,11 @@ bool CScanList::parseOffsetSwitch(const IRA::CString& val,int& start,
 		}
 		else if (strcmp(token,OFFFRAMEHOR)==0) {
 			offsetFrame=Antenna::ANT_HORIZONTAL;
-			if (!IRA::CIRATools::getNextToken(val,start,SEPARATOR,lontoken)) {
+			if (!IRA::CIRATools::getNextToken(val,start,SEPARATORS,lontoken,false)) {
 				errMsg="not enough parameters for horizontal offset switch";
 				return false;
 			}	
-			if (!IRA::CIRATools::getNextToken(val,start,SEPARATOR,lattoken)) {
+			if (!IRA::CIRATools::getNextToken(val,start,SEPARATORS,lattoken,false)) {
 				errMsg="not enough parameters for horizontal offset switch";
 				return false;
 			}
@@ -1038,11 +1231,11 @@ bool CScanList::parseOffsetSwitch(const IRA::CString& val,int& start,
 		}
 		else if (strcmp(token,OFFFRAMEGAL)==0) {
 			offsetFrame=Antenna::ANT_GALACTIC;
-			if (!IRA::CIRATools::getNextToken(val,start,SEPARATOR,lontoken)) {
+			if (!IRA::CIRATools::getNextToken(val,start,SEPARATORS,lontoken,false)) {
 				errMsg="not enough parameters for galactic offset switch";
 				return false;
 			}	
-			if (!IRA::CIRATools::getNextToken(val,start,SEPARATOR,lattoken)) {
+			if (!IRA::CIRATools::getNextToken(val,start,SEPARATORS,lattoken,false)) {
 				errMsg="not enough parameters for galactic offset switch";
 				return false;
 			}
@@ -1067,7 +1260,7 @@ bool CScanList::parseVRADSwitch(const IRA::CString& val,int& start,double& vrad,
 	IRA::CString token;
 	errMsg="";
 	result=false;
-	while (IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {
+	while (IRA::CIRATools::getNextToken(val,start,SEPARATORS,token,false)) {
 		if (strcmp(token,RVEL)==0) {
 			if (parseVRADSwitch(val,start,vrad,frame,ref,errMsg)) {
 				result=true;
@@ -1084,14 +1277,14 @@ bool CScanList::parseVRADSwitch(const IRA::CString& val,int& start,double& vrad,
 bool CScanList::parseVRADSwitch(const IRA::CString& val,int& start,double& vrad,Antenna::TReferenceFrame& frame,Antenna::TVradDefinition& ref,IRA::CString& errMsg)
 {
 	IRA::CString token;
-	if (IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {
+	if (IRA::CIRATools::getNextToken(val,start,SEPARATORS,token,false)) {
 		vrad=token.ToDouble();
 	}
 	else {
 		errMsg="not enough parameters for the radial velocity switch";
 		return false;
 	}
-	if (IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {
+	if (IRA::CIRATools::getNextToken(val,start,SEPARATORS,token,false)) {
 		if (!Antenna::Definitions::map(token,frame)) {
 			errMsg="the reference frame of the radial velocity is incorrect";
 			return false;
@@ -1101,7 +1294,7 @@ bool CScanList::parseVRADSwitch(const IRA::CString& val,int& start,double& vrad,
 		errMsg="not enough parameters for the radial velocity switch";
 		return false;
 	}
-	if (IRA::CIRATools::getNextToken(val,start,SEPARATOR,token)) {
+	if (IRA::CIRATools::getNextToken(val,start,SEPARATORS,token,false)) {
 		if (!Antenna::Definitions::map(token,ref)) {
 			errMsg="the radial velocity definition is incorrect";
 			return false;

@@ -43,10 +43,7 @@ module Receivers {
      * <h3>Methods</h3>:
      * <ul>
      *     <li>setup(): allow the derotator to be ready to move</li>
-     *     <li>powerOff(): switch the power amplifier off </li>
      *     <li>setPosition(): set the derotator position</li>
-     *     <li>setSpeed(): set the derotator speed, in rpm</li>
-     *     <li>getSpeed(): get the derotator speed, in rpm</li>
      *     <li>getActPosition(): return the actPosition value</li>
      *     <li>getCmdPosition(): return the cmdPosition value</li>
      *     <li>getPositionFromHistory(t): return the the derotator position at
@@ -61,7 +58,8 @@ module Receivers {
      *     <li>isSlewing(): return true when the derotator is moving</li>
      * </ul> 
      */
-    interface GenericDerotator : ACS::CharacteristicComponent {
+    interface GenericDerotator
+    {
        
         /** 
          * This property returns the sensor encoder position in the user
@@ -125,14 +123,6 @@ module Receivers {
         );
 
 
-        /** Switch the power amplifier off
-         *
-         * @throw CORBA::SystemException
-         * @throw ComponentErrors::ComponentErrorsEx
-         */
-        void powerOff() raises (ComponentErrors::ComponentErrorsEx);
-
-
         /** 
          * @return the actPosition property value
          *
@@ -145,6 +135,17 @@ module Receivers {
             DerotatorErrors::DerotatorErrorsEx,
             DerotatorErrors::OutOfRangeErrorEx
         );
+
+
+        /**
+         * This method loads a position that has to be tracked by the derotator
+         * @param point_time an ACS::Time object indicating the time associated with the coordinates to be tracked.
+         *        Only the start time is sent to the derotator and the points after are always spaced by the same amount of time from one another.
+         *        It is still necessary to fill this field in order to associate a time to the coordinates inside the component.
+         * @param position the position to track at the given time
+         * @param restart flag that says the given point is the first of a new trajectory
+         */
+        void loadTrackingPoint(in ACS::Time point_time, in double position, in boolean restart) raises (DerotatorErrors::DerotatorErrorsEx);
 
 
         /**
@@ -176,32 +177,6 @@ module Receivers {
          *  @throw ComponentError::ComponentErrorsEx
          */
          double getPositionFromHistory(in ACS::Time t) raises (ComponentErrors::ComponentErrorsEx);
-
-
-        /** 
-         * Set the derotator speed
-         *
-         * @arg speed speed in rpm
-         * @throw ComponentErrors::ComponentErrorsEx,
-         * @throw DerotatorErrors::DerotatorErrorsEx
-         */
-        void setSpeed(in unsigned long speed) raises (
-            ComponentErrors::ComponentErrorsEx,
-            DerotatorErrors::DerotatorErrorsEx
-        );
-
-
-        /** 
-         * Get the derotator speed
-         *
-         * @return the derotator speed in rpm
-         * @throw ComponentErrors::ComponentErrorsEx,
-         * @throw DerotatorErrors::DerotatorErrorsEx
-         */
-        unsigned long getSpeed() raises (
-            ComponentErrors::ComponentErrorsEx,
-            DerotatorErrors::DerotatorErrorsEx
-        );
 
 
         /**

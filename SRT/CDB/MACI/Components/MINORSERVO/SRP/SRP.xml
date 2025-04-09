@@ -10,6 +10,5 @@
     ImplLang="cpp"
     Type="IDL:alma/MinorServo/SRTProgramTrackMinorServo:1.0"
     Container="MinorServoContainer"
-    Default="true"
-
+    Default="false"
 />

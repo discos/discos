@@ -122,9 +122,9 @@ bool SRTProgramTrackMinorServoImpl::status()
     return status;
 }
 
-bool SRTProgramTrackMinorServoImpl::setup(const char* configuration_name)
+bool SRTProgramTrackMinorServoImpl::setup(const char* configuration_name, CORBA::Boolean as_off)
 {
-    bool return_value = SRTBaseMinorServoImpl::setup(configuration_name);
+    bool return_value = SRTBaseMinorServoImpl::setup(configuration_name, as_off);
 
     m_tracking_queue.clear();
     m_total_trajectory_points.store(0);

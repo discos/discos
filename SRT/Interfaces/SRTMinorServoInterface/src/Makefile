@@ -24,11 +24,12 @@ CSOURCENAMES = \
 #
 # IDL FILES
 #
-IDL_FILES = SRTMinorServoBoss SRTMinorServo SRTMinorServoCommon
+IDL_FILES = SRTMinorServoBoss SRTMinorServo SRTDerotator SRTMinorServoCommon
 
 SRTMinorServoCommonStubs_LIBS = baciStubs ManagmentDefinitionsStubs MinorServoDefinitionsStubs ComponentErrorsStubs MinorServoErrorsStubs
 SRTMinorServoStubs_LIBS = SRTMinorServoCommonStubs
 SRTMinorServoBossStubs_LIBS = SRTMinorServoCommonStubs MinorServoBossStubs
+SRTDerotatorStubs_LIBS = SRTMinorServoCommonStubs GenericDerotatorStubs
 
 #
 # INCLUDE STANDARDS

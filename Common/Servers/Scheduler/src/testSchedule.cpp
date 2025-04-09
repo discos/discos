@@ -35,7 +35,7 @@ IRA::CString toDescription(const Antenna::TsubScanDescription& des)
 
 IRA::CString toType(const Management::TScanTypes& tp)
 {
-	if (tp==Management::MNG_SIDEREAL) return IRA::CString("SIDEREAL");     
+	if (tp==Management::MNG_SIDEREAL) return IRA::CString("SIDEREAL");
 	else if (tp==Management::MNG_SUN)  return IRA::CString("SUN");   
 	else if (tp==Management::MNG_MOON) return IRA::CString("MOON");
 	else if (tp==Management::MNG_SATELLITE) return IRA::CString("SATELLITE");
@@ -66,7 +66,10 @@ int main(int argc, char *argv[])
 	Management::TSubScanConfiguration *subScanConf;
 	CSchedule::TRecord rec;
 	ACS::stringSeq layoutDef;
-	CSchedule sched("../templates/","schedule.tmpl");
+	std::string schedfile = "schedule.tmpl";
+	if(argc > 1)
+		schedfile = std::string(argv[1]);
+	CSchedule sched("../templates/",schedfile.c_str());
 	//CSchedule sched("/archive/schedules/maintenance/","mbfitstest-CrossEQEQ.scd");
 	//CSchedule sched("/archive/schedules/","calibrationSeq.scd");
 	

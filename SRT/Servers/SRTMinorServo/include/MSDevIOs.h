@@ -47,6 +47,8 @@ namespace MinorServo
 
         /**
          * It writes values into controller. Unused because all the properties are read-only.
+         * Derotator update, the cmdPosition is actually a RW property, but the position is never set anywhere by using the DevIO.
+         * I will keep this implementation that does nothing and the position will be set by the setPosition or programTrack methods.
          */
         void write(const T& value, ACS::Time& timestamp)
         {
@@ -237,7 +239,7 @@ namespace MinorServo
      * The templates is specialized for the types listed right below and compilation will fail if the developer attempts to use it for an unknown MSDevIO type.
      */
     template <typename X, typename Y, typename = std::enable_if<
-        is_any_v<Y, SRTMinorServoGeneralStatus, SRTMinorServoStatus>
+        is_any_v<Y, SRTMinorServoGeneralStatus, SRTMinorServoStatus, SRTDerotatorStatus>
         && is_any_v<X,
             Management::TBoolean,
             CORBA::Double,
@@ -306,7 +308,7 @@ namespace MinorServo
         const std::string m_property_name;
 
         /**
-         * The reference to the SRTMinorServoAnswerMap in which the readings from the PLC appear. This could be either a SRTMinorServoGeneralStatus or a SRTMinorServoStatus.
+         * The reference to the SRTMinorServoAnswerMap in which the readings from the PLC appear. This could be either a SRTMinorServoGeneralStatus, a SRTMinorServoStatus or a SRTDerotatorStatus.
          */
         const Y& m_map;
 
@@ -322,7 +324,14 @@ namespace MinorServo
      * The templates is specialized for the combinations of types listed right below and the compilation will fail if the developer attempts to use it with any other types combination.
      */
     template <typename C, typename A, typename = std::enable_if_t<
-        is_any_v<C, Management::TSystemStatus, Management::TBoolean, ACE_CString, CORBA::Long, SRTMinorServoError> || (std::is_same_v<C, ACS::doubleSeq> && std::is_same_v<A, std::vector<double>>)
+        is_any_v<C,
+            Management::TSystemStatus,
+            Management::TBoolean,
+            ACE_CString,
+            CORBA::Long,
+            SRTMinorServoError,
+            double,
+            ACS::pattern> || (std::is_same_v<C, ACS::doubleSeq> && std::is_same_v<A, std::vector<double>>)
     >>
     class MSGenericDevIO : public MSBaseDevIO<C>
     {
