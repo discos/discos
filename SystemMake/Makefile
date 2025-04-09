@@ -36,7 +36,7 @@ COMMON_SERVERS:=AntennaBoss Observatory OTF PointingModel Refraction SkySource S
                 Moon FitsWriter Scheduler ReceiversBoss ExternalClients \
                 CalibrationTool TotalPower CustomLogger \
                 PyDewarPositioner Sardara Skarab PyLocalOscillator MFKBandBaseReceiver PyCalmux \
-				ActiveSurfaceLan ActiveSurfaceUSD XBackend
+				ActiveSurfaceLan ActiveSurfaceUSD XBackend KQWReceiver
 COMMON_CLIENTS:=AntennaBossTextClient ObservatoryTextClient \
                 GenericBackendTextClient ReceiversBossTextClient \
                 SystemTerminal CaltoolClient CustomLoggingClient \
@@ -82,7 +82,7 @@ ifeq ($(STATION),SRT)
 		CommonInterface ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface \
 		SRTAntennaInterface SRTActiveSurfaceInterface SRTWeatherStationInterface SRTReceiversInterface \
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary XarcosLibrary SRTMinorServoLibrary ComponentProxy ModbusChannel PyTestingLibrary \
-		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool TotalPower CustomLogger \
+		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool TotalPower CustomLogger KQWReceiver \
 		SRTMount SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver \
 		SRT5GHzReceiver PyDewarPositioner \
 		SRTPyIFDistributor AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient CustomLoggingClient SchedulerTextClient \
@@ -103,7 +103,7 @@ ifeq ($(STATION),SRT)
 	AntennaImplementation_MODULES:=Observatory SkySource OTF Moon PointingModel Refraction AntennaBoss SRTMount
 	ManagementImplementation_MODULES:=Scheduler CalibrationTool FitsWriter ExternalClients
 	BackendsImplementation_MODULES:=TotalPower
-	ReceiversImplementation_MODULES:=ReceiversBoss SRTKBandMFReceiver SRT7GHzReceiver SRTLPBandReceiver
+	ReceiversImplementation_MODULES:=ReceiversBoss KQWReceiver SRTKBandMFReceiver SRT7GHzReceiver SRTLPBandReceiver
 	WeatherStationImplementation_MODULES:=SRTWeatherStation
 	SRTActiveSurfaceImplementation_MODULES:=SRTActiveSurfaceBoss
 	MinorServoImplementation_MODULES:=SRTMinorServo
@@ -121,7 +121,7 @@ ifeq ($(STATION),Medicina)
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary ComponentProxy ModbusChannel XarcosLibrary \
 	    PyTestingLibrary MedicinaVertexLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
-		TotalPower MedicinaMount MedicinaPyLocalOscillator MedicinaPyDMed CustomLogger MedicinaMinorServo MedicinaActiveSurfaceBoss \
+		TotalPower MedicinaMount MedicinaPyLocalOscillator MedicinaPyDMed CustomLogger KQWReceiver MedicinaMinorServo MedicinaActiveSurfaceBoss \
 		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient SchedulerTextClient MinorServoBossTextClient\
 		MedicinaActiveSurfaceGUIClient MedicinaMountTextClient CustomLoggingClient\
 		Plotter KStars Scripts MedScripts XBackend
@@ -138,7 +138,7 @@ ifeq ($(STATION),Medicina)
 	AntennaImplementation_MODULES:=Observatory SkySource OTF Moon PointingModel Refraction AntennaBoss MedicinaMount
 	ManagementImplementation_MODULES:=Scheduler CalibrationTool FitsWriter ExternalClients
 	BackendsImplementation_MODULES:=TotalPower XBackend
-	ReceiversImplementation_MODULES:=ReceiversBoss
+	ReceiversImplementation_MODULES:=ReceiversBoss KQWReceiver
 	WeatherStationImplementation_MODULES:=MedWeatherStation Metrology
 	MedicinaActiveSurfaceImplementation_MODULES:=MedicinaActiveSurfaceBoss
 	
@@ -153,7 +153,7 @@ ifeq ($(STATION),Noto)
 		NotoAntennaInterface \
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary PyTestingLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
-		TotalPower NotoMount CustomLogger NotoMinorServo NotoActiveSurfaceBoss \
+		TotalPower NotoMount CustomLogger KQWReceiver NotoMinorServo NotoActiveSurfaceBoss \
 		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal SchedulerTextClient MinorServoBossTextClient\
 		NotoMountTextClient CustomLoggingClient Scripts
 
@@ -168,7 +168,7 @@ ifeq ($(STATION),Noto)
 	AntennaImplementation_MODULES:=Observatory SkySource OTF Moon PointingModel Refraction AntennaBoss NotoMount
 	ManagementImplementation_MODULES:=Scheduler CalibrationTool FitsWriter ExternalClients
 	BackendsImplementation_MODULES:=TotalPower
-	ReceiversImplementation_MODULES:=ReceiversBoss
+	ReceiversImplementation_MODULES:=ReceiversBoss KQWReceiver
 	NotoActiveSurfaceImplementation_MODULES:=NotoActiveSurfaceBoss
 	
 	CDB_SVN_LOCATION="Noto/Configuration/CDB"
