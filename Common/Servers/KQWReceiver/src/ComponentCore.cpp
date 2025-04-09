@@ -80,10 +80,10 @@ void CComponentCore::cleanup()
         m_control->closeConnection();
         delete m_control;
     }
-    unloadLocalOscillator(m_localOscillatorDevice_K.out(),m_configuration.getLocalOscillatorInstance_K());
-    unloadLocalOscillator(m_localOscillatorDevice_Q.out(),m_configuration.getLocalOscillatorInstance_Q());
-    unloadLocalOscillator(m_localOscillatorDevice_WL.out(),m_configuration.getLocalOscillatorInstance_WL());
-    unloadLocalOscillator(m_localOscillatorDevice_WH.out(),m_configuration.getLocalOscillatorInstance_WH());
+    unloadLocalOscillator(m_localOscillatorDevice_K,m_configuration.getLocalOscillatorInstance_K());
+    unloadLocalOscillator(m_localOscillatorDevice_Q,m_configuration.getLocalOscillatorInstance_Q());
+    unloadLocalOscillator(m_localOscillatorDevice_WL,m_configuration.getLocalOscillatorInstance_WL());
+    unloadLocalOscillator(m_localOscillatorDevice_WH,m_configuration.getLocalOscillatorInstance_WH());
 }
 
 const IRA::CString& CComponentCore::getActualMode()
@@ -415,7 +415,6 @@ throw (
 */
 void CComponentCore::setLO(const ACS::doubleSeq& lo) 
 {
-	
     double trueValue,amp;
     double *freq=NULL;
     double *power=NULL;
@@ -470,18 +469,18 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo)
     		// make sure the synthesizer component is available
 
 			if (m_configuration.getArrayIndex(k)==CConfiguration<maci::ContainerServices>::KBAND) {
-    			loadLocalOscillator(m_localOscillatorDevice_K.out(),m_localOscillatorFault_K,
+				loadLocalOscillator(m_localOscillatorDevice_K,m_localOscillatorFault_K,
     			m_configuration.getLocalOscillatorInstance_K()); 	 // throw (ComponentErrors::CouldntGetComponentExImpl)
     		} else if (m_configuration.getArrayIndex(k)==CConfiguration<maci::ContainerServices>::QBAND) {
-    			loadLocalOscillator(m_localOscillatorDevice_Q.out(),m_localOscillatorFault_Q,
+				loadLocalOscillator(m_localOscillatorDevice_Q,m_localOscillatorFault_Q,
     			m_configuration.getLocalOscillatorInstance_Q()); // throw (ComponentErrors::CouldntGetComponentExImpl)
     		} else if (m_configuration.getArrayIndex(k)==CConfiguration<maci::ContainerServices>::WLBAND) {
-    			loadLocalOscillator(m_localOscillatorDevice_WL.out(),m_localOscillatorFault_WL,
+				loadLocalOscillator(m_localOscillatorDevice_WL,m_localOscillatorFault_WL,
     			m_configuration.getLocalOscillatorInstance_WL()); // throw (ComponentErrors::CouldntGetComponentExImpl)
     		}
     		else { //WHBAND
-    			loadLocalOscillator(m_localOscillatorDevice_WL.out(),m_localOscillatorFault_WL,
-    			m_configuration.getLocalOscillatorInstance_WL()); // throw (ComponentErrors::CouldntGetComponentExImpl)
+				loadLocalOscillator(m_localOscillatorDevice_WH,m_localOscillatorFault_WH,
+				m_configuration.getLocalOscillatorInstance_WH()); // throw (ComponentErrors::CouldntGetComponentExImpl)
     		}
    			try {
    				if (m_configuration.getArrayIndex(k)==CConfiguration<maci::ContainerServices>::KBAND) {
@@ -510,7 +509,6 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo)
         		throw impl;
     		}
     		m_configuration.setCurrentLOValue(lo[k],k);
-    					
     	}
     }
 }
@@ -1179,7 +1177,7 @@ void CComponentCore::updateVertexTemperature()
 }
 
 //throw (ComponentErrors::CouldntGetComponentExImpl)
-void CComponentCore::loadLocalOscillator(Receivers::LocalOscillator_ptr device,bool &fault,const IRA::CString& name)
+void CComponentCore::loadLocalOscillator(Receivers::LocalOscillator_var& device,bool &fault,const IRA::CString& name)
 {
     // If reference was already taken, but an error was found....dispose the reference
     if ((!CORBA::is_nil(device)) && (fault)) { 
@@ -1217,7 +1215,7 @@ void CComponentCore::loadLocalOscillator(Receivers::LocalOscillator_ptr device,b
     }
 }
 
-void CComponentCore::unloadLocalOscillator(Receivers::LocalOscillator_ptr device,const IRA::CString& name)
+void CComponentCore::unloadLocalOscillator(Receivers::LocalOscillator_var& device,const IRA::CString& name)
 {
     if (!CORBA::is_nil(device)) {
         try {

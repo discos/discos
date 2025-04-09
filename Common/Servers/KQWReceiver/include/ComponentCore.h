@@ -467,11 +467,11 @@ protected:
     /** Obtain a valid reference to the local oscillator device
 	  * @throw ComponentErrors::CouldntGetComponentExImpl   
      */
-    void loadLocalOscillator(Receivers::LocalOscillator_ptr device,bool &fault,const IRA::CString& name);
+    void loadLocalOscillator(Receivers::LocalOscillator_var& device,bool &fault,const IRA::CString& name);
 
 
     /** Used to free the reference to the local oscillator device */
-    void unloadLocalOscillator(Receivers::LocalOscillator_ptr device,const IRA::CString& name);
+    void unloadLocalOscillator(Receivers::LocalOscillator_var& device,const IRA::CString& name);
 
 
     /************************ CONVERSION FUNCTIONS **************************/
