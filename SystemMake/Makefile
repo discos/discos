@@ -31,7 +31,7 @@ COMMON_INTERFACES:=CommonInterface ManagmentInterface AntennaInterface Receivers
                    XBackendInterface
 COMMON_LIBRARIES:=SlaLibrary IRALibrary DiscosVersion TextWindowLibrary ParserLibrary \
                   XarcosLibrary ModbusChannel ComponentProxy DiscosLocals XEphemAstroLib \
-				  DiscosBackendProtocol PyTestingLibrary ZMQPublisher \
+				  DiscosBackendProtocol PyTestingLibrary ZMQPublisherLibrary \
 COMMON_SERVERS:=AntennaBoss Observatory OTF PointingModel Refraction SkySource SolarSystem \
                 Moon FitsWriter Scheduler ReceiversBoss ExternalClients \
                 CalibrationTool TotalPower CustomLogger \
@@ -81,7 +81,7 @@ ifeq ($(STATION),SRT)
 		ActiveSurfaceErrors \
 		CommonInterface ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface \
 		SRTAntennaInterface SRTActiveSurfaceInterface SRTWeatherStationInterface SRTReceiversInterface \
-		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary XarcosLibrary SRTMinorServoLibrary ComponentProxy ModbusChannel PyTestingLibrary ZMQPublisher \
+		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary XarcosLibrary SRTMinorServoLibrary ComponentProxy ModbusChannel PyTestingLibrary ZMQPublisherLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool TotalPower CustomLogger \
 		SRTMount SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver SRTWeatherStation SRT7GHzReceiver SRTLPBandReceiver \
 		SRT5GHzReceiver PyDewarPositioner \
@@ -99,7 +99,7 @@ ifeq ($(STATION),SRT)
 	Receivers_MODULES:=ReceiversInterface
 	MinorServo_MODULES:=MinorServoInterface
 	SRTActiveSurface_MODULES:=SRTActiveSurfaceInterface
-	Libraries_MODULES:=IRALibrary SlaLibrary TextWindowLibrary ParserLibrary SRTMinorServoLibrary PyTestingLibrary ZMQPublisher
+	Libraries_MODULES:=IRALibrary SlaLibrary TextWindowLibrary ParserLibrary SRTMinorServoLibrary PyTestingLibrary ZMQPublisherLibrary
 	AntennaImplementation_MODULES:=Observatory SkySource OTF Moon PointingModel Refraction AntennaBoss SRTMount
 	ManagementImplementation_MODULES:=Scheduler CalibrationTool FitsWriter ExternalClients
 	BackendsImplementation_MODULES:=TotalPower
