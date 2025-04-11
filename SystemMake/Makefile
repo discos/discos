@@ -13,6 +13,7 @@
 # Bartolini 02/02/15  added .PHONY target tall
 # Bartolini 03/02/15  split away common, inspired by http://lackof.org/taggart/hacking/make-example/
 # Bartolini 25/08/15  Added comments and changed default target for all
+# Carboni   11/04/25  Parallelized non-IDL code compilation
 
 #
 # this new Makefile section separates code modules between what is common
@@ -110,8 +111,15 @@ ifeq ($(STATION),SRT)
 	
 	CDB_SVN_LOCATION="SRT/Configuration/CDB"
 	SYSTEM_SVN_MODULES=Common SRT
-else 
-ifeq ($(STATION),Medicina)
+
+	ERRORS:=$(COMMON_ERRORS) $(SRT_ERRORS)
+	INTERFACES:=$(COMMON_INTERFACES) $(SRT_INTERFACES)
+	LIBRARIES:=$(COMMON_LIBRARIES) $(SRT_LIBRARIES)
+	SERVERS:=$(COMMON_SERVERS) $(SRT_SERVERS)
+	CLIENTS:=$(COMMON_CLIENTS) $(SRT_CLIENTS)
+	MISC:=$(COMMON_MISC) $(SRT_MISC)
+	SIMULATORS:=$(COMMON_SIMULATORS)
+else ifeq ($(STATION),Medicina)
 	#Add all modules included in the Medicina system in this sequence
 	#Doc, (Errors, Interfacies, Libraries, Servers, Clients, Misc)
 	MODULES:=MEDDox \
@@ -119,7 +127,7 @@ ifeq ($(STATION),Medicina)
 		CommonInterface ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface XBackendInterface\
 		MedicinaAntennaInterface MedicinaWeatherStationInterface \
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary ComponentProxy ModbusChannel XarcosLibrary \
-	    PyTestingLibrary MedicinaVertexLibrary \
+		PyTestingLibrary MedicinaVertexLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
 		TotalPower MedicinaMount MedicinaPyLocalOscillator MedicinaPyDMed CustomLogger MedicinaMinorServo MedicinaActiveSurfaceBoss \
 		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient SchedulerTextClient MinorServoBossTextClient\
@@ -144,8 +152,15 @@ ifeq ($(STATION),Medicina)
 	
 	CDB_SVN_LOCATION="Medicina/Configuration/CDB"
 	SYSTEM_SVN_MODULES=Common Medicina
-else
-ifeq ($(STATION),Noto)
+
+	ERRORS:=$(COMMON_ERRORS) $(MED_ERRORS)
+	INTERFACES:=$(COMMON_INTERFACES) $(MED_INTERFACES)
+	LIBRARIES:=$(COMMON_LIBRARIES) $(MED_LIBRARIES)
+	SERVERS:=$(COMMON_SERVERS) $(MED_SERVERS)
+	CLIENTS:=$(COMMON_CLIENTS) $(MED_CLIENTS)
+	MISC:=$(COMMON_MISC) $(MED_MISC)
+	SIMULATORS:=$(COMMON_SIMULATORS)
+else ifeq ($(STATION),Noto)
 	#Add all modules included in the Noto system in this sequence
 	#Doc, (Errors, Interfacies, Libraries, Servers, Clients, Misc)
 	MODULES:= ActiveSurfaceErrors ClientErrors ComponentErrors AntennaErrors ParserErrors BackendsErrors ManagementErrors ReceiversErrors MetrologyErrors MinorServoErrors \
@@ -174,57 +189,19 @@ ifeq ($(STATION),Noto)
 	CDB_SVN_LOCATION="Noto/Configuration/CDB"
 	SYSTEM_SVN_MODULES=Common Medicina Noto
 
+	ERRORS:=$(COMMON_ERRORS) $(NT_ERRORS)
+	INTERFACES:=$(COMMON_INTERFACES) $(NT_INTERFACES)
+	LIBRARIES:=$(COMMON_LIBRARIES) $(NT_LIBRARIES)
+	SERVERS:=$(COMMON_SERVERS) $(NT_SERVERS)
+	CLIENTS:=$(COMMON_CLIENTS) $(NT_CLIENTS)
+	MISC:=$(COMMON_MISC) $(NT_MISC)
+	SIMULATORS:=$(COMMON_SIMULATORS)
 else
 	RESULT:=$(error STATION variable is not set correctly!)	
-endif
-endif
 endif
 
 
 # ******* END of Editable area *****************
-COMMON_MODULES:=$(COMMON_ERRORS) \
-                $(COMMON_INTERFACES) \
-                $(COMMON_LIBRARIES) \
-                $(COMMON_SERVERS) \
-                $(COMMON_CLIENTS) \
-                $(COMMON_MISC) \
-                $(COMMON_SIMULATORS)
-
-SRT_MODULES:=$(SRT_ERRORS) \
-             $(SRT_INTERFACES) \
-             $(SRT_LIBRARIES) \
-             $(SRT_SERVERS) \
-             $(SRT_CLIENTS) \
-             $(SRT_MISC)
-
-MED_MODULES:=$(MED_ERRORS) \
-             $(MED_INTERFACES) \
-             $(MED_LIBRARIES) \
-             $(MED_SERVERS) \
-             $(MED_CLIENTS) \
-             $(MED_MISC)
-
-NT_MODULES:=$(NT_ERRORS) \
-            $(NT_INTERFACES) \
-            $(NT_LIBRARIES) \
-            $(NT_SERVERS) \
-            $(NT_CLIENTS) \
-            $(NT_MISC)
-
-ifeq ($(STATION), SRT)
-	TELESCOPE_MODULES:=$(SRT_MODULES)
-else 
-ifeq ($(STATION), Medicina)
-	TELESCOPE_MODULES:=$(MED_MODULES)
-else 
-ifeq ($(STATION), Noto)
-	TELESCOPE_MODULES:=$(NT_MODULES)
-else
-	RESULT:=$(error STATION variable is not set correctly!)	
-endif
-endif
-endif
-
 CURRENT_DIR:=$(shell pwd)/..
 
 define PathFinder
@@ -264,17 +241,42 @@ $(foreach i, $(CPP_DOC), $(shell echo "INPUT=$($(i)_MODULES_PATH)" > /tmp/$(i)_c
 $(foreach i, $(IDL_DOC), $(shell echo "INPUT=$($(i)_MODULES_PATH)" > /tmp/$(i)_idl.in))
 
 COMPILE_MODULES_PATH:=$(call PathFinder,$(MODULES))
-
 BUILD_DIRS:=$(foreach i, $(COMPILE_MODULES_PATH), $(i)/src)
 
-COMMON_MODULES_PATH:=$(call PathFinder,$(COMMON_MODULES))
-COMMON_MODULES_DIRS:=$(foreach i, $(COMMON_MODULES_PATH), $(i)/src)
-COMMON_BUILD_TARGETS:=$(COMMON_MODULES_DIRS:%=build-%)
-COMMON_CLEAN_TARGETS:=$(COMMON_MODULES_DIRS:%=clean-%)
-TELESCOPE_MODULES_PATH:=$(call PathFinder,$(TELESCOPE_MODULES))
-TELESCOPE_MODULES_DIRS:=$(foreach i, $(TELESCOPE_MODULES_PATH), $(i)/src)
-TELESCOPE_BUILD_TARGETS:=$(TELESCOPE_MODULES_DIRS:%=build-%)
-TELESCOPE_CLEAN_TARGETS:=$(TELESCOPE_MODULES_DIRS:%=clean-%)
+ERRORS_PATH:=$(call PathFinder,$(ERRORS))
+ERRORS_DIRS:=$(foreach i, $(ERRORS_PATH), $(i)/src)
+ERRORS_BUILD_TARGETS:=$(ERRORS_DIRS:%=build-%)
+ERRORS_CLEAN_TARGETS:=$(ERRORS_DIRS:%=clean-%)
+
+INTERFACES_PATH:=$(call PathFinder,$(INTERFACES))
+INTERFACES_DIRS:=$(foreach i, $(INTERFACES_PATH), $(i)/src)
+INTERFACES_BUILD_TARGETS:=$(INTERFACES_DIRS:%=build-%)
+INTERFACES_CLEAN_TARGETS:=$(INTERFACES_DIRS:%=clean-%)
+
+LIBRARIES_PATH:=$(call PathFinder,$(LIBRARIES))
+LIBRARIES_DIRS:=$(foreach i, $(LIBRARIES_PATH), $(i)/src)
+LIBRARIES_BUILD_TARGETS:=$(LIBRARIES_DIRS:%=build-%)
+LIBRARIES_CLEAN_TARGETS:=$(LIBRARIES_DIRS:%=clean-%)
+
+SERVERS_PATH:=$(call PathFinder,$(SERVERS))
+SERVERS_DIRS:=$(foreach i, $(SERVERS_PATH), $(i)/src)
+SERVERS_BUILD_TARGETS:=$(SERVERS_DIRS:%=build-%)
+SERVERS_CLEAN_TARGETS:=$(SERVERS_DIRS:%=clean-%)
+
+CLIENTS_PATH:=$(call PathFinder,$(CLIENTS))
+CLIENTS_DIRS:=$(foreach i, $(CLIENTS_PATH), $(i)/src)
+CLIENTS_BUILD_TARGETS:=$(CLIENTS_DIRS:%=build-%)
+CLIENTS_CLEAN_TARGETS:=$(CLIENTS_DIRS:%=clean-%)
+
+MISC_PATH:=$(call PathFinder,$(MISC))
+MISC_DIRS:=$(foreach i, $(MISC_PATH), $(i)/src)
+MISC_BUILD_TARGETS:=$(MISC_DIRS:%=build-%)
+MISC_CLEAN_TARGETS:=$(MISC_DIRS:%=clean-%)
+
+SIMULATORS_PATH:=$(call PathFinder,$(SIMULATORS))
+SIMULATORS_DIRS:=$(foreach i, $(SIMULATORS_PATH), $(i)/src)
+SIMULATORS_BUILD_TARGETS:=$(SIMULATORS_DIRS:%=build-%)
+SIMULATORS_CLEAN_TARGETS:=$(SIMULATORS_DIRS:%=clean-%)
 
 ifeq (X$(DOCROOT),X)
 	DOC:=$(HOME)/docroot
@@ -282,65 +284,99 @@ else
 	DOC:=$(DOCROOT)
 endif
 
-
 DOCIDL:=$(DOC)/idl
 DOCCPP:=$(DOC)/cpp
 
 .PHONY: all
+all: build-errors build-interfaces build-libraries build-servers build-clients build-misc build-simulators
 
-all: common-build telescope-build
+.PHONY: clean
+clean: clean-errors clean-interfaces clean-libraries clean-servers clean-clients clean-misc clean-simulators
 
-clean: common-clean telescope-clean
+.PHONY: build-errors $(ERRORS_BUILD_TARGETS)
+build-errors: $(ERRORS_BUILD_TARGETS)
+$(ERRORS_BUILD_TARGETS):
+	$(MAKE) -j -C $(@:build-%=%) all
+	$(MAKE) -C $(@:build-%=%) install
 
-legacy-all:
-	@for i in $(BUILD_DIRS); do \
-		make -C $${i} all install ; \
-	done
-
-.PHONY: common-build $(COMMON_BUILD_TARGETS)
-
-common-build: $(COMMON_BUILD_TARGETS)
-
-$(COMMON_BUILD_TARGETS):
-	$(MAKE) -C $(@:build-%=%) all install
-
-.PHONY: common-clean $(COMMON_CLEAN_TARGETS)
-
-common-clean: $(COMMON_CLEAN_TARGETS)
-
-$(COMMON_CLEAN_TARGETS):
+.PHONY: clean-errors $(ERRORS_CLEAN_TARGETS)
+clean-errors: $(ERRORS_CLEAN_TARGETS)
+$(ERROR_CLEAN_TARGETS):
 	$(MAKE) -C $(@:clean-%=%) clean_dist
 
-.PHONY: telescope-build $(TELESCOPE_BUILD_TARGETS)
+.PHONY: build-interfaces $(INTERFACES_BUILD_TARGETS)
+build-interfaces: $(INTERFACES_BUILD_TARGETS)
+$(INTERFACES_BUILD_TARGETS):
+	$(MAKE) -j -C $(@:build-%=%) all
+	$(MAKE) -C $(@:build-%=%) install
 
-telescope-build: $(TELESCOPE_BUILD_TARGETS)
-
-$(TELESCOPE_BUILD_TARGETS):
-	$(MAKE) -C $(@:build-%=%) all install
-
-.PHONY: telescope-clean $(TELESCOPE_CLEAN_TARGETS)
-
-telescope-clean: $(TELESCOPE_CLEAN_TARGETS)
-
-$(TELESCOPE_CLEAN_TARGETS):
+.PHONY: clean-interfaces $(INTERFACES_CLEAN_TARGETS)
+clean-interfaces: $(INTERFACES_CLEAN_TARGETS)
+$(INTERFACES_CLEAN_TARGETS):
 	$(MAKE) -C $(@:clean-%=%) clean_dist
 
-compile:
-	@for i in $(BUILD_DIRS); do \
-		make -C $${i} all ; \
-	done
+.PHONY: build-libraries $(LIBRARIES_BUILD_TARGETS)
+build-libraries: $(LIBRARIES_BUILD_TARGETS)
+$(LIBRARIES_BUILD_TARGETS):
+	$(MAKE) -j -C $(@:build-%=%) all
+	$(MAKE) -C $(@:build-%=%) install
 
-install:
-	@for i in $(BUILD_DIRS); do \
-		make -C $${i} install ; \
-	done
+.PHONY: clean-libraries $(LIBRARIES_CLEAN_TARGETS)
+clean-libraries: $(LIBRARIES_CLEAN_TARGETS)
+$(LIBRARIES_CLEAN_TARGETS):
+	$(MAKE) -C $(@:clean-%=%) clean_dist
+
+.PHONY: build-servers $(SERVERS_BUILD_TARGETS)
+build-servers: $(SERVERS_BUILD_TARGETS)
+$(SERVERS_BUILD_TARGETS):
+	$(MAKE) -j -C $(@:build-%=%) all
+	$(MAKE) -C $(@:build-%=%) install
+
+.PHONY: clean-servers $(SERVERS_CLEAN_TARGETS)
+clean-servers: $(SERVERS_CLEAN_TARGETS)
+$(SERVERS_CLEAN_TARGETS):
+	$(MAKE) -C $(@:clean-%=%) clean_dist
+
+.PHONY: build-clients $(CLIENTS_BUILD_TARGETS)
+build-clients: $(CLIENTS_BUILD_TARGETS)
+$(CLIENTS_BUILD_TARGETS):
+	$(MAKE) -j -C $(@:build-%=%) all
+	$(MAKE) -C $(@:build-%=%) install
+
+.PHONY: clean-clients $(CLIENTS_CLEAN_TARGETS)
+clean-clients: $(CLIENTS_CLEAN_TARGETS)
+$(CLIENTS_CLEAN_TARGETS):
+	$(MAKE) -C $(@:clean-%=%) clean_dist
+
+.PHONY: build-misc $(MISC_BUILD_TARGETS)
+build-misc: $(MISC_BUILD_TARGETS)
+$(MISC_BUILD_TARGETS):
+	$(MAKE) -j -C $(@:build-%=%) all
+	$(MAKE) -C $(@:build-%=%) install
+
+.PHONY: clean-misc $(MISC_CLEAN_TARGETS)
+clean-misc: $(MISC_CLEAN_TARGETS)
+$(MISC_CLEAN_TARGETS):
+	$(MAKE) -C $(@:clean-%=%) clean_dist
+
+.PHONY: build-simulators $(SIMULATORS_BUILD_TARGETS)
+build-simulators: $(SIMULATORS_BUILD_TARGETS)
+$(SIMULATORS_BUILD_TARGETS):
+	$(MAKE) -j -C $(@:build-%=%) all
+	$(MAKE) -C $(@:build-%=%) install
+
+.PHONY: clean-simulators $(SIMULATORS_CLEAN_TARGETS)
+clean-simulators: $(SIMULATORS_CLEAN_TARGETS)
+$(SIMULATORS_CLEAN_TARGETS):
+	$(MAKE) -C $(@:clean-%=%) clean_dist
 
 # cdb:
 # 	@cd $(ACS_CDB); ln -s $(SYSLOCATION)/$(SYSTEM_SVN_TAG)/$(CDB_SVN_LOCATION) CDB
 # 
 # sources:
 # 	@cd $(SYSLOCATION) ; svn checkout svn+ssh://$(SVNUSER)@nuraghe-devel.oa-cagliari.inaf.it/ACS/tags/$(SYSTEM_SVN_TAG)/$${i}
-  
+
+.PHONY: man
 man:
 	@echo "creating documentation tree....."
 	@if [ ! -d $(DOC) ]; then mkdir $(DOC) ; fi
@@ -352,7 +388,7 @@ man:
 		echo "OUTPUT_DIRECTORY=$(DOCIDL)/$${i}" >> /tmp/doxyconf ; \
 		cat /tmp/$${i}_idl.in >> /tmp/doxyconf ; \
 		echo "HTML_HEADER=$(INTROOT)/templates/DocHeader.html" >> /tmp/doxyconf ; \
-	    echo "HTML_FOOTER=$(INTROOT)/templates/DocFooter.html" >> /tmp/doxyconf ; \
+		echo "HTML_FOOTER=$(INTROOT)/templates/DocFooter.html" >> /tmp/doxyconf ; \
 		doxygen /tmp/doxyconf ; \
 		rm /tmp/doxyconf ; \
 		rm /tmp/$${i}_idl.in ; \
@@ -363,7 +399,7 @@ man:
 		echo "OUTPUT_DIRECTORY=$(DOCCPP)/$${i}" >> /tmp/doxyconf ; \
 		cat /tmp/$${i}_cpp.in >> /tmp/doxyconf ; \
 		echo "HTML_HEADER=$(INTROOT)/templates/DocHeader.html" >> /tmp/doxyconf ; \
-	    echo "HTML_FOOTER=$(INTROOT)/templates/DocFooter.html" >> /tmp/doxyconf ; \
+		echo "HTML_FOOTER=$(INTROOT)/templates/DocFooter.html" >> /tmp/doxyconf ; \
 		doxygen /tmp/doxyconf ; \
 		rm /tmp/doxyconf ; \
 		rm /tmp/$${i}_cpp.in ; \
@@ -371,7 +407,25 @@ man:
 
 	@echo "documentation done in $(DOC)"
 
-legacy-clean:
+.PHONY: stat
+stat:
+	@./slocc.sh -findopt "( -name *.cpp -o -name *.i -o -name *.h -o -name *.idl -o -name *.xml -o -name *.xsd -o -name *.py -o -name Makefile* ) \
+	-not -path *object* -not -path *lib*" ..
+
+.PHONY: legacy-all $(BUILD_DIRS)
+legacy-all: $(BUILD_DIRS)
+	@for i in $(BUILD_DIRS); do \
+		make -C $${i} all ; \
+	done
+
+.PHONY: legacy-install $(BUILD_DIRS)
+install: $(BUILD_DIRS)
+	@for i in $(BUILD_DIRS); do \
+		make -C $${i} install ; \
+	done
+
+.PHONY: legacy-clean $(BUILD_DIRS)
+legacy-clean: $(BUILD_DIRS)
 	@rm -rf $(INTROOT)/bin/*
 	@rm -rf $(INTROOT)/config/CDB/schemas/*
 	@rm -rf $(INTROOT)/idl/*
@@ -382,6 +436,3 @@ legacy-clean:
 		make -C $${i} clean; \
 	done
 	@rm -rf $(DOC)/*
-stat:
-	@./slocc.sh -findopt "( -name *.cpp -o -name *.i -o -name *.h -o -name *.idl -o -name *.xml -o -name *.xsd -o -name *.py -o -name Makefile* ) \
-	-not -path *object* -not -path *lib*" ..
