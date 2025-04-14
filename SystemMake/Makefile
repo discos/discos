@@ -246,7 +246,7 @@ $(COMMON_CLEAN_TARGETS):
 	$(MAKE) -C $(@:clean-%=%) clean_dist
 
 .PHONY: telescope-build $(TELESCOPE_BUILD_TARGETS)
-telescope-build:
+telescope-build: common-build
 	@for i in $(TELESCOPE_MODULES_DIRS); do \
 		$(MAKE) -C $${i} all; \
 		$(MAKE) -C $${i} install; \
