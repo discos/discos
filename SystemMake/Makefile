@@ -13,6 +13,7 @@
 # Bartolini 02/02/15  added .PHONY target tall
 # Bartolini 03/02/15  split away common, inspired by http://lackof.org/taggart/hacking/make-example/
 # Bartolini 25/08/15  Added comments and changed default target for all
+# Carboni   14/04/25  Enabled correct handling of parallel jobs (-j flag)
 
 #
 # this new Makefile section separates code modules between what is common
@@ -21,40 +22,23 @@
 #
 
 COMMON_DOC:=
-COMMON_ERRORS:=ClientErrors ComponentErrors AntennaErrors ParserErrors \
-               BackendsErrors ManagementErrors ReceiversErrors \
-               MetrologyErrors MinorServoErrors XBackendErrors \
-			   ActiveSurfaceErrors
-COMMON_INTERFACES:=CommonInterface ManagmentInterface AntennaInterface ReceiversInterface \
-                   BackendsInterface MinorServoInterface \
-                   WeatherStationInterface ActiveSurfaceInterface \
-                   XBackendInterface
-COMMON_LIBRARIES:=SlaLibrary IRALibrary DiscosVersion TextWindowLibrary ParserLibrary \
-                  XarcosLibrary ModbusChannel ComponentProxy DiscosLocals XEphemAstroLib \
-				  DiscosBackendProtocol PyTestingLibrary \
-COMMON_SERVERS:=AntennaBoss Observatory OTF PointingModel Refraction SkySource SolarSystem \
-                Moon FitsWriter Scheduler ReceiversBoss ExternalClients \
-                CalibrationTool TotalPower CustomLogger \
-                PyDewarPositioner Sardara Skarab PyLocalOscillator MFKBandBaseReceiver PyCalmux \
-				ActiveSurfaceLan ActiveSurfaceUSD XBackend
-COMMON_CLIENTS:=AntennaBossTextClient ObservatoryTextClient \
-                GenericBackendTextClient ReceiversBossTextClient \
-                SystemTerminal CaltoolClient CustomLoggingClient \
-                SchedulerTextClient MeteoClient
-
+COMMON_ERRORS:=ClientErrors ComponentErrors AntennaErrors ParserErrors BackendsErrors ManagementErrors ReceiversErrors MetrologyErrors MinorServoErrors XBackendErrors ActiveSurfaceErrors
+COMMON_INTERFACES:=CommonInterface ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface XBackendInterface
+COMMON_LIBRARIES:=SlaLibrary IRALibrary DiscosVersion TextWindowLibrary ParserLibrary XarcosLibrary ModbusChannel ComponentProxy DiscosLocals XEphemAstroLib DiscosBackendProtocol PyTestingLibrary
+COMMON_SERVERS:=AntennaBoss Observatory OTF PointingModel Refraction SkySource SolarSystem Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool TotalPower CustomLogger \
+                PyDewarPositioner Sardara Skarab PyLocalOscillator MFKBandBaseReceiver PyCalmux ActiveSurfaceLan ActiveSurfaceUSD XBackend
+COMMON_CLIENTS:=AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient CustomLoggingClient SchedulerTextClient MeteoClient
 COMMON_MISC:=Plotter KStars Scripts getTemplateForTests PMUpdate InjectCommand UserTools
-
 COMMON_SIMULATORS:= TCPGenericProtocolSim ReceiverBoardSim
+
+COMMON_MODULES:=$(COMMON_ERRORS) $(COMMON_INTERFACES) $(COMMON_LIBRARIES) $(COMMON_SERVERS) $(COMMON_CLIENTS) $(COMMON_MISC) $(COMMON_SIMULATORS)
 
 SRT_DOC:=SRTDox
 SRT_ERRORS:=
-SRT_INTERFACES:=SRTAntennaInterface SRTActiveSurfaceInterface \
-                SRTMinorServoInterface SRTReceiversInterface
+SRT_INTERFACES:=SRTAntennaInterface SRTActiveSurfaceInterface SRTMinorServoInterface SRTReceiversInterface
 SRT_LIBRARIES:=SRTMinorServoLibrary
-SRT_SERVERS:=SRTMount SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver \
-             SRT7GHzReceiver SRT5GHzReceiver SRTLPBandReceiver SRTPyIFDistributor WeatherStation
-SRT_CLIENTS:=SRTActiveSurfaceGUIClient SRTMountTextClient \
-             MinorServoBossTextClient
+SRT_SERVERS:=SRTMount SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver SRT7GHzReceiver SRT5GHzReceiver SRTLPBandReceiver SRTPyIFDistributor WeatherStation
+SRT_CLIENTS:=SRTActiveSurfaceGUIClient SRTMountTextClient MinorServoBossTextClient
 SRT_MISC:=SRTScripts
 
 MED_DOC:=MEDDox
@@ -66,8 +50,8 @@ MED_CLIENTS:=MedicinaMountTextClient MedicinaActiveSurfaceGUIClient
 MED_MISC:=MedScripts
 
 NT_DOC:=NTDox
-NT_ERRORS:= #ActiveSurfaceErrors NotoActiveSurfaceErrors
-NT_INTERFACES:=NotoAntennaInterface NotoReceiversInterface NotoWeatherStationInterface NotoActiveSurfaceInterface \
+NT_ERRORS:=
+NT_INTERFACES:=NotoAntennaInterface NotoReceiversInterface NotoWeatherStationInterface NotoActiveSurfaceInterface
 NT_LIBRARIES:=
 NT_SERVERS:= NotoReceivers NotoMount NotoWeatherStation NotoActiveSurfaceBoss NotoMinorServo NotoPyLocalOscillator NotoPyIfDistributor
 NT_CLIENTS:=NotoMountTextClient NotoActiveSurfaceGUIClient
@@ -110,19 +94,20 @@ ifeq ($(STATION),SRT)
 	
 	CDB_SVN_LOCATION="SRT/Configuration/CDB"
 	SYSTEM_SVN_MODULES=Common SRT
-else 
-ifeq ($(STATION),Medicina)
+
+	TELESCOPE_MODULES:=$(SRT_ERRORS) $(SRT_INTERFACES) $(SRT_LIBRARIES) $(SRT_SERVERS) $(SRT_CLIENTS) $(SRT_MISC)
+else ifeq ($(STATION),Medicina)
 	#Add all modules included in the Medicina system in this sequence
 	#Doc, (Errors, Interfacies, Libraries, Servers, Clients, Misc)
 	MODULES:=MEDDox \
-		ClientErrors ComponentErrors AntennaErrors ParserErrors BackendsErrors ManagementErrors ReceiversErrors MetrologyErrors MinorServoErrors XBackendErrors\
-		CommonInterface ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface XBackendInterface\
+		ClientErrors ComponentErrors AntennaErrors ParserErrors BackendsErrors ManagementErrors ReceiversErrors MetrologyErrors MinorServoErrors XBackendErrors \
+		CommonInterface ManagmentInterface AntennaInterface ReceiversInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface XBackendInterface \
 		MedicinaAntennaInterface MedicinaWeatherStationInterface \
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary ComponentProxy ModbusChannel XarcosLibrary \
-	    PyTestingLibrary MedicinaVertexLibrary \
+		PyTestingLibrary MedicinaVertexLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
 		TotalPower MedicinaMount MedicinaPyLocalOscillator MedicinaPyDMed CustomLogger MedicinaMinorServo MedicinaActiveSurfaceBoss \
-		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient SchedulerTextClient MinorServoBossTextClient\
+		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient SchedulerTextClient MinorServoBossTextClient \
 		MedicinaActiveSurfaceGUIClient MedicinaMountTextClient CustomLoggingClient\
 		Plotter KStars Scripts MedScripts XBackend
 
@@ -144,8 +129,9 @@ ifeq ($(STATION),Medicina)
 	
 	CDB_SVN_LOCATION="Medicina/Configuration/CDB"
 	SYSTEM_SVN_MODULES=Common Medicina
-else
-ifeq ($(STATION),Noto)
+
+	TELESCOPE_MODULES:=$(MED_ERRORS) $(MED_INTERFACES) $(MED_LIBRARIES) $(MED_SERVERS) $(MED_CLIENTS) $(MED_MISC)
+else ifeq ($(STATION),Noto)
 	#Add all modules included in the Noto system in this sequence
 	#Doc, (Errors, Interfacies, Libraries, Servers, Clients, Misc)
 	MODULES:= ActiveSurfaceErrors ClientErrors ComponentErrors AntennaErrors ParserErrors BackendsErrors ManagementErrors ReceiversErrors MetrologyErrors MinorServoErrors \
@@ -154,7 +140,7 @@ ifeq ($(STATION),Noto)
 		SlaLibrary IRALibrary TextWindowLibrary ParserLibrary PyTestingLibrary \
 		AntennaBoss Observatory OTF PointingModel Refraction SkySource Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool \
 		TotalPower NotoMount CustomLogger NotoMinorServo NotoActiveSurfaceBoss \
-		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal SchedulerTextClient MinorServoBossTextClient\
+		AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal SchedulerTextClient MinorServoBossTextClient \
 		NotoMountTextClient CustomLoggingClient Scripts
 
 	IDL_DOC:=Managment Antenna Backends Metrology
@@ -174,57 +160,13 @@ ifeq ($(STATION),Noto)
 	CDB_SVN_LOCATION="Noto/Configuration/CDB"
 	SYSTEM_SVN_MODULES=Common Medicina Noto
 
+	TELESCOPE_MODULES:=$(NT_ERRORS) $(NT_INTERFACES) $(NT_LIBRARIES) $(NT_SERVERS) $(NT_CLIENTS) $(NT_MISC)
 else
 	RESULT:=$(error STATION variable is not set correctly!)	
-endif
-endif
 endif
 
 
 # ******* END of Editable area *****************
-COMMON_MODULES:=$(COMMON_ERRORS) \
-                $(COMMON_INTERFACES) \
-                $(COMMON_LIBRARIES) \
-                $(COMMON_SERVERS) \
-                $(COMMON_CLIENTS) \
-                $(COMMON_MISC) \
-                $(COMMON_SIMULATORS)
-
-SRT_MODULES:=$(SRT_ERRORS) \
-             $(SRT_INTERFACES) \
-             $(SRT_LIBRARIES) \
-             $(SRT_SERVERS) \
-             $(SRT_CLIENTS) \
-             $(SRT_MISC)
-
-MED_MODULES:=$(MED_ERRORS) \
-             $(MED_INTERFACES) \
-             $(MED_LIBRARIES) \
-             $(MED_SERVERS) \
-             $(MED_CLIENTS) \
-             $(MED_MISC)
-
-NT_MODULES:=$(NT_ERRORS) \
-            $(NT_INTERFACES) \
-            $(NT_LIBRARIES) \
-            $(NT_SERVERS) \
-            $(NT_CLIENTS) \
-            $(NT_MISC)
-
-ifeq ($(STATION), SRT)
-	TELESCOPE_MODULES:=$(SRT_MODULES)
-else 
-ifeq ($(STATION), Medicina)
-	TELESCOPE_MODULES:=$(MED_MODULES)
-else 
-ifeq ($(STATION), Noto)
-	TELESCOPE_MODULES:=$(NT_MODULES)
-else
-	RESULT:=$(error STATION variable is not set correctly!)	
-endif
-endif
-endif
-
 CURRENT_DIR:=$(shell pwd)/..
 
 define PathFinder
@@ -264,7 +206,6 @@ $(foreach i, $(CPP_DOC), $(shell echo "INPUT=$($(i)_MODULES_PATH)" > /tmp/$(i)_c
 $(foreach i, $(IDL_DOC), $(shell echo "INPUT=$($(i)_MODULES_PATH)" > /tmp/$(i)_idl.in))
 
 COMPILE_MODULES_PATH:=$(call PathFinder,$(MODULES))
-
 BUILD_DIRS:=$(foreach i, $(COMPILE_MODULES_PATH), $(i)/src)
 
 COMMON_MODULES_PATH:=$(call PathFinder,$(COMMON_MODULES))
@@ -287,52 +228,45 @@ DOCIDL:=$(DOC)/idl
 DOCCPP:=$(DOC)/cpp
 
 .PHONY: all
-
 all: common-build telescope-build
 
+.PHONY: clean
 clean: common-clean telescope-clean
 
-legacy-all:
-	@for i in $(BUILD_DIRS); do \
-		make -C $${i} all install ; \
+.PHONY: common-build $(COMMON_BUILD_TARGETS)
+common-build:
+	@for i in $(COMMON_MODULES_DIRS); do \
+		$(MAKE) -C $${i} all; \
+		$(MAKE) -C $${i} install; \
 	done
 
-.PHONY: common-build $(COMMON_BUILD_TARGETS)
-
-common-build: $(COMMON_BUILD_TARGETS)
-
-$(COMMON_BUILD_TARGETS):
-	$(MAKE) -C $(@:build-%=%) all install
-
 .PHONY: common-clean $(COMMON_CLEAN_TARGETS)
-
 common-clean: $(COMMON_CLEAN_TARGETS)
-
 $(COMMON_CLEAN_TARGETS):
 	$(MAKE) -C $(@:clean-%=%) clean_dist
 
 .PHONY: telescope-build $(TELESCOPE_BUILD_TARGETS)
-
-telescope-build: $(TELESCOPE_BUILD_TARGETS)
-
-$(TELESCOPE_BUILD_TARGETS):
-	$(MAKE) -C $(@:build-%=%) all install
+telescope-build:
+	@for i in $(TELESCOPE_MODULES_DIRS); do \
+		$(MAKE) -C $${i} all; \
+		$(MAKE) -C $${i} install; \
+	done
 
 .PHONY: telescope-clean $(TELESCOPE_CLEAN_TARGETS)
-
 telescope-clean: $(TELESCOPE_CLEAN_TARGETS)
-
 $(TELESCOPE_CLEAN_TARGETS):
 	$(MAKE) -C $(@:clean-%=%) clean_dist
 
+.PHONY: compile
 compile:
 	@for i in $(BUILD_DIRS); do \
-		make -C $${i} all ; \
+		$(MAKE) -C $${i} all ; \
 	done
 
+.PHONY: install
 install:
 	@for i in $(BUILD_DIRS); do \
-		make -C $${i} install ; \
+		$(MAKE) -C $${i} install ; \
 	done
 
 # cdb:
@@ -352,7 +286,7 @@ man:
 		echo "OUTPUT_DIRECTORY=$(DOCIDL)/$${i}" >> /tmp/doxyconf ; \
 		cat /tmp/$${i}_idl.in >> /tmp/doxyconf ; \
 		echo "HTML_HEADER=$(INTROOT)/templates/DocHeader.html" >> /tmp/doxyconf ; \
-	    echo "HTML_FOOTER=$(INTROOT)/templates/DocFooter.html" >> /tmp/doxyconf ; \
+		echo "HTML_FOOTER=$(INTROOT)/templates/DocFooter.html" >> /tmp/doxyconf ; \
 		doxygen /tmp/doxyconf ; \
 		rm /tmp/doxyconf ; \
 		rm /tmp/$${i}_idl.in ; \
@@ -363,13 +297,18 @@ man:
 		echo "OUTPUT_DIRECTORY=$(DOCCPP)/$${i}" >> /tmp/doxyconf ; \
 		cat /tmp/$${i}_cpp.in >> /tmp/doxyconf ; \
 		echo "HTML_HEADER=$(INTROOT)/templates/DocHeader.html" >> /tmp/doxyconf ; \
-	    echo "HTML_FOOTER=$(INTROOT)/templates/DocFooter.html" >> /tmp/doxyconf ; \
+		echo "HTML_FOOTER=$(INTROOT)/templates/DocFooter.html" >> /tmp/doxyconf ; \
 		doxygen /tmp/doxyconf ; \
 		rm /tmp/doxyconf ; \
 		rm /tmp/$${i}_cpp.in ; \
 	done
 
 	@echo "documentation done in $(DOC)"
+
+legacy-all:
+	@for i in $(BUILD_DIRS); do \
+		make -C $${i} all install ; \
+	done
 
 legacy-clean:
 	@rm -rf $(INTROOT)/bin/*
