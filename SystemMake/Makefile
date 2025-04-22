@@ -230,16 +230,12 @@ all:
 		$(MAKE) build-$${i}; \
 	done
 
+# Clean target, calls clean_dist for each target inside the TARGETS variable. Can also be called with -j.
+.PHONY: clean $(addprefix clean-,$(TARGETS))
+clean: $(addprefix clean-,$(TARGETS))
+
 # The following line dynamically declares all the make targets starting from the TARGETS variable
 $(foreach t, $(TARGETS), $(eval $(call DeclareTarget,$(t))))
-
-# This target removes all the .gitignore ignored files from the repository, effectively removing all the object, lib and bin directories, etc.
-# It only works if discos was cloned via git
-.PHONY: clean-repo
-clean-repo:
-	@echo -n "Cleaning the repository from ignored files..."
-	-@git clean -fdX ..
-	@echo "done!"
 
 # This target cleans all the INTROOT so that a clean build process can be executed again
 .PHONY: clean-dist
