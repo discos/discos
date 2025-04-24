@@ -69,7 +69,7 @@ bool SRTProgramTrackMinorServoImpl::status()
             // The tracking timestamp is interpolated instead
             std::pair<ACS::Time, std::vector<double>> tracking_point = m_tracking_queue.get(last_timestamp);
             commanded_positions = tracking_point.second;
-            m_commanded_virtual_positions = commanded_positions;
+            m_commanded_plain_virtual_positions = commanded_positions;
 
             m_remaining_trajectory_points.store(m_tracking_queue.getRemainingPoints(last_timestamp));
 
@@ -93,7 +93,7 @@ bool SRTProgramTrackMinorServoImpl::status()
     }
     else if(operative_mode == OPERATIVE_MODE_SETUP || operative_mode == OPERATIVE_MODE_PRESET)
     {
-        commanded_positions = m_commanded_virtual_positions;
+        commanded_positions = m_commanded_plain_virtual_positions;
         for(size_t i = 0; i < m_virtual_axes; i++)
         {
             commanded_positions[i] += m_user_offsets[i] + m_system_offsets[i];

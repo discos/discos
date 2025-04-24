@@ -283,10 +283,10 @@ public:
     virtual ACS::ROdoubleSeq_ptr virtual_system_offsets();
 
     /**
-     * Returns a reference to the commanded_virtual_positions property implementation of the IDL interface.
-     * @return pointer to the read-only double sequence property commanded_virtual_positions.
+     * Returns a reference to the commanded_plain_virtual_positions property implementation of the IDL interface.
+     * @return pointer to the read-only double sequence property commanded_plain_virtual_positions.
      */
-    virtual ACS::ROdoubleSeq_ptr commanded_virtual_positions();
+    virtual ACS::ROdoubleSeq_ptr commanded_plain_virtual_positions();
 
     /**
      * Returns a reference to the in_use property implementation of the IDL interface.
@@ -388,9 +388,9 @@ protected:
     std::vector<double> m_system_offsets;
 
     /**
-     * Latest commanded virtual positions. It only takes into account the preset command.
+     * Latest commanded virtual positions.
      */
-    std::vector<double> m_commanded_virtual_positions;
+    std::vector<double> m_commanded_plain_virtual_positions;
 
     /**
      * Queue of positions assumed by the servo system in time, they comprehend the LDO offsets.
@@ -503,9 +503,9 @@ private:
     baci::SmartPropertyPointer<baci::ROdoubleSeq> m_virtual_system_offsets_ptr;
 
     /**
-     * Pointer to the commanded_virtual_positions property.
+     * Pointer to the commanded_plain_virtual_positions property.
      */
-    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_commanded_virtual_positions_ptr;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_commanded_plain_virtual_positions_ptr;
 
     /**
      * Pointer to the in_use property.
@@ -584,7 +584,7 @@ protected:
     virtual ACS::ROdoubleSeq_ptr virtual_offsets()                                              { return SRTBaseMinorServoImpl::virtual_offsets();                      }\
     virtual ACS::ROdoubleSeq_ptr virtual_user_offsets()                                         { return SRTBaseMinorServoImpl::virtual_user_offsets();                 }\
     virtual ACS::ROdoubleSeq_ptr virtual_system_offsets()                                       { return SRTBaseMinorServoImpl::virtual_system_offsets();               }\
-    virtual ACS::ROdoubleSeq_ptr commanded_virtual_positions()                                  { return SRTBaseMinorServoImpl::commanded_virtual_positions();          }\
+    virtual ACS::ROdoubleSeq_ptr commanded_plain_virtual_positions()                            { return SRTBaseMinorServoImpl::commanded_plain_virtual_positions();    }\
     virtual Management::ROTBoolean_ptr in_use()                                                 { return SRTBaseMinorServoImpl::in_use();                               }\
     virtual ACS::ROstring_ptr current_setup()                                                   { return SRTBaseMinorServoImpl::current_setup();                        }\
     virtual ROSRTMinorServoError_ptr error_code()                                               { return SRTBaseMinorServoImpl::error_code();                           }
