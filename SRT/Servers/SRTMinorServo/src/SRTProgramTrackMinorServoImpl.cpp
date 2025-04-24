@@ -55,7 +55,7 @@ bool SRTProgramTrackMinorServoImpl::status()
 {
     bool status = SRTBaseMinorServoImpl::status();
 
-    ACS::doubleSeq virtual_positions = m_status.getVirtualPositions();
+    ACS::doubleSeq virtual_positions = m_status.getPlainVirtualPositions();
     std::vector<double> commanded_positions;
 
     SRTMinorServoOperativeMode operative_mode = m_status.getOperativeMode();
@@ -69,6 +69,7 @@ bool SRTProgramTrackMinorServoImpl::status()
             // The tracking timestamp is interpolated instead
             std::pair<ACS::Time, std::vector<double>> tracking_point = m_tracking_queue.get(last_timestamp);
             commanded_positions = tracking_point.second;
+            m_commanded_virtual_positions = commanded_positions;
 
             m_remaining_trajectory_points.store(m_tracking_queue.getRemainingPoints(last_timestamp));
 
@@ -93,6 +94,10 @@ bool SRTProgramTrackMinorServoImpl::status()
     else if(operative_mode == OPERATIVE_MODE_SETUP || operative_mode == OPERATIVE_MODE_PRESET)
     {
         commanded_positions = m_commanded_virtual_positions;
+        for(size_t i = 0; i < m_virtual_axes; i++)
+        {
+            commanded_positions[i] += m_user_offsets[i] + m_system_offsets[i];
+        }
     }
     else
     {
@@ -149,11 +154,12 @@ void SRTProgramTrackMinorServoImpl::programTrack(CORBA::Long trajectory_id, CORB
 
     std::vector<double> coordinates(virtual_coordinates.get_buffer(), virtual_coordinates.get_buffer() + virtual_coordinates.length());
     ACS::doubleSeq offsets = m_status.getVirtualOffsets();
+    std::vector<double> coordinates_and_offsets = coordinates;
 
     for(size_t i = 0; i < m_virtual_axes; i++)
     {
-        double coordinate = coordinates[i] + offsets[i];
-        if(coordinate < m_min[i] || coordinate > m_max[i])
+        coordinates_and_offsets[i] += offsets[i];
+        if(coordinates_and_offsets[i] < m_min[i] || coordinates_and_offsets[i] > m_max[i])
         {
             _EXCPT(MinorServoErrors::TrackingErrorExImpl, ex, (m_servo_name + "::programTrack()").c_str());
             ex.addData("Reason", "Resulting position out of range, check the offsets!");
@@ -178,7 +184,7 @@ void SRTProgramTrackMinorServoImpl::programTrack(CORBA::Long trajectory_id, CORB
         // Clear the tracking queue to avoid interpolation between 2 different trajectories
         m_tracking_queue.clear();
     }
-    m_tracking_queue.put(point_time, coordinates);
+    m_tracking_queue.put(point_time, coordinates_and_offsets);
 }
 
 

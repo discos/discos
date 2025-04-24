@@ -142,7 +142,7 @@ bool SRTBaseMinorServoImpl::status()
     {
         m_socket.sendCommand(SRTMinorServoCommandLibrary::status(m_servo_name), m_status);
 
-        ACS::doubleSeq current_point = m_status.getVirtualPositions();
+        ACS::doubleSeq current_point = m_status.getPlainVirtualPositions();
 
         // Calculate the current speed of the axes
         try
@@ -641,22 +641,29 @@ ACS::TimeInterval SRTBaseMinorServoImpl::getTravelTime(const ACS::doubleSeq& _s_
 
     ACS::doubleSeq s_p(_s_p);
 
-    // No starting coordinates, it means we have to start from the current position taking into account the current speed
+    if(d_p.length() != m_virtual_axes)
+    {
+        _EXCPT(MinorServoErrors::StatusErrorExImpl, ex, (m_servo_name + "getTravelTime()").c_str());
+        ex.setReason("Wrong number of axes for destination_position.");
+        ex.log(LM_DEBUG);
+        throw ex.getMinorServoErrorsEx();
+    }
+
+    // No starting coordinates, it means we have to start from the current position taking into account the current speed.
     if(_s_p.length() == 0)
     {
         s_p = *getAxesPositions(0);
+
+        // Subtract the offsets since the destination coordinates are pure virtual
+        for(size_t i = 0; i < m_virtual_axes; i++)
+        {
+            s_p[i] -= m_user_offsets[i] + m_system_offsets[i];
+        }
     }
     else if(_s_p.length() != m_virtual_axes)
     {
         _EXCPT(MinorServoErrors::StatusErrorExImpl, ex, (m_servo_name + "getTravelTime()").c_str());
         ex.setReason("Wrong number of axes for starting_position.");
-        ex.log(LM_DEBUG);
-        throw ex.getMinorServoErrorsEx();
-    }
-    if(d_p.length() != m_virtual_axes)
-    {
-        _EXCPT(MinorServoErrors::StatusErrorExImpl, ex, (m_servo_name + "getTravelTime()").c_str());
-        ex.setReason("Wrong number of axes for destination_position.");
         ex.log(LM_DEBUG);
         throw ex.getMinorServoErrorsEx();
     }

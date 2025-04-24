@@ -393,7 +393,7 @@ protected:
     std::vector<double> m_commanded_virtual_positions;
 
     /**
-     * Queue of positions assumed by the servo system in time.
+     * Queue of positions assumed by the servo system in time, they comprehend the LDO offsets.
      */
     SRTMinorServoPositionsQueue m_positions_queue;
 
