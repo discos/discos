@@ -62,8 +62,8 @@
     <configuration><n>CTR</n>        <a>RZ</a><p>0                                                                                                                          </p></configuration>
 
     <configuration><n>MISTRAL</n>    <a>TX</a><p>-1.5                                                                                                                       </p></configuration>
-    <configuration><n>MISTRAL</n>    <a>TY</a><p>-90.4571677, 2.06486636, -0.066594993, 0.00679193157, -0.000204050966, 0.00000233354544, -0.00000000926776063              </p></configuration>
-    <configuration><n>MISTRAL</n>    <a>TZ</a><p>185.005164, -11.1663042, 0.212522011, -0.00131754377                                                                       </p></configuration>
+    <configuration><n>MISTRAL</n>    <a>TY</a><p>-90.44, 1.898, -0.0331, 0.00447, -0.00014, 1.566e-06, -5.922e-09                                                           </p></configuration>
+    <configuration><n>MISTRAL</n>    <a>TZ</a><p>9.969, -2.187, 0.2522, -0.01226, 0.0002682, -2.68e-06, 9.956e-09                                                           </p></configuration>
     <configuration><n>MISTRAL</n>    <a>RX</a><p>-0.0055555555555569409, 0.00014822163433269445, 0.000027586713698, -0.000000077732053                                      </p></configuration>
     <configuration><n>MISTRAL</n>    <a>RY</a><p>-0.036111111111111108                                                                                                      </p></configuration>
     <configuration><n>MISTRAL</n>    <a>RZ</a><p>0                                                                                                                          </p></configuration>
