@@ -12,8 +12,8 @@
 
     <!-- n stands for name, a stands for axis, p stands for polynomial -->
 
-    <configuration><n>CCB</n><a>ROTATION</a><p>44.95999544939037931     </p></configuration>
+    <configuration><n>CCB</n><a>ROTATION</a><p>-44.95999544939037931    </p></configuration>
 
-    <configuration><n>XB</n> <a>ROTATION</a><p>135.003886290282340384   </p></configuration>
+    <configuration><n>XB</n> <a>ROTATION</a><p>-135.003886290282340384  </p></configuration>
 
 </SRTMinorServoCoefficientsTable>

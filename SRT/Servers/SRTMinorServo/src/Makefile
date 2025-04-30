@@ -18,12 +18,12 @@ CDB_SCHEMAS = SRTMinorServoCommon SRTMinorServoBoss SRTMinorServo SRTMinorServoS
 # ----------------------------
 # Libraries (public and local)
 # ----------------------------
-LIBRARIES = SRTGenericMinorServoImpl SRTProgramTrackMinorServoImpl SRTMinorServoBossImpl
+LIBRARIES = SRTGenericMinorServoImpl SRTProgramTrackMinorServoImpl SRTMinorServoBossImpl SRTDerotatorImpl
 
 USER_CFLAGS =
 
 SRTMinorServoBossImpl_OBJECTS = SRTMinorServoBossCore SRTMinorServoSetupThread SRTMinorServoParkThread SRTMinorServoTrackingThread SRTMinorServoScanThread SRTMinorServoBossImpl SRTMinorServoStatusThread
-SRTMinorServoBossImpl_LIBS = IRALibrary SRTMinorServoBossStubs SRTMinorServoStubs ComponentErrors MinorServoErrors ManagementErrors MinorServoDefinitionsStubs SRTMinorServoCommandLibrary AntennaBossStubs SRTMinorServoSocketLibrary ParserErrors DiscosVersion acsnc
+SRTMinorServoBossImpl_LIBS = IRALibrary SRTMinorServoBossStubs SRTMinorServoStubs SRTDerotatorStubs ComponentErrors MinorServoErrors ManagementErrors MinorServoDefinitionsStubs SRTMinorServoCommandLibrary AntennaBossStubs SRTMinorServoSocketLibrary ParserErrors DiscosVersion acsnc
 SRTMinorServoBossImpl_CFLAGS = -std=c++17 -fconcepts
 SRTMinorServoBossCore_CFLAGS = -std=c++17 -fconcepts
 SRTMinorServoStatusThread_CFLAGS = -std=c++17 -fconcepts
@@ -39,6 +39,10 @@ SRTGenericMinorServoImpl_CFLAGS = -std=c++17 -fconcepts
 SRTProgramTrackMinorServoImpl_OBJECTS = SRTProgramTrackMinorServoImpl SRTBaseMinorServoImpl
 SRTProgramTrackMinorServoImpl_LIBS = IRALibrary SRTMinorServoStubs MinorServoErrors MinorServoDefinitionsStubs SRTMinorServoCommandLibrary SRTMinorServoSocketLibrary DiscosVersion
 SRTProgramTrackMinorServoImpl_CFLAGS = -std=c++17 -fconcepts
+SRTDerotatorImpl_OBJECTS = SRTDerotatorImpl SRTDerotatorStatusThread
+SRTDerotatorImpl_LIBS = IRALibrary SRTMinorServoStubs MinorServoDefinitionsStubs SRTMinorServoCommandLibrary SRTMinorServoSocketLibrary GenericDerotatorStubs SRTDerotatorStubs DerotatorErrors DiscosVersion
+SRTDerotatorImpl_CFLAGS = -std=c++17 -fconcepts
+SRTDerotatorStatusThread_CFLAGS = -std=c++17 -fconcepts
 
 
 # ----------------------------------------------------------------------

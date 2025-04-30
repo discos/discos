@@ -154,7 +154,7 @@ void SRTMinorServoSetupThread::runLoop()
             {
                 try
                 {
-                    if(servo->setup(m_core.m_commanded_setup.c_str(), m_core.m_as_configuration.load()))
+                    if(servo->setup(m_core.m_commanded_setup.c_str(), m_core.m_as_configuration.load() == Management::MNG_TRUE ? false : true))
                     {
                         m_core.m_current_servos[servo_name] = servo;
                         try
@@ -176,7 +176,7 @@ void SRTMinorServoSetupThread::runLoop()
                 }
             }
 
-            if(!m_core.m_as_configuration.load())
+            if(m_core.m_as_configuration.load() == Management::MNG_FALSE)
             {
                 // We commanded a configuration which does not use the active surface, therefore we need to send some slightly different coordinates with a preset command
 

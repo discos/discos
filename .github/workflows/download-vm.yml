@@ -1,0 +1,43 @@
+name: Download the DISCOS VM
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [update-vm]
+
+concurrency:
+  group: download
+  cancel-in-progress: false
+
+jobs:
+  download-vm:
+    name: Download the latest virtual machine
+    runs-on: ubuntu-latest
+    env:
+      REPOSITORY_TOKEN: "${{ secrets.DEPENDENCIES_TOKEN }}"
+      GH_TOKEN: "${{ secrets.GH_WORKFLOWS_TOKEN }}"
+      GOOGLE_DRIVE_TOKEN: "${{ secrets.GOOGLE_DRIVE_TOKEN }}"
+      PROVISIONED_VM_GDRIVE_ID: "${{ secrets.PROVISIONED_VM_GDRIVE_ID }}"
+      PROVISIONED_ARCHIVE_GDRIVE_ID: "${{ secrets.PROVISIONED_ARCHIVE_GDRIVE_ID }}"
+    steps:
+      - name: Clone the deployment repository
+        uses: actions/checkout@v4
+        with:
+          repository: 'discos/deployment'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3'
+          check-latest: true
+      - name: Download the provisioned virtual machine from Google Drive
+        run: |
+          pip install -r .github/utils/gdrive_requirements.txt
+          python .github/utils/download_from_gdrive.py
+          gh secret set GOOGLE_DRIVE_TOKEN --org discos --visibility selected --repos discos,deployment < token.json
+      - name: Save the downloaded VM to cache
+        uses: actions/cache/save@v4
+        with:
+          key: discos-manager-vm
+          path: |
+            /home/runner/discos_manager.ova
+            /home/runner/vagrant.tar.gz

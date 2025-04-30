@@ -18,7 +18,7 @@
 
 #
 # user definable C-compilation flags
-USER_CFLAGS = -DQT_THREAD_SUPPORT
+USER_CFLAGS = -DQT_THREAD_SUPPORT -fno-var-tracking-assignments
 
 #
 # additional include and library search paths
@@ -136,7 +136,7 @@ QT_COMPILE_FILES = $(subst .cpp,,$(QT_UI_FILES_MOC) $(QT_UI_FILES_EXTERN_MOC_H) 
 # <brief description of xxxxx program>
 MedicinaActiveSurfaceGUIClient_OBJECTS   = $(QT_COMPILE_FILES) MedicinaActiveSurfaceGUIui MedicinaActiveSurfaceCore MedicinaActiveSurfaceClientEventLoop MedicinaActiveSurfaceGUIClient
 MedicinaActiveSurfaceGUIClient_LIBS      = IRALibrary ActiveSurfaceBossStubs MedicinaActiveSurfaceBossStubs ASErrors ComponentErrors ClientErrors ManagementErrors ManagmentDefinitionsStubs
-MedicinaActiveSurfaceManagementGUIClient_OBJECTS   = $(QT_COMPILE_FILES) MedicinaActiveSurfaceGUIui MedicinaActiveSurfaceCore MedicinaActiveSurfaceClientEventLoop MedicinaActiveSurfaceGUIClient
+MedicinaActiveSurfaceManagementGUIClient_OBJECTS   = $(QT_COMPILE_FILES) MedicinaActiveSurfaceManagementGUIui MedicinaActiveSurfaceCore MedicinaActiveSurfaceClientEventLoop MedicinaActiveSurfaceGUIClient
 MedicinaActiveSurfaceManagementGUIClient_LIBS      = IRALibrary ActiveSurfaceBossStubs MedicinaActiveSurfaceBossStubs ASErrors ComponentErrors ClientErrors ManagementErrors ManagmentDefinitionsStubs
 
 $(PROG)_OBJECTS            = $(PROG)
