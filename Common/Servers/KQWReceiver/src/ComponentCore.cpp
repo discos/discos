@@ -554,7 +554,8 @@ void CComponentCore::getCalibrationMark(
             throw impl;
         }
     }
-    for (unsigned i=0;i<stdLen;i++) {
+    // TODO uncomment this block after tests and remove the next 3 lines
+    /*for (unsigned i=0;i<stdLen;i++) {
         if ((feeds[i]>=(long)m_configuration.getFeeds()) || (feeds[i]<0)) {
             _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::getCalibrationMark()");
             impl.setValueName("feed identifier");
@@ -564,7 +565,10 @@ void CComponentCore::getCalibrationMark(
 
     result.length(stdLen);
     resFreq.length(stdLen);
-    resBw.length(stdLen);
+    resBw.length(stdLen);*/
+    result.length(14);
+    resFreq.length(14);
+    resBw.length(14);
 
     vector< vector<double> > leftMarkCoeffs;
     vector< vector<double> > rightMarkCoeffs;
@@ -645,6 +649,15 @@ void CComponentCore::getCalibrationMark(
         resFreq[i]=realFreq;
         resBw[i]=realBw;
     }
+
+    // TODO remove this loop after test
+    for(size_t i = 8; i < 14; i++)
+    {
+        result[i] = result[7];
+        resFreq[i] = resFreq[7];
+        resBw[i] = resBw[7];
+    }
+
     scale=1.0;
     onoff=m_calDiode;
     if (tableLeftFreq) delete [] tableLeftFreq;
@@ -769,42 +782,42 @@ double CComponentCore::getTaper(
 void CComponentCore::setMode(const char * mode) {
     baci::ThreadSyncGuard guard(&m_mutex);
     IRA::CString cmdMode(mode);
-	m_configuration.setMode(mode); //* throw (ComponentErrors::CDBAccessExImpl, ReceiversErrors::ModeErrorExImpl)
-	 
-	 ACS::doubleSeq lo;
+    m_configuration.setMode(mode); //* throw (ComponentErrors::CDBAccessExImpl, ReceiversErrors::ModeErrorExImpl)
+
+    ACS::doubleSeq lo;
     lo.length(m_configuration.getFeeds());
     for (WORD i=0;i<m_configuration.getFeeds();i++) {
         lo[i]=m_configuration.getDefaultLO()[m_configuration.getArrayIndex(i)];
     }
     // the set the default LO for the default LO for the selected mode.....
-	 setLO(lo); // throw ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
-	            //       ComponentErrors::CouldntGetComponentExImpl, ComponentErrors::CORBAProblemExImpl,
-	            //       ReceiversErrors::LocalOscillatorErrorExImpl)
+    setLO(lo);  // throw ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
+                //       ComponentErrors::CouldntGetComponentExImpl, ComponentErrors::CORBAProblemExImpl,
+                //       ReceiversErrors::LocalOscillatorErrorExImpl)
     m_calDiode=false;
-    if (m_configuration.getLNABypass()) {
-    	try {
-   			m_control->enableBypass();// throw IRA::ReceiverControlEx
-   		}
-   		catch (IRA::ReceiverControlEx& ex) {
-      		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::setMode()");
-        	impl.setDetails(ex.what().c_str());
-        	setStatusBit(CONNECTIONERROR);
-        	throw impl;
-   		}
+    //TODO uncomment this section in order to test the LNABypass
+    /*if (m_configuration.getLNABypass()) {
+        try {
+            m_control->enableBypass();// throw IRA::ReceiverControlEx
+        }
+        catch (IRA::ReceiverControlEx& ex) {
+            _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::setMode()");
+            impl.setDetails(ex.what().c_str());
+            setStatusBit(CONNECTIONERROR);
+            throw impl;
+        }
     }
     else {
-	 	try {
-   			m_control->disableBypass();// throw IRA::ReceiverControlEx
-   		}
-   		catch (IRA::ReceiverControlEx& ex) {
-      		_EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::setMode()");
-        	impl.setDetails(ex.what().c_str());
-        	setStatusBit(CONNECTIONERROR);
-        	throw impl;
-   		}
-    }
-    ACS_LOG(LM_FULL_INFO,"CComponentCore::setMode()",(LM_NOTICE,"RECEIVER_MODE %s",mode));	
-
+        try {
+            m_control->disableBypass();// throw IRA::ReceiverControlEx
+        }
+        catch (IRA::ReceiverControlEx& ex) {
+            _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::setMode()");
+            impl.setDetails(ex.what().c_str());
+            setStatusBit(CONNECTIONERROR);
+            throw impl;
+        }
+    }*/
+    ACS_LOG(LM_FULL_INFO,"CComponentCore::setMode()",(LM_NOTICE,"RECEIVER_MODE %s",mode));
 }
 
 long CComponentCore::getFeeds(ACS::doubleSeq& X, ACS::doubleSeq& Y, ACS::doubleSeq& power)
