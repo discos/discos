@@ -431,6 +431,9 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo)
         throw impl;
     }
     for (WORD k=0;k<lo.length();k++) {
+        if(lo[k]==-1) { // user sent a WILDCARD, skip this LO
+            continue;
+        }
 	 	// now check if the requested value match the limits
     	if (lo[k]<m_configuration.getLOMin()[m_configuration.getArrayIndex(k)]) {
       		_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::setLO");
@@ -526,19 +529,17 @@ void CComponentCore::getCalibrationMark(
         double& scale
         )
 {
-    double realFreq,realBw, startF, BW, lo;
-    ACS::doubleSeq tableLeftFreq,tableLeftMark,tableRightFreq,tableRightMark;
-    DWORD sizeL=0;
-    DWORD sizeR=0;
-	 Receivers::TPolarization polarization;
-
+    double realFreq,realBw;
+    double *tableLeftFreq=NULL;
+    double *tableLeftMark=NULL;
+    double *tableRightFreq=NULL;
+    double *tableRightMark=NULL;
     baci::ThreadSyncGuard guard(&m_mutex);
     if (m_configuration.getActualMode()=="") {
         _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getCalibrationMark()");
         impl.setReason("receiver not configured yet");
         throw impl;
     }
-
     //let's do some checks about input data
     unsigned stdLen=freqs.length();
     if ((stdLen!=bandwidths.length()) || (stdLen!=feeds.length()) || (stdLen!=ifs.length())) {
@@ -553,50 +554,103 @@ void CComponentCore::getCalibrationMark(
             throw impl;
         }
     }
-    if(getFeeds() > 1) { 
-        for (unsigned i=0;i<stdLen;i++) {
-            if ((feeds[i]>=(long)m_configuration.getFeeds()) || (feeds[i]<0)) {
-                _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::getCalibrationMark()");
-                impl.setValueName("feed identifier");
-                throw impl;
-            }
+    for (unsigned i=0;i<stdLen;i++) {
+        if ((feeds[i]>=(long)m_configuration.getFeeds()) || (feeds[i]<0)) {
+            _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::getCalibrationMark()");
+            impl.setValueName("feed identifier");
+            throw impl;
         }
     }
-    
+
     result.length(stdLen);
     resFreq.length(stdLen);
     resBw.length(stdLen);
-    for (unsigned i=0;i<stdLen;i++) {
-    	      // first get the calibration mark tables
-    	  sizeL=m_configuration.getLeftMarkTable(tableLeftFreq,tableLeftMark,feeds[i]);
-    	  sizeR=m_configuration.getRightMarkTable(tableRightFreq,tableRightMark,feeds[i]);
-        // now computes the mark for each input band....considering the present mode and configuration of the receiver.
-        startF=m_configuration.getBandIFMin()[m_configuration.getArrayIndex(feeds[i],ifs[i])];
-        BW=m_configuration.getBandIFBandwidth()[m_configuration.getArrayIndex(feeds[i],ifs[i])];
-        lo=m_configuration.getCurrentLOValue()[m_configuration.getArrayIndex(feeds[i],ifs[i])];
-        polarization=m_configuration.getBandPolarizations()[m_configuration.getArrayIndex(feeds[i],ifs[i])];
-        
-        if (!IRA::CIRATools::skyFrequency(freqs[i],bandwidths[i],startF,BW,realFreq,realBw)) {
-        		realFreq=startF;
-        		realBw=0.0;
+
+    vector< vector<double> > leftMarkCoeffs;
+    vector< vector<double> > rightMarkCoeffs;
+    const CConfiguration<maci::ContainerServices>::TMarkValue *const markVector = m_configuration.getMarkVector();
+    if(markVector == NULL) {
+        _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getCalibrationMark()");
+        impl.setReason("The markVector pointer is NULL");
+        throw impl;
+    }
+    for(DWORD i=0; i<m_configuration.getMarkVectorLen(); i++) {
+        if(markVector[i].polarization==Receivers::RCV_LCP)
+            leftMarkCoeffs.push_back(markVector[i].coefficients);
+        else if(markVector[i].polarization==Receivers::RCV_RCP)
+            rightMarkCoeffs.push_back(markVector[i].coefficients);
+        else {
+            _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getCalibrationMark()");
+            impl.setReason("Polarization unknown");
+            throw impl;
         }
-        ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"SUB_BAND %lf %lf",realFreq,realBw));
-        realFreq+=lo;
+    }
+    if(leftMarkCoeffs.size() != rightMarkCoeffs.size() || leftMarkCoeffs.size() != m_configuration.getFeeds()) {
+        _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getCalibrationMark()");
+        impl.setReason("The mark coefficients length is inconsistent");
+        throw impl;
+    }
+
+    double f1,f2;
+    vector<double> integral_vect;
+    double integral = 0;
+    double mark=0;
+    for (unsigned i=0;i<stdLen;i++) {
+        Receivers::TPolarization polarization = m_configuration.getBandPolarizations()[m_configuration.getArrayIndex(feeds[i],ifs[i])];
+        double startF = m_configuration.getBandIFMin()[m_configuration.getArrayIndex(feeds[i],ifs[i])];
+        double BW=m_configuration.getBandIFBandwidth()[m_configuration.getArrayIndex(feeds[i],ifs[i])];
+        double lo=m_configuration.getCurrentLOValue()[m_configuration.getArrayIndex(feeds[i],ifs[i])];
+
+        if (polarization==(long)Receivers::RCV_LCP) {
+            // take the real observed bandwidth....the correlation between detector device and the band provided by the receiver
+            if (!IRA::CIRATools::skyFrequency(freqs[i],bandwidths[i],startF,BW,realFreq,realBw)) {
+                realFreq=startF;
+                realBw=0.0;
+            }
+            realFreq+=lo;
+            f1=realFreq;
+            f2=f1+realBw;
+            f1/=1000.0; f2/=1000.0; //frequencies in giga Hertz
+                for (vector<double>::size_type j=0; j<leftMarkCoeffs[feeds[i]].size(); j++){ //integrate
+                    int degree = ((leftMarkCoeffs[feeds[i]].size()) - j); //degree of the polynomial inside the integral
+                    integral_vect.push_back((leftMarkCoeffs[feeds[i]][j]/degree)*(pow(f2, degree) - pow(f1, degree)));
+                    }
+            for(vector<double>::iterator it = integral_vect.begin(); it != integral_vect.end(); it++)
+               integral += *it;
+            mark=integral/(f2-f1);
+            integral_vect.clear();
+            integral = 0;
+        }
+        else if (polarization==(long)Receivers::RCV_RCP) {
+            // take the real observed bandwidth....the correlation between detector device and the band provided by the receiver
+            if (!IRA::CIRATools::skyFrequency(freqs[i],bandwidths[i],startF,BW,realFreq,realBw)) {
+                realFreq=startF;
+                realBw=0.0;
+            }
+            realFreq+=lo;
+            f1= realFreq;
+            f2=f1+realBw;
+            f1/=1000.0; f2/=1000.0; //frequencies in giga Hertz
+                for (vector<double>::size_type j=0; j<rightMarkCoeffs[feeds[i]].size(); j++){ //integrate
+                    int degree = ((rightMarkCoeffs[feeds[i]].size()) - j); //degree of the polynomial inside the integral
+                    integral_vect.push_back((rightMarkCoeffs[feeds[i]][j]/degree)*(pow(f2, degree) - pow(f1, degree)));
+                    }
+            for(vector<double>::iterator it = integral_vect.begin(); it != integral_vect.end(); it++)
+               integral += *it;
+            mark=integral/(f2-f1);
+            integral_vect.clear();
+            integral = 0;
+        }
+        result[i]=mark;
         resFreq[i]=realFreq;
         resBw[i]=realBw;
-        realFreq+=realBw/2.0;
-        ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"REFERENCE_FREQUENCY %lf",realFreq));
-        if (polarization==Receivers::RCV_LCP) {
-            result[i]=linearFit(tableLeftFreq,tableLeftMark,sizeL,realFreq);
-            ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"LEFT_MARK_VALUE %lf",result[i]));
-        }
-        else { //RCV_RCP
-            result[i]=linearFit(tableRightFreq,tableRightMark,sizeR,realFreq);
-            ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"RIGHT_MARK_VALUE %lf",result[i]));
-        }
     }
     scale=1.0;
     onoff=m_calDiode;
+    if (tableLeftFreq) delete [] tableLeftFreq;
+    if (tableLeftMark) delete [] tableLeftMark;
+    if (tableRightFreq) delete [] tableRightFreq;
+    if (tableRightMark) delete [] tableRightMark;
 }    
 
 //throw (ComponentErrors::ValidationErrorExImpl, ComponentErrors::ValueOutofRangeExImpl)
@@ -1370,7 +1424,7 @@ bool CKQWReceiverControl::enableBypass()
         throw ReceiverControlEx(error_msg + ex.what());
     }
     pthread_mutex_unlock(&m_dewar_mutex); 
-    usleep(2*SETMODE_SLEEP_TIME);
+    usleep(3*SETMODE_SLEEP_TIME);
     //*************************************************************************
     // now read back parameters to check if the switches are properly configured
     //*************************************************************************
@@ -1391,7 +1445,7 @@ bool CKQWReceiverControl::enableBypass()
         std::string error_msg = "CKQWReceiverControl::enableBypass(): error while enabling bypass().\n";
         throw ReceiverControlEx(error_msg + ex.what());
     }
-    usleep(2*SETMODE_SLEEP_TIME);
+    usleep(3*SETMODE_SLEEP_TIME);
     try {
         std::vector<BYTE> parameters = makeRequest(
                 m_dewar_board_ptr,     // Pointer to the dewar board
@@ -1429,7 +1483,7 @@ bool CKQWReceiverControl::enableBypass()
         std::string error_msg = "CKQWReceiverControl::enableBypass(): error while enabling bypass().\n";
         throw ReceiverControlEx(error_msg + ex.what());
     }
-    usleep(2*SETMODE_SLEEP_TIME);
+    usleep(3*SETMODE_SLEEP_TIME);
     try {
         std::vector<BYTE> parameters = makeRequest(
                 m_dewar_board_ptr,     // Pointer to the dewar board
@@ -1494,7 +1548,7 @@ bool CKQWReceiverControl::disableBypass()
         throw ReceiverControlEx(error_msg + ex.what());
     }
     pthread_mutex_unlock(&m_dewar_mutex); 
-    usleep(2*SETMODE_SLEEP_TIME);
+    usleep(3*SETMODE_SLEEP_TIME);
     //*************************************************************************
     // now read back parameters to check if the switches are properly configured
     //*************************************************************************
@@ -1515,7 +1569,7 @@ bool CKQWReceiverControl::disableBypass()
         std::string error_msg = "CKQWReceiverControl::enableBypass(): error while enabling bypass().\n";
         throw ReceiverControlEx(error_msg + ex.what());
     }
-    usleep(2*SETMODE_SLEEP_TIME);
+    usleep(3*SETMODE_SLEEP_TIME);
     try {
         std::vector<BYTE> parameters = makeRequest(
                 m_dewar_board_ptr,     // Pointer to the dewar board
@@ -1553,7 +1607,7 @@ bool CKQWReceiverControl::disableBypass()
         std::string error_msg = "CKQWReceiverControl::enableBypass(): error while enabling bypass().\n";
         throw ReceiverControlEx(error_msg + ex.what());
     }
-    usleep(2*SETMODE_SLEEP_TIME);
+    usleep(3*SETMODE_SLEEP_TIME);
     try {
         std::vector<BYTE> parameters = makeRequest(
                 m_dewar_board_ptr,     // Pointer to the dewar board
@@ -1578,5 +1632,3 @@ bool CKQWReceiverControl::disableBypass()
     pthread_mutex_unlock(&m_dewar_mutex);
     return (check1&&check2);
 }
-
-

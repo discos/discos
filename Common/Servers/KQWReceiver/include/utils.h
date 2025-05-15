@@ -25,7 +25,7 @@ typedef string::size_type (string::*find_t)(const string &delim, string::size_ty
  * @return decimal vaule of readdata
  * @throw ComponentErrors::SocketErrorExImpl
  */
-int hex2dec(BYTE *buff, int idx, int len);
+//int hex2dec(BYTE *buff, int idx, int len);
 
 
 void dec2hexStr(unsigned long dec, unsigned char hex[], int len);

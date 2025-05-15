@@ -1,14 +1,8 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<!--
-	- Author: Marco Buttu
-	
-	- History:
-	    + 27-07-2012  Created 
--->
 
 <xs:schema
-  targetNamespace="urn:schemas-cosylab-com:MarkCoefficientsKBandLookUpTable:1.0"
-  xmlns="urn:schemas-cosylab-com:MarkCoefficientsKBandLookUpTable:1.0"
+  targetNamespace="urn:schemas-cosylab-com:MarkCoefficientsLookUpTable:1.0"
+  xmlns="urn:schemas-cosylab-com:MarkCoefficientsLookUpTable:1.0"
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
   xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
@@ -19,7 +13,7 @@
 	
 	<xs:simpleType name="TPolSpecType">
 		<xs:annotation><xs:documentation>
-			restricts the keyoword used to specify the polarization
+			restricts the keyword used to specify the polarization
 		</xs:documentation></xs:annotation>
 		<xs:restriction base="xs:string">
 	    	<xs:enumeration value="LEFT">
@@ -54,6 +48,6 @@
 		</xs:sequence>
  	</xs:complexType>
   
-	<xs:element name="MarkCoefficientsKBandLookUpTable" type="TTable"/>
+	<xs:element name="MarkCoefficientsLookUpTable" type="TTable"/>
   	
 </xs:schema>

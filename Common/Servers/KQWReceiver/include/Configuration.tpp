@@ -20,7 +20,7 @@ CConfiguration<T>::CConfiguration()
     m_BandRFMax = NULL;
     m_BandIFMin = NULL;
     m_BandIFBandwidth = NULL;
-    m_DefaultLO = m_FixedLO2= m_currentLOValue= m_LOMin = m_LOMax = NULL; 
+    m_DefaultLO = m_FixedLO2= m_currentLOValue= m_LOMin = m_LOMax = NULL;
 }
 
 template <class T>
@@ -30,17 +30,17 @@ CConfiguration<T>::~CConfiguration()
         delete m_markTable;
     }
     if (m_loTable_K) {
-    	delete m_loTable_K;
+        delete m_loTable_K;
     }
     if (m_loTable_Q) {
-    	delete m_loTable_Q;
+        delete m_loTable_Q;
     }
     if (m_loTable_WL) {
         delete m_loTable_WL;
     }
     if (m_loTable_WH) {
         delete m_loTable_WH;
-    } 
+    }
     if (m_feedsTable) {
         delete m_feedsTable;
     }
@@ -110,12 +110,12 @@ CConfiguration<T>::~CConfiguration()
 template <class T>
 WORD CConfiguration<T>::openSynthTable(IRA::CDBTable * &table, const IRA::CString &path, TLOValue * &loV)
 {
-	IRA::CError ErrEvent;
-	IRA::CString field;
-	WORD len;
-	try {
-		table=new IRA::CDBTable(m_services,"SynthesizerEntry",path); 
-	}
+    IRA::CError ErrEvent;
+    IRA::CString field;
+    WORD len;
+    try {
+        table=new IRA::CDBTable(m_services,"SynthesizerEntry",path);
+    }
     catch (std::bad_alloc& ex) {
         _EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CConfiguration::openSynthTable()");
         throw dummy;
@@ -159,17 +159,17 @@ WORD CConfiguration<T>::openSynthTable(IRA::CDBTable * &table, const IRA::CStrin
     delete table;
     table=NULL;
     return len;
-} 
+}
 
 
 /*
    throw (
    ComponentErrors::CDBAccessExImpl,
-   ComponentErrors::MemoryAllocationExImpl, 
-	ReceiversErrors::ModeErrorExImpl)
+   ComponentErrors::MemoryAllocationExImpl,
+   ReceiversErrors::ModeErrorExImpl)
 */
 template <class T>
-void CConfiguration<T>::init(T *Services,IRA::CString comp_name) 
+void CConfiguration<T>::init(T *Services,IRA::CString comp_name)
 {
     m_services = Services;
     IRA::CError error;
@@ -179,11 +179,11 @@ void CConfiguration<T>::init(T *Services,IRA::CString comp_name)
     // read component configuration
     _GET_STRING_ATTRIBUTE(m_services,"DewarIPAddress","Dewar IP address:",m_dewarIPAddress,comp_name);
     _GET_STRING_ATTRIBUTE(m_services,"LNAIPAddress", "LNA IP address:",m_LNAIPAddress,comp_name);
-	 _GET_STRING_ATTRIBUTE(m_services,"LocalOscillator_K_Instance","Local oscillator for K band:",m_localOscillator_K_Instance,comp_name);
-	 _GET_STRING_ATTRIBUTE(m_services,"LocalOscillator_Q_Instance","Local oscillator for Q band:",m_localOscillator_Q_Instance,comp_name);
-	 _GET_STRING_ATTRIBUTE(m_services,"LocalOscillator_W1_Instance","Local oscillator for W low band:",m_localOscillator_W1_Instance,comp_name);
-	 _GET_STRING_ATTRIBUTE(m_services,"LocalOscillator_W2_Instance","Local oscillator for W high band:",m_localOscillator_W2_Instance,comp_name);
-	 _GET_DWORD_ATTRIBUTE(m_services,"DewarPort","Dewar port:",m_dewarPort,comp_name);
+    _GET_STRING_ATTRIBUTE(m_services,"LocalOscillator_K_Instance","Local oscillator for K band:",m_localOscillator_K_Instance,comp_name);
+    _GET_STRING_ATTRIBUTE(m_services,"LocalOscillator_Q_Instance","Local oscillator for Q band:",m_localOscillator_Q_Instance,comp_name);
+    _GET_STRING_ATTRIBUTE(m_services,"LocalOscillator_W1_Instance","Local oscillator for W low band:",m_localOscillator_W1_Instance,comp_name);
+    _GET_STRING_ATTRIBUTE(m_services,"LocalOscillator_W2_Instance","Local oscillator for W high band:",m_localOscillator_W2_Instance,comp_name);
+    _GET_DWORD_ATTRIBUTE(m_services,"DewarPort","Dewar port:",m_dewarPort,comp_name);
     _GET_DWORD_ATTRIBUTE(m_services,"LNAPort","LNA port:",m_LNAPort,comp_name);
     _GET_DWORD_ATTRIBUTE(m_services,"WatchDogResponseTime","Response time of watch dog thread (uSec):",m_watchDogResponseTime,comp_name);
     _GET_DWORD_ATTRIBUTE(m_services,"WatchDogSleepTime","Sleep time of the watch dog thread (uSec):",m_watchDogSleepTime,comp_name);
@@ -193,7 +193,7 @@ void CConfiguration<T>::init(T *Services,IRA::CString comp_name)
     _GET_STRING_ATTRIBUTE(m_services,"DefaultMode","Default operating mode:",m_defaultMode,comp_name);
 
     const IRA::CString DEFAULTMODE_PATH = CONFIG_PATH"/Modes/" + m_defaultMode;
-    
+
     // now read the receiver configuration
     _GET_STRING_ATTRIBUTE(m_services,"Mode","mode name:", mode, DEFAULTMODE_PATH);
     _GET_DWORD_ATTRIBUTE(m_services,"Feeds","Number of feeds:", m_feeds, DEFAULTMODE_PATH);
@@ -209,7 +209,7 @@ void CConfiguration<T>::init(T *Services,IRA::CString comp_name)
         m_currentLOValue = new double[m_IFs*m_feeds];
         m_FixedLO2 = new double[m_IFs*m_feeds];
         m_LOMin = new double[m_IFs*m_feeds];
-        m_LOMax = new double[m_IFs*m_feeds];      
+        m_LOMax = new double[m_IFs*m_feeds];
     }
     catch (std::bad_alloc& ex) {
         _EXCPT(ComponentErrors::MemoryAllocationExImpl, dummy, "CConfiguration::init()");
@@ -230,16 +230,13 @@ void CConfiguration<T>::init(T *Services,IRA::CString comp_name)
     }
     error.Reset();
     if (!m_markTable->addField(error,"Feed",IRA::CDataField::LONGLONG)) {
-        field = "Feed";
+        field="Feed";
     }
-    else if (!m_markTable->addField(error, "Polarization", IRA::CDataField::STRING)) {
+    else if (!m_markTable->addField(error,"Polarization",IRA::CDataField::STRING)) {
         field="Polarization";
     }
-    else if (!m_markTable->addField(error,"SkyFrequency",IRA::CDataField::DOUBLE)) {
-        field="SkyFrequency";
-    }
-    else if (!m_markTable->addField(error,"NoiseMark",IRA::CDataField::DOUBLE)) {
-        field="NoiseMark";
+    else if (!m_markTable->addField(error,"Coefficients",IRA::CDataField::STRING)) {
+        field="Coefficients";
     }
     if (!error.isNoError()) {
         _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl,dummy,error);
@@ -253,6 +250,11 @@ void CConfiguration<T>::init(T *Services,IRA::CString comp_name)
 
     m_markTable->First();
     len = m_markTable->recordCount();
+    if(len != m_feeds * 2) { // Two channels per feed
+        _EXCPT(ComponentErrors::CDBAccessExImpl, dummy, "CConfiguration::init()");
+        dummy.setFieldName("MarkCoefficients table size");
+        throw dummy;
+    }
     try {
         m_markVector = new TMarkValue[len];
     }
@@ -261,77 +263,78 @@ void CConfiguration<T>::init(T *Services,IRA::CString comp_name)
         throw dummy;
     }
     for (WORD i=0;i<len;i++) {
-        m_markVector[i].skyFrequency=(*m_markTable)["SkyFrequency"]->asDouble();
-        m_markVector[i].feed = (*m_markTable)["Feed"]->asLongLong();
-        m_markVector[i].markValue=(*m_markTable)["NoiseMark"]->asDouble();
+        m_markVector[i].feed=(*m_markTable)["Feed"]->asLongLong();
         m_markVector[i].polarization=(*m_markTable)["Polarization"]->asString()=="LEFT"?Receivers::RCV_LCP:Receivers::RCV_RCP;
-        ACS_LOG(LM_FULL_INFO,"CConfiguration::init()",
-                (LM_DEBUG,"MARK_VALUE_ENTRY: %d %lf %lf",m_markVector[i].polarization,m_markVector[i].skyFrequency,
-        m_markVector[i].markValue));
+
+        std::vector<std::string> marks_str = split(std::string((*m_markTable)["Coefficients"]->asString()), std::string(","));
+
+        // Vector of coefficients (double)
+        for(std::vector<std::string>::iterator iter = marks_str.begin(); iter != marks_str.end(); iter++)
+            (m_markVector[i].coefficients).push_back(str2double(*iter));
         m_markTable->Next();
     }
     m_markVectorLen = len;
     m_markTable->closeTable();
     delete m_markTable;
     m_markTable = NULL;
-    
+
     // The synthesizer
 
-	m_loVectorLen_K=openSynthTable(m_loTable_K,LOTABLE_K_PATH,m_loVector_K);
-	m_loVectorLen_Q=openSynthTable(m_loTable_Q,LOTABLE_Q_PATH,m_loVector_Q);
-	m_loVectorLen_WL=openSynthTable(m_loTable_WL,LOTABLE_WL_PATH,m_loVector_WL);
-	m_loVectorLen_WH=openSynthTable(m_loTable_WH,LOTABLE_WH_PATH,m_loVector_WH);
+    m_loVectorLen_K=openSynthTable(m_loTable_K,LOTABLE_K_PATH,m_loVector_K);
+    m_loVectorLen_Q=openSynthTable(m_loTable_Q,LOTABLE_Q_PATH,m_loVector_Q);
+    m_loVectorLen_WL=openSynthTable(m_loTable_WL,LOTABLE_WL_PATH,m_loVector_WL);
+    m_loVectorLen_WH=openSynthTable(m_loTable_WH,LOTABLE_WH_PATH,m_loVector_WH);
 
 
     // The feeds
-	try {
-		m_feedsTable=new IRA::CDBTable(Services,"Feed", FEEDTABLE_PATH);
-	}
-	catch (std::bad_alloc& ex) {
-		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CConfiguration::init()");
-		throw dummy;
-	}
-	error.Reset();
-	if (!m_feedsTable->addField(error,"feedCode",IRA::CDataField::LONGLONG)) {
-		field="feedCode";
- 	}
-	else if (!m_feedsTable->addField(error,"xOffset",IRA::CDataField::DOUBLE)) {
-		field="xOffset";
- 	}
-	else if (!m_feedsTable->addField(error,"yOffset",IRA::CDataField::DOUBLE)) {
-		field="yOffset";
- 	}
-	else if (!m_feedsTable->addField(error,"relativePower",IRA::CDataField::DOUBLE)) {
-		field="relativePower";
- 	}
-	if (!error.isNoError()) {
-		_EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl,dummy,error);
-		dummy.setFieldName((const char *)field);
-		throw dummy;
-	}
-	if (!m_feedsTable->openTable(error))	{
-		_EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
-		throw dummy;
-	}
-	len=m_feeds;
-	try {
-		m_feedVector=new TFeedValue[len];
-	}
-	catch (std::bad_alloc& ex) {
-		_EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CConfiguration::init()");
-		throw dummy;
-	}
-	for (WORD i=0;i<len;i++) {
-		m_feedVector[i].xOffset=(*m_feedsTable)["xOffset"]->asDouble();
-		m_feedVector[i].yOffset=(*m_feedsTable)["yOffset"]->asDouble();
-		m_feedVector[i].relativePower=(*m_feedsTable)["relativePower"]->asDouble();
-		m_feedVector[i].code=(WORD)(*m_feedsTable)["feedCode"]->asLongLong();
-		ACS_LOG(LM_FULL_INFO,"CConfiguration::init()",(LM_DEBUG,"FEED_VALUE_ENTRY: %d %lf %lf %lf",m_feedVector[i].code,m_feedVector[i].xOffset,m_feedVector[i].yOffset,m_feedVector[i].relativePower));
-		m_feedsTable->Next();
-	}
-	m_feedsTable->closeTable();
-	delete m_feedsTable;
-	m_feedsTable=NULL;
+    try {
+        m_feedsTable=new IRA::CDBTable(Services,"Feed", FEEDTABLE_PATH);
+    }
+    catch (std::bad_alloc& ex) {
+        _EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CConfiguration::init()");
+        throw dummy;
+    }
+    error.Reset();
+    if (!m_feedsTable->addField(error,"feedCode",IRA::CDataField::LONGLONG)) {
+        field="feedCode";
+    }
+    else if (!m_feedsTable->addField(error,"xOffset",IRA::CDataField::DOUBLE)) {
+        field="xOffset";
+    }
+    else if (!m_feedsTable->addField(error,"yOffset",IRA::CDataField::DOUBLE)) {
+        field="yOffset";
+    }
+    else if (!m_feedsTable->addField(error,"relativePower",IRA::CDataField::DOUBLE)) {
+        field="relativePower";
+    }
+    if (!error.isNoError()) {
+        _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl,dummy,error);
+        dummy.setFieldName((const char *)field);
+        throw dummy;
+    }
+    if (!m_feedsTable->openTable(error)) {
+        _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
+        throw dummy;
+    }
+    len=m_feeds;
+    try {
+        m_feedVector=new TFeedValue[len];
+    }
+    catch (std::bad_alloc& ex) {
+        _EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CConfiguration::init()");
+        throw dummy;
+    }
+    for (WORD i=0;i<len;i++) {
+        m_feedVector[i].xOffset=(*m_feedsTable)["xOffset"]->asDouble();
+        m_feedVector[i].yOffset=(*m_feedsTable)["yOffset"]->asDouble();
+        m_feedVector[i].relativePower=(*m_feedsTable)["relativePower"]->asDouble();
+        m_feedVector[i].code=(WORD)(*m_feedsTable)["feedCode"]->asLongLong();
+        ACS_LOG(LM_FULL_INFO,"CConfiguration::init()",(LM_DEBUG,"FEED_VALUE_ENTRY: %d %lf %lf %lf",m_feedVector[i].code,m_feedVector[i].xOffset,m_feedVector[i].yOffset,m_feedVector[i].relativePower));
+        m_feedsTable->Next();
+    }
+    m_feedsTable->closeTable();
+    delete m_feedsTable;
+    m_feedsTable=NULL;
 
     //The taper.....
     try {
@@ -375,7 +378,7 @@ void CConfiguration<T>::init(T *Services,IRA::CString comp_name)
         m_taperVector[i].frequency = (*m_taperTable)["Frequency"]->asDouble();
         m_taperVector[i].taper = (*m_taperTable)["Taper"]->asDouble();
         ACS_LOG(LM_FULL_INFO,"CConfiguration::init()",
-        	(LM_DEBUG,"SYNTH_VALUE_ENTRY: %lld %lf %lf",m_taperVector[i].feed,m_taperVector[i].frequency,m_taperVector[i].taper));
+            (LM_DEBUG,"SYNTH_VALUE_ENTRY: %lld %lf %lf",m_taperVector[i].feed,m_taperVector[i].frequency,m_taperVector[i].taper));
         m_taperTable->Next();
     }
     m_taperVectorLen = len;
@@ -387,57 +390,57 @@ void CConfiguration<T>::init(T *Services,IRA::CString comp_name)
 /*template <class T>
 void CConfiguration<T>::setCurrentLOValue(const ACS::doubleSeq& lo)
 {
-	for (WORD k=0;k<MIN(lo.length(),getArrayLen());k++) {
-		if (lo[k]>=0.0) {
-			m_currentLOValue[k]=lo[k];
-			updateBandWith(k);
-		}
-	}	
+    for (WORD k=0;k<MIN(lo.length(),getArrayLen());k++) {
+        if (lo[k]>=0.0) {
+            m_currentLOValue[k]=lo[k];
+            updateBandWith(k);
+        }
+    }
 }*/
 
 template <class T>
 void CConfiguration<T>::setCurrentLOValue(const double& val,const long& pos)
 {
-	if ((pos>=0) && (pos<=getFeeds())) {
-		if (val>=0.0) {
-			m_currentLOValue[getArrayIndex(pos)]=val;
-			m_currentLOValue[getArrayIndex(pos)+1]=val;
-			updateBandWith();
-		}
-	}
+    if ((pos>=0) && (pos<=getFeeds())) {
+        if (val>=0.0) {
+            m_currentLOValue[getArrayIndex(pos)]=val;
+            m_currentLOValue[getArrayIndex(pos)+1]=val;
+            updateBandWith();
+        }
+    }
 }
 
 template <class T>
 void CConfiguration<T>::updateBandWith()
 {
-	for (WORD i=0;i<getArrayLen();i++) m_BandIFBandwidth[i]=m_BandRFMax[i]-(m_BandIFMin[i]+m_currentLOValue[i]);
+    for (WORD i=0;i<getArrayLen();i++) m_BandIFBandwidth[i]=m_BandRFMax[i]-(m_BandIFMin[i]+m_currentLOValue[i]);
 }
 
 /*
-* throw (ComponentErrors::CDBAccessExImpl, ReceiversErrors::ModeErrorExImpl) 
+* throw (ComponentErrors::CDBAccessExImpl, ReceiversErrors::ModeErrorExImpl)
 */
 template <class T>
-void CConfiguration<T>::setMode(const char * mode) 
+void CConfiguration<T>::setMode(const char * mode)
 {
     IRA::CString value, token;
     IRA::CError error;
     IRA::CString cmdMode(mode);
 
-	 if (cmdMode==m_mode) return;
+    if (cmdMode==m_mode) return;
     if(!m_mode.IsEmpty()) {
-    	  if (cmdMode=="*") return;
-    }    
-    
+        if (cmdMode=="*") return;
+    }
+
     CString MODE_PATH((std::string(CONFIG_PATH) + std::string("/Modes/") + std::string(cmdMode)).c_str());
     _GET_DWORD_ATTRIBUTE(m_services,"Feeds","Number of feeds:",m_feeds,MODE_PATH);
     _GET_DWORD_ATTRIBUTE(m_services,"IFs","Number of feeds:",m_IFs,MODE_PATH);
-    _GET_STRING_ATTRIBUTE(m_services,"ActivateBypass","Set LNA bypass mode:",value,MODE_PATH); 
+    _GET_STRING_ATTRIBUTE(m_services,"ActivateBypass","Set LNA bypass mode:",value,MODE_PATH);
     value.MakeUpper();
     if (value=="TRUE") m_lnaBypass=true;
-    else m_lnaBypass=false;											  
-    
+    else m_lnaBypass=false;
 
-    _GET_STRING_ATTRIBUTE(m_services,"IFBandPolarizations","IF polarizations:",value,MODE_PATH); 											  
+
+    _GET_STRING_ATTRIBUTE(m_services,"IFBandPolarizations","IF polarizations:",value,MODE_PATH);
     int start=0;
     for (WORD k=0;k<m_IFs*m_feeds;k++) {
         if (!IRA::CIRATools::getNextToken(value,start,' ',token)) {
@@ -447,7 +450,7 @@ void CConfiguration<T>::setMode(const char * mode)
         }
         token.MakeUpper();
         if (token == "L") {
-            m_BandPolarizations[k]=Receivers::RCV_LCP; 
+            m_BandPolarizations[k]=Receivers::RCV_LCP;
         }
         else if (token == "R") {
             m_BandPolarizations[k]=Receivers::RCV_RCP;
@@ -480,7 +483,7 @@ void CConfiguration<T>::setMode(const char * mode)
         }
         m_BandRFMax[k] = token.ToDouble();
     }
-    
+
     _GET_STRING_ATTRIBUTE(m_services,"IFMin", "IF lower limit (MHz):",value,MODE_PATH);
     start=0;
     for (WORD k=0; k<m_IFs*m_feeds; k++) {
@@ -502,7 +505,7 @@ void CConfiguration<T>::setMode(const char * mode)
         }
         m_BandIFBandwidth[k]=token.ToDouble()-m_BandIFMin[k];
     }
-    
+
     _GET_STRING_ATTRIBUTE(m_services,"DefaultLO","Default LO Value (MHz):",value,MODE_PATH);
     start=0;
     for (WORD k=0; k<m_IFs*m_feeds; k++) {
@@ -600,49 +603,17 @@ DWORD CConfiguration<T>::getSynthesizerTable_WH(double * &freq,double *&power) c
 template <class T>
 DWORD CConfiguration<T>::getTaperTable(double * &freq,double *&taper, short feed) const
 {
-   freq = new double [m_taperVectorLen];
-   taper = new double [m_taperVectorLen];
-	DWORD count=0;
-   for (DWORD j=0; j<m_taperVectorLen; j++) {
-		if (m_taperVector[j].feed==feed) {
-      	freq[count] = m_taperVector[j].frequency;
-         taper[count] = m_taperVector[j].taper;
-			count++;
-    	}
-	}
-   return count;
-}
-
-template <class T>
-DWORD CConfiguration<T>::getLeftMarkTable(ACS::doubleSeq& freq,ACS::doubleSeq& markValue,short feed) const
-{
-	freq.length(m_markVectorLen);
-	markValue.length(m_markVectorLen);
-	DWORD count=0;
-	for (DWORD j=0;j<m_markVectorLen;j++) {
-		if (m_markVector[j].polarization==Receivers::RCV_LCP && m_markVector[j].feed==feed) {
-			freq[count]=m_markVector[j].skyFrequency;
-			markValue[count]=m_markVector[j].markValue;
-			count++;
-		}
-	}
-	return count;
-}
-
-template <class T>
-DWORD CConfiguration<T>::getRightMarkTable(ACS::doubleSeq& freq,ACS::doubleSeq& markValue,short feed) const
-{
-	freq.length(m_markVectorLen);
-	markValue.length(m_markVectorLen);
-	DWORD count=0;
-	for (DWORD j=0;j<m_markVectorLen;j++) {
-		if (m_markVector[j].polarization==Receivers::RCV_RCP && m_markVector[j].feed==feed) {
-			freq[count]=m_markVector[j].skyFrequency;
-			markValue[count]=m_markVector[j].markValue;
-			count++;
-		}
-	}
-	return count;
+    freq = new double [m_taperVectorLen];
+    taper = new double [m_taperVectorLen];
+    DWORD count=0;
+    for (DWORD j=0; j<m_taperVectorLen; j++) {
+        if (m_taperVector[j].feed==feed) {
+            freq[count] = m_taperVector[j].frequency;
+            taper[count] = m_taperVector[j].taper;
+            count++;
+        }
+    }
+    return count;
 }
 
 template <class T>

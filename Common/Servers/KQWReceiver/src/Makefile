@@ -58,7 +58,7 @@ LIBRARIES_L     =
 
 #
 # <brief description of lllll library>
-KQWBandReceiverImpl_OBJECTS   =  Configuration ComponentCore KQWBandReceiverImpl MonitorThread
+KQWBandReceiverImpl_OBJECTS   =  Configuration ComponentCore KQWBandReceiverImpl MonitorThread utils
 #SRTLPBandReceiverImpl  SRTLPBandCore MonitorThread utils
 KQWBandReceiverImpl_LIBS = IRALibrary ComponentErrors ManagementErrors ReceiversErrors CommonReceiverInterfaceStubs \
 						     GenericReceiverStubs KQWBandStubs \

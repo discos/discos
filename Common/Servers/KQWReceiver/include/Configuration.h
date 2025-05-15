@@ -56,7 +56,7 @@
 #define LOTABLE_Q_PATH CONFIG_PATH"/Synthesizer_Q"
 #define LOTABLE_WL_PATH CONFIG_PATH"/Synthesizer_WLOW"
 #define LOTABLE_WH_PATH CONFIG_PATH"/Synthesizer_WHIGH"
-#define MARKTABLE_PATH CONFIG_PATH"/NoiseMark"
+#define MARKTABLE_PATH CONFIG_PATH"/MarkCoefficients"
 #define FEEDTABLE_PATH CONFIG_PATH"/Feeds"
 #define TAPERTABLE_PATH CONFIG_PATH"/Taper"
 
@@ -76,10 +76,9 @@ class CConfiguration {
 public:
 
 	typedef struct {
-		double skyFrequency;
 		long long feed; 
+		std::vector<double> coefficients;
 		Receivers::TPolarization polarization;
-		double markValue;
 	} TMarkValue;
 
 	typedef struct {
@@ -169,24 +168,6 @@ public:
 	 * @return the time of expiration of a log sent to the repetition log guard (microseconds)
 	 */
 	inline const DWORD& getRepetitionExpireTime() const { return m_repetitionExpireTime; }
-
-	/**
-	 * Allows to get the table of mark values relative to left polarization
-	 * @param freq vector containing the frequency value of the mark table. It must be freed by caller.
-	 * @param markValue vector of the value of the calibration diode. It must be freed by caller.
-	 * @param len used to return the length of the mark values array
-	 * @return the size of the output vectors
-	 */
-	DWORD getLeftMarkTable(ACS::doubleSeq& freq,ACS::doubleSeq& markValue,short feed) const;
-
-	/**
-	 * Allows to get the table of mark values relative to left polarization
-	 * @param freq vector containing the frequency value of the mark table. It must be freed by caller.
-	 * @param markValue vector of the value of the calibration diode. It must be freed by caller.
-	 * @param len used to return the length of the mark values array
-	 * @return the size of the output vectors
-	 */
-	DWORD getRightMarkTable(ACS::doubleSeq& freq,ACS::doubleSeq& markValue,short feed) const;
 
 	/**
 	 * @return the instance of the K-band local oscillator component  that the receiver will use to drive the set its LO

@@ -10,7 +10,7 @@
 #include <sstream>
 #include <cctype>
 
-int hex2dec(BYTE *buff, int idx, int len) throw (ComponentErrors::SocketErrorExImpl) {
+/*int hex2dec(BYTE *buff, int idx, int len) throw (ComponentErrors::SocketErrorExImpl) {
 
     unsigned int dec_array[len] ; // This array stores decimal values
     unsigned long dec_value = 0; // The result as decimal value 
@@ -35,7 +35,7 @@ int hex2dec(BYTE *buff, int idx, int len) throw (ComponentErrors::SocketErrorExI
         dec_value += static_cast<unsigned int>(dec_array[i]*pow(16, len - 1 - i)) ;
     }
     return dec_value;
-}
+}*/
 
 
 void dec2hexStr(unsigned long dec, unsigned char hex[], int len) {

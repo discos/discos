@@ -16,7 +16,8 @@ CDB_SCHEMAS = Feeds ReceiversModeSetup LocalOscillatorLookUpTable \
 			  DewarPositionerUpdatingTable DewarPositionerMapping \
 			  DewarPositionerActions \
 			  LocalOscillator LocalOscillatorEthernet \
-			  KQWBandNoiseMarkLookUpTable KQWBandReceiverModeSetup KQWBandTaperLookUpTable
+			  MarkCoefficientsLookUpTable \
+			  KQWBandReceiverModeSetup KQWBandTaperLookUpTable
 
 
 # IDL Files and flags
