@@ -17,6 +17,7 @@
     <!--configuration> <DISCOS>XKP</DISCOS>         <LDO>Primario</LDO>    </configuration-->
     <configuration> <DISCOS>CCG</DISCOS>         <LDO>Gregoriano1</LDO> </configuration>
     <configuration> <DISCOS>KKG</DISCOS>         <LDO>Gregoriano2</LDO> </configuration>
+    <configuration> <DISCOS>KBAND_TEST</DISCOS>  <LDO>Gregoriano2</LDO> </configuration>
     <configuration> <DISCOS>WWG</DISCOS>         <LDO>Gregoriano3</LDO> </configuration>
     <configuration> <DISCOS>QQG</DISCOS>         <LDO>Gregoriano4</LDO> </configuration>
     <configuration> <DISCOS>CTR</DISCOS>         <LDO>Gregoriano5</LDO> </configuration>

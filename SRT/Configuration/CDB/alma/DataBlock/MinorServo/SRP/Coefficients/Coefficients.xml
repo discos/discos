@@ -40,6 +40,13 @@
     <configuration><n>KKG_AS_OFF</n> <a>RY</a><p>-0.03611111111111111                                                                                                       </p></configuration>
     <configuration><n>KKG_AS_OFF</n> <a>RZ</a><p>0                                                                                                                          </p></configuration>
 
+    <configuration><n>KBAND_TEST</n> <a>TX</a><p>-1.5                                                                                                                       </p></configuration>
+    <configuration><n>KBAND_TEST</n> <a>TY</a><p>-90.4571677, 2.06486636, -0.066594993, 0.00679193157, -0.000204050966, 0.00000233354544, -0.00000000926776063              </p></configuration>
+    <configuration><n>KBAND_TEST</n> <a>TZ</a><p>-15.6669651675, 1.9293068324, -0.0628990613, 0.0007771141, -0.0000032940                                                   </p></configuration>
+    <configuration><n>KBAND_TEST</n> <a>RX</a><p>-0.0055555555555569409, 0.00014822163433269445, 0.000027586713698, -0.000000077732053                                      </p></configuration>
+    <configuration><n>KBAND_TEST</n> <a>RY</a><p>-0.036111111111111108                                                                                                      </p></configuration>
+    <configuration><n>KBAND_TEST</n> <a>RZ</a><p>0                                                                                                                          </p></configuration>
+
     <configuration><n>WWG</n>        <a>TX</a><p>0                                                                                                                          </p></configuration>
     <configuration><n>WWG</n>        <a>TY</a><p>0                                                                                                                          </p></configuration>
     <configuration><n>WWG</n>        <a>TZ</a><p>0                                                                                                                          </p></configuration>
