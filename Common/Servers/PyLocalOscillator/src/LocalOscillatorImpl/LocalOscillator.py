@@ -85,9 +85,7 @@ class LocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComponent, C
       
 # ___oOo___
    def cleanUp(self):
-      
       self.cl.close()
-   
    
    def initialize(self):
        name= self.getName()
@@ -104,11 +102,10 @@ class LocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComponent, C
               exc.setData('reason',msg)
               raise exc.getComponentErrorsEx()
        
-
        addProperty(self, 'frequency', devio_ref=frequencyDevIO(self.cl))
        addProperty(self, 'amplitude', devio_ref=amplitudeDevIO(self.cl))
        addProperty(self, 'isLocked', devio_ref=isLockedDevIO(self,self.cl))
-       self.cl.configure(IP,PORT)
+       self.rfon()
    
    def set(self,rf_power,rf_freq):
      try:
@@ -118,21 +115,10 @@ class LocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComponent, C
         self.power=rf_power
         logger.logNotice('SYNT FREQ  set to %f ' %self.freq)
         logger.logNotice('SYNT POWER set to %f ' %self.power)
-
      except CommandLine.CommandLineError as ex :
-          
         logger.logError(ex,message)
 
-       
-   
-   
-   
-   
-   
-
-   
    def get(self):
-     
        msg,power=self.cl.getPower()
        msg,freq= self.cl.getFrequency()
        print(power)
@@ -140,13 +126,10 @@ class LocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComponent, C
        return (power,freq)
   
    def rfon(self):
-    
-      pass
+       self.cl.rfOn()
   
    def rfoff(self):
-    
-       pass    
+       self.cl.rfOff()
    
    def getInternalFrequency(self):
        return self.freq
-   
