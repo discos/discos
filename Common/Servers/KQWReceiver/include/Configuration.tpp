@@ -569,7 +569,7 @@ DWORD CConfiguration<T>::getSynthesizerTable_Q(double * &freq,double *&power) co
 {
     freq= new double [m_loVectorLen_Q];
     power=new double [m_loVectorLen_Q];
-    for (DWORD j=0;j<m_loVectorLen_K;j++) {
+    for (DWORD j=0;j<m_loVectorLen_Q;j++) {
         freq[j]=m_loVector_Q[j].frequency;
         power[j]=m_loVector_Q[j].outputPower;
     }

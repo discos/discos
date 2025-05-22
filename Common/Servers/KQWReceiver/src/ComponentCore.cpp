@@ -1310,7 +1310,7 @@ void CComponentCore::getBandwidth(ACS::doubleSeq& bw)
     bw.length(m_configuration.getArrayLen());
     for (long i=0;i<m_configuration.getFeeds();i++) {
         for (long j=0;j<m_configuration.getIFs();j++) {
-            bw[i]=p[m_configuration.getArrayIndex(i,j)];
+            bw[2*i+j]=p[m_configuration.getArrayIndex(i,j)];
         }
     }
 }
@@ -1323,7 +1323,7 @@ void CComponentCore::getInitialFreq(ACS::doubleSeq& f)
     f.length(m_configuration.getArrayLen());
     for (long i=0;i<m_configuration.getFeeds();i++) {
         for (long j=0;j<m_configuration.getIFs();j++) {
-            f[i]=p[m_configuration.getArrayIndex(i,j)];
+            f[2*i+j]=p[m_configuration.getArrayIndex(i,j)];
         }
     }
 }
@@ -1336,7 +1336,7 @@ void CComponentCore::getLocalOscillator(ACS::doubleSeq& lo)
     lo.length(m_configuration.getArrayLen());
     for (long i=0;i<m_configuration.getFeeds();i++) {
         for (long j=0;j<m_configuration.getIFs();j++) {
-            lo[i]=p[m_configuration.getArrayIndex(i,j)];
+            lo[2*i+j]=p[m_configuration.getArrayIndex(i,j)];
         }
     }    
 }
@@ -1349,7 +1349,7 @@ void CComponentCore::getPolarizations(ACS::longSeq& pol)
     pol.length(m_configuration.getArrayLen());
     for (long i=0;i<m_configuration.getFeeds();i++) {
         for (long j=0;j<m_configuration.getIFs();j++) {
-            pol[i]=(long)p[m_configuration.getArrayIndex(i,j)];
+            pol[2*i+j]=(long)p[m_configuration.getArrayIndex(i,j)];
         }
     }    
 }
