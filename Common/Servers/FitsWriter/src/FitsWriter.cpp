@@ -235,7 +235,8 @@ bool CFitsWriter::create()
 	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY11,m_lastError)) return false;
 	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY12,m_lastError)) return false;
 	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY13,m_lastError)) return false;
-	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY14,m_lastError)) return false;	
+	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY14,m_lastError)) return false;
+	if (!CFitsTools::primaryHeaderHistory(pFits,HISTORY15,m_lastError)) return false;
 	
 	if (!CFitsTools::primaryHeaderComment(pFits,CREDITS1,m_lastError)) return false;
 	if (!CFitsTools::primaryHeaderComment(pFits,CREDITS2,m_lastError)) return false;
@@ -320,16 +321,21 @@ bool CFitsWriter::saveSectionHeader(const TSectionHeader* tch)
 	return true;
 };
 
-bool CFitsWriter::storeServoData(const double& time,const ACS::doubleSeq& pos)
+bool CFitsWriter::storeServoData(const double& time,const ACS::doubleSeq& pos, const ACS::doubleSeq& userOffsets, const ACS::doubleSeq& systemOffsets)
 {
 	if (servo_table) {
 		double app;
 		try {
 			app=time;
 			servo_table->column(1).write(&app,1,next_servo_table_row);
-			for (unsigned k=0;k<pos.length();k++) {
-				app=pos[k];
-				servo_table->column(2+k).write(&app,1,next_servo_table_row);
+
+			for(size_t i = 0; i < pos.length(); i++) {
+				app = pos[i];
+				servo_table->column(2+(3*i)).write(&app, 1, next_servo_table_row);
+				app = userOffsets[i];
+				servo_table->column(2+(3*i)+1).write(&app, 1, next_servo_table_row);
+				app = systemOffsets[i];
+				servo_table->column(2+(3*i)+2).write(&app, 1, next_servo_table_row);
 			}
 		}
 		catch(FitsException& fe) {
@@ -476,6 +482,12 @@ bool CFitsWriter::addServoTable(const ACS::stringSeq &axisName,const ACS::string
 		servoColName.push_back((const char *)axisName[k]);
 		servoColUnit.push_back((const char *)axisUnit[k]);
 		servoColForm.push_back("D");
+		servoColName.push_back((std::string(axisName[k]) + "_USER_OFFSET").c_str());
+		servoColUnit.push_back((const char *)axisUnit[k]);
+		servoColForm.push_back("D");
+		servoColName.push_back((std::string(axisName[k]) + "_SYSTEM_OFFSET").c_str());
+		servoColUnit.push_back((const char *)axisUnit[k]);
+		servoColForm.push_back("D");
 	}
 	try{
 		servo_table=pFits->addTable((const char *)name,0,servoColName,servoColForm,servoColUnit);
@@ -569,7 +581,7 @@ bool CFitsWriter::addSectionTable(const ACS::longSeq &sectionID, const ACS::long
 			type <<  (1 * bins[i]) << data_type;
 		}
 		if (!noData) {
-		    DataColName.push_back(colName.str());
+			DataColName.push_back(colName.str());
 			DataColForm.push_back(type.str());
 			DataColUnit.push_back("");
 		}

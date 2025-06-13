@@ -781,7 +781,7 @@ void SRTMinorServoBossCore::setUserOffset(std::string servo_axis_name, double of
     }
 }
 
-ACS::doubleSeq* SRTMinorServoBossCore::getUserOffsets()
+ACS::doubleSeq* SRTMinorServoBossCore::getUserOffsets(ACS::Time acs_time)
 {
     AUTO_TRACE("SRTMinorServoBossCore::getUserOffsets()");
 
@@ -798,7 +798,7 @@ ACS::doubleSeq* SRTMinorServoBossCore::getUserOffsets()
 
     for(const auto& [servo_name, servo] : m_current_servos)
     {
-        ACS::doubleSeq servo_offsets = *servo->getUserOffsets();
+        ACS::doubleSeq servo_offsets = *servo->getUserOffsets(acs_time);
         size_t start_index = offsets->length();
         offsets->length(start_index + servo_offsets.length());
         std::copy(servo_offsets.begin(), servo_offsets.end(), offsets->begin() + start_index);
@@ -936,7 +936,7 @@ void SRTMinorServoBossCore::setSystemOffset(std::string servo_axis_name, double 
     }
 }
 
-ACS::doubleSeq* SRTMinorServoBossCore::getSystemOffsets()
+ACS::doubleSeq* SRTMinorServoBossCore::getSystemOffsets(ACS::Time acs_time)
 {
     AUTO_TRACE("SRTMinorServoBossCore::getSystemOffsets()");
 
@@ -953,7 +953,7 @@ ACS::doubleSeq* SRTMinorServoBossCore::getSystemOffsets()
 
     for(const auto& [servo_name, servo] : m_current_servos)
     {
-        ACS::doubleSeq servo_offsets = *servo->getSystemOffsets();
+        ACS::doubleSeq servo_offsets = *servo->getSystemOffsets(acs_time);
         size_t start_index = offsets->length();
         offsets->length(start_index + servo_offsets.length());
         std::copy(servo_offsets.begin(), servo_offsets.end(), offsets->begin() + start_index);
@@ -1112,9 +1112,9 @@ SRTMinorServoScan SRTMinorServoBossCore::checkScanFeasibility(const ACS::Time& s
     ACS::doubleSeq_var min_ranges, max_ranges;
     servo->getAxesRanges(min_ranges, max_ranges);
 
-    // Read the servo offsets
-    ACS::doubleSeq user_offsets = *servo->getUserOffsets();
-    ACS::doubleSeq system_offsets = *servo->getSystemOffsets();
+    // Read the current servo offsets
+    ACS::doubleSeq user_offsets = *servo->getUserOffsets(0);
+    ACS::doubleSeq system_offsets = *servo->getSystemOffsets(0);
 
     // Check if starting or final positions are outside the axes range (considering offsets)
     for(size_t i = 0; i < starting_position.length(); i++)
