@@ -209,7 +209,7 @@ module MinorServo {
          *
          * @return offset the user offset of the system
          */
-         ACS::doubleSeq getUserOffset() 
+         ACS::doubleSeq getUserOffset(in ACS::Time t)
          raises (MinorServoErrors::MinorServoErrorsEx,
                  ComponentErrors::ComponentErrorsEx);
  
@@ -241,7 +241,7 @@ module MinorServo {
          *
          * @return offset the system offset
          */
-         ACS::doubleSeq getSystemOffset() 
+         ACS::doubleSeq getSystemOffset(in ACS::Time t)
          raises (MinorServoErrors::MinorServoErrorsEx,
                  ComponentErrors::ComponentErrorsEx);
  

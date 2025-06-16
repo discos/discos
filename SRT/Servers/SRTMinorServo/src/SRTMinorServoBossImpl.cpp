@@ -269,10 +269,10 @@ void SRTMinorServoBossImpl::setUserOffset(const char* servo_axis_name, const dou
     m_core.setUserOffset(std::string(servo_axis_name), (double)offset, true);
 }
 
-ACS::doubleSeq* SRTMinorServoBossImpl::getUserOffset()
+ACS::doubleSeq* SRTMinorServoBossImpl::getUserOffset(ACS::Time acs_time)
 {
     AUTO_TRACE("SRTMinorServoBossImpl::getUserOffset()");
-    return m_core.getUserOffsets();
+    return m_core.getUserOffsets(acs_time == 0 ? getTimeStamp() : acs_time);
 }
 
 void SRTMinorServoBossImpl::clearSystemOffset(const char* servo_name)
@@ -287,10 +287,10 @@ void SRTMinorServoBossImpl::setSystemOffset(const char* servo_axis_name, CORBA::
     m_core.setSystemOffset(std::string(servo_axis_name), (double)offset);
 }
 
-ACS::doubleSeq* SRTMinorServoBossImpl::getSystemOffset()
+ACS::doubleSeq* SRTMinorServoBossImpl::getSystemOffset(ACS::Time acs_time)
 {
     AUTO_TRACE("SRTMinorServoBossImpl::getSystemOffset()");
-    return m_core.getSystemOffsets();
+    return m_core.getSystemOffsets(acs_time == 0 ? getTimeStamp() : acs_time);
 }
 
 void SRTMinorServoBossImpl::getAxesInfo(ACS::stringSeq_out axes_names, ACS::stringSeq_out axes_units)

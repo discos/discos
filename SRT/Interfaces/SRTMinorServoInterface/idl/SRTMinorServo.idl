@@ -97,9 +97,10 @@ module MinorServo
 
         /**
          * This method returns the user offsets of the servo
+         * @param acs_time the ACS::Time for which we want to retrieve the servo user offsets
          * @return the user offsets as a sequence of doubles
          */
-        ACS::doubleSeq getUserOffsets();
+        ACS::doubleSeq getUserOffsets(in ACS::Time acs_time);
 
         /**
          * This method sets the user offset of the servo for a given axis
@@ -118,9 +119,10 @@ module MinorServo
 
         /**
          * This method returns the system offsets of the servo
+         * @param acs_time the ACS::Time for which we want to retrieve the servo system offsets
          * @return the system offsets as a sequence of doubles
          */
-        ACS::doubleSeq getSystemOffsets();
+        ACS::doubleSeq getSystemOffsets(in ACS::Time acs_time);
 
         /**
          * This method sets the system offset of the servo for a given axis
