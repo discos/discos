@@ -24,9 +24,10 @@
 #define FITS_VERSION12 "V.1.21"
 #define FITS_VERSION13 "V.1.22"
 #define FITS_VERSION14 "V.1.23"
+#define FITS_VERSION15 "V.1.24"
 
 
-#define CURRENT_VERSION FITS_VERSION14
+#define CURRENT_VERSION FITS_VERSION15
 
 #define DEFAULT_COMMENT CURRENT_VERSION" Created by  S. Righini, M. Bartolini  & A. Orlati"
 
@@ -44,6 +45,7 @@
 #define HISTORY12 FITS_VERSION12" SubScan offsets added to the primary header"
 #define HISTORY13 FITS_VERSION13" Summary file aligned to reference document"
 #define HISTORY14 FITS_VERSION14" Rest frequency information also added in the header of section table"
+#define HISTORY15 FITS_VERSION15" Minor Servos' user and system offsets added to the SERVO TABLE"
 
 
 #define CREDITS1  " "
