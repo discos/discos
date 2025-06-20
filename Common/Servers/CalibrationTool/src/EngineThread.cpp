@@ -1381,7 +1381,7 @@ void CEngineThread::setAxisOffsets()
 					ACS::doubleSeq_var offs;
 	   				if ((m_data->isFocusScanDone()) && (m_focusResult)) {
 						double oldOffset;
-						offs=m_minorServoBoss->getUserOffset();
+						offs=m_minorServoBoss->getUserOffset(0);
 						if (m_minorServoCurrentAxisPosition!=-1) {
 							oldOffset=offs[m_minorServoCurrentAxisPosition];
 						}
@@ -1425,7 +1425,7 @@ void CEngineThread::setAxisOffsets()
 					ACS::doubleSeq_var offs;
 	   				if ((m_data->isFocusScanDone()) && (m_focusResult)) {
 						double oldOffset;
-						offs=m_minorServoBoss->getUserOffset();
+						offs=m_minorServoBoss->getUserOffset(0);
 						if (m_minorServoCurrentAxisPosition!=-1) {
 							oldOffset=offs[m_minorServoCurrentAxisPosition];
 						}
