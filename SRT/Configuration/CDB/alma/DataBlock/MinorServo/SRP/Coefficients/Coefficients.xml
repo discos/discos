@@ -40,11 +40,11 @@
     <configuration><n>KKG_AS_OFF</n>    <a>RY</a><p>-0.03611111111111111                                                                                                        </p></configuration>
     <configuration><n>KKG_AS_OFF</n>    <a>RZ</a><p>0                                                                                                                           </p></configuration>
 
-    <configuration><n>KKG_METROLOGY</n> <a>TX</a><p>1.7325348393251                                                                                                             </p></configuration>
-    <configuration><n>KKG_METROLOGY</n> <a>TY</a><p>13.8520348723981, 0.0625983374117, -0.0105428296221, 0.0000367139436                                                        </p></configuration>
-    <configuration><n>KKG_METROLOGY</n> <a>TZ</a><p>6.6901419157268, -0.1426540181448, 0.0002334562581, 0.0000041177530                                                         </p></configuration>
-    <configuration><n>KKG_METROLOGY</n> <a>RX</a><p>0.0241581362650, -0.0000915032266, 0.0000234020204, -0.0000000843661                                                        </p></configuration>
-    <configuration><n>KKG_METROLOGY</n> <a>RY</a><p>0.0349447765071                                                                                                             </p></configuration>
+    <configuration><n>KKG_METROLOGY</n> <a>TX</a><p>2.822885155, -0.138521245, 0.011530396, -0.000460164, 0.00000664452, -0.0000000314614                                       </p></configuration>
+    <configuration><n>KKG_METROLOGY</n> <a>TY</a><p>6.166494342, 1.126099842, -0.118487266, 0.005179987, -0.000106509, 0.000000989503, -0.0000000034197                         </p></configuration>
+    <configuration><n>KKG_METROLOGY</n> <a>TZ</a><p>-15.6669651675, 1.9293068324, -0.0628990613, 0.0007771141, -0.0000032940                                                    </p></configuration>
+    <configuration><n>KKG_METROLOGY</n> <a>RX</a><p>-0.0055555555555569409, 0.00014822163433269445, 0.000027586713698, -0.000000077732053                                       </p></configuration>
+    <configuration><n>KKG_METROLOGY</n> <a>RY</a><p>-0.036111111111111108                                                                                                       </p></configuration>
     <configuration><n>KKG_METROLOGY</n> <a>RZ</a><p>0                                                                                                                           </p></configuration>
 
     <configuration><n>WWG</n>           <a>TX</a><p>0                                                                                                                           </p></configuration>
