@@ -104,7 +104,7 @@ bool CEngineThread::processData()
 	bool tracking;
 	double hum,temp,press;
 	double derot;
-	ACS::doubleSeq_var servoPositions;
+	ACS::doubleSeq_var servoPositions, servoUserOffsets, servoSystemOffsets;
 	long long integrationTime;
 	//CSecAreaResourceWrapper<CDataCollection> data=m_dataWrapper->Get();
 
@@ -262,6 +262,8 @@ bool CEngineThread::processData()
 				ACS::TimeInterval interval=(ACS::TimeInterval)m_config->getMinorServoEnquireMinGap()*10;
 				if (time>=m_lastMinorServoEnquireTime+interval) {
 					servoPositions=m_minorServoBoss->getAxesPosition(time);
+					servoUserOffsets=m_minorServoBoss->getUserOffset(time);
+					servoSystemOffsets=m_minorServoBoss->getSystemOffset(time);
 					m_lastMinorServoEnquireTime=time;
 					applyServoPositions=true;
 				}
@@ -307,7 +309,7 @@ bool CEngineThread::processData()
 		}
 #else
 		if (applyServoPositions) {
-			if (!m_file->storeServoData(tdh.time,servoPositions.in())) {
+			if (!m_file->storeServoData(tdh.time,servoPositions.in(),servoUserOffsets.in(),servoSystemOffsets.in())) {
 				_EXCPT(ManagementErrors::FitsCreationErrorExImpl,impl,"CEngineThread::processData()");
 				impl.setFileName((const char *)m_data->getFileName());
 				impl.setError(m_file->getLastError());
@@ -525,7 +527,8 @@ void CEngineThread::runLoop()
 			// create the file and save main headers
 			m_data->getFileName(fileName,filePath);
 			if (!IRA::CIRATools::directoryExists(filePath)) {
-				if (!IRA::CIRATools::makeDirectory(filePath)) {
+				IRA::CIRATools::makeDirectory(filePath);
+				if (!IRA::CIRATools::directoryExists(filePath)) {
 					_EXCPT(ComponentErrors::FileIOErrorExImpl,impl,"CEngineThread::runLoop()");
 					impl.setFileName((const char *)filePath);
 					impl.log(LM_ERROR);
@@ -893,7 +896,7 @@ void CEngineThread::runLoop()
 				if (restFreqs.length()==1) {
 					double rfValue;
 					IRA::CString keyName;
-			    	for (long j=0;j<m_data->getSectionsNumber();j++) {
+					for (long j=0;j<m_data->getSectionsNumber();j++) {
 						if (restFreqs[0]>0.0) rfValue=restFreqs[0];
 						else rfValue=DOUBLE_DUMMY_VALUE;
 						keyName.Format("RESTFREQ%d",j+1);

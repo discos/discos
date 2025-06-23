@@ -20,8 +20,9 @@ SRTBaseMinorServoImpl::SRTBaseMinorServoImpl(const ACE_CString& component_name, 
     m_error_code(ERROR_NO_ERROR),
     m_user_offsets(m_virtual_axes, 0.0),
     m_system_offsets(m_virtual_axes, 0.0),
-    m_commanded_virtual_positions(m_virtual_axes, 0.0),
+    m_commanded_plain_virtual_positions(m_virtual_axes, 0.0),
     m_positions_queue(5 * 60 * int(1 / getCDBValue<double>(container_services, "status_thread_period", "/MINORSERVO/Boss")), m_virtual_axes),
+    m_offsets_queue(5 * 60 * int(1 / getCDBValue<double>(container_services, "status_thread_period", "/MINORSERVO/Boss")), m_virtual_axes),
     m_min(SRTBaseMinorServoImpl::getMotionConstant(*this, "min_range")),
     m_max(SRTBaseMinorServoImpl::getMotionConstant(*this, "max_range")),
     m_m_s(SRTBaseMinorServoImpl::getMotionConstant(*this, "max_speed")),
@@ -43,7 +44,7 @@ SRTBaseMinorServoImpl::SRTBaseMinorServoImpl(const ACE_CString& component_name, 
     m_virtual_offsets_ptr(this),
     m_virtual_user_offsets_ptr(this),
     m_virtual_system_offsets_ptr(this),
-    m_commanded_virtual_positions_ptr(this),
+    m_commanded_plain_virtual_positions_ptr(this),
     m_in_use_ptr(this),
     m_current_setup_ptr(this),
     m_error_code_ptr(this),
@@ -89,8 +90,8 @@ void SRTBaseMinorServoImpl::initialize()
                 new MSGenericDevIO<ACS::doubleSeq, std::vector<double>>(m_user_offsets), true);
         m_virtual_system_offsets_ptr = new baci::ROdoubleSeq((m_component_name + ":virtual_system_offsets").c_str(), getComponent(),
                 new MSGenericDevIO<ACS::doubleSeq, std::vector<double>>(m_system_offsets), true);
-        m_commanded_virtual_positions_ptr = new baci::ROdoubleSeq((m_component_name + ":commanded_virtual_positions").c_str(), getComponent(),
-                new MSGenericDevIO<ACS::doubleSeq, std::vector<double>>(m_commanded_virtual_positions), true);
+        m_commanded_plain_virtual_positions_ptr = new baci::ROdoubleSeq((m_component_name + ":commanded_plain_virtual_positions").c_str(), getComponent(),
+                new MSGenericDevIO<ACS::doubleSeq, std::vector<double>>(m_commanded_plain_virtual_positions), true);
         m_in_use_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":in_use").c_str(), getComponent(),
                 new MSGenericDevIO<Management::TBoolean, std::atomic<Management::TBoolean>>(m_in_use), true);
         m_current_setup_ptr = new baci::ROstring((m_component_name + ":current_setup").c_str(), getComponent(),
@@ -142,7 +143,7 @@ bool SRTBaseMinorServoImpl::status()
     {
         m_socket.sendCommand(SRTMinorServoCommandLibrary::status(m_servo_name), m_status);
 
-        ACS::doubleSeq current_point = m_status.getVirtualPositions();
+        ACS::doubleSeq current_point = m_status.getPlainVirtualPositions();
 
         // Calculate the current speed of the axes
         try
@@ -215,8 +216,8 @@ void SRTBaseMinorServoImpl::preset(const ACS::doubleSeq& virtual_coords)
     if(virtual_coordinates.length() == 0)
     {
         // It means we want to command the latest coordinates again, to apply the offset in the LDO servo system
-        virtual_coordinates.length(m_commanded_virtual_positions.size());
-        std::copy(m_commanded_virtual_positions.begin(), m_commanded_virtual_positions.end(), virtual_coordinates.begin());
+        virtual_coordinates.length(m_commanded_plain_virtual_positions.size());
+        std::copy(m_commanded_plain_virtual_positions.begin(), m_commanded_plain_virtual_positions.end(), virtual_coordinates.begin());
     }
 
     if(virtual_coordinates.length() != m_virtual_axes)
@@ -251,7 +252,7 @@ void SRTBaseMinorServoImpl::preset(const ACS::doubleSeq& virtual_coords)
         throw ex.getMinorServoErrorsEx();
     }
 
-    std::copy(coordinates.begin(), coordinates.end(), m_commanded_virtual_positions.begin());
+    std::copy(coordinates.begin(), coordinates.end(), m_commanded_plain_virtual_positions.begin());
 }
 
 bool SRTBaseMinorServoImpl::setup(const char* configuration_name, CORBA::Boolean as_off)
@@ -353,7 +354,7 @@ bool SRTBaseMinorServoImpl::setup(const char* configuration_name, CORBA::Boolean
         // The positions tables inside the Leonardo minor servo systems are calculated with an elevation of 45 degrees.
         // We need to be sure the values are correct otherwise there will be a discrepancy.
         ACS::doubleSeq commanded_coordinates = *calcCoordinates(45);
-        std::copy(commanded_coordinates.begin(), commanded_coordinates.end(), m_commanded_virtual_positions.begin());
+        std::copy(commanded_coordinates.begin(), commanded_coordinates.end(), m_commanded_plain_virtual_positions.begin());
         return true;
     }
     else
@@ -396,13 +397,14 @@ ACS::doubleSeq* SRTBaseMinorServoImpl::calcCoordinates(double elevation)
     }
 }
 
-ACS::doubleSeq* SRTBaseMinorServoImpl::getUserOffsets()
+ACS::doubleSeq* SRTBaseMinorServoImpl::getUserOffsets(ACS::Time acs_time)
 {
     AUTO_TRACE(m_servo_name + "::getUserOffsets()");
 
+    const std::vector<double> user_offsets = m_offsets_queue.getUserOffsets(acs_time == 0 ? getTimeStamp() : acs_time);
     ACS::doubleSeq_var offsets = new ACS::doubleSeq;
-    offsets->length(m_user_offsets.size());
-    std::copy(m_user_offsets.begin(), m_user_offsets.end(), offsets->begin());
+    offsets->length(user_offsets.size());
+    std::copy(user_offsets.begin(), user_offsets.end(), offsets->begin());
     return offsets._retn();
 }
 
@@ -453,6 +455,7 @@ void SRTBaseMinorServoImpl::setUserOffset(const char* axis_name, CORBA::Double o
     }
 
     m_user_offsets[index] = offset;
+    m_offsets_queue.put(getTimeStamp(), m_user_offsets, m_system_offsets);
 }
 
 void SRTBaseMinorServoImpl::clearUserOffsets()
@@ -461,12 +464,7 @@ void SRTBaseMinorServoImpl::clearUserOffsets()
 
     checkLineStatus();
 
-    m_user_offsets = std::vector<double>(m_virtual_axes, 0.0);
-
-    std::vector<double> offsets(m_virtual_axes, 0);
-    std::transform(m_user_offsets.begin(), m_user_offsets.end(), m_system_offsets.begin(), offsets.begin(), std::plus<double>());
-
-    if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::offset(m_servo_name, offsets)).checkOutput())
+    if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::offset(m_servo_name, m_system_offsets)).checkOutput())
     {
         m_error_code.store(ERROR_COMMAND_ERROR);
         _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::clearUserOffset()").c_str());
@@ -474,15 +472,19 @@ void SRTBaseMinorServoImpl::clearUserOffsets()
         ex.log(LM_DEBUG);
         throw ex.getMinorServoErrorsEx();
     }
+
+    m_user_offsets = std::vector<double>(m_virtual_axes, 0.0);
+    m_offsets_queue.put(getTimeStamp(), m_user_offsets, m_system_offsets);
 }
 
-ACS::doubleSeq* SRTBaseMinorServoImpl::getSystemOffsets()
+ACS::doubleSeq* SRTBaseMinorServoImpl::getSystemOffsets(ACS::Time acs_time)
 {
     AUTO_TRACE(m_servo_name + "::getSystemOffsets()");
 
+    const std::vector<double> system_offsets = m_offsets_queue.getSystemOffsets(acs_time == 0 ? getTimeStamp() : acs_time);
     ACS::doubleSeq_var offsets = new ACS::doubleSeq;
-    offsets->length(m_system_offsets.size());
-    std::copy(m_system_offsets.begin(), m_system_offsets.end(), offsets->begin());
+    offsets->length(system_offsets.size());
+    std::copy(system_offsets.begin(), system_offsets.end(), offsets->begin());
     return offsets._retn();
 }
 
@@ -533,6 +535,7 @@ void SRTBaseMinorServoImpl::setSystemOffset(const char* axis_name, CORBA::Double
     }
 
     m_system_offsets[index] = offset;
+    m_offsets_queue.put(getTimeStamp(), m_user_offsets, m_system_offsets);
 }
 
 void SRTBaseMinorServoImpl::clearSystemOffsets()
@@ -541,13 +544,7 @@ void SRTBaseMinorServoImpl::clearSystemOffsets()
 
     checkLineStatus();
 
-    m_system_offsets = std::vector<double>(m_virtual_axes, 0.0);
-
-    // Update the offsets
-    std::vector<double> offsets(m_virtual_axes, 0);
-    std::transform(m_user_offsets.begin(), m_user_offsets.end(), m_system_offsets.begin(), offsets.begin(), std::plus<double>());
-
-    if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::offset(m_servo_name, offsets)).checkOutput())
+    if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::offset(m_servo_name, m_user_offsets)).checkOutput())
     {
         m_error_code.store(ERROR_COMMAND_ERROR);
         _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::clearSystemOffset()").c_str());
@@ -555,6 +552,9 @@ void SRTBaseMinorServoImpl::clearSystemOffsets()
         ex.log(LM_DEBUG);
         throw ex.getMinorServoErrorsEx();
     }
+
+    m_system_offsets = std::vector<double>(m_virtual_axes, 0.0);
+    m_offsets_queue.put(getTimeStamp(), m_user_offsets, m_system_offsets);
 }
 
 void SRTBaseMinorServoImpl::reloadOffsets()
@@ -582,6 +582,7 @@ void SRTBaseMinorServoImpl::reloadOffsets()
             throw ex.getMinorServoErrorsEx();
         }
 
+        m_offsets_queue.put(getTimeStamp(), m_user_offsets, m_system_offsets);
         ACS_LOG(LM_FULL_INFO, m_servo_name + "::reloadOffsets()", (LM_NOTICE, "Offsets discrepancy, reloading them"));
     }
 }
@@ -609,15 +610,9 @@ ACS::doubleSeq* SRTBaseMinorServoImpl::getAxesPositions(ACS::Time acs_time)
 {
     AUTO_TRACE("SRTBaseMinorServoImpl::getAxesPositions()");
 
-    // Get the latest position
-    if(acs_time == 0)
-    {
-        acs_time = getTimeStamp();
-    }
-
     try
     {
-        std::vector<double> p = m_positions_queue.get(acs_time).second;
+        std::vector<double> p = m_positions_queue.get(acs_time == 0 ? getTimeStamp() : acs_time).second;
 
         ACS::doubleSeq_var positions = new ACS::doubleSeq;
         positions->length(m_virtual_axes);
@@ -641,22 +636,29 @@ ACS::TimeInterval SRTBaseMinorServoImpl::getTravelTime(const ACS::doubleSeq& _s_
 
     ACS::doubleSeq s_p(_s_p);
 
-    // No starting coordinates, it means we have to start from the current position taking into account the current speed
+    if(d_p.length() != m_virtual_axes)
+    {
+        _EXCPT(MinorServoErrors::StatusErrorExImpl, ex, (m_servo_name + "getTravelTime()").c_str());
+        ex.setReason("Wrong number of axes for destination_position.");
+        ex.log(LM_DEBUG);
+        throw ex.getMinorServoErrorsEx();
+    }
+
+    // No starting coordinates, it means we have to start from the current position taking into account the current speed.
     if(_s_p.length() == 0)
     {
         s_p = *getAxesPositions(0);
+
+        // Subtract the offsets since the destination coordinates are pure virtual
+        for(size_t i = 0; i < m_virtual_axes; i++)
+        {
+            s_p[i] -= m_user_offsets[i] + m_system_offsets[i];
+        }
     }
     else if(_s_p.length() != m_virtual_axes)
     {
         _EXCPT(MinorServoErrors::StatusErrorExImpl, ex, (m_servo_name + "getTravelTime()").c_str());
         ex.setReason("Wrong number of axes for starting_position.");
-        ex.log(LM_DEBUG);
-        throw ex.getMinorServoErrorsEx();
-    }
-    if(d_p.length() != m_virtual_axes)
-    {
-        _EXCPT(MinorServoErrors::StatusErrorExImpl, ex, (m_servo_name + "getTravelTime()").c_str());
-        ex.setReason("Wrong number of axes for destination_position.");
         ex.log(LM_DEBUG);
         throw ex.getMinorServoErrorsEx();
     }
@@ -891,7 +893,7 @@ GET_PROPERTY_REFERENCE(ACS::ROdoubleSeq, SRTBaseMinorServoImpl, m_virtual_positi
 GET_PROPERTY_REFERENCE(ACS::ROdoubleSeq, SRTBaseMinorServoImpl, m_virtual_offsets_ptr, virtual_offsets);
 GET_PROPERTY_REFERENCE(ACS::ROdoubleSeq, SRTBaseMinorServoImpl, m_virtual_user_offsets_ptr, virtual_user_offsets);
 GET_PROPERTY_REFERENCE(ACS::ROdoubleSeq, SRTBaseMinorServoImpl, m_virtual_system_offsets_ptr, virtual_system_offsets);
-GET_PROPERTY_REFERENCE(ACS::ROdoubleSeq, SRTBaseMinorServoImpl, m_commanded_virtual_positions_ptr, commanded_virtual_positions);
+GET_PROPERTY_REFERENCE(ACS::ROdoubleSeq, SRTBaseMinorServoImpl, m_commanded_plain_virtual_positions_ptr, commanded_plain_virtual_positions);
 GET_PROPERTY_REFERENCE(Management::ROTBoolean, SRTBaseMinorServoImpl, m_in_use_ptr, in_use);
 GET_PROPERTY_REFERENCE(ACS::ROstring, SRTBaseMinorServoImpl, m_current_setup_ptr, current_setup);
 GET_PROPERTY_REFERENCE(ROSRTMinorServoError, SRTBaseMinorServoImpl, m_error_code_ptr, error_code);

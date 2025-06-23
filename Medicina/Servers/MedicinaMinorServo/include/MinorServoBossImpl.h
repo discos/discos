@@ -365,7 +365,7 @@ public:
       * @throw ManagementErrors::ConfigurationErrorEx
       * @throw MinorServoErrors::OperationNotPermittedEx
       */
-     ACS::doubleSeq * getUserOffset()
+     ACS::doubleSeq * getUserOffset(ACS::Time acs_time)
           throw (MinorServoErrors::MinorServoErrorsEx,
                  ComponentErrors::ComponentErrorsEx);
 
@@ -403,7 +403,7 @@ public:
       * @throw MinorServoErrors::OperationNotPermittedEx
       * @throw ManagementErrors::ConfigurationErrorEx
       */
-     ACS::doubleSeq * getSystemOffset()
+     ACS::doubleSeq * getSystemOffset(ACS::Time acs_time)
           throw (MinorServoErrors::MinorServoErrorsEx,
                  ComponentErrors::ComponentErrorsEx);
     
