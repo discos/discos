@@ -318,7 +318,7 @@ namespace MinorServo
         const ACS::Time getTimestamp() const
         {
             std::shared_lock<std::shared_mutex> lock(m_mutex);
-            return IRA::CIRATools::UNIXEpoch2ACSTime(this->get<double>("TIMESTAMP"));
+            return IRA::CIRATools::UNIXTime2ACSTime(this->get<double>("TIMESTAMP"));
         }
 
         /**

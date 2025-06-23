@@ -19,7 +19,9 @@
 #include "Configuration.h"
 #include "ACUProtocol.h"
 #include <LogFilter.h>
-#include "ZMQPublisher.hpp"
+#include "ZMQLibrary.hpp"
+
+namespace ZMQ = ZMQLibrary;
 
 /**
  * This class is inherited from the IRA::CSocket class. It takes charge of the management of the socket used by the component in order to get from remote interface of  the SRT ACU the status messages.. 
@@ -101,7 +103,10 @@ private:
 	 */ 
 	void createSocket() throw (ComponentErrors::SocketErrorExImpl);
 
-	ZMQPublisher m_zmqPublisher;
+	/*
+	 * ZMQ publisher object
+	 */
+	ZMQ::ZMQPublisher m_zmqPublisher;
 };
 
 #endif /*STATUSSOCKET_H_*/

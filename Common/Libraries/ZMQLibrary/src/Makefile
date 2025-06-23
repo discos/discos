@@ -27,7 +27,7 @@ EXECUTABLES =
 EXECUTABLES_L =
 
 
-PY_PACKAGES = ZMQPublisher
+PY_PACKAGES = ZMQLibrary
 #PY_SCRIPTS =
 
 
@@ -38,18 +38,22 @@ PY_PACKAGES = ZMQPublisher
 #
 # Includes (.h) files (public only)
 # ---------------------------------
-INCLUDES = ZMQDictionary.hpp ZMQPublisher.hpp PyZMQPublisher.hpp
+INCLUDES = ZMQLibrary.hpp ZMQDictionary.hpp ZMQPublisher.hpp PyZMQPublisher.hpp ZMQTimeStamp.hpp PyZMQTimeStamp.hpp
 
 #
 # Libraries (public and local)
 # ----------------------------
-LIBRARIES = ZMQPublisher PyZMQPublisher
+LIBRARIES = ZMQLibrary PyZMQPublisher PyZMQTimeStamp
 LIBRARIES_L =
 
-ZMQPublisher_OBJECTS = ZMQPublisher
+ZMQLibrary_OBJECTS = ZMQPublisher ZMQTimeStamp
+ZMQLibrary_LIBS = IRALibrary
 
 PyZMQPublisher_OBJECTS = PyZMQPublisher
-PyZMQPublisher_LIBS = ZMQPublisher boost_python3
+PyZMQPublisher_LIBS = ZMQLibrary boost_python3
+
+PyZMQTimeStamp_OBJECTS = PyZMQTimeStamp
+PyZMQTimeStamp_LIBS = ZMQLibrary boost_python3
 
 
 #

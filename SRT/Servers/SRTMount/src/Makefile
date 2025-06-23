@@ -41,10 +41,10 @@ EXECUTABLES     =
 EXECUTABLES_L     = testACU statusLineTest
 
 testACU_OBJECTS = ACUProtocol CommandSocket StatusSocket Configuration CommonData testACU 
-testACU_LIBS = IRALibrary ComponentErrors AntennaErrors ZMQPublisher
+testACU_LIBS = IRALibrary ComponentErrors AntennaErrors ZMQLibrary
 
 statusLineTest_OBJECTS = ACUProtocol StatusSocket Configuration CommonData statusLineTest 
-statusLineTest_LIBS = IRALibrary ComponentErrors ZMQPublisher
+statusLineTest_LIBS = IRALibrary ComponentErrors ZMQLibrary
 
 
 #
@@ -62,7 +62,7 @@ INCLUDES        =
 LIBRARIES       = SRTMountImpl
 #LIBRARIES_L     =
 SRTMountImpl_OBJECTS = ACUProtocol CommandSocket StatusSocket Configuration CommonData SRTMountImpl WatchDog
-SRTMountImpl_LIBS = SRTMountStubs MountStubs IRALibrary AntennaDefinitionsStubs ComponentErrors AntennaErrors ManagementErrors ManagmentDefinitionsStubs ZMQPublisher
+SRTMountImpl_LIBS = SRTMountStubs MountStubs IRALibrary AntennaDefinitionsStubs ComponentErrors AntennaErrors ManagementErrors ManagmentDefinitionsStubs ZMQLibrary
 
 #
 # Configuration Database Files

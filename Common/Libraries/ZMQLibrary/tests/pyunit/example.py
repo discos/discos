@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import time
-from ZMQPublisher import ZMQPublisher
+from ZMQLibrary import ZMQPublisher
 
 pub = ZMQPublisher("python")
 #pub = ZMQPublisher("python", '127.0.0.1', 16001)

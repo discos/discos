@@ -60,7 +60,7 @@ void SRTMinorServoTrackingThread::runLoop()
     if(m_point_id == 0)
     {
         m_point_time = getTimeStamp() + PROGRAM_TRACK_FUTURE_TIME;
-        m_trajectory_id = (unsigned int)(IRA::CIRATools::ACSTime2UNIXEpoch(m_point_time));
+        m_trajectory_id = (unsigned int)(IRA::CIRATools::ACSTime2UNIXTime(m_point_time));
     }
     else if(m_point_id == 1)
     {

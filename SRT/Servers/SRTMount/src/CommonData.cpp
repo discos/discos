@@ -529,20 +529,20 @@ void CCommonData::reBind()
 	}
 }
 
-ZMQDictionary CCommonData::getZMQDictionary()
+ZMQ::ZMQDictionary CCommonData::getZMQDictionary()
 {
-	ZMQDictionary dictionary;
-	dictionary["timestamp"] = pointingStatus()->actualMJD();
+	ZMQ::ZMQDictionary dictionary;
+	dictionary["timestamp"] = ZMQ::ZMQTimeStamp::fromMJD(pointingStatus()->actualMJD());
 
-	dictionary["messageSyncError"] = getStatusWord() & (1 << STATUS_MESSAGE_SYNC_ERROR);
-	dictionary["statusLineError"] = getStatusWord() & (1 << STATUS_LINE_ERROR);
-	dictionary["controlLineError"] = getStatusWord() & (1 << CONTROL_LINE_ERROR);
-	dictionary["remoteControlDisabled"] = getStatusWord() & (1 << REMOTE_CONTROL_DISABLED);
-	dictionary["emergencyStop"] = getStatusWord() & (1 << EMERGENCY_STOP);
-	dictionary["mainPowerError"] = getStatusWord() & (1 << MAIN_POWER_ERROR);
-	dictionary["timeError"] = getStatusWord() & (1 << TIME_ERROR);
-	dictionary["programTrackError"] = getStatusWord() & (1 << PROGRAM_TRACK_DATA_ERROR);
-	dictionary["remoteCommandError"] = getStatusWord() & (1 << REMOTE_COMMAND_ERROR);
+	dictionary["messageSyncError"] = static_cast<bool>(getStatusWord() & (1 << STATUS_MESSAGE_SYNC_ERROR));
+	dictionary["statusLineError"] = static_cast<bool>(getStatusWord() & (1 << STATUS_LINE_ERROR));
+	dictionary["controlLineError"] = static_cast<bool>(getStatusWord() & (1 << CONTROL_LINE_ERROR));
+	dictionary["remoteControlDisabled"] = static_cast<bool>(getStatusWord() & (1 << REMOTE_CONTROL_DISABLED));
+	dictionary["emergencyStop"] = static_cast<bool>(getStatusWord() & (1 << EMERGENCY_STOP));
+	dictionary["mainPowerError"] = static_cast<bool>(getStatusWord() & (1 << MAIN_POWER_ERROR));
+	dictionary["timeError"] = static_cast<bool>(getStatusWord() & (1 << TIME_ERROR));
+	dictionary["programTrackError"] = static_cast<bool>(getStatusWord() & (1 << PROGRAM_TRACK_DATA_ERROR));
+	dictionary["remoteCommandError"] = static_cast<bool>(getStatusWord() & (1 << REMOTE_COMMAND_ERROR));
 	dictionary["statusSocketConnected"] = getStatusLineState() == Antenna::ACU_CNTD;
 	dictionary["controlSocketConnected"] = getControlLineState() == Antenna::ACU_CNTD;
 	dictionary["componentStatus"] = getMountStatus() == Management::MNG_OK ? "OK" : getMountStatus() == Management::MNG_WARNING ? "WARNING" : "FAILURE";
@@ -551,7 +551,7 @@ ZMQDictionary CCommonData::getZMQDictionary()
 	dictionary["MJDOffset"] = pointingStatus()->actualTimeOffset();
 	dictionary["azimuthSector"] = pointingStatus()->azimuthSector() == Antenna::ACU_CW ? "CW" : "CCW";
 
-	dictionary["azimuth"] = ZMQDictionary();
+	dictionary["azimuth"] = ZMQ::ZMQDictionary();
 	dictionary["azimuth"]["currentPosition"] = azimuthStatus()->actualPosition();;
 	dictionary["azimuth"]["currentRate"] = azimuthStatus()->actualVelocity();
 	dictionary["azimuth"]["currentOffset"] = azimuthStatus()->positionOffset();
@@ -573,14 +573,14 @@ ZMQDictionary CCommonData::getZMQDictionary()
 	dictionary["azimuth"]["active"] = azimuthStatus()->axisState() == CACUProtocol::STATE_ACTIVE;
 	dictionary["azimuth"]["lowPowerMode"] = azimuthStatus()->lowPowerMode();
 	dictionary["azimuth"]["stowed"] = azimuthStatus()->stowed();
-	dictionary["azimuth"]["motors"] = std::vector<ZMQDictionary>();
+	dictionary["azimuth"]["motors"] = std::vector<ZMQ::ZMQDictionary>();
 
 	TWORD motorSelection = azimuthStatus()->motorSelection();
 	TWORD brakesOpen = azimuthStatus()->brakesOpen();
 	TWORD powerModuleOk = azimuthStatus()->powerModuleOk();
 	for(WORD i = 0; i < CACUProtocol::AZIMUTH_MOTORS; i++)
 	{
-		ZMQDictionary motorStatus;
+		ZMQ::ZMQDictionary motorStatus;
 		motorStatus["id"] = i + 1;
 		motorStatus["position"] = m_azimuthMotors[i]->actualPosition();
 		motorStatus["rpm"] = m_azimuthMotors[i]->actualVelocity();
@@ -596,7 +596,7 @@ ZMQDictionary CCommonData::getZMQDictionary()
 		dictionary["azimuth"]["motors"].push_back(motorStatus);
 	}
 
-	dictionary["elevation"] = ZMQDictionary();
+	dictionary["elevation"] = ZMQ::ZMQDictionary();
 	dictionary["elevation"]["currentPosition"] = elevationStatus()->actualPosition();;
 	dictionary["elevation"]["currentRate"] = elevationStatus()->actualVelocity();
 	dictionary["elevation"]["currentOffset"] = elevationStatus()->positionOffset();
@@ -618,14 +618,14 @@ ZMQDictionary CCommonData::getZMQDictionary()
 	dictionary["elevation"]["active"] = elevationStatus()->axisState() == CACUProtocol::STATE_ACTIVE;
 	dictionary["elevation"]["lowPowerMode"] = elevationStatus()->lowPowerMode();
 	dictionary["elevation"]["stowed"] = elevationStatus()->stowed();
-	dictionary["elevation"]["motors"] = std::vector<ZMQDictionary>();
+	dictionary["elevation"]["motors"] = std::vector<ZMQ::ZMQDictionary>();
 
 	motorSelection = elevationStatus()->motorSelection();
 	brakesOpen = elevationStatus()->brakesOpen();
 	powerModuleOk = elevationStatus()->powerModuleOk();
 	for(WORD i = 0; i < CACUProtocol::ELEVATION_MOTORS; i++)
 	{
-		ZMQDictionary motorStatus;
+		ZMQ::ZMQDictionary motorStatus;
 		motorStatus["id"] = i + 1;
 		motorStatus["position"] = m_elevationMotors[i]->actualPosition();
 		motorStatus["rpm"] = m_elevationMotors[i]->actualVelocity();
@@ -676,7 +676,7 @@ ZMQDictionary CCommonData::getZMQDictionary()
 		dictionary[i == 0 ? "azimuth" : "elevation"]["currentMode"] = currentMode;
 	}
 
-	dictionary["cableWrap"] = ZMQDictionary();
+	dictionary["cableWrap"] = ZMQ::ZMQDictionary();
 	dictionary["cableWrap"]["currentPosition"] = cableWrapStatus()->actualPosition();
 	dictionary["cableWrap"]["currentRate"] = cableWrapStatus()->actualVelocity();
 	dictionary["cableWrap"]["currentTrackingError"] = cableWrapStatus()->positionError();
@@ -684,7 +684,7 @@ ZMQDictionary CCommonData::getZMQDictionary()
 	motorSelection = cableWrapStatus()->motorSelection();
 	brakesOpen = cableWrapStatus()->brakesOpen();
 	powerModuleOk = cableWrapStatus()->powerModuleOk();	
-	ZMQDictionary CWMotorStatus;
+	ZMQ::ZMQDictionary CWMotorStatus;
 	CWMotorStatus["id"] = 1;
 	CWMotorStatus["position"] = m_cableWrapMotor->actualPosition();
 	CWMotorStatus["rpm"] = m_cableWrapMotor->actualVelocity();
@@ -697,7 +697,7 @@ ZMQDictionary CCommonData::getZMQDictionary()
 	CWMotorStatus["servoError"] = m_cableWrapMotor->servoError();
 	CWMotorStatus["sensorError"] = m_cableWrapMotor->sensorError();
 	CWMotorStatus["bus"] = m_cableWrapMotor->busError();
-	dictionary["cableWrap"]["motors"] = std::vector<ZMQDictionary>{CWMotorStatus};
+	dictionary["cableWrap"]["motors"] = std::vector<ZMQ::ZMQDictionary>{CWMotorStatus};
 
 	return dictionary;
 }

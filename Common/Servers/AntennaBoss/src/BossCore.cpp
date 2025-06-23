@@ -27,7 +27,8 @@ CBossCore::CBossCore(ContainerServices *service,CConfiguration *conf,acscomponen
 	m_services(service),
 	m_config(conf),
 	m_notificationChannel(NULL),
-	m_thisIsMe(me)
+	m_thisIsMe(me),
+	m_zmqPublisher("antenna")
 {
 	m_callbackUnstow=new CCallback(CCallback::UNSTOW),
 	m_callbackStow=new CCallback(CCallback::STOW);
@@ -1144,11 +1145,146 @@ bool CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,Co
 		}
 	}
 
-    return true;
+	m_zmqDictionary["timestamp"] = ZMQ::ZMQTimeStamp::fromACSTime(time);
+	m_zmqDictionary["azimuthOffset"] = getAzimuthOffset()*DR2D;
+	m_zmqDictionary["correctionEnabled"] = getCorrectionEnable();
+	m_zmqDictionary["declinationOffset"] = getDeclinationOffset()*DR2D;
+	m_zmqDictionary["elevationOffset"] = getElevationOffset()*DR2D;
+	//m_zmqDictionary["enabled"] = getEnable();
+	m_zmqDictionary["FWHM"] = getFWHM()*DR2D;
+
+	// generatorType enum
+	switch (getGeneratorType()) {
+		case Antenna::ANT_SIDEREAL : {
+			m_zmqDictionary["generatorType"] = "SIDEREAL";
+			break;
+		}
+		case Antenna::ANT_SUN : {
+			m_zmqDictionary["generatorType"] = "SUN";
+			break;
+		}
+		case Antenna::ANT_MOON : {
+			m_zmqDictionary["generatorType"] = "MOON";
+			break;
+		}
+		case Antenna::ANT_SATELLITE : {
+			m_zmqDictionary["generatorType"] = "SATELLITE";
+			break;
+		}
+		case Antenna::ANT_SOLARSYSTEMBODY : {
+			m_zmqDictionary["generatorType"] = "SOLARSYSTEMBODY";
+			break;
+		}
+		case Antenna::ANT_OTF : {
+			m_zmqDictionary["generatorType"] = "OTF";
+			break;
+		}
+		default: { //Antenna::ANT_NONE
+			m_zmqDictionary["generatorType"] = "NONE";
+			break;
+		}
+	}
+
+	m_zmqDictionary["latitudeOffset"] = getLatitudeOffset()*DR2D;
+	m_zmqDictionary["longitudeOffset"] = getLongitudeOffset()*DR2D;
+	m_zmqDictionary["observedAzimuth"] = getObservedHorizontalAzimuth()*DR2D;
+	m_zmqDictionary["observedDeclination"] = getObservedEquatorialDeclination()*DR2D;
+	m_zmqDictionary["observedElevation"] = getObservedHorizontalElevation()*DR2D;
+	m_zmqDictionary["observedGalLatitude"] = getObservedGalacticLatitude()*DR2D;
+	m_zmqDictionary["observedGalLongitude"] = getObservedGalacticLongitude()*DR2D;
+	m_zmqDictionary["observedRightAscension"] = getObservedEquatorialRightAscension()*DR2D;
+	m_zmqDictionary["pointingAzimuthCorrection"] = getPointingAzOffset()*DR2D;
+	m_zmqDictionary["pointingElevationCorrection"] = getPointingElOffset()*DR2D;
+	m_zmqDictionary["rawAzimuth"] = m_lastEncoderAzimuth*DR2D;
+	m_zmqDictionary["rawElevation"] = m_lastEncoderElevation*DR2D;
+	m_zmqDictionary["refractionCorrection"] = getRefractionOffset()*DR2D;
+	m_zmqDictionary["rightAscensionOffset"] = getRightAscensionOffset()*DR2D;
+
+	// status enum
+	switch (getStatus()) {
+		case Management::MNG_OK : {
+			m_zmqDictionary["status"] = "OK";
+			break;
+		}
+		case Management::MNG_WARNING : {
+			m_zmqDictionary["status"] = "WARNING";
+			break;
+		}
+		default: { //Management::MNG_FAILURE
+			m_zmqDictionary["status"] = "FAILURE";
+			break;
+		}
+	}
+
+	m_zmqDictionary["target"] = std::string(getTargetName()) == "none" ? "NONE" : std::string(getTargetName());
+	m_zmqDictionary["targetDeclination"] = getTargetDeclination()*DR2D;
+	m_zmqDictionary["targetFlux"] = getTargetFlux();
+	m_zmqDictionary["targetRightAscension"] = getTargetRightAscension()*DR2D;
+	m_zmqDictionary["targetVrad"] = getTargetVrad();
+
+	// vradDefinition enum
+	switch (getVradDefinition()) {
+		case Antenna::ANT_RADIO : {
+			m_zmqDictionary["vradDefinition"] = "RADIO";
+			break;
+		}
+		case Antenna::ANT_OPTICAL : {
+			m_zmqDictionary["vradDefinition"] = "OPTICAL";
+			break;
+		}
+		case Antenna::ANT_REDSHIFT : {
+			m_zmqDictionary["vradDefinition"] = "REDSHIFT";
+			break;
+		}
+		default: { //Antenna::ANT_UNDEF_DEF
+			m_zmqDictionary["vradDefinition"] = "UNDEFINED";
+			break;
+		}
+	}
+
+	// vradReferenceFrame enum
+	switch (getReferenceFrame()) {
+		case Antenna::ANT_TOPOCEN : {
+			m_zmqDictionary["vradReferenceFrame"] = "TOPOCENTRIC";
+			break;
+		}
+		case Antenna::ANT_BARY : {
+			m_zmqDictionary["vradReferenceFrame"] = "BARYCENTRIC";
+			break;
+		}
+		case Antenna::ANT_LSRK : {
+			m_zmqDictionary["vradReferenceFrame"] = "KINEMATICLOCALSTANDARDOFREST";
+			break;
+		}
+		case Antenna::ANT_LSRD : {
+			m_zmqDictionary["vradReferenceFrame"] = "DYNAMICLOCALSTANDARDOFREST";
+			break;
+		}
+		case Antenna::ANT_GALCEN : {
+			m_zmqDictionary["vradReferenceFrame"] = "GALACTICCENTER";
+			break;
+		}
+		case Antenna::ANT_LGROUP : {
+			m_zmqDictionary["vradReferenceFrame"] = "LOCALGROUP";
+			break;
+		}
+		default: { //Antenna::ANT_UNDEF_FRAME
+			m_zmqDictionary["vradReferenceFrame"] = "UNDEFINED";
+			break;
+		}
+	}
+
+	m_zmqDictionary["waveLength"] = getWaveLength();
+	m_zmqDictionary["tracking"] = m_tracking;
+
+	return true;
 }
 
 void CBossCore::publishData() throw (ComponentErrors::NotificationChannelErrorExImpl)
 {
+	// Always publish ZMQ message
+	m_zmqPublisher.publish(m_zmqDictionary);
+
 	bool sendData;
 	static TIMEVALUE lastEvent(0.0L);
 	static Antenna::AntennaDataBlock prvData={0,false,Management::MNG_OK};

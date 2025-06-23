@@ -1,14 +1,15 @@
-# The following lines will look for the libZMQPublisher in the
+# The following lines will look for the libZMQPublisher and other libs in the
 # $INTROOT/lib path instead of looking in the $INTROOT/lib/python/site-packages
 # path. This is a workaround needed since the said library is a C++ shared
 # library and it does not get automatically installed in the correct folder.
 # By adding this workaround we're also able to rename the library with the
-# module name ZMQPublisher, trimming the 'lib' header. I
+# module name ZMQLibrary, trimming the 'lib' header. I
 # suggest to use this approach whenever a Python wrapper is needed.
 import os
 import sys
 sys.path.append(os.path.join(os.environ['INTROOT'], 'lib'))
 from libPyZMQPublisher import PyZMQPublisher, DEFAULT_ADDRESS, DEFAULT_PORT
+import libPyZMQTimeStamp as ZMQTimeStamp
 sys.path.remove(os.path.join(os.environ['INTROOT'], 'lib'))
 del os
 del sys
@@ -32,4 +33,7 @@ class ZMQPublisher:
         return PyZMQPublisher(topic, address, port) 
 
 
-__all__ = ['ZMQPublisher']
+__all__ = [
+    'ZMQPublisher',
+    'ZMQTimeStamp'
+]

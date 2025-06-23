@@ -168,7 +168,7 @@ void SRTProgramTrackMinorServoImpl::programTrack(CORBA::Long trajectory_id, CORB
         }
     }
 
-    if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::programTrack(m_servo_name, trajectory_id, point_id, coordinates, point_id > 0 ? 0 : IRA::CIRATools::ACSTime2UNIXEpoch(point_time))).checkOutput())
+    if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::programTrack(m_servo_name, trajectory_id, point_id, coordinates, point_id > 0 ? 0 : IRA::CIRATools::ACSTime2UNIXTime(point_time))).checkOutput())
     {
         m_error_code.store(ERROR_COMMAND_ERROR);
         _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::programTrack()").c_str());

@@ -1,17 +1,19 @@
-#include "ZMQPublisher.hpp"
+#include "ZMQLibrary.hpp"
 #include <thread>
 #include <chrono>
 #include <iostream>
 
+namespace ZMQ = ZMQLibrary;
+
 int main()
 {
-    ZMQPublisher publisher("cpp");
+    ZMQ::ZMQPublisher publisher("cpp");
 
     std::cout << "Started cpp ZMQPublisher on topic '" << publisher.topic << "'" << std::endl;
 
     while(true)
     {
-        ZMQDictionary dictionary;
+        ZMQ::ZMQDictionary dictionary;
         dictionary["string"] = std::string("string value");
         char* c = strdup("char value");
         dictionary["charstring"] = c;

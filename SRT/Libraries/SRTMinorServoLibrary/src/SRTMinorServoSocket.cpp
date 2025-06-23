@@ -106,7 +106,7 @@ SRTMinorServoAnswerMap SRTMinorServoSocket::sendCommand(std::string command, std
 
     std::lock_guard<std::mutex> guard(m_mutex);
 
-    double start_time = IRA::CIRATools::getUNIXEpoch();
+    double start_time = IRA::CIRATools::getUNIXTime();
     size_t sent_bytes = 0;
 
     while(sent_bytes < command.size())
@@ -130,9 +130,9 @@ SRTMinorServoAnswerMap SRTMinorServoSocket::sendCommand(std::string command, std
         if(sent_now > 0)
         {
             // Reset the timer
-            start_time = IRA::CIRATools::getUNIXEpoch();
+            start_time = IRA::CIRATools::getUNIXTime();
         }
-        else if(IRA::CIRATools::getUNIXEpoch() - start_time >= m_timeout)
+        else if(IRA::CIRATools::getUNIXTime() - start_time >= m_timeout)
         {
             m_socket_status = TIMEOUT;
             Close(m_error);
@@ -142,7 +142,7 @@ SRTMinorServoAnswerMap SRTMinorServoSocket::sendCommand(std::string command, std
         }
     }
 
-    start_time = IRA::CIRATools::getUNIXEpoch();
+    start_time = IRA::CIRATools::getUNIXTime();
     std::string answer;
 
     while(answer.size() < 2 || !(answer.rfind(CLOSER) == answer.size() - CLOSER.size()))
@@ -155,9 +155,9 @@ SRTMinorServoAnswerMap SRTMinorServoSocket::sendCommand(std::string command, std
                 answer += buf;
 
                 // Reset the timer
-                start_time = IRA::CIRATools::getUNIXEpoch();
+                start_time = IRA::CIRATools::getUNIXTime();
             }
-            else if(IRA::CIRATools::getUNIXEpoch() - start_time >= m_timeout)
+            else if(IRA::CIRATools::getUNIXTime() - start_time >= m_timeout)
             {
                 m_socket_status = TIMEOUT;
                 Close(m_error);

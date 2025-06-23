@@ -5,12 +5,12 @@
 #include <boost/python.hpp>
 
 namespace py = boost::python;
-
+namespace ZMQ = ZMQLibrary;
 
 /**
  * Wrapper for the above ZMQPublisher class in order to be used with boost_python.
  */
-class PyZMQPublisher : public ZMQPublisher
+class PyZMQPublisher : public ZMQ::ZMQPublisher
 {
 public:
     using ZMQPublisher::ZMQPublisher;
@@ -44,7 +44,7 @@ BOOST_PYTHON_MODULE(libPyZMQPublisher)
      */
     py::class_<PyZMQPublisher>("PyZMQPublisher", py::init<const std::string, const std::string, const unsigned int>())
         .def("__publish", &PyZMQPublisher::publish)
-        .def_readonly("topic", &ZMQPublisher::topic);
+        .def_readonly("topic", &ZMQ::ZMQPublisher::topic);
 }
 
 #endif /*__PYZMQPUBLISHER_HPP__*/

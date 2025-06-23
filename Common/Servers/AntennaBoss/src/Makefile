@@ -67,7 +67,7 @@ AntennaBossImpl_OBJECTS   = AntennaBossImpl BossCore Configuration \
 AntennaBossImpl_LIBS = AntennaDefinitionsStubs AntennaBossStubs MountStubs ObservatoryStubs \
    EphemGeneratorStubs ManagmentDefinitionsStubs IRALibrary ComponentErrors ManagementErrors \
    AntennaErrors ParserErrors PointingModelStubs RefractionStubs SkySourceStubs OTFStubs MoonStubs SolarSystemBodyStubs acsnc \
-   DiscosVersion
+   DiscosVersion ZMQLibrary
 
 #
 # Configuration Database Files

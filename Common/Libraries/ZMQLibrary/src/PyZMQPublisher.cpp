@@ -2,5 +2,5 @@
 
 void PyZMQPublisher::publish(const std::string& payload)
 {
-    ZMQPublisher::publish(payload);
+    ZMQ::ZMQPublisher::publish(payload);
 }

@@ -28,7 +28,7 @@ void SRTMinorServoScanThread::onStart()
     size_t pre_scan_points = std::floor((m_core.m_current_scan.start_time - (getTimeStamp() + PROGRAM_TRACK_FUTURE_TIME)) / PROGRAM_TRACK_TIMEGAP);
     m_point_time = m_core.m_current_scan.start_time - pre_scan_points * PROGRAM_TRACK_TIMEGAP;
     m_point_id = 0;
-    m_trajectory_id = (unsigned int)(IRA::CIRATools::ACSTime2UNIXEpoch(m_point_time));
+    m_trajectory_id = (unsigned int)(IRA::CIRATools::ACSTime2UNIXTime(m_point_time));
 
     // How many points in the scan trajectory?
     // We don't check the modulo of the division, we assume all the scans duration is always expressed in seconds, therefore the modulo should always be 0

@@ -19,7 +19,7 @@ void SRTMinorServoSetupThread::onStart()
     AUTO_TRACE("SRTMinorServoSetupThread::onStart()");
 
     this->setSleepTime(500000);   // 50 milliseconds
-    m_start_time = IRA::CIRATools::getUNIXEpoch();
+    m_start_time = IRA::CIRATools::getUNIXTime();
 
     m_status = 0;
 
@@ -64,7 +64,7 @@ void SRTMinorServoSetupThread::runLoop()
         return;
     }
 
-    if(IRA::CIRATools::getUNIXEpoch() - m_start_time >= SETUP_TIMEOUT)
+    if(IRA::CIRATools::getUNIXTime() - m_start_time >= SETUP_TIMEOUT)
     {
         ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::runLoop()", (LM_CRITICAL, std::string("Timeout while configuring the system. Stopped at status " + std::to_string(m_status)).c_str()));
         m_core.setError(ERROR_CONFIG_ERROR);

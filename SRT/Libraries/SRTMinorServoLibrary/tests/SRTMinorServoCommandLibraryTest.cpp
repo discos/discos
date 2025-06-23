@@ -33,7 +33,7 @@ TEST(SRTMinorServoCommandLibraryTest, preset)
 
 TEST(SRTMinorServoCommandLibraryTest, programTrack)
 {
-    double start_time = IRA::CIRATools::getUNIXEpoch() + 3;
+    double start_time = IRA::CIRATools::getUNIXTime() + 3;
     unsigned long int trajectory_id = (unsigned long int)start_time;
     std::stringstream expected_answer;
     expected_answer << std::fixed << std::setprecision(6);

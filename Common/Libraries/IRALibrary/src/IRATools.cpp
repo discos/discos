@@ -56,19 +56,31 @@ ACS::Time CIRATools::getACSTime()
 	return now.value().value;
 }
 
-double CIRATools::getUNIXEpoch()
+double CIRATools::getUNIXTime()
 {
-	return CIRATools::ACSTime2UNIXEpoch(CIRATools::getACSTime());
+	return CIRATools::ACSTime2UNIXTime(CIRATools::getACSTime());
 }
 
-double CIRATools::ACSTime2UNIXEpoch(ACS::Time acs_time)
+double CIRATools::ACSTime2UNIXTime(const ACS::Time& acs_time)
 {
 	return double(acs_time - ACSTIME2UNIXEPOCHOFFSET) / 10000000;
 }
 
-ACS::Time CIRATools::UNIXEpoch2ACSTime(double unix_epoch)
+ACS::Time CIRATools::UNIXTime2ACSTime(const double& unix_epoch)
 {
 	return ACS::Time(long(unix_epoch * 10000000) + ACSTIME2UNIXEPOCHOFFSET);
+}
+
+std::string CIRATools::ACSTime2ISO8601(const ACS::Time& acs_time)
+{
+	ACS::Time unix_time = acs_time - ACSTIME2UNIXEPOCHOFFSET;
+	std::time_t seconds = static_cast<std::time_t>(unix_time / 10000000);
+	std::ostringstream mseconds;
+	mseconds << std::setw(7) << std::setfill('0') << static_cast<unsigned int>(unix_time - seconds * 10000000);
+	std::tm* tm = std::gmtime(&seconds);
+	std::ostringstream oss;
+	oss << std::put_time(tm, "%Y-%m-%dT%H:%M:%S") << "." << mseconds.str().substr(0, 3) << "Z";
+	return oss.str();
 }
 
 void CIRATools::timeCopy(TIMEVALUE& dst,const TIMEVALUE& src)

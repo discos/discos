@@ -9,15 +9,16 @@
 /*                                                                                                      */
 /* Who                                          when            What                                    */
 /* Andrea Orlati(aorlati@ira.inaf.it)           30/09/2009      Creation                                */
-/* Giuseppe Carboni(giuseppe.carboni@inaf.it)   09/05/2024      Added ZMQPublisher                      */
+/* Giuseppe Carboni(giuseppe.carboni@inaf.it)   09/05/2024      Added ZMQLibrary                        */
 
 #include <AntennaDefinitionsS.h>
 #include <ManagmentDefinitionsS.h>
 #include <TimeTaggedCircularArray.h>
 #include "ACUProtocol.h"
-#include "ZMQPublisher.hpp"
+#include "ZMQLibrary.hpp"
 
 using namespace IRA;
+namespace ZMQ = ZMQLibrary;
 
 class CCommonData {
 public:
@@ -295,7 +296,7 @@ public:
 	 
 	inline const Management::TSystemStatus& getMountStatus() const { return m_mountStatus; }
 
-	ZMQDictionary getZMQDictionary();
+	ZMQ::ZMQDictionary getZMQDictionary();
 		
 private:
 	/**

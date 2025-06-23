@@ -17,7 +17,7 @@ USER_INC=-I$(GTEST_HOME) -I$(GMOCK_HOME)
 EXECUTABLES_L = example
 
 example_OBJECTS = example
-example_LIBS = ZMQPublisher
+example_LIBS = ZMQLibrary
 
 # END OF CUSTOMIZATION
 # do not edit below this line

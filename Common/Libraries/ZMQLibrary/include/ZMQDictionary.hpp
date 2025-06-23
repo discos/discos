@@ -2,7 +2,11 @@
 #define __ZMQDICTIONARY_HPP__
 
 #include <json.hpp>
+#include <IRA>
 
-using ZMQDictionary = nlohmann::json;
+namespace ZMQLibrary
+{
+    using ZMQDictionary = nlohmann::json;
+}
 
 #endif /*__ZMQDICTIONARY_HPP__*/

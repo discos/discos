@@ -358,7 +358,7 @@ void SRTDerotatorImpl::loadTrackingPoint(ACS::Time point_time, CORBA::Double pos
 
     if(restart)
     {
-        trajectory_id = (unsigned int)(IRA::CIRATools::ACSTime2UNIXEpoch(point_time));
+        trajectory_id = (unsigned int)(IRA::CIRATools::ACSTime2UNIXTime(point_time));
         point_id = 0;
     }
     else
@@ -367,7 +367,7 @@ void SRTDerotatorImpl::loadTrackingPoint(ACS::Time point_time, CORBA::Double pos
         point_id = m_total_trajectory_points.load();
     }
 
-    if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::programTrack(m_servo_name, trajectory_id, point_id, std::vector<double>{ -position }, restart ? IRA::CIRATools::ACSTime2UNIXEpoch(point_time) : 0)).checkOutput())
+    if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::programTrack(m_servo_name, trajectory_id, point_id, std::vector<double>{ -position }, restart ? IRA::CIRATools::ACSTime2UNIXTime(point_time) : 0)).checkOutput())
     {
         _EXCPT(DerotatorErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::loadTrackingPoint()").c_str());
         ex.addData("Reason", "Received NAK in response to a PROGRAMTRACK command.");
