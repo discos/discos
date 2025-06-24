@@ -32,7 +32,6 @@ SUBSYSTEM = Interfaces
 MODULES = 	SRTActiveSurfaceInterface \
 		SRTAntennaInterface \
 		SRTReceiversInterface \
-		SRTWeatherStationInterface
 
 MAKE_FLAGS = "-k"
 PLATFORM := $(shell uname)
