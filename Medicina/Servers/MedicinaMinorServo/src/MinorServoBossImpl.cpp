@@ -1018,10 +1018,12 @@ MinorServoBossImpl::setOffsetImpl(string axis_code,
 }
 
 
-ACS::doubleSeq * MinorServoBossImpl::getUserOffset() 
+ACS::doubleSeq * MinorServoBossImpl::getUserOffset(ACS::Time acs_time)
           throw (MinorServoErrors::MinorServoErrorsEx,
                  ComponentErrors::ComponentErrorsEx)
 {
+    //TODO No matter the given acs_time, this implementation only returns the current offsets
+    //     It would be ideal to have a queue of offsets and retrieve them starting from the given acs_time
     vector<double> offset;
     offset = getOffsetImpl("user");
     ACS::doubleSeq_var offset_res = new ACS::doubleSeq;
@@ -1033,10 +1035,12 @@ ACS::doubleSeq * MinorServoBossImpl::getUserOffset()
 
 
 ACS::doubleSeq * 
-MinorServoBossImpl::getSystemOffset() 
+MinorServoBossImpl::getSystemOffset(ACS::Time acs_time)
      throw (MinorServoErrors::MinorServoErrorsEx,
             ComponentErrors::ComponentErrorsEx)
 {
+    //TODO No matter the given acs_time, this implementation only returns the current offsets
+    //     It would be ideal to have a queue of offsets and retrieve them starting from the given acs_time
     vector<double> offset;
     offset = getOffsetImpl("system");
     ACS::doubleSeq_var offset_res = new ACS::doubleSeq;

@@ -105,6 +105,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/
     issue #806   Added support for the C-band receiver at the SRT
     project #2 - Completed integration of new SRT Minor Servos
     issue #2   - Completed integration of solar system planets, sun and moon tracking. Other bodies will be added in the future.
+    issue #936 - Added minor servos user and system offsets inside the FITS files SERVO TABLE
 
 ## Fixed
 ## Changed
