@@ -96,7 +96,7 @@ void SolarSystemBody::setObject(PLCode code){
   
 SolarSystemBody::SolarSystemBody(PLCode code)
 {
-    //obj=new Obj();
+      obj=new Obj();
 
     _code=code;
     
@@ -184,10 +184,8 @@ void SolarSystemBody::getCoordinates(double& ra, double& dec,double& az,double& 
 
 void  SolarSystemBody::compute(Site* site){
     
-    Obj* obj=new Obj();
-    
-    
-    
+    //Obj* obj=new Obj();
+
     obj->any.co_type=PLANET;
     strncpy(obj->any.co_name,planetnames[_code],10);
     obj->
@@ -208,7 +206,7 @@ void  SolarSystemBody::compute(Site* site){
     _az=obj->any.co_az;
     _el=obj->any.co_alt;
     _range=obj->anyss.so_edist;
-    delete obj;
+   // delete obj;
     
 }
 

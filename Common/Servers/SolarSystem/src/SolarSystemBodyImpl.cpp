@@ -230,16 +230,18 @@ void SolarSystemBodyImpl::getAllCoordinates(ACS::Time time,CORBA::Double_out az,
 {
 
     AUTO_TRACE("SolarSystemBodyImpl::getAllCoordinates()")
-
+ 
     TIMEVALUE val(time);
 	double azi,ele,rae,dece,lone,late,jepoche;
 	IRA::CDateTime ctime(val,m_dut1);
-	baci::ThreadSyncGuard guard(&m_mutex);
+//	baci::ThreadSyncGuard guard(&m_mutex);
 	BodyPosition(val);
 	m_source.process(ctime,m_site);
 	m_source.getApparentHorizontal(azi,ele);
 	m_source.getApparentEquatorial(rae,dece,jepoche);
 	m_source.getApparentGalactic(lone,late);
+//	std::cout << "Azi,ele"<< azi<<","<<ele<<std::endl;
+//	std::cout << "Time"<< time <<std::endl;
 	az=azi; el=ele;
 	ra=rae; dec=dece; jepoch=jepoche;
 	lon=lone; lat=late;
@@ -395,7 +397,8 @@ void SolarSystemBodyImpl::BodyPosition(TIMEVALUE &time)
 
         m_sitex -> setTime(time_utc) ;  
         m_body_xephem->compute( m_sitex );
-  //      m_body_xephem->report();
+//		  m_sitex ->stampa();        
+//        m_body_xephem->report();
         m_body_xephem->getCoordinates(ra,dec,az,el,range);
         m_ra2000 = ra;
         m_dec2000= dec;
