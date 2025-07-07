@@ -75,6 +75,7 @@ public:
 protected:
         
             Obj* obj;
+            Obj* m_obj;
     
     
     
@@ -85,6 +86,9 @@ class Jupiter : public SolarSystemBody {
 public:
     
      Jupiter() ;
+     
+private:
+   
     
     
     
