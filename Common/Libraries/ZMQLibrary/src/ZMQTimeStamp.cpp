@@ -15,7 +15,7 @@ namespace ZMQLibrary
             ZMQDictionary timestamp;
             timestamp["jd"] = clock.getJD();
             timestamp["mjd"] = MJD;
-            timestamp["acs_time"] = time.value().value;
+            timestamp["omg"] = time.value().value;
             timestamp["unix_time"] = unix_time;
             timestamp["iso8601"] = IRA::CIRATools::ACSTime2ISO8601(time.value().value);
             return timestamp;
@@ -29,7 +29,7 @@ namespace ZMQLibrary
 
             ZMQDictionary timestamp;
             timestamp["unix_time"] = unix_time;
-            timestamp["acs_time"] = acs_time;
+            timestamp["omg"] = acs_time;
             timestamp["jd"] = clock.getJD();
             timestamp["mjd"] = clock.getMJD();
             timestamp["iso8601"] = IRA::CIRATools::ACSTime2ISO8601(acs_time);
@@ -46,7 +46,7 @@ namespace ZMQLibrary
             timestamp["jd"] = clock.getJD();
             timestamp["mjd"] = clock.getMJD();
             timestamp["unix_time"] = unix_time;
-            timestamp["acs_time"] = acs_time;
+            timestamp["omg"] = acs_time;
             timestamp["iso8601"] = IRA::CIRATools::ACSTime2ISO8601(acs_time);
             return timestamp;
         }

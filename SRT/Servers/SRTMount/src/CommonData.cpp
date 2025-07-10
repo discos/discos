@@ -545,11 +545,11 @@ ZMQ::ZMQDictionary CCommonData::getZMQDictionary()
 	dictionary["remoteCommandError"] = static_cast<bool>(getStatusWord() & (1 << REMOTE_COMMAND_ERROR));
 	dictionary["statusSocketConnected"] = getStatusLineState() == Antenna::ACU_CNTD;
 	dictionary["controlSocketConnected"] = getControlLineState() == Antenna::ACU_CNTD;
-	dictionary["componentStatus"] = getMountStatus() == Management::MNG_OK ? "OK" : getMountStatus() == Management::MNG_WARNING ? "WARNING" : "FAILURE";
+	dictionary["status"] = getMountStatus() == Management::MNG_OK ? "OK" : getMountStatus() == Management::MNG_WARNING ? "WARNING" : "FAILURE";
 	dictionary["remainingTrackingPoints"] = pointingStatus()->pTTLength() - pointingStatus()->pTTCurrentIndex();
-	dictionary["MJD"] = pointingStatus()->actualMJD();
-	dictionary["MJDOffset"] = pointingStatus()->actualTimeOffset();
-	dictionary["azimuthSector"] = pointingStatus()->azimuthSector() == Antenna::ACU_CW ? "CW" : "CCW";
+	//dictionary["MJD"] = pointingStatus()->actualMJD(); redundant, we use this time in the timestamp
+	dictionary["timeOffset"] = pointingStatus()->actualTimeOffset();
+	dictionary["sector"] = pointingStatus()->azimuthSector() == Antenna::ACU_CW ? "CW" : "CCW";
 
 	dictionary["azimuth"] = ZMQ::ZMQDictionary();
 	dictionary["azimuth"]["currentPosition"] = azimuthStatus()->actualPosition();;
@@ -586,13 +586,13 @@ ZMQ::ZMQDictionary CCommonData::getZMQDictionary()
 		motorStatus["rpm"] = m_azimuthMotors[i]->actualVelocity();
 		motorStatus["torque"] = m_azimuthMotors[i]->actualTorque();
 		motorStatus["usage"] = m_azimuthMotors[i]->utilization();
-		motorStatus["selected"] = (motorSelection & (1 << i)) != 0;
+		motorStatus["enabled"] = (motorSelection & (1 << i)) != 0;
 		motorStatus["brakesOpen"] = (brakesOpen & (1 << i)) != 0;
 		motorStatus["powerModuleOk"] = (powerModuleOk & (1 << i)) == 0;
 		motorStatus["active"] = m_azimuthMotors[i]->active();
 		motorStatus["servoError"] = m_azimuthMotors[i]->servoError();
 		motorStatus["sensorError"] = m_azimuthMotors[i]->sensorError();
-		motorStatus["bus"] = m_azimuthMotors[i]->busError();
+		motorStatus["busError"] = m_azimuthMotors[i]->busError();
 		dictionary["azimuth"]["motors"].push_back(motorStatus);
 	}
 
@@ -631,13 +631,13 @@ ZMQ::ZMQDictionary CCommonData::getZMQDictionary()
 		motorStatus["rpm"] = m_elevationMotors[i]->actualVelocity();
 		motorStatus["torque"] = m_elevationMotors[i]->actualTorque();
 		motorStatus["usage"] = m_elevationMotors[i]->utilization();
-		motorStatus["selected"] = (motorSelection & (1 << i)) != 0;
+		motorStatus["enabled"] = (motorSelection & (1 << i)) != 0;
 		motorStatus["brakesOpen"] = (brakesOpen & (1 << i)) != 0;
 		motorStatus["powerModuleOk"] = (powerModuleOk & (1 << i)) == 0;
 		motorStatus["active"] = m_elevationMotors[i]->active();
 		motorStatus["servoError"] = m_elevationMotors[i]->servoError();
 		motorStatus["sensorError"] = m_elevationMotors[i]->sensorError();
-		motorStatus["bus"] = m_elevationMotors[i]->busError();
+		motorStatus["busError"] = m_elevationMotors[i]->busError();
 		dictionary["elevation"]["motors"].push_back(motorStatus);
 	}
 
@@ -690,13 +690,13 @@ ZMQ::ZMQDictionary CCommonData::getZMQDictionary()
 	CWMotorStatus["rpm"] = m_cableWrapMotor->actualVelocity();
 	CWMotorStatus["torque"] = m_cableWrapMotor->actualTorque();
 	CWMotorStatus["usage"] = m_cableWrapMotor->utilization();
-	CWMotorStatus["selected"] = (motorSelection & (1 << 0)) != 0;
+	CWMotorStatus["enabled"] = (motorSelection & (1 << 0)) != 0;
 	CWMotorStatus["brakesOpen"] = (brakesOpen & (1 << 0)) != 0;
 	CWMotorStatus["powerModuleOk"] = (powerModuleOk & (1 << 0)) == 0;
 	CWMotorStatus["active"] = m_cableWrapMotor->active();
 	CWMotorStatus["servoError"] = m_cableWrapMotor->servoError();
 	CWMotorStatus["sensorError"] = m_cableWrapMotor->sensorError();
-	CWMotorStatus["bus"] = m_cableWrapMotor->busError();
+	CWMotorStatus["busError"] = m_cableWrapMotor->busError();
 	dictionary["cableWrap"]["motors"] = std::vector<ZMQ::ZMQDictionary>{CWMotorStatus};
 
 	return dictionary;
