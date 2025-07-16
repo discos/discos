@@ -101,6 +101,43 @@ class PointingModelImpl: public virtual acscomponent::ACSComponentImpl, public v
 	*/
 	void setReceiver(const char* receiverCode) throw (CORBA::SystemException, AntennaErrors::AntennaErrorsEx); 
 	
+	
+		/**
+		* This method reads offset to pointing m
+		void setPointingOffsets(out double pointingOffsetAzimuth, out double elOodel. An example of a pointing offset is
+		* the output of the pointing after a calibration tool.  
+		* @param pointOffAz
+		* @param pointOffAz
+		*/	
+
+   void getPointingOffsets(CORBA::Double_out pointOffAz, CORBA::Double_out  pointOffEl) 	throw (CORBA::SystemException, AntennaErrors::AntennaErrorsEx); 
+	
+
+	/**
+		* This method add extra offset to pointing model. An example of a pointing offset is
+		* the output of the pointing after a calibration tool.  
+		* @param pointOffAz
+		* @param pointOffEl
+		*/
+		
+
+		void setPointingOffsets(CORBA::Double pointOffAz,  CORBA::Double pointOffEl) throw (CORBA::SystemException, AntennaErrors::AntennaErrorsEx);	
+
+
+	/**
+		* This method increases the extra offset to be added with the  pointing model. An example of a pointing offset is
+		* the output of the pointing after a calibration tool.  
+		* @param pointOffAz
+		* @param pointOffEl
+		*/
+
+		void addPointingOffsets(CORBA::Double pointOffAz,  CORBA::Double pointOffEl) throw (CORBA::SystemException, AntennaErrors::AntennaErrorsEx);						
+	/**
+		* Clear the pointing offsets 
+		*   
+		*/
+		void clearPointingOffsets() throw (CORBA::SystemException, AntennaErrors::AntennaErrorsEx);	;
+	
 	private:
 	/**
 	* Copy constructor is not allowed following the ACS desgin rules.
@@ -110,6 +147,7 @@ class PointingModelImpl: public virtual acscomponent::ACSComponentImpl, public v
 	* Assignment operator is not allowed due to ACS design rules.
 	*/
 	void operator=(const PointingModelImpl&);
+
 
 	/**
 	 * This will contains the code of the receiver
@@ -144,5 +182,9 @@ class PointingModelImpl: public virtual acscomponent::ACSComponentImpl, public v
 	* This parameter indicates if a receiver is active or not
 	*/
 	bool receiverActivated;
+	double m_pointingOffsetAz;
+	double m_pointingOffsetEl;
+	
 };
 #endif /*POINTINGMODELIMPL_H*/
+ 
