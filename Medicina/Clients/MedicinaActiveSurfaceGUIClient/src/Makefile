@@ -18,7 +18,7 @@
 
 #
 # user definable C-compilation flags
-USER_CFLAGS = -DQT_THREAD_SUPPORT
+USER_CFLAGS = -DQT_THREAD_SUPPORT -fno-var-tracking-assignments
 
 #
 # additional include and library search paths

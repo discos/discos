@@ -121,9 +121,10 @@ public:
 
     /**
      * Asks the component the virtual axes user offsets.
+     * @param acs_time the epoch we want to retrieve the axes virtual user offsets of the servo system.
      * @return a pointer to the double sequence object containing the current virtual axes user offsets of the servo system.
      */
-    ACS::doubleSeq* getUserOffsets();
+    ACS::doubleSeq* getUserOffsets(ACS::Time acs_time);
 
     /**
      * Load a single virtual axis user offset to the component and to the servo system.
@@ -142,9 +143,10 @@ public:
 
     /**
      * Asks the component the virtual axes system offsets.
+     * @param acs_time the epoch we want to retrieve the axes virtual system offsets of the servo system.
      * @return a pointer to the double sequence object containing the current virtual axes system offsets of the servo system.
      */
-    ACS::doubleSeq* getSystemOffsets();
+    ACS::doubleSeq* getSystemOffsets(ACS::Time acs_time);
 
     /**
      * Load a single virtual axis system offset to the component and to the servo system.
@@ -283,10 +285,10 @@ public:
     virtual ACS::ROdoubleSeq_ptr virtual_system_offsets();
 
     /**
-     * Returns a reference to the commanded_virtual_positions property implementation of the IDL interface.
-     * @return pointer to the read-only double sequence property commanded_virtual_positions.
+     * Returns a reference to the commanded_plain_virtual_positions property implementation of the IDL interface.
+     * @return pointer to the read-only double sequence property commanded_plain_virtual_positions.
      */
-    virtual ACS::ROdoubleSeq_ptr commanded_virtual_positions();
+    virtual ACS::ROdoubleSeq_ptr commanded_plain_virtual_positions();
 
     /**
      * Returns a reference to the in_use property implementation of the IDL interface.
@@ -388,14 +390,19 @@ protected:
     std::vector<double> m_system_offsets;
 
     /**
-     * Latest commanded virtual positions. It only takes into account the preset command.
+     * Latest commanded virtual positions.
      */
-    std::vector<double> m_commanded_virtual_positions;
+    std::vector<double> m_commanded_plain_virtual_positions;
 
     /**
-     * Queue of positions assumed by the servo system in time.
+     * Queue of positions assumed by the servo system in time, they comprehend the LDO offsets.
      */
     SRTMinorServoPositionsQueue m_positions_queue;
+
+    /*
+     * Queue of offsets commanded to the servo system in time, both user and system offsets.
+     */
+    SRTMinorServoOffsetsQueue m_offsets_queue;
 
     /**
      * Minimum ranges of the axes of the servo system.
@@ -503,9 +510,9 @@ private:
     baci::SmartPropertyPointer<baci::ROdoubleSeq> m_virtual_system_offsets_ptr;
 
     /**
-     * Pointer to the commanded_virtual_positions property.
+     * Pointer to the commanded_plain_virtual_positions property.
      */
-    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_commanded_virtual_positions_ptr;
+    baci::SmartPropertyPointer<baci::ROdoubleSeq> m_commanded_plain_virtual_positions_ptr;
 
     /**
      * Pointer to the in_use property.
@@ -550,10 +557,10 @@ protected:
     void stop()                                                                                 { SRTBaseMinorServoImpl::stop();                                        }\
     void preset(const ACS::doubleSeq& coordinates)                                              { SRTBaseMinorServoImpl::preset(coordinates);                           }\
     ACS::doubleSeq* calcCoordinates(CORBA::Double elevation)                                    { return SRTBaseMinorServoImpl::calcCoordinates(elevation);             }\
-    ACS::doubleSeq* getUserOffsets()                                                            { return SRTBaseMinorServoImpl::getUserOffsets();                       }\
+    ACS::doubleSeq* getUserOffsets(ACS::Time acs_time)                                          { return SRTBaseMinorServoImpl::getUserOffsets(acs_time);               }\
     void setUserOffset(const char* axis_name, CORBA::Double offset)                             { SRTBaseMinorServoImpl::setUserOffset(axis_name, offset);              }\
     void clearUserOffsets()                                                                     { SRTBaseMinorServoImpl::clearUserOffsets();                            }\
-    ACS::doubleSeq* getSystemOffsets()                                                          { return SRTBaseMinorServoImpl::getSystemOffsets();                     }\
+    ACS::doubleSeq* getSystemOffsets(ACS::Time acs_time)                                        { return SRTBaseMinorServoImpl::getSystemOffsets(acs_time);             }\
     void setSystemOffset(const char* axis_name, CORBA::Double offset)                           { SRTBaseMinorServoImpl::setSystemOffset(axis_name, offset);            }\
     void clearSystemOffsets()                                                                   { SRTBaseMinorServoImpl::clearSystemOffsets();                          }\
     void reloadOffsets()                                                                        { SRTBaseMinorServoImpl::reloadOffsets();                               }\
@@ -584,7 +591,7 @@ protected:
     virtual ACS::ROdoubleSeq_ptr virtual_offsets()                                              { return SRTBaseMinorServoImpl::virtual_offsets();                      }\
     virtual ACS::ROdoubleSeq_ptr virtual_user_offsets()                                         { return SRTBaseMinorServoImpl::virtual_user_offsets();                 }\
     virtual ACS::ROdoubleSeq_ptr virtual_system_offsets()                                       { return SRTBaseMinorServoImpl::virtual_system_offsets();               }\
-    virtual ACS::ROdoubleSeq_ptr commanded_virtual_positions()                                  { return SRTBaseMinorServoImpl::commanded_virtual_positions();          }\
+    virtual ACS::ROdoubleSeq_ptr commanded_plain_virtual_positions()                            { return SRTBaseMinorServoImpl::commanded_plain_virtual_positions();    }\
     virtual Management::ROTBoolean_ptr in_use()                                                 { return SRTBaseMinorServoImpl::in_use();                               }\
     virtual ACS::ROstring_ptr current_setup()                                                   { return SRTBaseMinorServoImpl::current_setup();                        }\
     virtual ROSRTMinorServoError_ptr error_code()                                               { return SRTBaseMinorServoImpl::error_code();                           }
