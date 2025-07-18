@@ -14,6 +14,9 @@
 #include <LocalOscillatorInterfaceC.h>
 #include <ReceiversErrors.h>
 #include <ManagmentDefinitionsC.h>
+#include "ZMQLibrary.hpp"
+
+namespace ZMQ = ZMQLibrary;
 
 /**
  * This class contains the code of almost all the features  of the component
@@ -366,6 +369,11 @@ public:
      */
     inline void setVacuumDefault(const double& val) { m_vacuumDefault=val; }
 
+    /**
+     * Updates the ZMQ dictionary and publishes it onto the desired topic
+     */
+    void publishZMQData();
+
 protected:
     /**
      * Obtain a valid reference to the local oscillator device
@@ -418,6 +426,8 @@ private:
     // error. See mantis issue n.0000236
     bool m_ioMarkError;
     Management::TSystemStatus m_componentStatus;
+    ZMQ::ZMQDictionary m_zmqDictionary;
+    ZMQ::ZMQPublisher m_zmqPublisher;
 
     void setComponentStatus(const Management::TSystemStatus& status) { if (status>m_componentStatus) m_componentStatus=status;  }
 

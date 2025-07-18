@@ -67,12 +67,16 @@ private:
     	 VACUUMVALVE,
     	 NOISEMARK,
     	 UNLOCKED,
-    	 ENVTEMP
+    	 ENVTEMP,
+    	 COMPONENT,
+    	 PUBLISH
      };
      CComponentCore *m_core;
      ACS::TimeInterval m_currentResponseTime;
      ACS::TimeInterval m_currentSampling;
+     const ACS::TimeInterval m_sleepTime;
      TStage m_currentStage;
+     ACS::Time m_nextTime;
 };
 
 #endif

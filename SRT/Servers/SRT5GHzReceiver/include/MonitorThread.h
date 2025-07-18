@@ -62,7 +62,6 @@ public:
      void setLNASamplingTime(const DDWORD& time);
 private:
      enum TStage {
-    	 COMPONENT,
     	 VACUUM,
     	 STATUS,
     	 LNA,
@@ -77,6 +76,7 @@ private:
     	 NOISEMARK,
     	 UNLOCKED,
     	 ENVTEMP,
+    	 COMPONENT,
     	 PUBLISH
      };
      CComponentCore *m_core;

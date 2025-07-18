@@ -398,6 +398,9 @@ public:
      */
     inline void setVacuumDefault(const double& val) noexcept { m_vacuumDefault=val; }
 
+    /**
+     * Updates the ZMQ dictionary and publishes it onto the desired topic
+     */
     void publishZMQData();
 
 protected:

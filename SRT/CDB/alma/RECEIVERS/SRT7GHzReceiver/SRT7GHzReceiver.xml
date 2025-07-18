@@ -13,7 +13,7 @@
 				LNAIPAddress="127.0.0.1"
 				LNAPort="12901"		
 				WatchDogResponseTime="400000"
-				WatchDogSleepTime="500000"
+				WatchDogSleepTime="1000000"
 				LNASamplingTime="250000"
 				RepetitionCacheTime="7000000"
 				RepetitionExpireTime="10000000"

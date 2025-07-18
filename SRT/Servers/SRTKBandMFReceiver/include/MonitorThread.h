@@ -44,49 +44,50 @@ public:
     /**
      * This method is executed once when the thread stops.
      */
-     virtual void onStop();
+    virtual void onStop();
 
 
-     /**
-      * This method overrides the thread implementation class. The method is executed in a loop until the thread is alive.
-      * The thread can be exited by calling ACS::ThreadBase::stop or ACS::ThreadBase::exit command.
-      */
-     virtual void runLoop();
+    /**
+     * This method overrides the thread implementation class. The method is executed in a loop until the thread is alive.
+     * The thread can be exited by calling ACS::ThreadBase::stop or ACS::ThreadBase::exit command.
+     */
+    virtual void runLoop();
 
 
-     /**
-      * This method allows to inform the watch dog on how long the LNA sampling time takes.
-      */
-     void setLNASamplingTime(const DDWORD& time);
-     
+    /**
+     * This method allows to inform the watch dog on how long the LNA sampling time takes.
+     */
+    void setLNASamplingTime(const DDWORD& time);
+
 
 private:
 
-     enum TStage {
-         VACUUM,
-         STATUS,
-         LNA_VD,
-         LNA_ID,
-         LNA_VG,
-         CTEMPCOOLHEAD,
-         CTEMPCOOLHEADW,
-         CTEMPLNA,
-         CTEMPLNAW,
-         REMOTE,
-         COOLHEAD,
-         VACUUMPUMP,
-         VACUUMVALVE,
-         NOISEMARK,
-         UNLOCKED,
-         ENVTEMP
-     };
-
-
-     SRTKBandMFCore *m_core;
-     ACS::TimeInterval m_currentResponseTime;
-     ACS::TimeInterval m_currentSampling;
-     TStage m_currentStage;
+    enum TStage {
+        VACUUM,
+        STATUS,
+        LNA_VD,
+        LNA_ID,
+        LNA_VG,
+        CTEMPCOOLHEAD,
+        CTEMPCOOLHEADW,
+        CTEMPLNA,
+        CTEMPLNAW,
+        REMOTE,
+        COOLHEAD,
+        VACUUMPUMP,
+        VACUUMVALVE,
+        NOISEMARK,
+        UNLOCKED,
+        ENVTEMP,
+        COMPONENT,
+        PUBLISH
+    };
+    SRTKBandMFCore *m_core;
+    ACS::TimeInterval m_currentResponseTime;
+    ACS::TimeInterval m_currentSampling;
+    const ACS::TimeInterval m_sleepTime;
+    TStage m_currentStage;
+    ACS::Time m_nextTime;
 };
 
 #endif
-

@@ -10,6 +10,10 @@
 
 #include "MFKBandBaseCore.h"
 
+#include "ZMQLibrary.hpp"
+
+namespace ZMQ = ZMQLibrary;
+
 /**
  * This class inherits from CComponentCore and so contains the code of almost 
  * all the features  of the component.
@@ -140,6 +144,11 @@ public:
      */
     void updateVgLNAControls() throw (ReceiversErrors::ReceiverControlBoardErrorExImpl);
 
+    /**
+     * Updates the ZMQ dictionary and publishes it onto the desired topic
+     */
+    void publishZMQData();
+
 protected:
 
 	    /************************ CONVERSION FUNCTIONS **************************/
@@ -179,6 +188,9 @@ private:
     std::vector<IRA::ReceiverControl::StageValues> m_vdStageValues;
     std::vector<IRA::ReceiverControl::StageValues> m_idStageValues;
     std::vector<IRA::ReceiverControl::StageValues> m_vgStageValues;
+
+    ZMQ::ZMQDictionary m_zmqDictionary;
+    ZMQ::ZMQPublisher m_zmqPublisher;
 };
 
 

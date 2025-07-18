@@ -3,15 +3,13 @@
 
 _IRA_LOGFILTER_IMPORT;
 
-CMonitorThread::CMonitorThread(
-        const ACE_CString& name,
-        SRTKBandMFCore *param,
-        const ACS::TimeInterval& responseTime,
-        const ACS::TimeInterval& sleepTime
-        ) : ACS::Thread(name, responseTime, sleepTime), m_core(param)
+CMonitorThread::CMonitorThread(const ACE_CString& name, SRTKBandMFCore *param, const ACS::TimeInterval& responseTime, const ACS::TimeInterval& sleepTime) :
+    ACS::Thread(name, responseTime, 0),
+    m_core(param),
+    m_currentResponseTime(responseTime),
+    m_sleepTime(sleepTime)
 {
     AUTO_TRACE("CMonitorThread::CMonitorThread()");
-    m_core = param;
 }
 
 CMonitorThread::~CMonitorThread()
@@ -23,68 +21,70 @@ void CMonitorThread::onStart()
 {
     AUTO_TRACE("CMonitorThread::onStart()");
     m_currentStage = VACUUM;
+    m_nextTime = getTimeStamp();
 }
 
- void CMonitorThread::onStop()
+void CMonitorThread::onStop()
 {
-     AUTO_TRACE("CMonitorThread::onStop()");
+    AUTO_TRACE("CMonitorThread::onStop()");
 }
 
- void CMonitorThread::setLNASamplingTime(const DDWORD& time)
+void CMonitorThread::setLNASamplingTime(const DDWORD& time)
 {
-     m_currentResponseTime = getResponseTime();
-     m_currentSampling = time * 10; // uSec to 100 nanoSec
-     if(m_currentResponseTime < m_currentSampling+m_currentSampling/10) {
-         // Force the response time to be at least 10% more than sampling time
-         m_currentResponseTime = m_currentSampling + m_currentSampling / 10; 
-         ACS_LOG(
-             LM_FULL_INFO,
-             "SRTKBandMFReceiverImpl::execute()",
-             (
-                  LM_WARNING,
-                  "WATCH_DOG_RESPONSE_TIME_ADJUSTED_TO_FIT_SAMPLING_TIME: %llu uSec",
-                  static_cast<long long unsigned int>(m_currentResponseTime/10)
-             )
-         );
-         setResponseTime(m_currentResponseTime);
-     }
+    m_currentResponseTime = getResponseTime();
+    m_currentSampling = time * 10; // uSec to 100 nanoSec
+    if (m_currentResponseTime < m_currentSampling + m_currentSampling / 10) {
+        // Force the response time to be at least 10% more than sampling time
+        m_currentResponseTime = m_currentSampling + m_currentSampling / 10;
+        ACS_LOG(
+            LM_FULL_INFO,
+            "SRTKBandMFReceiverImpl::execute()",
+            (
+                LM_WARNING,
+                "WATCH_DOG_RESPONSE_TIME_ADJUSTED_TO_FIT_SAMPLING_TIME: %llu uSec",
+                static_cast<long long unsigned int>(m_currentResponseTime / 10)
+            )
+        );
+        setResponseTime(m_currentResponseTime);
+    }
 }
 
- void CMonitorThread::runLoop()
+void CMonitorThread::runLoop()
 {
-     m_core->updateComponent();
-     switch( m_currentStage) {
-         case VACUUM: {
-             m_currentStage = STATUS;
-             try {
-                 m_core->updateVacuum();
-             }
-             catch (ACSErr::ACSbaseExImpl& ex) {
-                 _ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl, impl, ex, "CMonitorThread::runLoop");
-                 _IRA_LOGFILTER_LOG_EXCEPTION(impl, LM_ERROR);
-             }
-             break;
-         }
+    switch (m_currentStage) {
+        case VACUUM: {
+            // Avoid sleeping in between stages, we only sleep m_sleepTime after properties publication
+            setSleepTime(0);
+            m_currentStage = STATUS;
+            try {
+                m_core->updateVacuum();
+            }
+            catch (ACSErr::ACSbaseExImpl& ex) {
+                _ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl, impl, ex, "CMonitorThread::runLoop");
+                _IRA_LOGFILTER_LOG_EXCEPTION(impl, LM_ERROR);
+            }
+            break;
+        }
         case STATUS: {
             m_currentStage = LNA_VD;
-             break;
+            break;
         }
         case LNA_VD: {
             try {
-            	  // commented out in order to cope with the LNA control board substitution 
-                 //m_core->updateVdLNAControls();
+                // commented out in order to cope with the LNA control board substitution
+                //m_core->updateVdLNAControls();
             }
             catch (ACSErr::ACSbaseExImpl& ex) {
-                 _ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl, impl, ex, "CMonitorThread::runLoop");
-                 _IRA_LOGFILTER_LOG_EXCEPTION(impl, LM_ERROR);
+                _ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl, impl, ex, "CMonitorThread::runLoop");
+                _IRA_LOGFILTER_LOG_EXCEPTION(impl, LM_ERROR);
             }
             m_currentStage = LNA_ID;
             break;
-         }
-         case LNA_ID: {
+        }
+        case LNA_ID: {
             try {
-            	  // commented out in order to cope with the LNA control board substitution  	
-                 //m_core->updateIdLNAControls();
+                // commented out in order to cope with the LNA control board substitution
+                //m_core->updateIdLNAControls();
             }
             catch (ACSErr::ACSbaseExImpl& ex) {
                 _ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl, impl, ex, "CMonitorThread::runLoop");
@@ -92,11 +92,11 @@ void CMonitorThread::onStart()
             }
             m_currentStage = LNA_VG;
             break;
-         }
-         case LNA_VG: {
+        }
+        case LNA_VG: {
             try {
-					  // commented out in order to cope with the LNA control board substitution  	            	
-                 //m_core->updateVgLNAControls();
+                // commented out in order to cope with the LNA control board substitution
+                //m_core->updateVgLNAControls();
             }
             catch (ACSErr::ACSbaseExImpl& ex) {
                 _ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl, impl, ex, "CMonitorThread::runLoop");
@@ -104,8 +104,7 @@ void CMonitorThread::onStart()
             }
             m_currentStage = CTEMPCOOLHEAD;
             break;
-         }
-
+        }
         case CTEMPCOOLHEAD: {
             m_currentStage = CTEMPCOOLHEADW;
             try {
@@ -116,7 +115,7 @@ void CMonitorThread::onStart()
                 _IRA_LOGFILTER_LOG_EXCEPTION(impl, LM_ERROR);
             }
             break;
-         }
+        }
         case CTEMPCOOLHEADW: {
             m_currentStage = CTEMPLNA;
             try {
@@ -127,7 +126,7 @@ void CMonitorThread::onStart()
                 _IRA_LOGFILTER_LOG_EXCEPTION(impl, LM_ERROR);
             }
             break;
-         }
+        }
         case CTEMPLNA: {
             m_currentStage = CTEMPLNAW;
             try {
@@ -138,7 +137,7 @@ void CMonitorThread::onStart()
                _IRA_LOGFILTER_LOG_EXCEPTION(impl, LM_ERROR);
             }
             break;
-         }
+        }
         case CTEMPLNAW: {
             m_currentStage = REMOTE;
             try {
@@ -217,7 +216,7 @@ void CMonitorThread::onStart()
             break;
         }
         case ENVTEMP: {
-            m_currentStage = VACUUM;
+            m_currentStage = COMPONENT;
             try {
                 m_core->updateVertexTemperature();
             }
@@ -226,6 +225,19 @@ void CMonitorThread::onStart()
                 _IRA_LOGFILTER_LOG_EXCEPTION(impl, LM_ERROR);
             }
             break;
-         }
-     }
+        }
+        case COMPONENT: {
+            m_currentStage = PUBLISH;
+            m_core->updateComponent();
+            break;
+        }
+        case PUBLISH: {
+            m_currentStage = VACUUM;
+            m_core->publishZMQData();
+            m_nextTime += m_sleepTime;
+            // Now sleep for m_sleepTime
+            setSleepTime(ACS::TimeInterval(std::max(long(0), long(m_nextTime - getTimeStamp()))));
+            break;
+        }
+    }
 }
