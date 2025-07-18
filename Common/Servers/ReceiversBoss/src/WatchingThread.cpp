@@ -29,6 +29,7 @@ void CWatchingThread::onStart()
 		try {
 			m_core->updateRecvStatus();
 			m_core->updateDewarPositionerStatus();
+			m_core->updateZMQDictionary();
 		}
 		catch (ACSErr::ACSbaseExImpl& E) {
 			_ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl,_dummy,E,"CWatchingThread::runLoop()");

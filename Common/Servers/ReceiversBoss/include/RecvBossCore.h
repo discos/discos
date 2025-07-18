@@ -58,8 +58,11 @@
 #include "Configuration.h"
 #include <ReceiversBossS.h>
 #include <acsncSimpleSupplier.h>
+#include "ZMQLibrary.hpp"
 
 #endif
+
+namespace ZMQ = ZMQLibrary;
 
 class CRecvBossCore {
 public:
@@ -302,6 +305,8 @@ public:
 			ComponentErrors::OperationErrorExImpl,ReceiversErrors::DewarPositionerCommandErrorExImpl);
 
 	void publishData() throw (ComponentErrors::NotificationChannelErrorExImpl);
+
+	void updateZMQDictionary();
 private:
 
 	Management::TSystemStatus m_status;
@@ -317,6 +322,8 @@ private:
 	bool m_currentRecvError;
 	IRA::CString m_currentRecvInstance;
 	IRA::CString m_currentRecvCode;
+	ZMQ::ZMQPublisher m_zmqPublisher;
+	ZMQ::ZMQDictionary m_zmqDictionary;
 
 #ifdef COMPILE_TARGET_MED
         #warning "Compiling RecvBossCore with Medicina target"

@@ -14,7 +14,8 @@
 
 using namespace IRA;
 
-CRecvBossCore::CRecvBossCore() 
+CRecvBossCore::CRecvBossCore() :
+	 m_zmqPublisher("receivers")
 {
 }
 
@@ -1959,8 +1960,52 @@ const Management::TSystemStatus& CRecvBossCore::getStatus()
 	return m_status;
 }
 
+void CRecvBossCore::updateZMQDictionary()
+{
+	TIMEVALUE now;
+	IRA::CIRATools::getTime(now);
+
+	std::string currentSetup = (const char *)getRecvCode();
+
+	IRA::CString component;
+	bool derotator;
+
+	if(m_config->getReceiver(currentSetup.c_str(), component, derotator))
+	{
+		m_zmqDictionary["currentSetup"] = currentSetup;
+        std::string currentReceiver = (const char *)component;
+		m_zmqDictionary["currentReceiver"] = currentReceiver.substr(currentReceiver.find_last_of('/') != std::string::npos ? currentReceiver.find_last_of('/') + 1 : 0);
+	}
+	else
+	{
+		m_zmqDictionary["currentSetup"] = "";
+		m_zmqDictionary["currentReceiver"] = "";
+	}
+
+	m_zmqDictionary["timestamp"] = ZMQ::ZMQTimeStamp::fromACSTime(now.value().value);
+
+	// status enum
+	switch (getStatus()) {
+		case Management::MNG_OK : {
+			m_zmqDictionary["status"] = "OK";
+			break;
+		}
+		case Management::MNG_WARNING : {
+			m_zmqDictionary["status"] = "WARNING";
+			break;
+		}
+		default: { //Management::MNG_FAILURE
+			m_zmqDictionary["status"] = "FAILURE";
+			break;
+		}
+	}
+}
+
 void CRecvBossCore::publishData() throw (ComponentErrors::NotificationChannelErrorExImpl)
 {
+	// Always publish ZMQ message
+	m_zmqPublisher.publish(ZMQ::ZMQDictionary{{ "boss", m_zmqDictionary }});
+
 	bool sendData;
 	static TIMEVALUE lastEvent(0.0L);
 	static Receivers::ReceiversDataBlock prvData={0,false,Management::MNG_OK};

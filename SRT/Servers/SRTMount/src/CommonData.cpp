@@ -546,10 +546,13 @@ ZMQ::ZMQDictionary CCommonData::getZMQDictionary()
 	dictionary["statusSocketConnected"] = getStatusLineState() == Antenna::ACU_CNTD;
 	dictionary["controlSocketConnected"] = getControlLineState() == Antenna::ACU_CNTD;
 	dictionary["status"] = getMountStatus() == Management::MNG_OK ? "OK" : getMountStatus() == Management::MNG_WARNING ? "WARNING" : "FAILURE";
-	dictionary["remainingTrackingPoints"] = pointingStatus()->pTTLength() - pointingStatus()->pTTCurrentIndex();
-	//dictionary["MJD"] = pointingStatus()->actualMJD(); redundant, we use this time in the timestamp
-	dictionary["timeOffset"] = pointingStatus()->actualTimeOffset();
-	dictionary["sector"] = pointingStatus()->azimuthSector() == Antenna::ACU_CW ? "CW" : "CCW";
+
+	dictionary["pointing"] = ZMQ::ZMQDictionary();
+	dictionary["pointing"]["remainingTrackingPoints"] = pointingStatus()->pTTLength() - pointingStatus()->pTTCurrentIndex();
+	dictionary["pointing"]["timeOffset"] = pointingStatus()->actualTimeOffset();
+	dictionary["pointing"]["sector"] = pointingStatus()->azimuthSector() == Antenna::ACU_CW ? "CW" : "CCW";
+	dictionary["pointing"]["azimuthEncoderPosition"] = pointingStatus()->encoderAzimuth();
+	dictionary["pointing"]["elevationEncoderPosition"] = pointingStatus()->encoderElevation();
 
 	dictionary["azimuth"] = ZMQ::ZMQDictionary();
 	dictionary["azimuth"]["currentPosition"] = azimuthStatus()->actualPosition();;

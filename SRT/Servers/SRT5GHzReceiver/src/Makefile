@@ -63,7 +63,7 @@ LIBRARIES_L     =
 # <brief description of lllll library>
 SRT5GHzImpl_OBJECTS   =  Configuration SRT5GHzImpl ComponentCore MonitorThread
 SRT5GHzImpl_LIBS = IRALibrary ComponentErrors ManagementErrors ReceiversErrors CommonReceiverInterfaceStubs GenericReceiverStubs SRT5GHzStubs \
-                   LocalOscillatorInterfaceStubs ReceiversDefinitionsStubs ManagmentDefinitionsStubs
+                   LocalOscillatorInterfaceStubs ReceiversDefinitionsStubs ManagmentDefinitionsStubs ZMQLibrary
 
 #
 # Scripts (public and local)
