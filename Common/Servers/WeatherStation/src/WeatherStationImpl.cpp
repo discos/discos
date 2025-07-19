@@ -406,8 +406,8 @@ void WeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
         m_autoParkThreshold->getDevIO()->write(m_threshold,timestamp);
 
         WeatherStationImpl* self_p =this;
-        m_controlThread_p = getContainerServices()->getThreadManager()->create<CUpdatingThread, WeatherStationImpl*>("MeteoStation", self_p);
-        m_controlThread_p->setSleepTime(threadSleepTime*10);
+        m_controlThread_p = getContainerServices()->getThreadManager()->create<CUpdatingThread, WeatherStationImpl*>("MeteoStation", self_p, ThreadBase::defaultResponseTime, threadSleepTime*10);
+        //m_controlThread_p->setSleepTime(threadSleepTime*10);
         //m_controlThread_p->setResponseTime(60*1000000);
         m_controlThread_p->resume();
         m_parser=new CParser<WeatherSocket>(sock,10);
