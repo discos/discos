@@ -20,6 +20,7 @@ BOOST_PYTHON_MODULE(libPyZMQTimeStamp)
 {
     py::to_python_converter<nlohmann::json, JsonToPyString>();
 
+    py::def("now", ZMQ::ZMQTimeStamp::now);
     py::def("fromMJD", ZMQ::ZMQTimeStamp::fromMJD);
     py::def("fromUNIXTime", ZMQ::ZMQTimeStamp::fromUNIXTime);
     py::def("fromACSTime", ZMQ::ZMQTimeStamp::fromACSTime);

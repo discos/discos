@@ -6,11 +6,9 @@ deque<float> deq;
 float wind_avg;
 float deq_sum;
 
-CUpdatingThread::CUpdatingThread (const ACE_CString& name,
-    WeatherStationImpl*  weatherStation,
-    const ACS::TimeInterval& responseTime,
-	const ACS::TimeInterval& sleepTime) :
-	ACS::Thread(name)
+CUpdatingThread::CUpdatingThread (const ACE_CString& name, WeatherStationImpl* weatherStation, const ACS::TimeInterval& responseTime, const ACS::TimeInterval& sleepTime) :
+	ACS::Thread(name, responseTime, sleepTime),
+    m_sleepTime(sleepTime)
 {
     ACS_TRACE("CUpdatingThread::UpdatingThread");
     loopCounter_m = 0;
@@ -47,12 +45,14 @@ void CUpdatingThread::runLoop()
         ACS_LOG(LM_FULL_INFO,"UpdatingThread::runLoop()",(LM_WARNING,"WINDSPEED=%f ", w_pars.windspeed));
         std::cout<<"parking the Antenna"<<std::endl;
     }    */
- 
+    m_nextTime += m_sleepTime;
+    setSleepTime(ACS::TimeInterval(std::max(long(0), long(m_nextTime - getTimeStamp()))));
 }
     
 void CUpdatingThread::onStart()
 {
 	AUTO_TRACE("UpdatingThread::onStart()");
+    m_nextTime = getTimeStamp();
 }
 
 void CUpdatingThread::onStop()

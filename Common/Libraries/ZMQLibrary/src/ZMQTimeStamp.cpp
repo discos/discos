@@ -4,6 +4,11 @@ namespace ZMQLibrary
 {
     namespace ZMQTimeStamp
     {
+        ZMQDictionary now()
+        {
+            return fromACSTime(getTimeStamp());
+        }
+
         ZMQDictionary fromMJD(const double& MJD)
         {
             IRA::CDateTime clock;
@@ -13,9 +18,8 @@ namespace ZMQLibrary
             double unix_time = IRA::CIRATools::ACSTime2UNIXTime(time.value().value);
 
             ZMQDictionary timestamp;
-            timestamp["jd"] = clock.getJD();
             timestamp["mjd"] = MJD;
-            timestamp["omg"] = time.value().value;
+            timestamp["omg_time"] = time.value().value;
             timestamp["unix_time"] = unix_time;
             timestamp["iso8601"] = IRA::CIRATools::ACSTime2ISO8601(time.value().value);
             return timestamp;
@@ -29,8 +33,7 @@ namespace ZMQLibrary
 
             ZMQDictionary timestamp;
             timestamp["unix_time"] = unix_time;
-            timestamp["omg"] = acs_time;
-            timestamp["jd"] = clock.getJD();
+            timestamp["omg_time"] = acs_time;
             timestamp["mjd"] = clock.getMJD();
             timestamp["iso8601"] = IRA::CIRATools::ACSTime2ISO8601(acs_time);
             return timestamp;
@@ -43,10 +46,9 @@ namespace ZMQLibrary
             double unix_time = IRA::CIRATools::ACSTime2UNIXTime(acs_time);
 
             ZMQDictionary timestamp;
-            timestamp["jd"] = clock.getJD();
             timestamp["mjd"] = clock.getMJD();
             timestamp["unix_time"] = unix_time;
-            timestamp["omg"] = acs_time;
+            timestamp["omg_time"] = acs_time;
             timestamp["iso8601"] = IRA::CIRATools::ACSTime2ISO8601(acs_time);
             return timestamp;
         }

@@ -170,9 +170,14 @@ endif
 CURRENT_DIR:=$(shell pwd)/..
 
 define PathFinder
-	$(shell for MOD in $(if $(filter undefined,$(origin $(1))),$(1),$($(1))); \
-		do find ${CURRENT_DIR}/Common ${CURRENT_DIR}/${STATION} -name $${MOD} -not -path *ntroot* -not -path *CDB* -not -path *site-packages* \( -type d -o -type l \) -print 2>/dev/null; \
-	done)
+  $(shell for MOD in $(if $(filter undefined,$(origin $(1))),$(1),$($(1))); do \
+    for DIR in \
+      $$(find ${CURRENT_DIR}/Common ${CURRENT_DIR}/${STATION} \
+        \( -type d -o -type l \) -name $${MOD} \
+        -not -path '*ntroot*' -not -path '*CDB*' -not -path '*site-packages*' 2>/dev/null); do \
+      if [ -f "$$DIR/src/Makefile" ]; then echo $$DIR; fi; \
+    done; \
+  done)
 endef
 
 #if the INTROOT varaible is not defined the make is stopped
@@ -203,7 +208,11 @@ DOCCPP:=$(DOC)/cpp
 
 # Sequential targets like COMMON_SEQ_LIBS have to be expanded in order to avoid unwanted parallelization.
 # This order should not be changed in order for the build process to succeed. Simulators are disabled by default since we mostly rely on the discos-simulator suite.
+#TARGETS:= $(COMMON_SEQ_LIBS)
 TARGETS:=ERRORS BASE_INTERFACES CORE_INTERFACES EXTENDED_INTERFACES TELESCOPE_INTERFACES $(COMMON_SEQ_LIBS) LIBRARIES COMMON_SERVERS TELESCOPE_SERVERS CLIENTS MISC #SIMULATORS
+BUILD_TARGETS := $(addprefix build-,$(TARGETS))
+CLEAN_TARGETS := $(addprefix clean-,$(TARGETS))
+ALL_RELEVANT  := $(BUILD_TARGETS) $(CLEAN_TARGETS) all clean
 
 # This function is used to dynamically declare the build and clean targets
 define DeclareTarget
@@ -224,18 +233,20 @@ $$($1_CLEAN_TARGETS):
 endef
 
 # Main target, builds and installs all. Suggested to be launched with "make -j" in order to speed up the build process considerably.
-.PHONY: all $(addprefix build-,$(TARGETS))
+.PHONY: all $(BUILD_TARGETS)
 all:
-	@for i in $(TARGETS); do \
-		$(MAKE) build-$${i}; \
+	@for i in $(BUILD_TARGETS); do \
+		$(MAKE) $${i}; \
 	done
 
 # Clean target, calls clean_dist for each target inside the TARGETS variable. Can also be called with -j.
-.PHONY: clean $(addprefix clean-,$(TARGETS))
-clean: $(addprefix clean-,$(TARGETS))
+.PHONY: clean $(CLEAN_TARGETS)
+clean: $(CLEAN_TARGETS)
 
 # The following line dynamically declares all the make targets starting from the TARGETS variable
-$(foreach t, $(TARGETS), $(eval $(call DeclareTarget,$(t))))
+ifneq (,$(filter $(MAKECMDGOALS),$(ALL_RELEVANT)))
+  $(foreach t,$(TARGETS),$(eval $(call DeclareTarget,$(t))))
+endif
 
 # This target cleans all the INTROOT so that a clean build process can be executed again
 .PHONY: clean-dist
@@ -250,6 +261,9 @@ clean-dist:
 	@rm -rf $(INTROOT)/lib/endorsed/*
 	@find $(INTROOT)/lib/python -mindepth 1 ! -name 'site-packages' -exec rm -rf {} +
 	@rm -rf $(INTROOT)/lib/python/site-packages/*
+	@rm -rf $(INTROOT)/lib/*.so
+	@rm -rf $(INTROOT)/lib/*.a
+	@rm -rf $(INTROOT)/lib/*.jar
 	@rm -rf $(INTROOT)/man/man*/*
 	@rm -rf $(INTROOT)/Sources/*
 	@rm -rf $(INTROOT)/templates/*

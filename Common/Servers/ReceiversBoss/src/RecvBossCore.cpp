@@ -1962,9 +1962,6 @@ const Management::TSystemStatus& CRecvBossCore::getStatus()
 
 void CRecvBossCore::updateZMQDictionary()
 {
-	TIMEVALUE now;
-	IRA::CIRATools::getTime(now);
-
 	std::string currentSetup = (const char *)getRecvCode();
 
 	IRA::CString component;
@@ -1982,7 +1979,7 @@ void CRecvBossCore::updateZMQDictionary()
 		m_zmqDictionary["currentReceiver"] = "";
 	}
 
-	m_zmqDictionary["timestamp"] = ZMQ::ZMQTimeStamp::fromACSTime(now.value().value);
+	m_zmqDictionary["timestamp"] = ZMQ::ZMQTimeStamp::now();
 
 	// status enum
 	switch (getStatus()) {

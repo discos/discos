@@ -722,9 +722,7 @@ void CComponentCore::checkLocalOscillator()
 
 void CComponentCore::publishZMQData()
 {
-    TIMEVALUE now;
-    IRA::CIRATools::getTime(now);
-    m_zmqDictionary["timestamp"] = ZMQ::ZMQTimeStamp::fromACSTime(now.value().value);
+    m_zmqDictionary["timestamp"] = ZMQ::ZMQTimeStamp::now();
     m_zmqDictionary["cryoTemperatureCoolHead"] = getCryoCoolHead().temperature;
     m_zmqDictionary["cryoTemperatureCoolHeadWindow"] = getCryoCoolHeadWin().temperature;
     m_zmqDictionary["cryoTemperatureLNA"] = getCryoLNA().temperature;

@@ -661,7 +661,7 @@ ZMQ::ZMQDictionary CCommonData::getZMQDictionary()
 				currentMode = "PRESET";
 				break;
 			case Antenna::ACU_PROGRAMTRACK:
-				currentMode = "PROGRAMTRACK";
+				currentMode = "PROGRAM TRACK";
 				break;
 			case Antenna::ACU_RATE:
 				currentMode = "RATE";

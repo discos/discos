@@ -8,6 +8,7 @@ namespace ZMQLibrary
 {
     namespace ZMQTimeStamp
     {
+        ZMQDictionary now();
         ZMQDictionary fromMJD(const double& MJD);
         ZMQDictionary fromUNIXTime(const double& unix_epoch);
         ZMQDictionary fromACSTime(const ACS::Time& acs_time);

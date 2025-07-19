@@ -13,7 +13,8 @@ WeatherStationImpl::WeatherStationImpl(
     m_windspeedpeak(this),
     m_humidity(this),
     m_pressure(this),
-    m_autoParkThreshold(this)
+    m_autoParkThreshold(this),
+    m_zmqPublisher("weather")
 {
     m_containerServices = containerServices;
     m_scheduler.setComponentInterface("IDL:alma/Management/Scheduler:1.0");
@@ -201,6 +202,16 @@ void WeatherStationImpl::updateData() throw (ACSErr::ACSbaseEx,CORBA::SystemExce
 
     baci::ThreadSyncGuard guardMeteoParameters(&m_meteoParametersMutex);
     m_parameters = mp;
+
+    m_zmqDictionary["humidity"] = mp.humidity;
+    m_zmqDictionary["pressure"] = mp.pressure;
+    m_zmqDictionary["temperature"] = mp.temperature;
+    m_zmqDictionary["windDirection"] = mp.winddir;
+    m_zmqDictionary["windSpeed"] = mp.windspeed;
+    m_zmqDictionary["windSpeedPeak"] = mp.windspeedpeak;
+    m_zmqDictionary["timestamp"] = ZMQ::ZMQTimeStamp::now();
+
+    m_zmqPublisher.publish(m_zmqDictionary);
 }
 
 CORBA::Double WeatherStationImpl::getWindspeedPeak() throw (ACSErr::ACSbaseEx,CORBA::SystemException)
@@ -369,6 +380,7 @@ void WeatherStationImpl::initialize() throw (ACSErr::ACSbaseExImpl)
             CIRATools::getDBValue(getContainerServices(),"UpdatingThreadTime", threadSleepTime))
         {
             ACS_LOG(LM_FULL_INFO,"WeatherStationImpl::initialize()",(LM_INFO,"IP address %s, Port %d ",(const char *) ADDRESS,PORT));
+            m_zmqDictionary["autoParkThreshold"] = m_threshold;
         }
         else
         {

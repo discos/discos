@@ -168,8 +168,11 @@ void CBossCore::execute() throw (ComponentErrors::CouldntGetComponentExImpl,
 		throw Impl;		
 	}
 	ACS_LOG(LM_FULL_INFO,"CBossCore::execute()",(LM_INFO,"AntennaBoss::REFRACTION_LOCATED"));*/
+	std::string site_name;
 	try	{	
 		site=observatory->getSiteSummary();  //throw CORBA::SYSTEMEXCEPTION
+		ACSErr::Completion_var comp;
+		site_name=std::string(observatory->observatoryName()->get_sync(comp.out()));
 	}
 	catch (CORBA::SystemException& ex)	{
 		_EXCPT(ComponentErrors::CORBAProblemExImpl,__dummy,"CBossCore::execute()");
@@ -188,6 +191,44 @@ void CBossCore::execute() throw (ComponentErrors::CouldntGetComponentExImpl,
 		Impl.setComponentName((const char*)observatory->name());
 		throw Impl;
 	}	
+
+	ZMQ::ZMQDictionary site_info;
+	site_info["name"] = site_name;
+	site_info["longitude"] = m_site.getLongitude()*DR2D;
+	site_info["latitude"] = m_site.getLatitude()*DR2D;
+	site_info["height"] = m_site.getHeight();
+	site_info["xPosition"] = m_site.getXPos();
+	site_info["yPosition"] = m_site.getYPos();
+	site_info["zPosition"] = m_site.getZPos();
+	site_info["xPolarMotion"] = m_site.getXPoleMotion();
+	site_info["yPolarMotion"] = m_site.getYPoleMotion();
+	site_info["DUT1"] = m_dut1;
+
+	switch (m_site.getEllipsoid()) {
+		case CSite::WGS84 : {
+			site_info["ellipsoid"] = "WGS84";
+			break;
+		}
+		case CSite::GRS80 : {
+			site_info["ellipsoid"] = "GRS80";
+			break;
+		}
+		case CSite::MERIT83 : {
+			site_info["ellipsoid"] = "MERIT83";
+			break;
+		}
+		case CSite::OSU91A : {
+			site_info["ellipsoid"] = "OSU91A";
+			break;
+		}
+		case CSite::SOVIET85 : {
+			site_info["ellipsoid"] = "SOVIET85";
+			break;
+		}
+	}
+
+	m_zmqDictionary["site"] = site_info;
+
 	ACS_LOG(LM_FULL_INFO,"CBossCore::execute()",(LM_INFO,"AntennaBoss::OBSERVATORY_RELEASED"));
 	m_slewCheck.initSite(m_site,m_dut1);
 	m_slewCheck.initMount(m_config->getMaxAzimuthRate(),m_config->getMaxElevationRate(),m_config->getMinElevation(),m_config->getMaxElevation(),
@@ -1172,7 +1213,7 @@ bool CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,Co
 			break;
 		}
 		case Antenna::ANT_SOLARSYSTEMBODY : {
-			m_zmqDictionary["generatorType"] = "SOLARSYSTEMBODY";
+			m_zmqDictionary["generatorType"] = "SOLAR SYSTEM BODY";
 			break;
 		}
 		case Antenna::ANT_OTF : {
@@ -1253,19 +1294,19 @@ bool CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,Co
 			break;
 		}
 		case Antenna::ANT_LSRK : {
-			m_zmqDictionary["vradReferenceFrame"] = "KINEMATICLOCALSTANDARDOFREST";
+			m_zmqDictionary["vradReferenceFrame"] = "KINEMATIC LOCAL STANDARD OF REST";
 			break;
 		}
 		case Antenna::ANT_LSRD : {
-			m_zmqDictionary["vradReferenceFrame"] = "DYNAMICLOCALSTANDARDOFREST";
+			m_zmqDictionary["vradReferenceFrame"] = "DYNAMIC LOCAL STANDARD OF REST";
 			break;
 		}
 		case Antenna::ANT_GALCEN : {
-			m_zmqDictionary["vradReferenceFrame"] = "GALACTICCENTER";
+			m_zmqDictionary["vradReferenceFrame"] = "GALACTIC CENTER";
 			break;
 		}
 		case Antenna::ANT_LGROUP : {
-			m_zmqDictionary["vradReferenceFrame"] = "LOCALGROUP";
+			m_zmqDictionary["vradReferenceFrame"] = "LOCAL GROUP";
 			break;
 		}
 		default: { //Antenna::ANT_UNDEF_FRAME
