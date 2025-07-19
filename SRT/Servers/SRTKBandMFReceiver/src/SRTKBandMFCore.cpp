@@ -22,6 +22,8 @@ void SRTKBandMFCore::initialize(maci::ContainerServices* services)
     m_vgStageValues = std::vector<IRA::ReceiverControl::StageValues>(NUMBER_OF_STAGES);
 
     CComponentCore::initialize(services);
+    std::string componentName = services->getName().c_str();
+    m_componentName = componentName.substr(componentName.find_last_of('/') != std::string::npos ? componentName.find_last_of('/') + 1 : 0);
 }
 
 ACS::doubleSeq SRTKBandMFCore::getStageValues(const IRA::ReceiverControl::FetValue& control, DWORD ifs, DWORD stage)
@@ -239,7 +241,7 @@ void SRTKBandMFCore::publishZMQData()
     getBandwidth(bw);
     getPolarization(pol);
 
-    m_zmqDictionary["sections"] = std::vector<ZMQ::ZMQDictionary>();
+    m_zmqDictionary["channels"] = std::vector<ZMQ::ZMQDictionary>();
 
     for(WORD s = 0; s < feeds * IFs; s++)
     {
@@ -249,7 +251,7 @@ void SRTKBandMFCore::publishZMQData()
         section["startFrequency"] = sf[s];
         section["bandWidth"] = bw[s];
         section["polarization"] = pol[s] == 0 ? "LHCP" : "RHCP";
-        m_zmqDictionary["sections"].push_back(section);
+        m_zmqDictionary["channels"].push_back(section);
     }
 
     // status enum
@@ -268,5 +270,5 @@ void SRTKBandMFCore::publishZMQData()
         }
     }
 
-    m_zmqPublisher.publish(ZMQ::ZMQDictionary{{ "SRTKBandMFReceiver", m_zmqDictionary }});
+    m_zmqPublisher.publish(ZMQ::ZMQDictionary{{ m_componentName, m_zmqDictionary }});
 }

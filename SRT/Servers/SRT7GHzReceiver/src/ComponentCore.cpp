@@ -32,6 +32,8 @@ void CComponentCore::initialize(maci::ContainerServices* services)
     m_fetValues.VDL=m_fetValues.IDL=m_fetValues.VGL=m_fetValues.VDR=m_fetValues.IDR=m_fetValues.VGR=0.0;
     m_statusWord=0;
     m_ioMarkError = false;
+    std::string componentName = m_services->getName().c_str();
+    m_componentName = componentName.substr(componentName.find_last_of('/') != std::string::npos ? componentName.find_last_of('/') + 1 : 0);
 }
 
 CConfiguration const * const  CComponentCore::execute() throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::SocketErrorExImpl)
@@ -735,7 +737,7 @@ void CComponentCore::publishZMQData()
     getBandwidth(bw);
     getPolarization(pol);
 
-    m_zmqDictionary["sections"] = std::vector<ZMQ::ZMQDictionary>();
+    m_zmqDictionary["channels"] = std::vector<ZMQ::ZMQDictionary>();
 
     for(WORD s = 0; s < feeds * IFs; s++)
     {
@@ -745,7 +747,7 @@ void CComponentCore::publishZMQData()
         section["startFrequency"] = sf[s];
         section["bandWidth"] = bw[s];
         section["polarization"] = pol[s] == 0 ? "LHCP" : "RHCP";
-        m_zmqDictionary["sections"].push_back(section);
+        m_zmqDictionary["channels"].push_back(section);
     }
 
     // status enum
@@ -764,7 +766,7 @@ void CComponentCore::publishZMQData()
         }
     }
 
-    m_zmqPublisher.publish(ZMQ::ZMQDictionary{{ "SRT7GHzReceiver", m_zmqDictionary }});
+    m_zmqPublisher.publish(ZMQ::ZMQDictionary{{ m_componentName, m_zmqDictionary }});
 }
 
 void CComponentCore::updateComponent()

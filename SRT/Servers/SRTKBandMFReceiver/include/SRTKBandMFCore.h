@@ -191,6 +191,7 @@ private:
 
     ZMQ::ZMQDictionary m_zmqDictionary;
     ZMQ::ZMQPublisher m_zmqPublisher;
+    std::string m_componentName;
 };
 
 

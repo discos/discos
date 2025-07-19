@@ -458,6 +458,7 @@ private:
     Management::TSystemStatus m_componentStatus;
     ZMQ::ZMQDictionary m_zmqDictionary;
     ZMQ::ZMQPublisher m_zmqPublisher;
+    std::string m_componentName;
 
     void setComponentStatus(const Management::TSystemStatus& status) { if (status>m_componentStatus) m_componentStatus=status;  }
 
