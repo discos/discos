@@ -2,6 +2,7 @@
 #include <slamac.h>
 #include "Core.h"
 #include "ScheduleExecutor.h"
+#include "MonitorThread.h"
 #include <LogFilter.h>
 #include <ACSBulkDataError.h>
 
@@ -11,8 +12,9 @@ using namespace maci;
 _IRA_LOGFILTER_IMPORT;
 
 #define SCHED_EXECUTOR_NAME "SCHED_THREAD"
+#define MONITOR_THREAD_NAME "MONITOR_THREAD"
 
-CCore::CCore(ContainerServices *service, CConfiguration *conf, DiscosLocals::StationConfig *stConfig) : m_config(conf), m_stationConf(stConfig), m_services(service)
+CCore::CCore(ContainerServices *service, CConfiguration *conf, DiscosLocals::StationConfig *stConfig) : m_config(conf), m_stationConf(stConfig), m_services(service), m_zmqPublisher("scheduler")
 {
 }
 
@@ -105,6 +107,18 @@ void CCore::execute() throw(ComponentErrors::TimerErrorExImpl, ComponentErrors::
 	m_schedExecuter->initialize(m_services, m_dut1, m_site, m_config); // throw (ComponentErrors::TimerErrorExImpl)
 	ACS::TimeInterval sleepTime = m_config->getScheduleExecutorSleepTime() * 10;
 	m_schedExecuter->setSleepTime(sleepTime);
+
+	try
+	{
+		CCore *tmp = this;
+		m_monitorThread = m_services->getThreadManager()->create<CMonitorThread, CCore *>(MONITOR_THREAD_NAME, tmp, 0, m_config->getMonitorThreadSleepTime() * 10);
+		m_monitorThread->resume();
+	}
+	catch (acsthreadErrType::acsthreadErrTypeExImpl &ex)
+	{
+		_ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl, _dummy, ex, "CCore::execute()");
+		throw _dummy;
+	}
 
 	try
 	{
@@ -250,8 +264,11 @@ void CCore::cleanUp()
 	unloadDefaultDataReceiver();
 	if (m_schedExecuter != NULL)
 		m_schedExecuter->suspend();
+	if (m_monitorThread != NULL)
+		m_monitorThread->suspend();
 	m_services->getThreadManager()->destroy(m_schedExecuter);
-	ACS_LOG(LM_FULL_INFO, "CCore::cleanUp()", (LM_INFO, "THREAD_DESTROYED"));
+	m_services->getThreadManager()->destroy(m_monitorThread);
+	ACS_LOG(LM_FULL_INFO, "CCore::cleanUp()", (LM_INFO, "THREADS_DESTROYED"));
 }
 
 void CCore::skydip(const double &el1, const double &el2, const ACS::TimeInterval &duration) throw(

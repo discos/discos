@@ -69,12 +69,12 @@ INCLUDES        =
 LIBRARIES       = SchedulerImpl
 #LIBRARIES_L     =
 
-SchedulerImpl_OBJECTS = Schedule SchedulerImpl Configuration Core ScheduleExecutor SubScanBinder Schedule_ScanList ScheduleReport
+SchedulerImpl_OBJECTS = Schedule SchedulerImpl Configuration Core ScheduleExecutor SubScanBinder Schedule_ScanList ScheduleReport MonitorThread
 SchedulerImpl_LIBS = IRALibrary AntennaDefinitionsStubs ManagmentDefinitionsStubs SchedulerStubs acsnc \
 EphemGeneratorStubs AntennaBossStubs ObservatoryStubs FitsWriterStubs DataReceiverStubs CustomLoggerStubs GenericWeatherStationStubs\
 GenericBackendStubs ComponentErrors ManagementErrors AntennaErrors BackendsErrors ParserErrors ReceiversErrors MinorServoErrors\
 bulkDataStubs bulkDataReceiverStubs bulkDataCallback bulkDataSenderStubs CommonReceiverInterfaceStubs ReceiversBossStubs ReceiversDefinitionsStubs \
-MinorServoStubs MinorServoBossStubs MinorServoDefinitionsStubs ActiveSurfaceBossStubs DiscosVersion DiscosLocals
+MinorServoStubs MinorServoBossStubs MinorServoDefinitionsStubs ActiveSurfaceBossStubs DiscosVersion DiscosLocals ZMQLibrary
 
 #
 # <brief description of lllll library>

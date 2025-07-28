@@ -1257,7 +1257,7 @@ bool CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,Co
 		}
 	}
 
-	m_zmqDictionary["target"] = std::string(getTargetName()) == "none" ? "NONE" : std::string(getTargetName());
+	m_zmqDictionary["target"] = std::string(getTargetName()) == "none" ? "" : std::string(getTargetName());
 	m_zmqDictionary["targetDeclination"] = getTargetDeclination()*DR2D;
 	m_zmqDictionary["targetFlux"] = getTargetFlux();
 	m_zmqDictionary["targetRightAscension"] = getTargetRightAscension()*DR2D;

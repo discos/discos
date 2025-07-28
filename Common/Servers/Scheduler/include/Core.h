@@ -35,13 +35,16 @@
 #include <StationConfig.h>
 #include "Configuration.h"
 #include "Schedule.h"
+#include "ZMQLibrary.hpp"
 
 #define MINOR_SERVO_AVAILABLE m_config->getMinorServoBossComponent()!=""
 
 //using namespace maci;
 using namespace IRA;
+namespace ZMQ = ZMQLibrary;
 
 class CScheduleExecutor;
+class CMonitorThread;
 
 /**
  * This class models the Scheduler datasets and functionalities. 
@@ -51,6 +54,7 @@ class CScheduleExecutor;
  */
 class CCore {
 	friend class CScheduleExecutor;
+	friend class CMonitorThread;
 public:
 	/**
 	 * Constructor. Default Constructor.
@@ -162,6 +166,11 @@ private:
 	 * Pointer to the thread executer thread
 	 */
 	CScheduleExecutor *m_schedExecuter;
+
+	/**
+	 * Pointer to the monitor thread
+	 */
+	CMonitorThread *m_monitorThread;
 
 	/**
 	 * @var m_schedulerStatus it stores the current status of the scheduler  

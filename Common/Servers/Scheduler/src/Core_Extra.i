@@ -193,3 +193,43 @@ void CCore::waitUntilHandlerCleanup(const void *par)
 	}
 }
 
+void CCore::publishZMQDictionary()
+{
+	m_zmqDictionary["timestamp"] = ZMQ::ZMQTimeStamp::now();
+
+	IRA::CString str_buffer;
+	DWORD dwb1, dwb2;
+
+	std::string currentBackend = (const char *)m_defaultBackendInstance;
+	m_zmqDictionary["currentBackend"] = currentBackend.substr(currentBackend.find_last_of('/') != std::string::npos ? currentBackend.find_last_of('/') + 1 : 0);
+	m_zmqDictionary["currentDevice"] = m_currentDevice;
+	std::string currentRecorder = (const char *)m_defaultDataReceiverInstance;
+	m_zmqDictionary["currentRecorder"] = currentRecorder.substr(currentRecorder.find_last_of('/') != std::string::npos ? currentRecorder.find_last_of('/') + 1 : 0);
+	getProjectCode(str_buffer);
+	m_zmqDictionary["projectCode"] = (const char*)str_buffer;
+	m_zmqDictionary["restFrequency"] = std::vector<double>(m_restFrequency.get_buffer(), m_restFrequency.get_buffer() + m_restFrequency.length());
+	getCurrentIdentifiers(dwb1, dwb2);
+	m_zmqDictionary["scanID"] = dwb1;
+	m_zmqDictionary["subScanID"] = dwb2;
+	getScheduleName(str_buffer);
+	m_zmqDictionary["scheduleName"] = (const char*)str_buffer;
+
+	// status enum
+	switch (getStatus()) {
+		case Management::MNG_OK : {
+			m_zmqDictionary["status"] = "OK";
+			break;
+		}
+		case Management::MNG_WARNING : {
+			m_zmqDictionary["status"] = "WARNING";
+			break;
+		}
+		default: { //Management::MNG_FAILURE
+			m_zmqDictionary["status"] = "FAILURE";
+			break;
+		}
+	}
+
+	m_zmqDictionary["tracking"] = isTracking();
+	m_zmqPublisher.publish(m_zmqDictionary);
+}

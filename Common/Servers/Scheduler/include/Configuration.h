@@ -145,6 +145,11 @@ public:
 	 * @return the sleep time between two execution of the schedule executor thread (microseconds)
 	 */ 
 	long getScheduleExecutorSleepTime() const { return m_scheduleExecutorSleepTime; }
+
+	/**
+	 * @return the sleep time between two execution of the monitor thread (microseconds)
+	 */
+	long getMonitorThreadSleepTime() const { return m_monitorThreadSleepTime; }
 	
 	/**
 	 * @return the time (microseconds) gap between two transition of the calibration diode.
@@ -242,6 +247,7 @@ private:
 	long m_repetitionCacheTime;
 	long m_repetitionExpireTime;
 	long m_scheduleExecutorSleepTime;
+	long m_monitorThreadSleepTime;
 	long m_TsysGapTime;
 	IRA::CString m_proceduresLocation;
 	IRA::CString m_defaultProceduresFile;

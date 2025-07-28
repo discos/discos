@@ -1,6 +1,9 @@
 #ifndef CORE_EXTRA_H_
 #define CORE_EXTRA_H_
 
+ZMQ::ZMQPublisher m_zmqPublisher;
+ZMQ::ZMQDictionary m_zmqDictionary;
+
 // Call back and event handlers
 
 /**
@@ -32,6 +35,11 @@ static void waitUntilHandlerCleanup(const void *par);
  * used as wrapper to function that are in charge of forwarding commands to other packages
 */
 bool remoteCall(const IRA::CString& command,const IRA::CString& package,const long& par,IRA::CString& out) throw (ParserErrors::PackageErrorExImpl,ManagementErrors::UnsupportedOperationExImpl);
+
+/**
+ * Sends the ZMQ dictionary over the publisher
+ */
+void publishZMQDictionary();
 
 
 #endif
