@@ -192,10 +192,14 @@ void CBossCore::execute() throw (ComponentErrors::CouldntGetComponentExImpl,
 		throw Impl;
 	}	
 
+	IRA::CString str_buffer;
+
 	ZMQ::ZMQDictionary site_info;
 	site_info["name"] = site_name;
-	site_info["longitude"] = m_site.getLongitude()*DR2D;
-	site_info["latitude"] = m_site.getLatitude()*DR2D;
+	IRA::CIRATools::radToSexagesimalAngle(m_site.getLongitude(), str_buffer);
+	site_info["longitude"] = (const char*)str_buffer;
+	IRA::CIRATools::radToSexagesimalAngle(m_site.getLatitude(), str_buffer);
+	site_info["latitude"] = (const char*)str_buffer;
 	site_info["height"] = m_site.getHeight();
 	site_info["xPosition"] = m_site.getXPos();
 	site_info["yPosition"] = m_site.getYPos();
@@ -1226,14 +1230,20 @@ bool CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,Co
 		}
 	}
 
+	IRA::CString str_buffer;
+
 	m_zmqDictionary["latitudeOffset"] = getLatitudeOffset()*DR2D;
 	m_zmqDictionary["longitudeOffset"] = getLongitudeOffset()*DR2D;
 	m_zmqDictionary["observedAzimuth"] = getObservedHorizontalAzimuth()*DR2D;
-	m_zmqDictionary["observedDeclination"] = getObservedEquatorialDeclination()*DR2D;
+	IRA::CIRATools::radToSexagesimalAngle(getObservedEquatorialDeclination(), str_buffer);
+	m_zmqDictionary["observedDeclination"] = (const char*)str_buffer;
 	m_zmqDictionary["observedElevation"] = getObservedHorizontalElevation()*DR2D;
-	m_zmqDictionary["observedGalLatitude"] = getObservedGalacticLatitude()*DR2D;
-	m_zmqDictionary["observedGalLongitude"] = getObservedGalacticLongitude()*DR2D;
-	m_zmqDictionary["observedRightAscension"] = getObservedEquatorialRightAscension()*DR2D;
+	IRA::CIRATools::radToSexagesimalAngle(getObservedGalacticLatitude(), str_buffer);
+	m_zmqDictionary["observedGalLatitude"] = (const char*)str_buffer;
+	IRA::CIRATools::radToSexagesimalAngle(getObservedGalacticLongitude(), str_buffer);
+	m_zmqDictionary["observedGalLongitude"] = (const char*)str_buffer;
+	IRA::CIRATools::radToHourAngle(getObservedEquatorialRightAscension(), str_buffer);
+	m_zmqDictionary["observedRightAscension"] = (const char*)str_buffer;
 	m_zmqDictionary["pointingAzimuthCorrection"] = getPointingAzOffset()*DR2D;
 	m_zmqDictionary["pointingElevationCorrection"] = getPointingElOffset()*DR2D;
 	m_zmqDictionary["rawAzimuth"] = m_lastEncoderAzimuth*DR2D;
@@ -1258,9 +1268,11 @@ bool CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,Co
 	}
 
 	m_zmqDictionary["target"] = std::string(getTargetName()) == "none" ? "" : std::string(getTargetName());
-	m_zmqDictionary["targetDeclination"] = getTargetDeclination()*DR2D;
+	IRA::CIRATools::radToSexagesimalAngle(getTargetDeclination(), str_buffer);
+	m_zmqDictionary["targetDeclination"] = (const char*)str_buffer;
 	m_zmqDictionary["targetFlux"] = getTargetFlux();
-	m_zmqDictionary["targetRightAscension"] = getTargetRightAscension()*DR2D;
+	IRA::CIRATools::radToHourAngle(getTargetRightAscension(), str_buffer);
+	m_zmqDictionary["targetRightAscension"] = (const char*)str_buffer;
 	m_zmqDictionary["targetVrad"] = getTargetVrad();
 
 	// vradDefinition enum
