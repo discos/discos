@@ -22,6 +22,7 @@ SRTBaseMinorServoImpl::SRTBaseMinorServoImpl(const ACE_CString& component_name, 
     m_system_offsets(m_virtual_axes, 0.0),
     m_commanded_plain_virtual_positions(m_virtual_axes, 0.0),
     m_positions_queue(5 * 60 * int(1 / getCDBValue<double>(container_services, "status_thread_period", "/MINORSERVO/Boss")), m_virtual_axes),
+    m_offsets_queue(5 * 60 * int(1 / getCDBValue<double>(container_services, "status_thread_period", "/MINORSERVO/Boss")), m_virtual_axes),
     m_min(SRTBaseMinorServoImpl::getMotionConstant(*this, "min_range")),
     m_max(SRTBaseMinorServoImpl::getMotionConstant(*this, "max_range")),
     m_m_s(SRTBaseMinorServoImpl::getMotionConstant(*this, "max_speed")),
@@ -396,13 +397,14 @@ ACS::doubleSeq* SRTBaseMinorServoImpl::calcCoordinates(double elevation)
     }
 }
 
-ACS::doubleSeq* SRTBaseMinorServoImpl::getUserOffsets()
+ACS::doubleSeq* SRTBaseMinorServoImpl::getUserOffsets(ACS::Time acs_time)
 {
     AUTO_TRACE(m_servo_name + "::getUserOffsets()");
 
+    const std::vector<double> user_offsets = m_offsets_queue.getUserOffsets(acs_time == 0 ? getTimeStamp() : acs_time);
     ACS::doubleSeq_var offsets = new ACS::doubleSeq;
-    offsets->length(m_user_offsets.size());
-    std::copy(m_user_offsets.begin(), m_user_offsets.end(), offsets->begin());
+    offsets->length(user_offsets.size());
+    std::copy(user_offsets.begin(), user_offsets.end(), offsets->begin());
     return offsets._retn();
 }
 
@@ -453,6 +455,7 @@ void SRTBaseMinorServoImpl::setUserOffset(const char* axis_name, CORBA::Double o
     }
 
     m_user_offsets[index] = offset;
+    m_offsets_queue.put(getTimeStamp(), m_user_offsets, m_system_offsets);
 }
 
 void SRTBaseMinorServoImpl::clearUserOffsets()
@@ -461,12 +464,7 @@ void SRTBaseMinorServoImpl::clearUserOffsets()
 
     checkLineStatus();
 
-    m_user_offsets = std::vector<double>(m_virtual_axes, 0.0);
-
-    std::vector<double> offsets(m_virtual_axes, 0);
-    std::transform(m_user_offsets.begin(), m_user_offsets.end(), m_system_offsets.begin(), offsets.begin(), std::plus<double>());
-
-    if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::offset(m_servo_name, offsets)).checkOutput())
+    if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::offset(m_servo_name, m_system_offsets)).checkOutput())
     {
         m_error_code.store(ERROR_COMMAND_ERROR);
         _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::clearUserOffset()").c_str());
@@ -474,15 +472,19 @@ void SRTBaseMinorServoImpl::clearUserOffsets()
         ex.log(LM_DEBUG);
         throw ex.getMinorServoErrorsEx();
     }
+
+    m_user_offsets = std::vector<double>(m_virtual_axes, 0.0);
+    m_offsets_queue.put(getTimeStamp(), m_user_offsets, m_system_offsets);
 }
 
-ACS::doubleSeq* SRTBaseMinorServoImpl::getSystemOffsets()
+ACS::doubleSeq* SRTBaseMinorServoImpl::getSystemOffsets(ACS::Time acs_time)
 {
     AUTO_TRACE(m_servo_name + "::getSystemOffsets()");
 
+    const std::vector<double> system_offsets = m_offsets_queue.getSystemOffsets(acs_time == 0 ? getTimeStamp() : acs_time);
     ACS::doubleSeq_var offsets = new ACS::doubleSeq;
-    offsets->length(m_system_offsets.size());
-    std::copy(m_system_offsets.begin(), m_system_offsets.end(), offsets->begin());
+    offsets->length(system_offsets.size());
+    std::copy(system_offsets.begin(), system_offsets.end(), offsets->begin());
     return offsets._retn();
 }
 
@@ -533,6 +535,7 @@ void SRTBaseMinorServoImpl::setSystemOffset(const char* axis_name, CORBA::Double
     }
 
     m_system_offsets[index] = offset;
+    m_offsets_queue.put(getTimeStamp(), m_user_offsets, m_system_offsets);
 }
 
 void SRTBaseMinorServoImpl::clearSystemOffsets()
@@ -541,13 +544,7 @@ void SRTBaseMinorServoImpl::clearSystemOffsets()
 
     checkLineStatus();
 
-    m_system_offsets = std::vector<double>(m_virtual_axes, 0.0);
-
-    // Update the offsets
-    std::vector<double> offsets(m_virtual_axes, 0);
-    std::transform(m_user_offsets.begin(), m_user_offsets.end(), m_system_offsets.begin(), offsets.begin(), std::plus<double>());
-
-    if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::offset(m_servo_name, offsets)).checkOutput())
+    if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::offset(m_servo_name, m_user_offsets)).checkOutput())
     {
         m_error_code.store(ERROR_COMMAND_ERROR);
         _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::clearSystemOffset()").c_str());
@@ -555,6 +552,9 @@ void SRTBaseMinorServoImpl::clearSystemOffsets()
         ex.log(LM_DEBUG);
         throw ex.getMinorServoErrorsEx();
     }
+
+    m_system_offsets = std::vector<double>(m_virtual_axes, 0.0);
+    m_offsets_queue.put(getTimeStamp(), m_user_offsets, m_system_offsets);
 }
 
 void SRTBaseMinorServoImpl::reloadOffsets()
@@ -582,6 +582,7 @@ void SRTBaseMinorServoImpl::reloadOffsets()
             throw ex.getMinorServoErrorsEx();
         }
 
+        m_offsets_queue.put(getTimeStamp(), m_user_offsets, m_system_offsets);
         ACS_LOG(LM_FULL_INFO, m_servo_name + "::reloadOffsets()", (LM_NOTICE, "Offsets discrepancy, reloading them"));
     }
 }
@@ -609,15 +610,9 @@ ACS::doubleSeq* SRTBaseMinorServoImpl::getAxesPositions(ACS::Time acs_time)
 {
     AUTO_TRACE("SRTBaseMinorServoImpl::getAxesPositions()");
 
-    // Get the latest position
-    if(acs_time == 0)
-    {
-        acs_time = getTimeStamp();
-    }
-
     try
     {
-        std::vector<double> p = m_positions_queue.get(acs_time).second;
+        std::vector<double> p = m_positions_queue.get(acs_time == 0 ? getTimeStamp() : acs_time).second;
 
         ACS::doubleSeq_var positions = new ACS::doubleSeq;
         positions->length(m_virtual_axes);

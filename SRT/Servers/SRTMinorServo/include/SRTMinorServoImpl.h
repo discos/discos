@@ -121,9 +121,10 @@ public:
 
     /**
      * Asks the component the virtual axes user offsets.
+     * @param acs_time the epoch we want to retrieve the axes virtual user offsets of the servo system.
      * @return a pointer to the double sequence object containing the current virtual axes user offsets of the servo system.
      */
-    ACS::doubleSeq* getUserOffsets();
+    ACS::doubleSeq* getUserOffsets(ACS::Time acs_time);
 
     /**
      * Load a single virtual axis user offset to the component and to the servo system.
@@ -142,9 +143,10 @@ public:
 
     /**
      * Asks the component the virtual axes system offsets.
+     * @param acs_time the epoch we want to retrieve the axes virtual system offsets of the servo system.
      * @return a pointer to the double sequence object containing the current virtual axes system offsets of the servo system.
      */
-    ACS::doubleSeq* getSystemOffsets();
+    ACS::doubleSeq* getSystemOffsets(ACS::Time acs_time);
 
     /**
      * Load a single virtual axis system offset to the component and to the servo system.
@@ -397,6 +399,11 @@ protected:
      */
     SRTMinorServoPositionsQueue m_positions_queue;
 
+    /*
+     * Queue of offsets commanded to the servo system in time, both user and system offsets.
+     */
+    SRTMinorServoOffsetsQueue m_offsets_queue;
+
     /**
      * Minimum ranges of the axes of the servo system.
      */
@@ -550,10 +557,10 @@ protected:
     void stop()                                                                                 { SRTBaseMinorServoImpl::stop();                                        }\
     void preset(const ACS::doubleSeq& coordinates)                                              { SRTBaseMinorServoImpl::preset(coordinates);                           }\
     ACS::doubleSeq* calcCoordinates(CORBA::Double elevation)                                    { return SRTBaseMinorServoImpl::calcCoordinates(elevation);             }\
-    ACS::doubleSeq* getUserOffsets()                                                            { return SRTBaseMinorServoImpl::getUserOffsets();                       }\
+    ACS::doubleSeq* getUserOffsets(ACS::Time acs_time)                                          { return SRTBaseMinorServoImpl::getUserOffsets(acs_time);               }\
     void setUserOffset(const char* axis_name, CORBA::Double offset)                             { SRTBaseMinorServoImpl::setUserOffset(axis_name, offset);              }\
     void clearUserOffsets()                                                                     { SRTBaseMinorServoImpl::clearUserOffsets();                            }\
-    ACS::doubleSeq* getSystemOffsets()                                                          { return SRTBaseMinorServoImpl::getSystemOffsets();                     }\
+    ACS::doubleSeq* getSystemOffsets(ACS::Time acs_time)                                        { return SRTBaseMinorServoImpl::getSystemOffsets(acs_time);             }\
     void setSystemOffset(const char* axis_name, CORBA::Double offset)                           { SRTBaseMinorServoImpl::setSystemOffset(axis_name, offset);            }\
     void clearSystemOffsets()                                                                   { SRTBaseMinorServoImpl::clearSystemOffsets();                          }\
     void reloadOffsets()                                                                        { SRTBaseMinorServoImpl::reloadOffsets();                               }\

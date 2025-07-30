@@ -54,7 +54,7 @@ xxxxx_LIBS      =
 #
 # Includes (.h) files (public only)
 # ---------------------------------
-INCLUDES        = SRTMinorServoCommandLibrary.h SRTMinorServoSocket.h SRTMinorServoTestingSocket.h SRTMinorServoUtils.h SRTMinorServoContainers.h #hexlib.h
+INCLUDES        = SRTMinorServoCommandLibrary.h SRTMinorServoSocket.h SRTMinorServoTestingSocket.h SRTMinorServoUtils.h SRTMinorServoContainers.h SRTMinorServoPositionsQueue.h SRTMinorServoOffsetsQueue.h #hexlib.h
 
 #
 # Libraries (public and local)

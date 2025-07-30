@@ -154,10 +154,11 @@ private:
 
     /**
      * Retrieves all the current user offsets.
+     * @param acs_time the ACS::Time the user wants to retrieve all the axes user offsets for.
      * @throw MinorServoErrors::MinorServoErrorsEx when the system is not configured yet.
      * @return a ACS::doubleSeq containing all the axes user offsets. The axes order is the same one retrieved with the getAxesInfo method.
      */
-    ACS::doubleSeq* getUserOffsets();
+    ACS::doubleSeq* getUserOffsets(ACS::Time acs_time);
 
     /**
      * Resets the given servo system offsets to 0.
@@ -178,10 +179,11 @@ private:
 
     /**
      * Retrieves all the current system offsets.
+     * @param acs_time the ACS::Time the user wants to retrieve all the axes system offsets for.
      * @throw MinorServoErrors::MinorServoErrorsEx when the system is not configured yet.
      * @return a ACS::doubleSeq containing all the axes system offsets. The axes order is the same one retrieved with the getAxesInfo method.
      */
-    ACS::doubleSeq* getSystemOffsets();
+    ACS::doubleSeq* getSystemOffsets(ACS::Time acs_time);
 
     /**
      * Retrieves all the current axes names and units of measure.
