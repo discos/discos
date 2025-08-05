@@ -190,6 +190,11 @@ module MinorServo
          * This command resets the error status inside the component.
          */
         void reset();
+
+        /**
+         * Publishes the ZMQ dictionary
+         */
+        void publishData();
     };
 
     /**

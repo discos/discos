@@ -8,8 +8,8 @@ SRTBaseMinorServoImpl::SRTBaseMinorServoImpl(const ACE_CString& component_name, 
     m_servo_name(std::string(strchr(component_name.c_str(), '/') + 1)),
     m_virtual_axes(getCDBValue<size_t>(container_services, "virtual_axes")),
     m_physical_axes(getCDBValue<size_t>(container_services, "physical_axes")),
-    m_virtual_axes_names(SRTBaseMinorServoImpl::getPropertiesTable(*this, "virtual_positions")),
     m_virtual_axes_units(SRTBaseMinorServoImpl::getPropertiesTable(*this, "virtual_axes_units")),
+    m_virtual_axes_names(SRTBaseMinorServoImpl::getPropertiesTable(*this, "virtual_positions")),
     m_status(
         m_servo_name,
         SRTBaseMinorServoImpl::getPropertiesTable(*this, "physical_axes_enabled"),
@@ -50,9 +50,11 @@ SRTBaseMinorServoImpl::SRTBaseMinorServoImpl(const ACE_CString& component_name, 
     m_error_code_ptr(this),
     m_current_coefficients_table(),
     m_socket_configuration(SRTMinorServoSocketConfiguration::getInstance(container_services)),
+    m_zmqPublisher("minor_servo"),
     m_socket(SRTMinorServoSocket::getInstance(m_socket_configuration.m_ip_address, m_socket_configuration.m_port, m_socket_configuration.m_timeout))
 {
     AUTO_TRACE(m_servo_name + "::SRTBaseMinorServoImpl()");
+    m_zmqDictionary["axes"] = ZMQ::ZMQDictionary();
 }
 
 SRTBaseMinorServoImpl::~SRTBaseMinorServoImpl()
@@ -169,6 +171,135 @@ bool SRTBaseMinorServoImpl::status()
     }
 
     return true;
+}
+
+void SRTBaseMinorServoImpl::updateZMQDictionary()
+{
+    std::vector<double> current_positions = m_positions_queue.get(m_status.getTimestamp()).second;
+
+    for(size_t i = 0; i < m_virtual_axes; i++)
+    {
+        ZMQ::ZMQDictionary axis;
+        axis["currentPosition"] = current_positions[i];
+        axis["commandedPosition"] = m_commanded_plain_virtual_positions[i];
+        axis["userOffset"] = m_user_offsets[i];
+        axis["systemOffset"] = m_system_offsets[i];
+        std::string axis_name = m_virtual_axes_names[i];
+        axis_name = axis_name == "ROTATION" ? "RZ" : axis_name;
+        m_zmqDictionary["axes"][axis_name] = axis;
+    }
+
+    m_zmqDictionary["blocked"] = m_status.isBlocked() == Management::MNG_TRUE;
+    m_zmqDictionary["currentSetup"] = m_current_setup;
+
+    switch(m_status.getDriveCabinetStatus())
+    {
+        case DRIVE_CABINET_OK:
+        {
+            m_zmqDictionary["driveCabinetStatus"] = "OK";
+            break;
+        }
+        case DRIVE_CABINET_WARNING:
+        {
+            m_zmqDictionary["driveCabinetStatus"] = "WARNING";
+            break;
+        }
+        case DRIVE_CABINET_ERROR:
+        {
+            m_zmqDictionary["driveCabinetStatus"] = "ERROR";
+            break;
+        }
+    }
+    m_zmqDictionary["enabled"] = m_status.isEnabled() == Management::MNG_TRUE;
+
+    // error_code enum
+    switch(m_error_code.load())
+    {
+        case ERROR_NO_ERROR:
+        {
+            m_zmqDictionary["errorCode"] = "NO ERROR";
+            break;
+        }
+        case ERROR_NOT_CONNECTED:
+        {
+            m_zmqDictionary["errorCode"] = "SOCKET NOT CONNECTED";
+            break;
+        }
+        case ERROR_MAINTENANCE:
+        {
+            m_zmqDictionary["errorCode"] = "SYSTEM IN MAINTENANCE MODE";
+            break;
+        }
+        case ERROR_EMERGENCY_STOP:
+        {
+            m_zmqDictionary["errorCode"] = "EMERGENCY STOP";
+            break;
+        }
+        case ERROR_COVER_WRONG_POSITION:
+        {
+            m_zmqDictionary["errorCode"] = "GREGORIAN COVER IN WRONG POSITION";
+            break;
+        }
+        case ERROR_CONFIG_ERROR:
+        {
+            m_zmqDictionary["errorCode"] = "CONFIGURATION ERROR";
+            break;
+        }
+        case ERROR_COMMAND_ERROR:
+        {
+            m_zmqDictionary["errorCode"] = "REMOTE COMMAND ERROR";
+            break;
+        }
+        case ERROR_SERVO_BLOCKED:
+        {
+            m_zmqDictionary["errorCode"] = "MINOR SERVO IS BLOCKED";
+            break;
+        }
+        case ERROR_DRIVE_CABINET:
+        {
+            m_zmqDictionary["errorCode"] = "DRIVE CABINET ERROR";
+            break;
+        }
+    }
+
+    m_zmqDictionary["inUse"] = m_in_use.load() == Management::MNG_TRUE;
+
+    switch(m_status.getOperativeMode())
+    {
+        case OPERATIVE_MODE_UNKNOWN:
+        {
+            m_zmqDictionary["operativeMode"] = "UNKNOWN";
+        }
+        case OPERATIVE_MODE_SETUP:
+        {
+            m_zmqDictionary["operativeMode"] = "SETUP";
+        }
+        case OPERATIVE_MODE_STOW:
+        {
+            m_zmqDictionary["operativeMode"] = "STOW";
+        }
+        case OPERATIVE_MODE_STOP:
+        {
+            m_zmqDictionary["operativeMode"] = "STOP";
+        }
+        case OPERATIVE_MODE_PRESET:
+        {
+            m_zmqDictionary["operativeMode"] = "PRESET";
+        }
+        case OPERATIVE_MODE_PROGRAMTRACK:
+        {
+            m_zmqDictionary["operativeMode"] = "PROGRAM TRACK";
+        }
+    }
+
+    m_zmqDictionary["timestamp"] = ZMQ::ZMQTimeStamp::fromACSTime(m_status.getTimestamp());
+}
+
+void SRTBaseMinorServoImpl::publishData()
+{
+    updateZMQDictionary();
+
+    m_zmqPublisher.publish(ZMQ::ZMQDictionary{{ m_servo_name, m_zmqDictionary }});
 }
 
 void SRTBaseMinorServoImpl::stow(CORBA::Long stow_position)

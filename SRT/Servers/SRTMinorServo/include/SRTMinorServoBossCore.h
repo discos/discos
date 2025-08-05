@@ -24,6 +24,7 @@
 #include <MinorServoErrors.h>
 #include <ManagementErrors.h>
 #include <ComponentErrors.h>
+#include <acsncSimpleSupplier.h>
 #include "SRTMinorServoSocket.h"
 #include "MSDevIOs.h"
 #include "SRTMinorServoBossImpl.h"
@@ -33,11 +34,13 @@
 #include "SRTMinorServoTrackingThread.h"
 #include "SRTMinorServoScanThread.h"
 #include "SRTMinorServoContainers.h"
+#include "ZMQLibrary.hpp"
 
 
 _IRA_LOGFILTER_IMPORT;
 
 using namespace MinorServo;
+namespace ZMQ = ZMQLibrary;
 
 class SRTMinorServoBossImpl;
 class SRTMinorServoStatusThread;
@@ -289,6 +292,11 @@ private:
     void reset(bool force=false);
 
     /**
+     * Method that updates and publishes the ZMQ dictionary and the NotificationChannel object.
+     */
+    void publishData();
+
+    /**
      * Method that loads the focal configurations names when the boss is started
      */
     std::map<std::string, std::string> loadConfigurations();
@@ -464,6 +472,21 @@ private:
      * Last scan parameters.
      */
     SRTMinorServoScan m_last_scan;
+
+    /**
+     * The ACS notification channel simple supplier object.
+     */
+    nc::SimpleSupplier* m_notification_channel;
+
+    /**
+     * ZMQ Dictionary object.
+     */
+    ZMQ::ZMQDictionary m_zmqDictionary;
+
+    /**
+     * ZMQ Publisher object.
+     */
+    ZMQ::ZMQPublisher m_zmqPublisher;
 };
 
 #endif

@@ -25,9 +25,11 @@
 #include "MSDevIOs.h"
 #include "SRTMinorServoContainers.h"
 #include "SRTMinorServoCommon.h"
+#include "ZMQLibrary.hpp"
 
 
 using namespace MinorServo;
+namespace ZMQ = ZMQLibrary;
 
 /**
  * This class implements the base ACS::CharacteristicComponent CORBA interface for a SRTMinorServo component.
@@ -324,6 +326,16 @@ protected:
      */
     static std::vector<double> getMotionConstant(SRTBaseMinorServoImpl& object, const std::string& constant);
 
+    /**
+     * Update the ZMQ Dictionary
+     */
+    void updateZMQDictionary();
+
+    /**
+     * Publish data over the ZMQ Publisher object
+     */
+    void publishData();
+
 private:
     /**
      * Static function used to retrieve a table from the CDB DataBlock directory. Used inside the initialization list.
@@ -360,15 +372,15 @@ private:
     const size_t m_physical_axes;
 
     /**
-     * Name of the virtual axes of the servo system.
-     */
-    const std::vector<std::string> m_virtual_axes_names;
-
-    /**
      * Units of the virtual axes of the servo system.
      */
     const std::vector<std::string> m_virtual_axes_units;
 protected:
+    /**
+     * Name of the virtual axes of the servo system.
+     */
+    const std::vector<std::string> m_virtual_axes_names;
+
     /**
      * Dictionary containing the last status retrieved form the servo system.
      */
@@ -540,6 +552,16 @@ private:
     const SRTMinorServoSocketConfiguration& m_socket_configuration;
 protected:
     /**
+     * ZMQ publisher object
+     */
+    ZMQ::ZMQPublisher m_zmqPublisher;
+
+    /**
+     * ZMQ Dictionary
+     */
+    ZMQ::ZMQDictionary m_zmqDictionary;
+
+    /**
      * Socket object.
      */
     SRTMinorServoSocket& m_socket;
@@ -622,6 +644,11 @@ public:
     bool status()                                                                               { return SRTBaseMinorServoImpl::status();                               }
 
     /**
+     * Publish data over the ZMQ Publisher object
+     */
+    void publishData()                                                                          { return SRTBaseMinorServoImpl::publishData();                          }
+
+    /**
      * Setup method definition. It simply calls the SRTBaseMinorServoImpl method.
      */
     bool setup(const char* configuration_name = "", CORBA::Boolean as_off = false)              { return SRTBaseMinorServoImpl::setup(configuration_name, as_off);      }
@@ -676,6 +703,16 @@ public:
      * @throw ComponentErrors::ComponentErrorsEx when there is an error while trying to load the table for the given configuration.
      */
     bool setup(const char* configuration_name = "", CORBA::Boolean as_off = false);
+
+    /**
+     * Update the ZMQ Dictionary
+     */
+    void updateZMQDictionary();
+
+    /**
+     * Publish data over the ZMQ Publisher object
+     */
+    void publishData();
 
     /**
      * Declaration of all the other inherited methods.

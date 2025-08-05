@@ -387,7 +387,7 @@ namespace MinorServo
          */
         ACE_CString getPLCVersion() const
         {
-            return this->get<std::string>("PLC_VERSION").c_str();
+            return ACE_CString(this->get<std::string>("PLC_VERSION").c_str());
         }
 
         /**

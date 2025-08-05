@@ -39,7 +39,9 @@ SRTMinorServoBossCore::SRTMinorServoBossCore(SRTMinorServoBossImpl& component) :
         //{ "PFP", m_component.getContainerServices()->getComponent<SRTProgramTrackMinorServo>("MINORSERVO/PFP") },
         { "SRP", m_component.getContainerServices()->getComponent<SRTProgramTrackMinorServo>("MINORSERVO/SRP") }
     },
-    m_DISCOS_2_LDO_configurations(loadConfigurations())
+    m_DISCOS_2_LDO_configurations(loadConfigurations()),
+    m_notification_channel(nullptr),
+    m_zmqPublisher("minor_servo")
 {
     AUTO_TRACE("SRTMinorServoBossCore::SRTMinorServoBossCore()");
 
@@ -55,6 +57,12 @@ SRTMinorServoBossCore::~SRTMinorServoBossCore()
     destroyThread(m_tracking_thread);
     destroyThread(m_scan_thread);
     destroyThread(m_status_thread);
+
+    if(m_notification_channel != nullptr)
+    {
+        m_notification_channel->disconnect();
+        m_notification_channel = nullptr;
+    }
 }
 
 bool SRTMinorServoBossCore::status()
@@ -157,6 +165,204 @@ bool SRTMinorServoBossCore::status()
     }
 
     return true;
+}
+
+void SRTMinorServoBossCore::publishData()
+{
+    m_zmqDictionary["timestamp"] = ZMQ::ZMQTimeStamp::fromUNIXTime(m_status.getPLCTime());
+    m_zmqDictionary["socketConnected"] = m_socket_connected.load() == Management::MNG_TRUE;
+    m_zmqDictionary["tracking"] = m_tracking.load() == Management::MNG_TRUE;
+    m_zmqDictionary["emergency"] = m_status.emergencyPressed() == Management::MNG_TRUE;
+    m_zmqDictionary["scanning"] = m_scanning.load() == Management::MNG_TRUE;
+    m_zmqDictionary["currentSetup"] = m_actual_setup;
+    m_zmqDictionary["trackingEnabled"] = m_elevation_tracking_enabled.load() == Management::MNG_TRUE;
+    m_zmqDictionary["maintenanceMode"] = m_status.getControl() == CONTROL_VBRAIN;
+    m_zmqDictionary["PLCFirmwareVersion"] = m_status.getPLCVersion().c_str();
+
+    // error_code enum
+    switch(m_error_code.load())
+    {
+        case ERROR_NO_ERROR:
+        {
+            m_zmqDictionary["errorCode"] = "NO ERROR";
+            break;
+        }
+        case ERROR_NOT_CONNECTED:
+        {
+            m_zmqDictionary["errorCode"] = "SOCKET NOT CONNECTED";
+            break;
+        }
+        case ERROR_MAINTENANCE:
+        {
+            m_zmqDictionary["errorCode"] = "SYSTEM IN MAINTENANCE MODE";
+            break;
+        }
+        case ERROR_EMERGENCY_STOP:
+        {
+            m_zmqDictionary["errorCode"] = "EMERGENCY STOP";
+            break;
+        }
+        case ERROR_COVER_WRONG_POSITION:
+        {
+            m_zmqDictionary["errorCode"] = "GREGORIAN COVER IN WRONG POSITION";
+            break;
+        }
+        case ERROR_CONFIG_ERROR:
+        {
+            m_zmqDictionary["errorCode"] = "CONFIGURATION ERROR";
+            break;
+        }
+        case ERROR_COMMAND_ERROR:
+        {
+            m_zmqDictionary["errorCode"] = "REMOTE COMMAND ERROR";
+            break;
+        }
+        case ERROR_SERVO_BLOCKED:
+        {
+            m_zmqDictionary["errorCode"] = "MINOR SERVO IS BLOCKED";
+            break;
+        }
+        case ERROR_DRIVE_CABINET:
+        {
+            m_zmqDictionary["errorCode"] = "DRIVE CABINET ERROR";
+            break;
+        }
+    }
+
+    // gregorian cover enum
+    switch(m_status.getGregorianCoverPosition())
+    {
+        case COVER_STATUS_UNKNOWN :
+        {
+            m_zmqDictionary["gregorianCoverPosition"] = "UNKNOWN";
+            break;
+        }
+        case COVER_STATUS_CLOSED :
+        {
+            m_zmqDictionary["gregorianCoverPosition"] = "CLOSED";
+            break;
+        }
+        case COVER_STATUS_OPEN :
+        {
+            m_zmqDictionary["gregorianCoverPosition"] = "OPEN";
+            break;
+        }
+    }
+
+    // motion info enum
+    switch(m_motion_status.load())
+    {
+        case MOTION_STATUS_UNCONFIGURED :
+        {
+            m_zmqDictionary["motionInfo"] = "NOT CONFIGURED";
+            break;
+        }
+        case MOTION_STATUS_STARTING :
+        {
+            m_zmqDictionary["motionInfo"] = "STARTING";
+            break;
+        }
+        case MOTION_STATUS_CONFIGURED :
+        {
+            m_zmqDictionary["motionInfo"] = "CONFIGURED";
+            break;
+        }
+        case MOTION_STATUS_TRACKING :
+        {
+            m_zmqDictionary["motionInfo"] = "TRACKING";
+            break;
+        }
+        case MOTION_STATUS_PARKING :
+        {
+            m_zmqDictionary["motionInfo"] = "PARKING";
+            break;
+        }
+        case MOTION_STATUS_PARKED :
+        {
+            m_zmqDictionary["motionInfo"] = "PARKED";
+            break;
+        }
+        case MOTION_STATUS_ERROR :
+        {
+            m_zmqDictionary["motionInfo"] = "ERROR";
+            break;
+        }
+    }
+
+    // status enum
+    switch (m_subsystem_status.load())
+    {
+        case Management::MNG_OK :
+        {
+            m_zmqDictionary["status"] = "OK";
+            break;
+        }
+        case Management::MNG_WARNING :
+        {
+            m_zmqDictionary["status"] = "WARNING";
+            break;
+        }
+        default: //Management::MNG_FAILURE
+        {
+            m_zmqDictionary["status"] = "FAILURE";
+            break;
+        }
+    }
+
+    m_zmqPublisher.publish(ZMQ::ZMQDictionary{{ "boss", m_zmqDictionary }});
+
+    for(const auto& [name, servo] : m_servos)
+    {
+        if(!m_tracking_servos.count(name))
+        {
+            servo->publishData();
+        }
+        else
+        {
+            m_tracking_servos.at(name)->publishData();
+        }
+    }
+
+    static TIMEVALUE lastEvent(0UL);
+    static MinorServoDataBlock prvData = {0UL, false, false, false, false, Management::MNG_WARNING};
+
+    TIMEVALUE now(ACS::Time(IRA::CIRATools::UNIXTime2ACSTime(m_status.getPLCTime())));
+
+    if(IRA::CIRATools::timeDifference(now, lastEvent) < 1000000 && prvData.tracking == (m_tracking.load() == Management::MNG_TRUE) && prvData.status == m_subsystem_status.load())
+    {
+        return;
+    }
+
+    prvData.timeMark = now.value().value;
+    prvData.tracking = m_tracking.load() == Management::MNG_TRUE;
+    prvData.starting = m_starting.load() == Management::MNG_TRUE;
+    prvData.parking = m_motion_status.load() == MOTION_STATUS_PARKING;
+    prvData.parked = m_motion_status.load() == MOTION_STATUS_PARKED;
+    prvData.status = m_subsystem_status.load();
+
+    if(m_notification_channel == nullptr)
+    {
+        try
+        {
+            m_notification_channel = new nc::SimpleSupplier(MINORSERVO_DATA_CHANNEL, &m_component);
+        }
+        catch(...)
+        {
+            _IRA_LOGFILTER_LOG(LM_WARNING, "SRTMinorServoBossCore::publish()", "cannot access the MinorServoData notification channel!");
+            return;
+        }
+    }
+
+    try
+    {
+        m_notification_channel->publishData<MinorServoDataBlock>(prvData);
+    }
+    catch(ComponentErrors::CORBAProblemEx& ex)
+    {
+        _IRA_LOGFILTER_LOG(LM_WARNING, "SRTMinorServoBossCore::publish()", "cannot send MinorServoData over the notification channel!");
+    }
+
+    IRA::CIRATools::timeCopy(lastEvent, now);
 }
 
 void SRTMinorServoBossCore::setup(std::string commanded_setup)
