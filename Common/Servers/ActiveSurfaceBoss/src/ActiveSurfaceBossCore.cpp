@@ -1,12 +1,10 @@
-#include "MedicinaActiveSurfaceBossCore.h"
+#include "ActiveSurfaceBossCore.h"
 #include <Definitions.h>
 #include <cstdio>
 
-int actuatorsInCircle[] = {0,24,48,48,48,48,48,4};
-
-CMedicinaActiveSurfaceBossCore::CMedicinaActiveSurfaceBossCore(ContainerServices *service, acscomponent::ACSComponentImpl *me) :
-    m_services(service),
-    m_thisIsMe(me)
+// TODO this must be initialized with values read from the CDB
+CActiveSurfaceBossCore::CActiveSurfaceBossCore(ContainerServices *service, acscomponent::ACSComponentImpl *me) :
+    m_services(service)
 {
     m_error_strings[ASErrors::NoError           ] = "NoError";
     m_error_strings[ASErrors::USDCalibrated     ] = "USD calibrated";
@@ -35,22 +33,97 @@ CMedicinaActiveSurfaceBossCore::CMedicinaActiveSurfaceBossCore(ContainerServices
     m_error_strings[ASErrors::UnknownProfile    ] = "UnknownProfile";
 }
 
-CMedicinaActiveSurfaceBossCore::~CMedicinaActiveSurfaceBossCore()
+CActiveSurfaceBossCore::~CActiveSurfaceBossCore()
 {
 }
 
-void CMedicinaActiveSurfaceBossCore::initialize()
+void CActiveSurfaceBossCore::initialize()
 {
-    ACS_LOG(LM_FULL_INFO,"CMedicinaActiveSurfaceBossCore::initialize()",(LM_INFO,"CMedicinaActiveSurfaceBossCore::initialize"));
+    ACS_LOG(LM_FULL_INFO,"CActiveSurfaceBossCore::initialize()",(LM_INFO,"CActiveSurfaceBossCore::initialize"));
 
+    CString str_buffer1, str_buffer2;
+    if(!CIRATools::getDBValue(m_services, "sectors", SECTORS) ||
+       !CIRATools::getDBValue(m_services, "circles", CIRCLES) ||
+       !CIRATools::getDBValue(m_services, "LANs", ACTUATORS) ||
+       !CIRATools::getDBValue(m_services, "lastUSD", lastUSD) ||
+       !CIRATools::getDBValue(m_services, "actuatorsInCircle", str_buffer1) ||
+       !CIRATools::getDBValue(m_services, "acceptedProfiles", str_buffer2))
+    {
+        ACS_LOG(LM_SOURCE_INFO, "ActiveSurfaceBossCore:initialize()", (LM_ERROR, "Error reading CDB!"));
+        ASErrors::CDBAccessErrorExImpl exImpl(__FILE__, __LINE__, "ActiveSurfaceBossCore::initialize() - Error reading CDB parameters");
+        throw acsErrTypeLifeCycle::LifeCycleExImpl(exImpl, __FILE__, __LINE__, "ActiveSurfaceBossCore::initialize()");
+    }
+
+    usd.resize(CIRCLES + 1);
+    lanradius.resize(CIRCLES + 1);
+    for(long i = 0; i <= CIRCLES; i++)
+    {
+        usd[i].resize(ACTUATORS + 1);
+        lanradius[i].resize(ACTUATORS + 1);
+    }
+
+    lan.resize(SECTORS + 1);
+    for(long i = 0; i <= SECTORS; i++)
+    {
+        lan[i].resize(13);
+    }
+
+    std::istringstream iss(std::string(str_buffer1).c_str());
+    std::string token;
+
+    while(std::getline(iss, token, ','))
+    {
+        try
+        {
+            actuatorsInCircle.push_back(std::stoi(token));
+        }
+        catch(...)
+        {
+            ACS_LOG(LM_SOURCE_INFO, "ActiveSurfaceBossCore:initialize()", (LM_ERROR, "Error reading CDB!"));
+            ASErrors::CDBAccessErrorExImpl exImpl(__FILE__, __LINE__, "ActiveSurfaceBossCore::initialize() - Error reading CDB parameters");
+            throw acsErrTypeLifeCycle::LifeCycleExImpl(exImpl, __FILE__, __LINE__, "ActiveSurfaceBossCore::initialize()");
+        }
+    }
+
+    if(actuatorsInCircle.empty())
+    {
+        ACS_LOG(LM_SOURCE_INFO, "ActiveSurfaceBossCore:initialize()", (LM_ERROR, "Error reading CDB!"));
+        ASErrors::CDBAccessErrorExImpl exImpl(__FILE__, __LINE__, "ActiveSurfaceBossCore::initialize() - Error reading CDB parameters");
+        throw acsErrTypeLifeCycle::LifeCycleExImpl(exImpl, __FILE__, __LINE__, "ActiveSurfaceBossCore::initialize()");
+    }
+
+    iss.clear();
+    iss.str(std::string(str_buffer2).c_str());
+    while(std::getline(iss, token, ','))
+    {
+        try
+        {
+            m_acceptedProfiles.insert((ActiveSurface::TASProfile)std::stoi(token));
+        }
+        catch(...)
+        {
+            ACS_LOG(LM_SOURCE_INFO, "ActiveSurfaceBossCore:initialize()", (LM_ERROR, "Error reading CDB!"));
+            ASErrors::CDBAccessErrorExImpl exImpl(__FILE__, __LINE__, "ActiveSurfaceBossCore::initialize() - Error reading CDB parameters");
+            throw acsErrTypeLifeCycle::LifeCycleExImpl(exImpl, __FILE__, __LINE__, "ActiveSurfaceBossCore::initialize()");
+        }
+    }
+
+    if(m_acceptedProfiles.empty())
+    {
+        ACS_LOG(LM_SOURCE_INFO, "ActiveSurfaceBossCore:initialize()", (LM_ERROR, "Error reading CDB!"));
+        ASErrors::CDBAccessErrorExImpl exImpl(__FILE__, __LINE__, "ActiveSurfaceBossCore::initialize() - Error reading CDB parameters");
+        throw acsErrTypeLifeCycle::LifeCycleExImpl(exImpl, __FILE__, __LINE__, "ActiveSurfaceBossCore::initialize()");
+    }
+
+    m_initialized = false;
     m_enable = false;
     m_tracking = false;
     m_status = Management::MNG_WARNING;
+    m_lut = USDTABLECORRECTIONS;
     AutoUpdate = false;
     actuatorcounter = circlecounter = totacts = 1;
     for(int i = 0; i < SECTORS; i++)
     {
-        m_sector.push_back(false);
         usdCounters.push_back(0);
     }
     m_profileSetted = false;
@@ -58,7 +131,7 @@ void CMedicinaActiveSurfaceBossCore::initialize()
     m_newlut = false;
 }
 
-void CMedicinaActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetComponentExImpl)
+void CActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetComponentExImpl)
 {
 /*
     char serial_usd[23];
@@ -67,8 +140,8 @@ void CMedicinaActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGe
     char * value2;
 
     //s_usdTable = getenv ("ACS_CDB");
-    //strcat(s_usdTable,USDTABLE);
-    value2 = USDTABLE;
+    //strcat(s_usdTable,USDTABLE.c_str());
+    value2 = USDTABLE.c_str();
     //ifstream usdTable(s_usdTable);
     ifstream usdTable(value2);
     if(!usdTable)
@@ -78,7 +151,7 @@ void CMedicinaActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGe
         exit(-1);
     }
 
-    value = USDTABLECORRECTIONS;
+    value = USDTABLECORRECTIONS.c_str();
     ifstream usdCorrections (value);
     if(!usdCorrections)
     {
@@ -102,14 +175,14 @@ void CMedicinaActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGe
             }
             catch (maciErrType::CannotGetComponentExImpl& ex)
             {
-                _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CMedicinaActiveSurfaceBossCore::execute()");
+                _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CActiveSurfaceBossCore::execute()");
                 Impl.setComponentName((const char*)lanCobName);
                 Impl.log(LM_DEBUG);
             }
             CIRATools::Wait(LOOPTIME);
         }
     }
-    ACS_LOG(LM_FULL_INFO, "CMedicinaActiveSurfaceBossCore::execute()", (LM_INFO,"CMedicinaActiveSurfaceBossCore::LAN_LOCATED"));
+    ACS_LOG(LM_FULL_INFO, "CActiveSurfaceBossCore::execute()", (LM_INFO,"CActiveSurfaceBossCore::LAN_LOCATED"));
 
     // Get reference to usd components
     for (int i = firstUSD; i <= lastUSD; i++)
@@ -124,7 +197,7 @@ void CMedicinaActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGe
         }
         catch (maciErrType::CannotGetComponentExImpl& ex)
         {
-            _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CMedicinaActiveSurfaceBossCore::execute()");
+            _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CActiveSurfaceBossCore::execute()");
             Impl.setComponentName(serial_usd);
             Impl.log(LM_DEBUG);
         }
@@ -148,7 +221,7 @@ void CMedicinaActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGe
             }
         }
     }
-    ACS_LOG(LM_FULL_INFO, "CMedicinaActiveSurfaceBossCore::execute()", (LM_INFO,"CMedicinaActiveSurfaceBossCore::USD_LOCATED"));
+    ACS_LOG(LM_FULL_INFO, "CActiveSurfaceBossCore::execute()", (LM_INFO,"CActiveSurfaceBossCore::USD_LOCATED"));
 
     if(usdCounter < (int)lastUSD*WARNINGUSDPERCENT)
     {
@@ -158,6 +231,7 @@ void CMedicinaActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGe
     {
         m_status=Management::MNG_FAILURE;
     }
+*/
 
     m_antennaBoss = Antenna::AntennaBoss::_nil();
     try
@@ -166,24 +240,23 @@ void CMedicinaActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGe
     }
     catch (maciErrType::CannotGetComponentExImpl& ex)
     {
-        _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CMedicinaActiveSurfaceBossCore::execute()");
+        _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CActiveSurfaceBossCore::execute()");
         Impl.setComponentName("ANTENNA/Boss");
         m_status=Management::MNG_WARNING;
         throw Impl;
     }
-*/
     m_enable = true;
-    ACS_LOG(LM_FULL_INFO, "CMedicinaActiveSurfaceBossCore::execute()", (LM_INFO,"CMedicinaActiveSurfaceBossCore::MedicinaActiveSurfaceBoss_LOCATED"));
+    ACS_LOG(LM_FULL_INFO, "CActiveSurfaceBossCore::execute()", (LM_INFO,"CActiveSurfaceBossCore::ActiveSurfaceBoss_LOCATED"));
 }
 
-void CMedicinaActiveSurfaceBossCore::cleanUp()
+void CActiveSurfaceBossCore::cleanUp()
 {
-    ACS_LOG(LM_FULL_INFO, "CMedicinaActiveSurfaceBossCore::cleanUp()", (LM_INFO,"CMedicinaActiveSurfaceBossCore::cleanUp"));
+    ACS_LOG(LM_FULL_INFO, "CActiveSurfaceBossCore::cleanUp()", (LM_INFO,"CActiveSurfaceBossCore::cleanUp"));
 
     char serial_usd[23], graf[5], mecc[4];
     int lanIndex, circleIndex, usdCircleIndex;
 
-    ACS_LOG(LM_FULL_INFO, "CMedicinaActiveSurfaceBossCore::cleanUp()", (LM_INFO,"Releasing usd...wait"));
+    ACS_LOG(LM_FULL_INFO, "CActiveSurfaceBossCore::cleanUp()", (LM_INFO,"Releasing usd...wait"));
 
     for(int sector = 0; sector < SECTORS; sector++)
     {
@@ -212,7 +285,7 @@ void CMedicinaActiveSurfaceBossCore::cleanUp()
             }
             catch(maciErrType::CannotReleaseComponentExImpl& ex)
             {
-                _ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CMedicinaActiveSurfaceBossCore::cleanUp()");
+                _ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CActiveSurfaceBossCore::cleanUp()");
                 Impl.setComponentName((const char *)serial_usd);
                 Impl.log(LM_DEBUG);
             }
@@ -225,13 +298,13 @@ void CMedicinaActiveSurfaceBossCore::cleanUp()
     }
     catch(maciErrType::CannotReleaseComponentExImpl& ex)
     {
-        _ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CMedicinaActiveSurfaceBossCore::cleanUp()");
+        _ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CActiveSurfaceBossCore::cleanUp()");
         Impl.setComponentName((const char *)m_antennaBoss->name());
         Impl.log(LM_DEBUG);
     }
 }
 
-void CMedicinaActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl)
+void CActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl)
 {
     double cammaPos, cammaLen;
     bool calibrated;
@@ -958,7 +1031,7 @@ void CMedicinaActiveSurfaceBossCore::calibrate (int circle, int actuator, int ra
 */
 }
 
-void CMedicinaActiveSurfaceBossCore::calVer (int circle, int actuator, int radius) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl)
+void CActiveSurfaceBossCore::calVer (int circle, int actuator, int radius) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl)
 {
 /*
     if(circle == 0 && actuator == 0 && radius == 0) // ALL
@@ -1079,7 +1152,7 @@ void CMedicinaActiveSurfaceBossCore::calVer (int circle, int actuator, int radiu
 */
 }
 
-void CMedicinaActiveSurfaceBossCore::singleUSDonewayAction(ActiveSurface::TASOneWayAction action, ActiveSurface::USD_var usd, double elevation, double correction, long incr, ActiveSurface::TASProfile profile)
+void CActiveSurfaceBossCore::singleUSDonewayAction(ActiveSurface::TASOneWayAction action, ActiveSurface::USD_var usd, double elevation, double correction, long incr, ActiveSurface::TASProfile profile)
 {
     if(!CORBA::is_nil(usd))
     {
@@ -1145,37 +1218,37 @@ void CMedicinaActiveSurfaceBossCore::singleUSDonewayAction(ActiveSurface::TASOne
         }
         catch (ASErrors::ASErrorsEx& E)
         {
-            _ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,E,"CMedicinaActiveSurfaceBossCore::singleUSDonewayAction()");
+            _ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,E,"CActiveSurfaceBossCore::singleUSDonewayAction()");
             impl.setComponentName((const char*)usd->name());
             impl.setOperationName(operationName.c_str());
             impl.log();
         }
         catch(CORBA::SystemException &E)
         {
-            _EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CMedicinaActiveSurfaceBossCore::singleUSDonewayAction()");
+            _EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CActiveSurfaceBossCore::singleUSDonewayAction()");
             impl.setName(E._name());
             impl.setMinor(E.minor());
             impl.log();
         }
         catch(...)
         {
-            _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CMedicinaActiveSurfaceBossCore::singleUSDonewayAction()");
+            _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CActiveSurfaceBossCore::singleUSDonewayAction()");
             impl.log();
         }
     }
     else
     {
-        _EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CMedicinaActiveSurfaceBossCore::singleUSDonewayAction()");
+        _EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CActiveSurfaceBossCore::singleUSDonewayAction()");
         impl.log();
     }
 
 }
 
-void CMedicinaActiveSurfaceBossCore::onewayAction(ActiveSurface::TASOneWayAction action, int circle, int actuator, int radius, double elevation, double correction, long incr, ActiveSurface::TASProfile profile)
+void CActiveSurfaceBossCore::onewayAction(ActiveSurface::TASOneWayAction action, int circle, int actuator, int radius, double elevation, double correction, long incr, ActiveSurface::TASProfile profile)
 {
     if(action == ActiveSurface::AS_UPDATE && !m_profileSetted)
     {
-		ACS_LOG(LM_FULL_INFO,"MedicinaActiveSurfaceBossCore::onewayAction()",(LM_NOTICE,"SET THE PROFILE FIRST!"));
+        printf("you must set the profile first\n");
         return;
     }
 
@@ -1221,7 +1294,7 @@ void CMedicinaActiveSurfaceBossCore::onewayAction(ActiveSurface::TASOneWayAction
     }
 }
 
-/*void CMedicinaActiveSurfaceBossCore::watchingActiveSurfaceStatus() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl)
+/*void CActiveSurfaceBossCore::watchingActiveSurfaceStatus() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl)
 {
     ACS::ROpattern_var status_var;
     ACSErr::Completion_var completion;
@@ -1232,21 +1305,44 @@ void CMedicinaActiveSurfaceBossCore::onewayAction(ActiveSurface::TASOneWayAction
 
     if (totalactuators >= 1 && totalactuators <= 24)      // 1 circle
         i= 1;
-    if (totalactuators >= 25 && totalactuators <= 72)     // 2 circle
+    if (totalactuators >= 25 && totalactuators <= 48)     // 2 circle
         i= 2;
-    if (totalactuators >= 73 && totalactuators <= 120)     // 3 circle
+    if (totalactuators >= 49 && totalactuators <= 96)     // 3 circle
         i= 3;
-    if (totalactuators >= 121 && totalactuators <= 168)    // 4 circle
+    if (totalactuators >= 97 && totalactuators <= 144)    // 4 circle
         i= 4;
-    if (totalactuators >= 169 && totalactuators <= 216)   // 5 circle
+    if (totalactuators >= 145 && totalactuators <= 192)   // 5 circle
         i= 5;
-    if (totalactuators >= 217 && totalactuators <= 264)   // 6 circle
+    if (totalactuators >= 193 && totalactuators <= 240)   // 6 circle
         i= 6;
-    if (totalactuators >= 265 && totalactuators <= 268)   // 7 circle
+    if (totalactuators >= 241 && totalactuators <= 336)   // 7 circle
         i= 7;
-    if (totalactuators == 1 || totalactuators == 25 || totalactuators == 73 ||
-            totalactuators == 121 || totalactuators == 169 || totalactuators == 217 ||
-            totalactuators == 265 || totalactuators == 269)
+    if (totalactuators >= 337 && totalactuators <= 432)   // 8 circle
+        i= 8;
+    if (totalactuators >= 433 && totalactuators <= 528)   // 9 circle
+        i= 9;
+    if (totalactuators >= 529 && totalactuators <= 624)   // 10 circle
+        i= 10;
+    if (totalactuators >= 625 && totalactuators <= 720)   // 11 circle
+        i= 11;
+    if (totalactuators >= 721 && totalactuators <= 816)   // 12 circle
+        i= 12;
+    if (totalactuators >= 817 && totalactuators <= 912)   // 13 circle
+        i= 13;
+    if (totalactuators >= 913 && totalactuators <= 1008)  // 14 circle
+        i= 14;
+    if (totalactuators >= 1009 && totalactuators <= 1104) // 15 circle
+        i= 15;
+    if (totalactuators >= 1105 && totalactuators <= 1112) // 16 circle
+        i= 16;
+    if (totalactuators >= 1113 && totalactuators <= 1116) // 17 circle
+        i= 17;
+    if (totalactuators == 1 || totalactuators == 25 || totalactuators == 49 ||
+            totalactuators == 97 || totalactuators == 145 || totalactuators == 193 ||
+            totalactuators == 241 || totalactuators == 337 || totalactuators == 433 ||
+            totalactuators == 529 || totalactuators == 625 || totalactuators == 721 ||
+            totalactuators == 817 || totalactuators == 913 || totalactuators == 1009 ||
+            totalactuators == 1105 || totalactuators == 1113 || totalactuators == 1117)
         l = 1;
 
     bool propertyEx = false;
@@ -1276,7 +1372,7 @@ void CMedicinaActiveSurfaceBossCore::onewayAction(ActiveSurface::TASOneWayAction
 
     totalactuators++;
     l++;
-    if (totalactuators == 269)
+    if (totalactuators == 1117)
     {
         i = l = totalactuators = 1;
     }
@@ -1287,22 +1383,22 @@ void CMedicinaActiveSurfaceBossCore::onewayAction(ActiveSurface::TASOneWayAction
     if (corbaEx == true)
     {
         //printf("corba error\n");
-        _THROW_EXCPT(ComponentErrors::CORBAProblemExImpl,"CMedicinaActiveSurfaceBossCore::watchingActiveSurfaceStatus()");
+        _THROW_EXCPT(ComponentErrors::CORBAProblemExImpl,"CActiveSurfaceBossCore::watchingActiveSurfaceStatus()");
     }
     if (propertyEx == true)
     {
         //printf("property error\n");
-        _THROW_EXCPT(ComponentErrors::CouldntGetAttributeExImpl,"CMedicinaActiveSurfaceBossCore::watchingActiveSurfaceStatus()");
+        _THROW_EXCPT(ComponentErrors::CouldntGetAttributeExImpl,"CActiveSurfaceBossCore::watchingActiveSurfaceStatus()");
     }
     if (notActivEx == true )
     {
         //printf("not active\n");
-        _THROW_EXCPT(ComponentErrors::ComponentNotActiveExImpl,"CMedicinaActiveSurfaceBossCore::watchingActiveSurfaceStatus()");
+        _THROW_EXCPT(ComponentErrors::ComponentNotActiveExImpl,"CActiveSurfaceBossCore::watchingActiveSurfaceStatus()");
     }
     //printf("NO error\n");
 }*/
 
-void CMedicinaActiveSurfaceBossCore::workingActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx)
+void CActiveSurfaceBossCore::workingActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx)
 {
     if(AutoUpdate)
     {
@@ -1316,11 +1412,11 @@ void CMedicinaActiveSurfaceBossCore::workingActiveSurface() throw (ComponentErro
             try
             {
                 m_antennaBoss->getRawCoordinates(now.value().value, azimuth, elevation);
-                onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, elevation*DR2D, 0, 0, ActiveSurface::AS_PARABOLIC);
+                onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, elevation*DR2D, 0, 0, m_profile);
             }
             catch (CORBA::SystemException& ex)
             {
-                _EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CMedicinaActiveSurfaceBossCore::workingActiveSurface()");
+                _EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CActiveSurfaceBossCore::workingActiveSurface()");
                 impl.setName(ex._name());
                 impl.setMinor(ex.minor());
                 m_status=Management::MNG_WARNING;
@@ -1335,32 +1431,26 @@ void CMedicinaActiveSurfaceBossCore::workingActiveSurface() throw (ComponentErro
     }
 }
 
-void CMedicinaActiveSurfaceBossCore::asSetLUT(const char *newlut)
+void CActiveSurfaceBossCore::asSetLUT(const char *newlut)
 {
-    m_lut= (CDBPATH + "alma/AS/" + newlut).c_str();
+    m_lut = std::string(CDBPATH + "alma/AS/" + newlut);
     m_newlut = true;
 }
 
-void CMedicinaActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newProfile) throw (ComponentErrors::ComponentErrorsExImpl)
+void CActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newProfile) throw (ComponentErrors::ComponentErrorsExImpl)
 {
-    bool all_sectors = true;
-    for(unsigned int i = 0; i < SECTORS; i++)
+    if(!validProfile(newProfile))
     {
-        if(!m_sector[i]) all_sectors = false;
+        _THROW_EXCPT(ASErrors::UnknownProfileExImpl,"CActiveSurfaceBossCore::setProfile()");
     }
 
-    if (m_newlut == false)
-        m_lut = USDTABLECORRECTIONS;
-
-    if(all_sectors) // USD tables has not been loaded yet
+    if(m_initialized) // USD tables has not been loaded yet
     {
-        ifstream usdCorrections (m_lut);
-        //ifstream usdCorrections (USDTABLECORRECTIONS);
+        ifstream usdCorrections(m_lut);
         if(!usdCorrections)
         {
-            ACS_SHORT_LOG ((LM_INFO, "File %s not found", m_lut));
-            //ACS_SHORT_LOG ((LM_INFO, "File %s not found", USDTABLECORRECTIONS));
-            exit(-1);
+            ACS_SHORT_LOG ((LM_INFO, "File %s not found", m_lut.c_str()));
+            return;
         }
         actuatorsCorrections.length(NPOSITIONS);
         for (int i = 1; i <= CIRCLES; i++)
@@ -1381,7 +1471,6 @@ void CMedicinaActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile&
         usdCounter = 0;
         for(unsigned int i = 0; i < SECTORS; i++)
         {
-            m_sector[i] = false;
             usdCounter += usdCounters[i];
         }
 
@@ -1403,7 +1492,7 @@ void CMedicinaActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile&
     {
         asOff();
         CIRATools::Wait(1000000);
-        _SET_CDB_CORE(profile, newProfile,"MedicinaActiveSurfaceBossCore::setProfile")
+        _SET_CDB_CORE(profile, newProfile,"ActiveSurfaceBossCore::setProfile")
         m_profile = newProfile;
         try
         {
@@ -1419,7 +1508,7 @@ void CMedicinaActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile&
     }
 }
 
-void CMedicinaActiveSurfaceBossCore::asSetup() throw (ComponentErrors::ComponentErrorsEx)
+void CActiveSurfaceBossCore::asSetup() throw (ComponentErrors::ComponentErrorsEx)
 {
     try
     {
@@ -1432,11 +1521,11 @@ void CMedicinaActiveSurfaceBossCore::asSetup() throw (ComponentErrors::Component
     }
 }
 
-void CMedicinaActiveSurfaceBossCore::asOn()
+void CActiveSurfaceBossCore::asOn()
 {
     if(m_profileSetted == true)
     {
-        if((m_profile != ActiveSurface::AS_PARABOLIC_FIXED) && (m_profile != ActiveSurface::AS_PARK))	
+        if((m_profile != ActiveSurface::AS_PARABOLIC_FIXED) && (m_profile != ActiveSurface::AS_SHAPED_FIXED) && (m_profile != ActiveSurface::AS_PARK))
         {
             enableAutoUpdate();
             m_tracking = true;
@@ -1459,18 +1548,18 @@ void CMedicinaActiveSurfaceBossCore::asOn()
     }
     else
     {
-		ACS_LOG(LM_FULL_INFO,"MedicinaActiveSurfaceBossCore::asOn()",(LM_NOTICE,"SET THE PROFILE FIRST!"));
+        printf("you must set the profile first\n");
     }
 }
 
-void CMedicinaActiveSurfaceBossCore::asPark() throw (ComponentErrors::ComponentErrorsEx)
+void CActiveSurfaceBossCore::asPark() throw (ComponentErrors::ComponentErrorsEx)
 {
     if(m_profileSetted == true)
     {
         asOff();
         m_tracking = false;
         CIRATools::Wait(1000000);
-        _SET_CDB_CORE(profile, ActiveSurface::AS_PARK,"MedicinaActiveSurfaceBossCore::asPark()")
+        _SET_CDB_CORE(profile, ActiveSurface::AS_PARK,"ActiveSurfaceBossCore::asPark()")
         m_profile = ActiveSurface::AS_PARK;
         try
         {
@@ -1484,11 +1573,11 @@ void CMedicinaActiveSurfaceBossCore::asPark() throw (ComponentErrors::ComponentE
     }
     else
     {
-		ACS_LOG(LM_FULL_INFO,"MedicinaActiveSurfaceBossCore::asPark()",(LM_NOTICE,"SET THE PROFILE FIRST!"));
+        printf("you must set the profile first\n");
     }
 }
 
-void CMedicinaActiveSurfaceBossCore::asOff() throw (ComponentErrors::ComponentErrorsEx)
+void CActiveSurfaceBossCore::asOff() throw (ComponentErrors::ComponentErrorsEx)
 {
     if(m_profileSetted == true)
     {
@@ -1505,11 +1594,11 @@ void CMedicinaActiveSurfaceBossCore::asOff() throw (ComponentErrors::ComponentEr
     }
     else
     {
-		ACS_LOG(LM_FULL_INFO,"MedicinaActiveSurfaceBossCore::asOff()",(LM_NOTICE,"SET THE PROFILE FIRST!"));
+        printf("you must set the profile first\n");
     }
 }
 
-void CMedicinaActiveSurfaceBossCore::setActuator(int circle, int actuator, long int& actPos, long int& cmdPos, long int& Fmin, long int& Fmax, long int& acc,long int& delay) throw (ComponentErrors::PropertyErrorExImpl, ComponentErrors::ComponentNotActiveExImpl)
+void CActiveSurfaceBossCore::setActuator(int circle, int actuator, long int& actPos, long int& cmdPos, long int& Fmin, long int& Fmax, long int& acc,long int& delay) throw (ComponentErrors::PropertyErrorExImpl, ComponentErrors::ComponentNotActiveExImpl)
 {
     if(!CORBA::is_nil(usd[circle][actuator]))
     {
@@ -1528,7 +1617,7 @@ void CMedicinaActiveSurfaceBossCore::setActuator(int circle, int actuator, long 
         }
         else
         {
-            _EXCPT(ComponentErrors::PropertyErrorExImpl,impl,"CMedicinaActiveSurfaceBossCore::setActuator()");
+            _EXCPT(ComponentErrors::PropertyErrorExImpl,impl,"CActiveSurfaceBossCore::setActuator()");
             impl.setPropertyName("usd actual position");
             throw impl;
         }
@@ -1540,7 +1629,7 @@ void CMedicinaActiveSurfaceBossCore::setActuator(int circle, int actuator, long 
         }
         else
         {
-            _EXCPT(ComponentErrors::PropertyErrorExImpl,impl,"CMedicinaActiveSurfaceBossCore::setActuator()");
+            _EXCPT(ComponentErrors::PropertyErrorExImpl,impl,"CActiveSurfaceBossCore::setActuator()");
             impl.setPropertyName("usd commanded position");
             throw impl;
         }
@@ -1552,7 +1641,7 @@ void CMedicinaActiveSurfaceBossCore::setActuator(int circle, int actuator, long 
         }
         else
         {
-            _EXCPT(ComponentErrors::PropertyErrorExImpl,impl,"CMedicinaActiveSurfaceBossCore::setActuator()");
+            _EXCPT(ComponentErrors::PropertyErrorExImpl,impl,"CActiveSurfaceBossCore::setActuator()");
             impl.setPropertyName("usd Fmin");
             throw impl;
         }
@@ -1564,7 +1653,7 @@ void CMedicinaActiveSurfaceBossCore::setActuator(int circle, int actuator, long 
         }
         else
         {
-            _EXCPT(ComponentErrors::PropertyErrorExImpl,impl,"CMedicinaActiveSurfaceBossCore::setActuator()");
+            _EXCPT(ComponentErrors::PropertyErrorExImpl,impl,"CActiveSurfaceBossCore::setActuator()");
             impl.setPropertyName("usd Fmax");
             throw impl;
         }
@@ -1576,7 +1665,7 @@ void CMedicinaActiveSurfaceBossCore::setActuator(int circle, int actuator, long 
         }
         else
         {
-            _EXCPT(ComponentErrors::PropertyErrorExImpl,impl,"CMedicinaActiveSurfaceBossCore::setActuator()");
+            _EXCPT(ComponentErrors::PropertyErrorExImpl,impl,"CActiveSurfaceBossCore::setActuator()");
             impl.setPropertyName("usd acceleration");
             throw impl;
         }
@@ -1588,18 +1677,18 @@ void CMedicinaActiveSurfaceBossCore::setActuator(int circle, int actuator, long 
         }
         else
         {
-            _EXCPT(ComponentErrors::PropertyErrorExImpl,impl,"CMedicinaActiveSurfaceBossCore::setActuator()");
+            _EXCPT(ComponentErrors::PropertyErrorExImpl,impl,"CActiveSurfaceBossCore::setActuator()");
             impl.setPropertyName("usd delay");
             throw impl;
         }
     }
     else
     {
-        _THROW_EXCPT(ComponentErrors::ComponentNotActiveExImpl,"CMedicinaActiveSurfaceBossCore::setActuator()");
+        _THROW_EXCPT(ComponentErrors::ComponentNotActiveExImpl,"CActiveSurfaceBossCore::setActuator()");
     }
 }
 
-void CMedicinaActiveSurfaceBossCore::usdStatus4GUIClient(int circle, int actuator, CORBA::Long_out status) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl)
+void CActiveSurfaceBossCore::usdStatus4GUIClient(int circle, int actuator, CORBA::Long_out status) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl)
 {
     if(!CORBA::is_nil(usd[circle][actuator]))
     {
@@ -1607,11 +1696,11 @@ void CMedicinaActiveSurfaceBossCore::usdStatus4GUIClient(int circle, int actuato
     }
     else
     {
-        _THROW_EXCPT(ComponentErrors::ComponentNotActiveExImpl,"CMedicinaActiveSurfaceBossCore::usdStatus4GUIClient()");
+        _THROW_EXCPT(ComponentErrors::ComponentNotActiveExImpl,"CActiveSurfaceBossCore::usdStatus4GUIClient()");
     }
 }
 
-void CMedicinaActiveSurfaceBossCore::asStatus4GUIClient(ACS::longSeq& status) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl)
+void CActiveSurfaceBossCore::asStatus4GUIClient(ACS::longSeq& status) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl)
 {
     status.length(lastUSD);
     unsigned int i = 0;
@@ -1620,7 +1709,8 @@ void CMedicinaActiveSurfaceBossCore::asStatus4GUIClient(ACS::longSeq& status) th
     {
         for (int actuator = 1; actuator <= actuatorsInCircle[circle]; actuator++)
         {
-            int usdStatus = 0;
+            // Initialize the status word as component unavailable. If the component is available it will be overwritten
+            int usdStatus = UNAV;
 
             if(!CORBA::is_nil(usd[circle][actuator]))
             {
@@ -1634,7 +1724,7 @@ void CMedicinaActiveSurfaceBossCore::asStatus4GUIClient(ACS::longSeq& status) th
     }
 }
 
-void CMedicinaActiveSurfaceBossCore::recoverUSD(int circleIndex, int usdCircleIndex) throw (ComponentErrors::CouldntGetComponentExImpl)
+void CActiveSurfaceBossCore::recoverUSD(int circleIndex, int usdCircleIndex) throw (ComponentErrors::CouldntGetComponentExImpl)
 {
     char serial_usd[23];
     int lanIndex;
@@ -1648,13 +1738,13 @@ void CMedicinaActiveSurfaceBossCore::recoverUSD(int circleIndex, int usdCircleIn
     }
     catch (maciErrType::CannotGetComponentExImpl& ex)
     {
-        _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CMedicinaActiveSurfaceBossCore::recoverUSD()");
+        _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CActiveSurfaceBossCore::recoverUSD()");
         Impl.setComponentName(serial_usd);
         Impl.log(LM_DEBUG);
     }
 }
 
-void CMedicinaActiveSurfaceBossCore::setradius(int radius, int &actuatorsradius, int &jumpradius)
+void CActiveSurfaceBossCore::setradius(int radius, int &actuatorsradius, int &jumpradius)
 {
     if(radius == 1 || radius == 5 || radius == 9 || radius == 13 ||
         radius == 17 || radius == 21 || radius == 25 || radius == 29 ||
@@ -1690,7 +1780,7 @@ void CMedicinaActiveSurfaceBossCore::setradius(int radius, int &actuatorsradius,
     }
 }
 
-void CMedicinaActiveSurfaceBossCore::setserial (int circle, int actuator, int &lan, char* serial_usd)
+void CActiveSurfaceBossCore::setserial (int circle, int actuator, int &lan, char* serial_usd)
 {
     int sector = 0;
 
@@ -1793,36 +1883,36 @@ void CMedicinaActiveSurfaceBossCore::setserial (int circle, int actuator, int &l
     sprintf (serial_usd,"AS/SECTOR%02d/LAN%02d/USD%02d",sector, lan, circle);
 }
 
-void CMedicinaActiveSurfaceBossCore::enableAutoUpdate()
+void CActiveSurfaceBossCore::enableAutoUpdate()
 {
     if(!AutoUpdate)
     {
         AutoUpdate=true;
-        ACS_LOG(LM_FULL_INFO,"CMedicinaActiveSurfaceBossCore::enableAutoUpdate()",(LM_NOTICE,"MedicinaActiveSurfaceBoss::AUTOMATIC_UPDATE_ENABLED"));
+        ACS_LOG(LM_FULL_INFO,"CActiveSurfaceBossCore::enableAutoUpdate()",(LM_NOTICE,"ActiveSurfaceBoss::AUTOMATIC_UPDATE_ENABLED"));
     }
 }
 
-void CMedicinaActiveSurfaceBossCore::disableAutoUpdate()
+void CActiveSurfaceBossCore::disableAutoUpdate()
 {
     if(AutoUpdate)
     {
         AutoUpdate=false;
-        ACS_LOG(LM_FULL_INFO,"CMedicinaActiveSurfaceBossCore::disableAutoUpdate()",(LM_NOTICE,"MedicinaActiveSurfaceBoss::AUTOMATIC_UPDATE_DISABLED"));
+        ACS_LOG(LM_FULL_INFO,"CActiveSurfaceBossCore::disableAutoUpdate()",(LM_NOTICE,"ActiveSurfaceBoss::AUTOMATIC_UPDATE_DISABLED"));
     }
 }
 
-void CMedicinaActiveSurfaceBossCore::checkASerrors(const char* str, int circle, int actuator, ASErrors::ASErrorsEx Ex)
+void CActiveSurfaceBossCore::checkASerrors(const char* str, int circle, int actuator, ASErrors::ASErrorsEx Ex)
 {
     ASErrors::ASErrorsExImpl exImpl(Ex);
     checkASerrors(str, circle, actuator, exImpl.getErrorCode());
 }
 
-void CMedicinaActiveSurfaceBossCore::checkASerrors(const char* str, int circle, int actuator, CompletionImpl comp)
+void CActiveSurfaceBossCore::checkASerrors(const char* str, int circle, int actuator, CompletionImpl comp)
 {
     checkASerrors(str, circle, actuator, comp.getCode());
 }
 
-void CMedicinaActiveSurfaceBossCore::checkASerrors(const char* str, int circle, int actuator, int code)
+void CActiveSurfaceBossCore::checkASerrors(const char* str, int circle, int actuator, int code)
 {
     if(m_error_strings.find(code) != m_error_strings.end())
     {

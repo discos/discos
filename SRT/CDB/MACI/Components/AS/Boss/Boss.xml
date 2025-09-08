@@ -9,8 +9,8 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               
 	Name="Boss"
-	Code="SRTActiveSurfaceBossImpl"
-	Type="IDL:alma/ActiveSurface/SRTActiveSurfaceBoss:1.0"
+	Code="ActiveSurfaceBossImpl"
+	Type="IDL:alma/ActiveSurface/ActiveSurfaceBoss:1.0"
 	Container="SRTActiveSurfaceContainer"
 	ImplLang="cpp"
 	Default="true"

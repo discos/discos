@@ -1,9 +1,9 @@
-#ifndef MEDICINAACTIVESURFACEBOSSIMPL_H
-#define MEDICINAACTIVESURFACEBOSSIMPL_H
+#ifndef ACTIVESURFACEBOSSIMPL_H
+#define ACTIVESURFACEBOSSIMPL_H
 
 /* ****************************************************************************** */
 /* OAC Osservatorio Astronomico di Cagliari                                       */
-/* $Id: MedicinaActiveSurfaceBossImpl.h,v 1.4 2011-03-11 12:30:53 c.migoni Exp $  */
+/* $Id: ActiveSurfaceBossImpl.h,v 1.4 2011-03-11 12:30:53 c.migoni Exp $       */
 /*                                                                                */
 /* This code is under GNU General Public Licence (GPL).                           */
 /*                                                                                */
@@ -21,20 +21,18 @@
 #include <baciROstring.h>
 #include <enumpropROImpl.h>
 #include <Definitions.h>
-#include <MedicinaActiveSurfaceBossS.h>
+#include <ActiveSurfaceBossS.h>
 #include <IRA>
 #include <acsThread.h>
 #include <SecureArea.h>
 #include <ComponentErrors.h>
 #include <ASErrors.h>
 #include <ManagementErrors.h>
-#include "MedicinaActiveSurfaceBossCore.h"
-#include "MedicinaActiveSurfaceBossWorkingThread.h"
-#include "MedicinaActiveSurfaceBossSectorThread.h"
-#include <SP_parser.h>
+#include "ActiveSurfaceBossCore.h"
+#include "ActiveSurfaceBossWorkingThread.h"
+#include "ActiveSurfaceBossInitializationThread.h"
 
 #define LOOPSTATUSTIME 10000000 // 1.0 second
-#define SECTORTIME 1000000 // 0.1 seconds
 
 #define _SET_CDB(PROP,LVAL,ROUTINE) {	\
 	maci::ContainerServices* cs=getContainerServices();\
@@ -58,12 +56,12 @@ using namespace ASErrors;
 using namespace ComponentErrors;
 
 /**
- * This class implements the ActiveSurface::MedicinaActiveSurfaceBoss CORBA interface and the ACS Component.  
+ * This class implements the ActiveSurface::ActiveSurfaceBoss CORBA interface and the ACS Component.  
  * @author <a href=mailto:migoni@ca.astro.it>Carlo Migoni</a>
  * Osservatorio Astronomico di Cagliari, Italia
  * <br> 
  */
-class MedicinaActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl, public virtual POA_ActiveSurface::MedicinaActiveSurfaceBoss
+class ActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl, public virtual POA_ActiveSurface::ActiveSurfaceBoss
 {
 	public:
 	
@@ -72,12 +70,12 @@ class MedicinaActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl,
 	* @param CompName component's name. This is also the name that will be used to find the configuration data for the component in the Configuration Database.
 	* @param containerServices pointer to the class that exposes all services offered by container
 	*/
-	MedicinaActiveSurfaceBossImpl(const ACE_CString &CompName, maci::ContainerServices *containerServices);
+	ActiveSurfaceBossImpl(const ACE_CString &CompName, maci::ContainerServices *containerServices);
 
 	/**
 	 * Destructor.
 	*/
-	virtual ~MedicinaActiveSurfaceBossImpl(); 
+	virtual ~ActiveSurfaceBossImpl(); 
 
 	/** 
 	 * Called to give the component time to initialize itself. The component reads in configuration files/parameters, builds up connection. 
@@ -128,6 +126,12 @@ class MedicinaActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl,
 	 * @return pointer to read-only ROTBoolean  property enabled
 	*/
 	virtual Management::ROTBoolean_ptr tracking() throw (CORBA::SystemException);
+
+	/**
+	 * Returns a reference to the tracking property implementation of IDL interface.
+	 * @return pointer to read-only ACS::ROString property enabled
+	*/
+	virtual ACS::ROstring_ptr LUT_filename() throw (CORBA::SystemException);
 
 	/**
 	 *  This method can be called in order to disable the automatic update of the surface.
@@ -211,25 +215,26 @@ class MedicinaActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl,
 	*/
 	ContainerServices* cs;
 
-	CMedicinaActiveSurfaceBossWorkingThread *m_workingThread;
+	CActiveSurfaceBossWorkingThread *m_workingThread;
 
-	std::vector<CMedicinaActiveSurfaceBossSectorThread*> m_sectorThread;
+	CActiveSurfaceBossInitializationThread *m_initializationThread;
 
-	SimpleParser::CParser<CMedicinaActiveSurfaceBossCore> *m_parser;
+	SimpleParser::CParser<CActiveSurfaceBossCore> *m_parser;
 
 	SmartPropertyPointer < ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus), POA_Management::ROTSystemStatus> > m_pstatus;
 
 	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>  > m_penabled;
 	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(ActiveSurface::TASProfile), POA_ActiveSurface::ROTASProfile> > m_pprofile;
 	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean> > m_ptracking;
-	IRA::CSecureArea<CMedicinaActiveSurfaceBossCore> *m_core;
+	SmartPropertyPointer<ROstring> m_pLUT_filename;
+	IRA::CSecureArea<CActiveSurfaceBossCore> *m_core;
 
 	/* *
 	* Active Surface profile
 	*/
 	ActiveSurface::TASProfile m_profile;
 
-	CMedicinaActiveSurfaceBossCore *boss;
+	CActiveSurfaceBossCore *boss;
 };
 
-#endif /*MEDICINAACTIVESURFACEBOSSIMPL_H*/
+#endif /*ACTIVESURFACEBOSSIMPL_H*/

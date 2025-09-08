@@ -1,9 +1,9 @@
-#ifndef _MEDICINAACTIVESURFACEBOSSCORE_H_
-#define _MEDICINAACTIVESURFACEBOSSCORE_H_
+#ifndef _ACTIVESURFACEBOSSCORE_H_
+#define _ACTIVESURFACEBOSSCORE_H_
 
 /* ************************************************************************ */
 /* OAC Osservatorio Astronomico di Cagliari                                 */
-/* $Id: MedicinaActiveSurfaceBossCore.h,v 1.6 2011-03-11 12:30:53 c.migoni Exp $ */
+/* $Id: ActiveSurfaceBossCore.h,v 1.6 2011-03-11 12:30:53 c.migoni Exp $ */
 /*                                                                          */
 /* This code is under GNU General Public Licence (GPL).                     */
 /*                                                                          */
@@ -21,22 +21,26 @@
 #include <ComponentErrors.h>
 #include <ASErrors.h>
 #include <ManagmentDefinitionsS.h>
-#include <MedicinaActiveSurfaceBossS.h>
+#include <ActiveSurfaceBossS.h>
 #include <IRA>
 #include <fstream>
 #include <iostream>
 #include <slamac.h>
 #include <vector>
+#include <SP_parser.h>
 
-#define SECTORS 4
-#define CIRCLES 7
-#define ACTUATORS 48
+// TODO move these variables inside the CDB
+/*
+#define SECTORS 8
+#define CIRCLES 17
+#define ACTUATORS 96
+#define lastUSD 1116
+*/
 #define firstUSD 1
-#define lastUSD 268
 #define LOOPTIME 100000 // 0,10 sec
 #define CDBPATH std::string(getenv("ACS_CDB")) + "/CDB/"
-#define USDTABLE (CDBPATH + "alma/AS/tab_convUSD.txt").c_str()
-#define USDTABLECORRECTIONS (CDBPATH + "alma/AS/act_rev02.txt").c_str()
+#define USDTABLE CDBPATH + "alma/AS/tab_convUSD.txt"
+#define USDTABLECORRECTIONS CDBPATH + "alma/AS/act_rev02.txt"
 #define MM2HSTEP    350 //(10500 HSTEP / 30 MM)
 #define MM2STEP     1400 //(42000 STEP / 30 MM)
 #define WARNINGUSDPERCENT 0.95
@@ -46,6 +50,7 @@
 #define DELTAEL 15.0
 
 // mask pattern for status
+#define UNAV    0xFF000000
 #define MRUN    0x000080
 #define CAMM    0x000100
 #define ENBL    0x002000
@@ -65,33 +70,74 @@ using namespace maci;
 using namespace ComponentErrors;
 using namespace std;
 
-class MedicinaActiveSurfaceBossImpl;
-//class CMedicinaActiveSurfaceBossWatchingThread;
-class CMedicinaActiveSurfaceBossWorkingThread;
+class ActiveSurfaceBossImpl;
+//class CActiveSurfaceBossWatchingThread;
+class CActiveSurfaceBossWorkingThread;
+
+class ActiveSurfaceProfile2String {
+public:
+    static char *valToStr(const ActiveSurface::TASProfile& val) {
+        char *c=new char[16];
+        if (val==ActiveSurface::AS_SHAPED) {
+            strcpy(c,"S");
+        }
+        if (val==ActiveSurface::AS_SHAPED_FIXED) {
+            strcpy(c,"SF");
+        }
+        if (val==ActiveSurface::AS_PARABOLIC) {
+            strcpy(c,"P");
+        }
+        if (val==ActiveSurface::AS_PARABOLIC_FIXED) {
+            strcpy(c,"PF");
+        }
+        return c;
+    }
+    static ActiveSurface::TASProfile strToVal(const char* str) throw (ParserErrors::BadTypeFormatExImpl) {
+        IRA::CString strVal(str);
+        strVal.MakeUpper();
+        if (strVal=="S") {
+            return ActiveSurface::AS_SHAPED;
+        }
+        else if (strVal=="SF") {
+            return ActiveSurface::AS_SHAPED_FIXED;
+        }
+        else if (strVal=="P") {
+            return ActiveSurface::AS_PARABOLIC;
+        }
+        else if (strVal=="PF") {
+            return ActiveSurface::AS_PARABOLIC_FIXED;
+        }
+        else {
+            _EXCPT(ParserErrors::BadTypeFormatExImpl,ex,"ActiveSurfaceProfile2String::strToVal()");
+            throw ex;
+        }
+    }
+};
 
 /**
- * This class models the MedicinaActiveSurfaceBoss datasets and functionalities.
+ * This class models the ActiveSurfaceBoss datasets and functionalities.
  * @author <a href=mailto:migoni@ca.astro.it>Migoni Carlo</a>
  * Osservatorio Astronomico di Cagliari, Italia
  * <br>
  */
-class CMedicinaActiveSurfaceBossCore {
-    friend class MedicinaActiveSurfaceBossImpl;
-    //friend class CMedicinaActiveSurfaceBossWatchingThread;
-    friend class CMedicinaActiveSurfaceBossWorkingThread;
-    friend class CMedicinaActiveSurfaceBossSectorThread;
+class CActiveSurfaceBossCore {
+    friend class ActiveSurfaceBossImpl;
+    //friend class CActiveSurfaceBossWatchingThread;
+    friend class CActiveSurfaceBossWorkingThread;
+    friend class CActiveSurfaceBossSectorThread;
+    friend class CActiveSurfaceBossInitializationThread;
 public:
     /**
      * Constructor. Default Constructor.
      * @param service pointer to the continaer services.
      * @param me pointer to the component itself
     */
-    CMedicinaActiveSurfaceBossCore(ContainerServices *service,acscomponent::ACSComponentImpl *me);
+    CActiveSurfaceBossCore(ContainerServices *service,acscomponent::ACSComponentImpl *me);
 
     /**
      * Destructor.
     */
-    virtual ~CMedicinaActiveSurfaceBossCore();
+    virtual ~CActiveSurfaceBossCore();
 
     /**
      * This function initializes the boss core, all preliminary operation are performed here.
@@ -145,6 +191,10 @@ public:
 
     inline bool getTracking() const { return m_tracking; }
 
+    inline bool validProfile(const ActiveSurface::TASProfile& profile) const { return m_acceptedProfiles.count(profile) > 0; }
+
+    inline std::string getLUTfilename() const { return m_lut.substr(m_lut.find_last_of('/') + 1); }
+
     /**
      * Sets the <i>AutoUpdate</i> flag to false, i.e. the component will not update automatically the surface.
     */
@@ -169,17 +219,15 @@ public:
 
     void setProfile (const ActiveSurface::TASProfile& profile) throw (ComponentErrors::ComponentErrorsExImpl);
 
-    void asSetLUT (const char* newlut);
-    
+    void asSetLUT(const char* newlut);
+
 private:
     std::map<int, std::string> m_error_strings;
     ContainerServices* m_services;
 
-    ActiveSurface::USD_var usd[CIRCLES+1][ACTUATORS+1];
-
-    ActiveSurface::USD_var lanradius[CIRCLES+1][ACTUATORS+1];
-
-    ActiveSurface::lan_var lan[SECTORS+1][13];
+    std::vector<std::vector<ActiveSurface::USD_var>> usd;
+    std::vector<std::vector<ActiveSurface::USD_var>> lanradius;
+    std::vector<std::vector<ActiveSurface::lan_var>> lan;
 
     IRA::CString lanCobName;
 
@@ -187,9 +235,6 @@ private:
     std::vector<int> usdCounters;
     int actuatorcounter, circlecounter, totacts;
     ACS::doubleSeq actuatorsCorrections;
-
-    /** pointer to the component itself */
-    acscomponent::ACSComponentImpl *m_thisIsMe;
 
     /**
      * This represents the status of the whole Active Surface subsystem, it also includes and sammerizes the status of the boss component
@@ -213,6 +258,7 @@ private:
     Antenna::AntennaBoss_var m_antennaBoss;
 
     ActiveSurface::TASProfile m_profile;
+    std::set<ActiveSurface::TASProfile> m_acceptedProfiles;
 
     bool m_tracking;
 
@@ -220,15 +266,19 @@ private:
 
     char *s_usdCorrections;
 
-    std::vector<bool> m_sector;
-
     bool m_profileSetted;
 
     bool m_ASup;
-
+    
     bool m_newlut;
 
-    const char* m_lut;
+    bool m_initialized;
+
+    std::string m_lut;
+
+    long SECTORS, CIRCLES, ACTUATORS, lastUSD;
+
+    std::vector<int> actuatorsInCircle;
 };
 
-#endif /*MEDICINAACTIVESURFACEBOSSCORE_H_*/
+#endif /*ACTIVESURFACEBOSSCORE_H_*/

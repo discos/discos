@@ -2,7 +2,7 @@
 #include <IRA>
 #include <usdC.h>
 #include <lanC.h>
-#include <SRTActiveSurfaceBossC.h>
+#include <ActiveSurfaceBossC.h>
 #include <iostream>
 #include <stdio.h>
 #include <acserr.h>
@@ -88,7 +88,7 @@ int main (int argc, char *argv[])
 	int lanIndex, circleIndex, usdCircleIndex;
 	IRA::CString lanCobName;
 
-    	SRTActiveSurface::SRTActiveSurfaceBoss_var ASBoss;
+    	ActiveSurface::ActiveSurfaceBoss_var ASBoss;
 
 	ACE_Time_Value tv(1);
 
@@ -118,7 +118,7 @@ int main (int argc, char *argv[])
 		ACS_SHORT_LOG ((LM_INFO, "OK activation client: %s", "TestClient"));
 
     try {
-			ASBoss = client->getComponent < SRTActiveSurface::SRTActiveSurfaceBoss > ("AS/Boss", 0, true);
+			ASBoss = client->getComponent <ActiveSurface::ActiveSurfaceBoss > ("AS/Boss", 0, true);
 			if (CORBA::is_nil (ASBoss.in ()) == true)
 			{
 				_EXCPT(ClientErrors::CouldntAccessComponentExImpl,impl,"TestClient::Main()");
