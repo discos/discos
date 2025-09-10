@@ -63,7 +63,7 @@ MED_DOC:=MEDDox
 MED_ERRORS:=
 MED_INTERFACES:=MedicinaAntennaInterface MedicinaReceiversInterface MedicinaActiveSurfaceInterface
 MED_LIBRARIES:=MedicinaVertexLibrary
-MED_SERVERS:=MedicinaMount MedicinaMinorServo WeatherStation MedicinaPyDMed MedicinaKBandDualFReceiver MedicinaActiveSurfaceBoss
+MED_SERVERS:=MedicinaMount MedicinaMinorServo WeatherStation MedicinaPyDMed MedicinaPyLocalOscillator MedicinaKBandDualFReceiver MedicinaActiveSurfaceBoss
 MED_CLIENTS:=MedicinaMountTextClient MedicinaActiveSurfaceGUIClient
 MED_MISC:=MedScripts
 

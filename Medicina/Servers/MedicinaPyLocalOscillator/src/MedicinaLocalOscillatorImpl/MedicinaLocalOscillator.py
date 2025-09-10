@@ -64,7 +64,7 @@ class MedicinaLocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComp
 		try:
 			self.cl.configure(IP,PORT)
 		except CommandLineError as ex:
-			msg="cannot get synthesiser IP %s with message %s" %(IP,ex.__str__)
+			msg="cannot get synthesiser IP %s with message %s" %(IP,ex.__str__())
 			exc=ComponentErrorsImpl.SocketErrorExImpl()
 			exc.setData('Reason',msg)
 			raise exc
@@ -76,14 +76,14 @@ class MedicinaLocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComp
 		try:
 			self.cl.setFrequency(rf_freq)
 		except CommandLineError as ex:
-			msg="cannot set frequency with message %s" % (ex.__str__)
+			msg="cannot set frequency with message %s" % (ex.__str__())
 			exc=ReceiversErrorsImpl.SynthetiserErrorExImpl()
 			exc.setData('Details',msg);
 			raise exc.getReceiversErrorsEx()
 		try:
 			self.cl.setPower(rf_power)
 		except CommandLineError as ex:
-			msg="cannot set power with message %s" % (ex.__str__)
+			msg="cannot set power with message %s" % (ex.__str__())
 			exc=ReceiversErrorsImpl.SynthetiserErrorExImpl()
 			exc.setData('Details',msg);
 			raise exc.getReceiversErrorsEx()     
@@ -94,7 +94,7 @@ class MedicinaLocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComp
 			power=self.cl.getPower()
 			freq=self.cl.getFrequency()
 		except CommandLineError as ex:
-			msg="cannot get values readout with message %s" % (ex.__str__)
+			msg="cannot get values readout with message %s" % (ex.__str__())
 			exc=ReceiversErrorsImpl.SynthetiserErrorExImpl()
 			exc.setData('Details',msg);
 			raise exc.getReceiversErrorsEx()
@@ -104,7 +104,7 @@ class MedicinaLocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComp
 		try:
 			self.cl.rfOn()
 		except CommandLineError as ex:
-			msg="cannot turn RF on with message %s" % (ex.__str__)
+			msg="cannot turn RF on with message %s" % (ex.__str__())
 			exc=ReceiversErrorsImpl.SynthetiserErrorExImpl()
 			exc.setData('Details',msg);
 			raise exc.getReceiversErrorsEx()
@@ -113,7 +113,7 @@ class MedicinaLocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComp
 		try:
 			self.cl.rfOff()
 		except CommandLineError as ex:
-			msg="cannot turn RF off with message %s" % (ex.__str__)
+			msg="cannot turn RF off with message %s" % (ex.__str__())
 			exc=ReceiversErrorsImpl.SynthetiserErrorExImpl()
 			exc.setData('Details',msg);
 			raise exc.getReceiversErrorsEx()
