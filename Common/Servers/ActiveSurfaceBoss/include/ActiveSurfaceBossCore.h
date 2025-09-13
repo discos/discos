@@ -17,8 +17,9 @@
 #include <DateTime.h>
 #include <usdC.h>
 #include <lanC.h>
-#include <AntennaBossC.h>
+#include <AntennaProxy.h>
 #include <ComponentErrors.h>
+#include <ManagementErrors.h>
 #include <ASErrors.h>
 #include <ManagmentDefinitionsS.h>
 #include <ActiveSurfaceBossS.h>
@@ -28,14 +29,10 @@
 #include <slamac.h>
 #include <vector>
 #include <SP_parser.h>
+#include <LogFilter.h>
 
-// TODO move these variables inside the CDB
-/*
-#define SECTORS 8
-#define CIRCLES 17
-#define ACTUATORS 96
-#define lastUSD 1116
-*/
+_IRA_LOGFILTER_IMPORT;
+
 #define firstUSD 1
 #define LOOPTIME 100000 // 0,10 sec
 #define CDBPATH std::string(getenv("ACS_CDB")) + "/CDB/"
@@ -162,7 +159,7 @@ public:
 
     void onewayAction(ActiveSurface::TASOneWayAction action, int circle, int actuator, int radius, double elevation, double correction, long incr, ActiveSurface::TASProfile profile);
 
-    void workingActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx);
+    void workingActiveSurface();
 
     //void watchingActiveSurfaceStatus() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl);
 
@@ -217,7 +214,7 @@ public:
 
     void asPark() throw (ComponentErrors::ComponentErrorsEx);
 
-    void setProfile (const ActiveSurface::TASProfile& profile) throw (ComponentErrors::ComponentErrorsExImpl);
+    void setProfile (const ActiveSurface::TASProfile& profile) throw (ComponentErrors::ComponentErrorsExImpl, ASErrors::UnknownProfileExImpl);
 
     void asSetLUT(const char* newlut);
 
@@ -255,7 +252,7 @@ private:
 
     void singleUSDonewayAction(ActiveSurface::TASOneWayAction action, ActiveSurface::USD_var usd, double elevation, double correction, long incr, ActiveSurface::TASProfile profile);
 
-    Antenna::AntennaBoss_var m_antennaBoss;
+    Antenna::AntennaBoss_proxy m_antennaBoss;
 
     ActiveSurface::TASProfile m_profile;
     std::set<ActiveSurface::TASProfile> m_acceptedProfiles;

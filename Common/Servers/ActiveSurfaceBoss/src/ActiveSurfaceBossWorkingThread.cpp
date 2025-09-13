@@ -1,7 +1,8 @@
 #include "ActiveSurfaceBossWorkingThread.h"
 
-CActiveSurfaceBossWorkingThread::CActiveSurfaceBossWorkingThread(const ACE_CString& name,IRA::CSecureArea<CActiveSurfaceBossCore>  *param, 
-			const ACS::TimeInterval& responseTime,const ACS::TimeInterval& sleepTime) : ACS::Thread(name,responseTime,sleepTime), m_core(param)
+CActiveSurfaceBossWorkingThread::CActiveSurfaceBossWorkingThread(const ACE_CString& name, IRA::CSecureArea<CActiveSurfaceBossCore> *param, const ACS::TimeInterval& responseTime, const ACS::TimeInterval& sleepTime) :
+    ACS::Thread(name, responseTime, sleepTime),
+    m_core(param)
 {
 	AUTO_TRACE("CActiveSurfaceBossWorkingThread::CActiveSurfaceBossWorkingThread()");
 }
@@ -24,20 +25,12 @@ void CActiveSurfaceBossWorkingThread::onStop()
 
 void CActiveSurfaceBossWorkingThread::runLoop()
 {
-	IRA::CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
-
 	TIMEVALUE now;
 	IRA::CIRATools::getTime(now);
 	ACS::Time t0 = now.value().value;
 
-	try
-	{
-		resource->workingActiveSurface();
-	}
-	catch (ComponentErrors::ComponentErrorsExImpl& ex)
-	{
-		ex.log(LM_DEBUG);
-	}
+	IRA::CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
+	resource->workingActiveSurface();
 	resource.Release();
 
 	IRA::CIRATools::getTime(now);

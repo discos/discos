@@ -4,7 +4,8 @@
 
 // TODO this must be initialized with values read from the CDB
 CActiveSurfaceBossCore::CActiveSurfaceBossCore(ContainerServices *service, acscomponent::ACSComponentImpl *me) :
-    m_services(service)
+    m_services(service),
+    m_antennaBoss("IDL:alma/Antenna/AntennaBoss:1.0", service)
 {
     m_error_strings[ASErrors::NoError           ] = "NoError";
     m_error_strings[ASErrors::USDCalibrated     ] = "USD calibrated";
@@ -116,7 +117,7 @@ void CActiveSurfaceBossCore::initialize()
     }
 
     m_initialized = false;
-    m_enable = false;
+    m_enable = true;
     m_tracking = false;
     m_status = Management::MNG_WARNING;
     m_lut = USDTABLECORRECTIONS;
@@ -133,174 +134,36 @@ void CActiveSurfaceBossCore::initialize()
 
 void CActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetComponentExImpl)
 {
-/*
-    char serial_usd[23];
-    char graf[5], mecc[4];
-    char * value;
-    char * value2;
-
-    //s_usdTable = getenv ("ACS_CDB");
-    //strcat(s_usdTable,USDTABLE.c_str());
-    value2 = USDTABLE.c_str();
-    //ifstream usdTable(s_usdTable);
-    ifstream usdTable(value2);
-    if(!usdTable)
-    {
-        //ACS_SHORT_LOG ((LM_INFO, "File %s not found", s_usdTable));
-        ACS_SHORT_LOG ((LM_INFO, "File %s not found", value2));
-        exit(-1);
-    }
-
-    value = USDTABLECORRECTIONS.c_str();
-    ifstream usdCorrections (value);
-    if(!usdCorrections)
-    {
-        ACS_SHORT_LOG ((LM_INFO, "File %s not found", value));
-        exit(-1);
-    }
-    actuatorsCorrections.length(NPOSITIONS);
-
-    // get reference to lan components
-    for (int s = 1; s <= 8; s++)
-    {
-        for (int l = 1; l <= 12; l++)
-        {
-            lanCobName.Format("AS/SECTOR%02d/LAN%02d",s, l);
-            ACS_SHORT_LOG((LM_INFO, "Getting component: %s", (const char*)lanCobName));
-            printf("lan = %s\n", (const char*)lanCobName);
-            lan[s][l] = ActiveSurface::lan::_nil();
-            try
-            {
-                lan[s][l] = m_services->getComponent<ActiveSurface::lan>((const char *)lanCobName);
-            }
-            catch (maciErrType::CannotGetComponentExImpl& ex)
-            {
-                _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CActiveSurfaceBossCore::execute()");
-                Impl.setComponentName((const char*)lanCobName);
-                Impl.log(LM_DEBUG);
-            }
-            CIRATools::Wait(LOOPTIME);
-        }
-    }
-    ACS_LOG(LM_FULL_INFO, "CActiveSurfaceBossCore::execute()", (LM_INFO,"CActiveSurfaceBossCore::LAN_LOCATED"));
-
-    // Get reference to usd components
-    for (int i = firstUSD; i <= lastUSD; i++)
-    {
-        usdTable >> lanIndex >> circleIndex >> usdCircleIndex >> serial_usd >> graf >> mecc;
-        usd[circleIndex][usdCircleIndex] = ActiveSurface::USD::_nil();
-        try
-        {
-            //usd[circleIndex][usdCircleIndex] = m_services->getComponent<ActiveSurface::USD>(serial_usd);
-            //lanradius[circleIndex][lanIndex] = usd[circleIndex][usdCircleIndex];
-            usdCounter++;
-        }
-        catch (maciErrType::CannotGetComponentExImpl& ex)
-        {
-            _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CActiveSurfaceBossCore::execute()");
-            Impl.setComponentName(serial_usd);
-            Impl.log(LM_DEBUG);
-        }
-        //CIRATools::Wait(LOOPTIME);
-    }
-
-    for (int i = 1; i <= CIRCLES; i++)
-    {
-        for (int l = 1; l <= actuatorsInCircle[i]; l++)
-        {
-            //printf ("Corrections = ");
-            for (int s = 0; s < NPOSITIONS; s++)
-            {
-                usdCorrections >> actuatorsCorrections[s];
-                //printf ("%f ", actuatorsCorrections[s]);
-            }
-            //printf("\n");
-            if(!CORBA::is_nil(usd[i][l]))
-            {
-                //usd[i][l]->posTable(actuatorsCorrections, NPOSITIONS, DELTAEL, THRESHOLDPOS);
-            }
-        }
-    }
-    ACS_LOG(LM_FULL_INFO, "CActiveSurfaceBossCore::execute()", (LM_INFO,"CActiveSurfaceBossCore::USD_LOCATED"));
-
-    if(usdCounter < (int)lastUSD*WARNINGUSDPERCENT)
-    {
-        m_status=Management::MNG_WARNING;
-    }
-    if(usdCounter < (int)lastUSD*ERRORUSDPERCENT)
-    {
-        m_status=Management::MNG_FAILURE;
-    }
-*/
-
-    m_antennaBoss = Antenna::AntennaBoss::_nil();
-    try
-    {
-        m_antennaBoss = m_services->getComponent<Antenna::AntennaBoss>("ANTENNA/Boss");
-    }
-    catch (maciErrType::CannotGetComponentExImpl& ex)
-    {
-        _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CActiveSurfaceBossCore::execute()");
-        Impl.setComponentName("ANTENNA/Boss");
-        m_status=Management::MNG_WARNING;
-        throw Impl;
-    }
-    m_enable = true;
-    ACS_LOG(LM_FULL_INFO, "CActiveSurfaceBossCore::execute()", (LM_INFO,"CActiveSurfaceBossCore::ActiveSurfaceBoss_LOCATED"));
+    // We used to get a reference to the AntennaBoss component here, therefore setting m_enable. We handle that dynamically with the AntennaBoss_proxy now.
 }
 
 void CActiveSurfaceBossCore::cleanUp()
 {
-    ACS_LOG(LM_FULL_INFO, "CActiveSurfaceBossCore::cleanUp()", (LM_INFO,"CActiveSurfaceBossCore::cleanUp"));
+    ACS_LOG(LM_FULL_INFO, "CActiveSurfaceBossCore::cleanUp()", (LM_INFO, "CActiveSurfaceBossCore::cleanUp"));
 
-    char serial_usd[23], graf[5], mecc[4];
-    int lanIndex, circleIndex, usdCircleIndex;
-
-    ACS_LOG(LM_FULL_INFO, "CActiveSurfaceBossCore::cleanUp()", (LM_INFO,"Releasing usd...wait"));
-
-    for(int sector = 0; sector < SECTORS; sector++)
+    ACS_LOG(LM_FULL_INFO, "CActiveSurfaceBossCore::cleanUp()", (LM_INFO, "Releasing USDs...wait"));
+    for (int i = 0; i < usd.size(); i++)
     {
-        std::stringstream value;
-        value << CDBPATH;
-        value << "alma/AS/tab_convUSD_S";
-        value << sector+1;
-        value << ".txt";
-
-        ifstream usdTable(value.str().c_str());
-        std::string buffer;
-
-        while(getline(usdTable, buffer))
+        for (int l = 0; l < usd[i].size(); l++)
         {
-            std::stringstream line;
-            line << buffer;
-            line >> lanIndex >> circleIndex >> usdCircleIndex >> serial_usd >> graf >> mecc;
-
-            try
+            if(!CORBA::is_nil(usd[i][l]))
             {
-                if(!CORBA::is_nil(usd[circleIndex][usdCircleIndex]))
+                std::string name = usd[i][l]->name();
+                try
                 {
-                    printf("releasing usd = %s\n", serial_usd);
-                    m_services->releaseComponent((const char*)serial_usd);
+                    std::cout << "Relasing " << name << "...";
+                    m_services->releaseComponent(name.c_str());
+                    std::cout << "done." << std::endl;
+                }
+                catch(maciErrType::CannotReleaseComponentExImpl& ex)
+                {
+                    std::cout << "failed!" << std::endl;
+                    _ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CActiveSurfaceBossCore::cleanUp()");
+                    Impl.setComponentName(name.c_str());
+                    Impl.log(LM_DEBUG);
                 }
             }
-            catch(maciErrType::CannotReleaseComponentExImpl& ex)
-            {
-                _ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CActiveSurfaceBossCore::cleanUp()");
-                Impl.setComponentName((const char *)serial_usd);
-                Impl.log(LM_DEBUG);
-            }
         }
-    }
-
-    try
-    {
-        m_services->releaseComponent((const char*)m_antennaBoss->name());
-    }
-    catch(maciErrType::CannotReleaseComponentExImpl& ex)
-    {
-        _ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CActiveSurfaceBossCore::cleanUp()");
-        Impl.setComponentName((const char *)m_antennaBoss->name());
-        Impl.log(LM_DEBUG);
     }
 }
 
@@ -1398,35 +1261,33 @@ void CActiveSurfaceBossCore::onewayAction(ActiveSurface::TASOneWayAction action,
     //printf("NO error\n");
 }*/
 
-void CActiveSurfaceBossCore::workingActiveSurface() throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::ComponentErrorsEx)
+void CActiveSurfaceBossCore::workingActiveSurface()
 {
     if(AutoUpdate)
     {
-        if(!CORBA::is_nil(m_antennaBoss))
+        double azimuth, elevation;
+
+        TIMEVALUE now;
+        IRA::CIRATools::getTime(now);
+
+        try
         {
-            double azimuth, elevation;
-
-            TIMEVALUE now;
-            IRA::CIRATools::getTime(now);
-
-            try
-            {
-                m_antennaBoss->getRawCoordinates(now.value().value, azimuth, elevation);
-                onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, elevation*DR2D, 0, 0, m_profile);
-            }
-            catch (CORBA::SystemException& ex)
-            {
-                _EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CActiveSurfaceBossCore::workingActiveSurface()");
-                impl.setName(ex._name());
-                impl.setMinor(ex.minor());
-                m_status=Management::MNG_WARNING;
-                throw impl;
-            }
-            catch (ComponentErrors::ComponentErrorsExImpl& ex)
-            {
-                ex.log(LM_DEBUG);
-                throw ex.getComponentErrorsEx();
-            }
+            m_antennaBoss->getRawCoordinates(getTimeStamp(), azimuth, elevation);
+            onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, elevation * DR2D, 0, 0, m_profile);
+            m_enable = true;
+            m_status = Management::MNG_OK;
+        }
+        catch(ComponentErrors::CouldntGetComponentExImpl& exImpl)
+        {
+            _IRA_LOGFILTER_LOG(LM_WARNING, "CActiveSurfaceBossCore::workingActiveSurface()", "ANTENNA/Boss component unavailable, cannot update the Active Surface!");
+            m_status = Management::MNG_WARNING;
+            m_enable = false;
+        }
+        catch(CORBA::SystemException& ex)
+        {
+            _IRA_LOGFILTER_LOG(LM_ERROR, "CActiveSurfaceBossCore::workingActiveSurface()", "CORBA::SystemException in working thread!");
+            m_status = Management::MNG_FAILURE;
+            m_enable = false;
         }
     }
 }
@@ -1437,7 +1298,7 @@ void CActiveSurfaceBossCore::asSetLUT(const char *newlut)
     m_newlut = true;
 }
 
-void CActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newProfile) throw (ComponentErrors::ComponentErrorsExImpl)
+void CActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newProfile) throw (ComponentErrors::ComponentErrorsExImpl, ASErrors::UnknownProfileExImpl)
 {
     if(!validProfile(newProfile))
     {

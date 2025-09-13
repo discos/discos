@@ -125,7 +125,7 @@ module ActiveSurface {
 
         void correction (in long circle, in long actuator, in long radius, in double correction) raises (ComponentErrors::ComponentErrorsEx);
 
-        void setProfile (in TASProfile profile) raises (ComponentErrors::ComponentErrorsEx);
+        void setProfile (in TASProfile profile) raises (ComponentErrors::ComponentErrorsEx, ASErrors::UnknownProfileEx);
 
         void usdStatus4GUIClient (in long circle, in long actuator, out long status) raises (ComponentErrors::ComponentErrorsEx);
 

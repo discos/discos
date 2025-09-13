@@ -27,7 +27,6 @@
 #include <SecureArea.h>
 #include <ComponentErrors.h>
 #include <ASErrors.h>
-#include <ManagementErrors.h>
 #include "ActiveSurfaceBossCore.h"
 #include "ActiveSurfaceBossWorkingThread.h"
 #include "ActiveSurfaceBossInitializationThread.h"
@@ -185,7 +184,7 @@ class ActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl, public 
 
 	void correction ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius, CORBA::Double correction) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
-	void setProfile ( ActiveSurface::TASProfile profile) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
+	void setProfile ( ActiveSurface::TASProfile profile) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, ASErrors::UnknownProfileEx);
 
 	void usdStatus4GUIClient( CORBA::Long circle,  CORBA::Long actuator, CORBA::Long_out status) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 

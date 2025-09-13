@@ -1,5 +1,5 @@
 #include <maciSimpleClient.h>
-#include <MedicinaActiveSurfaceBossC.h>
+#include <ActiveSurfaceBossC.h>
 #include <QtGui/QApplication>
 #include <QtGui/QWidget>
 #include <ClientErrors.h>

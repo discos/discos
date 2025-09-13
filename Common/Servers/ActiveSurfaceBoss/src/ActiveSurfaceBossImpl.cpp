@@ -8,6 +8,8 @@
 #include "DevIOTracking.h"
 #include "DevIOLUT.h"
 
+_IRA_LOGFILTER_DECLARE;
+
 static char const *rcsId="@(#) $Id: ActiveSurfaceBossImpl.cpp,v 1.2 2010-07-26 12:37:07 c.migoni Exp $";
 static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
 
@@ -33,6 +35,9 @@ ActiveSurfaceBossImpl::~ActiveSurfaceBossImpl()
 void ActiveSurfaceBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 {
     AUTO_TRACE("ActiveSurfaceBossImpl::initialize()");
+
+    _IRA_LOGFILTER_ACTIVATE(10000000, 20000000);
+
     cs = getContainerServices();
     ACS_LOG(LM_FULL_INFO,"ActiveSurfaceBossImpl::initialize()",(LM_INFO,"COMPSTATE_INITIALIZING"));
 
@@ -158,6 +163,8 @@ void ActiveSurfaceBossImpl::cleanUp()
     CSecAreaResourceWrapper<CActiveSurfaceBossCore> core = m_core->Get();
     core->cleanUp();
     ACS_LOG(LM_FULL_INFO,"ActiveSurfaceBossImpl::cleanUp()",(LM_INFO,"ActiveSurfaceBossImpl::BOSS_CORE_FREED"));
+    _IRA_LOGFILTER_FLUSH;
+    _IRA_LOGFILTER_DESTROY;
     CharacteristicComponentImpl::cleanUp();
 }
 
@@ -195,21 +202,28 @@ void ActiveSurfaceBossImpl::setup (const char *config) throw (CORBA::SystemExcep
     AUTO_TRACE("ActiveSurfaceBossImpl::setup()");
     IRA::CString strVal(config);
     strVal.MakeUpper();
-    if (strVal=="S") {
-        setProfile(ActiveSurface::AS_SHAPED);
+    try {
+        if (strVal=="S") {
+            setProfile(ActiveSurface::AS_SHAPED);
+        }
+        else if (strVal=="SF") {
+            setProfile(ActiveSurface::AS_SHAPED_FIXED);
+        }
+        else if (strVal=="P") {
+            setProfile(ActiveSurface::AS_PARABOLIC);
+        }
+        else if (strVal=="PF") {
+            setProfile(ActiveSurface::AS_PARABOLIC_FIXED);
+        }
+        else {
+            _EXCPT(ManagementErrors::ConfigurationErrorExImpl, ex, "ActiveSurfaceBossImpl::setup()");
+            throw ex.getConfigurationErrorEx();
+        }
     }
-    else if (strVal=="SF") {
-        setProfile(ActiveSurface::AS_SHAPED_FIXED);
-    }
-    else if (strVal=="P") {
-        setProfile(ActiveSurface::AS_PARABOLIC);
-    }
-    else if (strVal=="PF") {
-        setProfile(ActiveSurface::AS_PARABOLIC_FIXED);
-    }
-    else {
-        _EXCPT(ManagementErrors::ConfigurationErrorExImpl,ex,"ActiveSurfaceBossImpl::setup()");
-        throw ex.getConfigurationErrorEx();
+    catch (ASErrors::UnknownProfileEx& ex) {
+        _ADD_BACKTRACE(ManagementErrors::ConfigurationErrorExImpl, impl, ex, "ActiveSurfaceBossImpl::setup()");
+        impl.setSubsystem("ActiveSurfaceBoss");
+        throw impl.getConfigurationErrorEx();
     }
 }
 
@@ -392,20 +406,25 @@ void ActiveSurfaceBossImpl::reset (CORBA::Long circle, CORBA::Long actuator, COR
     }
 }
 
-void ActiveSurfaceBossImpl::setProfile (ActiveSurface::TASProfile newProfile) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
+void ActiveSurfaceBossImpl::setProfile (ActiveSurface::TASProfile newProfile) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, ASErrors::UnknownProfileEx)
 {
     AUTO_TRACE("ActiveSurfaceBossImpl::setProfile()");
 
     CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
     try
     {
-        resource->setProfile(m_profile);
+        resource->setProfile(newProfile);
         m_profile = newProfile;
     }
     catch (ComponentErrors::ComponentErrorsExImpl& ex)
     {
         ex.log(LM_DEBUG);
         throw ex.getComponentErrorsEx();
+    }
+    catch (ASErrors::UnknownProfileExImpl& ex)
+    {
+        ex.log(LM_DEBUG);
+        throw ex.getUnknownProfileEx();
     }
 }
 
