@@ -6,7 +6,7 @@ content = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 </lan>"""
 
 port_offset = 0
-for sector in range(1, 9):
+for sector in range(1, 5):
     for lan in range(1, 13):
         ip = '127.0.0.1'
         port = 11000 + port_offset

@@ -32,15 +32,15 @@ template <class T> class USDDevIO : public DevIO<T>
 public:
 	/** 
 	 * Constructor
-	 * @param pusd pointer to the  USD object. 
-	 * @param lan  pointer to the  USD lan. 
+	 * @param pusd reference to the  USD object. 
+	 * @param lan  CORBA pointer to the  USD lan. 
  	 * @param addr USD serial address. 
 	 * @param cmd usd command to be used for acces this property
 	 * @param wLen byte-lengh of write parameter
 	 * @param rLen byte-lengh of read parameter
 	
 	*/
-	USDDevIO(USDImpl* pusd, ActiveSurface::lan* plan,BYTE addr,BYTE cmd,BYTE wLen,BYTE rLen) : m_pusd(pusd),m_pLan(plan),m_addr(addr),m_cmd(cmd),m_wLen(wLen),m_rLen(rLen)   
+	USDDevIO(USDImpl& pusd, ActiveSurface::lan_ptr plan,BYTE addr,BYTE cmd,BYTE wLen,BYTE rLen) : m_pusd(pusd),m_pLan(plan),m_addr(addr),m_cmd(cmd),m_wLen(wLen),m_rLen(rLen)
 	//USDDevIO(USDImpl* pusd,MOD_LAN::lan* plan,BYTE addr,BYTE cmd,BYTE wLen,BYTE rLen) : m_pusd(pusd),m_pLan(plan),m_addr(addr),m_cmd(cmd),m_wLen(wLen),m_rLen(rLen)   
 	{
 		ACS_TRACE("::USDDevIO::USDDevIO()");
@@ -73,8 +73,8 @@ public:
 	
 private:
 	// devono rispettare l'ordine di iniz. del costruttore
-	USDImpl* m_pusd;		// usd object pointer
-	ActiveSurface::lan* m_pLan;   // component reference
+	USDImpl& m_pusd;		// usd object reference
+	ActiveSurface::lan_ptr m_pLan;   // component reference
 	//MOD_LAN::lan* m_pLan;   // component reference
 	BYTE m_addr;		// USD serial address
 	BYTE m_cmd;			// USD command code
