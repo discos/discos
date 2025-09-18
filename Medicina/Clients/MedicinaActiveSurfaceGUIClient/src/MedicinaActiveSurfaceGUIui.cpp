@@ -29,7 +29,7 @@ MedicinaActiveSurfaceGUI::MedicinaActiveSurfaceGUI(QWidget *parent) : QWidget(pa
 #endif
 }
 
-void MedicinaActiveSurfaceGUI::setParameters(maci::SimpleClient* theClient, ActiveSurface::MedicinaActiveSurfaceBoss_var theASBoss)
+void MedicinaActiveSurfaceGUI::setParameters(maci::SimpleClient* theClient, ActiveSurface::ActiveSurfaceBoss_var theASBoss)
 {
     myMedicinaActiveSurfaceClientEventLoop.setSimpleClient(theClient);
     myMedicinaActiveSurfaceCore.setASBoss(theASBoss);

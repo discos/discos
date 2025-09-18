@@ -3,7 +3,6 @@
 // ACS includes
 #include <baci.h>
 #include <ActiveSurfaceBossC.h>
-#include <NotoActiveSurfaceBossC.h>
 #include <ClientErrors.h>
 #include <ComponentErrors.h>
 #include <IRA>
@@ -27,7 +26,7 @@ class NotoActiveSurfaceCore : public QThread
         NotoActiveSurfaceCore(QObject *parent = 0);
         ~NotoActiveSurfaceCore();
 
-	    void setASBoss(ActiveSurface::NotoActiveSurfaceBoss_var ASBoss);
+	    void setASBoss(ActiveSurface::ActiveSurfaceBoss_var ASBoss);
 	    void run(void);
         void stop(void);
         void setactuator(int circle, int actuator);
@@ -86,7 +85,7 @@ class NotoActiveSurfaceCore : public QThread
         int setGUIasProfileCode(int);
         
 	private:
-	    ActiveSurface::NotoActiveSurfaceBoss_var tASBoss;
+	    ActiveSurface::ActiveSurfaceBoss_var tASBoss;
 	    int actuatorcounter;
 	    int circlecounter;
 	    int totacts;

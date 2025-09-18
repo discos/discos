@@ -14,7 +14,7 @@ class NotoActiveSurfaceGUI : public QWidget, public Ui_NotoActiveSurfaceGUI
     public:
         NotoActiveSurfaceGUI(QWidget *parent = 0);
 
-        void setParameters(maci::SimpleClient* theClient, ActiveSurface::NotoActiveSurfaceBoss_var theASBoss);
+        void setParameters(maci::SimpleClient* theClient, ActiveSurface::ActiveSurfaceBoss_var theASBoss);
         void clearactuatorslineedit();
 
     public slots:

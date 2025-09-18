@@ -163,5 +163,50 @@
             <remoteHost>MASTERHOST</remoteHost>
             <remoteAccount>discos</remoteAccount>
         </container>
+        <container>
+            <name>MedicinaActiveSurfaceContainer</name>
+            <type>cpp</type>
+            <heapSizeMB></heapSizeMB>
+            <useDedicatedSettings>true</useDedicatedSettings>
+            <scriptBase>0</scriptBase>
+            <remoteHost>MASTERHOST</remoteHost>
+            <remoteAccount>discos</remoteAccount>
+        </container>
+        <container>
+            <name>MedicinaActiveSurfaceContainer01</name>
+            <type>cpp</type>
+            <heapSizeMB></heapSizeMB>
+            <useDedicatedSettings>true</useDedicatedSettings>
+            <scriptBase>0</scriptBase>
+            <remoteHost>MASTERHOST</remoteHost>
+            <remoteAccount>discos</remoteAccount>
+        </container>
+        <container>
+            <name>MedicinaActiveSurfaceContainer02</name>
+            <type>cpp</type>
+            <heapSizeMB></heapSizeMB>
+            <useDedicatedSettings>true</useDedicatedSettings>
+            <scriptBase>0</scriptBase>
+            <remoteHost>MASTERHOST</remoteHost>
+            <remoteAccount>discos</remoteAccount>
+        </container>
+        <container>
+            <name>MedicinaActiveSurfaceContainer03</name>
+            <type>cpp</type>
+            <heapSizeMB></heapSizeMB>
+            <useDedicatedSettings>true</useDedicatedSettings>
+            <scriptBase>0</scriptBase>
+            <remoteHost>MASTERHOST</remoteHost>
+            <remoteAccount>discos</remoteAccount>
+        </container>
+        <container>
+            <name>MedicinaActiveSurfaceContainer04</name>
+            <type>cpp</type>
+            <heapSizeMB></heapSizeMB>
+            <useDedicatedSettings>true</useDedicatedSettings>
+            <scriptBase>0</scriptBase>
+            <remoteHost>MASTERHOST</remoteHost>
+            <remoteAccount>discos</remoteAccount>
+        </container>
     </containers>
 </AcsCommandCenterProject>

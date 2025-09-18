@@ -41,7 +41,7 @@ MedicinaActiveSurfaceCore::~MedicinaActiveSurfaceCore()
 {
 }
 
-void MedicinaActiveSurfaceCore::setASBoss (ActiveSurface::MedicinaActiveSurfaceBoss_var ASBoss)
+void MedicinaActiveSurfaceCore::setASBoss (ActiveSurface::ActiveSurfaceBoss_var ASBoss)
 {
     tASBoss = ASBoss;
     actuatorcounter = circlecounter = totacts = 1;

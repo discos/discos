@@ -128,16 +128,15 @@ tttlll_OBJECTS  =
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS = NotoActiveSurfaceBoss usd 
+CDB_SCHEMAS = usd 
 
 # 
 # IDL Files and flags
 # 
-IDL_FILES = NotoActiveSurfaceBoss
+IDL_FILES =
 TAO_IDLFLAGS =
 USER_IDL =
-NotoActiveSurfaceBossStubs_LIBS = baciStubs ComponentErrorsStubs ASErrorsStubs \
-					ManagmentDefinitionsStubs ActiveSurfaceBossStubs ActiveSurfaceCommonStubs
+
 #
 # Jarfiles and their directories
 #

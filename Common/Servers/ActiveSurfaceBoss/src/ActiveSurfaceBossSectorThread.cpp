@@ -1,24 +1,24 @@
-#include "MedicinaActiveSurfaceBossSectorThread.h"
+#include "ActiveSurfaceBossSectorThread.h"
 
-CMedicinaActiveSurfaceBossSectorThread::CMedicinaActiveSurfaceBossSectorThread(const ACE_CString& name,CMedicinaActiveSurfaceBossCore *param,
+CActiveSurfaceBossSectorThread::CActiveSurfaceBossSectorThread(const ACE_CString& name,CActiveSurfaceBossCore *param,
             const ACS::TimeInterval& responseTime,const ACS::TimeInterval& sleepTime) : ACS::Thread(name,responseTime,sleepTime), m_boss(param)
 {
     m_sector = std::atoi(name.substring(name.length()-1).c_str())-1;
     std::stringstream thread_name;
-    thread_name << "CMedicinaActiveSurfaceBossSector";
+    thread_name <<  "CActiveSurfaceBossSector";
     thread_name << m_sector+1;
     thread_name << "Thread";
     m_thread_name = thread_name.str();
 
-    AUTO_TRACE(std::string(m_thread_name + "::CMedicinaActiveSurfaceBossSectorThread()").c_str());
+    AUTO_TRACE(std::string(m_thread_name + "::CActiveSurfaceBossSectorThread()").c_str());
 }
 
-CMedicinaActiveSurfaceBossSectorThread::~CMedicinaActiveSurfaceBossSectorThread()
+CActiveSurfaceBossSectorThread::~CActiveSurfaceBossSectorThread()
 {
-    AUTO_TRACE(std::string(m_thread_name + "::~CMedicinaActiveSurfaceBossSectorThread()").c_str());
+    AUTO_TRACE(std::string(m_thread_name + "::~CActiveSurfaceBossSectorThread()").c_str());
 }
 
-void CMedicinaActiveSurfaceBossSectorThread::onStart()
+void CActiveSurfaceBossSectorThread::onStart()
 {
     AUTO_TRACE(std::string(m_thread_name + "::onStart()").c_str());
 
@@ -42,7 +42,7 @@ void CMedicinaActiveSurfaceBossSectorThread::onStart()
     }
 }
 
-void CMedicinaActiveSurfaceBossSectorThread::onStop()
+void CActiveSurfaceBossSectorThread::onStop()
 {
     AUTO_TRACE(std::string(m_thread_name + "::onStop()").c_str());
 
@@ -56,10 +56,9 @@ void CMedicinaActiveSurfaceBossSectorThread::onStop()
     }
 }
 
-void CMedicinaActiveSurfaceBossSectorThread::runLoop()
+void CActiveSurfaceBossSectorThread::runLoop()
 {
-    char serial_usd[23];
-    char graf[5], mecc[4];
+    std::string serial_usd, graf, mecc;
     int lanIndex;
     int circleIndex;
     int usdCircleIndex;
@@ -70,12 +69,12 @@ void CMedicinaActiveSurfaceBossSectorThread::runLoop()
 
         try
         {
-            current_usd = m_boss->m_services->getComponent<ActiveSurface::USD>(serial_usd);
+            current_usd = m_boss->m_services->getComponent<ActiveSurface::USD>(serial_usd.c_str());
         }
         catch (maciErrType::CannotGetComponentExImpl& ex)
         {
             _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,std::string(m_thread_name + "::runLoop()").c_str());
-            Impl.setComponentName(serial_usd);
+            Impl.setComponentName(serial_usd.c_str());
             Impl.log(LM_DEBUG);
         }
 
@@ -84,7 +83,6 @@ void CMedicinaActiveSurfaceBossSectorThread::runLoop()
     }
     else
     {
-        m_boss->m_sector[m_sector] = true;
         this->setStopped();
     }
 }

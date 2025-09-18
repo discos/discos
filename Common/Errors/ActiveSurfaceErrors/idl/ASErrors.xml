@@ -15,37 +15,37 @@
  name="ASErrors" type="2003" _prefix="alma">
 
  <Code name="NoError" shortDescription="No error" description="No error condition found"/>
- <ErrorCode name="USDCalibrated" shortDescription=" " description="USD succesful calibrated">
+ <ErrorCode name="USDCalibrated" description=" " shortDescription="USD succesful calibrated">
  	<Member name="CammaLen" type="double" description="Length of camma-on window"/>
  	<Member name="CammaPos" type="double" description="Distance from top edge of the middle camma-on window"/>
  </ErrorCode>
- <ErrorCode name="LibrarySocketError" shortDescription="Socket error. Critical" description="Error encountered while creating or accessing socket resource" />
- <ErrorCode name="SocketReconn" shortDescription="Socket reconnected. Warning" description="Socket was broken. Reconnected successfully"/>
- <ErrorCode name="SocketFail" shortDescription="Unrecoverable socket problems. Critical" description="The socket connection could not be re established"/>
- <ErrorCode name="SocketTOut" shortDescription=" " description="Time out writing to socket. Critical"/>
- <ErrorCode name="SocketNotRdy" shortDescription=" " description="Unable to allocate socket resource. Error"/>
- <ErrorCode name="MemoryAllocation" shortDescription=" " description="Buffer can't be allocated. Error"/>
- <ErrorCode name="LANConnectionError" shortDescription=" " description="LAN/485 converter is not reachable or disconnected"/>
- <ErrorCode name="LAN_Unavailable" shortDescription=" " description="The LAN component is unavailable"/>
- <ErrorCode name="sendCmdErr" shortDescription=" " description="sendCmd() returned a wrong code. Error"/>
- <ErrorCode name="Incomplete" shortDescription=" " description="Incomplete reply from USD. Warning"/>
- <ErrorCode name="InvalidResponse" shortDescription=" " description="USD returned an invalid acknowledge code. Error"/>
- <ErrorCode name="Nak" shortDescription=" " description="USD does not acknowledge last command.Warning"/>
- <ErrorCode name="CDBAccessError" shortDescription=" " description="Error while accessing the Configuration Database.Error">
+ <ErrorCode name="LibrarySocketError" description=" " shortDescription="Error encountered while creating or accessing socket resource" />
+ <ErrorCode name="SocketReconn" description=" " shortDescription="Socket was broken. Reconnected successfully"/>
+ <ErrorCode name="SocketFail" description=" " shortDescription="The socket connection could not be re established"/>
+ <ErrorCode name="SocketTOut" description=" " shortDescription="Time out writing to socket. Critical"/>
+ <ErrorCode name="SocketNotRdy" description=" " shortDescription="Unable to allocate socket resource. Error"/>
+ <ErrorCode name="MemoryAllocation" description=" " shortDescription="Buffer can't be allocated. Error"/>
+ <ErrorCode name="LANConnectionError" description=" " shortDescription="LAN/485 converter is not reachable or disconnected"/>
+ <ErrorCode name="LAN_Unavailable" description=" " shortDescription="The LAN component is unavailable"/>
+ <ErrorCode name="sendCmdErr" description=" " shortDescription="sendCmd() returned a wrong code. Error"/>
+ <ErrorCode name="Incomplete" description=" " shortDescription="Incomplete reply from USD. Warning"/>
+ <ErrorCode name="InvalidResponse" description=" " shortDescription="USD returned an invalid acknowledge code. Error"/>
+ <ErrorCode name="Nak" description=" " shortDescription="USD does not acknowledge last command.Warning"/>
+ <ErrorCode name="CDBAccessError" description=" " shortDescription="Error while accessing the Configuration Database.Error">
  	<Member name="FieldName" type="string" description="FiledName"/>
  </ErrorCode>
- <ErrorCode name="USDConnectionError" shortDescription=" " description="USD is not reachable or disconnected.Critical"/>
- <ErrorCode name="USDTimeout" shortDescription=" " description="Timeout on receive data from USD.Critical">
+ <ErrorCode name="USDConnectionError" description=" " shortDescription="USD is not reachable or disconnected.Critical"/>
+ <ErrorCode name="USDTimeout" description=" " shortDescription="Timeout on receive data from USD.Critical">
 	<Member name="which" type="string" description="the usd location"/>
  </ErrorCode>
- <ErrorCode name="USDUnavailable" shortDescription=" " description="USD no more available.Warning"/>
- <ErrorCode name="USDError" shortDescription=" " description="generic USD error executing an action.Error"/>
- <ErrorCode name="DevIOError" shortDescription=" " description="USD error reading or writing a property.Error">
+ <ErrorCode name="USDUnavailable" description=" " shortDescription="USD no more available.Warning"/>
+ <ErrorCode name="USDError" description=" " shortDescription="generic USD error executing an action.Error"/>
+ <ErrorCode name="DevIOError" description=" " shortDescription="USD error reading or writing a property.Error">
  	<Member name="property" type="string" description="Name of the property"/>
 </ErrorCode>
- <ErrorCode name="corbaError" shortDescription=" " description="CORBA system exception executing an action.Error"/>
- <ErrorCode name="USDStillRunning" shortDescription=" " description="USD still running while shouldn't be!.Error"/>
- <ErrorCode name="USDunCalibrated" shortDescription=" " description="USD not calibrated.Warning"/>
- <ErrorCode name="CannotGetUSD" shortDescription=" " description="USD not activated.Warning"/>
- <ErrorCode name="UnknownProfile" shortDescription=" " description="Set profile is unknown for this station.Error"/>
+ <ErrorCode name="corbaError" description=" " shortDescription="CORBA system exception executing an action.Error"/>
+ <ErrorCode name="USDStillRunning" description=" " shortDescription="USD still running while shouldn't be!.Error"/>
+ <ErrorCode name="USDunCalibrated" description=" " shortDescription="USD not calibrated.Warning"/>
+ <ErrorCode name="CannotGetUSD" description=" " shortDescription="USD not activated.Warning"/>
+ <ErrorCode name="UnknownProfile" description=" " shortDescription="Set profile is unknown for this station.Error"/>
  </Type>

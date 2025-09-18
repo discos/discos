@@ -1,5 +1,5 @@
 #include <maciSimpleClient.h>
-#include <SRTActiveSurfaceBossC.h>
+#include <ActiveSurfaceBossC.h>
 #include <QtGui/QApplication>
 #include <QtGui/QWidget>
 #include <ClientErrors.h>
@@ -12,7 +12,7 @@ using namespace maci;
 int main(int argc,char* argv[])
 {
 	QApplication a(argc,argv);
-    	ActiveSurface::SRTActiveSurfaceBoss_var ASBoss;
+    	ActiveSurface::ActiveSurfaceBoss_var ASBoss;
     	bool SRTActiveSurfaceBossComponent = false;
   
 	SRTActiveSurfaceGUI* mySRTActiveSurfaceGUI = new SRTActiveSurfaceGUI;
@@ -54,7 +54,7 @@ int main(int argc,char* argv[])
 
     // Get reference to the Active Surface Boss component
     try {
-        ASBoss = client->getComponent < ActiveSurface::SRTActiveSurfaceBoss > ("AS/Boss", 0, true);
+        ASBoss = client->getComponent < ActiveSurface::ActiveSurfaceBoss > ("AS/Boss", 0, true);
         if (CORBA::is_nil (ASBoss.in ()) == true) {
             _EXCPT(ClientErrors::CouldntAccessComponentExImpl,impl,"TestClient::Main()");
             impl.setComponentName("AS/Boss");

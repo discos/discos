@@ -86,11 +86,9 @@ void USDImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 
     // Use container to activate the object
     ACS_SHORT_LOG((LM_INFO, "Getting component: %s", (const char*)lanCobName));
-    ActiveSurface::lan_var obj=ActiveSurface::lan::_nil();
     try
     {
-        obj = cs->getComponent<ActiveSurface::lan>((const char *)lanCobName);
-        m_pLan = ActiveSurface::lan::_narrow(obj.in());
+        m_pLan = cs->getComponent<ActiveSurface::lan>((const char *)lanCobName);
     }
     catch (maciErrType::CannotGetComponentExImpl)
     {
@@ -108,16 +106,16 @@ void USDImpl::initialize() throw (ACSErr::ACSbaseExImpl)
     ACS_SHORT_LOG((LM_INFO,"Property creation..."));
     try
     {
-        m_delay_sp      = new RWlong(CompName + ":delay", getComponent(), new USDDevIO<CORBA::Long>(this, m_pLan, m_addr, DELAY, 1, 0), true);
-        m_Fmin_sp       = new RWlong(CompName + ":Fmin", getComponent(), new USDDevIO<CORBA::Long>(this, m_pLan, m_addr, FMIN, 2, 0), true);
-        m_Fmax_sp       = new RWlong(CompName + ":Fmax", getComponent(), new USDDevIO<CORBA::Long>(this, m_pLan, m_addr, FMAX, 2, 0), true);
-        m_acc_sp        = new RWlong(CompName + ":acc", getComponent(), new USDDevIO<CORBA::Long>(this, m_pLan, m_addr, ACCL, 1, 0), true);
-        m_uBits_sp      = new RWlong(CompName + ":uBits", getComponent(), new USDDevIO<CORBA::Long>(this, m_pLan, m_addr, UBIT, 1, 0), true);
-        m_actPos_sp     = new ROlong(CompName + ":actPos", getComponent(), new USDDevIO<CORBA::Long>(this, m_pLan, m_addr, APOS, 0, 4), true);
-        m_softVer_sp    = new ROlong(CompName + ":softVer", getComponent(), new USDDevIO<CORBA::Long>(this, m_pLan, m_addr, SVER, 0, 1), true);
-        m_type_sp       = new ROlong(CompName + ":type", getComponent(), new USDDevIO<CORBA::Long>(this, m_pLan, m_addr, USDT, 0, 1), true);
-        m_cmdPos_sp     = new RWlong(CompName + ":cmdPos", getComponent(), new USDDevIO<CORBA::Long>(this, m_pLan, m_addr, CPOS, 4, 0), true);
-        m_status_sp     = new ROpattern(CompName + ":status", getComponent(), new USDDevIO<ACS::pattern>(this, m_pLan, m_addr, STAT, 0, 3), true);
+        m_delay_sp      = new RWlong(CompName + ":delay", getComponent(), new USDDevIO<CORBA::Long>(*this, m_pLan, m_addr, DELAY, 1, 0), true);
+        m_Fmin_sp       = new RWlong(CompName + ":Fmin", getComponent(), new USDDevIO<CORBA::Long>(*this, m_pLan, m_addr, FMIN, 2, 0), true);
+        m_Fmax_sp       = new RWlong(CompName + ":Fmax", getComponent(), new USDDevIO<CORBA::Long>(*this, m_pLan, m_addr, FMAX, 2, 0), true);
+        m_acc_sp        = new RWlong(CompName + ":acc", getComponent(), new USDDevIO<CORBA::Long>(*this, m_pLan, m_addr, ACCL, 1, 0), true);
+        m_uBits_sp      = new RWlong(CompName + ":uBits", getComponent(), new USDDevIO<CORBA::Long>(*this, m_pLan, m_addr, UBIT, 1, 0), true);
+        m_actPos_sp     = new ROlong(CompName + ":actPos", getComponent(), new USDDevIO<CORBA::Long>(*this, m_pLan, m_addr, APOS, 0, 4), true);
+        m_softVer_sp    = new ROlong(CompName + ":softVer", getComponent(), new USDDevIO<CORBA::Long>(*this, m_pLan, m_addr, SVER, 0, 1), true);
+        m_type_sp       = new ROlong(CompName + ":type", getComponent(), new USDDevIO<CORBA::Long>(*this, m_pLan, m_addr, USDT, 0, 1), true);
+        m_cmdPos_sp     = new RWlong(CompName + ":cmdPos", getComponent(), new USDDevIO<CORBA::Long>(*this, m_pLan, m_addr, CPOS, 4, 0), true);
+        m_status_sp     = new ROpattern(CompName + ":status", getComponent(), new USDDevIO<ACS::pattern>(*this, m_pLan, m_addr, STAT, 0, 3), true);
         m_gravCorr_sp   = new RWdouble(CompName + ":gravCorr", getComponent());
         m_lmCorr_sp     = new RWdouble(CompName + ":lmCorr", getComponent());
         m_userOffset_sp = new RWdouble(CompName + ":userOffset", getComponent());
@@ -249,25 +247,7 @@ void USDImpl::execute() throw (ACSErr::ACSbaseExImpl)
  // Building Destructor
 void USDImpl::cleanUp()
 {
-    ACS_TRACE("::USDImpl::cleanUp()");
-
-    // must release the lan component
-    if(CORBA::is_nil(m_pLan) == false)
-    {
-        ACS_LOG(LM_RUNTIME_CONTEXT, "::USDImpl::cleanUp",(LM_DEBUG, "Releasing LANx"));
-        try
-        {
-            cs->releaseComponent((const char*)lanCobName);
-        }
-
-        catch (maciErrType::CannotReleaseComponentExImpl)
-        {
-            ACS_SHORT_LOG((LM_INFO, "cannot release lan component %s", (const char*)lanCobName));
-        }
-        // be sure to set the reference to nil
-        //m_pLan = MOD_LAN::lan::_nil();
-         m_pLan = ActiveSurface::lan::_nil();
-    }
+    // There is no need to release the LAN component since it is a HierarchicalComponent and will be released when all USDs have been released
 
     if(actuatorsCorrections != NULL)
     {
@@ -283,20 +263,7 @@ void USDImpl::cleanUp()
 
 void USDImpl::aboutToAbort()
 {
-    ACS_TRACE("::USDImpl::aboutToAbort()");
-
-    try
-    {
-        cs->releaseComponent((const char*)lanCobName);
-    }
-    catch (maciErrType::CannotReleaseComponentExImpl)
-    {
-        ACS_SHORT_LOG((LM_INFO, "cannot release lan component %s", (const char*)lanCobName));
-    }
-
-    // be sure to set the reference to nil
-    //m_pLan = MOD_LAN::lan::_nil();
-    m_pLan = ActiveSurface::lan::_nil();
+    // There is no need to release the LAN component since it is a HierarchicalComponent and will be released when all USDs have been released
 
     if(actuatorsCorrections != NULL)
     {

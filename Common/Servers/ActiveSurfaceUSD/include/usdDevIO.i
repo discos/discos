@@ -10,13 +10,13 @@
 		
 		if( m_rLen==0) return m_value;		// no hardware read for WO properties
 
-		if (m_pusd->m_available) {	
+		if (m_pusd.m_available) {	
 			
 			try {
 				m_pLan->recUSDPar(m_cmd,m_addr,m_rLen,value);
 			}
 			catch (ASErrors::ASErrorsEx& ex) {
-				m_pusd->exCheck(ex);
+				m_pusd.exCheck(ex);
 				throw ASErrors::USDErrorExImpl(ex,__FILE__,__LINE__,"USDDevIO::read()");
 			}  
 			
@@ -31,8 +31,8 @@
 			if(m_cmd==APOS) value>>=USxS;														// ustep to step position conversion
 			else if(m_cmd==FMIN || m_cmd==FMAX) value=long(value);		// velocity 
 			else if(m_cmd==STAT ) {
-				m_pusd->m_calibrate ? value|=CAL : value&=~CAL;		// status CAL integration
-				m_pusd->m_ploop ? value|=PAUT : value&=~PAUT;		// status  PAUT integration
+				m_pusd.m_calibrate ? value|=CAL : value&=~CAL;		// status CAL integration
+				m_pusd.m_ploop ? value|=PAUT : value&=~PAUT;		// status  PAUT integration
 			}
 			m_value=value;
 			return m_value;
@@ -55,7 +55,7 @@
 		}
 		
 	  try  {
-		  if (m_pusd->m_available) {
+		  if (m_pusd.m_available) {
 			
 			  if(m_cmd==CPOS||m_cmd==RPOS) par=value<<USxS; // step to ustep position conversion
 			  else if(m_cmd==FMIN || m_cmd==FMAX) par=long(value);	// velocity
@@ -64,7 +64,7 @@
 			  CompletionImpl
               comp(m_pLan->sendUSDCmd(m_cmd,m_addr,par,m_wLen));
 		
-			  if(m_pusd->compCheck(comp))	throw ASErrors::USDErrorExImpl(comp,__FILE__,__LINE__,"USDDevIO::write()");  
+			  if(m_pusd.compCheck(comp))	throw ASErrors::USDErrorExImpl(comp,__FILE__,__LINE__,"USDDevIO::write()");  
 			
 			  timestamp=getTimeStamp();
 			  m_value=value;

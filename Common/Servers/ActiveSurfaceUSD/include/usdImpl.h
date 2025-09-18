@@ -606,7 +606,7 @@ private:
 	/**
 	* pointer to LAN/485 component
 	*/
-	ActiveSurface::lan* m_pLan;
+	ActiveSurface::lan_ptr m_pLan;
 	
 	/** 
 	* sector of usd

@@ -1,5 +1,5 @@
-#ifndef _MEDICINAACTIVESURFACEBOSSIMPLDEVIOPROFILE_H_
-#define _MEDICINAACTIVESURFACEBOSSIMPLDEVIOPROFILE_H_
+#ifndef _ACTIVESURFACEBOSSIMPLDEVIOPROFILE_H_
+#define _ACTIVESURFACEBOSSIMPLDEVIOPROFILE_H_
 
 /* ************************************************************************************* */
 /* OAC Osservatorio Astronomico di Cagliari                                              */
@@ -9,6 +9,7 @@
 /*                                                                                       */
 /* Who                               When       What                                     */
 /* Carlo Migoni (migoni@ca.astro.it) 11/05/2008 Creation                                 */
+/* Giuseppe Carboni (giuseppe.carboni@inaf.it)  04/09/2025  Code generalization          */
 
 #include <baciDevIO.h>
 #include <IRA>
@@ -20,17 +21,17 @@ using namespace baci;
  * @author <a href=mailto:migoni@ca.astro.it>Carlo Migoni</a>,
  * Osservatorio Astronomico di Cagliari, Italia<br>
  */ 
-class MedicinaActiveSurfaceBossImplDevIOProfile: public virtual DevIO<ActiveSurface::TASProfile>
+class ActiveSurfaceBossImplDevIOProfile: public virtual DevIO<ActiveSurface::TASProfile>
 {
 	
 public:
 	
-	MedicinaActiveSurfaceBossImplDevIOProfile(IRA::CSecureArea<CMedicinaActiveSurfaceBossCore>* core): m_core(core) { 
-		AUTO_TRACE("MedicinaActiveSurfaceBossImplDevIOProfile::MedicinaActiveSurfaceBossImplDevIOProfile()");
+	ActiveSurfaceBossImplDevIOProfile(IRA::CSecureArea<CActiveSurfaceBossCore>* core): m_core(core) { 
+		AUTO_TRACE("ActiveSurfaceBossImplDevIOProfile::ActiveSurfaceBossImplDevIOProfile()");
 	}
 	
-	~MedicinaActiveSurfaceBossImplDevIOProfile() {
-		AUTO_TRACE("MedicinaActiveSurfaceBossImplDevIOProfile::~MedicinaActiveSurfaceBossImplDevIOProfile()");
+	~ActiveSurfaceBossImplDevIOProfile() {
+		AUTO_TRACE("ActiveSurfaceBossImplDevIOProfile::~ActiveSurfaceBossImplDevIOProfile()");
 	}
 	
 	bool initializeValue(){
@@ -38,18 +39,18 @@ public:
 	}
 	
 	ActiveSurface::TASProfile  read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
-		CSecAreaResourceWrapper<CMedicinaActiveSurfaceBossCore> resource=m_core->Get();
-		AUTO_TRACE("MedicinaActiveSurfaceBossImplDevIOProfile::read()");
+		CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
+		AUTO_TRACE("ActiveSurfaceBossImplDevIOProfile::read()");
 		timestamp=getTimeStamp();
 		return resource->getProfile();
     }
 	
     void write(const CORBA::Long& value, ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
-    	AUTO_TRACE("MedicinaActiveSurfaceBossImplDevIOProfile::write()");
+    	AUTO_TRACE("ActiveSurfaceBossImplDevIOProfile::write()");
 	}
     
 private:
-	IRA::CSecureArea<CMedicinaActiveSurfaceBossCore> *m_core;
+	IRA::CSecureArea<CActiveSurfaceBossCore> *m_core;
 };
 
 #endif /*DEVIOPROFILE_H_*/

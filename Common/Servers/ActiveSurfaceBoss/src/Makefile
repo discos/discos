@@ -65,7 +65,7 @@ EXECUTABLES     =
 #
 # <brief description of xxxxx program>
 #TestClient_OBJECTS   = TestClient
-#TestClient_LIBS      = MedicinaActiveSurfaceBossImpl IRALibrary lanStubs usdStubs ASErrors ComponentErrors ClientErrors ManagementErrors
+#TestClient_LIBS      = ActiveSurfaceBossImpl IRALibrary lanStubs usdStubs ASErrors ComponentErrors ClientErrors ManagementErrors
 
 #
 # special compilation flags for single c sources
@@ -79,12 +79,12 @@ INCLUDES        =
 #
 # Libraries (public and local)
 # ----------------------------
-LIBRARIES       = MedicinaActiveSurfaceBossImpl
+LIBRARIES       = ActiveSurfaceBossImpl
 LIBRARIES_L     =
 #
 # <brief description of lllll library>
-MedicinaActiveSurfaceBossImpl_OBJECTS = MedicinaActiveSurfaceBossImpl MedicinaActiveSurfaceBossCore MedicinaActiveSurfaceBossWorkingThread MedicinaActiveSurfaceBossSectorThread
-MedicinaActiveSurfaceBossImpl_LIBS = lanStubs usdStubs ActiveSurfaceBossStubs MedicinaActiveSurfaceBossStubs AntennaDefinitionsStubs ManagmentDefinitionsStubs AntennaBossStubs ComponentErrors ASErrors ManagementErrors AntennaErrors IRALibrary ParserErrors DiscosVersion
+ActiveSurfaceBossImpl_OBJECTS = ActiveSurfaceBossImpl ActiveSurfaceBossCore ActiveSurfaceBossWorkingThread ActiveSurfaceBossInitializationThread ActiveSurfaceBossSectorThread
+ActiveSurfaceBossImpl_LIBS = lanStubs usdStubs ActiveSurfaceBossStubs ActiveSurfaceBossStubs AntennaDefinitionsStubs ManagmentDefinitionsStubs AntennaBossStubs ComponentErrors ASErrors ManagementErrors AntennaErrors IRALibrary ParserErrors DiscosVersion
 
 #
 # Scripts (public and local)

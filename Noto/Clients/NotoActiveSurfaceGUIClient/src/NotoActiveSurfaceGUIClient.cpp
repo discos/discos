@@ -1,5 +1,5 @@
 #include <maciSimpleClient.h>
-#include <NotoActiveSurfaceBossC.h>
+#include <ActiveSurfaceBossC.h>
 #include <QtGui/QApplication>
 #include <QtGui/QWidget>
 #include <ClientErrors.h>
@@ -12,7 +12,7 @@ using namespace maci;
 int main(int argc,char* argv[])
 {
 	QApplication a(argc,argv);
-    	ActiveSurface::NotoActiveSurfaceBoss_var ASBoss;
+    	ActiveSurface::ActiveSurfaceBoss_var ASBoss;
     	bool NotoActiveSurfaceBossComponent = false;
   
 	NotoActiveSurfaceGUI* myNotoActiveSurfaceGUI = new NotoActiveSurfaceGUI;
@@ -54,7 +54,7 @@ int main(int argc,char* argv[])
 
     // Get reference to the Active Surface Boss component
     try {
-        ASBoss = client->getComponent < ActiveSurface::NotoActiveSurfaceBoss > ("AS/Boss", 0, true);
+        ASBoss = client->getComponent < ActiveSurface::ActiveSurfaceBoss > ("AS/Boss", 0, true);
         if (CORBA::is_nil (ASBoss.in ()) == true) {
             _EXCPT(ClientErrors::CouldntAccessComponentExImpl,impl,"TestClient::Main()");
             impl.setComponentName("AS/Boss");

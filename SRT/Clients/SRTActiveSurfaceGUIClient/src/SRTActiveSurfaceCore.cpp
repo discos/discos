@@ -42,7 +42,7 @@ SRTActiveSurfaceCore::~SRTActiveSurfaceCore()
 {
 }
 
-void SRTActiveSurfaceCore::setASBoss (ActiveSurface::SRTActiveSurfaceBoss_var ASBoss)
+void SRTActiveSurfaceCore::setASBoss (ActiveSurface::ActiveSurfaceBoss_var ASBoss)
 {
     tASBoss = ASBoss;
     actuatorcounter = circlecounter = totacts = 1;
