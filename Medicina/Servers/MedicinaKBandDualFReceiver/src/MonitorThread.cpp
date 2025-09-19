@@ -57,7 +57,8 @@ void CMonitorThread::onStart()
          case VACUUM: {
              m_currentStage = STATUS;
              try {
-                 m_core->updateVacuum();
+             	  //cout << "VACUUM" << endl;
+                 //m_core->updateVacuum();
              }
              catch (ACSErr::ACSbaseExImpl& ex) {
                  _ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl, impl, ex, "CMonitorThread::runLoop");
@@ -71,7 +72,8 @@ void CMonitorThread::onStart()
         }
         case LNA_VD: {
             try {
-                 m_core->updateVdLNAControls();
+            	  //cout << "Vd LNA" << endl;
+                 //m_core->updateVdLNAControls();
             }
             catch (ACSErr::ACSbaseExImpl& ex) {
                  _ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl, impl, ex, "CMonitorThread::runLoop");
@@ -82,7 +84,8 @@ void CMonitorThread::onStart()
          }
          case LNA_ID: {
             try {
-                 m_core->updateIdLNAControls();
+            	  //cout << "Id LNA" << endl;
+                 //m_core->updateIdLNAControls();
             }
             catch (ACSErr::ACSbaseExImpl& ex) {
                 _ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl, impl, ex, "CMonitorThread::runLoop");
@@ -93,7 +96,8 @@ void CMonitorThread::onStart()
          }
          case LNA_VG: {
             try {
-                 m_core->updateVgLNAControls();
+            	  //cout << "Vg LNA" << endl;
+                 //m_core->updateVgLNAControls();
             }
             catch (ACSErr::ACSbaseExImpl& ex) {
                 _ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl, impl, ex, "CMonitorThread::runLoop");
@@ -106,6 +110,7 @@ void CMonitorThread::onStart()
         case CTEMPCOOLHEAD: {
             m_currentStage = CTEMPCOOLHEADW;
             try {
+            	 //cout << "Cryo CoolHead" << endl;
                 m_core->updateCryoCoolHead();
             }
             catch (ACSErr::ACSbaseExImpl& ex) {
@@ -117,6 +122,7 @@ void CMonitorThread::onStart()
         case CTEMPCOOLHEADW: {
             m_currentStage = CTEMPLNA;
             try {
+            	 //cout << "Cryo CoolHead Finestra" << endl;
                 m_core->updateCryoCoolHeadWin();
             }
             catch (ACSErr::ACSbaseExImpl& ex) {
@@ -128,6 +134,7 @@ void CMonitorThread::onStart()
         case CTEMPLNA: {
             m_currentStage = CTEMPLNAW;
             try {
+            	 //cout << "Cryo LNA" << endl;
                 m_core->updateCryoLNA();
             }
             catch (ACSErr::ACSbaseExImpl& ex) {
@@ -139,6 +146,7 @@ void CMonitorThread::onStart()
         case CTEMPLNAW: {
             m_currentStage = REMOTE;
             try {
+            	 //cout << "Cryo Finestra LNA" << endl;
                 m_core->updateCryoLNAWin();
             }
             catch (ACSErr::ACSbaseExImpl& ex) {
@@ -150,6 +158,7 @@ void CMonitorThread::onStart()
         case REMOTE: {
             m_currentStage = COOLHEAD;
             try {
+            	 //cout << "Is Remote" << endl;
                 m_core->updateIsRemote();
             }
             catch (ACSErr::ACSbaseExImpl& ex) {
@@ -161,6 +170,7 @@ void CMonitorThread::onStart()
         case COOLHEAD: {
             m_currentStage = VACUUMPUMP;
             try {
+            	 //cout << "CoolHead" << endl;
                 m_core->updateCoolHead();
             }
             catch (ACSErr::ACSbaseExImpl& ex) {
@@ -172,6 +182,7 @@ void CMonitorThread::onStart()
         case VACUUMPUMP: {
             m_currentStage = VACUUMVALVE;
             try {
+            	 //cout << "Vacuum Pump" << endl;
                 m_core->updateVacuumPump();
             }
             catch (ACSErr::ACSbaseExImpl& ex) {
@@ -183,6 +194,7 @@ void CMonitorThread::onStart()
         case VACUUMVALVE: {
             m_currentStage = NOISEMARK;
             try {
+            	 //cout << "Vacuum Valve" << endl;
                 m_core->updateVacuumValve();
             }
             catch (ACSErr::ACSbaseExImpl& ex) {
@@ -194,6 +206,7 @@ void CMonitorThread::onStart()
         case NOISEMARK: {
             m_currentStage = UNLOCKED;
             try {
+            	 //cout << "Noise Mark" << endl;
                 m_core->updateNoiseMark();
             }
             catch (ACSErr::ACSbaseExImpl& ex) {
@@ -205,6 +218,7 @@ void CMonitorThread::onStart()
         case UNLOCKED: {
             m_currentStage = ENVTEMP;
             try {
+            	 //cout << "Local Oscillator" << endl;
                 m_core->checkLocalOscillator();
             }
             catch (ACSErr::ACSbaseExImpl& ex) {
@@ -216,6 +230,7 @@ void CMonitorThread::onStart()
         case ENVTEMP: {
             m_currentStage = VACUUM;
             try {
+            	 //cout << "Temperatura esterna" << endl; 
                 m_core->updateVertexTemperature();
             }
             catch (ACSErr::ACSbaseExImpl& ex) {

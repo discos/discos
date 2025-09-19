@@ -1817,6 +1817,7 @@ std::vector<BYTE> ReceiverControl::makeRequest(MicroControllerBoard *board_ptr, 
         m_reliable_comm ? board_ptr->send(command, vparams) \
                         : board_ptr->send(command | MCB_CMD_TYPE_NOCHECKSUM, vparams);
         vparams.clear();
+        IRA::CIRATools::Wait(10000); // wait for 0.01 seconds 
         vparams = board_ptr->receive();
     }
     catch(MicroControllerBoardEx& ex) {

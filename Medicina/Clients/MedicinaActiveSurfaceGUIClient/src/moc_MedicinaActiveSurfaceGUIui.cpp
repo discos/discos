@@ -140,7 +140,7 @@ void MedicinaActiveSurfaceGUI::qt_static_metacall(QObject *_o, QMetaObject::Call
 }
 
 const QMetaObjectExtraData MedicinaActiveSurfaceGUI::staticMetaObjectExtraData = {
-    0,  qt_static_metacall
+    0,  qt_static_metacall 
 };
 
 const QMetaObject MedicinaActiveSurfaceGUI::staticMetaObject = {

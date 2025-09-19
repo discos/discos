@@ -77,9 +77,15 @@ std::vector<BYTE> MicroControllerBoard::receive(void) {
     try {
         for(size_t j = 0; j < MCB_HT_COUNTER; j++) {
             if(m_socket->Receive(m_Error, (void *)(&msg[0]), 1) == 1) {
-                if(msg[0] == MCB_CMD_STX) // MCB_CMD_STX is the answer header
+                if(msg[0] == MCB_CMD_STX) { // MCB_CMD_STX is the answer header 
+                	  //cout << "RICEVUTO START BYTE" << endl;
                     break;
+                }
                 else
+                    continue;
+            }
+            else {
+                	  //cout << "RICEZIONE STARTBYTE NON CORRETA!" << endl;
                     continue;
             }
         }
@@ -99,6 +105,10 @@ std::vector<BYTE> MicroControllerBoard::receive(void) {
                     msg_stream.str("");
                     msg_stream << msg[i];
                     m_answer.push_back(msg[i]);
+                }
+                else {
+                	  //cout << "RICEZIONE PACCHETTO NON CORRETA!" << endl;
+                    continue;
                 }
             }
 
@@ -141,11 +151,13 @@ std::vector<BYTE> MicroControllerBoard::receive(void) {
             if(has_data_cmd) {
                 data.clear();
                 clean_data.clear();
+                //cout << "RISPOSTA CON PARAMETRI" << endl;
                 if(m_socket->Receive(m_Error, (void *)(&msg[MCB_BASE_ANSWER_LENGTH]), 1) == 1) {
                     msg_stream.clear();
                     msg_stream.str("");
                     msg_stream << msg[MCB_BASE_ANSWER_LENGTH];
                     m_answer.push_back(msg[MCB_BASE_ANSWER_LENGTH]);
+                    //cout << " LUNGHEZZA PARAMETRI : " << int(msg[MCB_BASE_ANSWER_LENGTH]) << endl;
                 }
                 else {
                 	pthread_mutex_unlock(&m_socket_mutex);
@@ -278,15 +290,17 @@ void MicroControllerBoard::send(const BYTE command, std::vector<BYTE> parameters
             msg[i] = *iter;
             i++;
         }
-
+        sent_bytes=0;
         while(sent_bytes < len) {
             // Send returns the total number of bytes sent
-            if ((num_bytes = m_socket->Send(m_Error, (const void *)(msg + sent_bytes), len - sent_bytes)) < 0) 
+            if ((num_bytes = m_socket->Send(m_Error, (const void *)(msg + sent_bytes), len - sent_bytes)) < 0) {
                 break ;
-            else sent_bytes += num_bytes;
+            }         
+            else {
+                sent_bytes += num_bytes;
+            }
         }
-        pthread_mutex_unlock(&m_socket_mutex); 
-
+        pthread_mutex_unlock(&m_socket_mutex);
         if (sent_bytes != len)
             throw MicroControllerBoardEx("Not all bytes sent");
     }

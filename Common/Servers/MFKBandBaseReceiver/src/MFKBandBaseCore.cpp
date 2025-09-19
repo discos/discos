@@ -51,6 +51,7 @@ CConfiguration const * const  CComponentCore::execute() throw (
                 m_configuration.getLNASamplingTime(),
                 m_configuration.getFeeds()
         );
+        IRA::CIRATools::Wait(100000); // wait for 0.1 seconds to let things settle down
     }
     catch (std::bad_alloc& ex) {
         _EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CComponentCore::execute()");
