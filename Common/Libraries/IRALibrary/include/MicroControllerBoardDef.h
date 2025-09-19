@@ -1,7 +1,7 @@
 #ifndef __MICRO_CONTROLLER_BOARD_DEF__H
 #define __MICRO_CONTROLLER_BOARD_DEF__H
 
-const unsigned MCB_TOUT = 100000; // 1 second (in microseconds)
+const unsigned MCB_TOUT = 1000000; // 1 second (in microseconds)
 const unsigned MCB_BUFF_LIMIT = 2048;
 // MCB_HT_COUNTER means Header or Terminator COUNTER
 const unsigned short MCB_HT_COUNTER = 50; // The maximum number of attempts we wait for a header or terminator
