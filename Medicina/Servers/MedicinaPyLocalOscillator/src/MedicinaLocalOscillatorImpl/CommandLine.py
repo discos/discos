@@ -48,7 +48,7 @@ class CommandLine:
 		answer=self.sendCmd(cmd)
 		if answer!=AMP_ANS_OK:
 			nak,err=answer.split()
-			message="cannot set the power, the error code is %d"%err
+			message="cannot set the power, the error code is %s"%err
 			exc=CommandLineError(message);
 			raise exc
 		else:
@@ -64,7 +64,7 @@ class CommandLine:
 		answer=self.sendCmd(cmd)
 		if AMP_QUERY_NOK in answer:
 			nak,err=answer.split()
-			message="cannot read power, the error code is %d"%err
+			message="cannot read power, the error code is %s"%err
 			exc=CommandLineError(message);
 			raise exc
 		else:
@@ -79,7 +79,7 @@ class CommandLine:
 		answer=self.sendCmd(cmd)
 		if answer!=FREQ_ANS_OK:
 			nak,err=answer.split()
-			message="cannot set frequency, the error code is %d"%err
+			message="cannot set frequency, the error code is %s"%err
 			exc=CommandLineError(message);
 			raise exc
 		else:
@@ -95,7 +95,7 @@ class CommandLine:
 		answer=self.sendCmd(cmd)
 		if FREQ_QUERY_NOK in answer:
 			nak,err=answer.split()
-			message="cannot read frequency, the error code is %d"%err
+			message="cannot read frequency, the error code is %s"%err
 			exc=CommandLineError(message);
 			raise exc
 		else:
@@ -111,7 +111,7 @@ class CommandLine:
 		print(answer)
 		if answer!=RF_ON_ANS_OK:
 			nak,err=answer.split()
-			message="an error occurred, the code is %d"%err
+			message="an error occurred, the code is %s"%err
 			exc=CommandLineError(message);
 			raise exc
   
@@ -121,22 +121,22 @@ class CommandLine:
 		answer=self.sendCmd(cmd)
 		if answer!=RF_OFF_ANS_OK:
 			nak,err=answer.split()
-			message="an error occurred, the code is %d"%err
+			message="an error occurred, the code is %s"%err
 			exc=CommandLineError(message);
 			raise exc
-   
+			  
 	def sendCmd(self,msg):
 		ans=""
 		if self.check():
 			try:
-				self.sock.sendall(msg)
+				self.sock.sendall(msg.encode('utf-8'))
 			except socket.error as msg:
-				slef.close()
+				self.close()
 				exc=CommandLineError(msg);
 				raise exc
 			try:
 				ans=self.sock.recv(128)
-				return ans
+				return ans.decode('utf-8')
 			except socket.error as msg:
 				self.close()
 				exc=CommandLineError(msg);
@@ -169,14 +169,17 @@ class CommandLine:
 		except socket.error as msg:
 			exc=CommandLineError(msg);
 			raise exc		
-
+			
 	def check(self):
-		try:
-			self.create()
-			self.connect()
-			return True
-		except Exception:
-			return False
+		if not self.connected:
+			try:
+				self.create()
+				self.connect()
+				return True
+			except Exception:
+				return False
+		return True			
+			
        
        
       

@@ -41,7 +41,7 @@ NotoActiveSurfaceCore::~NotoActiveSurfaceCore()
 {
 }
 
-void NotoActiveSurfaceCore::setASBoss (ActiveSurface::NotoActiveSurfaceBoss_var ASBoss)
+void NotoActiveSurfaceCore::setASBoss (ActiveSurface::ActiveSurfaceBoss_var ASBoss)
 {
     tASBoss = ASBoss;
     actuatorcounter = circlecounter = totacts = 1;
