@@ -1,14 +1,15 @@
-#ifndef _MEDICINAACTIVESURFACEBOSSIMPLDEVIOENABLE_H_
-#define _MEDICINAACTIVESURFACEBOSSIMPLDEVIOENABLE_H_
+#ifndef _ACTIVESURFACEBOSSIMPLDEVIOTRACKING_H_
+#define _ACTIVESURFACEBOSSIMPLDEVIOTRACKING_H_
 
 /* ************************************************************************************* */
 /* OAC Osservatorio Astronomico di Cagliari                                              */
-/* $Id: DevIOEnable.h,v 1.2 2009-05-25 07:45:32 c.migoni Exp $                       	 */
+/* $Id: DevIOTracking.h,v 1.2 2009-05-25 07:45:32 c.migoni Exp $                       	 */
 /*                                                                                       */
 /* This code is under GNU General Public Licence (GPL).                                  */
 /*                                                                                       */
 /* Who                                  when        What                                 */
 /* Carlo Migoni (migoni@ca.astro.it)    16/03/2009  Creation                             */
+/* Giuseppe Carboni (giuseppe.carboni@inaf.it)  04/09/2025  Code generalization          */
 
 #include <baciDevIO.h>
 #include <IRA>
@@ -20,16 +21,16 @@ using namespace baci;
  * @author <a href=mailto:migoni@ca.astro.it>Carlo Migoni</a>,
  * Osservatorio Astronomico di Cagliari, Italia<br>
  */ 
-class MedicinaActiveSurfaceBossImplDevIOEnable: public virtual DevIO<Management::TBoolean>
+class ActiveSurfaceBossImplDevIOTracking: public virtual DevIO<Management::TBoolean>
 {
 public:
 	
-	MedicinaActiveSurfaceBossImplDevIOEnable(IRA::CSecureArea<CMedicinaActiveSurfaceBossCore>* core): m_core(core) { 
-		AUTO_TRACE("MedicinaActiveSurfaceBossImplDevIOEnable::MedicinaActiveSurfaceBossImplDevIOEnable()");
+	ActiveSurfaceBossImplDevIOTracking(IRA::CSecureArea<CActiveSurfaceBossCore>* core): m_core(core) { 
+		AUTO_TRACE("ActiveSurfaceBossImplDevIOTracking::ActiveSurfaceBossImplDevIOTracking()");
 	}
 	
-	~MedicinaActiveSurfaceBossImplDevIOEnable() {
-		AUTO_TRACE("MedicinaActiveSurfaceBossImplDevIOEnable::~MedicinaActiveSurfaceBossImplDevIOEnable()");
+	~ActiveSurfaceBossImplDevIOTracking() {
+		AUTO_TRACE("ActiveSurfaceBossImplDevIOTracking::~ActiveSurfaceBossImplDevIOTracking()");
 	}
 	
 	bool initializeValue() 
@@ -40,10 +41,10 @@ public:
 	Management::TBoolean  read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
 	{
 		bool val;
-		CSecAreaResourceWrapper<CMedicinaActiveSurfaceBossCore> resource=m_core->Get();
-		AUTO_TRACE("MedicinaActiveSurfaceBossImplDevIOEnable::read()");
+		CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
+		AUTO_TRACE("ActiveSurfaceBossImplDevIOTracking::read()");
 		timestamp=getTimeStamp();
-		val=resource->getEnable();
+		val=resource->getTracking();
 		if (val) {
 			return Management::MNG_TRUE;
 		}
@@ -53,11 +54,11 @@ public:
     }
 	
     void write(const CORBA::Long& value, ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
-    	AUTO_TRACE("MedicinaActiveSurfaceBossImplDevIOEnable::write()");
+    	AUTO_TRACE("ActiveSurfaceBossImplDevIOTracking::write()");
 	}
     
 private:
-	IRA::CSecureArea<CMedicinaActiveSurfaceBossCore> *m_core;
+	IRA::CSecureArea<CActiveSurfaceBossCore> *m_core;
 };
 
-#endif /*DEVIOENABLE_H_*/
+#endif /*DEVIOTRACKING_H_*/

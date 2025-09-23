@@ -39,8 +39,8 @@ COMMON_LIBRARIES:=TextWindowLibrary ParserLibrary XarcosLibrary ModbusChannel Co
 # There may be some hidden dependency between servers, but it may never come up since each core compiles a single cpp file.
 # Issues may only arise if we use a very high number of cores, which is unlikely.
 # If we'll ever face this problem we will split the SERVERS into more groups, with the latter one having servers which depends on some other servers in the first group.
-COMMON_SERVERS:=AntennaBoss Observatory OTF PointingModel Refraction SkySource SolarSystem Moon FitsWriter Scheduler ReceiversBoss ExternalClients CalibrationTool TotalPower CustomLogger \
-				PyDewarPositioner Sardara Skarab PyLocalOscillator MFKBandBaseReceiver PyCalmux ActiveSurfaceLan ActiveSurfaceUSD XBackend
+COMMON_SERVERS:=AntennaBoss Observatory OTF PointingModel Refraction SkySource SolarSystem Moon FitsWriter Scheduler ActiveSurfaceLan ReceiversBoss ExternalClients CalibrationTool TotalPower CustomLogger \
+				PyDewarPositioner ActiveSurfaceUSD Sardara Skarab PyLocalOscillator MFKBandBaseReceiver PyCalmux ActiveSurfaceBoss XBackend
 # Same as servers
 COMMON_CLIENTS:=AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient CustomLoggingClient SchedulerTextClient MeteoClient
 # Misc do not depend from one another, compile in parallel
@@ -55,7 +55,7 @@ SRT_DOC:=SRTDox
 SRT_ERRORS:=
 SRT_INTERFACES:=SRTAntennaInterface SRTActiveSurfaceInterface SRTMinorServoInterface SRTReceiversInterface
 SRT_LIBRARIES:=SRTMinorServoLibrary
-SRT_SERVERS:=SRTMount SRTActiveSurfaceBoss SRTMinorServo SRTKBandMFReceiver SRT7GHzReceiver SRT5GHzReceiver SRTLPBandReceiver SRTPyIFDistributor WeatherStation
+SRT_SERVERS:=SRTMount SRTMinorServo SRTKBandMFReceiver SRT7GHzReceiver SRT5GHzReceiver SRTLPBandReceiver SRTPyIFDistributor WeatherStation
 SRT_CLIENTS:=SRTActiveSurfaceGUIClient SRTMountTextClient MinorServoBossTextClient
 SRT_MISC:=SRTScripts
 
@@ -63,7 +63,7 @@ MED_DOC:=MEDDox
 MED_ERRORS:=
 MED_INTERFACES:=MedicinaAntennaInterface MedicinaReceiversInterface MedicinaActiveSurfaceInterface
 MED_LIBRARIES:=MedicinaVertexLibrary
-MED_SERVERS:=MedicinaMount MedicinaMinorServo WeatherStation MedicinaPyDMed MedicinaKBandDualFReceiver MedicinaActiveSurfaceBoss
+MED_SERVERS:=MedicinaMount MedicinaMinorServo WeatherStation MedicinaPyDMed MedicinaPyLocalOscillator MedicinaKBandDualFReceiver
 MED_CLIENTS:=MedicinaMountTextClient MedicinaActiveSurfaceGUIClient
 MED_MISC:=MedScripts
 
@@ -71,7 +71,7 @@ NT_DOC:=NTDox
 NT_ERRORS:=
 NT_INTERFACES:=NotoAntennaInterface NotoReceiversInterface NotoWeatherStationInterface NotoActiveSurfaceInterface
 NT_LIBRARIES:=
-NT_SERVERS:= NotoReceivers NotoMount NotoWeatherStation NotoActiveSurfaceBoss NotoMinorServo NotoPyLocalOscillator NotoPyIfDistributor
+NT_SERVERS:= NotoReceivers NotoMount NotoWeatherStation NotoMinorServo NotoPyLocalOscillator NotoPyIfDistributor
 NT_CLIENTS:=NotoMountTextClient NotoActiveSurfaceGUIClient
 NT_MISC:=NotoScripts
 
@@ -92,7 +92,7 @@ ifeq ($(STATION),SRT)
 	BackendsImplementation_MODULES:=TotalPower
 	ReceiversImplementation_MODULES:=ReceiversBoss SRTKBandMFReceiver SRT7GHzReceiver SRTLPBandReceiver
 	WeatherStationImplementation_MODULES:=SRTWeatherStation
-	SRTActiveSurfaceImplementation_MODULES:=SRTActiveSurfaceBoss
+	SRTActiveSurfaceImplementation_MODULES:=ActiveSurfaceBoss
 	MinorServoImplementation_MODULES:=SRTMinorServo
 	#########################################################################################
 	################################# build groups section ##################################
@@ -126,7 +126,7 @@ else ifeq ($(STATION),Medicina)
 	BackendsImplementation_MODULES:=TotalPower XBackend
 	ReceiversImplementation_MODULES:=ReceiversBoss
 	WeatherStationImplementation_MODULES:=MedWeatherStation Metrology
-	MedicinaActiveSurfaceImplementation_MODULES:=MedicinaActiveSurfaceBoss
+	MedicinaActiveSurfaceImplementation_MODULES:=ActiveSurfaceBoss
 	#########################################################################################
 	################################# build groups section ##################################
 	ERRORS:=$(COMMON_ERRORS) $(MED_ERRORS)
@@ -150,7 +150,7 @@ else ifeq ($(STATION),Noto)
 	ManagementImplementation_MODULES:=Scheduler CalibrationTool FitsWriter ExternalClients
 	BackendsImplementation_MODULES:=TotalPower
 	ReceiversImplementation_MODULES:=ReceiversBoss
-	NotoActiveSurfaceImplementation_MODULES:=NotoActiveSurfaceBoss
+	NotoActiveSurfaceImplementation_MODULES:=ActiveSurfaceBoss
 	#########################################################################################
 	################################# build groups section ##################################
 	ERRORS:=$(COMMON_ERRORS) $(NT_ERRORS)

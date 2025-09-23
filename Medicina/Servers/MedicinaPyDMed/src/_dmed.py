@@ -25,17 +25,25 @@ import time
 from collections import namedtuple
 
 def send_command(ip, port, command):
-	s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	try:
-		s.connect((ip,int(port)))
-	except socket.error:
+		s.connect((ip, int(port)))
+		s.sendall(command.encode('utf-8'))
+		time.sleep(0.1)
+		response = s.recv(1024)
+		s.close()
+		response = response.strip().split(b'\n')
+		return response
+	except socket.error as e:
+		# Log or handle the specific error
+		if e.errno == 104:
+			return "ConnectionReset" # Custom return value
 		return "Fail"
-	s.sendall(command)
-	time.sleep(0.1)
-	response=s.recv(1024)
-	s.close()
-	response=response.strip().split('\n')
-	return response
+	except Exception as e:
+		# Catch other potential errors
+		return "Fail"
+	finally:
+		s.close() # Ensure socket is closed in all cases
 
 def cdb(xmlstr):
 	data=[]

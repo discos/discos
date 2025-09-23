@@ -207,6 +207,6 @@
             <scriptBase>0</scriptBase>
             <remoteHost>MASTERHOST</remoteHost>
             <remoteAccount>discos</remoteAccount>
-        </container>      
+        </container>
     </containers>
 </AcsCommandCenterProject>

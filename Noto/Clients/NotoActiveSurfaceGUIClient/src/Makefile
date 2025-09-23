@@ -135,9 +135,9 @@ QT_COMPILE_FILES = $(subst .cpp,,$(QT_UI_FILES_MOC) $(QT_UI_FILES_EXTERN_MOC_H) 
 #
 # <brief description of xxxxx program>
 NotoActiveSurfaceGUIClient_OBJECTS   = $(QT_COMPILE_FILES) NotoActiveSurfaceGUIui NotoActiveSurfaceCore NotoActiveSurfaceClientEventLoop NotoActiveSurfaceGUIClient
-NotoActiveSurfaceGUIClient_LIBS      = IRALibrary ActiveSurfaceBossStubs NotoActiveSurfaceBossStubs ASErrors ComponentErrors ClientErrors ManagementErrors ManagmentDefinitionsStubs
+NotoActiveSurfaceGUIClient_LIBS      = IRALibrary ActiveSurfaceBossStubs ASErrors ComponentErrors ClientErrors ManagementErrors ManagmentDefinitionsStubs
 NotoActiveSurfaceManagementGUIClient_OBJECTS   = $(QT_COMPILE_FILES) NotoActiveSurfaceManagementGUIui NotoActiveSurfaceCore NotoActiveSurfaceClientEventLoop NotoActiveSurfaceGUIClient
-NotoActiveSurfaceManagementGUIClient_LIBS      = IRALibrary ActiveSurfaceBossStubs NotoActiveSurfaceBossStubs ASErrors ComponentErrors ClientErrors ManagementErrors ManagmentDefinitionsStubs
+NotoActiveSurfaceManagementGUIClient_LIBS      = IRALibrary ActiveSurfaceBossStubs ASErrors ComponentErrors ClientErrors ManagementErrors ManagmentDefinitionsStubs
 
 $(PROG)_OBJECTS            = $(PROG)
 $(PROG)_LDFLAGS            =
