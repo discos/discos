@@ -45,7 +45,7 @@ class MedicinaActiveSurfaceGUI : public QWidget, public Ui_MedicinaActiveSurface
         void setactuator();
 
     private slots:
-        void changeGUIActuatorColor(int, int, bool, bool);
+        void changeGUIActuatorColor(int, int, bool, bool, bool);
         void changeGUIAllActuators(bool callfromfunction = false);
         void changeGUIcircleORradius(bool callfromfunction = false);
         void changeGUIActuator(bool callfromfunction = false);
@@ -54,6 +54,7 @@ class MedicinaActiveSurfaceGUI : public QWidget, public Ui_MedicinaActiveSurface
         void changeGUIActuatorStatusLabels();
         void changeGUIasStatusCode(int);
         void changeGUIasProfileCode(int);
+        void changeGUIasLUTFileName(QString);
 
     private:
         MedicinaActiveSurfaceCore myMedicinaActiveSurfaceCore;

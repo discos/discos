@@ -246,7 +246,7 @@
 -->
 <usd xmlns="urn:schemas-cosylab-com:usd:1.0" sector="4" lan="2" serialAddress="5" cammaLen="0" cammaPos="0" calibrate="1">
 	<delay min_value="0" max_value="255" units="512 uSec" default_value="5" description="delay on reply" />
-	<cmdPos min_value="-21000" max_value="21000" units="step" description="commanded position" />
+	<cmdPos min_value="-9100" max_value="9100" units="step" description="commanded position" />
 	<Fmin min_value="20" max_value="10000" units="step" default_value="100" description="min freq" />
 	<Fmax min_value="20" max_value="10000" units="step" default_value="500" description="max freq" />
 	<acc min_value="0" max_value="255" units="mS^2" default_value="50" description="acceleration" />
