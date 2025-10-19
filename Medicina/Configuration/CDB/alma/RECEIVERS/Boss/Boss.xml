@@ -30,4 +30,6 @@
 
 <AvailableReceiver Code="XXP" Derotator="false" Component=""/>
 
+<AvailableReceiver Code="KQW" Derotator="false" Component="RECEIVERS/KQWBandReceiver"/>
+
 </ReceiversBoss>
