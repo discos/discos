@@ -12,7 +12,7 @@ MedicinaActiveSurfaceGUI::MedicinaActiveSurfaceGUI(QWidget *parent) : QWidget(pa
 {
     setupUi(this);
 
-    QObject::connect(&myMedicinaActiveSurfaceCore, SIGNAL(setGUIActuatorColor(int,int,bool,bool)), this, SLOT(changeGUIActuatorColor(int,int,bool,bool)));
+    QObject::connect(&myMedicinaActiveSurfaceCore, SIGNAL(setGUIActuatorColor(int,int,bool,bool)), this, SLOT(changeGUIActuatorColor(int,int,bool,bool,bool)));
     QObject::connect(&myMedicinaActiveSurfaceCore, SIGNAL(setGUIAllActuators(bool)), this, SLOT(changeGUIAllActuators(bool)));
     QObject::connect(&myMedicinaActiveSurfaceCore, SIGNAL(setGUIcircleORradius(bool)), this, SLOT(changeGUIcircleORradius(bool)));
     QObject::connect(&myMedicinaActiveSurfaceCore, SIGNAL(setGUIActuator(bool)), this, SLOT(changeGUIActuator(bool)));
@@ -21,6 +21,7 @@ MedicinaActiveSurfaceGUI::MedicinaActiveSurfaceGUI(QWidget *parent) : QWidget(pa
     QObject::connect(&myMedicinaActiveSurfaceCore, SIGNAL(setGUIActuatorStatusLabels()), this, SLOT(changeGUIActuatorStatusLabels()));
     QObject::connect(&myMedicinaActiveSurfaceCore, SIGNAL(setGUIasStatusCode(int)), this, SLOT(changeGUIasStatusCode(int)));
     QObject::connect(&myMedicinaActiveSurfaceCore, SIGNAL(setGUIasProfileCode(int)), this, SLOT(changeGUIasProfileCode(int)));
+    QObject::connect(&myMedicinaActiveSurfaceCore, SIGNAL(setGUIasLUTFileName(QString)), this, SLOT(changeGUIasLUTFileName(QString)));
 
 #ifdef MANAGEMENT
     buttonGroup1->setEnabled(true);
@@ -29,7 +30,7 @@ MedicinaActiveSurfaceGUI::MedicinaActiveSurfaceGUI(QWidget *parent) : QWidget(pa
 #endif
 }
 
-void MedicinaActiveSurfaceGUI::setParameters(maci::SimpleClient* theClient, ActiveSurface::MedicinaActiveSurfaceBoss_var theASBoss)
+void MedicinaActiveSurfaceGUI::setParameters(maci::SimpleClient* theClient, ActiveSurface::ActiveSurfaceBoss_var theASBoss)
 {
     myMedicinaActiveSurfaceClientEventLoop.setSimpleClient(theClient);
     myMedicinaActiveSurfaceCore.setASBoss(theASBoss);
@@ -537,7 +538,7 @@ void MedicinaActiveSurfaceGUI::recoverUSD()
     }
 }
 
-void MedicinaActiveSurfaceGUI::changeGUIActuatorColor(int tcircle, int tactuator, bool active, bool fromRun)
+void MedicinaActiveSurfaceGUI::changeGUIActuatorColor(int tcircle, int tactuator, bool active, bool statusColor, bool fromRun)
 {
     if (!fromRun)
     {
@@ -553,13 +554,17 @@ void MedicinaActiveSurfaceGUI::changeGUIActuatorColor(int tcircle, int tactuator
 
     QPushButton* ActuatorButton = this->findChild<QPushButton*>(ActuatorButtonName.str().c_str());
 
-    if(active)
+    if(active == true && statusColor == false) // attivo e calibrato
     {
-        ActuatorButton->setStyleSheet("background-color: rgb(85, 255, 0)");
+        ActuatorButton->setStyleSheet("background-color: rgb(85, 255, 0)"); // verde
+    }
+    else if (active == true && statusColor == true) // attivo e scalibrato
+    {
+        ActuatorButton->setStyleSheet("background-color: rgb(255, 255, 0)"); // giallo
     }
     else
     {
-        ActuatorButton->setStyleSheet("background-color: rgb(255, 0, 0)");
+        ActuatorButton->setStyleSheet("background-color: rgb(255, 0, 0)"); // rosso
     }
 }
 
@@ -723,10 +728,18 @@ void MedicinaActiveSurfaceGUI::changeGUIasProfileCode(int asProfileCode)
     StatuslineEdit_2->setText(QApplication::translate("MedicinaActiveSurfaceGUI", asProfileString.c_str(), 0, QApplication::UnicodeUTF8));
 }
 
+void MedicinaActiveSurfaceGUI::changeGUIasLUTFileName(QString filename)
+{
+    //LUTLabelFileName->setText(filename);
+}
+
 void MedicinaActiveSurfaceGUI::changeGUIActuatorStatusLabels()
 {
     ActuatorStatusRunLabel->clear();
     switch (myMedicinaActiveSurfaceCore.ActuatorStatusRunLabelCode) {
+        case (0):
+            ActuatorStatusRunLabel->setText("");
+            break;
         case (-1):
             ActuatorStatusRunLabel->setText("STOPPED");
             break;
@@ -747,6 +760,9 @@ void MedicinaActiveSurfaceGUI::changeGUIActuatorStatusLabels()
 
     ActuatorStatusCammLabel->clear();
     switch (myMedicinaActiveSurfaceCore.ActuatorStatusCammLabelCode) {
+        case (0):
+            ActuatorStatusCammLabel->setText("");
+            break;
         case (-1):
             ActuatorStatusCammLabel->setText("NO CAMM");
             break;
@@ -757,6 +773,9 @@ void MedicinaActiveSurfaceGUI::changeGUIActuatorStatusLabels()
 
     ActuatorStatusLoopLabel->clear();
     switch (myMedicinaActiveSurfaceCore.ActuatorStatusLoopLabelCode) {
+        case (0):
+            ActuatorStatusLoopLabel->setText("");
+            break;
         case (-1):
             ActuatorStatusLoopLabel->setText("NO LOOP");
             break;
@@ -767,6 +786,9 @@ void MedicinaActiveSurfaceGUI::changeGUIActuatorStatusLabels()
      
     ActuatorStatusCalLabel->clear();
     switch (myMedicinaActiveSurfaceCore.ActuatorStatusCalLabelCode) {
+        case (0):
+            ActuatorStatusCalLabel->setText("");
+            break;
         case (-1):
             ActuatorStatusCalLabel->setText("UNCALIBRATED");
             break;

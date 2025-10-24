@@ -128,16 +128,15 @@ tttlll_OBJECTS  =
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS = MedicinaActiveSurfaceBoss usd 
+CDB_SCHEMAS = usd 
 
 # 
 # IDL Files and flags
 # 
-IDL_FILES = MedicinaActiveSurfaceBoss
+IDL_FILES =
 TAO_IDLFLAGS =
 USER_IDL =
-MedicinaActiveSurfaceBossStubs_LIBS = baciStubs ComponentErrorsStubs ASErrorsStubs \
-					ManagmentDefinitionsStubs ActiveSurfaceBossStubs ActiveSurfaceCommonStubs
+
 #
 # Jarfiles and their directories
 #

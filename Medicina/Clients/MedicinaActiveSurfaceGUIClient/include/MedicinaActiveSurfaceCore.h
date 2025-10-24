@@ -3,7 +3,6 @@
 // ACS includes
 #include <baci.h>
 #include <ActiveSurfaceBossC.h>
-#include <MedicinaActiveSurfaceBossC.h>
 #include <ClientErrors.h>
 #include <ComponentErrors.h>
 #include <IRA>
@@ -27,7 +26,7 @@ class MedicinaActiveSurfaceCore : public QThread
         MedicinaActiveSurfaceCore(QObject *parent = 0);
         ~MedicinaActiveSurfaceCore();
 
-	    void setASBoss(ActiveSurface::MedicinaActiveSurfaceBoss_var ASBoss);
+	    void setASBoss(ActiveSurface::ActiveSurfaceBoss_var ASBoss);
 	    void run(void);
         void stop(void);
         void setactuator(int circle, int actuator);
@@ -75,7 +74,7 @@ class MedicinaActiveSurfaceCore : public QThread
         int ActuatorStatusCalLabelCode;
 
     signals:
-        int setGUIActuatorColor(int, int, bool, bool);
+        int setGUIActuatorColor(int, int, bool, bool, bool);
         int setGUIAllActuators(bool callfromfunction = false);
         int setGUIcircleORradius(bool callfromfunction = false);
         int setGUIActuator(bool callfromfunction = false);
@@ -84,9 +83,10 @@ class MedicinaActiveSurfaceCore : public QThread
         int setGUIActuatorStatusLabels();
         int setGUIasStatusCode(int);
         int setGUIasProfileCode(int);
+        int setGUIasLUTFileName(QString);
         
 	private:
-	    ActiveSurface::MedicinaActiveSurfaceBoss_var tASBoss;
+	    ActiveSurface::ActiveSurfaceBoss_var tASBoss;
 	    int actuatorcounter;
 	    int circlecounter;
 	    int totacts;

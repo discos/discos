@@ -1,74 +1,48 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
 <!--
    - History:
-   -   Tue Apr 28 10:51:56 UTC 2020 modified by jDAL
-   -   Tue Apr 28 13:42:23 UTC 2020 modified by jDAL
-   -   Tue Apr 28 13:57:29 UTC 2020 modified by jDAL
-   -   Tue Apr 28 13:58:43 UTC 2020 modified by jDAL
-   -   Tue Apr 28 13:59:02 UTC 2020 modified by jDAL
-   -   Tue Apr 28 14:19:36 UTC 2020 modified by jDAL
-   -   Tue Apr 28 14:33:56 UTC 2020 modified by jDAL
-   -   Tue Apr 28 14:34:30 UTC 2020 modified by jDAL
-   -   Tue Apr 28 14:35:46 UTC 2020 modified by jDAL
-   -   Mon Dec 21 14:07:04 UTC 2020 modified by jDAL
-   -   Mon Dec 21 14:08:00 UTC 2020 modified by jDAL
-   -   Mon Dec 21 14:33:04 UTC 2020 modified by jDAL
-   -   Mon Dec 21 14:42:42 UTC 2020 modified by jDAL
-   -   Mon Dec 21 14:44:43 UTC 2020 modified by jDAL
-   -   Mon Dec 21 14:45:11 UTC 2020 modified by jDAL
-   -   Mon Dec 21 14:47:26 UTC 2020 modified by jDAL
-   -   Mon Dec 21 14:47:41 UTC 2020 modified by jDAL
-   -   Mon Dec 21 15:28:09 UTC 2020 modified by jDAL
-   -   Wed Mar 17 13:51:15 UTC 2021 modified by jDAL
-   -   Wed Mar 17 13:52:12 UTC 2021 modified by jDAL
-   -   Tue Dec 06 15:18:05 UTC 2022 modified by jDAL
-   -   Tue Dec 06 15:18:06 UTC 2022 modified by jDAL
-   -   Tue Dec 06 15:18:47 UTC 2022 modified by jDAL
-   -   Tue Dec 06 15:19:52 UTC 2022 modified by jDAL
-   -   Tue Dec 06 15:20:05 UTC 2022 modified by jDAL
-   -   Tue Dec 06 15:20:06 UTC 2022 modified by jDAL
-   -   Wed Dec 07 08:46:05 UTC 2022 modified by jDAL
-   -   Wed Dec 07 09:19:17 UTC 2022 modified by jDAL
-   -   Wed Dec 07 09:25:59 UTC 2022 modified by jDAL
-   -   Wed Dec 07 09:26:33 UTC 2022 modified by jDAL
-   -   Wed Dec 07 09:27:25 UTC 2022 modified by jDAL
-   -   Wed Dec 07 09:28:33 UTC 2022 modified by jDAL
-   -   Wed Dec 07 09:33:49 UTC 2022 modified by jDAL
-   -   Wed Dec 07 09:33:55 UTC 2022 modified by jDAL
-   -   Wed Dec 07 09:34:21 UTC 2022 modified by jDAL
-   -   Wed Dec 07 09:43:53 UTC 2022 modified by jDAL
-   -   Wed Dec 07 09:45:21 UTC 2022 modified by jDAL
-   -   Wed Dec 07 09:46:10 UTC 2022 modified by jDAL
-   -   Wed Dec 07 09:46:39 UTC 2022 modified by jDAL
-   -   Wed Dec 07 09:47:02 UTC 2022 modified by jDAL
-   -   Wed Dec 07 10:17:46 UTC 2022 modified by jDAL
-   -   Wed Dec 07 10:18:24 UTC 2022 modified by jDAL
-   -   Wed Dec 07 10:18:40 UTC 2022 modified by jDAL
-   -   Wed Dec 07 10:33:24 UTC 2022 modified by jDAL
-   -   Wed Dec 07 11:07:24 UTC 2022 modified by jDAL
-   -   Wed Dec 07 11:08:07 UTC 2022 modified by jDAL
-   -   Wed Dec 07 13:33:57 UTC 2022 modified by jDAL
-   -   Wed Dec 07 13:36:42 UTC 2022 modified by jDAL
-   -   Wed Dec 07 14:05:46 UTC 2022 modified by jDAL
-   -   Wed Dec 07 14:05:57 UTC 2022 modified by jDAL
-   -   Wed Dec 07 14:06:12 UTC 2022 modified by jDAL
-   -   Wed Dec 07 14:06:18 UTC 2022 modified by jDAL
-   -   Wed Dec 07 14:09:21 UTC 2022 modified by jDAL
-   -   Wed Dec 07 14:09:29 UTC 2022 modified by jDAL
-   -   Wed Dec 07 14:09:43 UTC 2022 modified by jDAL
-   -   Wed Dec 07 14:09:48 UTC 2022 modified by jDAL
-   -   Fri Dec 16 12:02:06 UTC 2022 modified by jDAL
-   -   Fri Dec 16 12:04:51 UTC 2022 modified by jDAL
-   -   Mon Dec 19 09:13:51 UTC 2022 modified by jDAL
-   -   Mon Dec 19 09:25:45 UTC 2022 modified by jDAL
-   -   Mon Dec 19 09:33:09 UTC 2022 modified by jDAL
-   -   Mon Dec 19 09:33:33 UTC 2022 modified by jDAL
-   -   Mon Dec 19 09:34:16 UTC 2022 modified by jDAL
-   -   Mon Dec 19 10:01:58 UTC 2022 modified by jDAL
+   -   Tue Sep 23 10:31:05 UTC 2025 modified by jDAL
+   -   Tue Sep 23 10:43:59 UTC 2025 modified by jDAL
+   -   Tue Sep 23 12:39:14 UTC 2025 modified by jDAL
+   -   Tue Sep 23 12:40:08 UTC 2025 modified by jDAL
+   -   Tue Sep 23 13:45:39 UTC 2025 modified by jDAL
+   -   Wed Sep 24 06:41:39 UTC 2025 modified by jDAL
+   -   Wed Sep 24 06:42:15 UTC 2025 modified by jDAL
+   -   Wed Sep 24 06:43:28 UTC 2025 modified by jDAL
+   -   Wed Sep 24 06:48:25 UTC 2025 modified by jDAL
+   -   Wed Sep 24 07:03:31 UTC 2025 modified by jDAL
+   -   Wed Sep 24 07:10:33 UTC 2025 modified by jDAL
+   -   Wed Sep 24 07:26:35 UTC 2025 modified by jDAL
+   -   Wed Sep 24 07:33:24 UTC 2025 modified by jDAL
+   -   Wed Sep 24 07:44:23 UTC 2025 modified by jDAL
+   -   Wed Sep 24 08:26:12 UTC 2025 modified by jDAL
+   -   Wed Sep 24 08:33:35 UTC 2025 modified by jDAL
+   -   Wed Sep 24 08:50:12 UTC 2025 modified by jDAL
+   -   Wed Sep 24 10:55:26 UTC 2025 modified by jDAL
+   -   Wed Sep 24 11:02:45 UTC 2025 modified by jDAL
+   -   Wed Sep 24 11:05:26 UTC 2025 modified by jDAL
+   -   Wed Sep 24 11:17:12 UTC 2025 modified by jDAL
+   -   Wed Sep 24 11:17:35 UTC 2025 modified by jDAL
+   -   Wed Sep 24 11:18:04 UTC 2025 modified by jDAL
+   -   Wed Sep 24 11:18:49 UTC 2025 modified by jDAL
+   -   Wed Sep 24 11:20:27 UTC 2025 modified by jDAL
+   -   Wed Sep 24 11:22:12 UTC 2025 modified by jDAL
+   -   Wed Sep 24 11:22:59 UTC 2025 modified by jDAL
+   -   Wed Sep 24 11:35:24 UTC 2025 modified by jDAL
+   -   Wed Sep 24 11:45:01 UTC 2025 modified by jDAL
+   -   Wed Sep 24 11:47:58 UTC 2025 modified by jDAL
+   -   Wed Sep 24 11:48:33 UTC 2025 modified by jDAL
+   -   Wed Sep 24 11:50:49 UTC 2025 modified by jDAL
+   -   Wed Sep 24 12:10:41 UTC 2025 modified by jDAL
+   -   Wed Sep 24 12:50:49 UTC 2025 modified by jDAL
+   -   Wed Sep 24 13:03:22 UTC 2025 modified by jDAL
+   -   Wed Sep 24 13:37:23 UTC 2025 modified by jDAL
+   -   Wed Sep 24 13:51:48 UTC 2025 modified by jDAL
 -->
-<MedicinaActiveSurfaceBoss xmlns="urn:schemas-cosylab-com:MedicinaActiveSurfaceBoss:1.0" xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" WatchingThreadTime="200000" WorkingThreadTime="500000" RepetitionCacheTime="2000000" RepetitionExpireTime="5000000" profile="4">
+<ActiveSurfaceBoss xmlns="urn:schemas-cosylab-com:ActiveSurfaceBoss:1.0" xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" WatchingThreadTime="200000" WorkingThreadTime="500000" RepetitionCacheTime="2000000" RepetitionExpireTime="5000000" sectors="4" circles="7" LANs="48" lastUSD="268" actuatorsInCircle="0,24,48,48,48,48,48,4" acceptedProfiles="2,3,4" profile="4">
 	<status />
 	<enabled />
 	<pprofile />
 	<tracking />
-</MedicinaActiveSurfaceBoss>
+	<LUT_filename />
+</ActiveSurfaceBoss>
