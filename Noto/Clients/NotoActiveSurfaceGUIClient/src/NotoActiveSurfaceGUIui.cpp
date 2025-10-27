@@ -29,7 +29,7 @@ NotoActiveSurfaceGUI::NotoActiveSurfaceGUI(QWidget *parent) : QWidget(parent)
 #endif
 }
 
-void NotoActiveSurfaceGUI::setParameters(maci::SimpleClient* theClient, ActiveSurface::NotoActiveSurfaceBoss_var theASBoss)
+void NotoActiveSurfaceGUI::setParameters(maci::SimpleClient* theClient, ActiveSurface::ActiveSurfaceBoss_var theASBoss)
 {
     myNotoActiveSurfaceClientEventLoop.setSimpleClient(theClient);
     myNotoActiveSurfaceCore.setASBoss(theASBoss);

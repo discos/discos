@@ -9,8 +9,8 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               
 	Name="Boss"
-	Code="MedicinaActiveSurfaceBossImpl"
-	Type="IDL:alma/ActiveSurface/MedicinaActiveSurfaceBoss:1.0"
+	Code="ActiveSurfaceBossImpl"
+	Type="IDL:alma/ActiveSurface/ActiveSurfaceBoss:1.0"
 	Container="MedicinaActiveSurfaceContainer"
 	ImplLang="cpp"
 	Default="true"

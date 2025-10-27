@@ -554,8 +554,8 @@ void CComponentCore::getCalibrationMark(
             throw impl;
         }
     }
-    // TODO uncomment this block after tests and remove the next 3 lines
-    /*for (unsigned i=0;i<stdLen;i++) {
+
+    for (unsigned i=0;i<stdLen;i++) {
         if ((feeds[i]>=(long)m_configuration.getFeeds()) || (feeds[i]<0)) {
             _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::getCalibrationMark()");
             impl.setValueName("feed identifier");
@@ -565,10 +565,8 @@ void CComponentCore::getCalibrationMark(
 
     result.length(stdLen);
     resFreq.length(stdLen);
-    resBw.length(stdLen);*/
-    result.length(14);
-    resFreq.length(14);
-    resBw.length(14);
+    resBw.length(stdLen);
+
 
     vector< vector<double> > leftMarkCoeffs;
     vector< vector<double> > rightMarkCoeffs;
@@ -649,15 +647,6 @@ void CComponentCore::getCalibrationMark(
         resFreq[i]=realFreq;
         resBw[i]=realBw;
     }
-
-    // TODO remove this loop after test
-    for(size_t i = 8; i < 14; i++)
-    {
-        result[i] = result[7];
-        resFreq[i] = resFreq[7];
-        resBw[i] = resBw[7];
-    }
-
     scale=1.0;
     onoff=m_calDiode;
     if (tableLeftFreq) delete [] tableLeftFreq;

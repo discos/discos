@@ -14,7 +14,7 @@ class MedicinaActiveSurfaceGUI : public QWidget, public Ui_MedicinaActiveSurface
     public:
         MedicinaActiveSurfaceGUI(QWidget *parent = 0);
 
-        void setParameters(maci::SimpleClient* theClient, ActiveSurface::MedicinaActiveSurfaceBoss_var theASBoss);
+        void setParameters(maci::SimpleClient* theClient, ActiveSurface::ActiveSurfaceBoss_var theASBoss);
         void clearactuatorslineedit();
 
     public slots:
@@ -45,7 +45,7 @@ class MedicinaActiveSurfaceGUI : public QWidget, public Ui_MedicinaActiveSurface
         void setactuator();
 
     private slots:
-        void changeGUIActuatorColor(int, int, bool, bool);
+        void changeGUIActuatorColor(int, int, bool, bool, bool);
         void changeGUIAllActuators(bool callfromfunction = false);
         void changeGUIcircleORradius(bool callfromfunction = false);
         void changeGUIActuator(bool callfromfunction = false);
@@ -54,6 +54,7 @@ class MedicinaActiveSurfaceGUI : public QWidget, public Ui_MedicinaActiveSurface
         void changeGUIActuatorStatusLabels();
         void changeGUIasStatusCode(int);
         void changeGUIasProfileCode(int);
+        void changeGUIasLUTFileName(QString);
 
     private:
         MedicinaActiveSurfaceCore myMedicinaActiveSurfaceCore;
