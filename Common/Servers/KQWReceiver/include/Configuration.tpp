@@ -175,6 +175,7 @@ void CConfiguration<T>::init(T *Services,IRA::CString comp_name)
     IRA::CError error;
     IRA::CString field;
     IRA::CString mode;
+    IRA::CString buffer;
     WORD len;
     // read component configuration
     _GET_STRING_ATTRIBUTE(m_services,"DewarIPAddress","Dewar IP address:",m_dewarIPAddress,comp_name);
@@ -191,6 +192,8 @@ void CConfiguration<T>::init(T *Services,IRA::CString comp_name)
     _GET_DWORD_ATTRIBUTE(m_services,"RepetitionCacheTime","Log repetition filter, caching time (uSec):",m_repetitionCacheTime,comp_name);
     _GET_DWORD_ATTRIBUTE(m_services,"RepetitionExpireTime","Log repetition filter, expire time (uSec):",m_repetitionExpireTime,comp_name);
     _GET_STRING_ATTRIBUTE(m_services,"DefaultMode","Default operating mode:",m_defaultMode,comp_name);
+    _GET_STRING_ATTRIBUTE(m_services,"BypassSwitchesPattern","Pattern assumed by POS1 readings when in LNA bypass configuration.",buffer,comp_name);
+    m_bypassSwitchesPattern = std::bitset<4>((const char*)buffer);
 
     const IRA::CString DEFAULTMODE_PATH = CONFIG_PATH"/Modes/" + m_defaultMode;
 
@@ -438,7 +441,6 @@ void CConfiguration<T>::setMode(const char * mode)
     value.MakeUpper();
     if (value=="TRUE") m_lnaBypass=true;
     else m_lnaBypass=false;
-
 
     _GET_STRING_ATTRIBUTE(m_services,"IFBandPolarizations","IF polarizations:",value,MODE_PATH);
     int start=0;

@@ -2,9 +2,9 @@
 #define _BASECOMPONENTCORE_H_
 
 /***********************************************************************\
- IRA Istituto di Radioastronomia                                 
- This code is under GNU General Public License (GPL).          
-                                                              
+ IRA Istituto di Radioastronomia
+ This code is under GNU General Public License (GPL).
+
  Andrea Orlati (andrea.orlati@inaf.it): Author
 \***********************************************************************/
 
@@ -24,26 +24,36 @@
  * This class extends the ReceiverControl class in order to include the bypass activation on the Wband RF chain to enable Sun observations
  * @author <a href=mailto:andrea.orlati@inaf.it>Andrea Orlati</a>,
  * Istituto di Radioastronomia, Italia
- * <br>  
+ * <br>
 */
 
 class CKQWReceiverControl: public virtual IRA::ReceiverControl {
 public:
-	CKQWReceiverControl(const std::string dewar_ip,
-                       const unsigned short dewar_port, 
-                       const std::string lna_ip, 
-                       const unsigned short lna_port, 
-                       const unsigned int guard_time=250000, 
-                       const unsigned short number_of_feeds=1) :  ReceiverControl(dewar_ip,dewar_port,lna_ip,lna_port,guard_time,number_of_feeds) {}
-	virtual ~CKQWReceiverControl() {}
-	/**
-	* @throw ReceiverControlEx
-	*/
-	bool enableBypass();
-	/**
-	* @throw ReceiverControlEx
-	*/
-	bool disableBypass();
+    CKQWReceiverControl(const std::string dewar_ip,
+                        const unsigned short dewar_port,
+                        const std::string lna_ip,
+                        const unsigned short lna_port,
+                        const std::bitset<4> bypass_switches_pattern,
+                        const unsigned int guard_time=250000,
+                        const unsigned short number_of_feeds=1) :
+        ReceiverControl(dewar_ip,dewar_port,lna_ip,lna_port,guard_time,number_of_feeds),
+        m_bypassSwitchesPattern(bypass_switches_pattern)
+    {}
+    virtual ~CKQWReceiverControl() {}
+    /**
+    * @throw ReceiverControlEx
+    */
+    void enableBypass();
+    /**
+    * @throw ReceiverControlEx
+    */
+    void disableBypass();
+    /**
+     * @throw ReceiverControlEx
+     */
+    bool isBypassEnabled();
+
+    std::bitset<4> m_bypassSwitchesPattern;
 };
 
 /**
@@ -51,7 +61,7 @@ public:
  * @author <a href=mailto:andrea.orlati@inaf.it>Andrea Orlati</a>,
  * Istituto di Radioastronomia, Italia
  * <br>
-  */
+ */
 class CComponentCore {
 
 public:
@@ -74,7 +84,7 @@ public:
      *       ReceiversErrors::ModeErrorExImpl)
      */
     virtual CConfiguration<maci::ContainerServices> const * const execute();
-    
+
 
     /**
      * This function is responsible to free all allocated resources
@@ -83,9 +93,9 @@ public:
 
 
     /*
-     * It sets the local oscillators. Before commanding the new value 
+     * It sets the local oscillators. Before commanding the new value
      * some check are done. The  corresponding signal amplitude is computed.
-     * @param lo lists of values for the local oscillator (MHz), one for each IF. 
+     * @param lo lists of values for the local oscillator (MHz), one for each IF.
      * In that case just the first one is significant. In a -1 is passed the present value is kept.
      * @throw  ComponentErrors::ValidationErrorExImpl
      * @throw ComponentErrors::ValueOutofRangeExImpl
@@ -96,7 +106,7 @@ public:
     void setLO(const ACS::doubleSeq& lo);
 
     /**
-     * It activate the receiver, in other words it allows to setup the default configuration 
+     * It activate the receiver, in other words it allows to setup the default configuration
      * and to make sure the LNA are turned on.
      * @throw ReceiversErrors::ModeErrorExImpl,
      * @throw ComponentErrors::ValidationErrorExImpl,
@@ -118,35 +128,33 @@ public:
 
 
     /**
-     * It allows to compute the value of the calibration mark for any given sub bands in 
+     * It allows to compute the value of the calibration mark for any given sub bands in
      * the IF space.
-     * @param result this the sequence of computed mark values, the first entry correspond to 
+     * @param result this the sequence of computed mark values, the first entry correspond to
      * first sub band and so on....
-     * @param, resFreq the sequence reports the initial observed sky frequency (MHz), the  
+     * @param, resFreq the sequence reports the initial observed sky frequency (MHz), the
      * first entry correspond to first sub band and so on....
-     * @param resBw the sequence reports the real bandwidth observed (MHz), the  first entry 
+     * @param resBw the sequence reports the real bandwidth observed (MHz), the  first entry
      * correspond to first sub band and so on....
      * @param freqs  list of start frequencies (MHz)
      * @param bandwidth list of the band widths (MHz)
-     * @param feeds list of feed identifier, it allows to specifies form which feed the sub 
+     * @param feeds list of feed identifier, it allows to specifies form which feed the sub
      * band comes from. In that case it is neglected since the receiver is a single feed
-     * @param ifs list of IF identifier, it allows to specifies from which receiver IF the 
+     * @param ifs list of IF identifier, it allows to specifies from which receiver IF the
      * sub band comes from.
      * @param scale value to scale tsys measurement
      * @throw ComponentErrors::ValidationErrorExImpl
      * @throw ComponentErrors::ValueOutofRangeExImpl
      */
-    void getCalibrationMark(
-            ACS::doubleSeq& result,
-            ACS::doubleSeq& resFreq,
-            ACS::doubleSeq& resBw,
-            const ACS::doubleSeq& freqs,
-            const ACS::doubleSeq& bandwidths,
-            const ACS::longSeq& feeds,
-            const ACS::longSeq& ifs,
-            bool& onoff,
-            double &scale
-     );
+    void getCalibrationMark(ACS::doubleSeq& result,
+                            ACS::doubleSeq& resFreq,
+                            ACS::doubleSeq& resBw,
+                            const ACS::doubleSeq& freqs,
+                            const ACS::doubleSeq& bandwidths,
+                            const ACS::longSeq& feeds,
+                            const ACS::longSeq& ifs,
+                            bool& onoff,
+                            double &scale);
 
     /**
      * It is called to get the all the receiver output information in one call.
@@ -162,15 +170,12 @@ public:
      * @throw ComponentErrors::ValidationErrorExImpl
      * @throw ComponentErrors::ValueOutofRangeExImpl
      */
-     void getIFOutput(
-             const ACS::longSeq& feeds,
-             const ACS::longSeq& ifs,
-             ACS::doubleSeq& freqs,
-             ACS::doubleSeq& bw,
-             ACS::longSeq& pols,
-             ACS::doubleSeq& LO
-     );
-
+     void getIFOutput(const ACS::longSeq& feeds,
+                      const ACS::longSeq& ifs,
+                      ACS::doubleSeq& freqs,
+                      ACS::doubleSeq& bw,
+                      ACS::longSeq& pols,
+                      ACS::doubleSeq& LO);
 
 
     /**
@@ -179,24 +184,22 @@ public:
      * @param bw width of the reference band
      * @param feed feed number
      * @param ifNumber IF chain identifier
-     * @param waveLen wave length of the reference band, the band is transformed in a real sky 
+     * @param waveLen wave length of the reference band, the band is transformed in a real sky
      * observed band and the the central frequency is taken.
-     * @throw ComponentErrors::ValidationErrorExImpl 
+     * @throw ComponentErrors::ValidationErrorExImpl
      * @thorw ComponentErrors::ValueOutofRangeExImpl
      */
-    double getTaper(
-            const double& freq,
-            const double& bw,
-            const long& feed,
-            const long& ifNumber,
-            double& waveLen
-    );
+    double getTaper(const double& freq,
+                    const double& bw,
+                    const long& feed,
+                    const long& ifNumber,
+                    double& waveLen);
 
 
     /** It turns the calibration diode on.
      * @throw ReceiversErrors::NoRemoteControlErrorExImpl
      * @throw ComponentErrors::ValidationErrorExImpl
-     * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl    
+     * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
     */
     void calOn();
 
@@ -204,7 +207,7 @@ public:
     /** It turns the calibration diode off
      * @throw ReceiversErrors::NoRemoteControlErrorExImpl
      * @throw ComponentErrors::ValidationErrorExImpl
-     * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl    
+     * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
     void calOff();
 
@@ -321,7 +324,7 @@ public:
 
 
     /**
-     * It checks is the status of the noise mark correspond to the commanded status, 
+     * It checks is the status of the noise mark correspond to the commanded status,
      * otherwise it sets the <i>NOISEMARKERROR</i> bit. It also check if the
      * external control of the noise mark has been enabled or not
      */
@@ -384,7 +387,7 @@ public:
 
 
     /**
-     * It returns the feed geometry of the receiver with respect to the central one. 
+     * It returns the feed geometry of the receiver with respect to the central one.
      * For this implementation it is just a placeholder since there is just one feed.
      */
     long getFeeds(ACS::doubleSeq& X, ACS::doubleSeq& Y, ACS::doubleSeq& power);
@@ -414,22 +417,22 @@ public:
     const Management::TSystemStatus& getComponentStatus();
 
     /**
-     * Allows to set the "default_value" for the vacuum characteristic. In principle it is possible 
+     * Allows to set the "default_value" for the vacuum characteristic. In principle it is possible
      * to read it directly from CDB, but I found it more
      * comfortable to get it directly from the characteristic itself.
      */
     inline void setVacuumDefault(const double& val) { m_vacuumDefault=val; }
-    
+
     void getBandwidth(ACS::doubleSeq& bw);
     void getInitialFreq(ACS::doubleSeq& f);
     void getLocalOscillator(ACS::doubleSeq& lo);
     void getPolarizations(ACS::longSeq& pol);
 
-    /** 
-     * It allows to change the operating mode of the receiver. 
+    /**
+     * It allows to change the operating mode of the receiver.
      * If the mode does not correspond to a valid mode an error is thrown.
      * @param  mode mode code as a string
-	  * @throw ComponentErrors::ValidationErrorExImpl
+     * @throw ComponentErrors::ValidationErrorExImpl
      * @throw ComponentErrors::ValueOutofRangeExImpl
      * @throw ComponentErrors::CouldntGetComponentExImpl
      * @throw ComponentErrors::CORBAProblemExImpl
@@ -439,33 +442,35 @@ public:
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
      */
     virtual void setMode(const char * mode);
-    
-    /*  
-     * This method will update the last readout of the gate voltage parameters of the LNAs    
+
+    /*
+     * This method will update the last readout of the gate voltage parameters of the LNAs
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
-    */
-	 void updateVgLNAControls();
+     */
+    void updateVgLNAControls();
 
 
-	 /*  
-     * This method will update the last readout of the drain voltage parameters of the LNAs    
+    /*
+     * This method will update the last readout of the drain voltage parameters of the LNAs
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
-    */
-	 void updateVdLNAControls();
+     */
+    void updateVdLNAControls();
 
-	    /*  
-     * This method will update the last readout of the drain current parameters of the LNAs    
+    /*
+     * This method will update the last readout of the drain current parameters of the LNAs
      * @throw ReceiversErrors::ReceiverControlBoardErrorExImpl
-    */	
-	 void updateIdLNAControls();
-	 
-	 ACS::doubleSeq getStageValues(const IRA::ReceiverControl::FetValue& control, DWORD ifs, DWORD stage);
+     */
+    void updateIdLNAControls();
+
+    ACS::doubleSeq getStageValues(const IRA::ReceiverControl::FetValue& control, DWORD ifs, DWORD stage);
+
+    CKQWReceiverControl *m_control; // This object is thread safe
 
 
 protected:
 
     /** Obtain a valid reference to the local oscillator device
-	  * @throw ComponentErrors::CouldntGetComponentExImpl   
+     * @throw ComponentErrors::CouldntGetComponentExImpl
      */
     void loadLocalOscillator(Receivers::LocalOscillator_var& device,bool &fault,const IRA::CString& name);
 
@@ -495,7 +500,7 @@ protected:
 
 
     // Convert the voltage value of the temperatures to Celsius (Sensor B57703-10K)
-    static double voltage2Celsius(double voltage) 
+    static double voltage2Celsius(double voltage)
     { return -5.9931 * pow(voltage, 5) + 40.392 * pow(voltage, 4) - 115.41 * pow(voltage, 3) + 174.67 * pow(voltage, 2) - 174.23 * voltage + 112.79; }
 
     // Convert the ID voltage value to the mA value
@@ -535,10 +540,10 @@ protected:
 
 
     CConfiguration<maci::ContainerServices> m_configuration;
-    CKQWReceiverControl *m_control; // This object is thread safe
+    //CKQWReceiverControl *m_control; // This object is thread safe
     BACIMutex m_mutex;
     //IRA::CString m_actualMode;
-    //IRA::CString m_setupMode; 
+    //IRA::CString m_setupMode;
 
 
 private:
@@ -551,8 +556,8 @@ private:
     Receivers::LocalOscillator_var m_localOscillatorDevice_WL;
     bool m_localOscillatorFault_WL;
     Receivers::LocalOscillator_var m_localOscillatorDevice_WH;
-    bool m_localOscillatorFault_WH;    
-    
+    bool m_localOscillatorFault_WH;
+
     //double m_localOscillatorValue;
     double m_vacuum;
     CConfiguration<maci::ContainerServices>::BoardValue m_cryoCoolHead;
@@ -572,11 +577,11 @@ private:
     bool m_ioMarkError;
     Management::TSystemStatus m_componentStatus;
 
-    void setComponentStatus(const Management::TSystemStatus& status) 
-    { 
-        if (status>m_componentStatus) m_componentStatus=status;  
+    void setComponentStatus(const Management::TSystemStatus& status)
+    {
+        if (status>m_componentStatus) m_componentStatus=status;
     }
-    
+
     double linearFit(ACS::doubleSeq& X,ACS::doubleSeq& Y, const WORD& size, double x) const;
 
     double linearFit(double *X,double *Y,const WORD& size,double x) const;

@@ -25,6 +25,7 @@
     RepetitionExpireTime="10000000"
     ReceiverName="KQWBand"
     DefaultMode="Normal"
+    BypassSwitchesPattern="0110"
     LocalOscillator_K_Instance="RECEIVERS/LO_KBAND"
     LocalOscillator_Q_Instance="RECEIVERS/LO_KQW_Q"
     LocalOscillator_W1_Instance="RECEIVERS/LO_KQW_WLOW"

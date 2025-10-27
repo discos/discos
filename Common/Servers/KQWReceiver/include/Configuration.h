@@ -2,9 +2,9 @@
 #define _BASECCONFIGURATION_H_
 
 /*******************************************************************************\
- IRA Istituto di Radioastronomia                                 
- This code is under GNU General Public License (GPL).          
-                                                              
+ IRA Istituto di Radioastronomia
+ This code is under GNU General Public License (GPL).
+
  Author: Andrea Orlati (andrea.orlati@inaf.it)
 \*******************************************************************************/
 
@@ -14,6 +14,7 @@
 #include <ReceiversErrors.h>
 #include <ReceiversDefinitionsC.h>
 #include <string>
+#include <bitset>
 #include "utils.h"
 
 #define _GET_DOUBLE_ATTRIBUTE(SERV,ATTRIB,DESCR,FIELD,NAME) { \
@@ -69,14 +70,14 @@ using namespace IRA;
  * This class implements the component configuration. The data inside this class are initialized at the startup from the
  * configuration database and then are used (read) inside the component.
  * @author <a href=mailto:andrea.orlati@inaf.it>Andrea Orlati</a>, Istituto di Radioastronomia, Italia
- * <br> 
+ * <br>
   */
-template <class T>  
+template <class T>
 class CConfiguration {
 public:
 
 	typedef struct {
-		long long feed; 
+		long long feed;
 		std::vector<double> coefficients;
 		Receivers::TPolarization polarization;
 	} TMarkValue;
@@ -87,7 +88,7 @@ public:
 	} TLOValue;
 
 	typedef struct {
-		long long feed; 
+		long long feed;
 		double frequency;
 		double taper;
 	} TTaperValue;
@@ -101,7 +102,7 @@ public:
 
 	typedef struct {
 		double temperature;
-      ACS::Time timestamp;
+		ACS::Time timestamp;
 	} BoardValue;
 	
 	typedef enum {
@@ -143,8 +144,8 @@ public:
 	inline const DWORD& getLNAPort() const { return m_LNAPort; }
 
 	/**
-	 * @return the time allowed to the watch dog thread to complete an iteration and 
-     * respond to the thread manager (microseconds)
+	 * @return the time allowed to the watch dog thread to complete an iteration and
+	 * respond to the thread manager (microseconds)
 	 */
 	inline const DWORD& getWarchDogResponseTime() const { return m_watchDogResponseTime; }
 
@@ -159,8 +160,8 @@ public:
 	inline const DWORD& getLNASamplingTime() const { return m_LNASamplingTime; }
 
 	/**
-	 * @return the time the repetition log guard will cache new log messages before sending 
-     * to the central logger (microseconds)
+	 * @return the time the repetition log guard will cache new log messages before sending
+	 * to the central logger (microseconds)
 	 */
 	inline const DWORD& getRepetitionCacheTime() const { return m_repetitionCacheTime; }
 
@@ -230,11 +231,11 @@ public:
 
 	/**
 	* @param code feed identification codes. It must be freed by caller.
-	* @param xOffset displacement of the feed with respect to the central one along x axis. 
+	* @param xOffset displacement of the feed with respect to the central one along x axis.
 	* It must be freed by caller.
-	* @param yOffset displacement of the feed with respect to the central one along y axis. 
+	* @param yOffset displacement of the feed with respect to the central one along y axis.
 	* It must be freed by caller.
-	* @param relativePower expected percentage of variation of gain with respect to the central one. 
+	* @param relativePower expected percentage of variation of gain with respect to the central one.
 	* It must be freed by caller.
 	* @return the size of the output vectors
 	*/
@@ -250,30 +251,30 @@ public:
 	*/
 	inline const IRA::CString& getDefaultMode() const { return m_defaultMode; }
 
-    /**
-     * @return the markVector
-     */
+	/**
+	 * @return the markVector
+	 */
 	inline const TMarkValue * getMarkVector() const { return m_markVector; }
 
-    inline const DWORD getMarkVectorLen() const { return m_markVectorLen; }
+	inline const DWORD getMarkVectorLen() const { return m_markVectorLen; }
 
 	 /*
 	 * @throw (ComponentErrors::CDBAccessExImpl, ReceiversErrors::ModeErrorExImpl)
 	 */
-    void setMode(const char * mode); 
-    
-    /** 
-     * @return the index of the dedicated arrays where the relative information are located 
-    */ 
-    inline const DWORD getArrayIndex(const long& feed, const long& ifs) const { return feed*2+ifs; }
-    
-    inline const DWORD getArrayIndex(const long& feed) const { return feed*2; }
+	void setMode(const char * mode);
 
-    /** 
-     * @return the length of the dedicated arrays where the relative information are located 
-    */ 
-    inline const DWORD getArrayLen() const { return m_feeds*m_IFs; }
-    
+	/**
+	 * @return the index of the dedicated arrays where the relative information are located
+	 */
+	inline const DWORD getArrayIndex(const long& feed, const long& ifs) const { return feed*2+ifs; }
+
+	inline const DWORD getArrayIndex(const long& feed) const { return feed*2; }
+
+	/**
+	 * @return the length of the dedicated arrays where the relative information are located
+	 */
+	inline const DWORD getArrayLen() const { return m_feeds*m_IFs; }
+
 
 	/**
 	 * @return the lower limit of the RF coming from the K,Q,W1 and W2 band feed (MHz)
@@ -348,15 +349,20 @@ public:
 	inline bool getLNABypass() const { return m_lnaBypass; }
 
 	/**
-    * This member function is used to configure component by reading the configuration parameter from the CDB.
+	 * @return the LNA switch POS1 pattern when in bypass configuration
+	 */
+	inline std::bitset<4> getBypassSwitchesPattern() const { return m_bypassSwitchesPattern; }
+
+	/**
+	 * This member function is used to configure component by reading the configuration parameter from the CDB.
 	 * This must be the first call before using any other function of this class.
 	 * @throw ComponentErrors::CDBAccessExImpl,
-    * @throw ComponentErrors::MemoryAllocationExImpl,
-    * @thorw ReceiversErrors::ModeErrorExImpl
+	 * @throw ComponentErrors::MemoryAllocationExImpl,
+	 * @thorw ReceiversErrors::ModeErrorExImpl
 	 * @param Services pointer to the container services object or to simpleClient
-	 * @param comp_name name of the component 
-	*/
-	void init(T *Services,IRA::CString comp_name=""); 
+	 * @param comp_name name of the component
+	 */
+	void init(T *Services,IRA::CString comp_name="");
 	
 
 private:
@@ -374,20 +380,21 @@ private:
 	IRA::CString m_localOscillator_W1_Instance;
 	IRA::CString m_localOscillator_W2_Instance;
 	
-   T* m_services;
+	T* m_services;
 	IRA::CString m_mode;
 	IRA::CString m_defaultMode;
 	double *m_BandRFMin;
 	double *m_BandRFMax;
 	double *m_BandIFMin;
 	double *m_BandIFBandwidth;
-   double *m_DefaultLO;
-   double *m_FixedLO2;
-   double *m_currentLOValue;
-   double *m_LOMin;
-   double *m_LOMax;
+	double *m_DefaultLO;
+	double *m_FixedLO2;
+	double *m_currentLOValue;
+	double *m_LOMin;
+	double *m_LOMax;
 	DWORD m_IFs;
 	bool m_lnaBypass;
+	std::bitset<4> m_bypassSwitchesPattern;
 	Receivers::TPolarization *m_BandPolarizations;
 	DWORD m_feeds;
 

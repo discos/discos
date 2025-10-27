@@ -52,6 +52,7 @@ CConfiguration<maci::ContainerServices> const * const  CComponentCore::execute()
                 m_configuration.getDewarPort(),
                 (const char *)m_configuration.getLNAIPAddress(),
                 m_configuration.getLNAPort(),
+                m_configuration.getBypassSwitchesPattern(),
                 m_configuration.getLNASamplingTime(),
                 PHYSICAL_FEEDS);
     }
@@ -125,7 +126,7 @@ const DWORD& CComponentCore::getFeeds()
        ReceiversErrors::ReceiverControlBoardErrorExImpl
        )
 */
-void CComponentCore::activate() 
+void CComponentCore::activate()
 {
     baci::ThreadSyncGuard guard(&m_mutex);
    setMode((const char *)m_configuration.getDefaultMode()); // Throw ......
@@ -149,7 +150,7 @@ void CComponentCore::activate()
    else {
        _IRA_LOGFILTER_LOG(LM_NOTICE, "CComponentCore::activate()", "RECEIVER_COMMUNICATION_MODE_LOCAL");
        setStatusBit(LOCAL);
-   }    
+   }
 }
 
 /*
@@ -158,7 +159,7 @@ void CComponentCore::activate()
         ComponentErrors::ValidationErrorExImpl,
         ReceiversErrors::ReceiverControlBoardErrorExImpl)
 */
-void CComponentCore::externalCalOn() 
+void CComponentCore::externalCalOn()
 {
     baci::ThreadSyncGuard guard(&m_mutex);
     if (m_configuration.getActualMode()=="") {
@@ -179,7 +180,7 @@ void CComponentCore::externalCalOn()
     try {
         m_control->isExtCalibrationOn() ? setStatusBit(EXTNOISEMARK) : clearStatusBit(EXTNOISEMARK);
         clearStatusBit(CONNECTIONERROR); // The communication was ok so clear the CONNECTIONERROR bit
-    }    
+    }
     catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::externalCalOn()");
         impl.setDetails(ex.what().c_str());
@@ -195,7 +196,7 @@ throw (
         ReceiversErrors::ReceiverControlBoardErrorExImpl
         )
 */
-void CComponentCore::externalCalOff() 
+void CComponentCore::externalCalOff()
 {
     baci::ThreadSyncGuard guard(&m_mutex);
     if (m_configuration.getActualMode()=="") {
@@ -227,7 +228,7 @@ void CComponentCore::externalCalOff()
 
 
 //throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
-void CComponentCore::deactivate() 
+void CComponentCore::deactivate()
 {
     ACS_LOG(LM_FULL_INFO,"CComponentCore::deactivate()",(LM_DEBUG,"Nothing is really required to deactivate the receiver"));
 }
@@ -249,7 +250,7 @@ void CComponentCore::calOn()
     }
     try {
         m_control->setCalibrationOn();
-        m_calDiode=true;    
+        m_calDiode=true;
     }
     catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::calOn()");
@@ -260,7 +261,7 @@ void CComponentCore::calOn()
     try {
         m_control->isCalibrationOn() ? setStatusBit(NOISEMARK) : clearStatusBit(NOISEMARK);
         clearStatusBit(CONNECTIONERROR); // The communication was ok so clear the CONNECTIONERROR bit
-    }    
+    }
     catch (IRA::ReceiverControlEx& ex) {
         _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::calOn()");
         impl.setDetails(ex.what().c_str());
@@ -276,7 +277,7 @@ void CComponentCore::calOn()
         ReceiversErrors::ReceiverControlBoardErrorExImpl
         )
 */
-void CComponentCore::calOff() 
+void CComponentCore::calOff()
 {
     baci::ThreadSyncGuard guard(&m_mutex);
     if (m_configuration.getActualMode()=="") {
@@ -311,7 +312,7 @@ throw (
         ReceiversErrors::NoRemoteControlErrorExImpl,
         ReceiversErrors::ReceiverControlBoardErrorExImpl
         )*/
-void CComponentCore::vacuumSensorOff() 
+void CComponentCore::vacuumSensorOff()
 {
     if (checkStatusBit(LOCAL)) {
         _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::vacuumSensorOff()");
@@ -335,7 +336,7 @@ throw (
         ReceiversErrors::ReceiverControlBoardErrorExImpl
         )
 */
-void CComponentCore::vacuumSensorOn() 
+void CComponentCore::vacuumSensorOn()
 {
     if (checkStatusBit(LOCAL)) {
         _EXCPT(ReceiversErrors::NoRemoteControlErrorExImpl,impl,"CComponentCore::vacuumSensorOn()");
@@ -412,7 +413,7 @@ throw (
         ReceiversErrors::LocalOscillatorErrorExImpl
         )
 */
-void CComponentCore::setLO(const ACS::doubleSeq& lo) 
+void CComponentCore::setLO(const ACS::doubleSeq& lo)
 {
     double trueValue,amp;
     double *freq=NULL;
@@ -506,7 +507,7 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo)
                 impl.setMinor(ex.minor());
                 throw impl;
             }
-            catch (ReceiversErrors::ReceiversErrorsEx& ex) { 
+            catch (ReceiversErrors::ReceiversErrorsEx& ex) {
                 _ADD_BACKTRACE(ReceiversErrors::LocalOscillatorErrorExImpl,impl,ex,"CComponentCore::setLO()");
                 throw impl;
             }
@@ -522,7 +523,7 @@ void CComponentCore::getCalibrationMark(
         ACS::doubleSeq& resBw,
         const ACS::doubleSeq& freqs,
         const ACS::doubleSeq& bandwidths,
-        const ACS::longSeq& feeds, 
+        const ACS::longSeq& feeds,
         const ACS::longSeq& ifs,
         bool& onoff,
         double& scale
@@ -653,7 +654,7 @@ void CComponentCore::getCalibrationMark(
     if (tableLeftMark) delete [] tableLeftMark;
     if (tableRightFreq) delete [] tableRightFreq;
     if (tableRightMark) delete [] tableRightMark;
-}    
+}
 
 //throw (ComponentErrors::ValidationErrorExImpl, ComponentErrors::ValueOutofRangeExImpl)
 void CComponentCore::getIFOutput(
@@ -661,9 +662,9 @@ void CComponentCore::getIFOutput(
         const ACS::longSeq& ifs,
         ACS::doubleSeq& freqs,
         ACS::doubleSeq& bw,
-        ACS::longSeq& pols, 
+        ACS::longSeq& pols,
         ACS::doubleSeq& LO
-        ) 
+        )
 {
      long index;
     if (m_configuration.getActualMode()=="") {
@@ -672,8 +673,10 @@ void CComponentCore::getIFOutput(
         throw impl;
     }
     // let's do some checks about input data
-    unsigned stdLen=feeds.length();
-    if ((stdLen!=ifs.length())) {
+    //unsigned stdLen=feeds.length();
+    unsigned stdLen=14;
+    // TODO uncomment this block after tests and remove the next 3 lines
+    /*if ((stdLen!=ifs.length())) {
         _EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::getIFOutput()");
         impl.setReason("sub-bands definition is not consistent");
         throw impl;
@@ -691,18 +694,25 @@ void CComponentCore::getIFOutput(
             impl.setValueName("feed identifier");
             throw impl;
         }
-    }
-        
+    }*/
+
     freqs.length(stdLen);
     bw.length(stdLen);
     pols.length(stdLen);
     LO.length(stdLen);
-    for (unsigned i=0;i<stdLen;i++) {
+    //for (unsigned i=0;i<stdLen;i++) {
+    for (unsigned i=0;i<8;i++) {
         index=m_configuration.getArrayIndex(feeds[i],ifs[i]);
         freqs[i]=m_configuration.getBandIFMin()[index];
         bw[i]=m_configuration.getBandIFBandwidth()[index];
         LO[i]=m_configuration.getCurrentLOValue()[index];
-        pols[i]=m_configuration.getBandPolarizations()[index];        
+        pols[i]=m_configuration.getBandPolarizations()[index];
+    }
+    for (unsigned i=8;i<14;i++) {
+        freqs[i]=m_configuration.getBandIFMin()[index];
+        bw[i]=m_configuration.getBandIFBandwidth()[index];
+        LO[i]=m_configuration.getCurrentLOValue()[index];
+        pols[i]=m_configuration.getBandPolarizations()[index];
     }
 }
 
@@ -713,7 +723,7 @@ double CComponentCore::getTaper(
         const long& feed,
         const long& ifNumber,
         double& waveLen
-        ) 
+        )
 {
     double taper;
     double centralFreq, startFreq, bandwidth, lo;
@@ -786,9 +796,15 @@ void CComponentCore::setMode(const char * mode) {
 
 
     //TODO uncomment this section in order to test the LNABypass
-    /*if (m_configuration.getLNABypass()) {
+    if (m_configuration.getLNABypass()) {
         try {
             m_control->enableBypass();// throw IRA::ReceiverControlEx
+
+            usleep(3*SETMODE_SLEEP_TIME);
+
+            if(!m_control->isBypassEnabled()){
+                throw ReceiverControlEx("CComponentCore::setMode(), Bypass was not enabled.");
+            }
         }
         catch (IRA::ReceiverControlEx& ex) {
             _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::setMode()");
@@ -800,6 +816,12 @@ void CComponentCore::setMode(const char * mode) {
     else {
         try {
             m_control->disableBypass();// throw IRA::ReceiverControlEx
+
+            usleep(3*SETMODE_SLEEP_TIME);
+
+            if(m_control->isBypassEnabled()){
+                throw ReceiverControlEx("CComponentCore::setMode(), Bypass was not disabled.");
+            }
         }
         catch (IRA::ReceiverControlEx& ex) {
             _EXCPT(ReceiversErrors::ReceiverControlBoardErrorExImpl,impl,"CComponentCore::setMode()");
@@ -807,7 +829,7 @@ void CComponentCore::setMode(const char * mode) {
             setStatusBit(CONNECTIONERROR);
             throw impl;
         }
-    }*/
+    }
     ACS_LOG(LM_FULL_INFO,"CComponentCore::setMode()",(LM_NOTICE,"RECEIVER_MODE %s",mode));
 }
 
@@ -869,7 +891,7 @@ ACS::doubleSeq CComponentCore::getStageValues(const IRA::ReceiverControl::FetVal
     values.length(getFeeds());
     for(size_t i=0; i<getFeeds(); i++)
         values[i] = 0.0;
-    
+
 
     if (ifs >= m_configuration.getIFs() || stage > NUMBER_OF_STAGES || stage < 1)
         return values;
@@ -897,11 +919,11 @@ ACS::doubleSeq CComponentCore::getStageValues(const IRA::ReceiverControl::FetVal
         if (control==IRA::ReceiverControl::DRAIN_VOLTAGE)
             for(size_t i=0; i<getFeeds(); i++)
                 values[i] = (m_vdStageValues[stage-1]).right_channel[i];
-        else 
-            if (control == IRA::ReceiverControl::DRAIN_CURRENT) 
+        else
+            if (control == IRA::ReceiverControl::DRAIN_CURRENT)
                 for(size_t i=0; i<getFeeds(); i++)
                     values[i] = (m_idStageValues[stage-1]).right_channel[i];
-            else 
+            else
                 for(size_t i=0; i<getFeeds(); i++)
                     values[i] = (m_vgStageValues[stage-1]).right_channel[i];
     }
@@ -909,7 +931,7 @@ ACS::doubleSeq CComponentCore::getStageValues(const IRA::ReceiverControl::FetVal
 }
 
 // throw ReceiversErrors::ReceiverControlBoardErrorExImpl
-void CComponentCore::updateVgLNAControls() 
+void CComponentCore::updateVgLNAControls()
 {
     // Not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
     try {
@@ -993,7 +1015,7 @@ void CComponentCore::updateVacuum()
 }
 
 // throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
-void CComponentCore::updateVacuumPump() 
+void CComponentCore::updateVacuumPump()
 {
     bool answer;
     // Not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
@@ -1052,7 +1074,7 @@ void CComponentCore::updateNoiseMark()
 }
 
 // throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
-void CComponentCore::updateVacuumValve() 
+void CComponentCore::updateVacuumValve()
 {
     bool answer;
     // Not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
@@ -1071,7 +1093,7 @@ void CComponentCore::updateVacuumValve()
 }
 
 // throw (ReceiversErrors::ReceiverControlBoardErrorExImpl)
-void CComponentCore::updateIsRemote() 
+void CComponentCore::updateIsRemote()
 {
     bool answer;
     // Not under the mutex protection because the m_control object is thread safe (at the micro controller board stage)
@@ -1137,7 +1159,7 @@ void CComponentCore::updateCoolHead()
         else
             clearStatusBit(COMPRESSORFAULT);
     }
-    else 
+    else
         clearStatusBit(COOLHEADON);
 
     clearStatusBit(CONNECTIONERROR); // the communication was ok so clear the CONNECTIONERROR bit
@@ -1237,7 +1259,7 @@ void CComponentCore::updateVertexTemperature()
 void CComponentCore::loadLocalOscillator(Receivers::LocalOscillator_var& device,bool &fault,const IRA::CString& name)
 {
     // If reference was already taken, but an error was found....dispose the reference
-    if ((!CORBA::is_nil(device)) && (fault)) { 
+    if ((!CORBA::is_nil(device)) && (fault)) {
         try {
             m_services->releaseComponent((const char*)device->name());
         }
@@ -1327,7 +1349,7 @@ void CComponentCore::getLocalOscillator(ACS::doubleSeq& lo)
         for (long j=0;j<m_configuration.getIFs();j++) {
             lo[2*i+j]=p[m_configuration.getArrayIndex(i,j)];
         }
-    }    
+    }
 }
 
 void CComponentCore::getPolarizations(ACS::longSeq& pol)
@@ -1340,7 +1362,7 @@ void CComponentCore::getPolarizations(ACS::longSeq& pol)
         for (long j=0;j<m_configuration.getIFs();j++) {
             pol[2*i+j]=(long)p[m_configuration.getArrayIndex(i,j)];
         }
-    }    
+    }
 }
 
 double CComponentCore::linearFit(ACS::doubleSeq& X,ACS::doubleSeq& Y, const WORD& size, double x) const
@@ -1352,7 +1374,7 @@ double CComponentCore::linearFit(ACS::doubleSeq& X,ACS::doubleSeq& Y, const WORD
     for (WORD i=0;i<size;i++) {
         Xv[i]=X[i];
         Yv[i]=Y[i];
-    }     
+    }
     res=linearFit(Xv,Yv,size,x);
     delete [] Xv;
     delete [] Yv;
@@ -1389,33 +1411,12 @@ double CComponentCore::linearFit(double *X, double *Y, const WORD& size, double 
 }
 
 // throw ReceiverControlEx
-bool CKQWReceiverControl::enableBypass() 
+void CKQWReceiverControl::enableBypass()
 {
-    for(unsigned char i = 0; i <= 0x1F; i++)
-    {
-        try {
-            std::vector<BYTE> answer = makeRequest(
-                m_dewar_board_ptr,
-                MCB_CMD_GET_DATA,
-                3,
-                MCB_CMD_DATA_TYPE_B01,
-                MCB_PORT_TYPE_DIO,
-                i);
-            std::cout << "IO Port " << i << static_cast<unsigned int>(i) << ": " << static_cast<unsigned int>(answer.front()) << std::endl;
-        } catch(MicroControllerBoardEx& ex) {
-            //
-        }
-        usleep(10);
-    }
-    return true;
-
-
-    bool check1,check2;
-    check1=check2=false;
-    std::vector<BYTE> port_numbers = {MCB_PORT_NUMBER_16, MCB_PORT_NUMBER_17, MCB_PORT_NUMBER_18, MCB_PORT_NUMBER_19};
+    std::string error_msg = "CKQWReceiverControl::enableBypass(): error while enabling bypass().\n";
     pthread_mutex_lock(&m_dewar_mutex);
     try {
-           //set O0=1, this will disable the current flow in the magnetic switch
+        //set MOS0=1
         makeRequest(
             m_dewar_board_ptr,     // Pointer to the dewar board
             MCB_CMD_SET_DATA,      // Command to send
@@ -1426,12 +1427,11 @@ bool CKQWReceiverControl::enableBypass()
             0x01);
     }
     catch(MicroControllerBoardEx& ex) {
-        pthread_mutex_unlock(&m_dewar_mutex); 
-        std::string error_msg = "CKQWReceiverControl::enableBypass(): error while enabling bypass().\n";
+        pthread_mutex_unlock(&m_dewar_mutex);
         throw ReceiverControlEx(error_msg + ex.what());
     }
     try {
-           //set O1=1, this will disable the current flow in the magnetic switch
+        //set MOS1=1 this lets the TTL through
         makeRequest(
             m_dewar_board_ptr,     // Pointer to the dewar board
             MCB_CMD_SET_DATA,      // Command to send
@@ -1442,15 +1442,58 @@ bool CKQWReceiverControl::enableBypass()
             0x01);
     }
     catch(MicroControllerBoardEx& ex) {
-        pthread_mutex_unlock(&m_dewar_mutex); 
-        std::string error_msg = "CKQWReceiverControl::enableBypass(): error while enabling bypass().\n";
+        pthread_mutex_unlock(&m_dewar_mutex);
         throw ReceiverControlEx(error_msg + ex.what());
     }
-    pthread_mutex_unlock(&m_dewar_mutex); 
-    usleep(3*SETMODE_SLEEP_TIME);
+    pthread_mutex_unlock(&m_dewar_mutex);
+}
+
+// throw ReceiverControlEx
+void CKQWReceiverControl::disableBypass()
+{
+    std::string error_msg = "CKQWReceiverControl::disableBypass(): error while disabling bypass().\n";
     pthread_mutex_lock(&m_dewar_mutex);
     try {
-        //set O2=0, this should enable the bypass
+        //set MOS0=0
+        makeRequest(
+            m_dewar_board_ptr,     // Pointer to the dewar board
+            MCB_CMD_SET_DATA,      // Command to send
+            4,                     // Number of parameters
+            MCB_CMD_DATA_TYPE_B01,
+            MCB_PORT_TYPE_DIO,
+            MCB_PORT_NUMBER_00,
+            0x00);
+    }
+    catch(MicroControllerBoardEx& ex) {
+        pthread_mutex_unlock(&m_dewar_mutex);
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+    try {
+        //set MOS1=1 this lets the TTL through
+        makeRequest(
+            m_dewar_board_ptr,     // Pointer to the dewar board
+            MCB_CMD_SET_DATA,      // Command to send
+            4,                     // Number of parameters
+            MCB_CMD_DATA_TYPE_B01,
+            MCB_PORT_TYPE_DIO,
+            MCB_PORT_NUMBER_01,
+            0x01);
+    }
+    catch(MicroControllerBoardEx& ex) {
+        pthread_mutex_unlock(&m_dewar_mutex);
+        throw ReceiverControlEx(error_msg + ex.what());
+    }
+    pthread_mutex_unlock(&m_dewar_mutex);
+}
+
+bool CKQWReceiverControl::isBypassEnabled()
+{
+    std::vector<BYTE> port_numbers = {MCB_PORT_NUMBER_16, MCB_PORT_NUMBER_17, MCB_PORT_NUMBER_18, MCB_PORT_NUMBER_19};
+    BYTE pos1 = 0;
+
+    pthread_mutex_lock(&m_dewar_mutex);
+    try {
+        //set MOS2=0, read pos 1
         makeRequest(
             m_dewar_board_ptr,     // Pointer to the dewar board
             MCB_CMD_SET_DATA,      // Command to send
@@ -1461,17 +1504,10 @@ bool CKQWReceiverControl::enableBypass()
             0x00);
     }
     catch(MicroControllerBoardEx& ex) {
-        pthread_mutex_unlock(&m_dewar_mutex); 
-        std::string error_msg = "CKQWReceiverControl::enableBypass(): error while enabling bypass().\n";
+        pthread_mutex_unlock(&m_dewar_mutex);
+        std::string error_msg = "CKQWReceiverControl::printBypass(): error while disabling bypass().\n";
         throw ReceiverControlEx(error_msg + ex.what());
     }
-    pthread_mutex_unlock(&m_dewar_mutex); 
-    usleep(3*SETMODE_SLEEP_TIME);
-    //*************************************************************************
-    // now read back parameters to check if the switches are properly configured
-    //*************************************************************************
-    pthread_mutex_lock(&m_dewar_mutex);
-    BYTE status = 0;
     for(size_t i = 0; i < port_numbers.size(); i++) {
         try {
             std::vector<BYTE> answer = makeRequest(
@@ -1485,273 +1521,18 @@ bool CKQWReceiverControl::enableBypass()
 
             if(answer.size()!=1) {
                 pthread_mutex_unlock(&m_dewar_mutex);
-                throw ReceiverControlEx("CKQWReceiverControl::enableBypass(): answer size differs from what expected.");
+                throw ReceiverControlEx("CKQWReceiverControl::printBypass(): answer size differs from what expected.");
             }
 
-            status |= (answer.front() << (3 - i));
+            pos1 |= (answer.front() << (3 - i));
         }
         catch(MicroControllerBoardEx& ex) {
-            std::string error_msg = "CKQWReceiverControl::enableBypass(): error while checking the switches status().\n";
-            pthread_mutex_unlock(&m_dewar_mutex); 
-            throw ReceiverControlEx(error_msg + ex.what());
-        }
-    }
-    pthread_mutex_unlock(&m_dewar_mutex); 
-    std::cout << std::bitset<8>(status) << std::endl;
-    check1=((status&0b0110)==0b0110);
-    return check1;
-    /*bool check1,check2;
-    check1=check2=false;
-   pthread_mutex_lock(&m_dewar_mutex);
-   try {
-       //set O0=0
-       makeRequest(
-        m_dewar_board_ptr,     // Pointer to the dewar board
-        MCB_CMD_SET_DATA,      // Command to send
-        4,                     // Number of parameters
-        MCB_CMD_DATA_TYPE_B01,
-        MCB_PORT_TYPE_DIO,
-        MCB_PORT_NUMBER_00,
-        0x00);
-    }
-    catch(MicroControllerBoardEx& ex) {
-          pthread_mutex_unlock(&m_dewar_mutex); 
-        std::string error_msg = "CKQWReceiverControl::enableBypass(): error while enabling bypass().\n";
-        throw ReceiverControlEx(error_msg + ex.what());
-    }
-    try {
-       //set O1=0
-       makeRequest(
-        m_dewar_board_ptr,     // Pointer to the dewar board
-        MCB_CMD_SET_DATA,      // Command to send
-        4,                     // Number of parameters
-        MCB_CMD_DATA_TYPE_B01,
-        MCB_PORT_TYPE_DIO,
-        MCB_PORT_NUMBER_01,
-        0x00);
-    }
-    catch(MicroControllerBoardEx& ex) {
-          pthread_mutex_unlock(&m_dewar_mutex); 
-        std::string error_msg = "CKQWReceiverControl::enableBypass(): error while enabling bypass().\n";
-        throw ReceiverControlEx(error_msg + ex.what());
-    }
-    pthread_mutex_unlock(&m_dewar_mutex); 
-    usleep(3*SETMODE_SLEEP_TIME);
-    //*************************************************************************
-    // now read back parameters to check if the switches are properly configured
-    //*************************************************************************
-    pthread_mutex_lock(&m_dewar_mutex);
-    try {
-       //set O2=0
-       makeRequest(
-        m_dewar_board_ptr,     // Pointer to the dewar board
-        MCB_CMD_SET_DATA,      // Command to send
-        4,                     // Number of parameters
-        MCB_CMD_DATA_TYPE_B01,
-        MCB_PORT_TYPE_DIO,
-        MCB_PORT_NUMBER_02,
-        0x00);
-    }
-    catch(MicroControllerBoardEx& ex) {
-          pthread_mutex_unlock(&m_dewar_mutex); 
-        std::string error_msg = "CKQWReceiverControl::enableBypass(): error while enabling bypass().\n";
-        throw ReceiverControlEx(error_msg + ex.what());
-    }
-    usleep(3*SETMODE_SLEEP_TIME);
-    try {
-        std::vector<BYTE> parameters = makeRequest(
-                m_dewar_board_ptr,     // Pointer to the dewar board
-                MCB_CMD_GET_DATA,      // Command to send
-                3,                     // Number of parameters
-                MCB_CMD_DATA_TYPE_B08,
-                MCB_PORT_TYPE_DIO,
-                MCB_PORT_NUMBER_16_23
-        );
-
-        if(parameters.size()!=1) {
-            pthread_mutex_unlock(&m_dewar_mutex);    
-            throw ReceiverControlEx("CKQWReceiverControl::enableBypass(): answer size differs from what expected.");
-        }
-        check1=((parameters.front()&0b1001)==0b1001);
-    }
-    catch(MicroControllerBoardEx& ex) {
-        std::string error_msg = "CKQWReceiverControl::enableBypass(): error while checking the switches status().\n";
-        pthread_mutex_unlock(&m_dewar_mutex); 
-        throw ReceiverControlEx(error_msg + ex.what());
-    }
-    try {
-       //set O2=1
-       makeRequest(
-        m_dewar_board_ptr,     // Pointer to the dewar board
-        MCB_CMD_SET_DATA,      // Command to send
-        4,                     // Number of parameters
-        MCB_CMD_DATA_TYPE_B01,
-        MCB_PORT_TYPE_DIO,
-        MCB_PORT_NUMBER_02,
-        0x01);
-    }
-    catch(MicroControllerBoardEx& ex) {
-          pthread_mutex_unlock(&m_dewar_mutex); 
-        std::string error_msg = "CKQWReceiverControl::enableBypass(): error while enabling bypass().\n";
-        throw ReceiverControlEx(error_msg + ex.what());
-    }
-    usleep(3*SETMODE_SLEEP_TIME);
-    try {
-        std::vector<BYTE> parameters = makeRequest(
-                m_dewar_board_ptr,     // Pointer to the dewar board
-                MCB_CMD_GET_DATA,      // Command to send
-                3,                     // Number of parameters
-                MCB_CMD_DATA_TYPE_B08,
-                MCB_PORT_TYPE_DIO,
-                MCB_PORT_NUMBER_16_23
-        );
-
-        if(parameters.size()!=1) {
-                pthread_mutex_unlock(&m_dewar_mutex);
-            throw ReceiverControlEx("CKQWReceiverControl::enableBypass(): answer size differs from what expected.");
-        }
-        check2=((parameters.front()&0b0110)==0b0110);
-    }
-    catch(MicroControllerBoardEx& ex) {
-        std::string error_msg = "CKQWReceiverControl::enableBypass(): error while checking the switches status().\n";
-        pthread_mutex_unlock(&m_dewar_mutex); 
-        throw ReceiverControlEx(error_msg + ex.what());
-    }
-    pthread_mutex_unlock(&m_dewar_mutex);
-    return (check1&&check2);*/
-}
-
-// throw ReceiverControlEx
-bool CKQWReceiverControl::disableBypass()
-{
-    bool check1,check2;
-    check1=check2=false;
-    std::vector<BYTE> port_numbers = {MCB_PORT_NUMBER_16, MCB_PORT_NUMBER_17, MCB_PORT_NUMBER_18, MCB_PORT_NUMBER_19};
-    pthread_mutex_lock(&m_dewar_mutex);
-    try {
-           //set O0=1, this will disable the current flow in the magnetic switch
-        makeRequest(
-            m_dewar_board_ptr,     // Pointer to the dewar board
-            MCB_CMD_SET_DATA,      // Command to send
-            4,                     // Number of parameters
-            MCB_CMD_DATA_TYPE_B01,
-            MCB_PORT_TYPE_DIO,
-            MCB_PORT_NUMBER_00,
-            0x01);
-    }
-    catch(MicroControllerBoardEx& ex) {
-        pthread_mutex_unlock(&m_dewar_mutex); 
-        std::string error_msg = "CKQWReceiverControl::disableBypass(): error while disabling bypass().\n";
-        throw ReceiverControlEx(error_msg + ex.what());
-    }
-    try {
-           //set O1=1, this will disable the current flow in the magnetic switch
-        makeRequest(
-            m_dewar_board_ptr,     // Pointer to the dewar board
-            MCB_CMD_SET_DATA,      // Command to send
-            4,                     // Number of parameters
-            MCB_CMD_DATA_TYPE_B01,
-            MCB_PORT_TYPE_DIO,
-            MCB_PORT_NUMBER_01,
-            0x01);
-    }
-    catch(MicroControllerBoardEx& ex) {
-        pthread_mutex_unlock(&m_dewar_mutex); 
-        std::string error_msg = "CKQWReceiverControl::disableBypass(): error while disabling bypass().\n";
-        throw ReceiverControlEx(error_msg + ex.what());
-    }
-    pthread_mutex_unlock(&m_dewar_mutex); 
-    usleep(3*SETMODE_SLEEP_TIME);
-    pthread_mutex_lock(&m_dewar_mutex);
-    try {
-        //set O2=1, this should set the bypass to off
-        makeRequest(
-            m_dewar_board_ptr,     // Pointer to the dewar board
-            MCB_CMD_SET_DATA,      // Command to send
-            4,                     // Number of parameters
-            MCB_CMD_DATA_TYPE_B01,
-            MCB_PORT_TYPE_DIO,
-            MCB_PORT_NUMBER_02,
-            0x01);
-    }
-    catch(MicroControllerBoardEx& ex) {
-        pthread_mutex_unlock(&m_dewar_mutex); 
-        std::string error_msg = "CKQWReceiverControl::disableBypass(): error while disabling bypass().\n";
-        throw ReceiverControlEx(error_msg + ex.what());
-    }
-    pthread_mutex_unlock(&m_dewar_mutex); 
-    usleep(3*SETMODE_SLEEP_TIME);
-    //*************************************************************************
-    // now read back parameters to check if the switches are properly configured
-    //*************************************************************************
-    pthread_mutex_lock(&m_dewar_mutex);
-    BYTE status = 0;
-    for(size_t i = 0; i < port_numbers.size(); i++) {
-        try {
-            std::vector<BYTE> answer = makeRequest(
-                m_dewar_board_ptr,
-                MCB_CMD_GET_DATA,
-                3,
-                MCB_CMD_DATA_TYPE_B01,
-                MCB_PORT_TYPE_DIO,
-                port_numbers[i]
-            );
-
-            if(answer.size()!=1) {
-                pthread_mutex_unlock(&m_dewar_mutex);
-                throw ReceiverControlEx("CKQWReceiverControl::disableBypass(): answer size differs from what expected.");
-            }
-
-            status |= (answer.front() << (3 - i));
-        }
-        catch(MicroControllerBoardEx& ex) {
-            std::string error_msg = "CKQWReceiverControl::disableBypass(): error while checking the switches status().\n";
-            pthread_mutex_unlock(&m_dewar_mutex); 
-            throw ReceiverControlEx(error_msg + ex.what());
-        }
-    }
-    pthread_mutex_unlock(&m_dewar_mutex); 
-    std::cout << std::bitset<8>(status) << std::endl;
-    check1=((status&0b0110)==0b0110);
-    return check1;
-    /*try {
-        //set O2=1
-        makeRequest(
-            m_dewar_board_ptr,     // Pointer to the dewar board
-            MCB_CMD_SET_DATA,      // Command to send
-            4,                     // Number of parameters
-            MCB_CMD_DATA_TYPE_B01,
-            MCB_PORT_TYPE_DIO,
-            MCB_PORT_NUMBER_02,
-            0x01);
-    }
-    catch(MicroControllerBoardEx& ex) {
-          pthread_mutex_unlock(&m_dewar_mutex); 
-        std::string error_msg = "CKQWReceiverControl::disableBypass(): error while enabling bypass().\n";
-        throw ReceiverControlEx(error_msg + ex.what());
-    }
-    usleep(3*SETMODE_SLEEP_TIME);
-    try {
-        std::vector<BYTE> parameters = makeRequest(
-                m_dewar_board_ptr,     // Pointer to the dewar board
-                MCB_CMD_GET_DATA,      // Command to send
-                3,                     // Number of parameters
-                MCB_CMD_DATA_TYPE_B08,
-                MCB_PORT_TYPE_DIO,
-                MCB_PORT_NUMBER_16_23
-        );
-
-        if(parameters.size()!=1) {
+            std::string error_msg = "CKQWReceiverControl::printBypass(): error while checking the switches status().\n";
             pthread_mutex_unlock(&m_dewar_mutex);
-            throw ReceiverControlEx("CKQWReceiverControl::disableBypass(): answer size differs from what expected.");
+            throw ReceiverControlEx(error_msg + ex.what());
         }
-        check2=((parameters.front()&0b1001)==0b1001);
-    }
-    catch(MicroControllerBoardEx& ex) {
-        std::string error_msg = "CKQWReceiverControl::disableBypass(): error while checking the switches status().\n";
-        pthread_mutex_unlock(&m_dewar_mutex); 
-        throw ReceiverControlEx(error_msg + ex.what());
     }
     pthread_mutex_unlock(&m_dewar_mutex);
-    return (check1&&check2);*/
+
+    return std::bitset<4>(pos1) == m_bypassSwitchesPattern;
 }

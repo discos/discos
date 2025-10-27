@@ -40,13 +40,6 @@
     <configuration><n>KKG_AS_OFF</n>    <a>RY</a><p>-0.03611111111111111                                                                                                        </p></configuration>
     <configuration><n>KKG_AS_OFF</n>    <a>RZ</a><p>0                                                                                                                           </p></configuration>
 
-    <configuration><n>KKG_METROLOGY</n> <a>TX</a><p>2.822885155, -0.138521245, 0.011530396, -0.000460164, 0.00000664452, -0.0000000314614                                       </p></configuration>
-    <configuration><n>KKG_METROLOGY</n> <a>TY</a><p>6.166494342, 1.126099842, -0.118487266, 0.005179987, -0.000106509, 0.000000989503, -0.0000000034197                         </p></configuration>
-    <configuration><n>KKG_METROLOGY</n> <a>TZ</a><p>-15.6669651675, 1.9293068324, -0.0628990613, 0.0007771141, -0.0000032940                                                    </p></configuration>
-    <configuration><n>KKG_METROLOGY</n> <a>RX</a><p>-0.0055555555555569409, 0.00014822163433269445, 0.000027586713698, -0.000000077732053                                       </p></configuration>
-    <configuration><n>KKG_METROLOGY</n> <a>RY</a><p>-0.036111111111111108                                                                                                       </p></configuration>
-    <configuration><n>KKG_METROLOGY</n> <a>RZ</a><p>0                                                                                                                           </p></configuration>
-
     <configuration><n>WWG</n>           <a>TX</a><p>0                                                                                                                           </p></configuration>
     <configuration><n>WWG</n>           <a>TY</a><p>0                                                                                                                           </p></configuration>
     <configuration><n>WWG</n>           <a>TZ</a><p>0                                                                                                                           </p></configuration>
@@ -61,13 +54,13 @@
     <configuration><n>QQG</n>           <a>RY</a><p>0                                                                                                                           </p></configuration>
     <configuration><n>QQG</n>           <a>RZ</a><p>0                                                                                                                           </p></configuration>
                                                                                                                                                                             
-    <configuration><n>KQW</n>           <a>TX</a><p>-1.5                                                                                                                        </p></configuration>
-    <configuration><n>KQW</n>           <a>TY</a><p>-90.4571677,2.06486636,-0.066594993,0.00679193157,-0.000204050966,0.00000233354544,-0.00000000926776063                     </p></configuration>
-    <configuration><n>KQW</n>           <a>TZ</a><p>185.005164,-11.1663042,0.212522011,-0.00131754377                                                                           </p></configuration>
-    <configuration><n>KQW</n>           <a>RX</a><p>-0.0055555555555569409,0.00014822163433269445,0.000027586713698,-0.000000077732053                                          </p></configuration>
+    <configuration><n>KQW</n>           <a>TX</a><p>2.822885155, -0.138521245, 0.011530396, -0.000460164, 0.00000664452, -0.0000000314614                                       </p></configuration>
+    <configuration><n>KQW</n>           <a>TY</a><p>6.166494342, 1.126099842, -0.118487266, 0.005179987, -0.000106509, 0.000000989503, -0.0000000034197                         </p></configuration>
+    <configuration><n>KQW</n>           <a>TZ</a><p>-14.692980764141153, 2.370357793034237, -0.1486180464117274, 0.0039003908084879017, -4.56597e-05, 1.96079e-07               </p></configuration>
+    <configuration><n>KQW</n>           <a>RX</a><p>-0.0055555555555569409, 0.00014822163433269445, 0.000027586713698, -0.000000077732053                                       </p></configuration>
     <configuration><n>KQW</n>           <a>RY</a><p>-0.036111111111111108                                                                                                       </p></configuration>
     <configuration><n>KQW</n>           <a>RZ</a><p>0                                                                                                                           </p></configuration>
-                                                                                                                                                                            
+
     <configuration><n>MISTRAL</n>       <a>TX</a><p>-1.5                                                                                                                        </p></configuration>
     <configuration><n>MISTRAL</n>       <a>TY</a><p>29.556666666666498, 0.263472663139432, -0.018206701940039, 0.000072373113855                                                </p></configuration>
     <configuration><n>MISTRAL</n>       <a>TZ</a><p>-15.6669651675, 1.9293068324, -0.0628990613, 0.0007771141, -0.0000032940                                                    </p></configuration>

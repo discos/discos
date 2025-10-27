@@ -140,6 +140,9 @@
         <xs:attribute name="RepetitionExpireTime" type="xs:unsignedLong" use="required" />
         <!-- Instance of the associated device that will set the local oscillator -->
         <xs:attribute name="DefaultMode" type="xs:string" use="required"/>
+        <!-- This field refers to the POS1 reading of the switches block when in LNA bypass status. E.g. 1001, 0110, etc. Default from KASI should be 0110 -->
+        <!-- This is required since the hardware implementation might not be perfect and some switches might have inverted logic -->
+        <xs:attribute name="BypassSwitchesPattern" type="xs:string" use="required" />
         <!-- Name of the LocalOscillator component serving the K band -->
         <xs:attribute name="LocalOscillator_K_Instance" type="xs:string" use="required"/>
         <!-- Name of the LocalOscillator component serving the Q band -->
