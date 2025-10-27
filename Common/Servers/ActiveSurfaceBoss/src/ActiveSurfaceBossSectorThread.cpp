@@ -23,10 +23,7 @@ void CActiveSurfaceBossSectorThread::onStart()
     AUTO_TRACE(std::string(m_thread_name + "::onStart()").c_str());
 
     this->setSleepTime(0); // No sleeping
-
-    TIMEVALUE now;
-    CIRATools::getTime(now);
-    this->timestart = now.value().value;
+    this->timestart = getTimeStamp();
 
     std::stringstream table;
     table << CDBPATH;
@@ -49,11 +46,10 @@ void CActiveSurfaceBossSectorThread::onStop()
     if (m_usdTable.is_open())
     {
         m_usdTable.close();
-        TIMEVALUE now;
-        CIRATools::getTime(now);
-        double elapsed = (double)(now.value().value - this->timestart) / 10000000;
-        ACS_LOG(LM_FULL_INFO,std::string(m_thread_name + "::onStop()").c_str(), (LM_NOTICE, "Total boot time: %.3fs", elapsed));
     }
+
+    double elapsed = (double)(getTimeStamp() - this->timestart) / 10000000;
+    ACS_LOG(LM_FULL_INFO,std::string(m_thread_name + "::onStop()").c_str(), (LM_NOTICE, "Total boot time: %.3fs", elapsed));
 }
 
 void CActiveSurfaceBossSectorThread::runLoop()
@@ -66,6 +62,10 @@ void CActiveSurfaceBossSectorThread::runLoop()
     if(m_usdTable >> lanIndex >> circleIndex >> usdCircleIndex >> serial_usd >> graf >> mecc)
     {
         ActiveSurface::USD_var current_usd = ActiveSurface::USD::_nil();
+        ActiveSurface::USDStatus s;
+        s.id = circleIndex;
+        s.status = UNAV;
+        m_boss->usdStatusMap[serial_usd] = s;
 
         try
         {
@@ -80,6 +80,23 @@ void CActiveSurfaceBossSectorThread::runLoop()
 
         m_boss->lanradius[circleIndex][lanIndex] = m_boss->usd[circleIndex][usdCircleIndex] = current_usd;
         m_boss->usdCounters[m_sector]++;
+
+        lanIndex = (lanIndex - 1) % m_boss->LANs_per_sector;
+
+        if(CORBA::is_nil(m_boss->lan[m_sector][lanIndex]))
+        {
+            std::string lan_key = serial_usd.substr(0, serial_usd.rfind('/'));
+            try
+            {
+                m_boss->lan[m_sector][lanIndex] = m_boss->m_services->getComponent<ActiveSurface::lan>(lan_key.c_str());
+            }
+            catch (maciErrType::CannotGetComponentExImpl& ex)
+            {
+                _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl, Impl, ex, std::string(m_thread_name + "::runLoop()").c_str());
+                Impl.setComponentName(lan_key.c_str());
+                Impl.log(LM_DEBUG);
+            }
+        }
     }
     else
     {

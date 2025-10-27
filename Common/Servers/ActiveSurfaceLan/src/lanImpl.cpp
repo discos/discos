@@ -10,10 +10,12 @@
 * GMM       jul 2005   creation				   
 */
 
-lanImpl::lanImpl(const ACE_CString& _name,maci::ContainerServices* containerServices) : CharacteristicComponentImpl(_name,containerServices),
- m_delay_sp(new RWdouble(_name+":delay", getComponent()),this),
- m_status_sp(new ROlong(_name+":status", getComponent()),this)
-
+lanImpl::lanImpl(const ACE_CString& _name,maci::ContainerServices* containerServices) :
+	CharacteristicComponentImpl(_name,containerServices),
+	m_lanIndex(std::atoi(_name.c_str() + _name.length() - 2)),
+	m_lanStatus(lanStatus::getInstance(m_lanIndex)),
+	m_delay_sp(new RWdouble(_name+":delay", getComponent()),this),
+	m_status_sp(new ROlong(_name+":status", getComponent()),this)
 {
 	ACS_TRACE("::lanImpl::lanImpl: constructor;Constructor!");
 }
@@ -161,6 +163,17 @@ void lanImpl::recUSDPar(CORBA::Long cmd,CORBA::Long addr,CORBA::Long nBytes,CORB
 	} else {
 	  	throw ASErrors::SocketNotRdyExImpl(__FILE__,__LINE__,"::lanImpl::recUSDPar").getASErrorsEx();
 	}
+}
+
+void lanImpl::getLanStatus(bool& connected, ActiveSurface::USDStatusSeq_out out)
+{
+    connected = m_psock->getStatus() == IRA::CSocket::READY;
+
+    std::vector<ActiveSurface::USDStatus> vec = m_lanStatus.readAll();
+    ActiveSurface::USDStatusSeq_var seq = new ActiveSurface::USDStatusSeq;
+    seq->length(vec.size());
+    std::copy(vec.begin(), vec.end(), seq->begin());
+    out = seq._retn();
 }
 
 

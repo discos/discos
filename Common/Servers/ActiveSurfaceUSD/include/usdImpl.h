@@ -26,6 +26,7 @@
 //CORBA stubs
 #include <usdS.h>			
 #include <lanS.h>
+#include <ActiveSurfaceCommonS.h>
 
 //error
 #include <ASErrors.h>
@@ -35,6 +36,7 @@
 #include <time.h>
 #include <math.h> //used for pow()
 #include <usdDevIO.h>
+#include <lanStatus.h>
 
 /// ustep to step exp. 2 factor (2^7=128)
 #define USxS	7
@@ -405,7 +407,10 @@ public:
 	{
 		try
 		{
-			action(CPOS, m_bottom<<USxS, 4);
+			_SET_PROP(cmdPos, m_bottom, "USDImpl::bottom()");
+			m_lastCmdStep = m_bottom;
+			m_usdStatus.commandedPosition = m_lastCmdStep;
+			m_lanStatus.write(m_usdStatus);
 		}
 		_CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl, USDError, "USDImpl::bottom()", m_status)
 	}
@@ -413,7 +418,10 @@ public:
 	{
 		try
 		{
-			action(CPOS, m_top<<USxS, 4);
+			_SET_PROP(cmdPos, m_top, "USDImpl::top()");
+			m_lastCmdStep = m_top;
+			m_usdStatus.commandedPosition = m_lastCmdStep;
+			m_lanStatus.write(m_usdStatus);
 		}
 		_CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl, USDError, "USDImpl::top()", m_status)
 	}
@@ -427,6 +435,7 @@ public:
 	{
 		try
 		{
+			//TODO update values with relative positioning
 			action(RPOS, incr<<USxS, 4);
 		}
 		_CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl, USDError, "USDImpl::move()", m_status)
@@ -470,7 +479,10 @@ public:
 	{
 		try
 		{
-			action(CPOS, 0, 4);
+			_SET_PROP(cmdPos, 0, "USDImpl::refPos()");
+			m_lastCmdStep = 0;
+			m_usdStatus.commandedPosition = m_lastCmdStep;
+			m_lanStatus.write(m_usdStatus);
 		}
 		_CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl, USDError, "USDImpl::refPos()", m_status)
 	} 
@@ -531,7 +543,10 @@ public:
 			 
 		try
 		{
-			action(CPOS, m_bottom<<USxS, 4);
+			_SET_PROP(cmdPos, m_bottom, "USDImpl::stow()");
+			m_lastCmdStep = m_bottom;
+			m_usdStatus.commandedPosition = m_bottom;
+			m_lanStatus.write(m_usdStatus);
 		}
 		_CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl, USDError, "USDImpl::stow()", m_status)
 				 
@@ -546,10 +561,15 @@ public:
 
 		try
 		{
-			action(CPOS, 0, 4);
+			_SET_PROP(cmdPos, 0, "USDImpl::stow()");
+			m_lastCmdStep = 0;
+			m_usdStatus.commandedPosition = m_bottom;
+			m_lanStatus.write(m_usdStatus);
 		}
 		_CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl, USDError, "USDImpl::setup()", m_status)
 	}
+
+	void readStatus() throw (CORBA::SystemException, ASErrors::ASErrorsEx);
 
 	/**
 	* check a corba exception.
@@ -663,6 +683,11 @@ private:
 	int m_lastCmdStep;
 
 	/**
+	* current position (steps)
+	*/
+	int m_currentStep;
+
+	/**
 	* usefull range in step
 	*/
 	int m_fullRange;
@@ -737,6 +762,8 @@ private:
 	* ALMA C++ coding standards state copy operators should be disabled.
 	*/
 	void operator=(const USDImpl&);
+
+	template <typename T> T getCDBValue(maci::ContainerServices* containerServices, const char* fieldName);
  
  	/**
 	* cob name of the LAN component.
@@ -747,6 +774,10 @@ private:
 	* pointer to Container Services
 	*/
 	ContainerServices* cs;
+
+	ActiveSurface::USDStatus m_usdStatus;
+
+	lanStatus& m_lanStatus;
 
 protected:
 	SmartPropertyPointer<RWlong> m_delay_sp;

@@ -40,7 +40,7 @@ public:
 	 * @param rLen byte-lengh of read parameter
 	
 	*/
-	USDDevIO(USDImpl& pusd, ActiveSurface::lan_ptr plan,BYTE addr,BYTE cmd,BYTE wLen,BYTE rLen) : m_pusd(pusd),m_pLan(plan),m_addr(addr),m_cmd(cmd),m_wLen(wLen),m_rLen(rLen)
+	USDDevIO(USDImpl& pusd, ActiveSurface::lan_ptr plan,BYTE addr,BYTE cmd,BYTE wLen,BYTE rLen) : m_pusd(pusd),m_pLan(plan),m_addr(addr),m_cmd(cmd),m_wLen(wLen),m_rLen(rLen),m_value(0)
 	//USDDevIO(USDImpl* pusd,MOD_LAN::lan* plan,BYTE addr,BYTE cmd,BYTE wLen,BYTE rLen) : m_pusd(pusd),m_pLan(plan),m_addr(addr),m_cmd(cmd),m_wLen(wLen),m_rLen(rLen)   
 	{
 		ACS_TRACE("::USDDevIO::USDDevIO()");
@@ -81,8 +81,6 @@ private:
 	BYTE m_wLen;		// param lenght in byte of parameter to write  
 	BYTE m_rLen;		// param lenght in byte.of parameter to read  
 	T m_value; 			// value stored for write only properties
-	
 };
-
 
 #endif /*!_H*/

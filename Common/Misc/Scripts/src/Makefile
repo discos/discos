@@ -31,7 +31,7 @@
 #
 # Python stuff (public and local)
 # ----------------------------
-PY_SCRIPTS         =
+PY_SCRIPTS         = ZMQProxy
 PY_SCRIPTS_L       = 
 
 PY_MODULES         =

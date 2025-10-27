@@ -5,7 +5,8 @@
 // TODO this must be initialized with values read from the CDB
 CActiveSurfaceBossCore::CActiveSurfaceBossCore(ContainerServices *service, acscomponent::ACSComponentImpl *me) :
     m_services(service),
-    m_antennaBoss("IDL:alma/Antenna/AntennaBoss:1.0", service)
+    m_antennaBoss("IDL:alma/Antenna/AntennaBoss:1.0", service),
+    m_zmqPublisher("active_surface")
 {
     m_error_strings[ASErrors::NoError           ] = "NoError";
     m_error_strings[ASErrors::USDCalibrated     ] = "USD calibrated";
@@ -55,19 +56,11 @@ void CActiveSurfaceBossCore::initialize()
         throw acsErrTypeLifeCycle::LifeCycleExImpl(exImpl, __FILE__, __LINE__, "ActiveSurfaceBossCore::initialize()");
     }
 
-    usd.resize(CIRCLES + 1);
-    lanradius.resize(CIRCLES + 1);
-    for(long i = 0; i <= CIRCLES; i++)
-    {
-        usd[i].resize(ACTUATORS + 1);
-        lanradius[i].resize(ACTUATORS + 1);
-    }
+    LANs_per_sector = ACTUATORS / SECTORS;
 
-    lan.resize(SECTORS + 1);
-    for(long i = 0; i <= SECTORS; i++)
-    {
-        lan[i].resize(13);
-    }
+    usd.resize(CIRCLES + 1, std::vector<ActiveSurface::USD_var>(ACTUATORS + 1, ActiveSurface::USD::_nil()));
+    lanradius.resize(CIRCLES + 1, std::vector<ActiveSurface::USD_var>(ACTUATORS + 1, ActiveSurface::USD::_nil()));
+    lan.resize(SECTORS, std::vector<ActiveSurface::lan_var>(LANs_per_sector, ActiveSurface::lan::_nil()));
 
     std::istringstream iss(std::string(str_buffer1).c_str());
     std::string token;
@@ -123,13 +116,25 @@ void CActiveSurfaceBossCore::initialize()
     m_lut = USDTABLECORRECTIONS;
     AutoUpdate = false;
     actuatorcounter = circlecounter = totacts = 1;
-    for(int i = 0; i < SECTORS; i++)
-    {
-        usdCounters.push_back(0);
-    }
+    usdCounters.resize(SECTORS, 0);
     m_profileSetted = false;
     m_ASup = false;
     m_newlut = false;
+    for(size_t i = 1; i <= SECTORS; i++)
+    {
+        std::ostringstream sector_key;
+        sector_key << "SECTOR" << std::setw(2) << std::setfill('0') << i;
+        m_zmqDictionary[sector_key.str()] = ZMQ::ZMQDictionary();
+
+        for(size_t j = 1; j <= LANs_per_sector; j++)
+        {
+            std::ostringstream lan_key;
+            lan_key << "LAN" << std::setw(2) << std::setfill('0') << j;
+            ZMQ::ZMQDictionary l;
+            l["connected"] = false;
+            m_zmqDictionary[sector_key.str()][lan_key.str()] = l;
+        }
+    }
 }
 
 void CActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetComponentExImpl)
@@ -142,13 +147,37 @@ void CActiveSurfaceBossCore::cleanUp()
     ACS_LOG(LM_FULL_INFO, "CActiveSurfaceBossCore::cleanUp()", (LM_INFO, "CActiveSurfaceBossCore::cleanUp"));
 
     ACS_LOG(LM_FULL_INFO, "CActiveSurfaceBossCore::cleanUp()", (LM_INFO, "Releasing USDs...wait"));
-    for (int i = 0; i < usd.size(); i++)
+    for (size_t i = 0; i < usd.size(); i++)
     {
-        for (int l = 0; l < usd[i].size(); l++)
+        for (size_t l = 0; l < usd[i].size(); l++)
         {
             if(!CORBA::is_nil(usd[i][l]))
             {
                 std::string name = usd[i][l]->name();
+                try
+                {
+                    std::cout << "Relasing " << name << "...";
+                    m_services->releaseComponent(name.c_str());
+                    std::cout << "done." << std::endl;
+                }
+                catch(maciErrType::CannotReleaseComponentExImpl& ex)
+                {
+                    std::cout << "failed!" << std::endl;
+                    _ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CActiveSurfaceBossCore::cleanUp()");
+                    Impl.setComponentName(name.c_str());
+                    Impl.log(LM_DEBUG);
+                }
+            }
+        }
+    }
+
+    for(size_t i = 0; i < SECTORS; i++)
+    {
+        for(size_t j = 0; j < LANs_per_sector; j++)
+        {
+            if(!CORBA::is_nil(lan[i][j]))
+            {
+                std::string name = lan[i][j]->name();
                 try
                 {
                     std::cout << "Relasing " << name << "...";
@@ -1077,6 +1106,10 @@ void CActiveSurfaceBossCore::singleUSDonewayAction(ActiveSurface::TASOneWayActio
                     usd->reset();
                     CIRATools::Wait(LOOPTIME);
                     break;
+                case ActiveSurface::AS_STATUS:
+                    operationName += "AS_STATUS)";
+                    usd->readStatus();
+                    break;
             }
         }
         catch (ASErrors::ASErrorsEx& E)
@@ -1099,12 +1132,11 @@ void CActiveSurfaceBossCore::singleUSDonewayAction(ActiveSurface::TASOneWayActio
             impl.log();
         }
     }
-    else
+    else if(m_initialized)
     {
         _EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CActiveSurfaceBossCore::singleUSDonewayAction()");
         impl.log();
     }
-
 }
 
 void CActiveSurfaceBossCore::onewayAction(ActiveSurface::TASOneWayAction action, int circle, int actuator, int radius, double elevation, double correction, long incr, ActiveSurface::TASProfile profile)
@@ -1267,9 +1299,6 @@ void CActiveSurfaceBossCore::workingActiveSurface()
     {
         double azimuth, elevation;
 
-        TIMEVALUE now;
-        IRA::CIRATools::getTime(now);
-
         try
         {
             m_antennaBoss->getRawCoordinates(getTimeStamp(), azimuth, elevation);
@@ -1288,6 +1317,17 @@ void CActiveSurfaceBossCore::workingActiveSurface()
             _IRA_LOGFILTER_LOG(LM_ERROR, "CActiveSurfaceBossCore::workingActiveSurface()", "CORBA::SystemException in working thread!");
             m_status = Management::MNG_FAILURE;
             m_enable = false;
+        }
+    }
+    else
+    {
+        try
+        {
+            onewayAction(ActiveSurface::AS_STATUS, 0, 0, 0, 0, 0, 0, 0);
+        }
+        catch(CORBA::SystemException& ex)
+        {
+            _IRA_LOGFILTER_LOG(LM_ERROR, "CActiveSurfaceBossCore::workingActiveSurface()", "CORBA::SystemException in working thread!");
         }
     }
 }
@@ -1561,28 +1601,104 @@ void CActiveSurfaceBossCore::usdStatus4GUIClient(int circle, int actuator, CORBA
     }
 }
 
-void CActiveSurfaceBossCore::asStatus4GUIClient(ACS::longSeq& status) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl)
+void CActiveSurfaceBossCore::publishZMQDictionary(ACS::Time now)
 {
-    status.length(lastUSD);
-    unsigned int i = 0;
+    m_zmqDictionary["timestamp"] = ZMQ::ZMQTimeStamp::fromACSTime(now);
+    m_zmqDictionary["LUTFilename"] = getLUTfilename();
 
-    for (int circle = 1; circle <= CIRCLES; circle++)
+    switch(m_status)
     {
-        for (int actuator = 1; actuator <= actuatorsInCircle[circle]; actuator++)
+        case Management::MNG_OK:
         {
-            // Initialize the status word as component unavailable. If the component is available it will be overwritten
-            int usdStatus = UNAV;
-
-            if(!CORBA::is_nil(usd[circle][actuator]))
-            {
-                usd[circle][actuator]->getStatus(usdStatus);
-            }
-
-            status[i] = usdStatus;
-
-            i++;
+            m_zmqDictionary["status"] = "OK";
+            break;
+        }
+        case Management::MNG_WARNING:
+        {
+            m_zmqDictionary["status"] = "WARNING";
+            break;
+        }
+        default: //Management::MNG_FAILURE
+        {
+            m_zmqDictionary["status"] = "FAILURE";
+            break;
         }
     }
+
+    switch(getProfile())
+    {
+        default: //ActiveSurface::AS_PARK
+        {
+            m_zmqDictionary["profile"] = "PARK";
+            break;
+        }
+        case ActiveSurface::AS_SHAPED:
+        {
+            m_zmqDictionary["profile"] = "SHAPED";
+            break;
+        }
+        case ActiveSurface::AS_SHAPED_FIXED:
+        {
+            m_zmqDictionary["profile"] = "SHAPED FIXED";
+            break;
+        }
+        case ActiveSurface::AS_PARABOLIC:
+        {
+            m_zmqDictionary["profile"] = "PARABOLIC";
+            break;
+        }
+        case ActiveSurface::AS_PARABOLIC_FIXED:
+        {
+            m_zmqDictionary["profile"] = "PARABOLIC FIXED";
+            break;
+        }
+    }
+
+    m_zmqDictionary["tracking"] = getTracking();
+
+    for(size_t i = 0; i < SECTORS; i++)
+    {
+        std::ostringstream sector_key_ss;
+        sector_key_ss << "SECTOR" << std::setw(2) << std::setfill('0') << i + 1;
+        std::string sector_key = sector_key_ss.str();
+
+        for(size_t j = 0; j < LANs_per_sector; j++)
+        {
+            std::ostringstream lan_key_ss;
+            lan_key_ss << "LAN" << std::setw(2) << std::setfill('0') << j + 1;
+            std::string lan_key = lan_key_ss.str();
+
+            ZMQ::ZMQDictionary l;
+            bool connected = false;
+
+            if(!CORBA::is_nil(lan[i][j]))
+            {
+                ActiveSurface::USDStatusSeq_var seq;
+                lan[i][j]->getLanStatus(connected, seq);
+
+                for(size_t k = 0; k < seq->length(); k++)
+                {
+                    std::ostringstream usd_key_ss;
+                    usd_key_ss << "USD" << std::setw(2) << std::setfill('0') << seq[k].id;
+                    std::string usd_key = usd_key_ss.str();
+                    std::string usd_map_key = "AS/" + sector_key + "/" + lan_key + "/" + usd_key;
+
+                    ZMQ::ZMQDictionary usdStatus = getUSDStatusDiff(usd_map_key, seq[k]);
+                    if(!usdStatus.empty())
+                    {
+                        l[usd_key] = usdStatus;
+                    }
+
+                    usdStatusMap[usd_map_key] = seq[k];
+                }
+            }
+
+            l["connected"] = connected;
+
+            m_zmqDictionary[sector_key][lan_key] = l;
+        }
+    }
+    m_zmqPublisher.publish(m_zmqDictionary);
 }
 
 void CActiveSurfaceBossCore::recoverUSD(int circleIndex, int usdCircleIndex) throw (ComponentErrors::CouldntGetComponentExImpl)
@@ -1779,4 +1895,32 @@ void CActiveSurfaceBossCore::checkASerrors(const char* str, int circle, int actu
     {
         std::cout << "checkASerrors: " << str << " " << circle << "_" << actuator << " " << m_error_strings[code] << std::endl;
     }
+}
+
+ZMQ::ZMQDictionary CActiveSurfaceBossCore::getUSDStatusDiff(const std::string& key, const ActiveSurface::USDStatus& n)
+{
+    ZMQ::ZMQDictionary diff;
+
+    auto it = usdStatusMap.find(key);
+    bool initialize = false;
+
+    if(it == usdStatusMap.end() || it->second.status == UNAV)               initialize = true;
+    if(initialize || it->second.id                 != n.id)                 diff["id"] = n.id;
+    if(initialize || it->second.accelerationFactor != n.accelerationFactor) diff["accelerationFactor"] = n.accelerationFactor;
+    if(initialize || it->second.commandedPosition  != n.commandedPosition)  diff["commandedPosition"] = n.commandedPosition;
+    if(initialize || it->second.currentPosition    != n.currentPosition)    diff["currentPosition"] = n.currentPosition;
+    if(initialize || it->second.delay              != n.delay)              diff["delay"] = n.delay == 255 ? -1 : 512 * n.delay;
+    if(initialize || it->second.maximumFrequency   != n.maximumFrequency)   diff["maximumFrequency"] = n.maximumFrequency / 10;
+    if(initialize || it->second.minimumFrequency   != n.minimumFrequency)   diff["minimumFrequency"] = n.minimumFrequency / 10;
+    if(initialize || it->second.softwareVersion    != n.softwareVersion)    diff["softwareVersion"] = std::to_string((n.softwareVersion >> 4) & 0xF) + "." + std::to_string(n.softwareVersion & 0xF);
+    if(initialize || it->second.type               != n.type)               diff["USDType"] = n.type == 0x20 ? "USD50xxx" : "USD60xxx";
+    if(initialize || it->second.status             != n.status)
+    {
+        diff["available"] = n.status != UNAV;
+        diff["calibrated"] = (n.status & CAL) != 0;
+        diff["enabled"] = (n.status & ENBL) != 0;
+        diff["running"] = (n.status & MRUN) != 0;
+    }
+
+    return diff;
 }

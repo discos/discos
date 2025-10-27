@@ -3,12 +3,13 @@
 
 /* ************************************************************************ */
 /* OAC Osservatorio Astronomico di Cagliari                                 */
-/* $Id: ActiveSurfaceBossCore.h,v 1.6 2011-03-11 12:30:53 c.migoni Exp $ */
+/* $Id: ActiveSurfaceBossCore.h,v 1.6 2011-03-11 12:30:53 c.migoni Exp $    */
 /*                                                                          */
 /* This code is under GNU General Public Licence (GPL).                     */
 /*                                                                          */
-/* Who                                  when        What                    */
-/* Carlo Migoni (migoni@ca.astro.it)   26/01/2009  Creation                 */
+/* Who                                   when        What                   */
+/* Carlo Migoni (migoni@ca.astro.it)     26/01/2009  Creation               */
+/* G. Carboni (giuseppe.carboni@inaf.it) 10/10/2025  Added ZMQ publishing   */
 
 #include <acsContainerServices.h>
 #include <maciContainerServices.h>
@@ -30,6 +31,7 @@
 #include <vector>
 #include <SP_parser.h>
 #include <LogFilter.h>
+#include "ZMQLibrary.hpp"
 
 _IRA_LOGFILTER_IMPORT;
 
@@ -66,6 +68,8 @@ using namespace baci;
 using namespace maci;
 using namespace ComponentErrors;
 using namespace std;
+
+namespace ZMQ = ZMQLibrary;
 
 class ActiveSurfaceBossImpl;
 //class CActiveSurfaceBossWatchingThread;
@@ -165,8 +169,6 @@ public:
 
     void usdStatus4GUIClient(int circle, int actuator, CORBA::Long_out status) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl);
 
-    void asStatus4GUIClient(ACS::longSeq& status) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl);
-
     void setActuator(int circle, int actuator, long int& actPos, long int& cmdPos, long int& Fmin, long int& Fmax, long int& acc, long int& delay) throw (ComponentErrors::PropertyErrorExImpl, ComponentErrors::ComponentNotActiveExImpl);
 
     void recoverUSD(int circle, int actuator) throw (ComponentErrors::CouldntGetComponentExImpl);
@@ -218,15 +220,21 @@ public:
 
     void asSetLUT(const char* newlut);
 
+    void publishZMQDictionary(ACS::Time now);
+
 private:
+    /**
+     * Utility function used to check if a USD status was updated or not.
+     */
+    ZMQ::ZMQDictionary getUSDStatusDiff(const std::string& key, const ActiveSurface::USDStatus& b);
+
     std::map<int, std::string> m_error_strings;
     ContainerServices* m_services;
 
     std::vector<std::vector<ActiveSurface::USD_var>> usd;
     std::vector<std::vector<ActiveSurface::USD_var>> lanradius;
     std::vector<std::vector<ActiveSurface::lan_var>> lan;
-
-    IRA::CString lanCobName;
+    std::map<std::string, ActiveSurface::USDStatus> usdStatusMap;
 
     int usdCounter;
     std::vector<int> usdCounters;
@@ -234,7 +242,7 @@ private:
     ACS::doubleSeq actuatorsCorrections;
 
     /**
-     * This represents the status of the whole Active Surface subsystem, it also includes and sammerizes the status of the boss component
+     * This represents the status of the whole Active Surface subsystem, it also includes and summarizes the status of the boss component
      */
     Management::TSystemStatus m_status;
 
@@ -273,9 +281,13 @@ private:
 
     std::string m_lut;
 
-    long SECTORS, CIRCLES, ACTUATORS, lastUSD;
+    long SECTORS, CIRCLES, ACTUATORS, lastUSD, LANs_per_sector;
 
     std::vector<int> actuatorsInCircle;
+
+    ZMQ::ZMQPublisher m_zmqPublisher;
+
+    ZMQ::ZMQDictionary m_zmqDictionary;
 };
 
 #endif /*ACTIVESURFACEBOSSCORE_H_*/

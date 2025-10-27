@@ -40,9 +40,29 @@ USDImpl::USDImpl(const ACE_CString& CompName, maci::ContainerServices* container
         m_softVer_sp(this),
         m_type_sp(this),
         m_gravCorr_sp(this),
-        m_userOffset_sp(this)
+        m_userOffset_sp(this),
+        m_sector(getCDBValue<long>(containerServices, "sector")),
+        m_lanNum(getCDBValue<long>(containerServices, "lan")),
+        m_addr(getCDBValue<long>(containerServices, "serialAddress")),
+        m_lanStatus(lanStatus::getInstance(m_lanNum))
 {
     ACS_SHORT_LOG((LM_INFO,"::USDImpl::USDImpl: constructor;Constructor!"));
+
+    m_usdStatus.id = m_addr;
+}
+
+template <typename T> T USDImpl::getCDBValue(maci::ContainerServices* containerServices, const char* fieldName)
+{
+    T temp;
+
+    if(!CIRATools::getDBValue(containerServices, fieldName, (T&)temp))
+    {
+        ACS_LOG(LM_SOURCE_INFO, "USDImpl::getCDBValue()", (LM_ERROR, "Error reading CDB!"));
+        ASErrors::CDBAccessErrorExImpl exImpl(__FILE__, __LINE__, "USDImpl::getCDBValue() - Error reading CDB parameters");
+        throw acsErrTypeLifeCycle::LifeCycleExImpl(exImpl, __FILE__, __LINE__, "USDImpl::getCDBValue()");
+    }
+
+    return temp;
 }
 
 void USDImpl::initialize() throw (ACSErr::ACSbaseExImpl)
@@ -50,10 +70,7 @@ void USDImpl::initialize() throw (ACSErr::ACSbaseExImpl)
     cs = getContainerServices();
 
     IRA::CString accepted_profiles;
-    if(CIRATools::getDBValue(cs,"sector",(long&)m_sector) &&
-        CIRATools::getDBValue(cs,"lan",(long&)m_lanNum) &&
-        CIRATools::getDBValue(cs,"serialAddress",(long&)m_addr) &&
-        CIRATools::getDBValue(cs,"fullRange",(long&)m_fullRange) &&
+    if(CIRATools::getDBValue(cs,"fullRange",(long&)m_fullRange) &&
         CIRATools::getDBValue(cs,"zeroRef",(long&)m_zeroRef) &&
         CIRATools::getDBValue(cs,"cammaLen",(double&)m_cammaLen) &&
         CIRATools::getDBValue(cs,"cammaPos",(double&)m_cammaPos) &&
@@ -68,7 +85,8 @@ void USDImpl::initialize() throw (ACSErr::ACSbaseExImpl)
         m_step_res = (double)(1. / pow(2, m_rs));
         m_top = -m_zeroRef;
         m_bottom = m_fullRange-m_zeroRef;
-        m_lastCmdStep = m_top + 1; // a value outside of full range will never be commanded, so the next commanded position will for sure be different
+        m_lastCmdStep = 0;
+        //m_lastCmdStep = m_top + 1; // a value outside of full range will never be commanded, so the next commanded position will for sure be different
         std::stringstream ss((const char *)accepted_profiles);
         int buffer;
         while(ss >> buffer)
@@ -143,6 +161,18 @@ void USDImpl::initialize() throw (ACSErr::ACSbaseExImpl)
             _SET_LDEF(uBits, "USDImpl::initialize()");
         }
         _GET_PROP(status,m_status,"usdImpl::initialize()")
+        _GET_PROP(actPos,m_currentStep,"usdImpl::initialize()")
+
+        m_usdStatus.status = m_status;
+        m_usdStatus.currentPosition = m_currentStep;
+        _GET_PROP(delay, m_usdStatus.delay, "usdImpl::initialize()");
+        _GET_PROP(Fmin, m_usdStatus.minimumFrequency, "usdImpl::initialize()");
+        _GET_PROP(Fmax, m_usdStatus.maximumFrequency, "usdImpl::initialize()");
+        _GET_PROP(acc, m_usdStatus.accelerationFactor, "usdImpl::initialize()");
+        _GET_PROP(softVer, m_usdStatus.softwareVersion, "usdImpl::initialize()");
+        _GET_PROP(type, m_usdStatus.type, "usdImpl::initialize()");
+        _GET_PROP(cmdPos, m_usdStatus.commandedPosition, "usdImpl::initialize()");
+        m_lanStatus.write(m_usdStatus);
     }
     catch (ASErrors::ASErrorsEx& ex)
     {
@@ -281,6 +311,21 @@ void USDImpl::getStatus(int& status)
     status = m_status;
 }
 
+void USDImpl::readStatus() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
+{
+    try
+    {
+        _GET_PROP(status, m_status, "usdImpl::readStatus()")
+        _GET_PROP(actPos, m_currentStep, "usdImpl::readStatus()")
+        m_usdStatus.status = m_status;
+        m_usdStatus.currentPosition = m_currentStep;
+        m_lanStatus.write(m_usdStatus);
+    }
+    _CATCH_EXCP_THROW_EX(CORBA::SystemException, corbaError, "::usdImpl::readStatus()", m_addr)
+    _CATCH_EXCP_THROW_EX(ASErrors::DevIOErrorEx, DevIOError, "::usdImpl::readStatus()", m_addr) // for _GET_PROP
+    _CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl, USDError, "::usdImpl::readStatus()", m_addr)    // for local USD excp
+}
+
 void USDImpl::reset() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 {
     ACS_TRACE("::USDImpl::reset()");
@@ -300,6 +345,12 @@ void USDImpl::reset() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
         _SET_LDEF(Fmin,  "USDImpl::reset()");
         _SET_LDEF(acc,   "USDImpl::reset()");
         _SET_LDEF(uBits, "USDImpl::reset()");
+
+        _GET_PROP(delay, m_usdStatus.delay, "usdImpl::initialize()");
+        _GET_PROP(Fmin, m_usdStatus.minimumFrequency, "usdImpl::initialize()");
+        _GET_PROP(Fmax, m_usdStatus.maximumFrequency, "usdImpl::initialize()");
+        _GET_PROP(acc, m_usdStatus.accelerationFactor, "usdImpl::initialize()");
+        m_lanStatus.write(m_usdStatus);
 
         action(RESL, m_rs, 1); // resolution
     }
@@ -329,6 +380,8 @@ void USDImpl::calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
         ACS_DEBUG_PARAM("::usdImpl::calibrate", "Loaded %d on counter", m_step_giro);
 
         _SET_PROP(Fmax, 100, "usdImpl::calibrate()")
+        m_usdStatus.maximumFrequency = 100;
+        m_lanStatus.write(m_usdStatus);
         ACS_DEBUG_PARAM("::usdImpl::calibrate", "Fmax set to:%d", 100);
 
         action(HSTOP, 9, 1); // sets the stop @ camma on
@@ -340,19 +393,24 @@ void USDImpl::calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
         ifp = 1;
         CIRATools::Wait(3, 0);
         _GET_PROP(status, m_status, "usdImpl::calibrate()")
+        m_usdStatus.status = m_status;
         if(m_status&MRUN)
         {
             ACS_DEBUG("::usdImpl::calibrate", "camma begin not found!");
             _THROW_EX(USDStillRunning, "::usdImpl::calibrate()", ifp);
             action(STOP);
         }
-
         _GET_PROP(actPos, cammaBegin, "usdImpl::calibrate()")
+        m_usdStatus.currentPosition = cammaBegin;
+        m_lanStatus.write(m_usdStatus);
         ACS_DEBUG_PARAM("::usdImpl::calibrate", "Camma begin at: %ld", cammaBegin);
 
         action(HSTOP, 0, 1); // disable HW stop
         ACS_DEBUG("::usdImpl::calibrate", "hstop disabled!");
         move(-10); // moves 10 steps further to avoid istheresis zone
+        m_lastCmdStep = m_currentStep - 10;
+        m_usdStatus.commandedPosition = m_lastCmdStep;
+        m_lanStatus.write(m_usdStatus);
         CIRATools::Wait(1, 0);
 
         action(HSTOP, 1, 1); // sets the stop @ camma off
@@ -364,6 +422,8 @@ void USDImpl::calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
         ifp = 2;
         CIRATools::Wait(3, 0);
         _GET_PROP(status, m_status, "usdImpl::calibrate()")
+        m_usdStatus.status = m_status;
+        m_lanStatus.write(m_usdStatus);
         if(m_status&MRUN)
         {
             ACS_DEBUG("::usdImpl::calibrate", "camma end not found!");
@@ -372,6 +432,8 @@ void USDImpl::calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
         }
 
         _GET_PROP(actPos, cammaEnd, "usdImpl::calibrate()")
+        m_usdStatus.currentPosition = cammaEnd;
+        m_lanStatus.write(m_usdStatus);
         ACS_DEBUG_PARAM("::usdImpl::calibrate", "Camma end at: %ld", cammaEnd);
 
         m_cammaLen = cammaBegin - cammaEnd;
@@ -387,6 +449,10 @@ void USDImpl::calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 
         _SET_PROP(Fmax, 500, "usdImpl::calibrate()")
         _SET_PROP(cmdPos, m_cammaPos, "usdImpl::calibrate()")
+        m_lastCmdStep = m_cammaPos;
+        m_usdStatus.maximumFrequency = 500;
+        m_usdStatus.commandedPosition = m_lastCmdStep;
+        m_lanStatus.write(m_usdStatus);
 
         CIRATools::Wait(1, 0); // 1 sec
         action(LCNTR, m_top<<USxS, 4); // load the top_scale value on counter
@@ -411,6 +477,8 @@ void USDImpl::calVer() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
     {
         action(CPOS, m_top<<USxS, 4); // top
         _GET_PROP(status, m_status, "usdImpl::calibrate()")
+        m_usdStatus.status = m_status;
+        m_lanStatus.write(m_usdStatus);
 
         ifp = 10;
         if(stillRunning(m_top))
@@ -438,6 +506,8 @@ void USDImpl::calVer() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
         action(CPOS, m_bottom<<USxS, 4); // to bottom
         ifp = 20;
         _GET_PROP(status, m_status, "usdImpl::calibrate()")
+        m_usdStatus.status = m_status;
+        m_lanStatus.write(m_usdStatus);
 
         if(stillRunning(m_bottom))
         {
@@ -454,6 +524,8 @@ void USDImpl::calVer() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
         action(CPOS, 0, 4); //to zero
         ifp = 30;
         _GET_PROP(status, m_status, "usdImpl::calibrate()")
+        m_usdStatus.status = m_status;
+        m_lanStatus.write(m_usdStatus);
 
         if(stillRunning(0))
         {
@@ -514,14 +586,20 @@ void USDImpl::update(CORBA::Double elevation) throw (CORBA::SystemException, ASE
 {
     double updatePosMM = 0.0;
     long updatePos;
-    char* station;
-    IRA::CString m_station;
-
-    station = getenv("STATION");
-    m_station = IRA::CString(station);
 
     try
     {
+        _GET_PROP(status, m_status, "usdImpl::update()")
+        _GET_PROP(actPos, m_currentStep, "usdImpl::update()")
+        m_usdStatus.status = m_status;
+        m_usdStatus.currentPosition = m_currentStep;
+        m_lanStatus.write(m_usdStatus);
+
+        if(m_status&MRUN)
+        {
+            return;
+        }
+
         if(actuatorsCorrections == NULL) // No profile set yet, return without doing anything else
         {
             return;
@@ -557,14 +635,14 @@ void USDImpl::update(CORBA::Double elevation) throw (CORBA::SystemException, ASE
         updatePos = (CORBA::Long)(updatePosMM * MM2STEP);
         updatePos = std::max(updatePos, m_bottom);
         updatePos = std::min(updatePos, m_top);
-        if(updatePos == m_lastCmdStep)
+        if(updatePos == m_currentStep)
+        {
             return;
-        _GET_PROP(status, m_status, "usdImpl::update()")
-        bool running = m_status&MRUN;
-        if(running)
-            return;
+        }
         _SET_PROP(cmdPos, updatePos, "usdImpl::update()")
         m_lastCmdStep = updatePos;
+        m_usdStatus.commandedPosition = m_lastCmdStep;
+        m_lanStatus.write(m_usdStatus);
     }
     _CATCH_EXCP_THROW_EX(CORBA::SystemException, corbaError, "::usdImpl::update()", m_addr)    // for CORBA
     _CATCH_EXCP_THROW_EX(ASErrors::DevIOErrorEx, DevIOError, "::usdImpl::update()", m_addr)    // for _GET_PROP

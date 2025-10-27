@@ -74,17 +74,19 @@ xxxxx_LDFLAGS   =
 #
 # Includes (.h) files (public only)
 # ---------------------------------lanSocket.h
-INCLUDES        = lanImpl.h  
+INCLUDES        = lanImpl.h lanStatus.h
 
 #
 # Libraries (public and local)
 # ----------------------------
-LIBRARIES       = lanImpl
+LIBRARIES       = lanStatus lanImpl
 LIBRARIES_L     =
 #
 # <brief description of lllll library>
+lanStatus_OBJECTS = lanStatus
+lanStatus_LIBS= ActiveSurfaceCommonStubs boost_thread
 lanImpl_OBJECTS = lanImpl lanSocket
-lanImpl_LIBS= lanStubs  IRALibrary ASErrors
+lanImpl_LIBS= lanStubs lanStatus IRALibrary ASErrors ActiveSurfaceCommonStubs boost_thread
 #
 # error file
 # ----------------------------

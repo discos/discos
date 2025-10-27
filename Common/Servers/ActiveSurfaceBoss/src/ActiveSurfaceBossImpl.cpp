@@ -448,11 +448,31 @@ void ActiveSurfaceBossImpl::asStatus4GUIClient (ACS::longSeq_out status) throw (
 {
     AUTO_TRACE("ActiveSurfaceBossImpl::asStatus4GUIClient()");
 
-    CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
     try
     {
         status = new ACS::longSeq;
-        resource->asStatus4GUIClient(*status);
+        status->length(boss->lastUSD);
+        unsigned int i = 0;
+
+        CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource = m_core->Get();
+        auto& usdStatusMap = resource->usdStatusMap;
+        resource.Release();
+
+        for (int circle = 1; circle <= boss->CIRCLES; circle++)
+        {
+            for (int actuator = 1; actuator <= boss->actuatorsInCircle[circle]; actuator++)
+            {
+                // Initialize the status word as component unavailable. If the component is available it will be overwritten
+                int usdStatus = UNAV;
+
+                if(!CORBA::is_nil(boss->usd[circle][actuator]))
+                {
+                    usdStatus = usdStatusMap[boss->usd[circle][actuator]->name()].status;
+                }
+
+                status[i++] = usdStatus;
+            }
+        }
     }
     catch (ComponentErrors::ComponentErrorsExImpl& ex)
     {

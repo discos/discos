@@ -84,7 +84,7 @@ LIBRARIES_L     =
 #
 # <brief description of lllll library>
 ActiveSurfaceUSDImpl_OBJECTS = ActiveSurfaceUSDImpl
-ActiveSurfaceUSDImpl_LIBS= usdStubs lanStubs IRALibrary ASErrors
+ActiveSurfaceUSDImpl_LIBS= usdStubs lanStubs lanStatus IRALibrary ASErrors boost_thread
 #
 # error file
 # ----------------------------

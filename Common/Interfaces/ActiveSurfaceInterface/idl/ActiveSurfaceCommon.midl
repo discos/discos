@@ -31,7 +31,8 @@ module ActiveSurface {
         AS_CORRECTION,
         AS_MOVE,
         AS_PROFILE,
-        AS_RESET
+        AS_RESET,
+        AS_STATUS
     };
     ACS_ENUM(TASOneWayAction);
 
@@ -43,6 +44,21 @@ module ActiveSurface {
         AS_PARK
     };
     ACS_ENUM(TASProfile);
+
+    struct USDStatus {
+        long id;
+        long accelerationFactor;
+        long commandedPosition;
+        long currentPosition;
+        long delay;
+        long maximumFrequency;
+        long minimumFrequency;
+        long softwareVersion;
+        long status;
+        long type;
+    };
+
+    typedef sequence<USDStatus> USDStatusSeq;
 };
 
 #endif
