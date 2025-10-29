@@ -1134,6 +1134,7 @@ void CActiveSurfaceBossCore::singleUSDonewayAction(ActiveSurface::TASOneWayActio
     }
     else if(m_initialized)
     {
+        printf("not active\n");
         _EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CActiveSurfaceBossCore::singleUSDonewayAction()");
         impl.log();
     }
@@ -1154,6 +1155,7 @@ void CActiveSurfaceBossCore::onewayAction(ActiveSurface::TASOneWayAction action,
             for (int l = 1; l <= actuatorsInCircle[i]; l++)
             {
                 singleUSDonewayAction(action, usd[i][l], elevation, correction, incr, profile);
+                printf("i = %d, l = %d\n", i, l);
             }
         }
     }
@@ -1360,14 +1362,21 @@ void CActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newProf
             {
                 for (int s = 0; s < NPOSITIONS; s++)
                 {
-                    usdCorrections >> actuatorsCorrections[s];
+                    // can be done as usdCorrections >> (double&)actuatorsCorrections[s] BUT:
+                    // it might have ad undefined behavior since a single element of the ACS::doubleSeq could potentially be different from a regular double, therefore we're better off using a buffer variable
+                    double tmp;
+                    usdCorrections >> tmp;
+                    actuatorsCorrections[s] = tmp;
+                    //printf("i = %d, l = %d, pos = %f in setProfile\n", i, l, actuatorsCorrections[s]);
                 }
                 if(!CORBA::is_nil(usd[i][l]))
                 {
                     usd[i][l]->posTable(actuatorsCorrections, NPOSITIONS, DELTAEL, THRESHOLDPOS);
                 }
+
             }
         }
+        //printf("lenght usdCorr = %d\n", usdCorrections.tellg());
 
         usdCounter = 0;
         for(unsigned int i = 0; i < SECTORS; i++)
