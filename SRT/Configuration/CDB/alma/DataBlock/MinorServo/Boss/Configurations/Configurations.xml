@@ -20,7 +20,7 @@
     <configuration> <DISCOS>KKG_METROLOGY</DISCOS>  <LDO>Gregoriano2</LDO> </configuration>
     <configuration> <DISCOS>WWG</DISCOS>            <LDO>Gregoriano3</LDO> </configuration>
     <configuration> <DISCOS>QQG</DISCOS>            <LDO>Gregoriano4</LDO> </configuration>
-    <configuration> <DISCOS>CTR</DISCOS>            <LDO>Gregoriano5</LDO> </configuration>
+    <configuration> <DISCOS>KQW</DISCOS>            <LDO>Gregoriano5</LDO> </configuration>
     <configuration> <DISCOS>MISTRAL</DISCOS>        <LDO>Gregoriano6</LDO> </configuration>
     <configuration> <DISCOS>CABINET</DISCOS>        <LDO>Gregoriano7</LDO> </configuration>
     <configuration> <DISCOS>CCB</DISCOS>            <LDO>BWG1</LDO>        </configuration>

@@ -15,13 +15,16 @@ CDB_SCHEMAS = Feeds ReceiversModeSetup LocalOscillatorLookUpTable \
 			  NoiseMarkLookUpTable TaperLookUpTable \
 			  DewarPositionerUpdatingTable DewarPositionerMapping \
 			  DewarPositionerActions \
-			  LocalOscillator LocalOscillatorEthernet
+			  LocalOscillator LocalOscillatorEthernet \
+			  MarkCoefficientsLookUpTable \
+			  KQWBandReceiverModeSetup KQWBandTaperLookUpTable
+
 
 # IDL Files and flags
 IDL_FILES = CommonReceiverInterface ReceiversBoss \
 			GenericReceiver LocalOscillatorInterface \
 			DewarPositionerDefinitions GenericDerotator \
-			DewarPositioner GenericIFDistributor
+			DewarPositioner GenericIFDistributor KQWBand
 
 
 CommonReceiverInterfaceStubs_LIBS = baciStubs ComponentErrorsStubs ManagementErrorsStubs \
@@ -38,6 +41,7 @@ GenericDerotatorStubs_LIBS = baciStubs DerotatorErrorsStubs ComponentErrorsStubs
 DewarPositionerStubs_LIBS =  baciStubs maciErrTypeStubs ComponentErrorsStubs \
     ManagmentDefinitionsStubs AntennaDefinitionsStubs DewarPositionerDefinitionsStubs
 GenericIFDistributorStubs_LIBS = baciStubs maciErrTypeStubs ComponentErrorsStubs
+KQWBandStubs_LIBS = baciStubs ComponentErrorsStubs GenericReceiverStubs ManagmentDefinitionsStubs CommonReceiverInterfaceStubs
 
 
 # list of all possible C-sources (used to create automatic dependencies)

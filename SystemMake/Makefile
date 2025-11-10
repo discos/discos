@@ -40,7 +40,7 @@ COMMON_LIBRARIES:=TextWindowLibrary ParserLibrary XarcosLibrary ModbusChannel Co
 # Issues may only arise if we use a very high number of cores, which is unlikely.
 # If we'll ever face this problem we will split the SERVERS into more groups, with the latter one having servers which depends on some other servers in the first group.
 COMMON_SERVERS:=AntennaBoss Observatory OTF PointingModel Refraction SkySource SolarSystem Moon FitsWriter Scheduler ActiveSurfaceLan ReceiversBoss ExternalClients CalibrationTool TotalPower CustomLogger \
-				PyDewarPositioner ActiveSurfaceUSD Sardara Skarab PyLocalOscillator MFKBandBaseReceiver PyCalmux ActiveSurfaceBoss XBackend
+				PyDewarPositioner ActiveSurfaceUSD Sardara Skarab PyLocalOscillator MFKBandBaseReceiver PyCalmux ActiveSurfaceBoss XBackend KQWReceiver
 # Same as servers
 COMMON_CLIENTS:=AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient CustomLoggingClient SchedulerTextClient MeteoClient
 # Misc do not depend from one another, compile in parallel
