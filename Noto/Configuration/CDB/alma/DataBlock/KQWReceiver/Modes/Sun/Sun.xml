@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<KQWBandReceiverModeSetup xmlns="urn:schemas-cosylab-com:KQWBandReceiverModeSetup:1.0"
+xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+
+Mode="Sun"
+
+RFMin="18000 18000 34000 34000 80000 80000 98000 98000"
+RFMax="26000 26000 50000 50000 98000 98000 116000 116000"
+IFMin="4000 4000 2000 2000 2000 2000 2000 2000"
+IFMax="12000 12000 18000 18000 18000 18000 18000 18000"
+
+Feeds="4" 
+IFs="2"
+
+IFBandPolarizations="L R L R L R L R"
+
+DefaultLO="14000 14000 32000 32000 78000 78000 96000 96000"
+FixedLO2="0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0"
+LOMin="14000.0 14000.0 32000.0 32000.0 78000.0 78000.0 96000.0 96000.0"
+LOMax="22000.0 22000.0 50000.0 50000.0 96000.0 96000.0 114000.0 114000.0"
+
+ActivateBypass="true" 
+
+/>
+

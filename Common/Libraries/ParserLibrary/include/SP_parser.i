@@ -99,6 +99,8 @@ IRA::CString CParser<OBJ>::executeCommand(const IRA::CString& command,IRA::CStri
 			IRA::CString answer("");
 			if (outNumber>0) {
 				for(int j=0;j<outNumber;++j) {
+					if(outParams[j] == "")
+						continue;
 					answer+=outParams[j];
 					answer+=IRA::CString(m_answerDelimiter);
 				}

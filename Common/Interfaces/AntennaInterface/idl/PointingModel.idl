@@ -48,6 +48,47 @@ module Antenna {
 		* @param receiverCode
 		*/
 		void setReceiver(in string receiverCode) raises (AntennaErrors::AntennaErrorsEx);
+		/**
+		* This method add extra offset to pointing model. An example of a pointing offset is
+		* the output of the pointing after a calibration tool.  
+		* @param pointingOffsetAzimuth
+		* @param pointingOffsetElevation
+		*/
+		
+
+		void setPointingOffsets(in double pointingOffsetAzimuth, in double elOffset) raises (AntennaErrors::AntennaErrorsEx);	
+				
+			/**
+		* This method reads offset to pointing m
+
+		* the output of the pointing after a calibration tool.  
+		* @param pointingOffsetAzimuth
+		* @param pointingOffsetElevation
+		*/	
+				
+		void getPointingOffsets(out double pointingOffsetAzimuth, out double elOffset) raises (AntennaErrors::AntennaErrorsEx);	
+		
+				
+		/**
+		* Clear the pointing offsets 
+		*   
+		*/
+		void clearPointingOffsets()  raises (AntennaErrors::AntennaErrorsEx);
+
+
+	   /**
+		* This method increases the  pointing offset to be added to the pointing model. An example of a pointing offset is
+		* the output of the pointing after a calibration tool.  
+		* @param pointingOffsetAzimuth
+		* @param pointingOffsetElevation
+		*/
+		
+
+		void addPointingOffsets(in double pointingOffsetAzimuth, in double elOffset) raises (AntennaErrors::AntennaErrorsEx);	
+						
+
+		
+		
 	};
 };
 
