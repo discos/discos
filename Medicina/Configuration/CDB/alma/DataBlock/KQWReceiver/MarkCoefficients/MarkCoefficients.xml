@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<MarkCoefficientsLookUpTable xmlns="urn:schemas-cosylab-com:MarkCoefficientsLookUpTable:1.0"
+                xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+                xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+                <MarkEntry><Feed>0</Feed><Polarization>LEFT</Polarization><Coefficients>2.91203e-12,-5.56662e-08,-0.00254511,61.7765</Coefficients></MarkEntry>
+                <MarkEntry><Feed>0</Feed><Polarization>RIGHT</Polarization><Coefficients>-6.08007e-12,5.48713e-07,-0.0158786,157.439</Coefficients></MarkEntry>
+                <MarkEntry><Feed>1</Feed><Polarization>LEFT</Polarization><Coefficients>-1.37991e-12,1.79576e-07,-0.00759659,115.554</Coefficients></MarkEntry>
+                <MarkEntry><Feed>1</Feed><Polarization>RIGHT</Polarization><Coefficients>-5.10537e-13,6.75199e-08,-0.00276572,46.2604</Coefficients></MarkEntry>
+                <MarkEntry><Feed>2</Feed><Polarization>LEFT</Polarization><Coefficients>7.07667e-12,-1.87764e-06,0.165695,-4847.92</Coefficients></MarkEntry>
+                <MarkEntry><Feed>2</Feed><Polarization>RIGHT</Polarization><Coefficients>8.19873e-12,-2.14901e-06,0.187488,-5430.99</Coefficients></MarkEntry>
+                <MarkEntry><Feed>3</Feed><Polarization>LEFT</Polarization><Coefficients>-6.91007e-12,2.17418e-06,-0.227097,7894.3</Coefficients></MarkEntry>
+                <MarkEntry><Feed>3</Feed><Polarization>RIGHT</Polarization><Coefficients>-9.93332e-12,3.11069e-06,-0.323526,11194.4</Coefficients></MarkEntry>
+</MarkCoefficientsLookUpTable>

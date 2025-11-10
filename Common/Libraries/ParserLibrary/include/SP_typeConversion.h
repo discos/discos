@@ -24,6 +24,39 @@ enum _sp_symbols {
 #define _SP_MULTI_ARGUMENT_SEPARATOR ';'
 #define _SP_MULTI_ARGUMENT_COMPACT_SEP 'x'
 
+#define _SP_JOLLYCHARACTER '*'
+#define _SP_JOLLYCHARACTER_REPLACEMENT "-1"
+
+#define _SP_WILDCARD_CLASS(NAME,REPLACE) \
+class NAME { \
+public: \
+	static char *replace(const char *str) { \
+        std::string result; \
+        for(const char* p = str; *p; ++p) { \
+            if (*p == _SP_JOLLYCHARACTER) { \
+                result += REPLACE; \
+            } else { \
+                result += *p; \
+            } \
+        } \
+        char* out = new char[result.size() + 1]; \
+        strcpy(out, result.c_str()); \
+        return out; \
+	} \
+}; \
+
+_SP_WILDCARD_CLASS(_default_wildcard,_SP_JOLLYCHARACTER_REPLACEMENT);
+
+class _no_wildcard
+{
+public:
+	static char *replace(const char *str) {
+		char *tmp=new char[strlen(str)+1];
+		strcpy(tmp,str);
+		return tmp;
+	}
+};
+
 class int_converter
 {
 public:
@@ -397,7 +430,7 @@ public:
 	}
 };
 
-class longSeq_converter
+class longSeq_converter : public _default_wildcard
 {
 public:
 	char *valToStr(const ACS::longSeq& val) {
@@ -439,6 +472,7 @@ public:
 			while (IRA::CIRATools::getNextToken(param,start,_SP_MULTI_ARGUMENT_SEPARATOR,ret)) {
 				errno=0;
 				token=const_cast<char *>((const char *)ret);
+				token=_default_wildcard::replace(token);
 				val=strtol(token,&endptr,10);
 				if ((errno==ERANGE && (val==LONG_MAX || val==LONG_MIN)) || (errno != 0 && val == 0)) {
 					_EXCPT(ParserErrors::BadTypeFormatExImpl,ex,"longSeq_converter::strToVal()");
@@ -459,7 +493,7 @@ public:
 	}
 };
 
-class doubleSeq_converter
+class doubleSeq_converter : public _default_wildcard
 {
 public:
 	char *valToStr(const ACS::doubleSeq& val) {
@@ -501,6 +535,7 @@ public:
 			while (IRA::CIRATools::getNextToken(param,start,_SP_MULTI_ARGUMENT_SEPARATOR,ret)) {
 				errno=0;
 				token=const_cast<char *>((const char *)ret);
+				token=_default_wildcard::replace(token);
 				val=strtod(token,&endptr);
 				if ((errno==ERANGE && (val==HUGE_VALF || val==HUGE_VALF)) || (errno != 0 && val == 0)) {
 					_EXCPT(ParserErrors::BadTypeFormatExImpl,ex,"doubleSeq_converter::strToVal()");
