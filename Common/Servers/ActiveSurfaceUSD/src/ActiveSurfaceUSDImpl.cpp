@@ -49,6 +49,9 @@ USDImpl::USDImpl(const ACE_CString& CompName, maci::ContainerServices* container
     ACS_SHORT_LOG((LM_INFO,"::USDImpl::USDImpl: constructor;Constructor!"));
 
     m_usdStatus.id = m_addr;
+    m_usdStatus.available = m_available;
+    m_usdStatus.status = UNAV;
+    m_lanStatus.write(m_usdStatus);
 }
 
 template <typename T> T USDImpl::getCDBValue(maci::ContainerServices* containerServices, const char* fieldName)
@@ -117,6 +120,7 @@ void USDImpl::initialize() throw (ACSErr::ACSbaseExImpl)
     ACS_SHORT_LOG((LM_INFO,"lan linked!"));
 
     m_available = true;
+    m_usdStatus.available = m_available;
     m_failures = 0;
 
     ACE_CString CompName(this->name());
@@ -316,8 +320,8 @@ void USDImpl::readStatus() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
     try
     {
         _GET_PROP(status, m_status, "usdImpl::readStatus()")
-        _GET_PROP(actPos, m_currentStep, "usdImpl::readStatus()")
         m_usdStatus.status = m_status;
+        _GET_PROP(actPos, m_currentStep, "usdImpl::readStatus()")
         m_usdStatus.currentPosition = m_currentStep;
         m_lanStatus.write(m_usdStatus);
     }
@@ -590,16 +594,13 @@ void USDImpl::update(CORBA::Double elevation) throw (CORBA::SystemException, ASE
     try
     {
         _GET_PROP(status, m_status, "usdImpl::update()")
-        _GET_PROP(actPos, m_currentStep, "usdImpl::update()")
         m_usdStatus.status = m_status;
-        m_usdStatus.currentPosition = m_currentStep;
         m_lanStatus.write(m_usdStatus);
 
         if(m_status&MRUN)
         {
             return;
         }
-
         if(actuatorsCorrections == NULL) // No profile set yet, return without doing anything else
         {
             return;
@@ -635,10 +636,16 @@ void USDImpl::update(CORBA::Double elevation) throw (CORBA::SystemException, ASE
         updatePos = (CORBA::Long)(updatePosMM * MM2STEP);
         updatePos = std::max(updatePos, m_bottom);
         updatePos = std::min(updatePos, m_top);
+
+        _GET_PROP(actPos, m_currentStep, "usdImpl::update()")
+        m_usdStatus.currentPosition = m_currentStep;
+        m_lanStatus.write(m_usdStatus);
+
         if(updatePos == m_currentStep)
         {
             return;
         }
+
         _SET_PROP(cmdPos, updatePos, "usdImpl::update()")
         m_lastCmdStep = updatePos;
         m_usdStatus.commandedPosition = m_lastCmdStep;
@@ -736,6 +743,9 @@ void USDImpl::exImplCheck(ASErrors::ASErrorsExImpl ex)
     if(m_failures == MAX_FAILURES)
     {
         m_available = false;
+        m_usdStatus.available = m_available;
+        m_usdStatus.status = UNAV;
+        m_lanStatus.write(m_usdStatus);
     }
 
     ex.log();

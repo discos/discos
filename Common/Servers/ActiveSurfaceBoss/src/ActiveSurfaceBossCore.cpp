@@ -1155,7 +1155,7 @@ void CActiveSurfaceBossCore::onewayAction(ActiveSurface::TASOneWayAction action,
             for (int l = 1; l <= actuatorsInCircle[i]; l++)
             {
                 singleUSDonewayAction(action, usd[i][l], elevation, correction, incr, profile);
-                printf("i = %d, l = %d\n", i, l);
+                //printf("i = %d, l = %d\n", i, l);
             }
         }
     }
@@ -1707,6 +1707,7 @@ void CActiveSurfaceBossCore::publishZMQDictionary(ACS::Time now)
             m_zmqDictionary[sector_key][lan_key] = l;
         }
     }
+
     m_zmqPublisher.publish(m_zmqDictionary);
 }
 
@@ -1913,8 +1914,10 @@ ZMQ::ZMQDictionary CActiveSurfaceBossCore::getUSDStatusDiff(const std::string& k
     auto it = usdStatusMap.find(key);
     bool initialize = false;
 
-    if(it == usdStatusMap.end() || it->second.status == UNAV)               initialize = true;
+    if(it == usdStatusMap.end())                                            initialize = true;
     if(initialize || it->second.id                 != n.id)                 diff["id"] = n.id;
+    if(initialize || it->second.available          != n.available)          diff["available"] = n.available;
+    if(!n.available)                                                        return diff;
     if(initialize || it->second.accelerationFactor != n.accelerationFactor) diff["accelerationFactor"] = n.accelerationFactor;
     if(initialize || it->second.commandedPosition  != n.commandedPosition)  diff["commandedPosition"] = n.commandedPosition;
     if(initialize || it->second.currentPosition    != n.currentPosition)    diff["currentPosition"] = n.currentPosition;
@@ -1925,7 +1928,6 @@ ZMQ::ZMQDictionary CActiveSurfaceBossCore::getUSDStatusDiff(const std::string& k
     if(initialize || it->second.type               != n.type)               diff["USDType"] = n.type == 0x20 ? "USD50xxx" : "USD60xxx";
     if(initialize || it->second.status             != n.status)
     {
-        diff["available"] = n.status != UNAV;
         diff["calibrated"] = (n.status & CAL) != 0;
         diff["enabled"] = (n.status & ENBL) != 0;
         diff["running"] = (n.status & MRUN) != 0;

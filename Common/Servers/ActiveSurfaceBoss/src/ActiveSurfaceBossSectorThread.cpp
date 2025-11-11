@@ -62,10 +62,6 @@ void CActiveSurfaceBossSectorThread::runLoop()
     if(m_usdTable >> lanIndex >> circleIndex >> usdCircleIndex >> serial_usd >> graf >> mecc)
     {
         ActiveSurface::USD_var current_usd = ActiveSurface::USD::_nil();
-        ActiveSurface::USDStatus s;
-        s.id = circleIndex;
-        s.status = UNAV;
-        m_boss->usdStatusMap[serial_usd] = s;
 
         try
         {

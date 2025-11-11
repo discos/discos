@@ -42,6 +42,7 @@
 #define USxS	7
 
 // mask pattern for status 
+#define UNAV	0xFF000000
 #define MRUN	0x000080
 #define CAMM	0x000100
 #define ENBL	0x002000

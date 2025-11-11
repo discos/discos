@@ -34,7 +34,7 @@ EXTENDED_INTERFACES:=ReceiversInterface XBackendInterface
 # These libraries must be compiled sequentially, since the DiscosVersion library depends on the IRALibrary which depends on the SlaLibrary
 COMMON_SEQ_LIBS:=SlaLibrary IRALibrary DiscosVersion
 # All these other libraries only depend on the libraries listed above, therefore they can be compiled in parallel
-COMMON_LIBRARIES:=TextWindowLibrary ParserLibrary XarcosLibrary ModbusChannel ComponentProxy DiscosLocals XEphemAstroLib DiscosBackendProtocol PyTestingLibrary ZMQLibrary
+COMMON_LIBRARIES:=TextWindowLibrary ParserLibrary XarcosLibrary ModbusChannel ComponentProxy DiscosLocals XEphemAstroLib DiscosBackendProtocol PyTestingLibrary ZMQLibrary ActiveSurfaceLibrary
 # All the common servers are independend from one another, they only depend on interfaces, therefore we can compile them in parallel.
 # There may be some hidden dependency between servers, but it may never come up since each core compiles a single cpp file.
 # Issues may only arise if we use a very high number of cores, which is unlikely.

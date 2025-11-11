@@ -47,6 +47,7 @@ module ActiveSurface {
 
     struct USDStatus {
         long id;
+        boolean available;
         long accelerationFactor;
         long commandedPosition;
         long currentPosition;

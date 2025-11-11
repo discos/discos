@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
-<ActiveSurfaceBoss xmlns="urn:schemas-cosylab-com:ActiveSurfaceBoss:1.0" xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" WatchingThreadTime="200000" WorkingThreadTime="200000" RepetitionCacheTime="2000000" RepetitionExpireTime="5000000" sectors="8" circles="17" LANs="96" lastUSD="1116" actuatorsInCircle="0,24,24,48,48,48,48,96,96,96,96,96,96,96,96,96,8,4" profile="4">
+<ActiveSurfaceBoss xmlns="urn:schemas-cosylab-com:ActiveSurfaceBoss:1.0" xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" WatchingThreadTime="200000" WorkingThreadTime="500000" RepetitionCacheTime="2000000" RepetitionExpireTime="5000000" sectors="8" circles="17" LANs="96" lastUSD="1116" actuatorsInCircle="0,24,24,48,48,48,48,96,96,96,96,96,96,96,96,96,8,4" profile="4">
 	<status />
 	<enabled />
 	<pprofile />
