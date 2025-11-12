@@ -31,6 +31,12 @@ namespace ZMQLibrary
         ~ZMQPublisher();
 
         /**
+         * Class cannot be copied
+         */
+        ZMQPublisher(const ZMQPublisher&) = delete;
+        ZMQPublisher& operator=(const ZMQPublisher&) = delete;
+
+        /**
          * Public publisher method. This method accepts a ZMQDictionary object reference,
          * it converts it to a json-ified string and calls the protected publisher method.
          * @param dictionary, a json-like dictionary containing tuples of key, value format.

@@ -42,7 +42,7 @@ BOOST_PYTHON_MODULE(libPyZMQPublisher)
      * The actual "publish" method is defined inside the actual python module in order to convert a python dict() to a json-ified string.
      * Take a look there for more info.
      */
-    py::class_<PyZMQPublisher>("PyZMQPublisher", py::init<const std::string, const std::string, const unsigned int>())
+    py::class_<PyZMQPublisher, boost::noncopyable>("PyZMQPublisher", py::init<const std::string, const std::string, const unsigned int>())
         .def("__publish", &PyZMQPublisher::publish)
         .def_readonly("topic", &ZMQ::ZMQPublisher::topic);
 }

@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 import re
-import os
-import glob
-import zmq
 import json
 from argparse import ArgumentParser
 from collections import defaultdict
 from collections.abc import Mapping
+import zmq
 
 RX_BOOT = re.compile(r'^[0-9A-Za-z]{4}_[^\s]+$')
 
@@ -16,7 +14,6 @@ def deep_merge(dst: dict, src: Mapping) -> dict:
             deep_merge(dst[k], v)
         else:
             dst[k] = v
-    return dst
 
 parser = ArgumentParser()
 parser.add_argument(
@@ -48,6 +45,7 @@ context = zmq.Context()
 frontend = context.socket(zmq.SUB)
 frontend.setsockopt(zmq.RCVHWM, 2000)
 frontend.setsockopt(zmq.SUBSCRIBE, b'')
+frontend.setsockopt(zmq.LINGER, 0)
 
 # Create the backend socket, publisher
 backend = context.socket(zmq.XPUB)
@@ -90,28 +88,25 @@ try:
         # The event involves the frontend socket
         # new message from a DISCOS # component
         if frontend in events:
-            # Receive the message
-            message = frontend.recv_string()
-
             try:
-                # Split it into topic and payload
-                topic, payload = message.split(" ", 1)
+                # Receive the message without copying it
+                message = frontend.recv_multipart(copy=False)
+
+                # Relay the message via the backend socket to the clients
+                backend.send_multipart(message, copy=False)
+
+                # Now that the message was relayed, we can update the cache
+                # We copy the inner message buffer into topic and payload
+                topic_f, payload_f = message
+                topic = memoryview(topic_f).tobytes().decode("ascii", "ignore")
+                payload = memoryview(payload_f).tobytes()
 
                 # Update the cached dictionary
-                #cache[topic].update(payload)
                 if topic not in cache or not isinstance(cache[topic], dict):
                     cache[topic] = {}
                 deep_merge(cache[topic], json.loads(payload))
-
-                # Relay the message via the backend socket to the clients
-                backend.send_multipart([
-                    topic.encode("ascii"),
-                    payload.encode("utf-8")
-                ])
             except ValueError:
                 # Not enough values to unpack, malformed message
-                # It means the message does not follow the structure:
-                # topic payload
                 pass
 
         # The event involves the backend socket

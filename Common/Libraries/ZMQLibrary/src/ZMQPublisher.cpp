@@ -8,8 +8,8 @@ namespace ZMQLibrary
         m_context(std::make_shared<zmq::context_t>()),
         m_socket(std::make_shared<zmq::socket_t>(*m_context, zmq::socket_type::pub))
     {
-        // Limit the outbound messages buffer to 2 (1 topic and 1 payload). This will assure we only send the last message after establishing a delayed connection.
-        m_socket->set(zmq::sockopt::conflate, true);
+        m_socket->set(zmq::sockopt::linger, 0);
+        m_socket->set(zmq::sockopt::immediate, true);
         m_socket->connect("tcp://" + address + ":" + std::to_string(port));
     }
 
@@ -23,10 +23,10 @@ namespace ZMQLibrary
         publish(dictionary.dump());
     }
 
-    void ZMQPublisher::publish(const std::string& payload)
+    void ZMQPublisher::publish(const std::string& payload_str)
     {
-        std::string message = topic + " " + payload;
-        zmq::message_t zmq_message(message.data(), message.size());
-        m_socket->send(zmq_message, zmq::send_flags::none);
+        zmq::const_buffer payload(payload_str.data(), payload_str.size());
+        std::array<zmq::const_buffer, 2> message = { m_topic, payload };
+        zmq::send_multipart(*m_socket, message);
     }
 }
