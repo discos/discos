@@ -595,6 +595,8 @@ void USDImpl::update(CORBA::Double elevation) throw (CORBA::SystemException, ASE
     {
         _GET_PROP(status, m_status, "usdImpl::update()")
         m_usdStatus.status = m_status;
+        _GET_PROP(actPos, m_currentStep, "usdImpl::update()")
+        m_usdStatus.currentPosition = m_currentStep;
         m_lanStatus.write(m_usdStatus);
 
         if(m_status&MRUN)
@@ -636,10 +638,6 @@ void USDImpl::update(CORBA::Double elevation) throw (CORBA::SystemException, ASE
         updatePos = (CORBA::Long)(updatePosMM * MM2STEP);
         updatePos = std::max(updatePos, m_bottom);
         updatePos = std::min(updatePos, m_top);
-
-        _GET_PROP(actPos, m_currentStep, "usdImpl::update()")
-        m_usdStatus.currentPosition = m_currentStep;
-        m_lanStatus.write(m_usdStatus);
 
         if(updatePos == m_currentStep)
         {
