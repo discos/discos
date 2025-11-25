@@ -28,7 +28,9 @@
 
 _IRA_LOGFILTER_IMPORT;
 
-CCommandLine::CCommandLine(): CSocket()
+CCommandLine::CCommandLine() :
+    CSocket(),
+    m_zmqPublisher("backends")
 {
 	AUTO_TRACE("CCommandLine::CCommandLine()");
 	m_bTimedout=false;
@@ -1809,4 +1811,70 @@ void CCommandLine::setStatus(TLineStatus sta)
 	else {
 		clearStatusField(CMDLINERROR);
 	}
+}
+
+void CCommandLine::publishZMQData(ACS::Time now)
+{
+	ACS::Time bt;
+	DWORD ptrn;
+	ACS::longSeq bins, pol, is;
+	ACS::doubleSeq att, bw, sr, sf, tsys;
+	long integration;
+
+	getTime(bt);
+	getBackendStatus(ptrn);
+	getAttenuation(att);
+	getBandWidth(bw);
+	getBins(bins);
+	getInputSection(is);
+	getPolarization(pol);
+	getSampleRate(sr);
+	getFrequency(sf);
+	getTsys(tsys);
+	getIntegration(integration);
+
+	m_zmqDictionary["backendTime"] = ZMQ::ZMQTimeStamp::fromACSTime(bt);    // This is the inner backend time
+	m_zmqDictionary["busy"] = getIsBusy();
+	m_zmqDictionary["channels"] = std::vector<ZMQ::ZMQDictionary>();
+	for(size_t i = 0; i < is.length(); i++)
+	{
+		ZMQ::ZMQDictionary section;
+		section["id"] = is[i];
+		section["attenuation"] = att[i];
+		section["bandWidth"] = bw[i];
+		section["bins"] = bins[i];
+		switch(pol[i])
+		{
+			case Backends::BKND_LCP:
+			{
+				section["polarization"] = "LHCP";
+				break;
+			}
+			case Backends::BKND_RCP:
+			{
+				section["polarization"] = "RHCP";
+				break;
+			}
+			default: // case Backends::BKND_FULL_STOKES:
+			{
+				section["polarization"] = "FULL STOKES";
+				break;
+			}
+		}
+		section["sampleRate"] = sr[i];
+		section["startFrequency"] = sf[i];
+		section["systemTemperature"] = tsys[i];
+		m_zmqDictionary["channels"].push_back(section);
+	}
+
+	m_zmqDictionary["commandLineError"] = (bool)((ptrn >> TstatusFields::CMDLINERROR) & 1);
+	m_zmqDictionary["dataLineError"] = (bool)((ptrn >> TstatusFields::DATALINERROR) & 1);
+	m_zmqDictionary["integration"] = integration;
+	m_zmqDictionary["sampling"] = (bool)((ptrn >> TstatusFields::SAMPLING) & 1);
+	m_zmqDictionary["suspended"] = (bool)((ptrn >> TstatusFields::SUSPEND) & 1);
+	m_zmqDictionary["timeSync"] = !(bool)((ptrn >> TstatusFields::TIME_SYNC) & 1);
+
+	m_zmqDictionary["timestamp"] = ZMQ::ZMQTimeStamp::fromACSTime(now);     // This is the message timestamp
+
+	m_zmqPublisher.publish(ZMQ::ZMQDictionary{{ "TotalPower", m_zmqDictionary }});
 }
