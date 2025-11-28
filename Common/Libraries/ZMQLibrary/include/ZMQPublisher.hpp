@@ -1,6 +1,8 @@
 #ifndef __ZMQPUBLISHER_HPP__
 #define __ZMQPUBLISHER_HPP__
 
+#include <unistd.h>
+#include <limits.h>
 #include <zmq.hpp>
 #include <zmq_addon.hpp>
 #include "ZMQDictionary.hpp"
@@ -56,6 +58,16 @@ namespace ZMQLibrary
         virtual void publish(const std::string& payload);
 
     private:
+        /**
+         * Function that creates and configures the socket
+         */
+        static std::shared_ptr<zmq::socket_t> create_socket(const std::shared_ptr<zmq::context_t>& ctx);
+
+        /**
+         * Function that retrieves a desired curve key from a file
+         */
+        static bool find_key(const std::string& file, const std::string& key_type, std::string& key);
+
         /**
          * ZMQ constant buffer which references the topic name.
          */

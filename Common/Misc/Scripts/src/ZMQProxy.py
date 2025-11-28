@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 import re
 import json
+import socket
+from pathlib import Path
 from argparse import ArgumentParser
 from collections import defaultdict
 from collections.abc import Mapping
 import zmq
+import zmq.auth
+from zmq.auth import load_certificate
+from zmq.auth.thread import ThreadAuthenticator
 
 RX_BOOT = re.compile(r'^[0-9A-Za-z]{4}_[^\s]+$')
 
@@ -35,6 +40,11 @@ args = parser.parse_args()
 if args.front_end_port == args.back_end_port:
     parser.error('FRONT_END_PORT and BACK_END_PORT cannot be the same port!')
 
+curve_directory = Path.home() / ".curve" / "discos" / "telemetry" / "server"
+authorized_directory = curve_directory / "authorized"
+server_pair = curve_directory / "identity.key_secret"
+server_public, server_secret = load_certificate(server_pair)
+
 # Data flows from frontend (DISCOS components endpoint) to backend (clients).
 # We use a TCP/IP socket listening to only the localhost interface.
 
@@ -46,6 +56,9 @@ frontend = context.socket(zmq.SUB)
 frontend.setsockopt(zmq.RCVHWM, 2000)
 frontend.setsockopt(zmq.SUBSCRIBE, b'')
 frontend.setsockopt(zmq.LINGER, 0)
+frontend.curve_secretkey = server_secret
+frontend.curve_publickey = server_public
+frontend.curve_server = True
 
 # Create the backend socket, publisher
 backend = context.socket(zmq.XPUB)
@@ -61,6 +74,10 @@ backend.setsockopt(zmq.HEARTBEAT_TIMEOUT, 15000)
 backend.setsockopt(zmq.HEARTBEAT_TTL, 10000)
 backend.setsockopt(zmq.SNDHWM, 30)
 
+auth = ThreadAuthenticator(context)
+auth.start()
+auth.configure_curve(domain='*', location=authorized_directory)
+
 # Create the cache dictionary
 cache = defaultdict(dict)
 
@@ -71,10 +88,13 @@ poller.register(backend, zmq.POLLIN)
 
 # Finally bind the sockets
 backend.bind(f'tcp://*:{args.back_end_port}')
-frontend.bind(f'tcp://127.0.0.1:{args.front_end_port}')
+frontend.bind(f'tcp://*:{args.front_end_port}')
 
 print('ZMQ proxy started')
-print(f'Receiving messages from DISCOS on 127.0.0.1:{args.front_end_port}')
+print(
+    f'Receiving messages from DISCOS on all network interfaces ,'
+    f'port {args.front_end_port}'
+)
 print(
     f'Relaying messages to clients on all network interfaces, '
     f'port {args.back_end_port}'
