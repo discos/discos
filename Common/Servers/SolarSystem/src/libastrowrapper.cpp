@@ -1,4 +1,7 @@
+#include <memory>
 #include "libastrowrapper.h"
+
+
 
 namespace xephemlib {
 	
@@ -63,9 +66,9 @@ double Site::getMjd()
     
 }
 
-SolarSystemBody::SolarSystemBody()
+SolarSystemBody::SolarSystemBody(): obj(std::unique_ptr<Obj>(new Obj()))
 {
-   obj=new Obj();
+ 
    
 
 };
@@ -94,9 +97,9 @@ void SolarSystemBody::setObject(PLCode code){
 
 };
   
-SolarSystemBody::SolarSystemBody(PLCode code)
+SolarSystemBody::SolarSystemBody(PLCode code): obj(std::unique_ptr<Obj>(new Obj()))
 {
-      obj=new Obj();
+   //   obj=new Obj();
 
     _code=code;
     
@@ -185,8 +188,9 @@ void SolarSystemBody::getCoordinates(double& ra, double& dec,double& az,double& 
 void  SolarSystemBody::compute(Site* site){
     
     //Obj* obj=new Obj();
-
+    std::cout << "Compute 2" <<std::endl;
     obj->any.co_type=PLANET;
+
     strncpy(obj->any.co_name,planetnames[_code],10);
     obj->
     pl.plo_code=_code;
@@ -197,9 +201,10 @@ void  SolarSystemBody::compute(Site* site){
 #endif    
      pref_set(PREF_EQUATORIAL,PREF_TOPO);
 
-    
-//    std::cout << "Compute " <<std::endl;
-    obj_cir (site, obj);
+    std::cout << "Name: " << obj->any.co_name << std::endl;
+     
+
+    obj_cir (site, obj.get());
 
     _ra=obj->any.co_ra;
     _dec=obj->any.co_dec;
@@ -213,7 +218,7 @@ void  SolarSystemBody::compute(Site* site){
 
 Obj* SolarSystemBody::getObject()
 {
-    return  obj;
+    return  obj.get();
     
     
 }

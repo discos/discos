@@ -9,8 +9,8 @@
 
 
 
-#ifndef _LIBRWAPPER
-#define  _LIBRWAPPER
+//#ifndef _LIBRWAPPER
+//#define  _LIBRWAPPER
 
 #include <iostream>
 #include <cstring>
@@ -21,6 +21,8 @@
 #include <cctype>
 #include <algorithm>
 #include <locale>
+#include <memory>
+
 
 namespace xephemlib
 {
@@ -51,8 +53,12 @@ class SolarSystemBody   {
 public:
       
       
-      SolarSystemBody(PLCode code);
-      ~SolarSystemBody(){ delete obj;}
+      SolarSystemBody(PLCode code)  ;
+      ~SolarSystemBody(){
+		std::cout << "destroyed"<<"\n";      
+      
+      //
+      };
     
       static std::string getPlanetNameFromCode(PLCode code);
       static PLCode  getPlanetCodeFromName(std::string  name);
@@ -74,8 +80,8 @@ public:
     
 protected:
         
-            Obj* obj;
-            Obj* m_obj;
+            std::unique_ptr<Obj> obj; // Replaces Obj* obj
+ 
     
     
     
@@ -105,4 +111,39 @@ private:
 
 
 
-#endif   /*_LIBRWAPPER*/
+//#endif   /*_LIBRWAPPER*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

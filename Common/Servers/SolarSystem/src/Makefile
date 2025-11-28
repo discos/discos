@@ -19,7 +19,7 @@
 
 #
 # user definable C-compilation flags
-#USER_CFLAGS = 
+USER_CFLAGS =  -std=c++17
 
 #
 # additional include and library search paths
@@ -42,12 +42,12 @@
 
 #
 # special compilation flags for single c sources
-#yyyyy_CFLAGS   = 
+
 
 #
 # Includes (.h) files (public only)
 # ---------------------------------
-# INCLUDES        = 
+ INCLUDES        = libastrowrapper
 
 #
 # Libraries (public and local)
@@ -58,16 +58,20 @@ LIBRARIES_L     =
 #
 # <brief description of lllll library>
 
-SolarSystemBodyImpl_OBJECTS   = SolarSystemBodyImpl libastrowrapper
+SolarSystemBodyImpl_OBJECTS   = libastrowrapper SolarSystemBodyImpl 
+SolarSystemBodyImpl_CFLAGS   = -std=c++17
 SolarSystemBodyImpl_LIBS      = EphemGeneratorStubs SolarSystemBodyStubs baci maci IRALibrary \
                                 SlaLibrary ObservatoryStubs \
 				ComponentErrors AntennaErrors \
 				AntennaDefinitionsStubs ManagmentDefinitionsStubs \
 				ManagementErrors astro
 
-testastrolib_OBJECTS  = 	 libastrowrapper 	mainastro		
+testastrolib_OBJECTS  = 	  	mainastro	libastrowrapper
+testastrolib_CFLAGS   = -std=c++17
 testastrolib_LIBS  =		astro		
 #
+
+
 # Scripts (public and local)
 # ----------------------------
 #

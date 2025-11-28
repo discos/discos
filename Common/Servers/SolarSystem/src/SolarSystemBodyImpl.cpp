@@ -14,6 +14,8 @@
 //#include <Site.h>
 #include <exception>
 #define R2D 57.29577951308232
+#include <memory>
+
 
 using namespace ComponentErrors;
 // using namespace baci;
@@ -36,7 +38,7 @@ SolarSystemBodyImpl::~SolarSystemBodyImpl()
 
 }
 
-void SolarSystemBodyImpl::initialize() throw(ACSErr::ACSbaseExImpl)
+void SolarSystemBodyImpl::initialize()  
 {
         AUTO_TRACE("SolarSystemBodyImpl::initialize()");
  
@@ -61,7 +63,7 @@ void SolarSystemBodyImpl::aboutToAbort()
         AUTO_TRACE("SolarSystemBodyImpl::aboutToAbort()");
 }
 
-void SolarSystemBodyImpl::execute() throw (ACSErr::ACSbaseExImpl)
+void SolarSystemBodyImpl::execute()  
 {
          AUTO_TRACE("SolarSystemBodyImpl::execute()");
          CError error;
@@ -114,7 +116,7 @@ void SolarSystemBodyImpl::execute() throw (ACSErr::ACSbaseExImpl)
 
 
 
-void SolarSystemBodyImpl::getAttributes(Antenna::SolarSystemBodyAttributes_out att) throw (CORBA::SystemException)
+void SolarSystemBodyImpl::getAttributes(Antenna::SolarSystemBodyAttributes_out att)  
 {
 
         AUTO_TRACE("SolarSystemBodyImpl::getAttributes()");
@@ -165,7 +167,7 @@ TIMEVALUE now;
 
 }
 
-void SolarSystemBodyImpl::setOffsets(CORBA::Double lon,CORBA::Double lat,Antenna::TCoordinateFrame frame) throw (CORBA::SystemException,AntennaErrors::AntennaErrorsEx)
+void SolarSystemBodyImpl::setOffsets(CORBA::Double lon,CORBA::Double lat,Antenna::TCoordinateFrame frame)  
 {       
         AUTO_TRACE("SolarSystemBodyImpl::setOffsets()");
         if (frame==Antenna::ANT_HORIZONTAL) {
@@ -190,7 +192,7 @@ void SolarSystemBodyImpl::setOffsets(CORBA::Double lon,CORBA::Double lat,Antenna
 
 }
 
-void SolarSystemBodyImpl::getJ2000EquatorialCoordinate(ACS::Time time, CORBA::Double_out ra2000, CORBA::Double_out dec2000) throw (CORBA::SystemException)
+void SolarSystemBodyImpl::getJ2000EquatorialCoordinate(ACS::Time time, CORBA::Double_out ra2000, CORBA::Double_out dec2000)  
 
 {
 	  AUTO_TRACE("SolarSystemBodyImpl::getJ2000EquatorialCoordinate()");
@@ -208,7 +210,7 @@ void SolarSystemBodyImpl::getJ2000EquatorialCoordinate(ACS::Time time, CORBA::Do
 }
 
 
-void SolarSystemBodyImpl::getHorizontalCoordinate(ACS::Time time, CORBA::Double_out az, CORBA::Double_out el) throw (CORBA::SystemException)
+void SolarSystemBodyImpl::getHorizontalCoordinate(ACS::Time time, CORBA::Double_out az, CORBA::Double_out el)  
 
 {
         AUTO_TRACE("SolarSystemBodyImpl::getHorizontalCoordinate()");
@@ -226,7 +228,7 @@ void SolarSystemBodyImpl::getHorizontalCoordinate(ACS::Time time, CORBA::Double_
 }
 
 void SolarSystemBodyImpl::getAllCoordinates(ACS::Time time,CORBA::Double_out az,CORBA::Double_out el,CORBA::Double_out ra,CORBA::Double_out dec,CORBA::Double_out jepoch,CORBA::Double_out lon,
-                CORBA::Double_out lat) throw (CORBA::SystemException)
+                CORBA::Double_out lat)  
 {
 
     AUTO_TRACE("SolarSystemBodyImpl::getAllCoordinates()")
@@ -248,7 +250,7 @@ void SolarSystemBodyImpl::getAllCoordinates(ACS::Time time,CORBA::Double_out az,
 }
 
  
-bool SolarSystemBodyImpl::checkTracking(ACS::Time time,CORBA::Double az,CORBA::Double el,CORBA::Double HPBW) throw (CORBA::SystemException)
+bool SolarSystemBodyImpl::checkTracking(ACS::Time time,CORBA::Double az,CORBA::Double el,CORBA::Double HPBW) 
 {
      	AUTO_TRACE("SolarSystemBodyImpl::checkTracking()")
 	   double computedAz,computedEl,azErr,elErr,skyErr;
@@ -265,7 +267,7 @@ bool SolarSystemBodyImpl::checkTracking(ACS::Time time,CORBA::Double az,CORBA::D
 }
 
 
-void SolarSystemBodyImpl::setBodyName(const char* bodyName) throw (CORBA::SystemException,AntennaErrors::AntennaErrorsEx)
+void SolarSystemBodyImpl::setBodyName(const char* bodyName)  
 {
 
 /*
@@ -340,14 +342,14 @@ typedef enum {
 
 }
 
-void SolarSystemBodyImpl::computeFlux(CORBA::Double freq, CORBA::Double fwhm, CORBA::Double_out flux) throw (CORBA::SystemException)
+void SolarSystemBodyImpl::computeFlux(CORBA::Double freq, CORBA::Double fwhm, CORBA::Double_out flux)  
 {
         flux=0.0;
         AUTO_TRACE("SolarSystemBodyImpl::computeFlux()");
 
 }
 
-void SolarSystemBodyImpl::getDistance(ACS::Time time,CORBA::Double_out distance) throw (CORBA::SystemException)
+void SolarSystemBodyImpl::getDistance(ACS::Time time,CORBA::Double_out distance)  
 {
     AUTO_TRACE("SolarSystemBodyImpl::getDistance()");
 	     double azi,ele;
