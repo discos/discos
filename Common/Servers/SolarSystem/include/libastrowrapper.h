@@ -14,6 +14,7 @@
 
 #include <iostream>
 #include <cstring>
+#include <string>
 #include "astro.h"
 #include "preferences.h"
 #include <string>
