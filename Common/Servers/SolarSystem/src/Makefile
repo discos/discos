@@ -47,7 +47,7 @@ USER_CFLAGS =  -std=c++17
 #
 # Includes (.h) files (public only)
 # ---------------------------------
- INCLUDES        = libastrowrapper
+# INCLUDES        = libastrowrapper
 
 #
 # Libraries (public and local)
