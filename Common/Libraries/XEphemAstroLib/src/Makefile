@@ -55,7 +55,7 @@
 
 #
 # user definable C-compilation flags
-USER_CFLAGS = -c -pedantic -Wall
+USER_CFLAGS = -c -pedantic -Wall -flto
 
 #
 # additional include and library search paths
