@@ -23,7 +23,7 @@
 #include <algorithm>
 #include <locale>
 #include <memory>
-
+#include <mutex> // Import mutex
 
 namespace xephemlib
 {
@@ -41,12 +41,12 @@ public:
     
     void stampa(void);
     double getMjd();
-    
+
     
 private:
        double m_lon,m_lat,m_height;
        std::string name;
-    
+
 };
 
 class SolarSystemBody   {
@@ -67,7 +67,7 @@ public:
       SolarSystemBody();
       void setObject(PLCode code);
        
- 
+      static std::mutex astro_mutex; // Declaration     
       Obj* getObject();
       void report();
       static std::map<std::string,PLCode> planet;
