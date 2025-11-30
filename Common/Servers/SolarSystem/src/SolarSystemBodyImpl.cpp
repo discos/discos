@@ -23,11 +23,19 @@ using namespace baci;
 
 
 SolarSystemBodyImpl::SolarSystemBodyImpl(const ACE_CString &CompName,maci::ContainerServices *containerServices) :
-        acscomponent::ACSComponentImpl(CompName, containerServices)
+        acscomponent::ACSComponentImpl(CompName, containerServices),
+        m_componentName(CString(CompName)),
+        m_bodyName("Unset"),
+        m_ra_off(0.0),m_ra(0.),m_ra2000(0.),
+        m_dec_off(0.0),m_dec(0.),m_dec2000(0.),
+        m_az_off(0.0),m_az(0.),
+        m_el_off(0.0),m_el(0.),
+        m_offsetFrame(Antenna::ANT_HORIZONTAL),
+        m_dut1(0.),m_distance(0.),
+        m_glon(0.),m_glat(0.)         
+            
 {
         AUTO_TRACE("SolarSystemBodyImpl::SolarSystemBodyImpl()");
-        m_componentName=CString(CompName);
-        m_bodyName="Unset";
 }
 
 SolarSystemBodyImpl::~SolarSystemBodyImpl()
@@ -40,9 +48,6 @@ void SolarSystemBodyImpl::initialize()
 {
         AUTO_TRACE("SolarSystemBodyImpl::initialize()");
  
-      	m_ra_off = m_dec_off = 0.0;
-	      m_az_off = m_el_off = 0.0;
-	      m_offsetFrame=Antenna::ANT_HORIZONTAL;
          ACS_LOG(LM_FULL_INFO, "SolarSystemBodyImpl::initialize()", (LM_INFO,"COMPSTATE_INITIALIZING"));
 }
 
@@ -179,6 +184,7 @@ void SolarSystemBodyImpl::getAttributes(Antenna::SolarSystemBodyAttributes_out a
 void SolarSystemBodyImpl::setOffsets(CORBA::Double lon,CORBA::Double lat,Antenna::TCoordinateFrame frame)  
 {       
    AUTO_TRACE("SolarSystemBodyImpl::setOffsets()");
+   baci::ThreadSyncGuard guard(&m_mutex);
    if (frame==Antenna::ANT_HORIZONTAL) {
 		m_source.setHorizontalOffsets(lon,lat);		
 		m_az_off=lon;
@@ -206,21 +212,13 @@ void SolarSystemBodyImpl::getJ2000EquatorialCoordinate(ACS::Time time, CORBA::Do
 {
 	  AUTO_TRACE("SolarSystemBodyImpl::getJ2000EquatorialCoordinate()");
 	  
-	  double _ra,_dec;
 	  
-	  	  TIMEVALUE val(time);
-
+	  TIMEVALUE val(time);
 	  baci::ThreadSyncGuard guard(&m_mutex);
-
 	  BodyPosition(val);
-	  
 	  IRA::CDateTime ctime(val,m_dut1);	
-	 _ra =slaDranrm(m_ra2000);
-	 _dec =IRA::CIRATools::latRangeRad(m_dec2000);
-     ra2000=_ra;
-     dec2000=_dec;
-
-
+     ra2000=slaDranrm(m_ra2000);
+     dec2000=IRA::CIRATools::latRangeRad(m_dec2000);
 }
 
 
@@ -233,7 +231,7 @@ void SolarSystemBodyImpl::getHorizontalCoordinate(ACS::Time time, CORBA::Double_
 
         TIMEVALUE val(time);
 	     IRA::CDateTime ctime(val,m_dut1);	
-      	BodyPosition(val);
+        BodyPosition(val);
 	     m_source.process(ctime,m_site);
 	     m_source.getApparentHorizontal(azi,ele);
 	     az=azi; el=ele;
@@ -269,7 +267,7 @@ bool SolarSystemBodyImpl::checkTracking(ACS::Time time,CORBA::Double az,CORBA::D
      	AUTO_TRACE("SolarSystemBodyImpl::checkTracking()")
 	   double computedAz,computedEl,azErr,elErr,skyErr;
 	   baci::ThreadSyncGuard guard(&m_mutex);  // obtain access
-
+      
     	TIMEVALUE val(time);
 	   IRA::CDateTime refTime(val,m_dut1);
    	m_source.process(refTime,m_site);
