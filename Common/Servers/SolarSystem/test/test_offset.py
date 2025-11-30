@@ -19,8 +19,8 @@ class SetOffsetTest(unittest.TestCase):
          tm=time.mktime(struct_time)
          self.acstime=epoch.py2epoch(tm)
          print(tm)
-         simpleClient = PySimpleClient()
-         self.hwRef = simpleClient.getDynamicComponent(None,"IDL:alma/Antenna/SolarSystemBody:1.0","SolarSystemBodyImpl",None)
+         self.simpleClient = PySimpleClient()
+         self.hwRef = self.simpleClient.getDynamicComponent(None,"IDL:alma/Antenna/SolarSystemBody:1.0","SolarSystemBodyImpl",None)
          self.hwRef.setBodyName('Jupiter')
 
 
@@ -46,7 +46,10 @@ class SetOffsetTest(unittest.TestCase):
          self.assertAlmostEqual(degrees(az),degrees( az_ref+az_offs/cos(el_ref+el_offs))  , delta=5e-4)   	 
          self.assertAlmostEqual(degrees(el), degrees( el_ref+el_offs) , delta=5e-4)  
     
-     	 
+    def tearDown(self):
+    	   print('closing')
+    	   self.simpleClient.disconnect()
+    	        	 
 
 if __name__ == '__main__':
     

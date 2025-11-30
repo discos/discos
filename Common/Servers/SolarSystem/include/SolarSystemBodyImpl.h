@@ -184,8 +184,12 @@ private:
       
       IRA::CSite m_site;
       IRA::CSkySource m_source;   
-        xephemlib::Site*  m_sitex;  // site class for libastro 
-        xephemlib::SolarSystemBody*  m_body_xephem;
+      
+      std::unique_ptr<xephemlib::Site> m_sitex;
+      std::unique_ptr<xephemlib::SolarSystemBody> m_body_xephem;      
+      
+      //  xephemlib::Site*  m_sitex;  // site class for libastro 
+      //  xephemlib::SolarSystemBody*  m_body_xephem;
         // dummy CSkySource onj for coordinate conversion  
         double m_longitude;
         double m_latitude;
