@@ -6,7 +6,7 @@
 #include <string>
 namespace xephemlib {
 	
-
+std::mutex SolarSystemBody::astro_mutex;
 
 //static const char  *planetnames[]={"Mercury","Venus","Mars","Jupiter","Saturn",
 //                            "Uranus","Neptune","Pluto","Sun","Moon","NOBJ"};
@@ -169,6 +169,8 @@ void  SolarSystemBody::compute(Site* site){
     //std::cout << "Compute 2" <<std::endl;
 
     pref_set(PREF_EQUATORIAL,PREF_TOPO);
+    std::lock_guard<std::mutex> lock(astro_mutex);
+    
     obj_cir (site, obj.get());
 
     _ra=obj->any.co_ra;
