@@ -20,6 +20,7 @@ class JupiterDistanceTest(unittest.TestCase):
          self.acstime=epoch.py2epoch(tm)
          print(tm)
          simpleClient = PySimpleClient()
+         time.sleep(1.)
          self.hwRef = simpleClient.getDynamicComponent(None,"IDL:alma/Antenna/SolarSystemBody:1.0","SolarSystemBodyImpl",None)
          self.hwRef.setBodyName('Jupiter')
 

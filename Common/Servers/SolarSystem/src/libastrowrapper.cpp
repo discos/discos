@@ -88,7 +88,7 @@ void SolarSystemBody::setObject(PLCode code){
     obj->any.co_type = PLANET;
     strncpy(obj->any.co_name, planetnames[_code], sizeof(obj->any.co_name)-1);
     obj->pl.plo_code = _code;    
-    std::cout << "Code: " << _code << "\n";
+  //  std::cout << "Code: " << _code << "\n";
     
 
 };
@@ -166,7 +166,7 @@ void SolarSystemBody::getCoordinates(double& ra, double& dec,double& az,double& 
 
 void  SolarSystemBody::compute(Site* site){
     
-    std::cout << "Compute 2" <<std::endl;
+    //std::cout << "Compute 2" <<std::endl;
 
     pref_set(PREF_EQUATORIAL,PREF_TOPO);
     obj_cir (site, obj.get());
