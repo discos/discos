@@ -145,9 +145,9 @@ void
 plans (double mj, PLCode p, double *lpd0, double *psi0, double *rp0,
 double *rho0, double *lam, double *bet, double *dia, double *mag)
 {
-	static double lastmj = -10000;
-	static double lsn, bsn, rsn;	/* geocentric coords of sun */
-	static double xsn, ysn, zsn;	/* cartesian " */
+	static __thread double lastmj = -10000;
+	static __thread double lsn, bsn, rsn;	/* geocentric coords of sun */
+	static __thread double xsn, ysn, zsn;	/* cartesian " */
 	double lp, bp, rp;		/* heliocentric coords of planet */
 	double xp, yp, zp, rho;		/* rect. coords and geocentric dist. */
 	double dt;			/* light time */
