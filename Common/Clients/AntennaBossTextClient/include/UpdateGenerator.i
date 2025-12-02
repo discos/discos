@@ -205,6 +205,50 @@ void updateGenerator(maci::SimpleClient& client,Antenna::TGeneratorType& lastGen
 				extraLabel6->Refresh();	
 				break;
 			}
+			case Antenna::ANT_SUN : {
+				IRA::CString str1,str2;
+ 
+				Antenna::SolarSystemBodyAttributes_var att;
+				Antenna::SolarSystemBody_var ssbody;
+				try {
+					ssbody=Antenna::SolarSystemBody::_narrow(lastGenerator);
+					if (!CORBA::is_nil(ssbody)) {
+						ssbody->getAttributes(att);
+					}
+				}
+				catch (...) {
+					_EXCPT(ClientErrors::UnknownExImpl,impl,"::Main()");
+					_IRA_LOGGUARD_LOG_EXCEPTION(guard,impl,LM_ERROR);
+					return;
+				}			
+				tmpString=(const char*)att->sourceID;
+				outString="Source name    : "+tmpString;
+				extraLabel1->setValue(outString);
+				extraLabel1->Refresh();
+				IRA::CIRATools::radToHourAngle(att->rightAscension,str1);
+				IRA::CIRATools::radToSexagesimalAngle(att->declination,str2);
+				outString="Apparent Eq.   : "+str1+"/"+str2+"/";
+				str1.Format("%.5lf",att->julianEpoch);
+				outString+=str1;
+				extraLabel2->setValue(outString);
+				extraLabel2->Refresh();
+				IRA::CIRATools::radToAngle(att->gLongitude,str1);
+				IRA::CIRATools::radToAngle(att->gLatitude,str2);
+				outString="Galactic       : "+str1+"/"+str2;
+				extraLabel3->setValue(outString);
+				extraLabel4->Refresh();
+				IRA::CIRATools::radToAngle(att->azimuth,str1);
+				IRA::CIRATools::radToAngle(att->elevation,str2);
+				outString="Horizontal     : "+str1+"/"+str2;
+				extraLabel4->setValue(outString);
+				extraLabel4->Refresh();								
+				extraLabel5->setValue("");
+				extraLabel5->Refresh();			
+				extraLabel6->setValue("");
+				extraLabel6->Refresh();	
+				break;
+			}
+
 			case Antenna::ANT_OTF: {
 				Antenna::OTFAttributes_var att;
 				Antenna::OTF_var otf;

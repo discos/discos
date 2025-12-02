@@ -55,12 +55,12 @@
 
 #
 # user definable C-compilation flags
-USER_CFLAGS = -c -pedantic -Wall -flto
+USER_CFLAGS = -c -pedantic -Wall -flto -pthread 
 
 #
 # additional include and library search paths
 #USER_INC = 
-USER_LIB = -lm
+USER_LIB = -lm -pthread
 
 #
 # MODULE CODE DESCRIPTION:
