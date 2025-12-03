@@ -192,9 +192,9 @@ module MinorServo
         void reset();
 
         /**
-         * Publishes the ZMQ dictionary
+         * Retrieves the ZMQ status object
          */
-        void publishData();
+        SRTMinorServoZMQStatus getSRTMinorServoZMQStatus(in ACS::Time timestamp);
     };
 
     /**

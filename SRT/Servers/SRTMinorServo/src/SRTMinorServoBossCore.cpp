@@ -309,19 +309,150 @@ void SRTMinorServoBossCore::publishData()
         }
     }
 
-    m_zmqPublisher.publish(ZMQ::ZMQDictionary{{ "boss", m_zmqDictionary }});
-
     for(const auto& [name, servo] : m_servos)
     {
-        if(!m_tracking_servos.count(name))
+        SRTMinorServoZMQStatus status = *servo->getSRTMinorServoZMQStatus(m_status.getPLCTime());
+
+        ZMQ::ZMQDictionary servo_status;
+        servo_status["blocked"] = status.blocked;
+        servo_status["currentSetup"] = status.currentSetup;
+
+        switch(status.driveCabinetStatus)
         {
-            servo->publishData();
+            case DRIVE_CABINET_OK:
+            {
+                servo_status["driveCabinetStatus"] = "OK";
+                break;
+            }
+            case DRIVE_CABINET_WARNING:
+            {
+                servo_status["driveCabinetStatus"] = "WARNING";
+                break;
+            }
+            case DRIVE_CABINET_ERROR:
+            {
+                servo_status["driveCabinetStatus"] = "ERROR";
+                break;
+            }
         }
-        else
+
+        servo_status["enabled"] = status.enabled;
+
+        switch(status.errorCode)
         {
-            m_tracking_servos.at(name)->publishData();
+            case ERROR_NO_ERROR:
+            {
+                servo_status["errorCode"] = "NO ERROR";
+                break;
+            }
+            case ERROR_NOT_CONNECTED:
+            {
+                servo_status["errorCode"] = "SOCKET NOT CONNECTED";
+                break;
+            }
+            case ERROR_MAINTENANCE:
+            {
+                servo_status["errorCode"] = "SYSTEM IN MAINTENANCE MODE";
+                break;
+            }
+            case ERROR_EMERGENCY_STOP:
+            {
+                servo_status["errorCode"] = "EMERGENCY STOP";
+                break;
+            }
+            case ERROR_COVER_WRONG_POSITION:
+            {
+                servo_status["errorCode"] = "GREGORIAN COVER IN WRONG POSITION";
+                break;
+            }
+            case ERROR_CONFIG_ERROR:
+            {
+                servo_status["errorCode"] = "CONFIGURATION ERROR";
+                break;
+            }
+            case ERROR_COMMAND_ERROR:
+            {
+                servo_status["errorCode"] = "REMOTE COMMAND ERROR";
+                break;
+            }
+            case ERROR_SERVO_BLOCKED:
+            {
+                servo_status["errorCode"] = "MINOR SERVO IS BLOCKED";
+                break;
+            }
+            default: //case ERROR_DRIVE_CABINET:
+            {
+                servo_status["errorCode"] = "DRIVE CABINET ERROR";
+                break;
+            }
         }
+
+        servo_status["inUse"] = status.inUse;
+
+        switch(status.operativeMode)
+        {
+            case OPERATIVE_MODE_UNKNOWN:
+            {
+                servo_status["operativeMode"] = "UNKNOWN";
+                break;
+            }
+            case OPERATIVE_MODE_SETUP:
+            {
+                servo_status["operativeMode"] = "SETUP";
+                break;
+            }
+            case OPERATIVE_MODE_STOW:
+            {
+                servo_status["operativeMode"] = "STOW";
+                break;
+            }
+            case OPERATIVE_MODE_STOP:
+            {
+                servo_status["operativeMode"] = "STOP";
+                break;
+            }
+            case OPERATIVE_MODE_PRESET:
+            {
+                servo_status["operativeMode"] = "PRESET";
+                break;
+            }
+            default: //case OPERATIVE_MODE_PROGRAMTRACK:
+            {
+                servo_status["operativeMode"] = "PROGRAM TRACK";
+                break;
+            }
+        }
+
+        servo_status["axes"] = ZMQ::ZMQDictionary();
+
+        for(size_t i = 0; i < status.axesNames.length(); i++)
+        {
+            ZMQ::ZMQDictionary axis;
+            axis["currentPosition"] = status.currentPositions[i];
+            axis["commandedPosition"] = status.commandedPositions[i];
+            axis["userOffset"] = status.userOffsets[i];
+            axis["systemOffset"] = status.systemOffsets[i];
+
+            if(status.trackingErrors.length() == status.axesNames.length())
+            {
+                axis["trackingError"] = status.trackingErrors[i];
+            }
+
+            servo_status["axes"][(const char*)status.axesNames[i]] = axis;
+        }
+
+        if(status.trackingErrors.length() > 0)
+        {
+            servo_status["remainingTrajectoryPoints"] = status.remainingTrajectoryPoints;
+            servo_status["totalTrajectoryPoints"] = status.totalTrajectoryPoints;
+            servo_status["tracking"] = status.tracking;
+            servo_status["trajectoryID"] = status.trajectoryID;
+        }
+
+        m_zmqDictionary[name] = servo_status;
     }
+
+    m_zmqPublisher.publish(m_zmqDictionary);
 
     static TIMEVALUE lastEvent(0UL);
     static MinorServoDataBlock prvData = {0UL, false, false, false, false, Management::MNG_WARNING};

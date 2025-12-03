@@ -127,32 +127,30 @@ bool SRTProgramTrackMinorServoImpl::status()
     return status;
 }
 
-void SRTProgramTrackMinorServoImpl::updateZMQDictionary()
+SRTMinorServoZMQStatus* SRTProgramTrackMinorServoImpl::getSRTMinorServoZMQStatus(ACS::Time timestamp)
 {
-    SRTBaseMinorServoImpl::updateZMQDictionary();
+    AUTO_TRACE("SRTProgramTrackMinorServoImpl::getSRTMinorServoZMQStatus()");
 
-    m_zmqDictionary["remainingTrajectoryPoints"] = m_remaining_trajectory_points.load();
-    m_zmqDictionary["totalTrajectoryPoints"] = m_total_trajectory_points.load();
-    m_zmqDictionary["tracking"] = m_tracking.load() == Management::MNG_TRUE;
-    m_zmqDictionary["trajectoryID"] = m_trajectory_id.load();
+    SRTMinorServoZMQStatus* status = SRTBaseMinorServoImpl::getSRTMinorServoZMQStatus(timestamp);
+
+    status->remainingTrajectoryPoints = m_remaining_trajectory_points.load();
+    status->totalTrajectoryPoints = m_total_trajectory_points.load();
+    status->tracking = m_tracking.load() == Management::MNG_TRUE;
+    status->trajectoryID = m_trajectory_id.load();
+    status->trackingErrors.length(m_virtual_axes);
 
     for(size_t i = 0; i < m_virtual_axes; i++)
     {
-        std::string axis_name = m_virtual_axes_names[i];
-        axis_name = axis_name == "ROTATION" ? "RZ" : axis_name;
-        m_zmqDictionary["axes"][axis_name]["trackingError"] = m_tracking_error[i];
+        status->trackingErrors[i] = m_tracking_error[i];
     }
-}
 
-void SRTProgramTrackMinorServoImpl::publishData()
-{
-    updateZMQDictionary();
-
-    m_zmqPublisher.publish(ZMQ::ZMQDictionary{{ m_servo_name, m_zmqDictionary }});
+    return status;
 }
 
 bool SRTProgramTrackMinorServoImpl::setup(const char* configuration_name, CORBA::Boolean as_off)
 {
+    AUTO_TRACE("SRTProgramTrackMinorServoImpl::setup()");
+
     bool return_value = SRTBaseMinorServoImpl::setup(configuration_name, as_off);
 
     m_tracking_queue.clear();

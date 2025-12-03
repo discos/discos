@@ -186,5 +186,25 @@ module MinorServo
          */
         readonly attribute ACS::ROdoubleSeq virtual_offsets;
     };
+
+    struct SRTMinorServoZMQStatus {
+        ACS::stringSeq axesNames;
+        ACS::doubleSeq currentPositions;
+        ACS::doubleSeq commandedPositions;
+        ACS::doubleSeq userOffsets;
+        ACS::doubleSeq systemOffsets;
+        ACS::doubleSeq trackingErrors;
+        boolean blocked;
+        string currentSetup;
+        SRTMinorServoCabinetStatus driveCabinetStatus;
+        boolean enabled;
+        SRTMinorServoError errorCode;
+        boolean inUse;
+        SRTMinorServoOperativeMode operativeMode;
+        long remainingTrajectoryPoints;
+        long totalTrajectoryPoints;
+        boolean tracking;
+        long trajectoryID;
+    };
 };
 #endif

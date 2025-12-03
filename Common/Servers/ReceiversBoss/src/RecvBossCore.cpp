@@ -2001,7 +2001,7 @@ void CRecvBossCore::updateZMQDictionary()
 void CRecvBossCore::publishData() throw (ComponentErrors::NotificationChannelErrorExImpl)
 {
 	// Always publish ZMQ message
-	m_zmqPublisher.publish(ZMQ::ZMQDictionary{{ "boss", m_zmqDictionary }});
+	m_zmqPublisher.publish(m_zmqDictionary);
 
 	bool sendData;
 	static TIMEVALUE lastEvent(0.0L);

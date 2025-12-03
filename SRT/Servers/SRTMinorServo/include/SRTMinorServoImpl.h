@@ -25,11 +25,9 @@
 #include "MSDevIOs.h"
 #include "SRTMinorServoContainers.h"
 #include "SRTMinorServoCommon.h"
-#include "ZMQLibrary.hpp"
 
 
 using namespace MinorServo;
-namespace ZMQ = ZMQLibrary;
 
 /**
  * This class implements the base ACS::CharacteristicComponent CORBA interface for a SRTMinorServo component.
@@ -327,14 +325,9 @@ protected:
     static std::vector<double> getMotionConstant(SRTBaseMinorServoImpl& object, const std::string& constant);
 
     /**
-     * Update the ZMQ Dictionary
+     * Returns the SRTMinorServoZMQStatus object.
      */
-    void updateZMQDictionary();
-
-    /**
-     * Publish data over the ZMQ Publisher object
-     */
-    void publishData();
+    SRTMinorServoZMQStatus* getSRTMinorServoZMQStatus(ACS::Time timestamp);
 
 private:
     /**
@@ -552,16 +545,6 @@ private:
     const SRTMinorServoSocketConfiguration& m_socket_configuration;
 protected:
     /**
-     * ZMQ publisher object
-     */
-    ZMQ::ZMQPublisher m_zmqPublisher;
-
-    /**
-     * ZMQ Dictionary
-     */
-    ZMQ::ZMQDictionary m_zmqDictionary;
-
-    /**
      * Socket object.
      */
     SRTMinorServoSocket& m_socket;
@@ -644,14 +627,11 @@ public:
     bool status()                                                                               { return SRTBaseMinorServoImpl::status();                               }
 
     /**
-     * Publish data over the ZMQ Publisher object
-     */
-    void publishData()                                                                          { return SRTBaseMinorServoImpl::publishData();                          }
-
-    /**
      * Setup method definition. It simply calls the SRTBaseMinorServoImpl method.
      */
     bool setup(const char* configuration_name = "", CORBA::Boolean as_off = false)              { return SRTBaseMinorServoImpl::setup(configuration_name, as_off);      }
+
+    SRTMinorServoZMQStatus* getSRTMinorServoZMQStatus(ACS::Time timestamp)                      { return SRTBaseMinorServoImpl::getSRTMinorServoZMQStatus(timestamp);   }
 
     /**
      * Declaration of all the other inherited methods.
@@ -705,14 +685,9 @@ public:
     bool setup(const char* configuration_name = "", CORBA::Boolean as_off = false);
 
     /**
-     * Update the ZMQ Dictionary
+     * Returns the SRTMinorServoZMQStatus object.
      */
-    void updateZMQDictionary();
-
-    /**
-     * Publish data over the ZMQ Publisher object
-     */
-    void publishData();
+    SRTMinorServoZMQStatus* getSRTMinorServoZMQStatus(ACS::Time timestamp);
 
     /**
      * Declaration of all the other inherited methods.
