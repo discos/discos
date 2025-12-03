@@ -38,6 +38,8 @@ class MedicinaActiveSurfaceGUI : public QWidget, public Ui_MedicinaActiveSurface
         void setupAS();
         void startAS();
         void stowAS();
+        void onAS();
+        void offAS();
         void stopAS();
         void setallactuators();
         void setradius();

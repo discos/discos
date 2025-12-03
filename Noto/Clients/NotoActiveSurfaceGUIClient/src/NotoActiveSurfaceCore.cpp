@@ -8,6 +8,7 @@
 #include <NotoActiveSurfaceCore.h>
 
 // mask pattern for status 
+#define UNAV    0xFF000000
 #define MRUN    0x000080
 #define CAMM    0x000100
 #define ENBL    0x002000
@@ -58,6 +59,7 @@ void NotoActiveSurfaceCore::run(void)
 
     Management::ROTSystemStatus_var bossStatus_var;
     ActiveSurface::ROTASProfile_var asProfile_var;
+    ACS::ROstring_var asLUTFileName_var;
 
     while (monitor == true)
     {
@@ -71,10 +73,12 @@ void NotoActiveSurfaceCore::run(void)
         asProfile_var = tASBoss->pprofile();
         emit setGUIasProfileCode((int)asProfile_var->get_sync(completion.out()));
 
-        //ACS::longSeq_var asStatus;
-        CORBA::Long usdStatus;
-        //tASBoss->asStatus4GUIClient(asStatus);
-        //tASBoss->usdStatus4GUIClient(asStatus);
+        asLUTFileName_var = tASBoss->LUT_filename();
+        emit setGUIasLUTFileName(QString(asLUTFileName_var->get_sync(completion.out())));
+
+        // This will have a length of 244
+        ACS::longSeq_var asStatus;
+        tASBoss->asStatus4GUIClient(asStatus);
 
         for(unsigned int actuator = 1, i, l; actuator < 269; actuator++, l++)
         {
@@ -99,47 +103,31 @@ void NotoActiveSurfaceCore::run(void)
                 CIRATools::Wait(100000); //100ms
             }
 
-            //CORBA::Long status;
-            //if (i > 1)
-            //    status = asStatus[actuator - 1 - 24];
 
-            bool active;
-            try {
-                tASBoss->usdStatus4GUIClient(i, l, usdStatus);
-                if ((usdStatus & ENBL) == 0) 
-                    active = false;
-                else
-                    active = true;
-                }
-                catch (ComponentErrors::ComponentNotActiveExImpl& ex) {
-                    active = false;
-                    ex.log(LM_DEBUG);
-                }
-                catch (ComponentErrors::ComponentErrorsExImpl& ex) {
-                    active = false;
-                    ex.log(LM_DEBUG);
-                }
-            catch (CORBA::SystemException& sysEx) {
-                active = false;
-                _EXCPT(ClientErrors::CORBAProblemExImpl,impl,"NotoActiveSurfaceGUIClient::NotoActiveSurfaceCore::setactuator()");
-                impl.setName(sysEx._name());
-                impl.setMinor(sysEx.minor());
-                impl.log();
-            }
-            catch (...) {
-                active = false;
-                _EXCPT(ClientErrors::UnknownExImpl,impl,"NotoActiveSurfaceGUIClient::NotoActiveSurfaceCore::setactuator()");
-                impl.log();
-            }
-            if (i == 1)
+            bool active, statusColor;
+
+            if (i == 1) { // ONLY FOR NOTO
                 active = true;
-            emit setGUIActuatorColor(i, l, active, true);
-        }
+                statusColor = false;
+            }
+            else {
+                CORBA::Long status = asStatus[actuator - 25]; //we need to normalize to asStatus.length() range
+                if(status == UNAV)
+                    active = false;             // red
+                else
+                {
+                    active = true;
 
-        /*CIRATools::getTime(clock);
-        ACS::Time t1 = clock.value().value;
-        int elapsed = (t1 - t0) / 10;
-        CIRATools::Wait(std::max(1000000 - elapsed, 0)); //1 sec*/
+                    if((status & ENBL) == 0 || (status & CAL) == 0)
+                    {
+                        statusColor = true;     // yellow
+                    }
+                    else
+                        statusColor = false;    // green
+                }
+            }
+            emit setGUIActuatorColor(i, l, active, statusColor, true);
+        }
     }
 }
 
@@ -153,7 +141,8 @@ void NotoActiveSurfaceCore::setactuator(int circle, int actuator)
     CORBA::Long acc_val;
     CORBA::Long delay_val;
     CORBA::Long status;
-
+    bool active;
+    bool statusColor;
 
     /*
     ActuatorNumber_str = QString("%1_%2").arg(circle).arg(actuator);
@@ -186,41 +175,51 @@ void NotoActiveSurfaceCore::setactuator(int circle, int actuator)
 
     try {
         tASBoss->usdStatus4GUIClient(circle, actuator, status);
+        active = true;
+    }
+    catch (ComponentErrors::ComponentNotActiveExImpl& ex) {
+        active = false;
+        ex.log(LM_DEBUG);
     }
     catch (ComponentErrors::ComponentErrorsExImpl& ex) {
         //clearactuatorslineedit();
+        active = false;
         ex.log(LM_DEBUG);
     }
     catch (CORBA::SystemException& sysEx) {
+        active = false;
         _EXCPT(ClientErrors::CORBAProblemExImpl,impl,"NotoActiveSurfaceGUIClient::NotoActiveSurfaceCore::setactuator()");
         impl.setName(sysEx._name());
         impl.setMinor(sysEx.minor());
         impl.log();
     }
     catch (...) {
+        active = false;
         _EXCPT(ClientErrors::UnknownExImpl,impl,"NotoActiveSurfaceGUIClient::NotoActiveSurfaceCore::setactuator()");
         impl.log();
     }
 
-    if ((status & ENBL) == 0) {
+    if (active == true)
+    {
+        //if ((status & ENBL) == 0) {
         /*qApp->lock();
         tGUI->ActuatorStatusEnblLabel->clear();
         qApp->unlock();
         qApp->lock();
         tGUI->ActuatorStatusEnblLabel->setText("UNABLED");
         qApp->unlock();*/
-        ActuatorStatusEnblLabelCode = -1;
-        emit setGUIActuatorStatusEnblLabel();
-    }
-    else {
+        //ActuatorStatusEnblLabelCode = -1;
+        //emit setGUIActuatorStatusEnblLabel();
+        //}
+        //else {
         /*qApp->lock();
         tGUI->ActuatorStatusEnblLabel->clear();
         qApp->unlock();
         qApp->lock();
         tGUI->ActuatorStatusEnblLabel->setText("ENABLED");
         qApp->unlock();*/
-        ActuatorStatusEnblLabelCode = 1;
-        emit setGUIActuatorStatusEnblLabel();
+        //ActuatorStatusEnblLabelCode = 1;
+        //emit setGUIActuatorStatusEnblLabel();
         try {
             tASBoss->setActuator(circle, actuator, actPos_val, cmdPos_val, Fmin_val, Fmax_val, acc_val, delay_val);
             ActuatorActualPosition_str.setNum(actPos_val);
@@ -260,7 +259,7 @@ void NotoActiveSurfaceCore::setactuator(int circle, int actuator)
             //ActuatorStatus_color.setRgb( 0, 170, 0 );
             //setactuatorcolor(circle, actuator, ActuatorStatus_color);
             //theCircle = i; theActuator = l;
-            emit setGUIActuatorColor(circle, actuator, true, false);
+            //emit setGUIActuatorColor(circle, actuator, active, statusColor, false);
 
             //setactuatorstatuslabels(circle,actuator);
             //The status has been updated right before this if-else section, there is no need to ask it again
@@ -276,7 +275,8 @@ void NotoActiveSurfaceCore::setactuator(int circle, int actuator)
                 //tGUI->ActuatorStatusRunLabel->clear();
                 //tGUI->ActuatorStatusRunLabel->setText("RUNNING");
             }
-            if ((status & ENBL) == 0) {
+            ActuatorStatusEnblLabelCode = 1;
+            /*if ((status & ENBL) == 0) {
                 ActuatorStatusEnblLabelCode = -1;
                 //tGUI->ActuatorStatusEnblLabel->clear();
                 //tGUI->ActuatorStatusEnblLabel->setText("UNABLED");
@@ -285,7 +285,7 @@ void NotoActiveSurfaceCore::setactuator(int circle, int actuator)
                 ActuatorStatusEnblLabelCode = 1;
                 //tGUI->ActuatorStatusEnblLabel->clear();
                 //tGUI->ActuatorStatusEnblLabel->setText("ENABLED");
-            }
+            }*/
             if ((status & CAMM) == 0) {
                 ActuatorStatusCammLabelCode = -1;
                 //tGUI->ActuatorStatusCammLabel->clear();
@@ -306,33 +306,53 @@ void NotoActiveSurfaceCore::setactuator(int circle, int actuator)
                 //tGUI->ActuatorStatusLoopLabel->clear();
                 //tGUI->ActuatorStatusLoopLabel->setText("LOOP");
             }
-            if ((status & CAL) == 0) {
+            if ((status & CAL) == 0)
+            {
                 ActuatorStatusCalLabelCode = -1;
+                statusColor = true;
                 //tGUI->ActuatorStatusCalLabel->clear();
                 //tGUI->ActuatorStatusCalLabel->setText("UNCALIBRATED");
+		        //printf("uncalibrated\n");
+		        //emit setGUIActuatorColor(circle, actuator, false, false);
             }
             else {
                 ActuatorStatusCalLabelCode = 1;
+                statusColor = false;
                 //tGUI->ActuatorStatusCalLabel->clear();
                 //tGUI->ActuatorStatusCalLabel->setText("CALIBRATED");
             }
-            emit setGUIActuatorStatusLabels();
+            //emit setGUIActuatorStatusLabels();
+            //emit setGUIActuatorColor(circle, actuator, active, statusColor, false);
         }
         catch (ComponentErrors::ComponentErrorsExImpl& ex) {
             // clearactuatorslineedit();
+            active = false;
             ex.log(LM_DEBUG);
         }
         catch (CORBA::SystemException& sysEx) {
+            active = false;
             _EXCPT(ClientErrors::CORBAProblemExImpl,impl,"NotoActiveSurfaceGUIClient::NotoActiveSurfaceCore::setActuator()");
             impl.setName(sysEx._name());
             impl.setMinor(sysEx.minor());
             impl.log();
         }
         catch (...) {
+            active = false;
             _EXCPT(ClientErrors::UnknownExImpl,impl,"NotoActiveSurfaceGUIClient::NotoActiveSurfaceCore::setActuator()");
             impl.log();
         }
     }
+    else {
+        active = false;
+        statusColor = true;
+        ActuatorStatusRunLabelCode = 0;
+        ActuatorStatusEnblLabelCode = -1;
+        ActuatorStatusCammLabelCode = 0;
+        ActuatorStatusLoopLabelCode = 0;
+        ActuatorStatusCalLabelCode = 0;
+    }
+    emit setGUIActuatorStatusLabels();
+    emit setGUIActuatorColor(circle, actuator, active, statusColor, false);
 }
 
 
@@ -697,8 +717,7 @@ void NotoActiveSurfaceCore::move(int circle, int actuator, int radius, long incr
         setactuator(circle,actuator);
 }
 
-/*
-void NotoActiveSurfaceCore::setProfile(long int profile)
+/*void NotoActiveSurfaceCore::setProfile(long int profile)
 {
     if (profile == 0)
         tASBoss->setProfile(ActiveSurface::AS_SHAPED);
@@ -708,8 +727,7 @@ void NotoActiveSurfaceCore::setProfile(long int profile)
         tASBoss->setProfile(ActiveSurface::AS_PARABOLIC);
     if (profile == 3)
         tASBoss->setProfile(ActiveSurface::AS_PARABOLIC_FIXED);
-}
-*/
+}*/
 
 void NotoActiveSurfaceCore::correction(int circle, int actuator, int radius, double correction)
 {
