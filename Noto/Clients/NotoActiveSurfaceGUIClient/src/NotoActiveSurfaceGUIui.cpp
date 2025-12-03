@@ -12,7 +12,7 @@ NotoActiveSurfaceGUI::NotoActiveSurfaceGUI(QWidget *parent) : QWidget(parent)
 {
     setupUi(this);
 
-    QObject::connect(&myNotoActiveSurfaceCore, SIGNAL(setGUIActuatorColor(int,int,bool,bool)), this, SLOT(changeGUIActuatorColor(int,int,bool,bool)));
+    QObject::connect(&myNotoActiveSurfaceCore, SIGNAL(setGUIActuatorColor(int,int,bool,bool,bool)), this, SLOT(changeGUIActuatorColor(int,int,bool,bool,bool)));
     QObject::connect(&myNotoActiveSurfaceCore, SIGNAL(setGUIAllActuators(bool)), this, SLOT(changeGUIAllActuators(bool)));
     QObject::connect(&myNotoActiveSurfaceCore, SIGNAL(setGUIcircleORradius(bool)), this, SLOT(changeGUIcircleORradius(bool)));
     QObject::connect(&myNotoActiveSurfaceCore, SIGNAL(setGUIActuator(bool)), this, SLOT(changeGUIActuator(bool)));
@@ -21,6 +21,7 @@ NotoActiveSurfaceGUI::NotoActiveSurfaceGUI(QWidget *parent) : QWidget(parent)
     QObject::connect(&myNotoActiveSurfaceCore, SIGNAL(setGUIActuatorStatusLabels()), this, SLOT(changeGUIActuatorStatusLabels()));
     QObject::connect(&myNotoActiveSurfaceCore, SIGNAL(setGUIasStatusCode(int)), this, SLOT(changeGUIasStatusCode(int)));
     QObject::connect(&myNotoActiveSurfaceCore, SIGNAL(setGUIasProfileCode(int)), this, SLOT(changeGUIasProfileCode(int)));
+    QObject::connect(&myNotoActiveSurfaceCore, SIGNAL(setGUIasLUTFileName(QString)), this, SLOT(changeGUIasLUTFileName(QString)));
 
 #ifdef MANAGEMENT
     buttonGroup1->setEnabled(true);
@@ -493,6 +494,24 @@ void NotoActiveSurfaceGUI::startAS()
     StatuslineEdit_2->setText(QApplication::translate("NotoActiveSurfaceGUI", str.c_str(), 0, QApplication::UnicodeUTF8));
 }
 
+void NotoActiveSurfaceGUI::onAS()
+{
+    std::string str;
+    setallactuators();
+    myNotoActiveSurfaceCore.enableAutoUpdate();
+    str = "ON";
+    StatuslineEdit_2->setText(QApplication::translate("NotoActiveSurfaceGUI", str.c_str(), 0, QApplication::UnicodeUTF8));
+}
+
+void NotoActiveSurfaceGUI::offAS()
+{
+    std::string str;
+    setallactuators();
+    myNotoActiveSurfaceCore.disableAutoUpdate();
+    str = "OFF";
+    StatuslineEdit_2->setText(QApplication::translate("NotoActiveSurfaceGUI", str.c_str(), 0, QApplication::UnicodeUTF8));
+}
+
 void NotoActiveSurfaceGUI::stowAS()
 {
     std::string str;
@@ -537,7 +556,7 @@ void NotoActiveSurfaceGUI::recoverUSD()
     }
 }
 
-void NotoActiveSurfaceGUI::changeGUIActuatorColor(int tcircle, int tactuator, bool active, bool fromRun)
+void NotoActiveSurfaceGUI::changeGUIActuatorColor(int tcircle, int tactuator, bool active, bool statusColor, bool fromRun)
 {
     if (!fromRun)
     {
@@ -553,13 +572,17 @@ void NotoActiveSurfaceGUI::changeGUIActuatorColor(int tcircle, int tactuator, bo
 
     QPushButton* ActuatorButton = this->findChild<QPushButton*>(ActuatorButtonName.str().c_str());
 
-    if(active)
+    if(active == true && statusColor == false) // attivo e calibrato
     {
-        ActuatorButton->setStyleSheet("background-color: rgb(85, 255, 0)");
+        ActuatorButton->setStyleSheet("background-color: rgb(85, 255, 0)"); // verde
+    }
+    else if (active == true && statusColor == true) // attivo e scalibrato
+    {
+        ActuatorButton->setStyleSheet("background-color: rgb(255, 255, 0)"); // giallo
     }
     else
     {
-        ActuatorButton->setStyleSheet("background-color: rgb(255, 0, 0)");
+        ActuatorButton->setStyleSheet("background-color: rgb(255, 0, 0)"); // rosso
     }
 }
 
@@ -723,10 +746,18 @@ void NotoActiveSurfaceGUI::changeGUIasProfileCode(int asProfileCode)
     StatuslineEdit_2->setText(QApplication::translate("NotoActiveSurfaceGUI", asProfileString.c_str(), 0, QApplication::UnicodeUTF8));
 }
 
+void NotoActiveSurfaceGUI::changeGUIasLUTFileName(QString filename)
+{
+    LUTLabelFileName->setText(filename);
+}
+
 void NotoActiveSurfaceGUI::changeGUIActuatorStatusLabels()
 {
     ActuatorStatusRunLabel->clear();
     switch (myNotoActiveSurfaceCore.ActuatorStatusRunLabelCode) {
+        case (0):
+            ActuatorStatusRunLabel->setText("");
+            break;
         case (-1):
             ActuatorStatusRunLabel->setText("STOPPED");
             break;
@@ -747,6 +778,9 @@ void NotoActiveSurfaceGUI::changeGUIActuatorStatusLabels()
 
     ActuatorStatusCammLabel->clear();
     switch (myNotoActiveSurfaceCore.ActuatorStatusCammLabelCode) {
+        case (0):
+            ActuatorStatusCammLabel->setText("");
+            break;
         case (-1):
             ActuatorStatusCammLabel->setText("NO CAMM");
             break;
@@ -757,6 +791,9 @@ void NotoActiveSurfaceGUI::changeGUIActuatorStatusLabels()
 
     ActuatorStatusLoopLabel->clear();
     switch (myNotoActiveSurfaceCore.ActuatorStatusLoopLabelCode) {
+        case (0):
+            ActuatorStatusLoopLabel->setText("");
+            break;
         case (-1):
             ActuatorStatusLoopLabel->setText("NO LOOP");
             break;
@@ -767,6 +804,9 @@ void NotoActiveSurfaceGUI::changeGUIActuatorStatusLabels()
      
     ActuatorStatusCalLabel->clear();
     switch (myNotoActiveSurfaceCore.ActuatorStatusCalLabelCode) {
+        case (0):
+            ActuatorStatusCalLabel->setText("");
+            break;
         case (-1):
             ActuatorStatusCalLabel->setText("UNCALIBRATED");
             break;

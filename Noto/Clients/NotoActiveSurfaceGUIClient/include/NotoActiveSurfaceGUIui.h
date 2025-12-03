@@ -38,6 +38,8 @@ class NotoActiveSurfaceGUI : public QWidget, public Ui_NotoActiveSurfaceGUI
         void setupAS();
         void startAS();
         void stowAS();
+        void onAS();
+        void offAS();
         void stopAS();
         void setallactuators();
         void setradius();
@@ -45,7 +47,7 @@ class NotoActiveSurfaceGUI : public QWidget, public Ui_NotoActiveSurfaceGUI
         void setactuator();
 
     private slots:
-        void changeGUIActuatorColor(int, int, bool, bool);
+        void changeGUIActuatorColor(int, int, bool, bool, bool);
         void changeGUIAllActuators(bool callfromfunction = false);
         void changeGUIcircleORradius(bool callfromfunction = false);
         void changeGUIActuator(bool callfromfunction = false);
@@ -54,6 +56,7 @@ class NotoActiveSurfaceGUI : public QWidget, public Ui_NotoActiveSurfaceGUI
         void changeGUIActuatorStatusLabels();
         void changeGUIasStatusCode(int);
         void changeGUIasProfileCode(int);
+	void changeGUIasLUTFileName(QString);
 
     private:
         NotoActiveSurfaceCore myNotoActiveSurfaceCore;
