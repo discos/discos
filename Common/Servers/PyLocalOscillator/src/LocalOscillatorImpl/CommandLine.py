@@ -8,9 +8,9 @@ QUERYERROR="SYST:ERR? \n"
 FREQCMD="FREQ "
 QUERYFREQ="FREQ?;"+QUERYERROR
 QUERYPOWER="POW?\n"
-RFONCMD="OUTP:STAT ON"
-RFOFFCMD="OUTP:STAT OFF"
-QUERYRF="OUTP:STAT?"
+RFONCMD="OUTP:STAT ON\n"
+RFOFFCMD="OUTP:STAT OFF\n"
+QUERYRF="OUTP:STAT?\n"
 FREQUNIT=" MHZ\n"
 POWERUNIT=" dBM\n"
 
@@ -24,9 +24,7 @@ class CommandLineError(Exception):
 
 class CommandLine:
    
-    
    def __init__(self):
-     
        try: 
           self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
        except socket.error as msg:
@@ -42,8 +40,6 @@ class CommandLine:
       Clear query error
       
       '''
-        
-   
       try:
          self.sock.connect((ip,port))
          msg ='OK' 
@@ -55,21 +51,15 @@ class CommandLine:
          return msg
    
    def init(self,reply):
-     
      pass
    
    def setPower(self,power):
        POWERCMD="POWER "
        cmd= POWERCMD + str(power) + POWERUNIT
- 
        try:
-
            err=self.sendCmd(cmd)
-             
            msg=self.query(QUERYERROR)
-            
            return msg,err
-           
        except socket.error as msg:
           print("connect error: " ,msg)
           return msg,False
@@ -79,7 +69,6 @@ class CommandLine:
        QUERYPOWER="POWER?;SYST:ERR?\n"
        cmd=QUERYPOWER
        try:
-
           msg=self.query(cmd)
           commands=msg.split(';')
           val=int(commands[0])# unit is MHZ,
@@ -89,7 +78,6 @@ class CommandLine:
                 print("exception",err_msg)
                 raise CommandLineError(err_msg)   
           return err_msg,val
-   
        except socket.error as msg:
           print("connect error: " ,msg)
           return msg,-1
@@ -98,30 +86,22 @@ class CommandLine:
           raise
        except ValueError as msg:
           raise CommandLineError(msg)   
-   
      
    def setFrequency(self,freq):
-
        cmd= FREQCMD + str(freq) + FREQUNIT
  
        try:
-
            err=self.sendCmd(cmd)
-             
            msg=self.query(QUERYERROR)
-            
            return msg,err
-           
        except socket.error as msg:
           print("connect error: " ,msg)
           return msg,False
           self.sock=None
    
    def getFrequency(self):
-         
         cmd= QUERYFREQ
         try:
-           
           msg=self.query(cmd)
           commands=msg.split(';')
           val=int(commands[0])/1e6 # unit is MHZ,
@@ -158,16 +138,40 @@ class CommandLine:
           return msg
           
    def rfOn(self):
-     
-       pass
+       cmd= RFONCMD
+       try:
+           err=self.sendCmd(cmd)
+           msg=self.query(QUERYERROR)
+           return msg,err
+       except socket.error as msg:
+          print("connect error: " ,msg)
+          return msg,False
+          self.sock=None
    
    def rfOff(self):
-      
-      
-      pass
+       cmd= RFOFFCMD
+       try:
+           err=self.sendCmd(cmd)
+           msg=self.query(QUERYERROR)
+           return msg,err
+       except socket.error as msg:
+          print("connect error: " ,msg)
+          return msg,False
+          self.sock=None
+
+   def isRfOn(self):
+       cmd=QUERYRF
+       try:
+           return bool(int(self.query(cmd).strip()))
+       except socket.error as msg:
+          print("connect error: " ,msg)
+          self.sock=None
+          raise msg
+       except:
+          print("wrong answer")
+          raise
    
    def sendCmd(self,msg):
-     
        try:
            self.sock.sendall(msg.encode())
            return True
@@ -179,7 +183,6 @@ class CommandLine:
           return False
    
    def close(self):
-     
        self.sock.close()
 
    def query(self,cmd):
@@ -193,8 +196,3 @@ class CommandLine:
           print("connect error: " ,msg)
           raise
           return msg
-   
-       
-       
-      
-     

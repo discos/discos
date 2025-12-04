@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+    - Author: Giuseppe Carboni
+    - History:
+    - 14-03-23 Created
+-->
+
+<SRTMinorServoCoefficientsTable xmlns="urn:schemas-cosylab-com:SRTMinorServoCoefficients:1.0" 
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <!-- n stands for name, a stands for axis, p stands for polynomial -->
+
+    <configuration><n>CCG</n>           <a>ROTATION</a><p>-88.70659   </p></configuration>
+
+    <configuration><n>KKG</n>           <a>ROTATION</a><p>-159.8899   </p></configuration>
+    <configuration><n>KKG_METROLOGY</n> <a>ROTATION</a><p>-159.8899   </p></configuration>
+
+    <configuration><n>WWG</n>           <a>ROTATION</a><p>90.971610   </p></configuration>
+                                      
+    <configuration><n>QQG</n>           <a>ROTATION</a><p>162.771     </p></configuration>
+                                      
+    <configuration><n>KQW</n>           <a>ROTATION</a><p>55.373967   </p></configuration>
+                                      
+    <configuration><n>MISTRAL</n>       <a>ROTATION</a><p>-51.821170  </p></configuration>
+                                      
+    <configuration><n>CABINET</n>       <a>ROTATION</a><p>40          </p></configuration>
+
+    <!-- BWG configurations are not necessary since the SETUP command takes care of positioning the GFR to 0 -->
+
+</SRTMinorServoCoefficientsTable>

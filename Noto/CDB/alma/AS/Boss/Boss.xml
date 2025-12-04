@@ -1,19 +1,22 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
-<!--
-   - History:
--->
-<NotoActiveSurfaceBoss
-	xmlns="urn:schemas-cosylab-com:NotoActiveSurfaceBoss:1.0"
-	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
-	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	WatchingThreadTime="200000"
-	WorkingThreadTime="200000"
-	profile="1"
-	IPAddress="192.167.187.92"
-	Port="5001">
+<ActiveSurfaceBoss xmlns="urn:schemas-cosylab-com:ActiveSurfaceBoss:1.0"
+                   xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+                   xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   WatchingThreadTime="200000"
+                   WorkingThreadTime="500000"
+                   RepetitionCacheTime="2000000"
+                   RepetitionExpireTime="5000000"
+                   sectors="4"
+                   circles="7"
+                   LANs="48"
+                   lastUSD="244"
+                   actuatorsInCircle="0,0,48,48,48,48,48,4"
+                   acceptedProfiles="2,3,4"
+                   profile="4">
 	<status />
 	<enabled />
 	<pprofile />
 	<tracking />
-</NotoActiveSurfaceBoss>
+    <LUT_filename />
+</ActiveSurfaceBoss>

@@ -26,12 +26,16 @@
 
 <AvailableReceiver Code="CCB" Derotator="false" Component="RECEIVERS/SRT7GHzReceiver"/>
 
-<AvailableReceiver Code="KKG" Derotator="true" Component="RECEIVERS/SRTKBandMFReceiver"/>
+<AvailableReceiver Code="CCG" Derotator="false" Component="RECEIVERS/SRT5GHzReceiver"/>
+
+<AvailableReceiver Code="KKG" Derotator="true"  Component="RECEIVERS/SRTKBandMFReceiver"/>
 
 <AvailableReceiver Code="LLP" Derotator="false" Component="RECEIVERS/SRTLPBandReceiver"/>
 
 <AvailableReceiver Code="PPP" Derotator="false" Component="RECEIVERS/SRTLPBandReceiver"/>
 
 <AvailableReceiver Code="PLP" Derotator="false" Component="RECEIVERS/SRTLPBandReceiver"/>
+
+<AvailableReceiver Code="KQW" Derotator="false" Component="RECEIVERS/KQWBandReceiver"/>
 
 </ReceiversBoss>

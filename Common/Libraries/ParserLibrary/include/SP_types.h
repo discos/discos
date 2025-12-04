@@ -14,49 +14,25 @@
 #ifndef _SP_TYPES_H_
 #define _SP_TYPES_H_
 
+#include <Cplusplus11Helper.h>
+
 #include <String.h>
+C11_IGNORE_WARNING_PUSH
+C11_IGNORE_WARNING("-Wdeprecated-declarations")
+C11_IGNORE_WARNING("-Wmisleading-indentation")
+C11_IGNORE_WARNING("-Wcatch-value=")
 #include <ParserErrors.h>
+#include <acstimeEpochHelper.h>
+#include <IRATools.h>
+C11_IGNORE_WARNING_POP
 #include <Definitions.h>
 #include <slamac.h>
 #include <slalib.h>
 #include <math.h>
-#include <acstimeEpochHelper.h>
-#include <IRATools.h>
+
 #include "SP_typeConversion.h"
 
-#define _SP_JOLLYCHARACTER '*'
-#define _SP_JOLLYCHARACTER_REPLACEMENT "-1"
-
 namespace SimpleParser {
-
-#define _SP_WILDCARD_CLASS(NAME,REPLACE) \
-class NAME { \
-public: \
-	static char *replace(const char *str) { \
-		if (str[0]==_SP_JOLLYCHARACTER) { \
-			char * out=new char[strlen(REPLACE)+1]; \
-			strcpy(out,REPLACE); \
-			return out; \
-		} \
-		else { \
-			char *tmp=new char[strlen(str)+1]; \
-			strcpy(tmp,str); \
-			return tmp; \
-		} \
-	} \
-}; \
-
-_SP_WILDCARD_CLASS(_default_wildcard,_SP_JOLLYCHARACTER_REPLACEMENT);
-
-class _no_wildcard
-{
-public:
-	static char *replace(const char *str) {
-		char *tmp=new char[strlen(str)+1];
-		strcpy(tmp,str);
-		return tmp;
-	}
-};
 
 /**
  * This is the base class for all types that are known to the parser. New types can be easily added, just providing the converter class.
@@ -75,7 +51,10 @@ public:
 		m_val=bt.m_val;
 	}
 	basic_type(const T& val):  m_strVal(NULL ) { m_strVal=m_conv.valToStr(val); m_val=val; }
-	basic_type(const char *str) throw (ParserErrors::BadTypeFormatExImpl): m_strVal(NULL) {
+	/*    
+    * @throw ParserErrors::BadTypeFormatExImpl
+   */ 
+	basic_type(const char *str) : m_strVal(NULL) {
 		clone(str);
 		try  {
 			convert(); // check the string contains proper value
@@ -111,7 +90,7 @@ public:
 	 * Initializes the type starting from a string.
 	 * @throw  ParserErrors::BadTypeFormatExImpl if the string cannot be converted into the specific type (@sa <i>strToVal()</i>
 	 */
-	virtual const basic_type<T,CONVERTER,WILDCARD>& operator =(const char * str) throw (ParserErrors::BadTypeFormatExImpl) {
+	virtual const basic_type<T,CONVERTER,WILDCARD>& operator =(const char * str) {
 		clone(str);
 		convert();
 		return *this;
@@ -143,7 +122,10 @@ protected:
 		strcpy(m_strVal,src);
 	}
 private:
-	void convert() throw (ParserErrors::BadTypeFormatExImpl) {
+	/*    
+    * @throw ParserErrors::BadTypeFormatExImpl
+   */ 
+	void convert() {
 		char *str=WILDCARD::replace(m_strVal);
 		try {
 			m_val=m_conv.strToVal(str);
@@ -188,7 +170,10 @@ public:
         	string_type::clone(bt.m_val);
             return *this;
         }
-        virtual const string_type& operator =(const char* str) throw (ParserErrors::BadTypeFormatExImpl) {
+        	/*    
+    		* @throw ParserErrors::BadTypeFormatExImpl
+   		*/ 
+        virtual const string_type& operator =(const char* str) {
         	string_type::clone(str);
             return *this;
         }
@@ -231,7 +216,10 @@ public:
 	enum_type() : basic_type<ENUM,ENUM_CONV,WILDCARD>() {}
 	enum_type(const enum_type& bt): basic_type<ENUM,ENUM_CONV,WILDCARD>(bt)  { }
 	enum_type(const ENUM& val): basic_type<ENUM,ENUM_CONV,WILDCARD>(val) {}
-	enum_type(const char *str) throw (ParserErrors::BadTypeFormatExImpl) : basic_type<ENUM,ENUM_CONV,WILDCARD>(str) {}
+	/*    
+    * @throw ParserErrors::BadTypeFormatExImpl
+   */ 
+	enum_type(const char *str) : basic_type<ENUM,ENUM_CONV,WILDCARD>(str) {}
 	virtual ~enum_type() { }
 	using basic_type<ENUM,ENUM_CONV,WILDCARD>::operator =;
 };
@@ -245,7 +233,10 @@ public:
 	angle_type() : basic_type<double,angle_converter<OUT>, WILDCARD>() {}
 	angle_type(const angle_type& bt): basic_type<double,angle_converter<OUT>, WILDCARD>(bt)  { }
 	angle_type(const double& val): basic_type<double,angle_converter<OUT>, WILDCARD>(val) {}
-	angle_type(const char *str)  throw (ParserErrors::BadTypeFormatExImpl) : basic_type<double,angle_converter<OUT>, WILDCARD>(str) {}
+	/*    
+    * @throw ParserErrors::BadTypeFormatExImpl
+   */ 
+	angle_type(const char *str) : basic_type<double,angle_converter<OUT>, WILDCARD>(str) {}
 	virtual ~angle_type() { }
 	using basic_type<double,angle_converter<OUT>,WILDCARD>::operator =;
 };
@@ -259,7 +250,10 @@ public:
 	angleOffset_type() : basic_type<double,angleOffset_converter<OUT>,WILDCARD>() {}
 	angleOffset_type(const angleOffset_type& bt): basic_type<double,angleOffset_converter<OUT>,WILDCARD>(bt)  { }
 	angleOffset_type(const double& val): basic_type<double,angleOffset_converter<OUT>,WILDCARD>(val) {}
-	angleOffset_type(const char *str)  throw (ParserErrors::BadTypeFormatExImpl) : basic_type<double,angleOffset_converter<OUT>,WILDCARD>(str) {	}
+	/*    
+    * @throw ParserErrors::BadTypeFormatExImpl
+   */ 
+	angleOffset_type(const char *str) : basic_type<double,angleOffset_converter<OUT>,WILDCARD>(str) {	}
 	virtual ~angleOffset_type() { }
 	using basic_type<double,angleOffset_converter<OUT>,WILDCARD>::operator =;
 };
@@ -275,7 +269,10 @@ public:
 	declination_type() : basic_type<double,declination_converter<OUT,RANGECHECK>, WILDCARD>() {}
 	declination_type(const declination_type& bt): basic_type<double,declination_converter<OUT,RANGECHECK>, WILDCARD>(bt)  { }
 	declination_type(const double& val): basic_type<double,declination_converter<OUT,RANGECHECK>, WILDCARD>(val) {}
-	declination_type(const char *str)  throw (ParserErrors::BadTypeFormatExImpl) : basic_type<double,declination_converter<OUT,RANGECHECK>, WILDCARD>(str) {}
+	/*    
+    * @throw ParserErrors::BadTypeFormatExImpl
+   */ 
+	declination_type(const char *str) : basic_type<double,declination_converter<OUT,RANGECHECK>, WILDCARD>(str) {}
 	virtual ~declination_type() { }
 	using basic_type<double,declination_converter<OUT,RANGECHECK>, WILDCARD>::operator =;
 };
@@ -291,7 +288,10 @@ public:
 	rightAscension_type() : basic_type<double,rightAscension_converter<OUT,RANGECHECK>, WILDCARD>() {}
 	rightAscension_type(const rightAscension_type& bt): basic_type<double,rightAscension_converter<OUT,RANGECHECK>, WILDCARD>(bt)  { }
 	rightAscension_type(const double& val): basic_type<double,rightAscension_converter<OUT,RANGECHECK>, WILDCARD>(val) {}
-	rightAscension_type(const char *str)  throw (ParserErrors::BadTypeFormatExImpl) : basic_type<double,rightAscension_converter<OUT,RANGECHECK>, WILDCARD>(str) {}
+	/*    
+    * @throw ParserErrors::BadTypeFormatExImpl
+   */ 	
+	rightAscension_type(const char *str) : basic_type<double,rightAscension_converter<OUT,RANGECHECK>, WILDCARD>(str) {}
 	virtual ~rightAscension_type() { }
 	using basic_type<double,rightAscension_converter<OUT,RANGECHECK>, WILDCARD>::operator =;
 };
@@ -307,7 +307,10 @@ public:
 	azimuth_type() : basic_type<double,azimuth_converter<OUT,RANGECHECK>,WILDCARD >() {}
 	azimuth_type(const azimuth_type& bt): basic_type<double,azimuth_converter<OUT,RANGECHECK>,WILDCARD >(bt)  { }
 	azimuth_type(const double& val): basic_type<double,azimuth_converter<OUT,RANGECHECK>,WILDCARD >(val) {}
-	azimuth_type(const char *str)  throw (ParserErrors::BadTypeFormatExImpl) : basic_type<double,azimuth_converter<OUT,RANGECHECK>,WILDCARD >(str) {	}
+	/*    
+    * @throw ParserErrors::BadTypeFormatExImpl
+   */ 
+	azimuth_type(const char *str) : basic_type<double,azimuth_converter<OUT,RANGECHECK>,WILDCARD >(str) {	}
 	virtual ~azimuth_type() { }
 	using basic_type<double,azimuth_converter<OUT,RANGECHECK>,WILDCARD >::operator =;
 };
@@ -323,7 +326,10 @@ public:
 	elevation_type() : basic_type<double,elevation_converter<OUT,RANGECHECK>,WILDCARD>() {}
 	elevation_type(const elevation_type& bt): basic_type<double,elevation_converter<OUT,RANGECHECK>,WILDCARD>(bt)  { }
 	elevation_type(const double& val): basic_type<double,elevation_converter<OUT,RANGECHECK>,WILDCARD>(val) {}
-	elevation_type(const char *str)  throw (ParserErrors::BadTypeFormatExImpl) : basic_type<double,elevation_converter<OUT,RANGECHECK>,WILDCARD>(str) {}
+	/*    
+    * @throw ParserErrors::BadTypeFormatExImpl
+   */ 	
+	elevation_type(const char *str) : basic_type<double,elevation_converter<OUT,RANGECHECK>,WILDCARD>(str) {}
 	virtual ~elevation_type() { }
 	using basic_type<double,elevation_converter<OUT,RANGECHECK>,WILDCARD>::operator =;
 };
@@ -339,7 +345,10 @@ public:
 	galacticLatitude_type() : basic_type<double,galacticLatitude_converter<OUT,RANGECHECK>,WILDCARD>() {}
 	galacticLatitude_type(const galacticLatitude_type& bt): basic_type<double,galacticLatitude_converter<OUT,RANGECHECK>,WILDCARD>(bt)  { }
 	galacticLatitude_type(const double& val): basic_type<double,galacticLatitude_converter<OUT,RANGECHECK>,WILDCARD>(val) {}
-	galacticLatitude_type(const char *str)  throw (ParserErrors::BadTypeFormatExImpl) : basic_type<double,galacticLatitude_converter<OUT,RANGECHECK>,WILDCARD>(str) {	}
+	/*    
+    * @throw ParserErrors::BadTypeFormatExImpl
+   */ 	
+	galacticLatitude_type(const char *str) : basic_type<double,galacticLatitude_converter<OUT,RANGECHECK>,WILDCARD>(str) {	}
 	virtual ~galacticLatitude_type() { }
 	using basic_type<double,galacticLatitude_converter<OUT,RANGECHECK>,WILDCARD>::operator =;
 };
@@ -355,7 +364,10 @@ public:
 	galacticLongitude_type() : basic_type<double,galacticLongitude_converter<OUT,RANGECHECK>,WILDCARD>() {}
 	galacticLongitude_type(const galacticLongitude_type& bt): basic_type<double,galacticLongitude_converter<OUT,RANGECHECK>,WILDCARD>(bt)  { }
 	galacticLongitude_type(const double& val): basic_type<double,galacticLongitude_converter<OUT,RANGECHECK>,WILDCARD>(val) {}
-	galacticLongitude_type(const char *str)  throw (ParserErrors::BadTypeFormatExImpl) : basic_type<double,galacticLongitude_converter<OUT,RANGECHECK>,WILDCARD>(str) {}
+	/*    
+    * @throw ParserErrors::BadTypeFormatExImpl
+   */ 	
+	galacticLongitude_type(const char *str) : basic_type<double,galacticLongitude_converter<OUT,RANGECHECK>,WILDCARD>(str) {}
 	virtual ~galacticLongitude_type() { }
 	using basic_type<double,galacticLongitude_converter<OUT,RANGECHECK>,WILDCARD>::operator =;
 };

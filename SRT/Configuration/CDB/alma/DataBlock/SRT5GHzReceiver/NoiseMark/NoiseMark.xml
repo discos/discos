@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<NoiseMarkLookUpTable xmlns="urn:schemas-cosylab-com:NoiseMarkLookUpTable:1.0"
+             	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+				xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>4200.0</SkyFrequency><NoiseMark>0.93</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>4900.0</SkyFrequency><NoiseMark>0.93</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>LEFT</Polarization><SkyFrequency>5600.0</SkyFrequency><NoiseMark>0.93</NoiseMark></MarkEntry>
+
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>4200.0</SkyFrequency><NoiseMark>1.02</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>4900.0</SkyFrequency><NoiseMark>1.02</NoiseMark></MarkEntry>
+<MarkEntry><Polarization>RIGHT</Polarization><SkyFrequency>5600.0</SkyFrequency><NoiseMark>1.02</NoiseMark></MarkEntry>
+
+</NoiseMarkLookUpTable>

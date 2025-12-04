@@ -51,6 +51,7 @@ CConfiguration const * const  CComponentCore::execute() throw (
                 m_configuration.getLNASamplingTime(),
                 m_configuration.getFeeds()
         );
+        IRA::CIRATools::Wait(100000); // wait for 0.1 seconds to let things settle down
     }
     catch (std::bad_alloc& ex) {
         _EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CComponentCore::execute()");
@@ -170,9 +171,13 @@ void CComponentCore::activate() throw (
     m_calDiode=false; 
     guard.release();
     
-	lnaOn(); // Throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
-    //externalCalOff();
-
+    try {
+	 	lnaOn(); // Throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
+    	//externalCalOff();
+	 }
+	 catch (ReceiversErrors::ReceiversErrorsExImpl& E) {
+	 	ACS_LOG(LM_FULL_INFO,"CComponentCore::activate()",(LM_WARNING,"LNA control board is showing some issues"));
+	 }	 
     bool answer;
     try {
         answer=m_control->isRemoteOn();

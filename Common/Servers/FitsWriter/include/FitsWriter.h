@@ -228,7 +228,7 @@ public:
 	 * @param pos sequence of positions, one for each involved axis
 	 * @return false if the operation failed
 	 */
-	bool storeServoData(const double& time, const ACS::doubleSeq& pos);
+	bool storeServoData(const double& time, const ACS::doubleSeq& pos, const ACS::doubleSeq& userOffsets, const ACS::doubleSeq& systemOffsets);
 	
 	/**
 	 * This method stores the auxiliary data into the fits file.

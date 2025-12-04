@@ -1,35 +1,50 @@
-#*****************************************
-#-----------------------------------------
-# Marco Buttu <mbuttu@oa-cagliari.inaf.it>
-#-----------------------------------------
-#*****************************************
+#********************************************
+#--------------------------------------------
+# Giuseppe Carboni <giuseppe.carboni@inaf.it>
+#--------------------------------------------
+#********************************************
+#
+# C programs (public and local)
+# -----------------------------
+EXECUTABLES     =
+EXECUTABLES_L   =
 
-PY_PACKAGES = 
-PY_SCRIPTS = 
+PY_SCRIPTS = _cover _airBlade _servoReset
 
 # On-Line Database Files
 # ----------------------
-CDB_SCHEMAS = MinorServo
+CDB_SCHEMAS = SRTMinorServoCommon SRTMinorServoBoss SRTMinorServo SRTMinorServoSocketConfiguration SRTMinorServoVBrainConfiguration SRTMinorServoProperties SRTMinorServoCoefficients
 
 # ----------------------------
 # Libraries (public and local)
 # ----------------------------
-LIBRARIES = WPServoImpl MinorServoBossImpl
+LIBRARIES = SRTGenericMinorServoImpl SRTProgramTrackMinorServoImpl SRTMinorServoBossImpl SRTDerotatorImpl
 
-WPServoImpl_OBJECTS = WPServoImpl WPServoSocket WPServoTalker RequestDispatcher \
-					  WPStatusUpdater SocketListener utils libCom WPUtils
-WPServoImpl_LIBS = MinorServoStubs IRALibrary ComponentErrors \
-				   SRTMinorServoLibrary MinorServoErrors
+USER_CFLAGS =
 
-MinorServoBossImpl_OBJECTS = MinorServoBossImpl utils SetupThread ParkThread \
-							 TrackingThread ScanThread MSBossPublisher libCom \
-							 MSBossConfiguration
-MinorServoBossImpl_LIBS = MinorServoStubs MinorServoBossStubs SRTMinorServoLibrary \
-						  ManagmentDefinitionsStubs ManagementErrors \
-						  IRALibrary ComponentErrors MinorServoErrors acsnc \
-						  ParserErrors DiscosVersion AntennaDefinitionsStubs MountStubs \
-						  AntennaBossStubs AntennaErrors ActiveSurfaceBossStubs \
-						  SRTActiveSurfaceBossStubs MinorServoDefinitionsStubs
+SRTMinorServoBossImpl_OBJECTS = SRTMinorServoBossCore SRTMinorServoSetupThread SRTMinorServoParkThread SRTMinorServoTrackingThread SRTMinorServoScanThread SRTMinorServoBossImpl SRTMinorServoStatusThread
+SRTMinorServoBossImpl_LIBS = IRALibrary SRTMinorServoBossStubs SRTMinorServoStubs SRTDerotatorStubs ComponentErrors MinorServoErrors ManagementErrors MinorServoDefinitionsStubs SRTMinorServoCommandLibrary AntennaBossStubs SRTMinorServoSocketLibrary ParserErrors DiscosVersion acsnc
+SRTMinorServoBossImpl_CFLAGS = -std=c++17 -fconcepts
+SRTMinorServoBossCore_CFLAGS = -std=c++17 -fconcepts
+SRTMinorServoStatusThread_CFLAGS = -std=c++17 -fconcepts
+SRTMinorServoSetupThread_CFLAGS = -std=c++17 -fconcepts
+SRTMinorServoParkThread_CFLAGS = -std=c++17 -fconcepts
+SRTMinorServoTrackingThread_CFLAGS = -std=c++17 -fconcepts
+SRTMinorServoScanThread_CFLAGS = -std=c++17 -fconcepts
+
+SRTBaseMinorServoImpl_CFLAGS = -std=c++17 -fconcepts
+SRTGenericMinorServoImpl_OBJECTS = SRTGenericMinorServoImpl SRTBaseMinorServoImpl
+SRTGenericMinorServoImpl_LIBS = IRALibrary SRTMinorServoStubs MinorServoErrors MinorServoDefinitionsStubs SRTMinorServoCommandLibrary SRTMinorServoSocketLibrary DiscosVersion
+SRTGenericMinorServoImpl_CFLAGS = -std=c++17 -fconcepts
+SRTProgramTrackMinorServoImpl_OBJECTS = SRTProgramTrackMinorServoImpl SRTBaseMinorServoImpl
+SRTProgramTrackMinorServoImpl_LIBS = IRALibrary SRTMinorServoStubs MinorServoErrors MinorServoDefinitionsStubs SRTMinorServoCommandLibrary SRTMinorServoSocketLibrary DiscosVersion
+SRTProgramTrackMinorServoImpl_CFLAGS = -std=c++17 -fconcepts
+SRTDerotatorImpl_OBJECTS = SRTDerotatorImpl SRTDerotatorStatusThread
+SRTDerotatorImpl_LIBS = IRALibrary SRTMinorServoStubs MinorServoDefinitionsStubs SRTMinorServoCommandLibrary SRTMinorServoSocketLibrary GenericDerotatorStubs SRTDerotatorStubs DerotatorErrors DiscosVersion
+SRTDerotatorImpl_CFLAGS = -std=c++17 -fconcepts
+SRTDerotatorStatusThread_CFLAGS = -std=c++17 -fconcepts
+
+
 # ----------------------------------------------------------------------
 # List of all possible C-sources (used to create automatic dependencies)
 # ----------------------------------------------------------------------
@@ -54,19 +69,12 @@ all:	do_all
 	@echo " . . . 'all' done" 
 
 clean : clean_all 
-	$(RM) *~ ../include/*~ ../idl/*~ ../*~ ../../*~ core
-	$(RM) ../doc/html
-	$(RM) tmp.txt acsexmplbeans.jar ../doc/abeans.log
-	$(RM) ../lib/python/site-packages/*
-	$(RM) $(INTROOT)/lib/python/site-packages/SRTMinorServoTest
-	$(RM) $(INTROOT)/bin/mscu-runserver
 	@echo " . . . clean done"
 
 clean_dist : clean clean_dist_all 
 	@echo " . . . clean_dist done"
 
 man   : do_man 
-	# cp ../doc/html/group__ACSEXMPLDOC.html ../doc/html/main.html
 	@echo " . . . man page(s) done"
 
 install : install_all

@@ -210,8 +210,7 @@ class SRTIFDistributor14Impl(SRTIFDistributor14, cc, services, lcycle):
             raise exc
 
         try:
-            children = ElementTree.fromstring(dao).getchildren()
-            for child in children:
+            for child in list(ElementTree.fromstring(dao))
                 backend, channel, address = [c.text.strip() for c in child]
                 value = {int(channel): int(address)}
                 if backend in self.mapping:

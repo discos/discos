@@ -167,6 +167,7 @@ void XBackendsImpl::initialize()
 	m_parser->add("getAttenuation",new function1<CCommandLine,constant,void_type,O<doubleSeq_type> >(commandL,&CCommandLine::getAttenuation),0 );
 	m_parser->add("getTime",new function1<CCommandLine,constant,void_type,O<time_type> >(commandL,&CCommandLine::getTime),0 );
 	m_parser->add("initialize",new function1<CCommandLine,non_constant,void_type,I<string_type> >(commandL,&CCommandLine::setup),1 );
+	m_parser->add("backendPark", new function0<CCommandLine,non_constant, void_type>(commandL,&CCommandLine::backendPark),0 );
 	
 	m_initialized=true;
 	ACS_LOG(LM_FULL_INFO,"XBackendsImpl::initialize()",(LM_INFO,"COMPSTATE_INITIALIZED"));

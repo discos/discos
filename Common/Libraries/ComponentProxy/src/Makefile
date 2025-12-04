@@ -33,6 +33,8 @@ compilation_test_LIBS       = IRALibrary \
                               NoiseGeneratorStubs \
                               TotalPowerStubs \
                               ActiveSurfaceBossStubs \
+                              usdStubs \
+                              lanStubs \
                               MinorServoBossStubs \
                               MinorServoStubs \
                               ReceiversBossStubs \
@@ -44,7 +46,7 @@ compilation_test_LIBS       = IRALibrary \
                               CommonReceiverInterfaceStubs \
                               bulkDataStubs bulkDataReceiverStubs \
                               bulkDataCallback bulkDataSenderStubs \
-			      MountStubs \
+                              MountStubs \
                               ManagementErrors \
                               ComponentErrors \
                               AntennaErrors \

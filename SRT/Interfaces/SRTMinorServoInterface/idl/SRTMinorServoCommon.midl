@@ -1,0 +1,190 @@
+/***************************************************************\
+ *  Author: Giuseppe Carboni <giuseppe.carboni@inaf.it>
+\***************************************************************/
+#ifndef __SRTMINORSERVOCOMMON_MIDL__
+#define __SRTMINORSERVOCOMMON_MIDL__
+
+#include <baci.idl>
+#include <enumpropMACRO.idl>
+#include <ManagmentDefinitions.idl>
+#include <MinorServoDefinitions.idl>
+#include <ComponentErrors.idl>
+#include <MinorServoErrors.idl>
+
+#pragma prefix "alma"
+
+module MinorServo
+{
+    /**
+     * Enumerator which indicates a Leonardo minor servo configuration
+     */
+    enum SRTMinorServoFocalConfiguration
+    {
+        CONFIGURATION_UNKNOWN,
+        CONFIGURATION_PARK,
+        CONFIGURATION_PRIMARY,
+        CONFIGURATION_GREGORIAN1,
+        CONFIGURATION_GREGORIAN2,
+        CONFIGURATION_GREGORIAN3,
+        CONFIGURATION_GREGORIAN4,
+        CONFIGURATION_GREGORIAN5,
+        CONFIGURATION_GREGORIAN6,
+        CONFIGURATION_GREGORIAN7,
+        CONFIGURATION_GREGORIAN8,
+        CONFIGURATION_BWG1,
+        CONFIGURATION_BWG2,
+        CONFIGURATION_BWG3,
+        CONFIGURATION_BWG4
+    };
+    ACS_ENUM(SRTMinorServoFocalConfiguration);
+
+    /**
+     * Enumerator which indicates the status of the control for the Leonardo minor servo system
+     */
+    enum SRTMinorServoControlStatus
+    {
+        CONTROL_DISCOS,
+        CONTROL_VBRAIN
+    };
+    ACS_ENUM(SRTMinorServoControlStatus);
+
+    /**
+     * Enumerator which indicates the position of the gregorian cover
+     */
+    enum SRTMinorServoGregorianCoverStatus
+    {
+        COVER_STATUS_UNKNOWN,
+        COVER_STATUS_CLOSED,
+        COVER_STATUS_OPEN
+    };
+    ACS_ENUM(SRTMinorServoGregorianCoverStatus);
+
+    /**
+     * Enumerator which indicates the status of the gregorian air blade
+     */
+    enum SRTMinorServoGregorianAirBladeStatus
+    {
+        AIR_BLADE_STATUS_AUTO,
+        AIR_BLADE_STATUS_OFF,
+        AIR_BLADE_STATUS_ON
+    };
+    ACS_ENUM(SRTMinorServoGregorianAirBladeStatus);
+
+    /**
+     * Enumerator which indicates the status of a servo drive cabinet
+     */
+    enum SRTMinorServoCabinetStatus
+    {
+        DRIVE_CABINET_OK,
+        DRIVE_CABINET_WARNING,
+        DRIVE_CABINET_ERROR
+    };
+    ACS_ENUM(SRTMinorServoCabinetStatus);
+
+    /**
+     * Enumerator which indicates the operating mode of a single servo
+     */
+    enum SRTMinorServoOperativeMode
+    {
+        OPERATIVE_MODE_UNKNOWN,
+        OPERATIVE_MODE_SETUP,
+        OPERATIVE_MODE_STOW,
+        OPERATIVE_MODE_STOP,
+        OPERATIVE_MODE_PRESET,
+        OPERATIVE_MODE_PROGRAMTRACK
+    };
+    ACS_ENUM(SRTMinorServoOperativeMode);
+
+    /**
+     * Enumerator which indicates the type of movement made by the whole system (i.e.: performing setup, parking, tracking...)
+     */
+    enum SRTMinorServoMotionStatus
+    {
+        MOTION_STATUS_UNCONFIGURED,
+        MOTION_STATUS_STARTING,
+        MOTION_STATUS_CONFIGURED,
+        MOTION_STATUS_TRACKING,
+        MOTION_STATUS_PARKING,
+        MOTION_STATUS_PARKED,
+        MOTION_STATUS_ERROR
+    };
+    ACS_ENUM(SRTMinorServoMotionStatus);
+
+    /**
+     * Enumerator which indicates what type of error is present on the component
+     */
+    enum SRTMinorServoError
+    {
+        ERROR_NO_ERROR,
+        ERROR_NOT_CONNECTED,
+        ERROR_MAINTENANCE,
+        ERROR_EMERGENCY_STOP,
+        ERROR_COVER_WRONG_POSITION,
+        ERROR_CONFIG_ERROR,
+        ERROR_COMMAND_ERROR,
+        ERROR_SERVO_BLOCKED,
+        ERROR_DRIVE_CABINET
+    };
+    ACS_ENUM(SRTMinorServoError);
+
+    /*
+     * This IDL interface describes the CORBA interface of a common Leonardo Minor Servo System component.
+     * This interface contains the properties that are common to a focus path minor servo system and a derotator minor servo system.
+     */
+    interface SRTLDOBaseProperties
+    {
+        /**
+         * This property tells if all the servo axes are enabled
+         */
+        readonly attribute Management::ROTBoolean enabled;
+
+        /**
+         * This property tells the status of the servo drive cabinet
+         */
+        readonly attribute ROSRTMinorServoCabinetStatus drive_cabinet_status;
+
+        /**
+         * This property tells if the servo is in blocked state and cannot move
+         */
+        readonly attribute Management::ROTBoolean block;
+
+        /**
+         * This property returns the current operative mode of the servo
+         */
+        readonly attribute ROSRTMinorServoOperativeMode operative_mode;
+
+        /**
+         * This property returns the sequence of statuses of the servo physical axes
+         */
+        readonly attribute ACS::RObooleanSeq physical_axes_enabled;
+
+        /**
+         * This property returns the sequence of current positions of the physical axes of the servo
+         */
+        readonly attribute ACS::ROdoubleSeq physical_positions;
+
+        /**
+         * This property returns the number of virtual axes of the servo
+         */
+        readonly attribute ACS::ROlong virtual_axes;
+
+        /**
+         * This property returns the current plain positions of the virtual axes of the servo
+         * The plain positions are the positions returned from the Leonardo servo system, without subtracting the offsets
+         */
+        readonly attribute ACS::ROdoubleSeq plain_virtual_positions;
+
+        /**
+         * This property returns the current positions of the virtual axes of the servo
+         * The positions returned by this property equals to the plain virtual positions minus the offsets
+         */
+        readonly attribute ACS::ROdoubleSeq virtual_positions;
+
+        /**
+         * This property returns the current offsets of the virtual axes of the servo
+         * The offset values are the sum of user and system offsets
+         */
+        readonly attribute ACS::ROdoubleSeq virtual_offsets;
+    };
+};
+#endif

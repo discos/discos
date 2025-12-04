@@ -544,27 +544,27 @@ bool CString::CheckIsValidLongLong() const
 
 bool CString::CheckIsValidFloat() const
 {
-    char *endptr;
-    float val;
-	if (IsEmpty()) return false;
-    errno=0;
-    val = strtof(m_cpString,&endptr);
-    if (errno==ERANGE) {
-    	return false;
-    }
-    if (endptr==m_cpString) {
-    	return false;
-    }
-    return true;
+	char *endptr;
+   //float val;
+   if (IsEmpty()) return false;
+   errno=0;
+   /*val = */strtof(m_cpString,&endptr);
+   if (errno==ERANGE) {
+   	return false;
+   }
+   if (endptr==m_cpString) {
+   	return false;
+   }
+   return true;
 }
 
 bool CString::CheckIsValidDouble() const
 {
     char *endptr;
-    double val;
+    //double val;
 	if (IsEmpty()) return false;
     errno=0;
-    val = strtod(m_cpString,&endptr);
+    /*val = */strtod(m_cpString,&endptr);
     if (errno==ERANGE) {
     	return false;
     }
@@ -577,10 +577,10 @@ bool CString::CheckIsValidDouble() const
 bool CString::CheckIsValidLongDouble() const
 {
     char *endptr;
-    long double val;
+    //long double val;
 	if (IsEmpty()) return false;
     errno=0;
-    val = strtold(m_cpString,&endptr);
+    /*val = */strtold(m_cpString,&endptr);
     if (errno==ERANGE) {
     	return false;
     }

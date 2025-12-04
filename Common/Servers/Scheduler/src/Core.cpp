@@ -150,6 +150,8 @@ void CCore::execute() throw(ComponentErrors::TimerErrorExImpl, ComponentErrors::
 	m_parser->add("latOTF", new function3<CCore, non_constant, void_type, I<enum_type<AntennaFrame2String, Antenna::TCoordinateFrame> >, I<angleOffset_type<rad> >, I<interval_type> >(this, &CCore::_latOTF), 3);
 	m_parser->add("skydipOTF", new function3<CCore, non_constant, void_type, I<elevation_type<rad, false> >, I<elevation_type<rad, false> >, I<interval_type> >(this, &CCore::_skydipOTF), 3);
 	m_parser->add("moon", new function0<CCore, non_constant, void_type>(this, &CCore::_moon), 0);
+	m_parser->add("sun", new function0<CCore, non_constant, void_type>(this, &CCore::_sun), 0);
+	m_parser->add("planet", new function1<CCore, non_constant, void_type,I<string_type> > (this, &CCore::_planet), 1);
 	m_parser->add("sidereal", new function5<CCore, non_constant, void_type, I<string_type>, I<rightAscension_type<rad, true> >, I<declination_type<rad, true> >, I<enum_type<AntennaEquinox2String, Antenna::TSystemEquinox> >, I<enum_type<AntennaSection2String, Antenna::TSections> > >(this, &CCore::_sidereal), 5);
 	m_parser->add("track", new function1<CCore, non_constant, void_type, I<string_type> >(this, &CCore::_track), 1);
 	m_parser->add("goTo", new function2<CCore, non_constant, void_type, I<azimuth_type<rad, false> >, I<elevation_type<rad, false> > >(this, &CCore::_goTo), 2);
@@ -208,6 +210,8 @@ void CCore::execute() throw(ComponentErrors::TimerErrorExImpl, ComponentErrors::
 	m_parser->add("initialize", "backend", 3, &CCore::remoteCall);
 	m_parser->add("calSwitch", "backend", 3, &CCore::remoteCall);
 	m_parser->add("getRms", "backend", 3, &CCore::remoteCall);
+	m_parser->add("setTsysRange","backend",3,&CCore::remoteCall);
+	m_parser->add("backendPark","backend",3,&CCore::remoteCall);
 
 	// minor servo
 	m_parser->add("servoSetup", "minorservo", 4, &CCore::remoteCall);
@@ -216,12 +220,16 @@ void CCore::execute() throw(ComponentErrors::TimerErrorExImpl, ComponentErrors::
 	m_parser->add("setServoASConfiguration", "minorservo", 4, &CCore::remoteCall);
 	m_parser->add("clearServoOffsets", "minorservo", 4, &CCore::remoteCall);
 	m_parser->add("setServoOffset", "minorservo", 4, &CCore::remoteCall);
+	m_parser->add("servoReset", "_servoReset", 0, "SRT");
+	m_parser->add("setGregorianCoverPosition", "_cover", 1, "SRT");
+	m_parser->add("setGregorianAirBladeStatus", "_airBlade", 1, "SRT");
 
 	// active surface
 	m_parser->add("asSetup", "activesurface", 5, &CCore::remoteCall);
 	m_parser->add("asPark", "activesurface", 5, &CCore::remoteCall);
 	m_parser->add("asOn", "activesurface", 5, &CCore::remoteCall);
 	m_parser->add("asOff", "activesurface", 5, &CCore::remoteCall);
+	m_parser->add("asSetLUT", "activesurface", 5, &CCore::remoteCall);
 
 	// procedures
 	loadProcedures(m_config->getDefaultProceduresFile()); // throws ManagementErrors::ProcedureFileLoadingErrorExImpl

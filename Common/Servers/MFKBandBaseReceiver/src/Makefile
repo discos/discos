@@ -140,7 +140,7 @@ tttlll_OBJECTS  =
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS = MarkCoefficientsKBandLookUpTable
+CDB_SCHEMAS =
 
 # 
 # IDL Files and flags

@@ -9,9 +9,10 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               
 	Name="Boss"
-	Code="NotoActiveSurfaceBossImpl"
-	Type="IDL:alma/ActiveSurface/NotoActiveSurfaceBoss:1.0"
+	Code="ActiveSurfaceBossImpl"
+	Type="IDL:alma/ActiveSurface/ActiveSurfaceBoss:1.0"
 	Container="NotoActiveSurfaceContainer"
-    ImplLang="cpp"
-    Default="true"
+	ImplLang="cpp"
+	Default="true"
+	KeepAliveTime="-1"
 />

@@ -40,7 +40,7 @@ MSBossTracker::MSBossTracker(
 {
     AUTO_TRACE("MSBossTracker::MSBossTracker()");
     m_antennaBoss.setContainerServices(m_services);
-    m_antennaBoss.setComponentName(m_antennaBossInterface.c_str());
+    m_antennaBoss.setComponentInterface(m_antennaBossInterface.c_str());
 }
 
 MSBossTracker::~MSBossTracker() { AUTO_TRACE("MSBossTracker::~MSBossTracker()"); }

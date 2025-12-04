@@ -24,7 +24,7 @@
 #include "Configuration.h"
 
 #define _SCHED_NULLTARGET "NULL"
-#define SEPARATOR '\t'
+#define SEPARATORS std::vector<char>{'\t', ' '}
 #define MAX_SCHED_NAME_LEN 37
 
 /**
@@ -64,6 +64,8 @@ public:
 
 	void track(const char *targetName);
 	void moon();
+	void sun();
+	void planet(const char * planetName);
 	void sidereal(const char * targetName,const double& ra,const double& dec,const Antenna::TSystemEquinox& eq,const Antenna::TSections& section);
 	void sidereal(const char * targetName,const Antenna::TCoordinateFrame& frame,double *parameters,const long& paramNumber,
 			const Antenna::TSystemEquinox& eq);
@@ -551,7 +553,28 @@ private:
 	 * @param errMsg error specification string in case of unsuccessful operation
 	 * @return the result of the parse
 	 */
+	bool parseSun(const IRA::CString& val,Antenna::TTrackingParameters *scan,DWORD& id,IRA::CString& errMsg);
+
+	/**
+	 * Parse the list of parameters for moon tracking
+	 * @param val line to parse
+	 * @param otf structure containing the ORF parameters
+	 * @param id numeral identifier of the scan
+	 * @param errMsg error specification string in case of unsuccessful operation
+	 * @return the result of the parse
+	 */
 	bool parseMoon(const IRA::CString& val,Antenna::TTrackingParameters *scan,DWORD& id,IRA::CString& errMsg);
+	
+		/**
+	 * Parse the list of parameters for moon tracking
+	 * @param val line to parse
+	 * @param otf structure containing the ORF parameters
+	 * @param id numeral identifier of the scan
+	 * @param errMsg error specification string in case of unsuccessful operation
+	 * @return the result of the parse
+	 */
+	bool parsePlanet(const IRA::CString& val,Antenna::TTrackingParameters *scan,DWORD& id,IRA::CString& errMsg);
+
 
 	/**
 	 * Parse the vRAD switch in order to configure a radial velocity

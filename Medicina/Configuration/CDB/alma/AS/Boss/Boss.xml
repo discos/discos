@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+   - History:
+   -   Tue Sep 23 10:31:05 UTC 2025 modified by jDAL
+   -   Tue Sep 23 10:43:59 UTC 2025 modified by jDAL
+   -   Tue Sep 23 12:39:14 UTC 2025 modified by jDAL
+   -   Tue Sep 23 12:40:08 UTC 2025 modified by jDAL
+   -   Tue Sep 23 13:45:39 UTC 2025 modified by jDAL
+   -   Wed Sep 24 06:41:39 UTC 2025 modified by jDAL
+   -   Wed Sep 24 06:42:15 UTC 2025 modified by jDAL
+   -   Wed Sep 24 06:43:28 UTC 2025 modified by jDAL
+   -   Wed Sep 24 06:48:25 UTC 2025 modified by jDAL
+   -   Wed Sep 24 07:03:31 UTC 2025 modified by jDAL
+   -   Wed Sep 24 07:10:33 UTC 2025 modified by jDAL
+   -   Wed Sep 24 07:26:35 UTC 2025 modified by jDAL
+   -   Wed Sep 24 07:33:24 UTC 2025 modified by jDAL
+   -   Wed Sep 24 07:44:23 UTC 2025 modified by jDAL
+   -   Wed Sep 24 08:26:12 UTC 2025 modified by jDAL
+   -   Wed Sep 24 08:33:35 UTC 2025 modified by jDAL
+   -   Wed Sep 24 08:50:12 UTC 2025 modified by jDAL
+   -   Wed Sep 24 10:55:26 UTC 2025 modified by jDAL
+   -   Wed Sep 24 11:02:45 UTC 2025 modified by jDAL
+   -   Wed Sep 24 11:05:26 UTC 2025 modified by jDAL
+   -   Wed Sep 24 11:17:12 UTC 2025 modified by jDAL
+   -   Wed Sep 24 11:17:35 UTC 2025 modified by jDAL
+   -   Wed Sep 24 11:18:04 UTC 2025 modified by jDAL
+   -   Wed Sep 24 11:18:49 UTC 2025 modified by jDAL
+   -   Wed Sep 24 11:20:27 UTC 2025 modified by jDAL
+   -   Wed Sep 24 11:22:12 UTC 2025 modified by jDAL
+   -   Wed Sep 24 11:22:59 UTC 2025 modified by jDAL
+   -   Wed Sep 24 11:35:24 UTC 2025 modified by jDAL
+   -   Wed Sep 24 11:45:01 UTC 2025 modified by jDAL
+   -   Wed Sep 24 11:47:58 UTC 2025 modified by jDAL
+   -   Wed Sep 24 11:48:33 UTC 2025 modified by jDAL
+   -   Wed Sep 24 11:50:49 UTC 2025 modified by jDAL
+   -   Wed Sep 24 12:10:41 UTC 2025 modified by jDAL
+   -   Wed Sep 24 12:50:49 UTC 2025 modified by jDAL
+   -   Wed Sep 24 13:03:22 UTC 2025 modified by jDAL
+   -   Wed Sep 24 13:37:23 UTC 2025 modified by jDAL
+   -   Wed Sep 24 13:51:48 UTC 2025 modified by jDAL
+-->
+<ActiveSurfaceBoss xmlns="urn:schemas-cosylab-com:ActiveSurfaceBoss:1.0" xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" WatchingThreadTime="200000" WorkingThreadTime="500000" RepetitionCacheTime="2000000" RepetitionExpireTime="5000000" sectors="4" circles="7" LANs="48" lastUSD="268" actuatorsInCircle="0,24,48,48,48,48,48,4" acceptedProfiles="2,3,4" profile="4">
+	<status />
+	<enabled />
+	<pprofile />
+	<tracking />
+	<LUT_filename />
+</ActiveSurfaceBoss>

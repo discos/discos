@@ -71,7 +71,8 @@ void CMonitorThread::onStart()
         }
         case LNA_VD: {
             try {
-                 m_core->updateVdLNAControls();
+            	  // commented out in order to cope with the LNA control board substitution 
+                 //m_core->updateVdLNAControls();
             }
             catch (ACSErr::ACSbaseExImpl& ex) {
                  _ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl, impl, ex, "CMonitorThread::runLoop");
@@ -82,7 +83,8 @@ void CMonitorThread::onStart()
          }
          case LNA_ID: {
             try {
-                 m_core->updateIdLNAControls();
+            	  // commented out in order to cope with the LNA control board substitution  	
+                 //m_core->updateIdLNAControls();
             }
             catch (ACSErr::ACSbaseExImpl& ex) {
                 _ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl, impl, ex, "CMonitorThread::runLoop");
@@ -93,7 +95,8 @@ void CMonitorThread::onStart()
          }
          case LNA_VG: {
             try {
-                 m_core->updateVgLNAControls();
+					  // commented out in order to cope with the LNA control board substitution  	            	
+                 //m_core->updateVgLNAControls();
             }
             catch (ACSErr::ACSbaseExImpl& ex) {
                 _ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl, impl, ex, "CMonitorThread::runLoop");

@@ -12,7 +12,7 @@ SRTActiveSurfaceGUI::SRTActiveSurfaceGUI(QWidget *parent) : QWidget(parent)
 {
     setupUi(this);
 
-    QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIActuatorColor(int,int,bool,bool)), this, SLOT(changeGUIActuatorColor(int,int,bool,bool)));
+    QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIActuatorColor(int,int,bool,bool,bool)), this, SLOT(changeGUIActuatorColor(int,int,bool,bool,bool)));
     QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIAllActuators(bool)), this, SLOT(changeGUIAllActuators(bool)));
     QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIcircleORradius(bool)), this, SLOT(changeGUIcircleORradius(bool)));
     QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIActuator(bool)), this, SLOT(changeGUIActuator(bool)));
@@ -21,6 +21,7 @@ SRTActiveSurfaceGUI::SRTActiveSurfaceGUI(QWidget *parent) : QWidget(parent)
     QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIActuatorStatusLabels()), this, SLOT(changeGUIActuatorStatusLabels()));
     QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIasStatusCode(int)), this, SLOT(changeGUIasStatusCode(int)));
     QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIasProfileCode(int)), this, SLOT(changeGUIasProfileCode(int)));
+    QObject::connect(&mySRTActiveSurfaceCore, SIGNAL(setGUIasLUTFileName(QString)), this, SLOT(changeGUIasLUTFileName(QString)));
 
 #ifdef MANAGEMENT
     buttonGroup1->setEnabled(true);
@@ -29,7 +30,7 @@ SRTActiveSurfaceGUI::SRTActiveSurfaceGUI(QWidget *parent) : QWidget(parent)
 #endif
 }
 
-void SRTActiveSurfaceGUI::setParameters(maci::SimpleClient* theClient, ActiveSurface::SRTActiveSurfaceBoss_var theASBoss)
+void SRTActiveSurfaceGUI::setParameters(maci::SimpleClient* theClient, ActiveSurface::ActiveSurfaceBoss_var theASBoss)
 {
     mySRTActiveSurfaceClientEventLoop.setSimpleClient(theClient);
     mySRTActiveSurfaceCore.setASBoss(theASBoss);
@@ -526,7 +527,7 @@ void SRTActiveSurfaceGUI::recoverUSD()
     }
 }
 
-void SRTActiveSurfaceGUI::changeGUIActuatorColor(int tcircle, int tactuator, bool active, bool fromRun)
+void SRTActiveSurfaceGUI::changeGUIActuatorColor(int tcircle, int tactuator, bool active, bool statusColor, bool fromRun)
 {
     if (!fromRun)
     {
@@ -542,13 +543,17 @@ void SRTActiveSurfaceGUI::changeGUIActuatorColor(int tcircle, int tactuator, boo
 
     QPushButton* ActuatorButton = this->findChild<QPushButton*>(ActuatorButtonName.str().c_str());
 
-    if(active)
+    if(active == true && statusColor == false) // attivo e calibrato
     {
-        ActuatorButton->setStyleSheet("background-color: rgb(85, 255, 0)");
+        ActuatorButton->setStyleSheet("background-color: rgb(85, 255, 0)"); // verde
+    }
+    else if (active == true && statusColor == true) // attivo e scalibrato
+    {
+        ActuatorButton->setStyleSheet("background-color: rgb(255, 255, 0)"); // giallo
     }
     else
     {
-        ActuatorButton->setStyleSheet("background-color: rgb(255, 0, 0)");
+        ActuatorButton->setStyleSheet("background-color: rgb(255, 0, 0)"); // rosso
     }
 }
 
@@ -712,10 +717,18 @@ void SRTActiveSurfaceGUI::changeGUIasProfileCode(int asProfileCode)
     ProfilelineEdit_2->setText(QApplication::translate("SRTActiveSurfaceGUI", asProfileString.c_str(), 0, QApplication::UnicodeUTF8));
 }
 
+void SRTActiveSurfaceGUI::changeGUIasLUTFileName(QString filename)
+{
+    LUTLabelFileName->setText(filename);
+}
+
 void SRTActiveSurfaceGUI::changeGUIActuatorStatusLabels()
 {
     ActuatorStatusRunLabel->clear();
     switch (mySRTActiveSurfaceCore.ActuatorStatusRunLabelCode) {
+        case (0):
+            ActuatorStatusRunLabel->setText("");
+            break;
         case (-1):
             ActuatorStatusRunLabel->setText("STOPPED");
             break;
@@ -736,6 +749,9 @@ void SRTActiveSurfaceGUI::changeGUIActuatorStatusLabels()
 
     ActuatorStatusCammLabel->clear();
     switch (mySRTActiveSurfaceCore.ActuatorStatusCammLabelCode) {
+        case (0):
+            ActuatorStatusCammLabel->setText("");
+            break;
         case (-1):
             ActuatorStatusCammLabel->setText("NO CAMM");
             break;
@@ -746,6 +762,9 @@ void SRTActiveSurfaceGUI::changeGUIActuatorStatusLabels()
 
     ActuatorStatusLoopLabel->clear();
     switch (mySRTActiveSurfaceCore.ActuatorStatusLoopLabelCode) {
+        case (0):
+            ActuatorStatusLoopLabel->setText("");
+            break;
         case (-1):
             ActuatorStatusLoopLabel->setText("NO LOOP");
             break;
@@ -756,6 +775,9 @@ void SRTActiveSurfaceGUI::changeGUIActuatorStatusLabels()
      
     ActuatorStatusCalLabel->clear();
     switch (mySRTActiveSurfaceCore.ActuatorStatusCalLabelCode) {
+        case (0):
+            ActuatorStatusCalLabel->setText("");
+            break;
         case (-1):
             ActuatorStatusCalLabel->setText("UNCALIBRATED");
             break;

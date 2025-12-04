@@ -2,8 +2,11 @@
 #define TIMERIDENTIFIER '!'
 #define PROCEDUREPARAMETER '$'
 
+/*
+* @throw (ACSErr::ACSbaseExImpl, ParserErrors::ConversionErrorExImpl)
+*/
 template <class OBJ>
-void  CParser<OBJ>::run(const IRA::CString& command,IRA::CString& out) throw (ParserErrors::ParserErrorsExImpl,ACSErr::ACSbaseExImpl)
+void  CParser<OBJ>::run(const IRA::CString& command,IRA::CString& out)
 {
 	IRA::CString instr; 
 	if ((command=="") || (command=="\n")) {
@@ -33,8 +36,11 @@ void  CParser<OBJ>::run(const IRA::CString& command,IRA::CString& out) throw (Pa
 	}
 }
 
+/*
+* @throw (ParserErrors::ConversionErrorExImpl)
+*/
 template <class OBJ>
-void CParser<OBJ>::runAsync(const IRA::CString& command,_SP_CALLBACK(callBack),const void * callBackParam)  throw (ParserErrors::ParserErrorsExImpl)
+void CParser<OBJ>::runAsync(const IRA::CString& command,_SP_CALLBACK(callBack),const void * callBackParam)
 {
 	TRule *elem;
 	bool timeTagged;
@@ -53,10 +59,16 @@ void CParser<OBJ>::runAsync(const IRA::CString& command,_SP_CALLBACK(callBack),c
 	}
 }
 
+/*
+* @throw ParserErrors::SyntaxErrorExImpl,ParserErrors::CommandNotFoundExImpl,
+*        ParserErrors::NotEnoughParametersExImpl,ParserErrors::SystemCommandErrorExImpl,
+*        ParserErrors::ProcedureErrorExImpl,ParserErrors::TimeFormatErrorExImpl,
+*        ParserErrors::ParserTimerErrorExImpl,ParserErrors::NotSupportedErrorExImpl,
+*        ParserErrors::TooManyParametersExImpl,ParserErrors::ConversionErrorExImpl,
+*        ParserErrors::PackageErrorExImpl,ParserErrors::RemoteCommandErrorExImpl,ACSErr::ACSbaseExImpl)
+*/
 template<class OBJ>
-IRA::CString CParser<OBJ>::executeCommand(const IRA::CString& command,IRA::CString& instr) throw (ParserErrors::SyntaxErrorExImpl,ParserErrors::CommandNotFoundExImpl,
-		ParserErrors::NotEnoughParametersExImpl,ParserErrors::SystemCommandErrorExImpl,ParserErrors::ProcedureErrorExImpl,ParserErrors::TimeFormatErrorExImpl,ParserErrors::ParserTimerErrorExImpl,
-		ParserErrors::NotSupportedErrorExImpl,ParserErrors::TooManyParametersExImpl,ParserErrors::ConversionErrorExImpl,ParserErrors::PackageErrorExImpl,ParserErrors::RemoteCommandErrorExImpl,ACSErr::ACSbaseExImpl)
+IRA::CString CParser<OBJ>::executeCommand(const IRA::CString& command,IRA::CString& instr)
 {
 	TRule *elem;
 	WORD outNumber;
@@ -87,6 +99,8 @@ IRA::CString CParser<OBJ>::executeCommand(const IRA::CString& command,IRA::CStri
 			IRA::CString answer("");
 			if (outNumber>0) {
 				for(int j=0;j<outNumber;++j) {
+					if(outParams[j] == "")
+						continue;
 					answer+=outParams[j];
 					answer+=IRA::CString(m_answerDelimiter);
 				}
@@ -212,10 +226,14 @@ IRA::CString CParser<OBJ>::executeCommand(const IRA::CString& command,IRA::CStri
 	}
 }
 
+/*
+* @throw ParserErrors::SyntaxErrorExImpl,ParserErrors::CommandNotFoundExImpl,
+*        ParserErrors::NotEnoughParametersExImpl,ParserErrors::TimeFormatErrorExImpl,
+*        ParserErrors::NotSupportedErrorExImpl,ParserErrors::TooManyParametersExImpl)
+*/
 template<class OBJ>
 typename CParser<OBJ>::TRule *CParser<OBJ>::checkCommand(const IRA::CString& line,IRA::CString& instr,IRA::CString* inParams,WORD& parNum,bool& timeTagged,IRA::CString& timeCommand,ACS::Time& execTime,
-		ACS::TimeInterval& execInterval)  throw (ParserErrors::SyntaxErrorExImpl,ParserErrors::CommandNotFoundExImpl,ParserErrors::NotEnoughParametersExImpl,ParserErrors::TimeFormatErrorExImpl,
-		ParserErrors::NotSupportedErrorExImpl,ParserErrors::TooManyParametersExImpl)
+		ACS::TimeInterval& execInterval)
 {
 	IRA::CString timeMark;
 	TRule *elem;
@@ -352,9 +370,12 @@ void CParser<OBJ>::timerCleanup(const void * par)
 	}
 }
 
+/*
+* @throw ParserErrors::ProcedureErrorExImpl
+*/
 template <class OBJ>
 void CParser<OBJ>::pushProcedure(const IRA::CString& name,const ACS::stringSeq& procedure,IRA::CString *procPrm,WORD& parNumber,
-		_SP_CALLBACK(callBack),const void* parameter) throw (ParserErrors::ProcedureErrorExImpl)
+		_SP_CALLBACK(callBack),const void* parameter)
 {
 	TRule *elem;
 	IRA::CString instr;

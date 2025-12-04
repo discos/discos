@@ -21,6 +21,7 @@
 #include <EphemGeneratorC.h>
 #include <SkySourceC.h>
 #include <MoonC.h>
+#include <SolarSystemBodyC.h>
 #include <PointingModelC.h>
 #include <RefractionC.h>
 #include <OTFC.h>

@@ -6,6 +6,7 @@
 #include "DevIOEnable.h"
 #include "DevIOProfile.h"
 #include "DevIOTracking.h"
+#include "DevIOLUT.h"
 
 static char const *rcsId="@(#) $Id: SRTActiveSurfaceBossImpl.cpp,v 1.2 2010-07-26 12:37:07 c.migoni Exp $";
 static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
@@ -58,6 +59,7 @@ SRTActiveSurfaceBossImpl::SRTActiveSurfaceBossImpl(const ACE_CString &CompName, 
     m_penabled(this),
     m_pprofile(this),
     m_ptracking(this),
+    m_pLUT_filename(this),
     m_core(NULL)
 {
     AUTO_TRACE("SRTActiveSurfaceBossImpl::SRTActiveSurfaceBossImpl()");
@@ -86,6 +88,7 @@ void SRTActiveSurfaceBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
             (getContainerServices()->getName()+":pprofile",getComponent(),new SRTActiveSurfaceBossImplDevIOProfile(m_core),true);
         m_ptracking=new ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean>
             (getContainerServices()->getName()+":tracking",getComponent(),new SRTActiveSurfaceBossImplDevIOTracking(m_core),true);
+        m_pLUT_filename=new ROstring(getContainerServices()->getName()+":LUT_filename",getComponent(),new SRTActiveSurfaceBossImplDevIOLUT(m_core),true);
 
         // create the parser for command line execution
         m_parser = new SimpleParser::CParser<CSRTActiveSurfaceBossCore>(boss,10);
@@ -125,25 +128,18 @@ void SRTActiveSurfaceBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
         _THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"SRTActiveSurfaceBossImpl::initialize()");
     }
 
-    for(int sector = 0; sector < SECTORS; sector++)
+    try
     {
-        std::stringstream threadName;
-        threadName << "SRTACTIVESURFACEBOSSSECTOR";
-        threadName << sector+1;
-        try
-        {
-            CSRTActiveSurfaceBossSectorThread* sectorThread = getContainerServices()->getThreadManager()->create<CSRTActiveSurfaceBossSectorThread,CSRTActiveSurfaceBossCore *> (threadName.str().c_str(), boss);
-            m_sectorThread.push_back(sectorThread);
-        }
-        catch (acsthreadErrType::acsthreadErrTypeExImpl& ex)
-        {
-            _ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,_dummy,ex,"SRTActiveSurfaceBossImpl::initialize()");
-            throw _dummy;
-        }
-        catch (...)
-        {
-            _THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"SRTActiveSurfaceBossImpl::initialize()");
-        }
+        m_initializationThread=getContainerServices()->getThreadManager()->create<CSRTActiveSurfaceBossInitializationThread,CSRTActiveSurfaceBossCore *>("SRTACTIVESURFACEBOSSINITTHREAD",boss);
+    }
+    catch (acsthreadErrType::acsthreadErrTypeExImpl& ex)
+    {
+        _ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,_dummy,ex,"SRTActiveSurfaceBossImpl::initialize()");
+        throw _dummy;
+    }
+    catch (...)
+    {
+        _THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"SRTActiveSurfaceBossImpl::initialize()");
     }
 
     // configure the parser.....
@@ -151,6 +147,7 @@ void SRTActiveSurfaceBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
     m_parser->add("asOn",new function0<CSRTActiveSurfaceBossCore,non_constant,void_type >(boss,&CSRTActiveSurfaceBossCore::asOn),0);
     m_parser->add("asOff",new function0<CSRTActiveSurfaceBossCore,non_constant,void_type >(boss,&CSRTActiveSurfaceBossCore::asOff),0);
     m_parser->add("asPark",new function0<CSRTActiveSurfaceBossCore,non_constant,void_type >(boss,&CSRTActiveSurfaceBossCore::asPark),0);
+    m_parser->add("asSetLUT",new function1<CSRTActiveSurfaceBossCore,non_constant,void_type,I<string_type> >(boss,&CSRTActiveSurfaceBossCore::asSetLUT),1 );
 
     ACS_LOG(LM_FULL_INFO, "SRTActiveSurfaceBossImpl::initialize()", (LM_INFO,"COMPSTATE_INITIALIZED"));
 }
@@ -169,12 +166,7 @@ void SRTActiveSurfaceBossImpl::execute() throw (ACSErr::ACSbaseExImpl)
         throw _dummy;
     }
     m_workingThread->resume();
-
-    for(unsigned int i = 0; i < m_sectorThread.size(); i++)
-    {
-        m_sectorThread[i]->setSleepTime(SECTORTIME);
-        m_sectorThread[i]->resume();
-    }
+    m_initializationThread->resume();
 
     ACS_LOG(LM_FULL_INFO,"SRTActiveSurfaceBossImpl::execute()",(LM_INFO,"SRTActiveSurfaceBossImpl::COMPSTATE_OPERATIONAL"));
 }
@@ -187,13 +179,10 @@ void SRTActiveSurfaceBossImpl::cleanUp()
         m_workingThread->suspend();
         getContainerServices()->getThreadManager()->destroy(m_workingThread);
     }
-    for(unsigned int i = 0; i < m_sectorThread.size(); i++)
+    if (m_initializationThread!=NULL)
     {
-        if(m_sectorThread[i] != NULL)
-        {
-            m_sectorThread[i]->suspend();
-            getContainerServices()->getThreadManager()->destroy(m_sectorThread[i]);
-        }
+        m_initializationThread->suspend();
+        getContainerServices()->getThreadManager()->destroy(m_initializationThread);
     }
     ACS_LOG(LM_FULL_INFO,"SRTActiveSurfaceBossImpl::cleanUp()",(LM_INFO,"SRTActiveSurfaceBossImpl::THREADS_TERMINATED"));
     if (m_parser!=NULL) delete m_parser;
@@ -618,6 +607,7 @@ _PROPERTY_REFERENCE_CPP(SRTActiveSurfaceBossImpl,Management::ROTSystemStatus,m_p
 _PROPERTY_REFERENCE_CPP(SRTActiveSurfaceBossImpl,Management::ROTBoolean,m_penabled,enabled);
 _PROPERTY_REFERENCE_CPP(SRTActiveSurfaceBossImpl,ActiveSurface::ROTASProfile,m_pprofile,pprofile);
 _PROPERTY_REFERENCE_CPP(SRTActiveSurfaceBossImpl,Management::ROTBoolean,m_ptracking,tracking);
+_PROPERTY_REFERENCE_CPP(SRTActiveSurfaceBossImpl,ACS::ROstring,m_pLUT_filename,LUT_filename);
 /* --------------- [ MACI DLL support functions ] -----------------*/
 #include <maciACSComponentDefines.h>
 MACI_DLL_SUPPORT_FUNCTIONS(SRTActiveSurfaceBossImpl)

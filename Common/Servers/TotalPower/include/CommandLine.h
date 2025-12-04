@@ -236,7 +236,7 @@ public:
 	 * This method will change the current value of the <i>m_enabled</i> array.
 	 * @throw BackendsErrors::BackendBusyExImpl
 	 * @param en new values sequence for the <i>m_enabled</i> elements. A value grater than zero correspond to a true,
-	 *                a zero match to a false, while a negative will keep the things unchanged.
+	 *                a zero match to a false, while a negative will keep the things unchanged. 
 	 */ 
 	void setEnabled(const ACS::longSeq& en) throw (BackendsErrors::BackendBusyExImpl);
 	
@@ -427,6 +427,9 @@ public:
 	 */
 	void setAttenuation(const long&inputId, const double& attenuation)  throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,BackendsErrors::NakExImpl,
 			ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl);
+
+    void backendPark() throw (BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
+		ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::NotAllowedExImpl,BackendsErrors::BackendFailExImpl);
 	
 	/**
 	 * Called by the component to fill the <i>Backends::TMainHeader</i> with the proper informations.

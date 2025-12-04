@@ -30,13 +30,22 @@
 /* Andrea Orlati(aorlati@ira.inaf.it)  12/08/2015	  Function to check if a file exists or not */
 /* Andrea Orlati(aorlati@ira.inaf.it)  19/11/2015	  Function timeToStrExtended was added */
 /* Andrea Orlati(aorlati@ira.inaf.it)  12/01/2016	  reviewed the function skyFrequency in order to address also lower side band during down conversion */
+/* Giuseppe Carboni (giuseppe.carboni@inaf.it) 07/12/2021 added the getUNIXEpoch, ACSTime2UNIXEpoch and UNIXEpoch2ACSTime functions */
+
+#include <Cplusplus11Helper.h>
 
 #include <time.h>
 #include <sys/time.h>
+C11_IGNORE_WARNING_PUSH
+C11_IGNORE_WARNING("-Wdeprecated-declarations")
+C11_IGNORE_WARNING("-Wmisleading-indentation")
+C11_IGNORE_WARNING("-Wcatch-value=")
 #include <baciDB.h>
 #include <maciContainerServices.h>
 #include <acstimeEpochHelper.h>
 #include <acstimeDurationHelper.h>
+C11_IGNORE_WARNING_POP
+
 #include <maciSimpleClient.h>
 #include <AntennaDefinitionsC.h>
 
@@ -136,6 +145,23 @@ public:
 	 * @return the ACS::Time variable containing the current time
 	*/
 	static ACS::Time getACSTime();
+	/**
+	 * Call this function to get the current UNIX epoch
+	 * @return a double containing the current UNIX epoch
+	*/
+	static double getUNIXEpoch();
+	/**
+	 * Call this function in order to get the UNIX Epoch of the given ACS::Time
+	 * @param acs_time the given ACS::Time
+	 * @return a double containing the UNIX epoch of the given ACS::Time
+	*/
+	static double ACSTime2UNIXEpoch(ACS::Time acs_time);
+	/**
+	 * Call this function in order to get the ACS::Time of the given UNIX Epoch
+	 * @param unix_epoch the given UNIX Epoch (double)
+	 * @return a ACS::Time object of the given UNIX Epoch
+	*/
+	static ACS::Time UNIXEpoch2ACSTime(double unix_epoch);
 	/** 
 	 * This function performs the copy of an epoch
 	 * @param dst destination epoch
@@ -328,10 +354,23 @@ public:
 	 * @param start position inside the string from which to start the next token, if a new token has been found
 	 *                it points to the character immediately after the localized token
 	 * @param delimiter this is the character that separates the token
-	 * @param it returns the next token in the string
+	 * @param ret it returns the next token in the string
+	 * @param stopAtFirst immediately returns (true) if the first character found is one of the delimiters, otherwise it goes further inside str
 	 * @return true if a token has been found
 	 */
-	static bool getNextToken(const IRA::CString& str,int &start,char delimiter,IRA::CString &ret);
+	static bool getNextToken(const IRA::CString& str,int &start,const char& delimiter,IRA::CString &ret, const bool& stopAtFirst=true);
+
+	/**
+	 * Use this function to divide a string into  separated tokens. Multiple token delimiters can be specified.
+	 * @param str string to be divided into tokens
+	 * @param start position inside the string from which to start the next token, if a new token has been found
+	 *                it points to the character immediately after the localized token
+	 * @param delimiters vector that contains characters that separate the token
+	 * @param ret it returns the next token in the string
+	 * @param stopAtFirst immediately returns (true) if the first character found is one of the delimiters, otherwise it goes further inside str
+	 * @return true if a token has been found
+	 */
+	static bool getNextToken(const IRA::CString& str,int &start,const std::vector<char>& delimiters,IRA::CString &ret, const bool& stopAtFirst=true);
 	
 	/**
 	 * Computes the normalized (+/-PI) difference between two angles expressed in radians(a-b). For example 359°-1°=-2°,1°-359°=2°, 179°-360°=179° and so on.

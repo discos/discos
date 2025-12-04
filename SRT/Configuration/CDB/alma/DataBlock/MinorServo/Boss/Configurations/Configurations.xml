@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!--
+   - Author: Giuseppe Carboni
+   - History:
+ 	- 02-04-25 Created
+-->
+
+<SRTMinorServoBossConfigurationsTable xmlns="urn:schemas-cosylab-com:SRTMinorServoBoss:1.0" 
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <!--configuration> <DISCOS>LLP</DISCOS>            <LDO>Primario</LDO>    </configuration-->
+    <!--configuration> <DISCOS>PPP</DISCOS>            <LDO>Primario</LDO>    </configuration-->
+    <!--configuration> <DISCOS>PLP</DISCOS>            <LDO>Primario</LDO>    </configuration-->
+    <!--configuration> <DISCOS>HHP</DISCOS>            <LDO>Primario</LDO>    </configuration-->
+    <!--configuration> <DISCOS>XKP</DISCOS>            <LDO>Primario</LDO>    </configuration-->
+    <configuration> <DISCOS>CCG</DISCOS>            <LDO>Gregoriano1</LDO> </configuration>
+    <configuration> <DISCOS>KKG</DISCOS>            <LDO>Gregoriano2</LDO> </configuration>
+    <configuration> <DISCOS>KKG_METROLOGY</DISCOS>  <LDO>Gregoriano2</LDO> </configuration>
+    <configuration> <DISCOS>WWG</DISCOS>            <LDO>Gregoriano3</LDO> </configuration>
+    <configuration> <DISCOS>QQG</DISCOS>            <LDO>Gregoriano4</LDO> </configuration>
+    <configuration> <DISCOS>KQW</DISCOS>            <LDO>Gregoriano5</LDO> </configuration>
+    <configuration> <DISCOS>MISTRAL</DISCOS>        <LDO>Gregoriano6</LDO> </configuration>
+    <configuration> <DISCOS>CABINET</DISCOS>        <LDO>Gregoriano7</LDO> </configuration>
+    <configuration> <DISCOS>CCB</DISCOS>            <LDO>BWG1</LDO>        </configuration>
+    <configuration> <DISCOS>XB</DISCOS>             <LDO>BWG3</LDO>        </configuration>
+
+</SRTMinorServoBossConfigurationsTable>

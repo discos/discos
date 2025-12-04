@@ -302,6 +302,8 @@ module Backends {
 		ACS::doubleSeq getTpi() raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
 
 		ACS::doubleSeq getRms() raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+
+		void endSchedule() raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
 		
 		/**
 		 * Call this method in order to read the total power from each input when the input are connected directly to the 50 Ohm. 
@@ -350,6 +352,17 @@ module Backends {
  		 * This method can be used to configure and give to the backend some commands. The commands and configuration is given as strings.   If the component is busy 
 		 * it is not allowed to call this method.  
 		 */
+
+		/*
+		 * It allows to set a range where to calculate a Tsys.
+		 * @throw ComponentErrors::ComponentErrorsEx
+		 * @throw BackendsErrors::BackendsErrorsEx
+		 * @throw CORBA::SystemException
+		 * @param freq starting frequency (MHz).
+		 * @param bw portion of the backend bandwith (MHz) where calculate the Tsys.
+		 */
+		 void setTsysRange(in double freq,in double bw) raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+
 		
 	};
 	

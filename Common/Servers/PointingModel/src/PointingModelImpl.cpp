@@ -16,6 +16,8 @@ PointingModelImpl::PointingModelImpl(const ACE_CString &CompName, maci::Containe
 	AUTO_TRACE("PointingModelImpl::PointingModelImpl()");
 	m_componentName = CString(CompName);
 	m_receiverCode = "";
+	m_pointingOffsetAz=0;
+	m_pointingOffsetEl=0;
 }
 
 PointingModelImpl::~PointingModelImpl()
@@ -263,6 +265,9 @@ void PointingModelImpl::getAzElOffsets (CORBA::Double azimuth, CORBA::Double ele
 	if (receiverActivated) {
 		getAzOff(azimuth, elevation, azOffset);
 		getElOff(azimuth, elevation, elOffset);
+		azOffset  = azOffset+m_pointingOffsetAz;
+		elOffset= elOffset+m_pointingOffsetEl;
+ 
 	}
 	else {
 		azOffset = 0.0;
@@ -361,8 +366,67 @@ void PointingModelImpl::setReceiver (const char* receiverCode) throw (CORBA::Sys
 	}
 }
 
+
+
+
+void PointingModelImpl::setPointingOffsets(CORBA::Double pointOffAz,  CORBA::Double pointingOffEl) throw (CORBA::SystemException, AntennaErrors::AntennaErrorsEx)
+
+{
+    
+    AUTO_TRACE("PointingModelImpl::setPointingOffsets()");
+    
+    m_pointingOffsetAz=pointOffAz;
+    m_pointingOffsetEl=pointingOffEl;
+
+
+ 
+}
+
+void PointingModelImpl::addPointingOffsets(CORBA::Double pointOffAz,  CORBA::Double pointingOffEl) throw (CORBA::SystemException, AntennaErrors::AntennaErrorsEx)
+
+{
+    
+    AUTO_TRACE("PointingModelImpl::addPointingOffsets()");
+    
+    m_pointingOffsetAz+=pointOffAz;
+    m_pointingOffsetEl+=pointingOffEl;
+
+
+ 
+}
+
+
+	/**
+		* This method add extra offset to pointing model. An example of a pointing offset is
+		* the output of the pointing after a calibration tool.  
+		* @param pointOffAz
+		* @param pointOffEl
+		*/
+
+void PointingModelImpl::getPointingOffsets(CORBA::Double_out pointOffAz, CORBA::Double_out pointOffEl) 	throw (CORBA::SystemException, AntennaErrors::AntennaErrorsEx)
+{
+
+    AUTO_TRACE("PointingModelImpl::getPointingOffsets()");
+    pointOffAz=m_pointingOffsetAz ;
+    pointOffEl=m_pointingOffsetEl;
+
+} 
+	
+
+void PointingModelImpl::clearPointingOffsets() throw (CORBA::SystemException, AntennaErrors::AntennaErrorsEx)
+{
+
+
+       AUTO_TRACE("PointingModelImpl::clearPointingOfsets()");
+       m_pointingOffsetAz=0;
+       m_pointingOffsetEl=0;
+    	
+}
+		
+		
 /* --------------- [ MACI DLL support functions ] -----------------*/
 #include <maciACSComponentDefines.h>
 MACI_DLL_SUPPORT_FUNCTIONS(PointingModelImpl)
 
 /*___oOo___*/
+ 

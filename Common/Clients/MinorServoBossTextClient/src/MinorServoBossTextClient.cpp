@@ -279,7 +279,7 @@ int main(int argc, char *argv[]) {
         userInput=new TW::CInputCommand();
         
         /** setting up the properties of the components of the frame controls */
-        _TW_SET_COMPONENT(actualSetup_field,18,0,12,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+        _TW_SET_COMPONENT(actualSetup_field,18,0,20,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
         tracking_display->setPosition(CPoint(18,1));
         tracking_display->setOrientation(TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>::HORIZONTAL);
         tracking_display->setFormatFunction(boolFormat,NULL);
@@ -289,7 +289,7 @@ int main(int argc, char *argv[]) {
 		status_box->setStatusLook(Management::MNG_OK,CStyle(BLACK_GREEN,CStyle::BOLD));
 		status_box->setStatusLook(Management::MNG_WARNING,CStyle(BLACK_YELLOW,CStyle::BOLD));
 		status_box->setStatusLook(Management::MNG_FAILURE,CStyle(BLACK_RED,CStyle::BOLD));
-        _TW_SET_COMPONENT(motionInfo_field,18,3,23,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+        _TW_SET_COMPONENT(motionInfo_field,18,3,40,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 
         /* ****************************************************************** */
         _TW_SET_COMPONENT(userInput,0,WINDOW_HEIGHT-6,WINDOW_WIDTH-1,1,USER_INPUT_COLOR_PAIR,USER_INPUT_STYLE,NULL);
