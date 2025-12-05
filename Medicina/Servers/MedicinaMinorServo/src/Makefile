@@ -60,6 +60,13 @@ scudisconnect_OBJECTS = scudisconnect MedMinorServoModbus MedMinorServoConstants
 scudisconnect_LIBS = IRALibrary ModbusChannel boost_thread-mt boost_system
 
 #
+# Python stuff (public and local)
+# ----------------------------
+PY_SCRIPTS         = 
+PY_SCRIPTS_L       = poly_converter
+
+
+#
 # Configuration Database Files
 # ----------------------------
 CDB_SCHEMAS = MinorServo MinorServoParameters

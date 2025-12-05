@@ -1265,7 +1265,14 @@ void CCommandLine::setEnabled(const ACS::longSeq& en) throw (BackendsErrors::Bac
 	}
 	
 	if((long) en.length() > m_beams){
-		 CUSTOM_LOG(LM_FULL_INFO,"CCommandLine::setEnabled()",(LM_NOTICE,"the number of input elements are greater than allowed"));
+		 CUSTOM_LOG(LM_FULL_INFO,"CCommandLine::setEnabled()",(LM_WARNING,"The number of input elements are greater than allowed"));
+		 return;
+	}
+	for (int i = 0; i < (int) en.length(); i++) { 
+		if(en[i]>=m_beams){ 
+		    CUSTOM_LOG(LM_FULL_INFO,"CCommandLine::setEnabled()",(LM_WARNING,"Feed ID is invalid for current configuration")); 
+		    return;
+	    }
 	}
 	
 	for (int j = 0; j < MAX_SECTION_NUMBER; j++){ m_enabled[j] = false; }
@@ -1273,10 +1280,6 @@ void CCommandLine::setEnabled(const ACS::longSeq& en) throw (BackendsErrors::Bac
 	for (int i = 0; i < (int) en.length(); i++) { 
 	  for (int k = 0; k < m_sectionsNumber; k++){  
 	    if(m_feedNumber[k] == en[i]){ m_enabled[k] = true;}
-	    if(en[i] >= m_beams){ 
-		    CUSTOM_LOG(LM_FULL_INFO,"CCommandLine::setEnabled()",(LM_NOTICE,"feeds inserted in input are invalid for this backend configuration")); 
-		    break;
-	    }
 	  } 
 	}	
 	
