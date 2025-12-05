@@ -26,6 +26,7 @@ from DewarPositioner.devios import StatusDevIO
 from Receivers import TDewarPositionerScanInfo as ScanInfo
 
 from IRAPy import logger
+from ZMQLibrary import ZMQPublisher, ZMQTimeStamp
 
 
 __copyright__ = "Marco Buttu <mbuttu@oa-cagliari.inaf.it>"
@@ -71,6 +72,17 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         self._setDefaultSetup() 
         self.client = PySimpleClient()
         self.control = Control()
+        self.zmqDictionary = {
+            "currentConfiguration": "",
+            "currentDerotator": "",
+            "currentSetup": "",
+            "rewinding": False,
+            "rewindingMode": "",
+            "rewindingRequired": False,
+            "status": "WARNING",
+            "timestamp": ZMQTimeStamp.fromUNIXTime(time.time()),
+            "tracking": False
+        }
         try:
             self.supplier = Supplier(Receivers.DEWAR_POSITIONER_DATA_CHANNEL)
         except CORBAProblemExImpl as ex:
@@ -84,7 +96,12 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             self.statusThread = services().getThread(
                     name='Publisher',
                     target=DewarPositionerImpl.publisher,
-                    args=(self.positioner, self.supplier, self.control)
+                    args=(
+                        self.positioner,
+                        self.supplier,
+                        self.control,
+                        self.zmqDictionary
+                    )
             )
             self.statusThread.start()
         except AttributeError as ex:
@@ -114,6 +131,7 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
     def setup(self, code):
         self.commandedSetup = code.upper()
         logger.logNotice('starting the derotator %s setup' %self.commandedSetup)
+        deviceName = ""
         try:
             self.cdbconf.setup(self.commandedSetup)
             deviceName = self.cdbconf.getAttribute('DerotatorName')
@@ -161,6 +179,8 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             self.setConfiguration(self.cdbconf.getAttribute('DefaultConfiguration'))
             self.setRewindingMode(self.cdbconf.getAttribute('DefaultRewindingMode'))
             self.actualSetup = self.commandedSetup
+            self.zmqDictionary["currentDerotator"] = deviceName.split("/")[-1]
+            self.zmqDictionary["currentSetup"] = self.actualSetup
             logger.logNotice('derotator %s setup done' %self.commandedSetup)
         except PositionerError as ex:
             logger.logError(ex)
@@ -202,6 +222,8 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
             raise exc.getComponentErrorsEx()
         finally:
             self._setDefaultSetup()
+        self.zmqDictionary["currentSetup"] = ""
+        self.zmqDictionary["currentDerotator"] = ""
         logger.logNotice('derotator parked')
 
 
@@ -605,7 +627,9 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
         self.commandedSetup = ''
 
     @staticmethod
-    def publisher(positioner, supplier, control, sleep_time=1):
+    def publisher(positioner, supplier, control, zmqDictionary, sleep_time=1):
+        zmqPublisher = ZMQPublisher("derotators")
+
         error = False
         while True:
             if control.stop:
@@ -617,10 +641,13 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
 
                     if failure:
                         control.mngStatus = Management.MNG_FAILURE
+                        zmqDictionary["status"] = "FAILURE"
                     elif warning or not positioner.isSetup():
                         control.mngStatus = Management.MNG_WARNING
+                        zmqDictionary["status"] = "WARNING"
                     else:
                         control.mngStatus = Management.MNG_OK
+                        zmqDictionary["status"] = "OK"
 
                     event = Receivers.DewarPositionerDataBlock(
                             getTimeStamp().value,
@@ -632,6 +659,24 @@ class DewarPositionerImpl(POA, cc, services, lcycle):
                     )
                     supplier.publishEvent(simple_data=event)
                     error = False
+
+                    if zmqDictionary["currentSetup"] != "":
+                        zmqDictionary["currentConfiguration"] = positioner.getConfiguration()
+                        zmqDictionary["rewinding"] = positioner.isRewinding()
+                        zmqDictionary["rewindingMode"] = positioner.getRewindingMode().upper()
+                        zmqDictionary["rewindingRequired"] = positioner.isRewindingRequired()
+                        zmqDictionary["tracking"] = tracking
+                        zmqDictionary["updating"] = updating
+                    else:
+                        zmqDictionary["currentConfiguration"] = ""
+                        zmqDictionary["rewinding"] = False
+                        zmqDictionary["rewindingMode"] = "NONE"
+                        zmqDictionary["rewindingRequired"] = False
+                        zmqDictionary["tracking"] = False
+                        zmqDictionary["updating"] = False
+
+                    zmqDictionary["timestamp"] = ZMQTimeStamp.fromUNIXTime(time.time())
+                    zmqPublisher.publish(zmqDictionary)
                 except Exception as ex:
                     reason = ex.getReason() if hasattr(ex, 'getReason') else ex
                     if not error:

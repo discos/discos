@@ -58,6 +58,11 @@ private:
      * The thread should be cycling at a constant rate, therefore the inner sleeping time is always updated taking into account this and the thread execution time.
      */
     ACS::TimeInterval m_sleep_time;
+
+    /**
+     * Variable containing the time of the next planned thread iteration.
+     */
+    ACS::Time m_next_time;
 };
 
 #endif /*_SRTDEROTATORSTATUSTHREAD_H_*/

@@ -52,9 +52,13 @@ SRTDerotatorImpl::SRTDerotatorImpl(const ACE_CString& component_name, maci::Cont
     m_position_difference_ptr(this),
     m_status_ptr(this),
     m_socket_configuration(SRTMinorServoSocketConfiguration::getInstance(container_services)),
-    m_socket(SRTMinorServoSocket::getInstance(m_socket_configuration.m_ip_address, m_socket_configuration.m_port, m_socket_configuration.m_timeout))
+    m_socket(SRTMinorServoSocket::getInstance(m_socket_configuration.m_ip_address, m_socket_configuration.m_port, m_socket_configuration.m_timeout)),
+    m_zmqPublisher("derotators")
 {
     AUTO_TRACE(m_servo_name + "::SRTDerotatorImpl()");
+    m_zmqDictionary["minLimit"] = m_min;
+    m_zmqDictionary["maxLimit"] = m_max;
+    m_zmqDictionary["rewindingStep"] = m_step;
 }
 
 SRTDerotatorImpl::~SRTDerotatorImpl()
@@ -189,7 +193,9 @@ bool SRTDerotatorImpl::updateStatus()
             status |= (1L << 3);
         }
 
-        if(!isReady())
+        bool ready = isReady();
+
+        if(!ready)
         {
             // No failures but not ready
             status |= (1L << 3);
@@ -226,16 +232,15 @@ bool SRTDerotatorImpl::updateStatus()
             }
         }
 
+
         m_positions_queue.put(last_timestamp, { current_point });
-        m_position_difference.store(m_commanded_position - current_point);
-        if(std::fabs(m_position_difference.load()) <= m_tracking_delta)
-        {
-            m_tracking.store(Management::MNG_TRUE);
-        }
-        else
-        {
-            m_tracking.store(Management::MNG_FALSE);
-        }
+        m_zmqDictionary["commandedPosition"] = m_commanded_position.load();
+        m_zmqDictionary["currentPosition"] = current_point;
+        m_zmqDictionary["ready"] = ready;
+        m_zmqDictionary["slewing"] = isSlewing();
+        m_zmqDictionary["tracking"] = isTracking();
+        m_zmqDictionary["trackingError"] = m_position_difference.load();
+        m_zmqDictionary["timestamp"] = ZMQ::ZMQTimeStamp::fromACSTime(last_timestamp);
     }
     catch(...)
     {
@@ -250,6 +255,13 @@ bool SRTDerotatorImpl::updateStatus()
 
     m_status_pattern.store(status);
     return true;
+}
+
+void SRTDerotatorImpl::publishZMQDictionary()
+{
+    AUTO_TRACE(m_servo_name + "::publishZMQDictionary()");
+
+    m_zmqPublisher.publish(ZMQ::ZMQDictionary{{ m_servo_name, m_zmqDictionary }});
 }
 
 void SRTDerotatorImpl::setup()
@@ -307,6 +319,24 @@ double SRTDerotatorImpl::getPositionFromHistory(ACS::Time acs_time)
         ex.log(LM_DEBUG);
         throw ex.getComponentErrorsEx();
     }
+}
+
+bool SRTDerotatorImpl::isTracking()
+{
+    bool is_tracking = false;
+    double current_point = m_status.getActualPosition();
+    double posDiff = m_commanded_position - current_point;
+
+    m_position_difference.store(posDiff);
+
+    if(std::fabs(posDiff) <= m_tracking_delta)
+    {
+        is_tracking = true;
+    }
+
+    m_tracking.store(is_tracking ? Management::MNG_TRUE : Management::MNG_FALSE);
+
+    return is_tracking;
 }
 
 bool SRTDerotatorImpl::isReady()

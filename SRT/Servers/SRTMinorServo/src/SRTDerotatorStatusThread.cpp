@@ -19,13 +19,14 @@ void SRTDerotatorStatusThread::onStart()
 {
     AUTO_TRACE("SRTDerotatorStatusThread::onStart()");
 
+    m_next_time = 0;
+
     ACS_LOG(LM_FULL_INFO, "SRTDerotatorStatusThread::onStart()", (LM_DEBUG, "STATUS THREAD STARTED"));
 }
 
 void SRTDerotatorStatusThread::onStop()
 {
     AUTO_TRACE("SRTDerotatorStatusThread::onStop()");
-
     ACS_LOG(LM_FULL_INFO, "SRTDerotatorStatusThread::onStop()", (LM_DEBUG, "STATUS THREAD STOPPED"));
 }
 
@@ -33,13 +34,25 @@ void SRTDerotatorStatusThread::runLoop()
 {
     AUTO_TRACE("SRTDerotatorStatusThread::runLoop()");
 
-    ACS::Time t0 = getTimeStamp();
     unsigned long sleep_time = 10000000;
 
     if(m_component.updateStatus())
     {
+        if(m_next_time == 0)
+        {
+            m_next_time = getTimeStamp();
+        }
+
+        m_component.publishZMQDictionary();
+
+        m_next_time += m_sleep_time;
+
         // Update the sleep time in order to not drift away by adding latency
-        sleep_time = std::max(m_sleep_time - (getTimeStamp() - t0), (long unsigned int)0);
+        sleep_time = ACS::TimeInterval(std::max(long(0), long(m_next_time - getTimeStamp())));
+    }
+    else
+    {
+        m_next_time = 0;
     }
 
     this->setSleepTime(sleep_time);

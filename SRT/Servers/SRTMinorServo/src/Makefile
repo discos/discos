@@ -40,7 +40,7 @@ SRTProgramTrackMinorServoImpl_OBJECTS = SRTProgramTrackMinorServoImpl SRTBaseMin
 SRTProgramTrackMinorServoImpl_LIBS = IRALibrary SRTMinorServoStubs MinorServoErrors MinorServoDefinitionsStubs SRTMinorServoCommandLibrary SRTMinorServoSocketLibrary DiscosVersion
 SRTProgramTrackMinorServoImpl_CFLAGS = -std=c++17 -fconcepts
 SRTDerotatorImpl_OBJECTS = SRTDerotatorImpl SRTDerotatorStatusThread
-SRTDerotatorImpl_LIBS = IRALibrary SRTMinorServoStubs MinorServoDefinitionsStubs SRTMinorServoCommandLibrary SRTMinorServoSocketLibrary GenericDerotatorStubs SRTDerotatorStubs DerotatorErrors DiscosVersion
+SRTDerotatorImpl_LIBS = IRALibrary SRTMinorServoStubs MinorServoDefinitionsStubs SRTMinorServoCommandLibrary SRTMinorServoSocketLibrary GenericDerotatorStubs SRTDerotatorStubs DerotatorErrors DiscosVersion ZMQLibrary
 SRTDerotatorImpl_CFLAGS = -std=c++17 -fconcepts
 SRTDerotatorStatusThread_CFLAGS = -std=c++17 -fconcepts
 
