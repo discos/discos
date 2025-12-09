@@ -17,7 +17,7 @@
 void
 sunpos (double mj, double *lsn, double *rsn, double *bsn)
 {
-	static double last_mj = -3691, last_lsn, last_rsn, last_bsn;
+	static __thread double last_mj = -3691, last_lsn, last_rsn, last_bsn;
 	double ret[6];
 
 	if (mj == last_mj) {

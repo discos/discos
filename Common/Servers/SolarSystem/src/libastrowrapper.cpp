@@ -1,12 +1,20 @@
+#include <memory>
 #include "libastrowrapper.h"
 
+#include <vector>
+#include <array>
+#include <string>
 namespace xephemlib {
 	
+std::mutex SolarSystemBody::astro_mutex;
 
-
-const char  *planetnames[]={"Mercury","Venus","Mars","Jupiter","Saturn",
-                            "Uranus","Neptune","Pluto","Sun","Moon","NOBJ"};
+//static const char  *planetnames[]={"Mercury","Venus","Mars","Jupiter","Saturn",
+//                            "Uranus","Neptune","Pluto","Sun","Moon","NOBJ"};
                             
+constexpr std::array<const char*, 11> planetnames = {
+    "Mercury", "Venus", "Mars", "Jupiter", "Saturn",
+    "Uranus", "Neptune", "Pluto", "Sun", "Moon", "NOBJ"
+};
 
 
 
@@ -63,9 +71,9 @@ double Site::getMjd()
     
 }
 
-SolarSystemBody::SolarSystemBody()
+SolarSystemBody::SolarSystemBody(): obj(std::unique_ptr<Obj>(new Obj()))
 {
-   obj=new Obj();
+ 
    
 
 };
@@ -73,43 +81,23 @@ SolarSystemBody::SolarSystemBody()
 void SolarSystemBody::setObject(PLCode code){
     
         
-    
-//    obj=new Obj();   
-      _code=code;
-       
-    
-  //  obj->any.co_type=PLANET;
-    strncpy(obj->any.co_name,planetnames[_code],10);
-//    obj->
- //   pl.plo_code=code;
-#ifdef DEBUG    
-//    std::cout << "Code: " << code << std::endl;
-//    std::cout << "Name: " << planetnames[code] << std::endl;
- //   std::cout << "Name: " << obj->any.co_name << std::endl;
-#endif
-    
-//    pref_set(PREF_EQUATORIAL,PREF_TOPO);
+    _code = code;
+    if (_code < 0 || _code >= NOBJ) return;
 
-  //      std::cout << "exit after pref_set: " << obj->any.co_name << std::endl;
+    // PRE-CALCULATE invariant data here, not in compute()
+    obj->any.co_type = PLANET;
+    strncpy(obj->any.co_name, planetnames[_code], sizeof(obj->any.co_name)-1);
+    obj->pl.plo_code = _code;    
+  //  std::cout << "Code: " << _code << "\n";
+    
 
 };
   
-SolarSystemBody::SolarSystemBody(PLCode code)
+SolarSystemBody::SolarSystemBody(PLCode code): obj(std::unique_ptr<Obj>(new Obj()))
 {
-      obj=new Obj();
-
-    _code=code;
-    
-//    obj->any.co_type=PLANET;
-  //  strncpy(obj->any.co_name,planetnames[_code],10);
-  //  obj->pl.plo_code=code;
-#ifdef DEBUG    
-//    std::cout << "Code: " << code << std::endl;
-//    std::cout << "Name: " << planetnames[code] << std::endl;
-//    std::cout << "Name: " << obj->any.co_name << std::endl;
-#endif
-    
-  //  pref_set(PREF_EQUATORIAL,PREF_TOPO);
+ 
+ 
+    setObject(code);
 
     
     
@@ -117,23 +105,15 @@ SolarSystemBody::SolarSystemBody(PLCode code)
 
 PLCode  SolarSystemBody::getPlanetCodeFromName(std::string  str)
 {
-     std::locale loc;
-    for (std::string::size_type i=0; i<str.length(); ++i){
-           str[i]=std::toupper(str[i],loc);
-     }
-      if (planet.find(str) != planet.end()) 
-      { 
-      //     std::cout <<str << " is in the map." << std::endl;
-           return SolarSystemBody::planet[str]; 
-      } 
-      else 
-      { 
-      
-      //std::cout << str << " is not in the map." << std::endl;
-            return NOBJ;
-      }
-
-      
+// Iterate over the static C-array defined at the top of the file
+    for(int i = 0; i < NOBJ; ++i) {
+        // strcasecmp is standard on POSIX (Linux/Unix). 
+        // Use _stricmp on Windows.
+        if (strcasecmp(str.c_str(), planetnames[i]) == 0) {
+            return (PLCode)i;
+        }
+    }
+    return NOBJ;      
 
      
      
@@ -150,7 +130,9 @@ std::string  SolarSystemBody::getPlanetNameFromCode(PLCode code ){
 
 
     std::string name;
-    for (std::map<std::string,PLCode>::iterator it=SolarSystemBody::planet.begin(); it!=SolarSystemBody::planet.end(); ++it)
+    
+ //   for (std::map<std::string,PLCode>::iterator it=SolarSystemBody::planet.begin(); it!=SolarSystemBody::planet.end(); ++it)    
+    for ( auto it=SolarSystemBody::planet.begin(); it!=SolarSystemBody::planet.end(); ++it)
     {       
 #ifdef DEBUG        
          //   std::cout << it->first << " => " << it->second << '\n';
@@ -184,36 +166,26 @@ void SolarSystemBody::getCoordinates(double& ra, double& dec,double& az,double& 
 
 void  SolarSystemBody::compute(Site* site){
     
-    //Obj* obj=new Obj();
+    //std::cout << "Compute 2" <<std::endl;
 
-    obj->any.co_type=PLANET;
-    strncpy(obj->any.co_name,planetnames[_code],10);
-    obj->
-    pl.plo_code=_code;
-#ifdef DEBUG    
-//    std::cout << "Code: " << _code << std::endl;
-//    std::cout << "Name: " << planetnames[_code] << std::endl;
-//    std::cout << "Name: " << obj->any.co_name << std::endl;
-#endif    
-     pref_set(PREF_EQUATORIAL,PREF_TOPO);
-
+    pref_set(PREF_EQUATORIAL,PREF_TOPO);
+    std::lock_guard<std::mutex> lock(astro_mutex);
     
-//    std::cout << "Compute " <<std::endl;
-    obj_cir (site, obj);
+    obj_cir (site, obj.get());
 
     _ra=obj->any.co_ra;
     _dec=obj->any.co_dec;
     _az=obj->any.co_az;
     _el=obj->any.co_alt;
     _range=obj->anyss.so_edist;
-   // delete obj;
+
     
 }
 
 
 Obj* SolarSystemBody::getObject()
 {
-    return  obj;
+    return  obj.get();
     
     
 }
@@ -238,7 +210,7 @@ aberration.*/
     
 }
 
-std::map<std::string,PLCode>SolarSystemBody::planet;  //definition of static variable
+ std::map<std::string,PLCode>SolarSystemBody::planet;  //definition of static variable
 
 
  bool  createMap() // function to initialize static map 

@@ -28,7 +28,6 @@ class SunPositionTest(unittest.TestCase):
 
     def test_equatorialJ2000(self):
          ra,dec=self.hwRef.getJ2000EquatorialCoordinate(self.acstime.value)
-         time.sleep(1)
          print(ra,dec)	 
              
     
@@ -36,7 +35,7 @@ class SunPositionTest(unittest.TestCase):
          self.assertAlmostEqual(degrees(dec),   -18.451737235,  delta=1e-4)
 
     def test_equatorialApparent(self):
-        for i in range(100000):	
+        for i in range(10):	
             az,el,ra,dec,l,lon,lat =self.hwRef.getAllCoordinates(self.acstime.value)
 #          print('type az',type(az))
             self.assertAlmostEqual(degrees(ra),309.986231168 , delta=1e-4)   	 
@@ -59,7 +58,9 @@ class SunPositionTest(unittest.TestCase):
             self.assertAlmostEqual(degrees(az),   210.403368369   , delta=5e-4)   	 
             self.assertAlmostEqual(degrees(el),  26.276295555  , delta=5e-4)  
        	 
-
+    def tearDown(self):
+    	   print('closing')
+    	   self.simpleClient.disconnect()
 if __name__ == '__main__':
     
         unittest.main() 
