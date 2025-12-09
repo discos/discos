@@ -26,6 +26,35 @@
 #pragma prefix "alma"
 
 module Backends {
+
+
+	/**
+	 * This defines the basic interface that all the devices able to control an attenuator must inherits from.
+ 	 * @author <a href=mailto:andrea.orlati@inaf.it>Andrea Orlati</a>,
+ 	 * Istituto di Radioastronomia, Italia
+ 	 * <br>
+	 */
+	interface BackendAttenuation {
+	
+		/*
+		 * It allows to change the attenuation value for each of the inputs.
+		 * @throw ComponentErrors::ComponentErrorsEx 
+		 * @throw BackendsErrors::BackendsErrorsEx
+		 * @throw CORBA::SystemException
+		 * @param input identifier of the input we want to set the attenuation. It must be between 0 and <i>inputsNumber</i>-1. The first input belongs to the first section; if the section is polarimetric ti has 2 inputs;
+		 *                by convection the first input of the section is the signal coming from the left polarization.
+		 * @param att sets the attenuation level for given  input in db. If not set the component will assume a default value depending
+		 * 						on the implementation. A negative will keep the present configuration. 
+		 */
+		 void setAttenuation(in long input,in double att) raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+		 
+		/**
+		 * This attribute lists all attenuation values used in each of the backend inputs (db). The length of the sequnece is given by the attribute <i>inputsNumber</i>.
+		 * It can be modified by the method <i>setAttenuation()</i> 
+		 */
+		 readonly attribute ACS::ROdoubleSeq attenuation;
+
+	};
 	
 	/**
 	 * This is the interface of the component GenericBackend. Any backend inherits from this interface
@@ -69,7 +98,7 @@ module Backends {
 	 * Istituto di Radioastronomia, Italia
 	 * <br> 
 	*/
-	interface GenericBackend: bulkdata::BulkDataSender,Management::CommandInterpreter  {
+	interface GenericBackend: bulkdata::BulkDataSender,Management::CommandInterpreter, Backends::BackendAttenuation  {
 		
 		/**
 		 * This attribute is hte current time in the backend. It is represented as the number of 
@@ -104,7 +133,7 @@ module Backends {
 		 * This attribute lists all attenuation values used in each of the backend inputs (db). The length of the sequnece is given by the attribute <i>inputsNumber</i>.
 		 * It can be modified by the method <i>setAttenuation()</i> 
 		 */
-		readonly attribute ACS::ROdoubleSeq attenuation;
+		//readonly attribute ACS::ROdoubleSeq attenuation;
 			
 		/**
 		 * This attribute reports the polarization configured in each section of the backend. The length of the sequence is given by the attribute <i>sectionsNumber</i>
@@ -239,7 +268,7 @@ module Backends {
 		 * @param att sets the attenutation level for given  input in db. If not set the component will assume a default value depending
 		 * 						on the implementation. A negative will keep the present configuration. 
 		 */
-		 void setAttenuation(in long input,in double att) raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+		 //void setAttenuation(in long input,in double att) raises (ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
 
 		/**
 		 * @deprecated Call this function in order to configure all the sections.  If the component is busy it is not allowed to call this method.
