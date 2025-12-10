@@ -17,6 +17,7 @@ class JupiterPositionTest(unittest.TestCase):
          epoch = Acspy.Common.TimeHelper.TimeUtil()
          struct_time = time.strptime("2021-Apr-15 00:00", "%Y-%b-%d %H:%M")
          tm=time.mktime(struct_time)
+
          self.acstime=epoch.py2epoch(tm)
          print(tm)
          self.simpleClient = PySimpleClient()
@@ -27,7 +28,6 @@ class JupiterPositionTest(unittest.TestCase):
 
     def test_equatorialJ2000(self):
          ra,dec=self.hwRef.getJ2000EquatorialCoordinate(self.acstime.value)
-         time.sleep(1)
          print(ra,dec)	 
 
 

@@ -9,11 +9,12 @@
 
 
 
-#ifndef _LIBRWAPPER
-#define  _LIBRWAPPER
+//#ifndef _LIBRWAPPER
+//#define  _LIBRWAPPER
 
 #include <iostream>
 #include <cstring>
+#include <string>
 #include "astro.h"
 #include "preferences.h"
 #include <string>
@@ -21,6 +22,8 @@
 #include <cctype>
 #include <algorithm>
 #include <locale>
+#include <memory>
+#include <mutex> // Import mutex
 
 namespace xephemlib
 {
@@ -38,12 +41,12 @@ public:
     
     void stampa(void);
     double getMjd();
-    
+
     
 private:
        double m_lon,m_lat,m_height;
        std::string name;
-    
+
 };
 
 class SolarSystemBody   {
@@ -51,8 +54,12 @@ class SolarSystemBody   {
 public:
       
       
-      SolarSystemBody(PLCode code);
-      ~SolarSystemBody(){ delete obj;}
+      SolarSystemBody(PLCode code)  ;
+      ~SolarSystemBody(){
+		std::cout << "destroyed"<<"\n";      
+      
+      //
+      };
     
       static std::string getPlanetNameFromCode(PLCode code);
       static PLCode  getPlanetCodeFromName(std::string  name);
@@ -60,7 +67,7 @@ public:
       SolarSystemBody();
       void setObject(PLCode code);
        
- 
+      static std::mutex astro_mutex; // Declaration     
       Obj* getObject();
       void report();
       static std::map<std::string,PLCode> planet;
@@ -74,8 +81,8 @@ public:
     
 protected:
         
-            Obj* obj;
-            Obj* m_obj;
+            std::unique_ptr<Obj> obj; // Replaces Obj* obj
+ 
     
     
     
@@ -105,4 +112,39 @@ private:
 
 
 
-#endif   /*_LIBRWAPPER*/
+//#endif   /*_LIBRWAPPER*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

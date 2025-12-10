@@ -721,6 +721,8 @@ MedMinorServoGeometry::_get_direct_zp(const MEDMINORSERVOSTATUS actual_position)
 
 /****************************************************
  * DIRECT EQUATIONS FOR SUBREFLECTOR POSITIONS
+ * ************************************************* *
+ * TO BE NOTED: geometry here is done with the assumption that arctg(x)=x if x is small
  ****************************************************/
 
 double
@@ -757,7 +759,10 @@ MedMinorServoGeometry::_get_direct_z(const MEDMINORSERVOSTATUS actual_position)
     MedMinorServoConstants *medMinorServoConstants = MedMinorServoConstants::getInstance();
     double z = 0.0;
     if (actual_position.mode == 1) // GREGORIAN
-        z = -0.1392 * (actual_position.pos_y_zp - medMinorServoConstants->MINOR_SERVO_Y.position_zero) + 0.3333 * (actual_position.pos_z1 - medMinorServoConstants->MINOR_SERVO_Z1.position_zero) + 0.3333 * (actual_position.pos_z2 - medMinorServoConstants->MINOR_SERVO_Z2.position_zero) + 0.3333 * (actual_position.pos_z3 - medMinorServoConstants->MINOR_SERVO_Z3.position_zero);
+        z = -0.1392 * (actual_position.pos_y_zp - medMinorServoConstants->MINOR_SERVO_Y.position_zero) + 
+        0.3333 * (actual_position.pos_z1 - medMinorServoConstants->MINOR_SERVO_Z1.position_zero) + 
+        0.3333 * (actual_position.pos_z2 - medMinorServoConstants->MINOR_SERVO_Z2.position_zero) + 
+        0.3333 * (actual_position.pos_z3 - medMinorServoConstants->MINOR_SERVO_Z3.position_zero);
     else
     {
         // TODO: raise exception? warning?
@@ -771,7 +776,9 @@ MedMinorServoGeometry::_get_direct_theta_x(const MEDMINORSERVOSTATUS actual_posi
     MedMinorServoConstants *medMinorServoConstants = MedMinorServoConstants::getInstance();
     double theta_x = 0.0;
     if (actual_position.mode == 1) // GREGORIAN
-        theta_x = (actual_position.pos_z1 - medMinorServoConstants->MINOR_SERVO_Z1.position_zero) / 1791 - (actual_position.pos_z2 - medMinorServoConstants->MINOR_SERVO_Z2.position_zero) / 3582 - (actual_position.pos_z3 - medMinorServoConstants->MINOR_SERVO_Z3.position_zero) / 3582;
+        theta_x = (actual_position.pos_z1 - medMinorServoConstants->MINOR_SERVO_Z1.position_zero) / 1791 - 
+        (actual_position.pos_z2 - medMinorServoConstants->MINOR_SERVO_Z2.position_zero) / 3582 - 
+        (actual_position.pos_z3 - medMinorServoConstants->MINOR_SERVO_Z3.position_zero) / 3582;
     else
     {
         // TODO: raise exception? warning?
@@ -785,7 +792,8 @@ MedMinorServoGeometry::_get_direct_theta_y(const MEDMINORSERVOSTATUS actual_posi
     MedMinorServoConstants *medMinorServoConstants = MedMinorServoConstants::getInstance();
     double theta_y = 0.0;
     if (actual_position.mode == 1) // GREGORIAN
-        theta_y = (actual_position.pos_z2 - medMinorServoConstants->MINOR_SERVO_Z2.position_zero) / 2068 - (actual_position.pos_z3 - medMinorServoConstants->MINOR_SERVO_Z3.position_zero) / 2068;
+        theta_y = (actual_position.pos_z2 - medMinorServoConstants->MINOR_SERVO_Z2.position_zero) / 2068 -
+        (actual_position.pos_z3 - medMinorServoConstants->MINOR_SERVO_Z3.position_zero) / 2068;
     else
     {
         // TODO: raise exception? warning?
@@ -837,7 +845,7 @@ double
 MedMinorServoGeometry::_get_inverse_z1(const MedMinorServoPosition &position)
 {
     MedMinorServoConstants *medMinorServoConstants = MedMinorServoConstants::getInstance();
-    double z1 = 0.1405 * position.y + position.z + 1194 * position.theta_x + medMinorServoConstants->MINOR_SERVO_Z1.position_zero;
+    double z1 = 0.1392 * position.y + position.z + 1194 * position.theta_x + medMinorServoConstants->MINOR_SERVO_Z1.position_zero;
     return _check_axis_limit(z1, medMinorServoConstants->MINOR_SERVO_Z1);
 }
 
@@ -845,7 +853,7 @@ double
 MedMinorServoGeometry::_get_inverse_z2(const MedMinorServoPosition &position)
 {
     MedMinorServoConstants *medMinorServoConstants = MedMinorServoConstants::getInstance();
-    double z2 = 0.1405 * position.y + position.z - 597 * position.theta_x + 1034 * position.theta_y + medMinorServoConstants->MINOR_SERVO_Z2.position_zero;
+    double z2 = 0.1392 * position.y + position.z - 597 * position.theta_x + 1034 * position.theta_y + medMinorServoConstants->MINOR_SERVO_Z2.position_zero;
     return _check_axis_limit(z2, medMinorServoConstants->MINOR_SERVO_Z2);
 }
 
@@ -853,6 +861,6 @@ double
 MedMinorServoGeometry::_get_inverse_z3(const MedMinorServoPosition &position)
 {
     MedMinorServoConstants *medMinorServoConstants = MedMinorServoConstants::getInstance();
-    double z3 = 0.1405 * position.y + position.z - 597 * position.theta_x - 1034 * position.theta_y + medMinorServoConstants->MINOR_SERVO_Z3.position_zero;
+    double z3 = 0.1392 * position.y + position.z - 597 * position.theta_x - 1034 * position.theta_y + medMinorServoConstants->MINOR_SERVO_Z3.position_zero;
     return _check_axis_limit(z3, medMinorServoConstants->MINOR_SERVO_Z3);
 }
