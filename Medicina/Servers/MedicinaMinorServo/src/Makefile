@@ -20,7 +20,7 @@ MedMinorServoControl_OBJECTS   = MedMinorServoConstants MedMinorServoControl Med
                                  MedMinorServoTime MedMinorServoModbus \
                                  PositionQueue
 
-MedMinorServoControl_LIBS   = baci acsnc IRALibrary ModbusChannel ManagmentDefinitionsStubs \
+MedMinorServoControl_LIBS   = baci maci acsnc IRALibrary ModbusChannel ManagmentDefinitionsStubs \
                               ManagementErrors \
                               ComponentErrors boost_thread-mt boost_system
 

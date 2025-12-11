@@ -494,7 +494,7 @@ MinorServoBossImpl::getAxesPosition(ACS::Time time)
 {
     if(!(m_control))
         THROW_MINORSERVO_EX(CommunicationErrorEx, 
-                 "Minor Servo Server is not connected", false);
+                 "Minor Servo Server is not connected", true);
     if(!isReady())
         THROW_MINORSERVO_EX(StatusErrorEx, 
                  "getAxesInfo(): the system is not ready", 
@@ -508,11 +508,11 @@ MinorServoBossImpl::getAxesPosition(ACS::Time time)
         else
             position = m_control->get_position_at(time);
     }catch(const ServoTimeoutError& ste){
-        THROW_MINORSERVO_EX(CommunicationErrorEx, ste.what(), false);
+        THROW_MINORSERVO_EX(CommunicationErrorEx, ste.what(), true);
     }catch(const ServoConnectionError& sce){
-        THROW_MINORSERVO_EX(CommunicationErrorEx, sce.what(), false);
+        THROW_MINORSERVO_EX(CommunicationErrorEx, sce.what(), true);
     }catch(...){
-        THROW_MINORSERVO_EX(CommunicationErrorEx, "Cannot get position", false);
+        THROW_MINORSERVO_EX(CommunicationErrorEx, "Cannot get position", true);
     }
     //We hide the system offsets from the user view
     position -= m_offset.getSystemOffsetPosition();
@@ -1148,8 +1148,9 @@ MinorServoBossImpl::connect()
 throw (MinorServoErrors::CommunicationErrorExImpl)
 {
     try{
-        if(m_control)
+        if(m_control) {
             m_control->connect();
+        }
         else
             m_control.reset(new MedMinorServoControl(m_server_ip));
     }catch(ServoTimeoutError& ste){

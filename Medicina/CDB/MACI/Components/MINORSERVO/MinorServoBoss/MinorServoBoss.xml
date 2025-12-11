@@ -10,6 +10,6 @@
     ImplLang="cpp"
     Type="IDL:alma/MinorServo/MinorServoBoss:1.0"
     Container="MinorServoBossContainer"
-	Default="true"
-
+	 Default="true"
+    KeepAliveTime="-1"
 />
