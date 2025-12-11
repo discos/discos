@@ -55,7 +55,7 @@ MedMinorServoControl::connect()
                 // Initialize the connection without moving the subreflector
                 _commanded_position = update_position();
                 if(!(_commanded_position.is_success_position())){
-                    CUSTOM_LOG(LM_FULL_INFO,
+                    ACS_LOG(LM_FULL_INFO,
                            "MinorServo::MedMinorServoControl::connect",
                            (LM_DEBUG, 
                             "Got a wrong mode %s (%d) connecting anyway trying to guess ...", 
@@ -64,23 +64,35 @@ MedMinorServoControl::connect()
                     try{
                         _commanded_position.mode = MED_MINOR_SERVO_SECONDARY;
                         _commanded_status = MedMinorServoGeometry::positionToAxes(_commanded_position);
-                        CUSTOM_LOG(LM_FULL_INFO,
+                        ACS_LOG(LM_FULL_INFO,
                            "MinorServo::MedMinorServoControl::connect",
                            (LM_DEBUG, "... guessed it was in secondary focus"));
                     }catch(...){
                         _commanded_position.mode = MED_MINOR_SERVO_PRIMARY;
-                        _commanded_status = MedMinorServoGeometry::positionToAxes(_commanded_position);
-                        CUSTOM_LOG(LM_FULL_INFO,
-                           "MinorServo::MedMinorServoControl::connect",
-                           (LM_DEBUG, "... guessed it was in primary focus"));
+                        try {
+                        	_commanded_status = MedMinorServoGeometry::positionToAxes(_commanded_position);
+                        	ACS_LOG(LM_FULL_INFO,
+                           	"MinorServo::MedMinorServoControl::connect",
+                           	(LM_DEBUG, "... guessed it was in primary focus"));
+                        }
+                        catch(...) {
+                        	ACS_LOG(LM_FULL_INFO,
+                           	"MinorServo::MedMinorServoControl::connect",
+                           	(LM_DEBUG, "... could not make a guess"));
+                        }
                     }
                 }else{
-                    _commanded_status = MedMinorServoGeometry::positionToAxes(_commanded_position);
+                		try {
+                     	_commanded_status = MedMinorServoGeometry::positionToAxes(_commanded_position);
+                		} 
+                		catch(...) {
+                			ACS_LOG(LM_FULL_INFO,"MinorServo::MedMinorServoControl::connect",(LM_WARNING,"Starting position is uncertain"));
+                     }	    
                 }
                 _commanded_status.escs = 1; //get back control now fieldsystem can not operate
                 _is_connected = true;
                 _send_commanded_status();
-                CUSTOM_LOG(LM_FULL_INFO,
+                ACS_LOG(LM_FULL_INFO,
                            "MinorServo::MedMinorServoControl::connect",
                            (LM_DEBUG, "connected to server %s on port %d", 
                             _server_ip.c_str(),
@@ -133,7 +145,9 @@ MedMinorServoControl::set_position(const MedMinorServoPosition& position)
     boost::mutex::scoped_lock lock(_command_guard);
     boost::recursive_mutex::scoped_lock rlock(_read_guard);
     try{
+        // printf ("X: %lf, Y: %lf, Z: %lf, Rx: %lf, Ry:%lf",position.x,position.y,position.z,position.theta_x, position.theta_y);
         _commanded_status = MedMinorServoGeometry::positionToAxes(position);
+        //printf("Posizioni Recuperate\n");
     }catch(MinorServoGeometryError _geometry_error){
         throw ServoPositionError(_geometry_error.what());
     }catch(MinorServoAxisLimitError _axis_limit_error){
