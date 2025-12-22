@@ -17,7 +17,7 @@ USER_LIBS=C++ pthread
 
 EXECUTABLES_L = unittest 
 unittest_OBJECTS = unittest 
-unittest_LIBS = $(GTEST_LIBS) IRALibrary ComponentErrors ManagementErrors ReceiversErrors
+unittest_LIBS = $(GTEST_LIBS) IRALibrary ComponentErrors ManagementErrors ReceiversErrors KQWBandReceiverImpl
 
 # END OF CUSTOMIZATION
 # do not edit below this line

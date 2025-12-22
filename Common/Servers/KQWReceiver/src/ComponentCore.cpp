@@ -68,7 +68,9 @@ CConfiguration<maci::ContainerServices> const * const  CComponentCore::execute()
     m_localOscillatorDevice_Q=Receivers::LocalOscillator::_nil();
     m_localOscillatorDevice_WL=Receivers::LocalOscillator::_nil();
     m_localOscillatorDevice_WH=Receivers::LocalOscillator::_nil();
+    m_localOscillatorDevice_2IF=Receivers::LocalOscillator::_nil();
     m_localOscillatorFault_K=m_localOscillatorFault_Q=m_localOscillatorFault_WL=m_localOscillatorFault_WH=false;
+    m_localOscillatorFault_2IF=NULL;
     return &m_configuration;
 }
 
@@ -85,6 +87,7 @@ void CComponentCore::cleanup()
     unloadLocalOscillator(m_localOscillatorDevice_Q,m_configuration.getLocalOscillatorInstance_Q());
     unloadLocalOscillator(m_localOscillatorDevice_WL,m_configuration.getLocalOscillatorInstance_WL());
     unloadLocalOscillator(m_localOscillatorDevice_WH,m_configuration.getLocalOscillatorInstance_WH());
+    unloadLocalOscillator(m_localOscillatorDevice_2IF,m_configuration.getLocalOscillatorInstance_2IF());
 }
 
 const IRA::CString& CComponentCore::getActualMode()
@@ -128,7 +131,7 @@ const DWORD& CComponentCore::getFeeds()
 */
 void CComponentCore::activate()
 {
-    baci::ThreadSyncGuard guard(&m_mutex);
+   baci::ThreadSyncGuard guard(&m_mutex);
    setMode((const char *)m_configuration.getDefaultMode()); // Throw ......
    guard.release();
    lnaOn(); // throw (ReceiversErrors::NoRemoteControlErrorExImpl,ReceiversErrors::ReceiverControlBoardErrorExImpl)
@@ -413,11 +416,37 @@ throw (
         ReceiversErrors::LocalOscillatorErrorExImpl
         )
 */
+void CComponentCore::setLO()
+{
+	ACS::doubleSeq lo;
+    lo.length(m_configuration.getFeeds());
+    for (WORD i=0;i<m_configuration.getFeeds();i++) {
+    	if (m_configuration.is2IFEnabled()) {
+        	lo[i]=m_configuration.getDefaultLO1()[m_configuration.getArrayIndex(i)] + 
+                  m_configuration.getDefaultLO2()[m_configuration.getArrayIndex(i)];
+        }
+        else {
+        	lo[i]=m_configuration.getDefaultLO1()[m_configuration.getArrayIndex(i)];
+        }
+    }
+    setLO(lo);
+}
+
+/*
+throw (
+        ComponentErrors::ValidationErrorExImpl,
+        ComponentErrors::ValueOutofRangeExImpl,
+        ComponentErrors::CouldntGetComponentExImpl,
+        ComponentErrors::CORBAProblemExImpl,
+        ReceiversErrors::LocalOscillatorErrorExImpl
+        )
+*/
 void CComponentCore::setLO(const ACS::doubleSeq& lo)
 {
-    double trueValue,amp;
+    double trueValue,amp,amp2;
     double *freq=NULL;
     double *power=NULL;
+    double ol1, ol2;
     DWORD size;
     baci::ThreadSyncGuard guard(&m_mutex);
     if (lo.length()==0) {
@@ -434,7 +463,7 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo)
         // now check if the requested value match the limits
         if (lo[k]==-1) {
             ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"KEEP_CURRENT_LOCAL_OSCILLATOR %lf",
-        m_configuration.getCurrentLOValue()[m_configuration.getArrayIndex(k)]));
+        	m_configuration.getCurrentLO()[m_configuration.getArrayIndex(k)]));
         }
         else if (lo[k]<m_configuration.getLOMin()[m_configuration.getArrayIndex(k)]) {
             _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::setLO");
@@ -449,26 +478,40 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo)
             throw impl;
         }
         else {
-            //computes the synthesizer settings
-            trueValue=lo[k]+m_configuration.getFixedLO2()[m_configuration.getArrayIndex(k)];
-
+        	if (m_configuration.checkCurrentLOValue(lo[k],k,ol1,ol2)) {
+        		trueValue=lo[k];
+        	}
+        	else {
+        		_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::setLO");
+           		impl.setValueName("local oscillator out of valid ranges");
+           		throw impl;
+        	}
+       
             if (m_configuration.getArrayIndex(k)==CConfiguration<maci::ContainerServices>::KBAND) {
                 size=m_configuration.getSynthesizerTable_K(freq,power);
             } else if (m_configuration.getArrayIndex(k)==CConfiguration<maci::ContainerServices>::QBAND) {
-                trueValue/=2;
+                ol1/=2;
                 size=m_configuration.getSynthesizerTable_Q(freq,power);
             } else if (m_configuration.getArrayIndex(k)==CConfiguration<maci::ContainerServices>::WLBAND) {
-                trueValue/=6;
+                ol1/=6;
                 size=m_configuration.getSynthesizerTable_WL(freq,power);
             }
             else { //WHBAND
-                trueValue/=6;
+                ol1/=6;
                 size=m_configuration.getSynthesizerTable_WH(freq,power);
             }
-            amp=round(linearFit(freq,power,size,trueValue));
+            amp=round(linearFit(freq,power,size,ol1));
             if (power) delete [] power;
             if (freq) delete [] freq;
-            ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_DEBUG,"SYNTHESIZER_VALUES %lf %lf",trueValue,amp));
+            if (m_configuration.is2IFEnabled()) {
+            	if (m_configuration.getSynthesizerTable_2IF(freq, power));
+            	amp2=round(linearFit(freq,power,size,ol2));
+            	if (power) delete [] power;
+            	if (freq) delete [] freq;
+        	}	
+            
+            
+            
             // make sure the synthesizer component is available
 
             if (m_configuration.getArrayIndex(k)==CConfiguration<maci::ContainerServices>::KBAND) {
@@ -485,6 +528,7 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo)
                 loadLocalOscillator(m_localOscillatorDevice_WH,m_localOscillatorFault_WH,
                 m_configuration.getLocalOscillatorInstance_WH()); // throw (ComponentErrors::CouldntGetComponentExImpl)
             }
+            loadLocalOscillator(m_localOscillatorDevice_2IF,m_localOscillatorFault_2IF,m_configuration.getLocalOscillatorInstance_2IF()); 
             try {
                 if (m_configuration.getArrayIndex(k)==CConfiguration<maci::ContainerServices>::KBAND) {
                     m_localOscillatorDevice_K->set(amp,trueValue);
@@ -511,7 +555,15 @@ void CComponentCore::setLO(const ACS::doubleSeq& lo)
                 _ADD_BACKTRACE(ReceiversErrors::LocalOscillatorErrorExImpl,impl,ex,"CComponentCore::setLO()");
                 throw impl;
             }
-            m_configuration.setCurrentLOValue(lo[k],k);
+            if (m_configuration.setCurrentLOValue(lo[k],ol1,ol2,k)) {
+            	 ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_NOTICE,"Local Oscillator set to %lf MHz",trueValue));
+            	 ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_DEBUG,"First synthesizer is set to %lf MHz %lf dB",ol1,amp));
+            	 if (m_configuration.is2IFEnabled()) ACS_LOG(LM_FULL_INFO,"CComponentCore::setLO()",(LM_DEBUG,"First synthesizer is set to %lf MHz %lf dB",ol2,amp2));
+        	}
+        	else {
+        		_EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CComponentCore::setLO");
+           		impl.setValueName("local oscillator out of valid ranges");
+        	}
         }
     }
 }
@@ -602,7 +654,7 @@ void CComponentCore::getCalibrationMark(
         Receivers::TPolarization polarization = m_configuration.getBandPolarizations()[m_configuration.getArrayIndex(feeds[i],ifs[i])];
         double startF = m_configuration.getBandIFMin()[m_configuration.getArrayIndex(feeds[i],ifs[i])];
         double BW=m_configuration.getBandIFBandwidth()[m_configuration.getArrayIndex(feeds[i],ifs[i])];
-        double lo=m_configuration.getCurrentLOValue()[m_configuration.getArrayIndex(feeds[i],ifs[i])];
+        double lo=m_configuration.getCurrentLO()[m_configuration.getArrayIndex(feeds[i],ifs[i])];
 
         if (polarization==(long)Receivers::RCV_LCP) {
             // take the real observed bandwidth....the correlation between detector device and the band provided by the receiver
@@ -705,13 +757,13 @@ void CComponentCore::getIFOutput(
         index=m_configuration.getArrayIndex(feeds[i],ifs[i]);
         freqs[i]=m_configuration.getBandIFMin()[index];
         bw[i]=m_configuration.getBandIFBandwidth()[index];
-        LO[i]=m_configuration.getCurrentLOValue()[index];
+        LO[i]=m_configuration.getCurrentLO()[index];
         pols[i]=m_configuration.getBandPolarizations()[index];
     }
     for (unsigned i=8;i<14;i++) {
         freqs[i]=m_configuration.getBandIFMin()[index];
         bw[i]=m_configuration.getBandIFBandwidth()[index];
-        LO[i]=m_configuration.getCurrentLOValue()[index];
+        LO[i]=m_configuration.getCurrentLO()[index];
         pols[i]=m_configuration.getBandPolarizations()[index];
     }
 }
@@ -750,7 +802,7 @@ double CComponentCore::getTaper(
     }
     bandwidth=m_configuration.getBandIFBandwidth()[m_configuration.getArrayIndex(feed,ifNumber)];
     startFreq=m_configuration.getBandIFMin()[m_configuration.getArrayIndex(feed,ifNumber)];
-    lo=m_configuration.getCurrentLOValue()[m_configuration.getArrayIndex(feed,ifNumber)];
+    lo=m_configuration.getCurrentLO()[m_configuration.getArrayIndex(feed,ifNumber)];
     // take the real observed bandwidth....the correlation between detector device and the band provided by the receiver
     if (!IRA::CIRATools::skyFrequency(freq,bw,startFreq,bandwidth,realFreq,realBw)) {
         realFreq=startFreq;
@@ -783,13 +835,9 @@ void CComponentCore::setMode(const char * mode) {
     IRA::CString cmdMode(mode);
     m_configuration.setMode(mode); //* throw (ComponentErrors::CDBAccessExImpl, ReceiversErrors::ModeErrorExImpl)
 
-    ACS::doubleSeq lo;
-    lo.length(m_configuration.getFeeds());
-    for (WORD i=0;i<m_configuration.getFeeds();i++) {
-        lo[i]=m_configuration.getDefaultLO()[m_configuration.getArrayIndex(i)];
-    }
+ 
     // the set the default LO for the default LO for the selected mode.....
-    setLO(lo);  // throw ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
+    setLO();  // throw ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,
                 //       ComponentErrors::CouldntGetComponentExImpl, ComponentErrors::CORBAProblemExImpl,
                 //       ReceiversErrors::LocalOscillatorErrorExImpl)
     m_calDiode=false;
@@ -1343,7 +1391,7 @@ void CComponentCore::getLocalOscillator(ACS::doubleSeq& lo)
 {
     baci::ThreadSyncGuard guard(&m_mutex);
     const double *p;
-    p=m_configuration.getCurrentLOValue();
+    p=m_configuration.getCurrentLO();
     lo.length(m_configuration.getArrayLen());
     for (long i=0;i<m_configuration.getFeeds();i++) {
         for (long j=0;j<m_configuration.getIFs();j++) {

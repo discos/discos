@@ -92,6 +92,8 @@ public:
     virtual void cleanup();
 
 
+	void setLO();
+
     /*
      * It sets the local oscillators. Before commanding the new value
      * some check are done. The  corresponding signal amplitude is computed.
@@ -557,6 +559,8 @@ private:
     bool m_localOscillatorFault_WL;
     Receivers::LocalOscillator_var m_localOscillatorDevice_WH;
     bool m_localOscillatorFault_WH;
+    Receivers::LocalOscillator_var m_localOscillatorDevice_2IF;
+    bool m_localOscillatorFault_2IF;
 
     //double m_localOscillatorValue;
     double m_vacuum;

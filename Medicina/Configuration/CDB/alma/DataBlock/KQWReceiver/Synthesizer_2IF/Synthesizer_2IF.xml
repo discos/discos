@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<!--Values have been copied from the SRTKBandMFReceiver, to be fine-tuned -->
+
+<LocalOscillatorLookUpTable xmlns="urn:schemas-cosylab-com:LocalOscillatorLookUpTable:1.0"
+             	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+				xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<SynthesizerEntry><Frequency>3000.0</Frequency><OutputPower>-2</OutputPower></SynthesizerEntry>
+
+<SynthesizerEntry><Frequency>4000.0</Frequency><OutputPower>-2</OutputPower></SynthesizerEntry>
+
+<SynthesizerEntry><Frequency>5000.0</Frequency><OutputPower>-2</OutputPower></SynthesizerEntry>
+
+<SynthesizerEntry><Frequency>6000.0</Frequency><OutputPower>-2</OutputPower></SynthesizerEntry>
+
+<SynthesizerEntry><Frequency>7000.0</Frequency><OutputPower>-2</OutputPower></SynthesizerEntry>
+
+<SynthesizerEntry><Frequency>8000.0</Frequency><OutputPower>-2</OutputPower></SynthesizerEntry>
+
+</LocalOscillatorLookUpTable>
