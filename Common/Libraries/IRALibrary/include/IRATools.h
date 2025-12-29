@@ -335,9 +335,9 @@ public:
 	 * The band are defined by giving the start frequency and the bandwidth. If the start frequency is negative the method consider the corresponding band
 	 * to be inverted. In that case the results of the method is affected accordingly.
 	 * If we consider an RF band 1600-1800 MHz: a down conversion with an LO=1500 will produce a band f=100, bw=200
-	 * a down conversion with an LO=1900 will produce a band f=-300, bw=200. The same convention could be then adopted for backends Nyquist zones.
-	 * The rsulting band is extpressed in the form startFrequency(f) and bandwidth (bw). Up converting to RF band is always done by the following
-	 * formulas: f1=f+LO, f2=Lo+f+bw;
+	 * a down conversion with an LO=1900 will produce a band f=-100, bw=-200. The same convention could be then adopted for backends Nyquist zones.
+	 * The resulting band is expressed in the form startFrequency(f) and bandwidth (bw). Up converting to RF band is always done by the following
+	 * formulas: f1=f+LO, f2=LO+f+bw;
 	 * @param bf backend start frequency.
 	 * @param bbw backend bandwidth
 	 * @param rf receiver start frequency

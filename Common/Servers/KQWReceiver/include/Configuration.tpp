@@ -455,9 +455,31 @@ void CConfiguration<T>::setCurrentLOValue(const ACS::doubleSeq& lo)
 }*/
 
 template <class T>
-bool CConfiguration<T>::checkCurrentLOValue(const double& val,const long& pos,double& ol1, double &ol2)
+bool CConfiguration<T>::checkCurrentLOValue(const ACS::doubleSeq& val,ACS::doubleSeq& ol1,double& ol2)
 {
-    if ((pos>=0) && (pos<=getFeeds())) {
+	long pos=0;
+	double dol1,dol2;
+	while ((val[pos]==-1) && (pos<val.length())) { // find the first provided value
+		pos++;
+	}
+	if (pos>=val.length()) return false;
+	if (checkCurrentLOValue(val[pos],pos,dol1,dol2,false)) {//this is used to compute the first OL2, then it will be fixed
+		ol2=dol2;
+		for (long i=0;i<getFeeds();i++) {
+			if (checkCurrentLOValue(val[getArrayIndex(pos)],pos,dol1,ol2,true)) { //in this case dol2 is kept fixed for all iterations
+				ol1[getArrayIndex(pos)]=dol1;
+			}
+			else return false;
+		}
+		return true;
+	}
+	else return false;
+}
+
+template <class T>
+bool CConfiguration<T>::checkCurrentLOValue(const double& val,const long& pos,double& ol1, double &ol2, bool fixedOl2)
+{
+    if ((pos>=0) && (pos<getFeeds())) {
        	if (m_2IFConversionEnabled) {
        		bool res;
        		res=compute_OL_distribution(
@@ -465,7 +487,7 @@ bool CConfiguration<T>::checkCurrentLOValue(const double& val,const long& pos,do
        	 	m_LO1Max[getArrayIndex(pos)],
        	  	m_LO2Min[getArrayIndex(pos)],
        	  	m_LO2Max[getArrayIndex(pos)],
-       	  	val,ol1,ol2);
+       	  	val,ol1,ol2,fixedOl2);
 			return res;
         }
         else if ((val>=m_LO1Min[getArrayIndex(pos)]) && (val<=m_LO1Max[getArrayIndex(pos)])) {
@@ -481,7 +503,7 @@ bool CConfiguration<T>::checkCurrentLOValue(const double& val,const long& pos,do
 template <class T>
 bool CConfiguration<T>::setCurrentLOValue(const double& val,const double& ol1,const double& ol2,const long& pos)
 {
-	if ((pos>=0) && (pos<=getFeeds())) {
+	if ((pos>=0) && (pos<getFeeds())) {
 		m_currentLOValue[getArrayIndex(pos)]=val;
     	m_currentLOValue[getArrayIndex(pos)+1]=val; 
     	m_currentLO1Value[getArrayIndex(pos)]=ol1;
@@ -490,20 +512,27 @@ bool CConfiguration<T>::setCurrentLOValue(const double& val,const double& ol1,co
     		m_currentLO2Value[getArrayIndex(pos)]=ol2;
     		m_currentLO2Value[getArrayIndex(pos)+1]=ol2;
 		}
+		else {
+			m_currentLO2Value[getArrayIndex(pos)]=0;
+    		m_currentLO2Value[getArrayIndex(pos)+1]=0;
+		}
 		return (updateIFLimits(getArrayIndex(pos)) && updateIFLimits(getArrayIndex(pos)+1));
     }
     return false;
 }
-
-/// HArdcodeD 14
 
 //// CAPIRE COME VIENE GESTITO I VALORI NEGATIVI NEI CALCOLI DELLE BANDE UTILI E NEL ftrack
 
 template <class T>
 bool CConfiguration<T>::updateIFLimits(const WORD &i)
 {
-	long side;    
-	side=m_LO1Injection[i]*m_LO1Injection[i];    	
+	long side;   
+	if (m_2IFConversionEnabled) { 
+		side=m_LO1Injection[i]*m_LO1Injection[i];
+	}
+	else {
+		side=m_LO1Injection[i];
+	}   	
     if (side>0) { //low side local oscillator 
 		if (m_currentLOValue[i]<m_BandRFMax[i]) {
     		/// DETERMINAZIONE DELLA BANDA RF "UTILE" PER HIGH-SIDE INJECTION
@@ -846,19 +875,31 @@ DWORD CConfiguration<T>::getFeedInfo(
 }
 
 template <class T>
-bool CConfiguration<T>::compute_OL_distribution(double a, double b, double c, double d, double OL, double& out_OL1, double& out_OL2)
+bool CConfiguration<T>::compute_OL_distribution(double a, double b, double c, double d, double OL, double& out_OL1, double& inout_OL2, bool OL2Fixed)
 {
-    if (OL < (a + c) || OL > (b + d)) {
-        return false; // Errore: impossibile soddisfare la richiesta
+	if (OL2Fixed) {
+		if (inout_OL2 < c || inout_OL2 > d) {
+        	return false; // Errore: impossibile OL2 è fuori dai limiti consentiti
+    	}
+    	out_OL1 = OL - inout_OL2;
+    	if (out_OL1 < a || out_OL1 > b) {
+        	return false; // Errore: impossibile soddisfare la richiesta
+    	}
+    	return true;
+	}
+	else {  
+	    if (OL < (a + c) || OL > (b + d)) {
+    	    return false; // Errore: impossibile soddisfare la richiesta
+    	}
+    	out_OL1 = a;
+    	inout_OL2 = c;
+    	double mancante = OL - (out_OL1 + inout_OL2);
+    	double spazio_libero_OL1 = b - a;
+    	double da_aggiungere = MIN(mancante, spazio_libero_OL1);
+    	out_OL1 += da_aggiungere;
+    	mancante -= da_aggiungere; // Riduciamo il mancante di quanto abbiamo appena assegnato
+    	inout_OL2 += mancante;
+    	return true; // Successo
     }
-    out_OL1 = a;
-    out_OL2 = c;
-    double mancante = OL - (out_OL1 + out_OL2);
-    double spazio_libero_OL1 = b - a;
-    double da_aggiungere = MIN(mancante, spazio_libero_OL1);
-    out_OL1 += da_aggiungere;
-    mancante -= da_aggiungere; // Riduciamo il mancante di quanto abbiamo appena assegnato
-    out_OL2 += mancante;
-    return true; // Successo
 }
 

@@ -346,8 +346,12 @@ public:
 	inline double const * const  getDefaultLO2()  const { return m_DefaultLO2; }
 	
 
-	
-	bool checkCurrentLOValue(const double& val,const long& pos,double& ol1, double& ol2);
+	/*
+	 * This method computes the synth values provided a target OLs list. It considers if second conversion is enabled. If it is enabled
+	 * it computes its value (for the first provided OL) and keep it fixed for all other values. 
+	**/
+	bool checkCurrentLOValue(const ACS::doubleSeq& val,ACS::doubleSeq& ol1,double& ol2);
+	bool checkCurrentLOValue(const double& val,const long& pos,double& ol1, double& ol2,bool fixedOl2);
 	
 	inline bool is2IFEnabled() const {return m_2IFConversionEnabled; }
 
@@ -509,10 +513,11 @@ private:
      * @param d       Limite massimo per OL2
      * @param OL      Valore target (somma desiderata)\
      * @param out_OL1 (Output) Variabile dove è salvato il risultato di OL1
-     * @param out_OL2 (Output) Variabile dove è salvato il risultato di OL2
+     * @param inout_OL2 (Output) Variabile dove è salvato il risultato di OL2, se OL2Fixed allora (INPUT), valore da utilizzare di OL2
+     * @param OL2Fixed true if the OL2 value does not have to change
      * @return        true se il calcolo è possibile, false se OL è fuori dai limiti
-    */
-	bool compute_OL_distribution(double a, double b, double c, double d, double OL, double& out_OL1, double& out_OL2);
+    */ 
+	bool compute_OL_distribution(double a, double b, double c, double d, double OL, double& out_OL1, double& inout_OL2, bool OL2Fixed=false);
 
 	
 	

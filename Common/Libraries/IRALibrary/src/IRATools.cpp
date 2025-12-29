@@ -1320,20 +1320,20 @@ bool CIRATools::matchRegExp(const IRA::CString& input,const IRA::CString& expr,s
 
 bool CIRATools::bandLimits(const double&f,const double& w,double& f1,double& f2,bool& upper)
 {
-	if (w<0) {
+	/*if (w<0) {
 		return false;
-	}
+	}*/
 	if (f>=0) {
 		f1=f;
 		f2=f+w;
 		upper=true;
 	}
 	else {
-		if (w>-f) {
+		/*if (w>-f) {
 			return false;
-		}
-		f1=-f-w;
-		f2=-f;
+		}*/
+		f1=f+w;
+		f2=f;
 		upper=false;
 	}
 	return true;
@@ -1347,29 +1347,65 @@ bool CIRATools::mergeBands(const double& rf1,const double& rf2,const bool& rside
 	if ((rf1>rf2) || (bf1>bf2)) {
 		return false;
 	}
-	startF=MAX(rf1,bf1);
-	stopF=MIN(rf2,bf2);
-	bw=stopF-startF;
-	if (bw<=0) {
-		f=rf1;
-		w=0;
-		return false;
-	}
 	if (rside && bside) { //UU
-		f=startF;
-		w=stopF-startF;
+		startF=MAX(rf1,bf1);
+		stopF=MIN(rf2,bf2);
+		bw=stopF-startF;
+		if (bw<=0) {
+			f=rf1;
+			w=0;
+			return false;
+		}
+		else {
+			f=startF;
+			w=bw;
+			return true;
+		}
 	}
 	else if (rside && !bside) {  //UL
-		f=stopF;
-		w=startF-stopF;
+		startF=MAX(rf1,-bf2);
+		stopF=MIN(rf2,-bf1);
+		bw=stopF-startF;
+		if (bw<=0) {
+			f=rf1;
+			w=0;
+			return false;
+		}
+		else {
+			f=-stopF;
+			w=-bw;
+			return true;
+		}	
 	}
 	else if (!rside && bside) {  //LU
-		f=-startF;
-		w=startF-stopF;
+		startF=MAX(-rf2,bf1);
+		stopF=MIN(-rf1,bf2);
+		bw=stopF-startF;
+		if (bw<=0) {
+			f=rf1;
+			w=0;
+			return false;
+		}
+		else {
+			f=-stopF;
+			w=-bw;
+			return true;
+		}
 	}
 	else if (!rside && !bside) { //LL
-		f=-stopF;
-		w=stopF-startF;
+		startF=MAX(-rf2,-bf2);
+		stopF=MIN(-rf1,-bf1);
+		bw=stopF-startF;
+		if (bw<=0) {
+			f=rf1;
+			w=0;
+			return false;
+		}
+		else {
+			f=startF;
+			w=bw;
+			return true;
+		}
 	}
 	return true;
 }
