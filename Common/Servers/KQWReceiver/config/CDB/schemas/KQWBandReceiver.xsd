@@ -151,6 +151,9 @@
         <xs:attribute name="LocalOscillator_W1_Instance" type="xs:string" use="required"/>
         <!-- Name of the LocalOscillator component serving the W band -->
         <xs:attribute name="LocalOscillator_W2_Instance" type="xs:string" use="required"/>
+        <!-- Name of the LocalOscillator component serving as 2IF conversion local oscillator -->
+        <xs:attribute name="LocalOscillator_LO2_Instance" type="xs:string" use="required"/>
+        
 
       </xs:extension>
      </xs:complexContent>

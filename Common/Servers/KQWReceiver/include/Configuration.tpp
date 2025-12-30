@@ -455,21 +455,26 @@ void CConfiguration<T>::setCurrentLOValue(const ACS::doubleSeq& lo)
 }*/
 
 template <class T>
-bool CConfiguration<T>::checkCurrentLOValue(const ACS::doubleSeq& val,ACS::doubleSeq& ol1,double& ol2)
+bool CConfiguration<T>::checkCurrentLOValue(const ACS::doubleSeq& lo,std::vector<double>& ol1,double& ol2)
 {
 	long pos=0;
 	double dol1,dol2;
-	while ((val[pos]==-1) && (pos<val.length())) { // find the first provided value
+	while ((lo[pos]==-1) && (pos<lo.length())) { // find the first provided value
 		pos++;
 	}
-	if (pos>=val.length()) return false;
-	if (checkCurrentLOValue(val[pos],pos,dol1,dol2,false)) {//this is used to compute the first OL2, then it will be fixed
-		ol2=dol2;
-		for (long i=0;i<getFeeds();i++) {
-			if (checkCurrentLOValue(val[getArrayIndex(pos)],pos,dol1,ol2,true)) { //in this case dol2 is kept fixed for all iterations
-				ol1[getArrayIndex(pos)]=dol1;
+	if (pos>=lo.length()) return false;
+	ol1.resize(m_IFs*m_feeds);
+	if (computeCurrentLOValue(lo[pos],pos,dol1,dol2,false)) {//this is used to compute the first OL2, then it will be fixed
+		ol2=dol2; // save the ol2 value
+		for (long i=0;i<lo.length();i++) {
+			// if target ol is -1, don't perform the computation, keep the current value
+			if (lo[i]==-1) ol1[getArrayIndex(i)]=m_currentLO1Value[getArrayIndex(i)]; 
+			else if (computeCurrentLOValue(lo[1],i,dol1,ol2,true)) { //in this case dol2 is kept fixed for all iterations
+				ol1[getArrayIndex(i)]=dol1;  //save the ol1 values
 			}
-			else return false;
+			else {
+				return false;
+			}
 		}
 		return true;
 	}
@@ -477,7 +482,7 @@ bool CConfiguration<T>::checkCurrentLOValue(const ACS::doubleSeq& val,ACS::doubl
 }
 
 template <class T>
-bool CConfiguration<T>::checkCurrentLOValue(const double& val,const long& pos,double& ol1, double &ol2, bool fixedOl2)
+bool CConfiguration<T>::computeCurrentLOValue(const double& val,const long& pos,double& ol1, double &ol2, bool fixedOl2)
 {
     if ((pos>=0) && (pos<getFeeds())) {
        	if (m_2IFConversionEnabled) {
@@ -501,18 +506,22 @@ bool CConfiguration<T>::checkCurrentLOValue(const double& val,const long& pos,do
 }
 
 template <class T>
-bool CConfiguration<T>::setCurrentLOValue(const double& val,const double& ol1,const double& ol2,const long& pos)
+bool CConfiguration<T>::setCurrentLOValue(const double& ol1,const double& ol2,const long& pos)
 {
 	if ((pos>=0) && (pos<getFeeds())) {
-		m_currentLOValue[getArrayIndex(pos)]=val;
-    	m_currentLOValue[getArrayIndex(pos)+1]=val; 
-    	m_currentLO1Value[getArrayIndex(pos)]=ol1;
-    	m_currentLO1Value[getArrayIndex(pos)+1]=ol1;
-    	if (m_2IFConversionEnabled) {
+		if (m_2IFConversionEnabled) {
+			m_currentLOValue[getArrayIndex(pos)]=ol1+ol2;
+    		m_currentLOValue[getArrayIndex(pos)+1]=ol1+ol2; 
+    		m_currentLO1Value[getArrayIndex(pos)]=ol1;
+    		m_currentLO1Value[getArrayIndex(pos)+1]=ol1;
     		m_currentLO2Value[getArrayIndex(pos)]=ol2;
     		m_currentLO2Value[getArrayIndex(pos)+1]=ol2;
 		}
 		else {
+			m_currentLOValue[getArrayIndex(pos)]=ol1;
+    		m_currentLOValue[getArrayIndex(pos)+1]=ol1; 
+    		m_currentLO1Value[getArrayIndex(pos)]=ol1;
+    		m_currentLO1Value[getArrayIndex(pos)+1]=ol1;			
 			m_currentLO2Value[getArrayIndex(pos)]=0;
     		m_currentLO2Value[getArrayIndex(pos)+1]=0;
 		}
@@ -520,8 +529,6 @@ bool CConfiguration<T>::setCurrentLOValue(const double& val,const double& ol1,co
     }
     return false;
 }
-
-//// CAPIRE COME VIENE GESTITO I VALORI NEGATIVI NEI CALCOLI DELLE BANDE UTILI E NEL ftrack
 
 template <class T>
 bool CConfiguration<T>::updateIFLimits(const WORD &i)
@@ -535,7 +542,7 @@ bool CConfiguration<T>::updateIFLimits(const WORD &i)
 	}   	
     if (side>0) { //low side local oscillator 
 		if (m_currentLOValue[i]<m_BandRFMax[i]) {
-    		/// DETERMINAZIONE DELLA BANDA RF "UTILE" PER HIGH-SIDE INJECTION
+    		/// DETERMINAZIONE DELLA BANDA RF "UTILE" PER LOW-SIDE INJECTION
     		double rf_effective_end=MAX(m_BandRFMin[i],m_currentLOValue[i]);
   			double C_min = rf_effective_end - m_currentLOValue[i];
     		double C_max = m_BandRFMax[i] - m_currentLOValue[i];

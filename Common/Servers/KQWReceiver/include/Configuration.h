@@ -350,8 +350,8 @@ public:
 	 * This method computes the synth values provided a target OLs list. It considers if second conversion is enabled. If it is enabled
 	 * it computes its value (for the first provided OL) and keep it fixed for all other values. 
 	**/
-	bool checkCurrentLOValue(const ACS::doubleSeq& val,ACS::doubleSeq& ol1,double& ol2);
-	bool checkCurrentLOValue(const double& val,const long& pos,double& ol1, double& ol2,bool fixedOl2);
+	bool checkCurrentLOValue(const ACS::doubleSeq& lo,std::vector<double>& ol1,double& ol2);
+	bool computeCurrentLOValue(const double& val,const long& pos,double& ol1, double& ol2,bool fixedOl2);
 	
 	inline bool is2IFEnabled() const {return m_2IFConversionEnabled; }
 
@@ -359,7 +359,7 @@ public:
 	 * This methods sets the values of the local oscillators and computes the resulting OL. OL2 is considered only if the 2nd conversion is enabled
 	 * @return if the limit checks are ok (true) or not (false)
 	*/
-	bool setCurrentLOValue(const double& val,const double& ol1,const double& ol2,const long& pos);
+	bool setCurrentLOValue(const double& ol1,const double& ol2,const long& pos);
 
 	/**
 	 * @return the value of the synthesizer used for the second conversion (MHz)

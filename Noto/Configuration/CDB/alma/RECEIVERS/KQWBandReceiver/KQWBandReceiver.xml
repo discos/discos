@@ -30,6 +30,7 @@
     LocalOscillator_Q_Instance="LO_KQW_Q"
     LocalOscillator_W1_Instance="LO_KQW_WLOW"
     LocalOscillator_W2_Instance="LO_KQW_WHIGH"
+    LocalOscillator_LO2_Instance=""
 >
     <LO description="Sequence of local oscillator values for each IF chain" />
     <feeds description="Number of feeds of the receiver" />
