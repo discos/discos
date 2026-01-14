@@ -28,9 +28,9 @@
     BypassSwitchesPattern="0111"
     LocalOscillator_K_Instance="RECEIVERS/LO"
     LocalOscillator_Q_Instance="RECEIVERS/LO_KQW_Q"
-    LocalOscillator_W1_Instance="RECEIVERS/LO_KQW_WLOW"
-    LocalOscillator_W2_Instance="RECEIVERS/LO_KQW_WHIGH"
-    LocalOscillator_LO2_Instance=""
+    LocalOscillator_W1_Instance=""
+    LocalOscillator_W2_Instance=""
+    LocalOscillator_LO2_Instance="RECEIVERS/LO_KQW_WLOW"
 >
     <LO description="Sequence of local oscillator values for each IF chain" />
     <feeds description="Number of feeds of the receiver" />

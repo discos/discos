@@ -17,7 +17,7 @@ IFs="2"
 
 IFBandPolarizations="L R L R L R L R"
 
-DefaultLO1="14000.0 14000.0 32000.0 32000.0 97980.0 97980.0 98000.0 98000.0"
+DefaultLO1="14000.0 14000.0 32000.0 32000.0 96000.0 96000.0 98000.0 98000.0"
 LO1Injection="low low low low high high low low"
 DefaultLO2="7000.0 7000.0 7000.0 7000.0 7000.0 7000.0 7000.0 7000.0"
 LO2Injection="high high high high high high high high"

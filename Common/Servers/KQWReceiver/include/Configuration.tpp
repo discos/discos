@@ -236,7 +236,8 @@ void CConfiguration<T>::init(T *Services,IRA::CString comp_name)
     m_bypassSwitchesPattern = std::bitset<4>((const char*)buffer);
 
     const IRA::CString DEFAULTMODE_PATH = CONFIG_PATH"/Modes/" + m_defaultMode;
-    m_2IFConversionEnabled=(m_localOscillator_2_Instance=="");
+    cout << " 2IF instance: " << m_localOscillator_2_Instance << endl; 
+    m_2IFConversionEnabled=(m_localOscillator_2_Instance!="");
 
     // now read the receiver configuration
     _GET_STRING_ATTRIBUTE(m_services,"Mode","mode name:", mode, DEFAULTMODE_PATH);
@@ -462,14 +463,16 @@ bool CConfiguration<T>::checkCurrentLOValue(const ACS::doubleSeq& lo,std::vector
 	while ((lo[pos]==-1) && (pos<lo.length())) { // find the first provided value
 		pos++;
 	}
+	cout << "pos: " << pos << endl;
 	if (pos>=lo.length()) return false;
 	ol1.resize(m_IFs*m_feeds);
 	if (computeCurrentLOValue(lo[pos],pos,dol1,dol2,false)) {//this is used to compute the first OL2, then it will be fixed
+		cout << lo[pos] << "-" << dol1 << "-" << dol2 << endl;
 		ol2=dol2; // save the ol2 value
 		for (long i=0;i<lo.length();i++) {
 			// if target ol is -1, don't perform the computation, keep the current value
 			if (lo[i]==-1) ol1[getArrayIndex(i)]=m_currentLO1Value[getArrayIndex(i)]; 
-			else if (computeCurrentLOValue(lo[1],i,dol1,ol2,true)) { //in this case dol2 is kept fixed for all iterations
+			else if (computeCurrentLOValue(lo[i],i,dol1,ol2,true)) { //in this case dol2 is kept fixed for all iterations
 				ol1[getArrayIndex(i)]=dol1;  //save the ol1 values
 			}
 			else {
@@ -487,17 +490,23 @@ bool CConfiguration<T>::computeCurrentLOValue(const double& val,const long& pos,
     if ((pos>=0) && (pos<getFeeds())) {
        	if (m_2IFConversionEnabled) {
        		bool res;
+       		cout << "2IF enabled" << endl;
+       		cout << "val target: " << val << endl; 
+       		cout << "values " << m_LO1Min[getArrayIndex(pos)] << m_LO1Max[getArrayIndex(pos)] << m_LO2Min[getArrayIndex(pos)] << 
+       		  m_LO2Max[getArrayIndex(pos)] << endl;
        		res=compute_OL_distribution(
        	  	m_LO1Min[getArrayIndex(pos)],
        	 	m_LO1Max[getArrayIndex(pos)],
        	  	m_LO2Min[getArrayIndex(pos)],
        	  	m_LO2Max[getArrayIndex(pos)],
        	  	val,ol1,ol2,fixedOl2);
-			return res;
+       	  	cout << "ol1: " << ol1 << " ol2: " << ol2 << endl; 
+       	  	return res;
         }
         else if ((val>=m_LO1Min[getArrayIndex(pos)]) && (val<=m_LO1Max[getArrayIndex(pos)])) {
         	ol1=val;
         	ol2=0;
+        	cout << "2IF disabled" << endl;
 			return true;        
         }
         else return false;
@@ -535,14 +544,15 @@ bool CConfiguration<T>::updateIFLimits(const WORD &i)
 {
 	long side;   
 	if (m_2IFConversionEnabled) { 
-		side=m_LO1Injection[i]*m_LO1Injection[i];
+		side=m_LO1Injection[i]*m_LO2Injection[i];
 	}
 	else {
 		side=m_LO1Injection[i];
 	}   	
+	cout << "side is: " << side << endl;
     if (side>0) { //low side local oscillator 
 		if (m_currentLOValue[i]<m_BandRFMax[i]) {
-    		/// DETERMINAZIONE DELLA BANDA RF "UTILE" PER LOW-SIDE INJECTION
+    		/// DETERMINAZIONE DELLA BANDA RF UTILE PER LOW-SIDE INJECTION
     		double rf_effective_end=MAX(m_BandRFMin[i],m_currentLOValue[i]);
   			double C_min = rf_effective_end - m_currentLOValue[i];
     		double C_max = m_BandRFMax[i] - m_currentLOValue[i];
@@ -890,12 +900,14 @@ bool CConfiguration<T>::compute_OL_distribution(double a, double b, double c, do
     	}
     	out_OL1 = OL - inout_OL2;
     	if (out_OL1 < a || out_OL1 > b) {
+    		cout << "errore dei lmiti ol" << endl;
         	return false; // Errore: impossibile soddisfare la richiesta
     	}
     	return true;
 	}
 	else {  
 	    if (OL < (a + c) || OL > (b + d)) {
+	    	 cout << "errore dei limiti ol OL2 non fisso" << endl;
     	    return false; // Errore: impossibile soddisfare la richiesta
     	}
     	out_OL1 = a;
