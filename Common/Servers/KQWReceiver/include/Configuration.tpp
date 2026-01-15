@@ -499,9 +499,11 @@ bool CConfiguration<T>::computeCurrentLOValue(const double& val,const long& pos,
        	 	m_LO1Max[getArrayIndex(pos)],
        	  	m_LO2Min[getArrayIndex(pos)],
        	  	m_LO2Max[getArrayIndex(pos)],
-       	  	val,ol1,ol2,fixedOl2);
+       	  	val,ol1,ol2,
+       	  	m_LO1Injection[getArrayIndex(pos)],m_LO2Injection[getArrayIndex(pos)],
+       	  	fixedOl2);
        	  	cout << "ol1: " << ol1 << " ol2: " << ol2 << endl; 
-       	  	return res;
+       	  	return res;       	  	
         }
         else if ((val>=m_LO1Min[getArrayIndex(pos)]) && (val<=m_LO1Max[getArrayIndex(pos)])) {
         	ol1=val;
@@ -515,20 +517,36 @@ bool CConfiguration<T>::computeCurrentLOValue(const double& val,const long& pos,
 }
 
 template <class T>
+double CConfiguration<T>::getResultingLO(const double& ol1,const double& ol2,const long& pos)
+{
+	if (m_2IFConversionEnabled) {
+		if (m_LO1Injection[getArrayIndex(pos)]==1) { //low injection
+			return ol1+ol2;
+		}
+		else { //high injection
+			return fabs(ol1-ol2);
+		}
+	}
+	else { // 2IF not enabled
+		return ol1;
+	}
+}
+
+template <class T>
 bool CConfiguration<T>::setCurrentLOValue(const double& ol1,const double& ol2,const long& pos)
 {
 	if ((pos>=0) && (pos<getFeeds())) {
 		if (m_2IFConversionEnabled) {
-			m_currentLOValue[getArrayIndex(pos)]=ol1+ol2;
-    		m_currentLOValue[getArrayIndex(pos)+1]=ol1+ol2; 
+			m_currentLOValue[getArrayIndex(pos)]=getResultingLO(ol1,ol2,pos);
+    		m_currentLOValue[getArrayIndex(pos)+1]=getResultingLO(ol1,ol2,pos);
     		m_currentLO1Value[getArrayIndex(pos)]=ol1;
     		m_currentLO1Value[getArrayIndex(pos)+1]=ol1;
     		m_currentLO2Value[getArrayIndex(pos)]=ol2;
     		m_currentLO2Value[getArrayIndex(pos)+1]=ol2;
 		}
 		else {
-			m_currentLOValue[getArrayIndex(pos)]=ol1;
-    		m_currentLOValue[getArrayIndex(pos)+1]=ol1; 
+			m_currentLOValue[getArrayIndex(pos)]=getResultingLO(ol1,ol2,pos);
+    		m_currentLOValue[getArrayIndex(pos)+1]=getResultingLO(ol1,ol2,pos); 
     		m_currentLO1Value[getArrayIndex(pos)]=ol1;
     		m_currentLO1Value[getArrayIndex(pos)+1]=ol1;			
 			m_currentLO2Value[getArrayIndex(pos)]=0;
@@ -890,6 +908,97 @@ DWORD CConfiguration<T>::getFeedInfo(
     }
     return m_feeds;
 }
+
+template <class T>
+bool CConfiguration<T>::compute_OL_distribution(double a, double b, double c, double d, double OL, 
+                             double& out_OL1, double& inout_OL2, 
+                             long LO1Injection, long LO2Injection, 
+                             bool OL2Fixed)
+{
+    
+    // ---------------------------------------------------------
+    // 1. Validazione base degli argomenti
+    // ---------------------------------------------------------
+    // I range min non possono essere maggiori dei max
+    if (a > b || c > d) return false; 
+    // L'iniezione deve essere 1 (Low) o -1 (High)
+    if (std::abs(LO1Injection) != 1 || std::abs(LO2Injection) != 1) return false;
+
+    double calc_OL1 = 0.0;
+    double calc_OL2 = 0.0;
+
+    // ---------------------------------------------------------
+    // 2. Caso A: OL2 è FISSATO (OL2Fixed == true)
+    // ---------------------------------------------------------
+    if (OL2Fixed) {
+        calc_OL2 = inout_OL2;
+        // Verifica che il valore fisso sia nei limiti hardware di OL2
+        if (calc_OL2 < c || calc_OL2 > d) return false;
+        // Calcolo di OL1 in base alla regola dell'iniezione
+        if (LO1Injection == 1) {
+            // Low Side: OL = LO1 + LO2  --> LO1 = OL - LO2
+            calc_OL1 = OL - calc_OL2;
+        } else {
+            // High Side: OL = LO1 - LO2 --> LO1 = OL + LO2
+            calc_OL1 = OL + calc_OL2;
+        }
+        // Verifica che il risultato sia nei limiti hardware di OL1
+        if (calc_OL1 < a || calc_OL1 > b) return false;
+        out_OL1 = calc_OL1;
+        return true;
+    }
+
+    // ---------------------------------------------------------
+    // 3. Caso B: OL2 è VARIABILE (OL2Fixed == false)
+    // ---------------------------------------------------------
+    else {
+        // Dobbiamo trovare un valore di OL2 che soddisfi sia i propri limiti [c,d]
+        // sia i limiti imposti indirettamente da OL1 [a,b].
+        
+        double math_min_OL2, math_max_OL2;
+
+        if (LO1Injection == 1) {
+            // Low Side: OL = LO1 + LO2 --> LO2 = OL - LO1
+            // Il range matematico di OL2 è determinato dagli estremi di OL1
+            // Min LO2 si ha con Max LO1 (b)
+            // Max LO2 si ha con Min LO1 (a)
+            math_min_OL2 = OL - b;
+            math_max_OL2 = OL - a;
+        } else {
+            // High Side: OL = LO1 - LO2 --> LO2 = LO1 - OL
+            // Min LO2 si ha con Min LO1 (a)
+            // Max LO2 si ha con Max LO1 (b)
+            math_min_OL2 = a - OL;
+            math_max_OL2 = b - OL;
+        }
+
+        // Ora calcoliamo l'intersezione tra il range fisico [c, d] 
+        // e il range matematico calcolato [math_min, math_max]
+        double valid_min = MAX(c, math_min_OL2);
+        double valid_max = MIN(d, math_max_OL2);
+
+        // Se il minimo supera il massimo, non esiste intersezione valida
+        if (valid_min > valid_max) return false;
+
+        // Strategia di scelta: Prendiamo il punto centrale del range valido
+        // per massimizzare i margini di tolleranza, 
+        calc_OL2 = (valid_min + valid_max) / 2.0;
+
+        // Ricalcoliamo OL1 basandoci sul valore scelto di OL2
+        if (LO1Injection == 1) {
+            calc_OL1 = OL - calc_OL2;
+        } else {
+            calc_OL1 = OL + calc_OL2;
+        }
+
+        // Assegnazione parametri di uscita
+        inout_OL2 = calc_OL2;
+        out_OL1 = calc_OL1;
+        
+        return true;
+    }
+}
+
 
 template <class T>
 bool CConfiguration<T>::compute_OL_distribution(double a, double b, double c, double d, double OL, double& out_OL1, double& inout_OL2, bool OL2Fixed)

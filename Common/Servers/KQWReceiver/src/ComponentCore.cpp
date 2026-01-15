@@ -418,15 +418,15 @@ throw (
 */
 void CComponentCore::setLO()
 {
-	 ACS::doubleSeq lo;
-	 double ol2;
-	 std::vector<double> ol1; 
+	ACS::doubleSeq lo;
+	double ol2;
+	std::vector<double> ol1; 
     lo.length(m_configuration.getFeeds());
     ol1.resize(m_configuration.getArrayLen());
     for (WORD i=0;i<m_configuration.getFeeds();i++) {
     	if (m_configuration.is2IFEnabled()) {
-        	lo[i]=m_configuration.getDefaultLO1()[m_configuration.getArrayIndex(i)] + 
-                  m_configuration.getDefaultLO2()[m_configuration.getArrayIndex(i)];
+    		lo[i]=m_configuration.getResultingLO(m_configuration.getDefaultLO1()[m_configuration.getArrayIndex(i)],
+    		  m_configuration.getDefaultLO2()[m_configuration.getArrayIndex(i)],i);
       }
       else {
         	lo[i]=m_configuration.getDefaultLO1()[m_configuration.getArrayIndex(i)];

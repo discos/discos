@@ -360,6 +360,11 @@ public:
 	 * @return if the limit checks are ok (true) or not (false)
 	*/
 	bool setCurrentLOValue(const double& ol1,const double& ol2,const long& pos);
+	
+	/**
+	 * Return the resulting LO, given the combination of ol1 and ol2
+	**/ 	
+	double getResultingLO(const double& ol1,const double& ol2,const long& pos);
 
 	/**
 	 * @return the value of the synthesizer used for the second conversion (MHz)
@@ -519,7 +524,24 @@ private:
     */ 
 	bool compute_OL_distribution(double a, double b, double c, double d, double OL, double& out_OL1, double& inout_OL2, bool OL2Fixed=false);
 
-	
+	/**
+     * Calcola OL1 e OL2 dato un target OL e i limiti [a,b] e [c,d].
+     * @param a       Limite minimo per OL1
+     * @param b       Limite massimo per OL1
+     * @param c       Limite minimo per OL2
+     * @param d       Limite massimo per OL2
+     * @param OL      Valore target (somma desiderata)\
+     * @param out_OL1 (Output) Variabile dove è salvato il risultato di OL1
+     * @param inout_OL2 (Output) Variabile dove è salvato il risultato di OL2, se OL2Fixed allora (INPUT), valore da utilizzare di OL2
+     * @param OL2Fixed true if the OL2 value does not have to change
+     * @param LO1Injection 1 if the ol is low injected, -1 if the ol is high injected
+     * @param LO2Injection 1 if the ol is low injected, -1 if the ol is high injected     
+     * @return        true se il calcolo è possibile, false se OL è fuori dai limiti
+    */ 
+	bool compute_OL_distribution(double a, double b, double c, double d, double OL, 
+                             double& out_OL1, double& inout_OL2, 
+                             long LO1Injection, long LO2Injection, 
+                             bool OL2Fixed);
 	
 };
 
