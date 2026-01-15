@@ -227,6 +227,15 @@
             <remoteAccount>discos</remoteAccount>
         </container>
         <container>
+            <name>SRTDBESMContainer</name>
+            <type>cpp</type>
+            <heapSizeMB></heapSizeMB>
+            <useDedicatedSettings>true</useDedicatedSettings>
+            <scriptBase>0</scriptBase>
+            <remoteHost>MASTERHOST</remoteHost>
+            <remoteAccount>discos</remoteAccount>
+        </container>
+        <container>
             <name>WeatherStationContainer</name>
             <type>cpp</type>
             <heapSizeMB></heapSizeMB>
@@ -252,7 +261,7 @@
             <scriptBase>0</scriptBase>
             <remoteHost>MASTERHOST</remoteHost>
             <remoteAccount>discos</remoteAccount>
-        </container>        
+        </container>
         <container>
             <name>SRTActiveSurfaceContainer</name>
             <type>cpp</type>
