@@ -792,21 +792,23 @@ private:
 	 */
 	inline void clearStatusField(TstatusFields field) { m_backendStatus &= ~(1 << field); }
 
-    bool m_SKARAB_1;
-    bool m_SKARAB_1S;
+    /*bool m_SKARAB_1;
     bool m_SKARAB_2;
-    bool m_SKARAB_2S;
     bool m_SKARAB_3;
-    bool m_SKARAB_3S;
     bool m_SKARAB_4;
-    bool m_SKARAB_4S;
     bool m_SKARAB_5;
-    bool m_SKARAB_5S;
+    bool m_SKARAB_6;
     bool m_SKARAB_7;
+    bool m_SKARAB_8;
+    bool m_SKARAB_9;
+    bool m_SKARAB_10;
     bool m_SKARAB_11;
-    bool m_SKARAB_11S;
     bool m_SKARAB_12;
-    bool m_SKARAB_12S;
+    bool m_SKARAB_13;
+    bool m_SKARAB_14;
+    bool m_SKARAB_15;
+    bool m_SKARAB_16;
+    bool m_SKARAB_17;*/
 
     bool m_stationSRT;
     bool m_stationMED;

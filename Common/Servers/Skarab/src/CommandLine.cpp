@@ -47,21 +47,39 @@ CCommandLine::CCommandLine(ContainerServices *service): CSocket(),
     m_stokes=false;
     m_TsysRange_freq=0.0;
     m_TsysRange_bw=0.0;
-    m_SKARAB_1=false;
-    m_SKARAB_1S=false;
+
+    /*m_SKARAB_1=false;
     m_SKARAB_2=false;
-    m_SKARAB_2S=false;
     m_SKARAB_3=false;
-    m_SKARAB_3S=false;
     m_SKARAB_4=false;
-    m_SKARAB_4S=false;
     m_SKARAB_5=false;
-    m_SKARAB_5S=false;
+    m_SKARAB_6=false;
     m_SKARAB_7=false;
+    m_SKARAB_8=false;
+    m_SKARAB_9=false;
+    m_SKARAB_10=false;
     m_SKARAB_11=false;
-    m_SKARAB_11S=false;
     m_SKARAB_12=false;
-    m_SKARAB_12S=false;
+    m_SKARAB_13=false;
+    m_SKARAB_14=false;
+    m_SKARAB_15=false;
+    m_SKARAB_16=false;
+    m_SKARAB_17=false;
+    m_SKARAB_18=false;
+    m_SKARAB_19=false;
+    m_SKARAB_20=false;
+    m_SKARAB_21=false;
+    m_SKARAB_22=false;
+    m_SKARAB_23=false;
+    m_SKARAB_24=false;
+    m_SKARAB_25=false;
+    m_SKARAB_26=false;
+    m_SKARAB_27=false;
+    m_SKARAB_28=false;
+    m_SKARAB_29=false;
+    m_SKARAB_30=false;
+    m_SKARAB_31=false;
+    m_SKARAB_32=false;*/
 
     m_SkarabInitialized=false;
 
@@ -822,12 +840,15 @@ void CCommandLine::setDefaultConfiguration(const IRA::CString & config) throw (C
         ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,BackendsErrors::MalformedAnswerExImpl,BackendsErrors::ReplyNotValidExImpl,BackendsErrors::BackendFailExImpl)
 {
     AUTO_TRACE("CCommandLine::setDefaultConfiguration()");
-    if (config.Compare("SKARAB_1")==0 || config.Compare("SKARAB_2")==0 || config.Compare("SKARAB_3")==0 || config.Compare("SKARAB_4")==0 || config.Compare("SKARAB_5")==0 || config.Compare("SKARAB_7")==0
-            || config.Compare("SKARAB_11")==0 || config.Compare("SKARAB_12")==0 ) {
+    if (config.Compare("SKARAB_1")==0 || config.Compare("SKARAB_10")==0 || config.Compare("SKARAB_12")==0 || config.Compare("SKARAB_14")==0 || config.Compare("SKARAB_16")==0 || config.Compare("SKARAB_18")==0
+            || config.Compare("SKARAB_20")==0 || config.Compare("SKARAB_22")==0 || config.Compare("SKARAB_24")==0 || config.Compare("SKARAB_26")==0 || config.Compare("SKARAB_28")==0
+	    || config.Compare("SKARAB_30")==0 || config.Compare("SKARAB_32")==0) {
         m_inputsNumber=m_sectionsNumber;
     }
-    if (config.Compare("SKARAB_1S")==0 || config.Compare("SKARAB_2S")==0 || config.Compare("SKARAB_3S")==0 || config.Compare("SKARAB_4S")==0 || config.Compare("SKARAB_5S")==0
-            || config.Compare("SKARAB_11S")==0 || config.Compare("SKARAB_12S")==0 ) {
+    if (config.Compare("SKARAB_2")==0 || config.Compare("SKARAB_3")==0 || config.Compare("SKARAB_4")==0 || config.Compare("SKARAB_5")==0 || config.Compare("SKARAB_6")==0
+            || config.Compare("SKARAB_7")==0 || config.Compare("SKARAB_8")==0 || config.Compare("SKARAB_9")==0 || config.Compare("SKARAB_11")==0 || config.Compare("SKARAB_13")==0
+	    || config.Compare("SKARAB_15")==0 || config.Compare("SKARAB_17")==0 || config.Compare("SKARAB_19")==0 || config.Compare("SKARAB_21")==0 || config.Compare("SKARAB_23")==0
+	    || config.Compare("SKARAB_25")==0 || config.Compare("SKARAB_27")==0 || config.Compare("SKARAB_29")==0 || config.Compare("SKARAB_31")==0) {
         m_inputsNumber=m_sectionsNumber;
         m_sectionsNumber=m_sectionsNumber/2;
         m_stokes=true;
@@ -896,6 +917,9 @@ void CCommandLine::setup(const char *conf) throw (BackendsErrors::BackendBusyExI
     m_receiver = m_receiverRef->get_sync (completion.out ());
     m_recstr = IRA::CString (m_receiver);
 
+	m_sectionsNumber=0;
+	m_inputsNumber=0;
+
     if (!initializeConfiguration(conf)) {
         _EXCPT(BackendsErrors::ConfigurationErrorExImpl,impl,"CCommandLine::setup()");
         throw impl;
@@ -914,6 +938,15 @@ void CCommandLine::setup(const char *conf) throw (BackendsErrors::BackendBusyExI
             if (m_recstr.Compare("CCG")==0) {
                 inputs=2;
             }
+            if (m_recstr.Compare("CHC")==0) {
+                inputs=2;
+            }
+            if (m_recstr.Compare("CCC")==0) {
+                inputs=2;
+            }
+            if (m_recstr.Compare("KKC")==0) {
+                inputs=2;
+            }
             m_filter=2350.0;
             for (int i=0;i<inputs;i++) {
             //for (int i=0;i<m_inputsNumber;i++) {
@@ -923,6 +956,7 @@ void CCommandLine::setup(const char *conf) throw (BackendsErrors::BackendBusyExI
             }
         }
         ACS_LOG(LM_FULL_INFO,"CCommandLine::setup()",(LM_NOTICE,"BACKEND_SKARAB_INITIALIZED, CONFIGURATION: %s",conf));
+	ACS_LOG(LM_FULL_INFO,"CCommandLine::setup()",(LM_NOTICE,"BACKEND_SKARAB_INITIALIZED, inputs: %d , sections: %d",m_inputsNumber,m_sectionsNumber));
         m_SkarabInitialized = true;
     }
     catch (...) {
@@ -1108,7 +1142,7 @@ void CCommandLine::setEnabled(const ACS::longSeq& en) throw (BackendsErrors::Bac
                     throw impl;
                 }
             }
-            if ((m_recstr.Compare("CCB")==0) || (m_recstr.Compare("CCG")==0)) {
+            if ((m_recstr.Compare("CCB")==0) || (m_recstr.Compare("CCG")==0) || (m_recstr.Compare("CHC")==0) || (m_recstr.Compare("KKC")==0)) {
                 if (en[0] != 0) {
                     _EXCPT(ComponentErrors::ValueOutofRangeExImpl,impl,"CCommandLine::setEnabled()");
                     impl.setValueName("feed");
