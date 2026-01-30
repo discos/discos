@@ -26,14 +26,21 @@
     <!-- the first entry is relative to IF 0.  -->    
     <xs:attribute name="RFMax" type="xs:string" use="required"/>
     
-    <!-- blank separated list of the starting frequencies (MHZ) of the IF band relative to each of the IF for the K, Q, W1, and W2 band receiver respectively -->
+    <!-- blank separated list of the starting frequencies (MHZ) of the IF1 band relative to each of the IF for the K, Q, W1, and W2 band receiver respectively -->
     <!-- the first entry is relative to IF 0.  -->
-    <xs:attribute name="IFMin" type="xs:string" use="required"/>
+    <xs:attribute name="IF1Min" type="xs:string" use="required"/>
  
-    <!-- blank separated list of the upper value (MHZ) of the IF band relative to each of the IF for the K, Q, W1, and W2 band receiver respectively -->
+    <!-- blank separated list of the upper value (MHZ) of the IF1 band relative to each of the IF for the K, Q, W1, and W2 band receiver respectively -->
     <!-- the first entry is relative to IF 0.  -->    
-    <xs:attribute name="IFMax" type="xs:string" use="required"/>
+    <xs:attribute name="IF1Max" type="xs:string" use="required"/>
     
+    <!-- blank separated list of the starting frequencies (MHZ) of the IF2 band relative to each of the IF for the K, Q, W1, and W2 band receiver respectively -->
+    <!-- the first entry is relative to IF 0.  -->
+    <xs:attribute name="IF2Min" type="xs:string" use="required"/>
+ 
+    <!-- blank separated list of the upper value (MHZ) of the IF2 band relative to each of the IF for the K, Q, W1, and W2 band receiver respectively -->
+    <!-- the first entry is relative to IF 0.  -->    
+    <xs:attribute name="IF2Max" type="xs:string" use="required"/>    
     
     <!-- number of virtual feeds -->
     <xs:attribute name="Feeds" type="xs:unsignedLong" use="required"/>

@@ -109,6 +109,27 @@
 </body>	
 </Procedure>
 
+<Procedure name="setupKQW" args="0">
+<body>
+	antennaSetup=KQW
+	receiversSetup=KQW
+	receiversMode=NORMAL
+	chooseBackend=TotalPower
+	initialize=KQW
+	dmed=default
+	calmux=TotalPower
+	setAttenuation=0,8
+	setAttenuation=1,8
+	setAttenuation=2,8
+	setAttenuation=3,8
+	setAttenuation=4,8
+	setAttenuation=5,8	
+	device=0
+	calOff
+	restFrequency=0
+</body>	
+</Procedure>
+
 <Procedure name="telescopePark" args="0">
 <body>
 	goTo=180d,89.8d

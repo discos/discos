@@ -105,7 +105,7 @@ public:
      * @throw ComponentErrors::CORBAProblemExImpl
      * @thorw ReceiversErrors::LocalOscillatorErrorExImpl
      */
-    void setLO(const ACS::doubleSeq& lo);
+    void setLO(const ACS::doubleSeq& ilo);
     
     void setLO(const ACS::doubleSeq& lo,const std::vector<double>& ol1,const double& ol2);
 

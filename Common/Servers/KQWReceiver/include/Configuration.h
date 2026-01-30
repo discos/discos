@@ -303,12 +303,12 @@ public:
 	/**
 	 * @return the Minimum frequency of the IF coming from the K,Q,W1 and W2 band feed (MHz)
 	 */
-	inline double const * const  getBandIFMin() const { return m_BandIFMin; }
+	//inline double const * const  getBandIFMin() const { return m_BandIFMin; }
 	
 	/**
 	 * @return the Minimum frequency of the IF coming from the K,Q,W1 and W2 band feed (MHz)
 	 */
-	inline double const * const  getBandIFMax() const { return m_BandIFMax; }
+	//inline double const * const  getBandIFMax() const { return m_BandIFMax; }
 	
 	/**
 	 * @return the bandwidth of the resulting IFs (MHz)
@@ -455,8 +455,10 @@ private:
 	IRA::CString m_defaultMode;
 	double *m_BandRFMin;
 	double *m_BandRFMax;
-	double *m_BandIFMin;
-	double *m_BandIFMax;
+	double *m_BandIF1Min;
+	double *m_BandIF1Max;
+	double *m_BandIF2Min;
+	double *m_BandIF2Max;	
 	double *m_IFStartFreq;
 	double *m_IFBandWidth;
 	double *m_DefaultLO1;
@@ -509,20 +511,6 @@ private:
 	
 	bool updateIFLimits(const WORD &i);
 	WORD openSynthTable(IRA::CDBTable * &table, const IRA::CString &path, TLOValue * &loV);
-	
-	/**
-     * Calcola OL1 e OL2 dato un target OL e i limiti [a,b] e [c,d].
-     * @param a       Limite minimo per OL1
-     * @param b       Limite massimo per OL1
-     * @param c       Limite minimo per OL2
-     * @param d       Limite massimo per OL2
-     * @param OL      Valore target (somma desiderata)\
-     * @param out_OL1 (Output) Variabile dove è salvato il risultato di OL1
-     * @param inout_OL2 (Output) Variabile dove è salvato il risultato di OL2, se OL2Fixed allora (INPUT), valore da utilizzare di OL2
-     * @param OL2Fixed true if the OL2 value does not have to change
-     * @return        true se il calcolo è possibile, false se OL è fuori dai limiti
-    */ 
-	bool compute_OL_distribution(double a, double b, double c, double d, double OL, double& out_OL1, double& inout_OL2, bool OL2Fixed=false);
 
 	/**
      * Calcola OL1 e OL2 dato un target OL e i limiti [a,b] e [c,d].

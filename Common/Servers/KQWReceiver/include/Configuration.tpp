@@ -3,27 +3,29 @@
 template <class T>
 CConfiguration<T>::CConfiguration()
 {
-    m_markVector = NULL;
-    m_markVectorLen = 0;
-    m_markTable=NULL;
-    m_mode="";
-    m_loTable_K=m_loTable_Q=m_loTable_WL=m_loTable_WH=m_loTable_2IF=NULL;
-    m_loVector_K=m_loVector_Q=m_loVector_WL=m_loVector_WH=m_loVector_2IF=NULL;
-    m_loVectorLen_K=m_loVectorLen_Q=m_loVectorLen_WL=m_loVectorLen_WH=m_loVectorLen_2IF=0;
-    m_BandPolarizations = NULL;
-    m_feedsTable = NULL;
-    m_feedVector = NULL;
-    m_taperTable = NULL;
-    m_taperVector = NULL;
-    m_taperVectorLen = 0;
-    m_BandRFMin = NULL;
-    m_BandRFMax = NULL;
-    m_BandIFMin = NULL;
-    m_BandIFMax = NULL;
+   m_markVector = NULL;
+   m_markVectorLen = 0;
+   m_markTable=NULL;
+   m_mode="";
+   m_loTable_K=m_loTable_Q=m_loTable_WL=m_loTable_WH=m_loTable_2IF=NULL;
+   m_loVector_K=m_loVector_Q=m_loVector_WL=m_loVector_WH=m_loVector_2IF=NULL;
+   m_loVectorLen_K=m_loVectorLen_Q=m_loVectorLen_WL=m_loVectorLen_WH=m_loVectorLen_2IF=0;
+   m_BandPolarizations = NULL;
+   m_feedsTable = NULL;
+   m_feedVector = NULL;
+   m_taperTable = NULL;
+   m_taperVector = NULL;
+   m_taperVectorLen = 0;
+   m_BandRFMin = NULL;
+   m_BandRFMax = NULL;
+   m_BandIF1Min = NULL;
+   m_BandIF1Max = NULL;
+   m_BandIF2Min = NULL;
+   m_BandIF2Max = NULL;
 	m_IFStartFreq = NULL;
 	m_IFBandWidth = NULL;
 	m_LO1Injection=m_LO2Injection=NULL;    
-    m_DefaultLO1 = m_DefaultLO2= m_currentLOValue= m_currentLO1Value = m_currentLO2Value = m_LOMin = m_LOMax = m_LO1Min = m_LO1Max = m_LO2Min = m_LO2Max = NULL;
+   m_DefaultLO1 = m_DefaultLO2= m_currentLOValue= m_currentLO1Value = m_currentLO2Value = m_LOMin = m_LOMax = m_LO1Min = m_LO1Max = m_LO2Min = m_LO2Max = NULL;
 }
 
 template <class T>
@@ -86,12 +88,20 @@ CConfiguration<T>::~CConfiguration()
     if (m_BandRFMax) {
         delete [] m_BandRFMax;
     }
-    if (m_BandIFMin) {
-        delete [] m_BandIFMin;
+    if (m_BandIF1Min) {
+        delete [] m_BandIF1Min;
     }
-    if (m_BandIFMax) {
-        delete [] m_BandIFMax;
+    if (m_BandIF1Max) {
+        delete [] m_BandIF1Max;
     }
+
+    if (m_BandIF2Min) {
+        delete [] m_BandIF2Min;
+    }
+    if (m_BandIF2Max) {
+        delete [] m_BandIF2Max;
+    }    
+    
     if (m_IFStartFreq) {
         delete [] m_IFStartFreq;
     }
@@ -138,7 +148,6 @@ CConfiguration<T>::~CConfiguration()
         delete [] m_LO2Max;
     }
 }
-
 
 /*
    @throw (
@@ -236,7 +245,6 @@ void CConfiguration<T>::init(T *Services,IRA::CString comp_name)
     m_bypassSwitchesPattern = std::bitset<4>((const char*)buffer);
 
     const IRA::CString DEFAULTMODE_PATH = CONFIG_PATH"/Modes/" + m_defaultMode;
-    cout << " 2IF instance: " << m_localOscillator_2_Instance << endl; 
     m_2IFConversionEnabled=(m_localOscillator_2_Instance!="");
 
     // now read the receiver configuration
@@ -248,8 +256,10 @@ void CConfiguration<T>::init(T *Services,IRA::CString comp_name)
         m_BandPolarizations = new Receivers::TPolarization[m_IFs*m_feeds];
         m_BandRFMin = new double[m_IFs*m_feeds];
         m_BandRFMax = new double[m_IFs*m_feeds];
-        m_BandIFMin = new double[m_IFs*m_feeds];
-        m_BandIFMax = new double[m_IFs*m_feeds];
+        m_BandIF1Min = new double[m_IFs*m_feeds];
+        m_BandIF1Max = new double[m_IFs*m_feeds];
+        m_BandIF2Min = new double[m_IFs*m_feeds];
+        m_BandIF2Max = new double[m_IFs*m_feeds];
         m_IFStartFreq = new double[m_IFs*m_feeds];
         m_IFBandWidth = new double[m_IFs*m_feeds];
         m_DefaultLO1 = new double[m_IFs*m_feeds];
@@ -463,11 +473,9 @@ bool CConfiguration<T>::checkCurrentLOValue(const ACS::doubleSeq& lo,std::vector
 	while ((lo[pos]==-1) && (pos<lo.length())) { // find the first provided value
 		pos++;
 	}
-	cout << "pos: " << pos << endl;
 	if (pos>=lo.length()) return false;
 	ol1.resize(m_IFs*m_feeds);
 	if (computeCurrentLOValue(lo[pos],pos,dol1,dol2,false)) {//this is used to compute the first OL2, then it will be fixed
-		cout << lo[pos] << "-" << dol1 << "-" << dol2 << endl;
 		ol2=dol2; // save the ol2 value
 		for (long i=0;i<lo.length();i++) {
 			// if target ol is -1, don't perform the computation, keep the current value
@@ -490,10 +498,6 @@ bool CConfiguration<T>::computeCurrentLOValue(const double& val,const long& pos,
     if ((pos>=0) && (pos<getFeeds())) {
        	if (m_2IFConversionEnabled) {
        		bool res;
-       		cout << "2IF enabled" << endl;
-       		cout << "val target: " << val << endl; 
-       		cout << "values " << m_LO1Min[getArrayIndex(pos)] << m_LO1Max[getArrayIndex(pos)] << m_LO2Min[getArrayIndex(pos)] << 
-       		  m_LO2Max[getArrayIndex(pos)] << endl;
        		res=compute_OL_distribution(
        	  	m_LO1Min[getArrayIndex(pos)],
        	 	m_LO1Max[getArrayIndex(pos)],
@@ -502,13 +506,11 @@ bool CConfiguration<T>::computeCurrentLOValue(const double& val,const long& pos,
        	  	val,ol1,ol2,
        	  	m_LO1Injection[getArrayIndex(pos)],m_LO2Injection[getArrayIndex(pos)],
        	  	fixedOl2);
-       	  	cout << "ol1: " << ol1 << " ol2: " << ol2 << endl; 
        	  	return res;       	  	
         }
         else if ((val>=m_LO1Min[getArrayIndex(pos)]) && (val<=m_LO1Max[getArrayIndex(pos)])) {
         	ol1=val;
         	ol2=0;
-        	cout << "2IF disabled" << endl;
 			return true;        
         }
         else return false;
@@ -560,47 +562,40 @@ bool CConfiguration<T>::setCurrentLOValue(const double& ol1,const double& ol2,co
 template <class T>
 bool CConfiguration<T>::updateIFLimits(const WORD &i)
 {
-	long side;   
+	//long side;
+	//double IFMin,IFMax,IFStart,IFBandwidth;
+	IRA::DoubleConversionResult res;
 	if (m_2IFConversionEnabled) { 
-		side=m_LO1Injection[i]*m_LO2Injection[i];
+		res=IRA::CIRATools::calculateDualConversion(
+		  m_currentLO1Value[i],m_currentLO2Value[i],
+        m_BandIF2Min[i],m_BandIF2Max[i],
+        m_BandIF1Min[i],m_BandIF1Max[i],
+		  m_LO1Injection[i], m_LO2Injection[i]);
+		if (!res.valid) {
+			return false;  
+		}
+		else {
+			ACS_LOG(LM_FULL_INFO,"CConfiguration::updateIFLimits()",(LM_DEBUG,"RF limits are : %lf %lf",res.rf_min_freq,res.rf_max_freq));
+			ACS_LOG(LM_FULL_INFO,"CConfiguration::updateIFLimits()",(LM_DEBUG,"IF limits are : %lf %lf",res.if2_min_freq,res.if2_max_freq));
+			ACS_LOG(LM_FULL_INFO,"CConfiguration::updateIFLimits()",(LM_DEBUG,"IF1 limits are : %lf %lf",res.if1_min_generated,res.if1_max_generated));
+			m_IFStartFreq[i]=res.if2_min_freq;
+    		m_IFBandWidth[i]=res.if2_bandwidth;
+		}                            
 	}
-	else {
-		side=m_LO1Injection[i];
-	}   	
-	cout << "side is: " << side << endl;
-    if (side>0) { //low side local oscillator 
-		if (m_currentLOValue[i]<m_BandRFMax[i]) {
-    		/// DETERMINAZIONE DELLA BANDA RF UTILE PER LOW-SIDE INJECTION
-    		double rf_effective_end=MAX(m_BandRFMin[i],m_currentLOValue[i]);
-  			double C_min = rf_effective_end - m_currentLOValue[i];
-    		double C_max = m_BandRFMax[i] - m_currentLOValue[i];
-    		double ifstart=MAX(C_min,m_BandIFMin[i]);
-    		double ifend=MIN(C_max,m_BandIFMax[i]);
-    		if (ifstart>=ifend) return false;
-    		else {
-    			m_IFStartFreq[i]=ifstart;
-    			m_IFBandWidth[i]=(ifend-ifstart);
-    		}
-    	}
-    	else return false;    	
-    }
-    else { //high side local oscillator
-    	if (m_currentLOValue[i]>m_BandRFMin[i]) {
-    		/// DETERMINAZIONE DELLA BANDA RF "UTILE" PER HIGH-SIDE INJECTION
-    		double rf_effective_end=MIN(m_BandRFMax[i],m_currentLOValue[i]);
-  			double C_min = m_currentLOValue[i] - rf_effective_end;
-    		double C_max = m_currentLOValue[i] - m_BandRFMin[i];
-    		double ifstart=MAX(C_min,m_BandIFMin[i]);
-    		double ifend=MIN(C_max,m_BandIFMax[i]);
-    		if (ifstart>=ifend) return false;
-    		else {
-    			m_IFStartFreq[i]=-ifstart;
-    			m_IFBandWidth[i]=-(ifend-ifstart);
-    		}
-    	}
-    	else return false;
-    }
-    return true;
+	else { 
+		double out_IF_min, out_IF_max;                     
+		if (!IRA::CIRATools::calculateIFlimits(m_currentLOValue[i], 
+                             m_BandRFMin[i],m_BandRFMax[i], 
+                             m_LO1Injection[i],
+                             out_IF_min,out_IF_max,
+                             m_IFStartFreq[i],m_IFBandWidth[i])) {
+      	return false;
+		}
+		else {
+			ACS_LOG(LM_FULL_INFO,"CConfiguration::updateIFLimits()",(LM_DEBUG,"IF limits are : %lf %lf",m_IFStartFreq[i],m_IFBandWidth[i]));
+		}		
+	} 
+   return true;
 }
 
 /*
@@ -612,6 +607,7 @@ void CConfiguration<T>::setMode(const char * mode)
     IRA::CString value, token;
     IRA::CError error;
     IRA::CString cmdMode(mode);
+    double maxRF,minRF;
 
     if (cmdMode==m_mode) return;
     if(!m_mode.IsEmpty()) {
@@ -670,26 +666,48 @@ void CConfiguration<T>::setMode(const char * mode)
         m_BandRFMax[k] = token.ToDouble();
     }
 
-    _GET_STRING_ATTRIBUTE(m_services,"IFMin", "IF lower limit (MHz):",value,MODE_PATH);
+    _GET_STRING_ATTRIBUTE(m_services,"IF1Min", "IF1 lower limit (MHz):",value,MODE_PATH);
     start=0;
     for (WORD k=0; k<m_IFs*m_feeds; k++) {
         if (!IRA::CIRATools::getNextToken(value,start,' ',token)) {
             _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
-            dummy.setFieldName("IFMin");
+            dummy.setFieldName("IF1Min");
             throw dummy;
         }
-        m_BandIFMin[k] = token.ToDouble();
+        m_BandIF1Min[k] = token.ToDouble();
     }
 
-    _GET_STRING_ATTRIBUTE(m_services,"IFMax","IF upper limit (MHz):",value,MODE_PATH);
+    _GET_STRING_ATTRIBUTE(m_services,"IF1Max","IF1 upper limit (MHz):",value,MODE_PATH);
     start = 0;
     for (WORD k=0;k<m_IFs*m_feeds;k++) {
         if (!IRA::CIRATools::getNextToken(value,start,' ',token)) {
             _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl,dummy,error);
-            dummy.setFieldName("RFMax");
+            dummy.setFieldName("IF1Max");
             throw dummy;
         }
-        m_BandIFMax[k]=token.ToDouble();
+        m_BandIF1Max[k]=token.ToDouble();
+    }
+    
+    _GET_STRING_ATTRIBUTE(m_services,"IF2Min", "IF2 lower limit (MHz):",value,MODE_PATH);
+    start=0;
+    for (WORD k=0; k<m_IFs*m_feeds; k++) {
+        if (!IRA::CIRATools::getNextToken(value,start,' ',token)) {
+            _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, dummy, error);
+            dummy.setFieldName("IF1Min");
+            throw dummy;
+        }
+        m_BandIF2Min[k] = token.ToDouble();
+    }
+
+    _GET_STRING_ATTRIBUTE(m_services,"IF2Max","IF2 upper limit (MHz):",value,MODE_PATH);
+    start = 0;
+    for (WORD k=0;k<m_IFs*m_feeds;k++) {
+        if (!IRA::CIRATools::getNextToken(value,start,' ',token)) {
+            _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl,dummy,error);
+            dummy.setFieldName("IF1Max");
+            throw dummy;
+        }
+        m_BandIF2Max[k]=token.ToDouble();
     }
 
     _GET_STRING_ATTRIBUTE(m_services,"DefaultLO1","Default LO1 Value (MHz):",value,MODE_PATH);
@@ -803,11 +821,36 @@ void CConfiguration<T>::setMode(const char * mode)
     } 
     if (m_2IFConversionEnabled) {
     	for (WORD k=0; k<m_IFs*m_feeds; k++) {
-    		m_LOMax[k] += m_LO2Max[k];	
-    		m_LOMin[k] += m_LO2Min[k];
+    		IRA::DoubleConversionAnalysis res;
+    		res=IRA::CIRATools::analyzeDualConversion(m_BandRFMin[k],m_BandRFMax[k],
+                                     m_LO1Min[k],m_LO1Max[k],
+                                     m_BandIF1Min[k],m_BandIF1Max[k],
+                                     m_LO2Min[k],m_LO2Max[k],
+                                     m_BandIF2Min[k],m_BandIF2Max[k],
+                                     m_LO1Injection[k], m_LO2Injection[k]);
+         if (res.valid_configuration) {
+        		m_LOMax[k]=res.max_OL_eq;
+         	m_LOMin[k]=res.min_OL_eq;
+         	minRF=res.min_RF_converted;
+         	maxRF=res.max_RF_converted;
+         	m_BandRFMin[k]=minRF;
+         	m_BandRFMax[k]=maxRF;
+         	ACS_LOG(LM_FULL_INFO,"CConfiguration::updateIFLimits()",(LM_DEBUG,"LO limits are : %lf %lf",m_LOMin[k],m_LOMax[k]));
+         	ACS_LOG(LM_FULL_INFO,"CConfiguration::updateIFLimits()",(LM_DEBUG,"RF limits are : %lf %lf",minRF,maxRF));
+         }
+         else {
+            _EXCPT(ComponentErrors::CDBAccessExImpl,dummy,"CConfiguration::setMode()");
+            dummy.setFieldName("RF configuration sanity check");
+            throw dummy;
+			}	                              
     	}	
-    }   
-    
+    }
+    else  {
+    	for (WORD k=0; k<m_IFs*m_feeds; k++) {
+	 		m_LOMax[k]=m_LO1Max[k];
+      	m_LOMin[k]=m_LO1Max[k];
+      }
+    }
     m_mode = cmdMode;
 }
 
@@ -999,35 +1042,4 @@ bool CConfiguration<T>::compute_OL_distribution(double a, double b, double c, do
     }
 }
 
-
-template <class T>
-bool CConfiguration<T>::compute_OL_distribution(double a, double b, double c, double d, double OL, double& out_OL1, double& inout_OL2, bool OL2Fixed)
-{
-	if (OL2Fixed) {
-		if (inout_OL2 < c || inout_OL2 > d) {
-        	return false; // Errore: impossibile OL2 è fuori dai limiti consentiti
-    	}
-    	out_OL1 = OL - inout_OL2;
-    	if (out_OL1 < a || out_OL1 > b) {
-    		cout << "errore dei lmiti ol" << endl;
-        	return false; // Errore: impossibile soddisfare la richiesta
-    	}
-    	return true;
-	}
-	else {  
-	    if (OL < (a + c) || OL > (b + d)) {
-	    	 cout << "errore dei limiti ol OL2 non fisso" << endl;
-    	    return false; // Errore: impossibile soddisfare la richiesta
-    	}
-    	out_OL1 = a;
-    	inout_OL2 = c;
-    	double mancante = OL - (out_OL1 + inout_OL2);
-    	double spazio_libero_OL1 = b - a;
-    	double da_aggiungere = MIN(mancante, spazio_libero_OL1);
-    	out_OL1 += da_aggiungere;
-    	mancante -= da_aggiungere; // Riduciamo il mancante di quanto abbiamo appena assegnato
-    	inout_OL2 += mancante;
-    	return true; // Successo
-    }
-}
 
