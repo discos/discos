@@ -21,13 +21,13 @@ void SRTDerotatorStatusThread::onStart()
 
     m_next_time = 0;
 
-    ACS_LOG(LM_FULL_INFO, "SRTDerotatorStatusThread::onStart()", (LM_DEBUG, "STATUS THREAD STARTED"));
+    ACS_LOG(LM_FULL_INFO, "SRTDerotatorStatusThread::onStart()", (LM_NOTICE, "STATUS THREAD STARTED"));
 }
 
 void SRTDerotatorStatusThread::onStop()
 {
     AUTO_TRACE("SRTDerotatorStatusThread::onStop()");
-    ACS_LOG(LM_FULL_INFO, "SRTDerotatorStatusThread::onStop()", (LM_DEBUG, "STATUS THREAD STOPPED"));
+    ACS_LOG(LM_FULL_INFO, "SRTDerotatorStatusThread::onStop()", (LM_NOTICE, "STATUS THREAD STOPPED"));
 }
 
 void SRTDerotatorStatusThread::runLoop()

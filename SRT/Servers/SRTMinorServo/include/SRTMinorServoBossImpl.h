@@ -155,13 +155,6 @@ public:
     virtual CORBA::Double getCentralScanPosition();
 
     /**
-     * Clears the user defined offsets from all the minor servos.
-     * @throw MinorServoErrors::MinorServoErrorsEx when a scan is waiting to be completed, when the system is not configured yet, when the given servo_name is unknown,
-     *                                             when the given servo is not used in the current focal configuration or when checkLineStatus throws.
-     */
-    virtual void clearOffsets();
-
-    /**
      * Resets the given servo user offsets to 0.
      * @param servo_name the name of the minor servo the user offsets will be reset to 0.
      * @throw MinorServoErrors::MinorServoErrorsEx when a scan is waiting to be completed, when the system is not configured yet, when the given servo_name is unknown,
@@ -173,21 +166,10 @@ public:
      * Sets the given axis' user offset. CORBA IDL implementation.
      * @param servo_axis_name the minor servo and axis names, connected by a _ character.
      * @param offset the desired user offset to be loaded for the given axis.
-     * @param log a boolean indicating whether the call comes from the SimpleParser or from outside sources. In case it comes from the SimpleParser, we will log the action, otherwise we won't.
      * @throw MinorServoErrors::MinorServoErrorsEx when a scan is waiting to be completed, when the system is not configured yet, when the given servo or axis name are unknown,
      *                                             when the given servo is not used in the current focal configuration or when checkLineStatus throws.
      */
     virtual void setUserOffset(const char* servo_axis_name, CORBA::Double offset);
-
-    /**
-     * Sets the given axis' user offset. SimpleParser implementation.
-     * @param servo_axis_name the minor servo and axis names, connected by a _ character.
-     * @param offset the desired user offset to be loaded for the given axis.
-     * @param log a boolean indicating whether the call comes from the SimpleParser or from outside sources. In case it comes from the SimpleParser, we will log the action, otherwise we won't.
-     * @throw MinorServoErrors::MinorServoErrorsEx when a scan is waiting to be completed, when the system is not configured yet, when the given servo or axis name are unknown,
-     *                                             when the given servo is not used in the current focal configuration or when checkLineStatus throws.
-     */
-    virtual void setUserOffset(const char* servo_axis_name, const double& offset);
 
     /**
      * Retrieves all the current user offsets.
@@ -469,7 +451,7 @@ private:
     /**
      * Command line parser object.
      */
-    SimpleParser::CParser<SRTMinorServoBossImpl> m_parser;
+    SimpleParser::CParser<SRTMinorServoBossCore> m_parser;
 
     /**
      * Pointer to the connected property.

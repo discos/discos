@@ -14,11 +14,11 @@
 #define MAXRAWDATAPOINTS 2000
 
 // microseconds in which a status is valid and not considered cleared
-#define STATUS_VALIDITY 3000000 
+#define STATUS_VALIDITY 3000000
 
 _IRA_LOGFILTER_DECLARE;
 
-CBossCore::CBossCore(ContainerServices *service,CConfiguration *conf,acscomponent::ACSComponentImpl *me) : 
+CBossCore::CBossCore(ContainerServices *service,CConfiguration *conf,acscomponent::ACSComponentImpl *me) :
 	m_observedHorizontals(MAXDATAPOINTS),
 	m_observedEquatorials(MAXDATAPOINTS),
 	m_integratedObservedEquatorial(MAXDATAPOINTS),
@@ -142,13 +142,13 @@ void CBossCore::execute() throw (ComponentErrors::CouldntGetComponentExImpl,
 	catch (maciErrType::NoPermissionExImpl& ex) {
 		_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CBossCore::execute()");
 		Impl.setComponentName((const char*)m_config->getObservatoryComponent());
-		throw Impl;		
+		throw Impl;
 	}
 	catch (maciErrType::NoDefaultComponentExImpl& ex) {
 		_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CBossCore::execute()");
 		Impl.setComponentName((const char*)m_config->getObservatoryComponent());
-		throw Impl;				
-	}	
+		throw Impl;
+	}
 	ACS_LOG(LM_FULL_INFO,"CBossCore::execute()",(LM_INFO,"AntennaBoss::OBSERVATORY_LOCATED"));
 	/*try {
 		m_pointingModel=m_services->getComponent<Antenna::PointingModel>((const char*)m_config->getPointingModelInstance());
@@ -156,7 +156,7 @@ void CBossCore::execute() throw (ComponentErrors::CouldntGetComponentExImpl,
 	catch (maciErrType::CannotGetComponentExImpl& ex) {
 		_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CBossCore::execute()");
 		Impl.setComponentName((const char*)m_config->getPointingModelInstance());
-		throw Impl;		
+		throw Impl;
 	}
 	ACS_LOG(LM_FULL_INFO,"CBossCore::execute()",(LM_INFO,"AntennaBoss::POINTING_MODEL_LOCATED"));
 	try {
@@ -165,11 +165,11 @@ void CBossCore::execute() throw (ComponentErrors::CouldntGetComponentExImpl,
 	catch (maciErrType::CannotGetComponentExImpl& ex) {
 		_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CBossCore::execute()");
 		Impl.setComponentName((const char*)m_config->getRefractionInstance());
-		throw Impl;		
+		throw Impl;
 	}
 	ACS_LOG(LM_FULL_INFO,"CBossCore::execute()",(LM_INFO,"AntennaBoss::REFRACTION_LOCATED"));*/
 	std::string site_name;
-	try	{	
+	try	{
 		site=observatory->getSiteSummary();  //throw CORBA::SYSTEMEXCEPTION
 		ACSErr::Completion_var comp;
 		site_name=std::string(observatory->observatoryName()->get_sync(comp.out()));
@@ -190,7 +190,7 @@ void CBossCore::execute() throw (ComponentErrors::CouldntGetComponentExImpl,
 		_ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CBossCore::execute()");
 		Impl.setComponentName((const char*)observatory->name());
 		throw Impl;
-	}	
+	}
 
 	IRA::CString str_buffer;
 
@@ -436,7 +436,7 @@ void CBossCore::setup(const char *config) throw (ManagementErrors::Configuration
 		_ADD_BACKTRACE(ManagementErrors::ConfigurationErrorExImpl,managEx,ex,"CBossCore::setup()");
 		managEx.setSubsystem("Antenna");
 		throw managEx;
-	}	
+	}
 	IRA::CIRATools::getTime(now);
 	try {
 		if (m_enable) {
@@ -449,7 +449,7 @@ void CBossCore::setup(const char *config) throw (ManagementErrors::Configuration
 		impl.setMinor(ex.minor());
 		_ADD_BACKTRACE(ManagementErrors::ConfigurationErrorExImpl,manImpl,impl,"CBossCore::setup()");
 		manImpl.setSubsystem("Antenna");
-		manImpl.setReason("Could not synchronize time");		
+		manImpl.setReason("Could not synchronize time");
 		changeBossStatus(Management::MNG_WARNING);
 		m_mountError=true;
 		throw manImpl;
@@ -467,7 +467,7 @@ void CBossCore::setup(const char *config) throw (ManagementErrors::Configuration
 		impl.setReason("Could not synchronize time");
 		changeBossStatus(Management::MNG_WARNING);
 		throw impl;
-	}	
+	}
 	catch (...) {
 		changeBossStatus(Management::MNG_WARNING);
 		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CBossCore::setup()");
@@ -492,7 +492,7 @@ void CBossCore::setup(const char *config) throw (ManagementErrors::Configuration
 		impl.setMinor(ex.minor());
 		_ADD_BACKTRACE(ManagementErrors::ConfigurationErrorExImpl,manImpl,impl,"CBossCore::setup()");
 		manImpl.setSubsystem("Antenna");
-		manImpl.setSubsystem("Could not initialize pointing model");		
+		manImpl.setSubsystem("Could not initialize pointing model");
 		changeBossStatus(Management::MNG_WARNING);
 		throw manImpl;
 	}
@@ -502,12 +502,12 @@ void CBossCore::setup(const char *config) throw (ManagementErrors::Configuration
 		_ADD_BACKTRACE(ManagementErrors::ConfigurationErrorExImpl,manImpl,impl,"CBossCore::setup()");
 		manImpl.setSubsystem("Antenna");
 		manImpl.setReason("Could not initialize pointing model");
-		throw manImpl;		
+		throw manImpl;
 	}
 	m_correctionEnable=true;  // enable the correction for pointing model and refraction.
 	m_correctionEnable_scan=true;
 	desc.normal_timeout=4000000;
-	//cbvoid=callbackUnstow._this(); 
+	//cbvoid=callbackUnstow._this();
 	try {
 		if (m_enable) {
 			m_mount->unstow(m_cbSetup,desc);
@@ -519,7 +519,7 @@ void CBossCore::setup(const char *config) throw (ManagementErrors::Configuration
 		impl.setMinor(ex.minor());
 		_ADD_BACKTRACE(ManagementErrors::ConfigurationErrorExImpl,manImpl,impl,"CBossCore::setup()");
 		manImpl.setSubsystem("Antenna");
-		manImpl.setReason("Could not unstow the antenna");		
+		manImpl.setReason("Could not unstow the antenna");
 		changeBossStatus(Management::MNG_WARNING);
 		m_mountError=true;
 		throw manImpl;
@@ -530,7 +530,7 @@ void CBossCore::setup(const char *config) throw (ManagementErrors::Configuration
 		_ADD_BACKTRACE(ManagementErrors::ConfigurationErrorExImpl,manImpl,impl,"CBossCore::setup()");
 		manImpl.setSubsystem("Antenna");
 		manImpl.setReason("Could not unstow the antenna");
-		throw manImpl;		
+		throw manImpl;
 	}
 	m_userOffset.lon=m_userOffset.lat=0.0; m_userOffset.frame=Antenna::ANT_HORIZONTAL;
 	m_scanOffset.lon=m_scanOffset.lat=0.0; m_scanOffset.frame=Antenna::ANT_HORIZONTAL;
@@ -557,7 +557,7 @@ void CBossCore::enable()
 {
 	if (!m_enable) {
 		m_enable=true;
-		ACS_LOG(LM_FULL_INFO,"CBossCore::enable()",(LM_NOTICE,"AntennaBoss::COMPONENT_ENABLED"));		
+		ACS_LOG(LM_FULL_INFO,"CBossCore::enable()",(LM_NOTICE,"AntennaBoss::COMPONENT_ENABLED"));
 	}
 }
 
@@ -578,7 +578,7 @@ void CBossCore::disableCorrection()
 }
 
 void CBossCore::setFWHM(const double& val,const double& waveLen)
-{ 
+{
 	m_FWHM=val;
 	m_waveLength=waveLen;
 	m_currentObservingFrequency=LIGHTSPEED_MS/waveLen; // frequency in Hz
@@ -678,7 +678,7 @@ void CBossCore::setOffsets(const double& lonOff,const double& latOff,const Anten
 			}
 			else if (frame==Antenna::ANT_GALACTIC) {
 				ACS_LOG(LM_FULL_INFO,"CBossCore::setOffsets()",
-					(LM_NOTICE,"NEW_GALACTIC_OFFSETS %lf %lf",lonOff,latOff));					
+					(LM_NOTICE,"NEW_GALACTIC_OFFSETS %lf %lf",lonOff,latOff));
 			}
 		}
 		catch (CORBA::SystemException& ex) {
@@ -735,7 +735,7 @@ void CBossCore::getAllOffsets(double& azOff,double& elOff,double& raOff,double& 
 		raOff=m_longitudeOffset;
 		decOff=m_latitudeOffset;
 		lonOff=0.0;
-		latOff=0.0;		
+		latOff=0.0;
 	}
 	else if (m_offsetFrame==Antenna::ANT_GALACTIC) {
 		azOff=0.0;
@@ -743,7 +743,7 @@ void CBossCore::getAllOffsets(double& azOff,double& elOff,double& raOff,double& 
 		raOff=0.0;
 		decOff=0.0;
 		lonOff=m_longitudeOffset;
-		latOff=m_latitudeOffset;		
+		latOff=m_latitudeOffset;
 	}
 }
 
@@ -754,7 +754,7 @@ void CBossCore::stop() throw (ComponentErrors::UnexpectedExImpl,ComponentErrors:
 	m_generatorType=Antenna::ANT_NONE;
 	m_generator=Antenna::EphemGenerator::_nil(); // it also releases the previous reference.
 	m_generatorFlux=Antenna::EphemGenerator::_nil();
-	m_targetName=IRA::CString("none");	
+	m_targetName=IRA::CString("none");
 	m_currentAxis=Management::MNG_NO_AXIS;
 	m_timeToStop=0;
 	m_targetRA=m_targetDec=m_targetVrad=m_targetFlux=0.0;
@@ -772,7 +772,7 @@ void CBossCore::stop() throw (ComponentErrors::UnexpectedExImpl,ComponentErrors:
 	loadMount(m_mount,m_mountError); // throw ComponentErrors::CouldntGetComponentExImpl
 	if (m_enable) {
 		try {
-			m_mount->stop(); 
+			m_mount->stop();
 		}
 		catch (ComponentErrors::ComponentErrorsEx& E) {
 			_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,E,"CBossCore::stop()");
@@ -787,7 +787,7 @@ void CBossCore::stop() throw (ComponentErrors::UnexpectedExImpl,ComponentErrors:
 			impl.setOperationName("stop()");
 			changeBossStatus(Management::MNG_FAILURE);
 			throw impl;
-		}		
+		}
 		catch (CORBA::SystemException& E) {
 			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CBossCore::stop()");
 			impl.setName(E._name());
@@ -837,7 +837,7 @@ bool CBossCore::checkScan(const ACS::Time& startUt,const Antenna::TTrackingParam
 			double pangle;
 			TIMEVALUE ct(startTime);
 			IRA::CDateTime time(ct,m_dut1);
-			generator->getHorizontalCoordinate(startTime,azimuth,elevation); 
+			generator->getHorizontalCoordinate(startTime,azimuth,elevation);
 			generator->getHorizontalCoordinate(startTime+par.otf.subScanDuration,stopAzimuth,stopElevation); //this is the coordinate at the end of the scan
 			antennaInfo->startEpoch=startTime;
 			antennaInfo->azimuth=azimuth;
@@ -848,7 +848,7 @@ bool CBossCore::checkScan(const ACS::Time& startUt,const Antenna::TTrackingParam
 			ACS_LOG(LM_FULL_INFO,"CBossCore::checkScan()",(LM_DEBUG,"OTF_AZ_EL: %lf %lf",azimuth,elevation));
 			ACS_LOG(LM_FULL_INFO,"CBossCore::checkScan()",(LM_DEBUG,"OTF_STOPAZ_STOPEL: %lf %lf",stopAzimuth,stopElevation));
 		}
-		else { // all other cases 
+		else { // all other cases
 			//************************************************
 			// Also in this case, as the OTF on secondary target, the start time should be computed by a two iteration process:
 			// 1) compute where the source is now and the expected slewing time
@@ -877,27 +877,27 @@ bool CBossCore::checkScan(const ACS::Time& startUt,const Antenna::TTrackingParam
 	}
 	catch (ComponentErrors::UnexpectedExImpl& ex) {
 		changeBossStatus(Management::MNG_WARNING);
-		throw ex;		
+		throw ex;
 	}
 	catch (ComponentErrors::CORBAProblemExImpl& ex) {
 		changeBossStatus(Management::MNG_WARNING);
-		throw ex;		
+		throw ex;
 	}
 	catch (AntennaErrors::ScanErrorExImpl& ex) {
 		changeBossStatus(Management::MNG_WARNING);
-		throw ex;		
+		throw ex;
 	}
 	catch (AntennaErrors::SecondaryScanErrorExImpl& ex) {
 		changeBossStatus(Management::MNG_WARNING);
 		throw ex;
-	}	
+	}
 	catch (AntennaErrors::MissingTargetExImpl& ex) {
 		changeBossStatus(Management::MNG_WARNING);
-		throw ex;		
+		throw ex;
 	}
 	catch (AntennaErrors::LoadGeneratorErrorExImpl& ex) {
 		changeBossStatus(Management::MNG_WARNING);
-		throw ex;				
+		throw ex;
 	}
 	catch (...) {
 		changeBossStatus(Management::MNG_WARNING);
@@ -909,11 +909,11 @@ bool CBossCore::checkScan(const ACS::Time& startUt,const Antenna::TTrackingParam
 	else {
 		antennaInfo->section=Antenna::ANT_NORTH;
 	}
-	loadMount(m_mount,m_mountError); 
+	loadMount(m_mount,m_mountError);
 	// ask the mount about the azimuth coordinate that will be effectively commanded to the antenna (hardware coordinate)
 	try {
 		hwAzimuth=m_mount->getHWAzimuth(azimuth*DR2D,section)*DD2R;
-		ACS_LOG(LM_FULL_INFO,"CBossCore::checkScan()",(LM_DEBUG,"HARDWARE_AZIMUTH: %lf",hwAzimuth*DR2D));	
+		ACS_LOG(LM_FULL_INFO,"CBossCore::checkScan()",(LM_DEBUG,"HARDWARE_AZIMUTH: %lf",hwAzimuth*DR2D));
 	}
 	catch (CORBA::SystemException& ex) {
 		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CBossCore::checkScan()");
@@ -953,7 +953,7 @@ bool CBossCore::checkScan(const ACS::Time& startUt,const Antenna::TTrackingParam
 		ACS_LOG(LM_FULL_INFO,"CBossCore::checkScan()",(LM_DEBUG,"TARGET_INSIDE_ELEVATION_RANGE"));
 		// if startUt==0 no slewing checks are done...the answer is always true but the slewing time is computed anyway
 		slew=m_slewCheck.checkSlewing(m_lastEncoderAzimuth,m_lastEncoderElevation,m_lastEncoderRead,hwAzimuth,elevation,startUt,antennaInfo->slewingTime);
-		if (generatorType!=Antenna::ANT_OTF) { // the startime need to be computed only for not-OTF scans. 
+		if (generatorType!=Antenna::ANT_OTF) { // the startime need to be computed only for not-OTF scans.
 			antennaInfo->startEpoch=m_lastEncoderRead+antennaInfo->slewingTime+1000000; // add 0.1s as safety margin
 		}
 		if (slew) {
@@ -1011,12 +1011,12 @@ void CBossCore::resetFailures() throw (ComponentErrors::CouldntGetComponentExImp
 		impl.setOperationName("reset()");
 		throw impl;
 	}
-	m_status=Management::MNG_OK;	
+	m_status=Management::MNG_OK;
 }
 
 
 void CBossCore::getAllattributes()
-{	
+{
 }
 
 bool CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntCallOperationExImpl,
@@ -1029,7 +1029,7 @@ bool CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,Co
 	double ra,dec;
 	m_trackingTime=0;
 	m_tracking=false;
-	
+
 	// get the encoders coordinates from the mount
 	loadMount(m_mount,m_mountError); // throw ComponentErrors::CouldntGetComponentExImpl
 	try {
@@ -1057,7 +1057,7 @@ bool CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,Co
 		impl.setComponentName((const char*)m_mount->name());
 		impl.setOperationName("getEncoderCoordinates()");
 		throw impl;
-	}	
+	}
 	catch (...) {
 		changeBossStatus(Management::MNG_WARNING);
 		_THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"CBossCore::updateAttributes()");
@@ -1085,7 +1085,7 @@ bool CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,Co
 		try {
 			m_refraction->getCorrection(DPIBY2-el,m_waveLength,m_refractionOffset);
 		}
-		catch (AntennaErrors::AntennaErrorsEx& ex) {  
+		catch (AntennaErrors::AntennaErrorsEx& ex) {
 			_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CBossCore::updateAttributes()");
 			impl.setComponentName((const char*)m_refraction->name());
 			impl.setOperationName("getCorrection()");
@@ -1135,7 +1135,7 @@ bool CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,Co
 		m_pointingAzOffset=m_pointingElOffset=m_refractionOffset=0.0;
 	}
 	m_observedHorizontals.addPoint(az,el,timeMark);
-	// computes the apparent equatorial coordinates from the horizontal ones  
+	// computes the apparent equatorial coordinates from the horizontal ones
 	IRA::CSkySource:: horizontalToEquatorial(dateTime,m_site,az,el,appRa,appDec,pAngle);
 	IRA::CSkySource::apparentToJ2000(appRa,appDec,dateTime,ra,dec);
 	m_observedEquatorials.addPoint(ra,dec,timeMark);
@@ -1188,6 +1188,20 @@ bool CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,Co
 				_THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"CBossCore::updateAttributes()");
 			}
 		}
+	}
+
+	std::pair<IRA::CDateTime, std::string> items[] = {
+		std::make_pair(dateTime.LST((m_site)), "lst"),
+		std::make_pair(dateTime.GST((m_site)), "gast")
+	};
+
+	for(const auto& item : items)
+	{
+		TIMEDIFFERENCE td;
+		item.first.getDateTime(td);
+		char buffer[64];
+		snprintf(buffer, sizeof(buffer), "%02ld:%02ld:%02ld.%03ld", (long)td.hour(), (long)td.minute(), (long)td.second(), (long)(td.microSecond()/1000));
+		m_zmqDictionary["site"][item.second] = buffer;
 	}
 
 	m_zmqDictionary["timestamp"] = ZMQ::ZMQTimeStamp::fromACSTime(time);
@@ -1380,7 +1394,7 @@ void CBossCore::setEquatorialOffsets(const double& raOff,const double& decOff) t
 
 void CBossCore::setGalacticOffsets(const double& lonOff,const double& latOff) throw(ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl)
 {
-	setOffsets(lonOff,latOff,Antenna::ANT_GALACTIC); // could throw(ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl)	
+	setOffsets(lonOff,latOff,Antenna::ANT_GALACTIC); // could throw(ComponentErrors::UnexpectedExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl)
 }
 
 #include "BossCore_startScan.i"
@@ -1418,7 +1432,7 @@ void CBossCore::loadTrackingPoint(const TIMEVALUE& time,bool restart) throw (Com
 	else {
 		changeBossStatus(Management::MNG_WARNING); // if the ephem generator is not loaded
 		_THROW_EXCPT(AntennaErrors::TrackingNotStartedExImpl,"CBossCore::loadTrackingPoint()")
-	}	
+	}
 	if (m_correctionEnable && m_correctionEnable_scan) {
 		double azOff,elOff;
 		double refOff;
@@ -1503,7 +1517,7 @@ void CBossCore::loadTrackingPoint(const TIMEVALUE& time,bool restart) throw (Com
 		impl.setComponentName((const char*)m_mount->name());
 		impl.setOperationName("programTrack()");
 		throw impl;
-	}	
+	}
 	catch (...) {
 		changeBossStatus(Management::MNG_WARNING);
 		_THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"CBossCore::loadTrackingPoint()");
@@ -1536,12 +1550,12 @@ void CBossCore::checkStatus() throw (ComponentErrors::CORBAProblemExImpl,Compone
 					CompletionImpl local(comp);
 					if (!local.isErrorFree()) {
 						_ADD_BACKTRACE(ComponentErrors::CouldntGetAttributeExImpl,impl,local,"CBossCore::checkStatus()");
-						 impl.setComponentName((const char*)m_mount->name()); 
+						 impl.setComponentName((const char*)m_mount->name());
 						 impl.setAttributeName("mountStatus");
 						 changeBossStatus(Management::MNG_WARNING);
 						 m_status=Management::MNG_WARNING;
 						 throw impl;
-					}					
+					}
 				}
 				else {
 					st=Management::MNG_WARNING;
@@ -1578,7 +1592,7 @@ void CBossCore::checkStatus() throw (ComponentErrors::CORBAProblemExImpl,Compone
 
 void CBossCore::changeBossStatus(const Management::TSystemStatus& status)
 {
-	if (status>=m_bossStatus) { // if the new state has an higher priority...update the status 
+	if (status>=m_bossStatus) { // if the new state has an higher priority...update the status
 		m_bossStatus=status;
 		IRA::CIRATools::getTime(m_lastStatusChange);
 	}
@@ -1587,7 +1601,7 @@ void CBossCore::changeBossStatus(const Management::TSystemStatus& status)
 		IRA::CIRATools::getTime(now);
 		if (IRA::CIRATools::timeDifference(m_lastStatusChange,now)>STATUS_VALIDITY) {
 			m_bossStatus=status;
-			IRA::CIRATools::getTime(m_lastStatusChange);			
+			IRA::CIRATools::getTime(m_lastStatusChange);
 		}
 	}
 }
@@ -1604,7 +1618,7 @@ void CBossCore::loadMount(Antenna::Mount_var& ref,bool& errorDetected) const thr
 		ref=Antenna::Mount::_nil();
 	}
 	if (CORBA::is_nil(ref)) {  //only if it has not been retrieved yet
-		try {  
+		try {
 			// no default component because we use the parents interface Antenna::Mount not the site specific interface Antenna::MedicinaMount or Antenna::SRTMount
 			ref=m_services->getComponent<Antenna::Mount>((const char*)m_config->getMountInstance());
 			ACS_LOG(LM_FULL_INFO,"CBossCore::loadMount()",(LM_INFO,"MOUNT_LOCATED"));
@@ -1613,13 +1627,13 @@ void CBossCore::loadMount(Antenna::Mount_var& ref,bool& errorDetected) const thr
 		catch (maciErrType::CannotGetComponentExImpl& ex) {
 			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CBossCore::loadMount()");
 			Impl.setComponentName((const char*)m_config->getMountInstance());
-			throw Impl;		
+			throw Impl;
 		}
 		catch (...) {
 			_EXCPT(ComponentErrors::CouldntGetComponentExImpl,impl,"CBossCore::loadMount()");
 			impl.setComponentName((const char*)m_config->getMountInstance());
 			throw impl;
-		}		
+		}
 	}
 }
 
@@ -1654,7 +1668,7 @@ void CBossCore::loadPointingModel(Antenna::PointingModel_var& ref) const throw (
 		catch (maciErrType::CannotGetComponentExImpl& ex) {
 			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CBossCore::loadPointingModel()");
 			Impl.setComponentName((const char*)m_config->getPointingModelInstance());
-			throw Impl;		
+			throw Impl;
 		}
 	}
 }
@@ -1670,7 +1684,7 @@ void CBossCore::loadRefraction(Antenna::Refraction_var& ref) const throw (Compon
 		catch (maciErrType::CannotGetComponentExImpl& ex) {
 			_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CBossCore::loadRefraction()");
 			Impl.setComponentName((const char*)m_config->getRefractionInstance());
-			throw Impl;		
+			throw Impl;
 		}
 	}
 }
@@ -1751,7 +1765,7 @@ Antenna::EphemGenerator_ptr CBossCore::loadInternalGenerator(const Antenna::TGen
 			if (CORBA::is_nil(m_otfGenerator)) {
 				m_otfGenerator=loadGenerator(type); // could throw exceptions
 			}
-			ref=Antenna::EphemGenerator::_duplicate(m_otfGenerator);			
+			ref=Antenna::EphemGenerator::_duplicate(m_otfGenerator);
 			break;
 		}
 		default: { //Antenna::ANT_NONE
@@ -1805,7 +1819,7 @@ Antenna::EphemGenerator_ptr CBossCore::loadPrimaryGenerator(const Antenna::TGene
 			if (CORBA::is_nil(m_primaryOtfGenerator)) {
 				m_primaryOtfGenerator=loadGenerator(type); // could throw exceptions
 			}
-			ref=Antenna::EphemGenerator::_duplicate(m_primaryOtfGenerator);			
+			ref=Antenna::EphemGenerator::_duplicate(m_primaryOtfGenerator);
 			break;
 		}
 		default: { //Antenna::ANT_NONE
@@ -1852,7 +1866,7 @@ Antenna::EphemGenerator_ptr CBossCore::loadGenerator(const Antenna::TGeneratorTy
 		default: { //Antenna::ANT_NONE
 			_EXCPT(ComponentErrors::CouldntGetComponentExImpl,impl,"CBossCore::loadGenerator()");
 			impl.setComponentName("NONE");
-			throw impl;   
+			throw impl;
 		}
 	}
 	try {
@@ -1861,7 +1875,7 @@ Antenna::EphemGenerator_ptr CBossCore::loadGenerator(const Antenna::TGeneratorTy
 	catch (ACSErr::ACSbaseExImpl& E) {
 		_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,impl,E,"CBossCore::loadGenerator()");
 		impl.setComponentName((const char *)cSpec->component_type);
-		throw impl;   
+		throw impl;
 	}
 	catch( CORBA::SystemException &E) {  // ... than CORBA system exception
 		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CBossCore::loadGenerator()");
@@ -1899,7 +1913,7 @@ void CBossCore::freeGenerator(Antenna::EphemGenerator_ptr& generator) throw (Com
 
 void CBossCore::addOffsets(double &lon,double& lat,Antenna::TCoordinateFrame& frame,const TOffset& userOffset,const TOffset& scanOffset) const
 {
-	if (userOffset.frame==scanOffset.frame) { // if the frames differ the scanOffset prevails  
+	if (userOffset.frame==scanOffset.frame) { // if the frames differ the scanOffset prevails
 		lon=userOffset.lon+scanOffset.lon;
 		lat=userOffset.lat+scanOffset.lat;
 	}

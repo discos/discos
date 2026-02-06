@@ -67,14 +67,14 @@ T getCDBValue(maci::ContainerServices* container_services, const std::string& fi
                 {
                     _EXCPT(ComponentErrors::CDBAccessExImpl, ex, "SRTMinorServoUtils::getCDBValue()");
                     ex.setFieldName(field.c_str());
-                    throw ex.getComponentErrorsEx();
+                    throw ex;
                 }
                 catch(std::out_of_range& oor)
                 {
                     _EXCPT(ComponentErrors::ValueOutofRangeExImpl, ex, "SRTMinorServoUtils::getCDBValue()");
                     ex.setValueName(field.c_str());
                     ex.setValueLimit(token.find('-') == std::string::npos ? std::numeric_limits<double>::max() : std::numeric_limits<double>::min());
-                    throw ex.getComponentErrorsEx();
+                    throw ex;
                 }
 
                 values.push_back(value);
@@ -94,7 +94,7 @@ T getCDBValue(maci::ContainerServices* container_services, const std::string& fi
     {
         _EXCPT(ComponentErrors::CDBAccessExImpl, ex, "SRTMinorServoUtils::getCDBValue()");
         ex.setFieldName(field.c_str());
-        throw ex.getComponentErrorsEx();  // Maybe throw the plain ex
+        throw ex;
     }
 }
 

@@ -22,7 +22,7 @@ void SRTMinorServoTrackingThread::onStart()
     m_point_id = 0;
     m_point_time = 0;
 
-    ACS_LOG(LM_FULL_INFO, "SRTMinorServoTrackingThread::onStart()", (LM_DEBUG, "TRACKING THREAD STARTED"));
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoTrackingThread::onStart()", (LM_NOTICE, "TRACKING THREAD STARTED"));
 }
 
 void SRTMinorServoTrackingThread::onStop()
@@ -31,7 +31,7 @@ void SRTMinorServoTrackingThread::onStop()
 
     m_core.m_elevation_tracking.store(Management::MNG_FALSE);
 
-    ACS_LOG(LM_FULL_INFO, "SRTMinorServoTrackingThread::onStop()", (LM_DEBUG, "TRACKING THREAD STOPPED"));
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoTrackingThread::onStop()", (LM_NOTICE, "TRACKING THREAD STOPPED"));
 }
 
 void SRTMinorServoTrackingThread::runLoop()
@@ -42,9 +42,9 @@ void SRTMinorServoTrackingThread::runLoop()
     {
         m_core.checkLineStatus();
     }
-    catch(MinorServoErrors::MinorServoErrorsEx& ex)
+    catch(MinorServoErrors::MinorServoErrorsExImpl& impl)
     {
-        ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
+        impl.log(LM_ERROR);
         this->setStopped();
         return;
     }
@@ -62,7 +62,7 @@ void SRTMinorServoTrackingThread::runLoop()
         m_point_time = getTimeStamp() + PROGRAM_TRACK_FUTURE_TIME;
         m_trajectory_id = (unsigned int)(IRA::CIRATools::ACSTime2UNIXTime(m_point_time));
     }
-    else if(m_point_id == 1)
+    else if(m_point_id > 0 && m_core.m_elevation_tracking.load() != Management::MNG_TRUE)
     {
         if(std::all_of(m_core.m_current_tracking_servos.begin(), m_core.m_current_tracking_servos.end(), [this](const std::pair<std::string, SRTBaseMinorServo_ptr>& servo) -> bool
         {
@@ -86,39 +86,54 @@ void SRTMinorServoTrackingThread::runLoop()
         }
     }
 
+    double elevation = 45.0;
+
+    try
+    {
+        elevation = m_core.getElevation(m_point_time);
+    }
+    catch(ComponentErrors::CouldntGetComponentExImpl&)
+    {
+        _IRA_LOGFILTER_LOG(LM_WARNING, "SRTMinorServoTrackingThread::runLoop()", "AntennaBoss component unreachable: using a fixed elevation of 45° for tracking!");
+        m_core.m_elevation_tracking.store(Management::MNG_FALSE);
+    }
+    catch(CORBA::Exception&)
+    {
+        _IRA_LOGFILTER_LOG(LM_WARNING, "SRTMinorServoTrackingThread::runLoop()", "CORBA Problem: using a fixed elevation of 45° for tracking!");
+        m_core.m_elevation_tracking.store(Management::MNG_FALSE);
+    }
+
     for(const auto& [servo_name, servo] : m_core.m_current_tracking_servos)
     {
-        double elevation = 45.0;
-
-        try
-        {
-            elevation = m_core.getElevation(m_point_time);
-        }
-        catch(ComponentErrors::ComponentErrorsEx& ex)
-        {
-            _IRA_LOGFILTER_LOG(LM_WARNING, "SRTMinorServoTrackingThread::runLoop()", (std::string(getReasonFromEx(ex)) + ": using a fixed elevation of 45° for tracking!").c_str());
-            m_core.m_elevation_tracking.store(Management::MNG_FALSE);
-        }
-
         try
         {
             servo->programTrack(m_trajectory_id, m_point_id, m_point_time, *servo->calcCoordinates(elevation));
         }
-        catch(MinorServoErrors::MinorServoErrorsEx& ex)
+        catch(MinorServoErrors::TrackingErrorEx& ex)
         {
-            ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
+            _ADD_BACKTRACE(MinorServoErrors::TrackingErrorExImpl, impl, ex, "SRTMinorServoTrackingThread::runLoop()");
+            impl.log(LM_ERROR);
             m_core.setError(ERROR_COMMAND_ERROR);
             this->setStopped();
             return;
         }
-        catch(std::exception& ex)
+        catch(MinorServoErrors::CommunicationErrorEx& ex)
         {
-            ACS_SHORT_LOG((LM_ERROR, ex.what()));
+            _ADD_BACKTRACE(MinorServoErrors::CommunicationErrorExImpl, impl, ex, "SRTMinorServoTrackingThread::runLoop()");
+            impl.log(LM_ERROR);
             m_core.setError(ERROR_COMMAND_ERROR);
             this->setStopped();
             return;
         }
-        catch(CORBA::Exception& ex)
+        catch(MinorServoErrors::StatusErrorEx& ex)
+        {
+            _ADD_BACKTRACE(MinorServoErrors::StatusErrorExImpl, impl, ex, "SRTMinorServoTrackingThread::runLoop()");
+            impl.log(LM_ERROR);
+            m_core.setError(ERROR_COMMAND_ERROR);
+            this->setStopped();
+            return;
+        }
+        catch(CORBA::UserException& ex)
         {
             ACS_SHORT_LOG((LM_ERROR, ex._info().c_str()));
             m_core.setError(ERROR_COMMAND_ERROR);

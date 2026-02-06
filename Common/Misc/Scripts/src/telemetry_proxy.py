@@ -40,7 +40,7 @@ args = parser.parse_args()
 if args.front_end_port == args.back_end_port:
     parser.error('FRONT_END_PORT and BACK_END_PORT cannot be the same port!')
 
-curve_directory = Path.home() / ".curve" / "discos" / "telemetry" / "server"
+curve_directory = Path.home() / ".config" / "discos" / "telemetry" / "server"
 authorized_directory = curve_directory / "authorized"
 server_pair = curve_directory / "identity.key_secret"
 server_public, server_secret = load_certificate(server_pair)

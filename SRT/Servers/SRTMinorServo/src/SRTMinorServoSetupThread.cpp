@@ -40,9 +40,9 @@ void SRTMinorServoSetupThread::onStop()
         {
             m_core.startThread(m_core.m_tracking_thread);
         }
-        catch(ComponentErrors::ComponentErrorsEx& ex)
+        catch(ComponentErrors::ComponentErrorsExImpl& impl)
         {
-            ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
+            impl.log(LM_ERROR);
         }
     }
 
@@ -57,9 +57,9 @@ void SRTMinorServoSetupThread::runLoop()
     {
         m_core.checkLineStatus();
     }
-    catch(MinorServoErrors::StatusErrorEx& ex)
+    catch(MinorServoErrors::MinorServoErrorsExImpl& impl)
     {
-        ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
+        impl.log(LM_ERROR);
         this->setStopped();
         return;
     }
@@ -103,7 +103,7 @@ void SRTMinorServoSetupThread::runLoop()
         {
             try
             {
-                if(!m_core.m_socket.sendCommand(SRTMinorServoCommandLibrary::setup(m_LDO_configuration)).checkOutput())
+                if(!m_core.m_socket->sendCommand(SRTMinorServoCommandLibrary::setup(m_LDO_configuration)).checkOutput())
                 {
                     ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::runLoop()", (LM_CRITICAL, "Received NAK in response to a SETUP command."));
                     m_core.setError(ERROR_CONFIG_ERROR);
@@ -115,9 +115,9 @@ void SRTMinorServoSetupThread::runLoop()
                     m_status = 3;
                 }
             }
-            catch(...)
+            catch(MinorServoErrors::MinorServoErrorsExImpl& impl)
             {
-                ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::runLoop()", (LM_CRITICAL, "Communication error while sending a SETUP command."));
+                impl.log(LM_ERROR);
                 m_core.setError(ERROR_CONFIG_ERROR);
                 this->setStopped();
                 return;
@@ -161,15 +161,15 @@ void SRTMinorServoSetupThread::runLoop()
                         {
                             m_core.m_current_tracking_servos[servo_name] = m_core.m_tracking_servos.at(servo_name);
                         }
-                        catch(...)
+                        catch(std::out_of_range&)
                         {
                             // Not a tracking servo, ignore
                         }
                     }
                 }
-                catch(...)
+                catch(ComponentErrors::ComponentErrorsEx& ex)
                 {
-                    ACS_LOG(LM_FULL_INFO, "SRTMinorServoSetupThread::runLoop()", (LM_CRITICAL, ("Error while loading a SETUP to servo'" + servo_name + "'.").c_str()));
+                    ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
                     m_core.setError(ERROR_CONFIG_ERROR);
                     this->setStopped();
                     return;

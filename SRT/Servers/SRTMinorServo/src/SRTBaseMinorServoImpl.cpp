@@ -6,30 +6,8 @@ SRTBaseMinorServoImpl::SRTBaseMinorServoImpl(const ACE_CString& component_name, 
     CharacteristicComponentImpl(component_name, container_services),
     m_component_name(std::string(component_name.c_str())),
     m_servo_name(std::string(strchr(component_name.c_str(), '/') + 1)),
-    m_virtual_axes(getCDBValue<size_t>(container_services, "virtual_axes")),
-    m_physical_axes(getCDBValue<size_t>(container_services, "physical_axes")),
-    m_virtual_axes_units(SRTBaseMinorServoImpl::getPropertiesTable(*this, "virtual_axes_units")),
-    m_virtual_axes_names(SRTBaseMinorServoImpl::getPropertiesTable(*this, "virtual_positions")),
-    m_status(
-        m_servo_name,
-        SRTBaseMinorServoImpl::getPropertiesTable(*this, "physical_axes_enabled"),
-        SRTBaseMinorServoImpl::getPropertiesTable(*this, "physical_positions"),
-        m_virtual_axes_names,
-        SRTBaseMinorServoImpl::getPropertiesTable(*this, "virtual_offsets")
-    ),
+    m_status(m_servo_name),
     m_error_code(ERROR_NO_ERROR),
-    m_user_offsets(m_virtual_axes, 0.0),
-    m_system_offsets(m_virtual_axes, 0.0),
-    m_commanded_plain_virtual_positions(m_virtual_axes, 0.0),
-    m_positions_queue(5 * 60 * int(1 / getCDBValue<double>(container_services, "status_thread_period", "/MINORSERVO/Boss")), m_virtual_axes),
-    m_offsets_queue(5 * 60 * int(1 / getCDBValue<double>(container_services, "status_thread_period", "/MINORSERVO/Boss")), m_virtual_axes),
-    m_min(SRTBaseMinorServoImpl::getMotionConstant(*this, "min_range")),
-    m_max(SRTBaseMinorServoImpl::getMotionConstant(*this, "max_range")),
-    m_m_s(SRTBaseMinorServoImpl::getMotionConstant(*this, "max_speed")),
-    m_a(SRTBaseMinorServoImpl::getMotionConstant(*this, "acceleration")),
-    m_r_t(SRTBaseMinorServoImpl::getMotionConstant(*this, "ramp_times")),
-    m_r_d(SRTBaseMinorServoImpl::getMotionConstant(*this, "ramp_distances")),
-    m_c_s(m_virtual_axes, 0.0),
     m_in_use(Management::MNG_FALSE),
     m_current_setup(""),
     m_enabled_ptr(this),
@@ -48,9 +26,7 @@ SRTBaseMinorServoImpl::SRTBaseMinorServoImpl(const ACE_CString& component_name, 
     m_in_use_ptr(this),
     m_current_setup_ptr(this),
     m_error_code_ptr(this),
-    m_current_coefficients_table(),
-    m_socket_configuration(SRTMinorServoSocketConfiguration::getInstance(container_services)),
-    m_socket(SRTMinorServoSocket::getInstance(m_socket_configuration.m_ip_address, m_socket_configuration.m_port, m_socket_configuration.m_timeout))
+    m_current_coefficients_table()
 {
     AUTO_TRACE(m_servo_name + "::SRTBaseMinorServoImpl()");
 }
@@ -64,8 +40,36 @@ void SRTBaseMinorServoImpl::initialize()
 {
     AUTO_TRACE(m_servo_name + "::initialize()");
 
+    maci::ContainerServices* container_services = getContainerServices();
+
     try
     {
+        m_virtual_axes = getCDBValue<size_t>(container_services, "virtual_axes");
+        m_physical_axes = getCDBValue<size_t>(container_services, "physical_axes");
+        m_virtual_axes_units = SRTBaseMinorServoImpl::getPropertiesTable(*this, "virtual_axes_units");
+        m_virtual_axes_names = SRTBaseMinorServoImpl::getPropertiesTable(*this, "virtual_positions");
+        m_status = SRTMinorServoStatus(
+            m_servo_name,
+            SRTBaseMinorServoImpl::getPropertiesTable(*this, "physical_axes_enabled"),
+            SRTBaseMinorServoImpl::getPropertiesTable(*this, "physical_positions"),
+            m_virtual_axes_names,
+            SRTBaseMinorServoImpl::getPropertiesTable(*this, "virtual_offsets")
+        );
+        m_user_offsets.assign(m_virtual_axes, 0.0);
+        m_system_offsets.assign(m_virtual_axes, 0.0);
+        m_commanded_plain_virtual_positions.assign(m_virtual_axes, 0.0);
+        m_positions_queue = SRTMinorServoPositionsQueue(5 * 60 * int(1 / getCDBValue<double>(container_services, "status_thread_period", "/MINORSERVO/Boss")), m_virtual_axes);
+        m_offsets_queue = SRTMinorServoOffsetsQueue(5 * 60 * int(1 / getCDBValue<double>(container_services, "status_thread_period", "/MINORSERVO/Boss")), m_virtual_axes);
+        m_min = SRTBaseMinorServoImpl::getMotionConstant(*this, "min_range");
+        m_max = SRTBaseMinorServoImpl::getMotionConstant(*this, "max_range");
+        m_m_s = SRTBaseMinorServoImpl::getMotionConstant(*this, "max_speed");
+        m_a = SRTBaseMinorServoImpl::getMotionConstant(*this, "acceleration");
+        m_r_t = SRTBaseMinorServoImpl::getMotionConstant(*this, "ramp_times");
+        m_r_d = SRTBaseMinorServoImpl::getMotionConstant(*this, "ramp_distances");
+        m_c_s.assign(m_virtual_axes, 0.0);
+        m_socket_configuration = &SRTMinorServoSocketConfiguration::getInstance(container_services);
+        m_socket = &SRTMinorServoSocket::getInstance(m_socket_configuration->m_ip_address, m_socket_configuration->m_port, m_socket_configuration->m_timeout);
+
         m_enabled_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":enabled").c_str(), getComponent(),
                 new MSAnswerMapDevIO<Management::TBoolean, SRTMinorServoStatus>("enabled", m_status, &SRTMinorServoStatus::isEnabled), true);
         m_drive_cabinet_status_ptr = new ROEnumImpl<ACS_ENUM_T(SRTMinorServoCabinetStatus), POA_MinorServo::ROSRTMinorServoCabinetStatus>((m_component_name + ":drive_cabinet_status").c_str(), getComponent(),
@@ -102,9 +106,15 @@ void SRTBaseMinorServoImpl::initialize()
     catch(std::bad_alloc& ba)
     {
         _EXCPT(ComponentErrors::MemoryAllocationExImpl, ex, (m_servo_name + "::initialize()").c_str());
+        ex.addData("Reason", ba.what());
         ex.log(LM_DEBUG);
-        throw ex.getComponentErrorsEx();
+        throw ex;
     }
+}
+
+void SRTBaseMinorServoImpl::execute()
+{
+    AUTO_TRACE(m_servo_name + "::execute()");
 
     // Try to read the current status of the servo
     try
@@ -118,11 +128,6 @@ void SRTBaseMinorServoImpl::initialize()
     }
 }
 
-void SRTBaseMinorServoImpl::execute()
-{
-    AUTO_TRACE(m_servo_name + "::execute()");
-}
-
 void SRTBaseMinorServoImpl::cleanUp()
 {
     AUTO_TRACE(m_servo_name + "::cleanUp()");
@@ -134,14 +139,14 @@ void SRTBaseMinorServoImpl::aboutToAbort()
 }
 
 /////////////////// PUBLIC methods
-bool SRTBaseMinorServoImpl::status()
+void SRTBaseMinorServoImpl::status()
 {
     AUTO_TRACE(m_servo_name + "::status()");
 
     // We don't check if the socket is connected here since a status command will try to reconnect it automatically
     try
     {
-        m_socket.sendCommand(SRTMinorServoCommandLibrary::status(m_servo_name), m_status);
+        m_socket->sendCommand(SRTMinorServoCommandLibrary::status(m_servo_name), m_status);
 
         ACS::doubleSeq current_point = m_status.getPlainVirtualPositions();
 
@@ -154,26 +159,24 @@ bool SRTBaseMinorServoImpl::status()
                 m_c_s[i] = (current_point[i] - previous_point.second[i]) * ((double(m_status.getTimestamp() - previous_point.first)) / 10000000);
             }
         }
-        catch(...)
+        catch(std::logic_error&)
         {
             // Empty queue, first reading, skip the speed calculation
         }
 
         m_positions_queue.put(m_status.getTimestamp(), current_point);
     }
-    catch(...)
+    catch(MinorServoErrors::MinorServoErrorsExImpl& impl)
     {
         // Something went wrong when sending the status command
         m_error_code.store(ERROR_COMMAND_ERROR);
-        return false;
+        throw impl.getMinorServoErrorsEx();
     }
-
-    return true;
 }
 
 SRTMinorServoZMQStatus* SRTBaseMinorServoImpl::getSRTMinorServoZMQStatus(ACS::Time timestamp)
 {
-    AUTO_TRACE("SRTBaseMinorServoImpl::getSRTMinorServoZMQStatus()");
+    AUTO_TRACE(m_servo_name + "::getSRTMinorServoZMQStatus()");
 
     SRTMinorServoZMQStatus* status = new SRTMinorServoZMQStatus;
     status->axesNames.length(m_virtual_axes);
@@ -182,7 +185,17 @@ SRTMinorServoZMQStatus* SRTBaseMinorServoImpl::getSRTMinorServoZMQStatus(ACS::Ti
     status->userOffsets.length(m_virtual_axes);
     status->systemOffsets.length(m_virtual_axes);
 
-    const std::vector<double> current_positions = m_positions_queue.get(timestamp).second;
+    std::vector<double> current_positions(m_virtual_axes, 0.0);
+
+    try
+    {
+        current_positions = m_positions_queue.get(timestamp).second;
+    }
+    catch(std::logic_error& le)
+    {
+        // This only happens whenever the component is started and the socket was never able to connect
+        // therefore is ok to send all zeroes. A client should first check if the socket is connected.
+    }
 
     for(size_t i = 0; i < m_virtual_axes; i++)
     {
@@ -208,15 +221,22 @@ void SRTBaseMinorServoImpl::stow(CORBA::Long stow_position)
 {
     AUTO_TRACE(m_servo_name + "::stow()");
 
-    checkLineStatus();
-
-    if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::stow(m_servo_name, (unsigned int)stow_position)).checkOutput())
+    try
     {
-        m_error_code.store(ERROR_COMMAND_ERROR);
-        _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::stow()").c_str());
-        ex.setReason("Received NAK in response to a STOW command.");
-        ex.log(LM_DEBUG);
-        throw ex.getMinorServoErrorsEx();
+        checkLineStatus();
+
+        if(!m_socket->sendCommand(SRTMinorServoCommandLibrary::stow(m_servo_name, (unsigned int)stow_position)).checkOutput())
+        {
+            m_error_code.store(ERROR_COMMAND_ERROR);
+            _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::stow()").c_str());
+            ex.setReason("Received NAK in response to a STOW command.");
+            ex.log(LM_DEBUG);
+            throw ex.getMinorServoErrorsEx();
+        }
+    }
+    catch(MinorServoErrors::MinorServoErrorsExImpl& impl)
+    {
+        throw impl.getMinorServoErrorsEx();
     }
 }
 
@@ -224,15 +244,22 @@ void SRTBaseMinorServoImpl::stop()
 {
     AUTO_TRACE(m_servo_name + "::stop()");
 
-    checkLineStatus();
-
-    if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::stop(m_servo_name)).checkOutput())
+    try
     {
-        m_error_code.store(ERROR_COMMAND_ERROR);
-        _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::stop()").c_str());
-        ex.setReason("Received NAK in response to a STOP command.");
-        ex.log(LM_DEBUG);
-        throw ex.getMinorServoErrorsEx();
+        checkLineStatus();
+
+        if(!m_socket->sendCommand(SRTMinorServoCommandLibrary::stop(m_servo_name)).checkOutput())
+        {
+            m_error_code.store(ERROR_COMMAND_ERROR);
+            _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::stop()").c_str());
+            ex.setReason("Received NAK in response to a STOP command.");
+            ex.log(LM_DEBUG);
+            throw ex.getMinorServoErrorsEx();
+        }
+    }
+    catch(MinorServoErrors::MinorServoErrorsExImpl& impl)
+    {
+        throw impl.getMinorServoErrorsEx();
     }
 }
 
@@ -240,52 +267,59 @@ void SRTBaseMinorServoImpl::preset(const ACS::doubleSeq& virtual_coords)
 {
     AUTO_TRACE(m_servo_name + "::preset()");
 
-    checkLineStatus();
-
-    ACS::doubleSeq virtual_coordinates;
-    virtual_coordinates.length(virtual_coords.length());
-    std::copy(virtual_coords.begin(), virtual_coords.end(), virtual_coordinates.begin());
-
-    if(virtual_coordinates.length() == 0)
+    try
     {
-        // It means we want to command the latest coordinates again, to apply the offset in the LDO servo system
-        virtual_coordinates.length(m_commanded_plain_virtual_positions.size());
-        std::copy(m_commanded_plain_virtual_positions.begin(), m_commanded_plain_virtual_positions.end(), virtual_coordinates.begin());
-    }
+        checkLineStatus();
 
-    if(virtual_coordinates.length() != m_virtual_axes)
-    {
-        _EXCPT(MinorServoErrors::PositioningErrorExImpl, ex, (m_servo_name + "::preset()").c_str());
-        ex.addData("Reason", "Wrong number of values for this servo system.");
-        ex.log(LM_DEBUG);
-        throw ex.getMinorServoErrorsEx();
-    }
+        ACS::doubleSeq virtual_coordinates;
+        virtual_coordinates.length(virtual_coords.length());
+        std::copy(virtual_coords.begin(), virtual_coords.end(), virtual_coordinates.begin());
 
-    std::vector<double> coordinates(virtual_coordinates.get_buffer(), virtual_coordinates.get_buffer() + virtual_coordinates.length());
-    ACS::doubleSeq offsets = m_status.getVirtualOffsets();
+        if(virtual_coordinates.length() == 0)
+        {
+            // It means we want to command the latest coordinates again, to apply the offset in the LDO servo system
+            virtual_coordinates.length(m_commanded_plain_virtual_positions.size());
+            std::copy(m_commanded_plain_virtual_positions.begin(), m_commanded_plain_virtual_positions.end(), virtual_coordinates.begin());
+        }
 
-    for(size_t i = 0; i < m_virtual_axes; i++)
-    {
-        double coordinate = coordinates[i] + offsets[i];
-        if(coordinate < m_min[i] || coordinate > m_max[i])
+        if(virtual_coordinates.length() != m_virtual_axes)
         {
             _EXCPT(MinorServoErrors::PositioningErrorExImpl, ex, (m_servo_name + "::preset()").c_str());
-            ex.addData("Reason", "Resulting position out of range, check the offsets.");
+            ex.addData("Reason", "Wrong number of values for this servo system.");
             ex.log(LM_DEBUG);
             throw ex.getMinorServoErrorsEx();
         }
-    }
 
-    if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::preset(m_servo_name, coordinates)).checkOutput())
+        std::vector<double> coordinates(virtual_coordinates.get_buffer(), virtual_coordinates.get_buffer() + virtual_coordinates.length());
+        ACS::doubleSeq offsets = m_status.getVirtualOffsets();
+
+        for(size_t i = 0; i < m_virtual_axes; i++)
+        {
+            double coordinate = coordinates[i] + offsets[i];
+            if(coordinate < m_min[i] || coordinate > m_max[i])
+            {
+                _EXCPT(MinorServoErrors::PositioningErrorExImpl, ex, (m_servo_name + "::preset()").c_str());
+                ex.addData("Reason", "Resulting position out of range, check the offsets.");
+                ex.log(LM_DEBUG);
+                throw ex.getMinorServoErrorsEx();
+            }
+        }
+
+        if(!m_socket->sendCommand(SRTMinorServoCommandLibrary::preset(m_servo_name, coordinates)).checkOutput())
+        {
+            m_error_code.store(ERROR_COMMAND_ERROR);
+            _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::preset()").c_str());
+            ex.setReason("Received NAK in response to a PRESET command.");
+            ex.log(LM_DEBUG);
+            throw ex.getMinorServoErrorsEx();
+        }
+
+        std::copy(coordinates.begin(), coordinates.end(), m_commanded_plain_virtual_positions.begin());
+    }
+    catch(MinorServoErrors::MinorServoErrorsExImpl& impl)
     {
-        m_error_code.store(ERROR_COMMAND_ERROR);
-        _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::preset()").c_str());
-        ex.setReason("Received NAK in response to a PRESET command.");
-        ex.log(LM_DEBUG);
-        throw ex.getMinorServoErrorsEx();
+        throw impl.getMinorServoErrorsEx();
     }
-
-    std::copy(coordinates.begin(), coordinates.end(), m_commanded_plain_virtual_positions.begin());
 }
 
 bool SRTBaseMinorServoImpl::setup(const char* configuration_name, CORBA::Boolean as_off)
@@ -445,65 +479,79 @@ void SRTBaseMinorServoImpl::setUserOffset(const char* axis_name, CORBA::Double o
 {
     AUTO_TRACE(m_servo_name + "::setUserOffset()");
 
-    checkLineStatus();
-
-    std::string axis(axis_name);
-    std::transform(axis.begin(), axis.end(), axis.begin(), ::toupper);
-
-    if(axis == "RZ" && m_virtual_axes == 1)
+    try
     {
-        axis = "ROTATION";
+        checkLineStatus();
+
+        std::string axis(axis_name);
+        std::transform(axis.begin(), axis.end(), axis.begin(), ::toupper);
+
+        if(axis == "RZ" && m_virtual_axes == 1)
+        {
+            axis = "ROTATION";
+        }
+
+        unsigned int index = std::distance(m_virtual_axes_names.begin(), std::find(m_virtual_axes_names.begin(), m_virtual_axes_names.end(), axis));
+
+        if(index == m_virtual_axes)
+        {
+            _EXCPT(MinorServoErrors::OffsetErrorExImpl, ex, (m_servo_name + "::setUserOffset()").c_str());
+            ex.addData("Reason", ("Unknown axis '" + axis + "'.").c_str());
+            ex.log(LM_DEBUG);
+            throw ex.getMinorServoErrorsEx();
+        }
+
+        // Calculate the new offsets
+        std::vector<double> offsets(m_virtual_axes, 0);
+        std::transform(m_user_offsets.begin(), m_user_offsets.end(), m_system_offsets.begin(), offsets.begin(), std::plus<double>());
+        offsets[index] = m_system_offsets[index] + offset;
+
+        if(offsets[index] < m_min[index] || offsets[index] > m_max[index])
+        {
+            _EXCPT(MinorServoErrors::OffsetErrorExImpl, ex, (m_servo_name + "::setUserOffset()").c_str());
+            ex.addData("Reason", "Sum of user and system offsets out of range.");
+            ex.log(LM_DEBUG);
+            throw ex.getMinorServoErrorsEx();
+        }
+
+        if(!m_socket->sendCommand(SRTMinorServoCommandLibrary::offset(m_servo_name, offsets)).checkOutput())
+        {
+            m_error_code.store(ERROR_COMMAND_ERROR);
+            _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::setUserOffset()").c_str());
+            ex.setReason("Received NAK in response to an OFFSET command.");
+            ex.log(LM_DEBUG);
+            throw ex.getMinorServoErrorsEx();
+        }
+
+        m_user_offsets[index] = offset;
+        m_offsets_queue.put(getTimeStamp(), m_user_offsets, m_system_offsets);
     }
-
-    unsigned int index = std::distance(m_virtual_axes_names.begin(), std::find(m_virtual_axes_names.begin(), m_virtual_axes_names.end(), axis));
-
-    if(index == m_virtual_axes)
+    catch(MinorServoErrors::MinorServoErrorsExImpl& impl)
     {
-        _EXCPT(MinorServoErrors::OffsetErrorExImpl, ex, (m_servo_name + "::setUserOffset()").c_str());
-        ex.addData("Reason", ("Unknown axis '" + axis + "'.").c_str());
-        ex.log(LM_DEBUG);
-        throw ex.getMinorServoErrorsEx();
+        throw impl.getMinorServoErrorsEx();
     }
-
-    // Calculate the new offsets
-    std::vector<double> offsets(m_virtual_axes, 0);
-    std::transform(m_user_offsets.begin(), m_user_offsets.end(), m_system_offsets.begin(), offsets.begin(), std::plus<double>());
-    offsets[index] = m_system_offsets[index] + offset;
-
-    if(offsets[index] < m_min[index] || offsets[index] > m_max[index])
-    {
-        _EXCPT(MinorServoErrors::OffsetErrorExImpl, ex, (m_servo_name + "::setUserOffset()").c_str());
-        ex.addData("Reason", "Sum of user and system offsets out of range.");
-        ex.log(LM_DEBUG);
-        throw ex.getMinorServoErrorsEx();
-    }
-
-    if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::offset(m_servo_name, offsets)).checkOutput())
-    {
-        m_error_code.store(ERROR_COMMAND_ERROR);
-        _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::setUserOffset()").c_str());
-        ex.setReason("Received NAK in response to an OFFSET command.");
-        ex.log(LM_DEBUG);
-        throw ex.getMinorServoErrorsEx();
-    }
-
-    m_user_offsets[index] = offset;
-    m_offsets_queue.put(getTimeStamp(), m_user_offsets, m_system_offsets);
 }
 
 void SRTBaseMinorServoImpl::clearUserOffsets()
 {
     AUTO_TRACE(m_servo_name + "::clearUserOffsets()");
 
-    checkLineStatus();
-
-    if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::offset(m_servo_name, m_system_offsets)).checkOutput())
+    try
     {
-        m_error_code.store(ERROR_COMMAND_ERROR);
-        _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::clearUserOffset()").c_str());
-        ex.setReason("Received NAK in response to an OFFSET command.");
-        ex.log(LM_DEBUG);
-        throw ex.getMinorServoErrorsEx();
+        checkLineStatus();
+
+        if(!m_socket->sendCommand(SRTMinorServoCommandLibrary::offset(m_servo_name, m_system_offsets)).checkOutput())
+        {
+            m_error_code.store(ERROR_COMMAND_ERROR);
+            _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::clearUserOffset()").c_str());
+            ex.setReason("Received NAK in response to an OFFSET command.");
+            ex.log(LM_DEBUG);
+            throw ex.getMinorServoErrorsEx();
+        }
+    }
+    catch(MinorServoErrors::MinorServoErrorsExImpl& impl)
+    {
+        throw impl.getMinorServoErrorsEx();
     }
 
     m_user_offsets = std::vector<double>(m_virtual_axes, 0.0);
@@ -525,65 +573,79 @@ void SRTBaseMinorServoImpl::setSystemOffset(const char* axis_name, CORBA::Double
 {
     AUTO_TRACE(m_servo_name + "::setSystemOffset()");
 
-    checkLineStatus();
-
-    std::string axis(axis_name);
-    std::transform(axis.begin(), axis.end(), axis.begin(), ::toupper);
-
-    if(axis == "RZ" && m_virtual_axes == 1)
+    try
     {
-        axis = "ROTATION";
+        checkLineStatus();
+
+        std::string axis(axis_name);
+        std::transform(axis.begin(), axis.end(), axis.begin(), ::toupper);
+
+        if(axis == "RZ" && m_virtual_axes == 1)
+        {
+            axis = "ROTATION";
+        }
+
+        unsigned int index = std::distance(m_virtual_axes_names.begin(), std::find(m_virtual_axes_names.begin(), m_virtual_axes_names.end(), axis));
+
+        if(index == m_virtual_axes)
+        {
+            _EXCPT(MinorServoErrors::OffsetErrorExImpl, ex, (m_servo_name + "::setSystemOffset()").c_str());
+            ex.addData("Reason", ("Unknown axis '" + axis + "'.").c_str());
+            ex.log(LM_DEBUG);
+            throw ex.getMinorServoErrorsEx();
+        }
+
+        // Calculate the new offsets
+        std::vector<double> offsets(m_virtual_axes, 0);
+        std::transform(m_user_offsets.begin(), m_user_offsets.end(), m_system_offsets.begin(), offsets.begin(), std::plus<double>());
+        offsets[index] = m_user_offsets[index] + offset;
+
+        if(offsets[index] < m_min[index] || offsets[index] > m_max[index])
+        {
+            _EXCPT(MinorServoErrors::OffsetErrorExImpl, ex, (m_servo_name + "::setUserOffset()").c_str());
+            ex.addData("Reason", "Sum of user and system offsets out of range.");
+            ex.log(LM_DEBUG);
+            throw ex.getMinorServoErrorsEx();
+        }
+
+        if(!m_socket->sendCommand(SRTMinorServoCommandLibrary::offset(m_servo_name, offsets)).checkOutput())
+        {
+            m_error_code.store(ERROR_COMMAND_ERROR);
+            _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::setSystemOffset()").c_str());
+            ex.setReason("Received NAK in response to an OFFSET command.");
+            ex.log(LM_DEBUG);
+            throw ex.getMinorServoErrorsEx();
+        }
+
+        m_system_offsets[index] = offset;
+        m_offsets_queue.put(getTimeStamp(), m_user_offsets, m_system_offsets);
     }
-
-    unsigned int index = std::distance(m_virtual_axes_names.begin(), std::find(m_virtual_axes_names.begin(), m_virtual_axes_names.end(), axis));
-
-    if(index == m_virtual_axes)
+    catch(MinorServoErrors::MinorServoErrorsExImpl& impl)
     {
-        _EXCPT(MinorServoErrors::OffsetErrorExImpl, ex, (m_servo_name + "::setSystemOffset()").c_str());
-        ex.addData("Reason", ("Unknown axis '" + axis + "'.").c_str());
-        ex.log(LM_DEBUG);
-        throw ex.getMinorServoErrorsEx();
+        throw impl.getMinorServoErrorsEx();
     }
-
-    // Calculate the new offsets
-    std::vector<double> offsets(m_virtual_axes, 0);
-    std::transform(m_user_offsets.begin(), m_user_offsets.end(), m_system_offsets.begin(), offsets.begin(), std::plus<double>());
-    offsets[index] = m_user_offsets[index] + offset;
-
-    if(offsets[index] < m_min[index] || offsets[index] > m_max[index])
-    {
-        _EXCPT(MinorServoErrors::OffsetErrorExImpl, ex, (m_servo_name + "::setUserOffset()").c_str());
-        ex.addData("Reason", "Sum of user and system offsets out of range.");
-        ex.log(LM_DEBUG);
-        throw ex.getMinorServoErrorsEx();
-    }
-
-    if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::offset(m_servo_name, offsets)).checkOutput())
-    {
-        m_error_code.store(ERROR_COMMAND_ERROR);
-        _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::setSystemOffset()").c_str());
-        ex.setReason("Received NAK in response to an OFFSET command.");
-        ex.log(LM_DEBUG);
-        throw ex.getMinorServoErrorsEx();
-    }
-
-    m_system_offsets[index] = offset;
-    m_offsets_queue.put(getTimeStamp(), m_user_offsets, m_system_offsets);
 }
 
 void SRTBaseMinorServoImpl::clearSystemOffsets()
 {
     AUTO_TRACE(m_servo_name + "::clearSystemOffsets()");
 
-    checkLineStatus();
-
-    if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::offset(m_servo_name, m_user_offsets)).checkOutput())
+    try
     {
-        m_error_code.store(ERROR_COMMAND_ERROR);
-        _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::clearSystemOffset()").c_str());
-        ex.setReason("Received NAK in response to an OFFSET command.");
-        ex.log(LM_DEBUG);
-        throw ex.getMinorServoErrorsEx();
+        checkLineStatus();
+
+        if(!m_socket->sendCommand(SRTMinorServoCommandLibrary::offset(m_servo_name, m_user_offsets)).checkOutput())
+        {
+            m_error_code.store(ERROR_COMMAND_ERROR);
+            _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::clearSystemOffset()").c_str());
+            ex.setReason("Received NAK in response to an OFFSET command.");
+            ex.log(LM_DEBUG);
+            throw ex.getMinorServoErrorsEx();
+        }
+    }
+    catch(MinorServoErrors::MinorServoErrorsExImpl& impl)
+    {
+        throw impl.getMinorServoErrorsEx();
     }
 
     m_system_offsets = std::vector<double>(m_virtual_axes, 0.0);
@@ -594,35 +656,44 @@ void SRTBaseMinorServoImpl::reloadOffsets()
 {
     AUTO_TRACE(m_servo_name + "::reloadOffsets()");
 
-    // Sum the user and system DISCOS offsets to check whether they correspond to the Leonardo offsets
-    std::vector<double> DISCOS_offsets(m_virtual_axes, 0.0);
-    std::transform(m_user_offsets.begin(), m_user_offsets.end(), m_system_offsets.begin(), DISCOS_offsets.begin(), std::plus<double>());
-
-    // Read the Leonardo offsets
-    ACS::doubleSeq sequence = m_status.getVirtualOffsets();
-    std::vector<double> LEONARDO_offsets(sequence.get_buffer(), sequence.get_buffer() + sequence.length());
-
-    // Check if the offsets correspond or not
-    if(!std::equal(DISCOS_offsets.begin(), DISCOS_offsets.end(), LEONARDO_offsets.begin()))
+    try
     {
-        // Offsets do not correspond, should reset them by sending a offset command
-        if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::offset(m_servo_name, DISCOS_offsets)).checkOutput())
-        {
-            m_error_code.store(ERROR_COMMAND_ERROR);
-            _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::reloadOffsets()").c_str());
-            ex.setReason("Received NAK in response to an OFFSET command.");
-            ex.log(LM_DEBUG);
-            throw ex.getMinorServoErrorsEx();
-        }
+        checkLineStatus();
 
-        m_offsets_queue.put(getTimeStamp(), m_user_offsets, m_system_offsets);
-        ACS_LOG(LM_FULL_INFO, m_servo_name + "::reloadOffsets()", (LM_NOTICE, "Offsets discrepancy, reloading them"));
+        // Sum the user and system DISCOS offsets to check whether they correspond to the Leonardo offsets
+        std::vector<double> DISCOS_offsets(m_virtual_axes, 0.0);
+        std::transform(m_user_offsets.begin(), m_user_offsets.end(), m_system_offsets.begin(), DISCOS_offsets.begin(), std::plus<double>());
+
+        // Read the Leonardo offsets
+        ACS::doubleSeq sequence = m_status.getVirtualOffsets();
+        std::vector<double> LEONARDO_offsets(sequence.get_buffer(), sequence.get_buffer() + sequence.length());
+
+        // Check if the offsets correspond or not
+        if(!std::equal(DISCOS_offsets.begin(), DISCOS_offsets.end(), LEONARDO_offsets.begin()))
+        {
+            // Offsets do not correspond, should reset them by sending a offset command
+            if(!m_socket->sendCommand(SRTMinorServoCommandLibrary::offset(m_servo_name, DISCOS_offsets)).checkOutput())
+            {
+                m_error_code.store(ERROR_COMMAND_ERROR);
+                _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::reloadOffsets()").c_str());
+                ex.setReason("Received NAK in response to an OFFSET command.");
+                ex.log(LM_DEBUG);
+                throw ex.getMinorServoErrorsEx();
+            }
+
+            m_offsets_queue.put(getTimeStamp(), m_user_offsets, m_system_offsets);
+            ACS_LOG(LM_FULL_INFO, m_servo_name + "::reloadOffsets()", (LM_NOTICE, "Offsets discrepancy, reloading them"));
+        }
+    }
+    catch(MinorServoErrors::MinorServoErrorsExImpl& impl)
+    {
+        throw impl.getMinorServoErrorsEx();
     }
 }
 
 void SRTBaseMinorServoImpl::getAxesInfo(ACS::stringSeq_out axes_names_out, ACS::stringSeq_out axes_units_out)
 {
-    AUTO_TRACE("SRTBaseMinorServoImpl::getAxesInfo()");
+    AUTO_TRACE(m_servo_name + "::getAxesInfo()");
 
     ACS::stringSeq_var axes_names = new ACS::stringSeq;
     ACS::stringSeq_var axes_units = new ACS::stringSeq;
@@ -641,7 +712,7 @@ void SRTBaseMinorServoImpl::getAxesInfo(ACS::stringSeq_out axes_names_out, ACS::
 
 ACS::doubleSeq* SRTBaseMinorServoImpl::getAxesPositions(ACS::Time acs_time)
 {
-    AUTO_TRACE("SRTBaseMinorServoImpl::getAxesPositions()");
+    AUTO_TRACE(m_servo_name + "::getAxesPositions()");
 
     try
     {
@@ -749,7 +820,7 @@ ACS::TimeInterval SRTBaseMinorServoImpl::getTravelTime(const ACS::doubleSeq& _s_
 
 void SRTBaseMinorServoImpl::getAxesRanges(ACS::doubleSeq_out min_ranges_out, ACS::doubleSeq_out max_ranges_out)
 {
-    AUTO_TRACE("SRTBaseMinorServoImpl::getAxesRanges()");
+    AUTO_TRACE(m_servo_name + "::getAxesRanges()");
 
     ACS::doubleSeq_var min_ranges = new ACS::doubleSeq;
     ACS::doubleSeq_var max_ranges = new ACS::doubleSeq;
@@ -763,20 +834,20 @@ void SRTBaseMinorServoImpl::getAxesRanges(ACS::doubleSeq_out min_ranges_out, ACS
 
 void SRTBaseMinorServoImpl::reset()
 {
-    AUTO_TRACE("SRTBaseMinorServoImpl::reset()");
+    AUTO_TRACE(m_servo_name + "::reset()");
     m_error_code.store(ERROR_NO_ERROR);
 }
 
 /////////////////// PROTECTED methods
 void SRTBaseMinorServoImpl::checkLineStatus()
 {
-    if(!m_socket.isConnected())
+    if(!m_socket->isConnected())
     {
         _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "checkLineStatus()").c_str());
         ex.setReason("Socket not connected.");
         ex.log(LM_DEBUG);
         m_error_code.store(ERROR_NOT_CONNECTED);
-        throw ex.getMinorServoErrorsEx();
+        throw ex;
     }
 
     if(m_status.isBlocked() == Management::MNG_TRUE)
@@ -785,7 +856,7 @@ void SRTBaseMinorServoImpl::checkLineStatus()
         ex.setReason("Servo system blocked.");
         ex.log(LM_DEBUG);
         m_error_code.store(ERROR_SERVO_BLOCKED);
-        throw ex.getMinorServoErrorsEx();
+        throw ex;
     }
 
     if(m_status.getDriveCabinetStatus() == DRIVE_CABINET_ERROR)
@@ -794,7 +865,7 @@ void SRTBaseMinorServoImpl::checkLineStatus()
         ex.setReason("Drive cabinet error.");
         ex.log(LM_DEBUG);
         m_error_code.store(ERROR_DRIVE_CABINET);
-        throw ex.getMinorServoErrorsEx();
+        throw ex;
     }
 }
 
@@ -812,7 +883,7 @@ std::vector<double> SRTBaseMinorServoImpl::getMotionConstant(SRTBaseMinorServoIm
             _EXCPT(ComponentErrors::CDBAccessExImpl, ex, (object.m_servo_name + "::getMotionConstant()").c_str());
             ex.setFieldName(constant.c_str());
             ex.log(LM_DEBUG);
-            throw ex.getComponentErrorsEx();
+            throw ex;
         }
         else if(std::any_of(values.begin(), values.end(), [](double value)
         {
@@ -822,7 +893,7 @@ std::vector<double> SRTBaseMinorServoImpl::getMotionConstant(SRTBaseMinorServoIm
             _EXCPT(ComponentErrors::NotAllowedExImpl, ex, (object.m_servo_name + "::getMotionConstant()").c_str());
             ex.setReason(("A" + constant == "acceleration" ? "n " : " " + constant + " equals to 0 is not allowed.").c_str());
             ex.log(LM_DEBUG);
-            throw ex.getComponentErrorsEx();
+            throw ex;
         }
     }
     else if(constant == "min_range" || constant == "max_range" || constant == "tracking_delta")
@@ -833,7 +904,7 @@ std::vector<double> SRTBaseMinorServoImpl::getMotionConstant(SRTBaseMinorServoIm
             _EXCPT(ComponentErrors::CDBAccessExImpl, ex, (object.m_servo_name + "::getMotionConstant()").c_str());
             ex.setFieldName(constant.c_str());
             ex.log(LM_DEBUG);
-            throw ex.getComponentErrorsEx();
+            throw ex;
         }
     }
     else if(constant == "ramp_times")       // Acceleration ramp times, 0 to max_speed and vice versa
@@ -874,14 +945,14 @@ std::vector<std::string> SRTBaseMinorServoImpl::getPropertiesTable(SRTBaseMinorS
         ex.setCode(error.getErrorCode());
         ex.setDescription((const char *)error.getDescription());
         ex.log(LM_DEBUG);
-        throw ex.getComponentErrorsEx();
+        throw ex;
     }
     if(!table.openTable(error))
     {
         _EXCPT_FROM_ERROR(ComponentErrors::CDBAccessExImpl, ex, error);
         ex.setFieldName(properties_name.c_str());
         ex.log(LM_DEBUG);
-        throw ex.getComponentErrorsEx();
+        throw ex;
     }
 
     table.First();
@@ -907,7 +978,7 @@ std::vector<std::string> SRTBaseMinorServoImpl::getPropertiesTable(SRTBaseMinorS
         _EXCPT(ComponentErrors::CDBAccessExImpl, ex, (object.m_servo_name + "::initialize()").c_str());
         ex.setFieldName(properties_name.c_str());
         ex.log(LM_DEBUG);
-        throw ex.getComponentErrorsEx();
+        throw ex;
     }
 
     return properties;

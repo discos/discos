@@ -114,7 +114,7 @@ namespace MinorServo
     using SRTMinorServoCoefficientsTable = std::map<std::string, std::vector<double>>;
 
 
-    class SRTMinorServoAnswerMap : private std::map<std::string, std::variant<long, double, std::string>>
+    class SRTMinorServoAnswerMap : protected std::map<std::string, std::variant<long, double, std::string>>
     {
         /**
          * This class privately extends the type std::map<std::string, std::variant<long, double, std::string>>.
@@ -231,7 +231,8 @@ namespace MinorServo
             catch(std::out_of_range& ex)
             {
                 std::cout << "PLAIN_COMMAND: " << this->getPlainCommand();
-                std::cout << "PLAIN_ANSWER:" << this->getPlainAnswer();
+                std::cout << "PLAIN_ANSWER: " << this->getPlainAnswer();
+                std::cout << "KEY: " << key << std::endl;
                 throw ex;
             }
         }
@@ -483,6 +484,26 @@ namespace MinorServo
             m_virtual_offsets(virtual_offsets)
         {}
 
+        SRTMinorServoStatus(const std::string& servo_name) : SRTMinorServoAnswerMap(), m_servo_name(servo_name)
+        {}
+
+        SRTMinorServoStatus& operator=(const SRTMinorServoStatus& other)
+        {
+            if(this != &other)
+            {
+                std::unique_lock<std::shared_mutex> lockThis(m_mutex, std::defer_lock);
+                std::shared_lock<std::shared_mutex> lockOther(other.m_mutex, std::defer_lock);
+                std::lock(lockThis, lockOther);
+                static_cast<std::map <std::string, std::variant<long, double, std::string>>&>(*this) = static_cast<const std::map<std::string, std::variant<long, double, std::string>>&>(other);
+                m_physical_axes_enabled = other.m_physical_axes_enabled;
+                m_physical_positions = other.m_physical_positions;
+                m_virtual_positions = other.m_virtual_positions;
+                m_virtual_offsets = other.m_virtual_offsets;
+            }
+
+            return *this;
+        }
+
         /**
          * Returns a boolean indicating whether the servo is enabled.
          * @returns true if enabled, false otherwise.
@@ -611,22 +632,22 @@ namespace MinorServo
         /**
          * The labels for the enabled value of each physical axis.
          */
-        const std::vector<std::string> m_physical_axes_enabled;
+        std::vector<std::string> m_physical_axes_enabled;
 
         /**
          * The labels for the positions of each physical axis.
          */
-        const std::vector<std::string> m_physical_positions;
+        std::vector<std::string> m_physical_positions;
 
         /**
          * The labels for the positions of each virtual axis.
          */
-        const std::vector<std::string> m_virtual_positions;
+        std::vector<std::string> m_virtual_positions;
 
         /**
          * The labels for the offsets of each virtual axis.
          */
-        const std::vector<std::string> m_virtual_offsets;
+        std::vector<std::string> m_virtual_offsets;
     };
 
     /**

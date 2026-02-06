@@ -40,9 +40,9 @@ void SRTMinorServoParkThread::runLoop()
     {
         m_core.checkLineStatus();
     }
-    catch(MinorServoErrors::MinorServoErrorsEx& ex)
+    catch(MinorServoErrors::MinorServoErrorsExImpl& impl)
     {
-        ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
+        impl.log(LM_ERROR);
         this->setStopped();
         return;
     }

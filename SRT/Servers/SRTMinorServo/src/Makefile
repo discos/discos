@@ -9,7 +9,7 @@
 EXECUTABLES     =
 EXECUTABLES_L   =
 
-PY_SCRIPTS = _cover _airBlade _servoReset
+PY_SCRIPTS =
 
 # On-Line Database Files
 # ----------------------
@@ -23,7 +23,7 @@ LIBRARIES = SRTGenericMinorServoImpl SRTProgramTrackMinorServoImpl SRTMinorServo
 USER_CFLAGS =
 
 SRTMinorServoBossImpl_OBJECTS = SRTMinorServoBossCore SRTMinorServoSetupThread SRTMinorServoParkThread SRTMinorServoTrackingThread SRTMinorServoScanThread SRTMinorServoBossImpl SRTMinorServoStatusThread
-SRTMinorServoBossImpl_LIBS = IRALibrary SRTMinorServoBossStubs SRTMinorServoStubs SRTDerotatorStubs ComponentErrors MinorServoErrors ManagementErrors MinorServoDefinitionsStubs SRTMinorServoCommandLibrary AntennaBossStubs SRTMinorServoSocketLibrary ParserErrors DiscosVersion acsnc ZMQLibrary
+SRTMinorServoBossImpl_LIBS = IRALibrary SRTMinorServoBossStubs SRTMinorServoStubs SRTDerotatorStubs ComponentErrors MinorServoErrors ManagementErrors MinorServoDefinitionsStubs SRTMinorServoCommandLibrary AntennaBossStubs SRTMinorServoSocketLibrary ParserErrors DiscosVersion acsnc ZMQLibrary curl
 SRTMinorServoBossImpl_CFLAGS = -std=c++17 -fconcepts
 SRTMinorServoBossCore_CFLAGS = -std=c++17 -fconcepts
 SRTMinorServoStatusThread_CFLAGS = -std=c++17 -fconcepts

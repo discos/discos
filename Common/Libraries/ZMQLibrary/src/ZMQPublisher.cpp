@@ -47,8 +47,8 @@ namespace ZMQLibrary
                     hostname = hostname.substr(0, dot);
                 }
                 std::string home = std::getenv("HOME");
-                std::string client_key_file = home + "/.curve/discos/telemetry/client/identity.key_secret";
-                std::string server_key_file = home + "/.curve/discos/telemetry/client/server.key";
+                std::string client_key_file = home + "/.config/discos/telemetry/client/identity.key_secret";
+                std::string server_key_file = home + "/.config/discos/telemetry/client/server.key";
                 std::string curve_publickey, curve_secretkey, curve_serverkey;
 
                 if(find_key(client_key_file, "public-key", curve_publickey) &&

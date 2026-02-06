@@ -4,9 +4,6 @@ using namespace MinorServo;
 
 SRTProgramTrackMinorServoImpl::SRTProgramTrackMinorServoImpl(const ACE_CString &componentName, maci::ContainerServices *containerServices) :
     SRTBaseMinorServoImpl(componentName, containerServices),
-    m_tracking_queue(1500, m_virtual_axes),
-    m_tracking_delta(SRTBaseMinorServoImpl::getMotionConstant(*this, "tracking_delta")),
-    m_tracking_error(m_virtual_axes, 0.0),
     m_tracking(Management::MNG_FALSE),
     m_trajectory_id(0),
     m_total_trajectory_points(0),
@@ -31,6 +28,10 @@ void SRTProgramTrackMinorServoImpl::initialize()
 
     try
     {
+        m_tracking_queue = SRTMinorServoPositionsQueue(1500, m_virtual_axes);
+        m_tracking_delta = SRTBaseMinorServoImpl::getMotionConstant(*this, "tracking_delta");
+        m_tracking_error.assign(m_virtual_axes, 0.0);
+
         m_tracking_ptr = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>((m_component_name + ":tracking").c_str(), getComponent(),
                 new MSGenericDevIO<Management::TBoolean, std::atomic<Management::TBoolean>>(m_tracking), true);
         m_trajectory_id_ptr = new baci::ROlong((m_component_name + ":trajectory_id").c_str(), getComponent(),
@@ -45,15 +46,16 @@ void SRTProgramTrackMinorServoImpl::initialize()
     catch(std::bad_alloc& ba)
     {
         _EXCPT(ComponentErrors::MemoryAllocationExImpl, ex, (m_servo_name + "::initialize()").c_str());
+        ex.addData("Reason", ba.what());
         ex.log(LM_DEBUG);
-        throw ex.getComponentErrorsEx();
+        throw ex;
     }
 }
 
 /////////////////// PUBLIC methods
-bool SRTProgramTrackMinorServoImpl::status()
+void SRTProgramTrackMinorServoImpl::status()
 {
-    bool status = SRTBaseMinorServoImpl::status();
+    SRTBaseMinorServoImpl::status();  // The base method might throw, we let it throw
 
     ACS::doubleSeq virtual_positions = m_status.getPlainVirtualPositions();
     std::vector<double> commanded_positions;
@@ -79,16 +81,16 @@ bool SRTProgramTrackMinorServoImpl::status()
                 m_tracking.store(Management::MNG_FALSE);
                 m_tracking_queue.clear();
                 m_tracking_error = std::vector<double>(m_virtual_axes, 0.0);
-                return status;
+                return;
             }
         }
-        catch(...)
+        catch(std::logic_error&)
         {
             // We might get here if m_tracking_queue is empty
             // So whenever we just got a new setup or if we are past the last point inside the trajectory
             m_tracking.store(Management::MNG_FALSE);  // May be redundant but who cares?
             m_tracking_error = std::vector<double>(m_virtual_axes, 0.0);
-            return status;
+            return;
         }
     }
     else if(operative_mode == OPERATIVE_MODE_SETUP || operative_mode == OPERATIVE_MODE_PRESET)
@@ -103,7 +105,7 @@ bool SRTProgramTrackMinorServoImpl::status()
     {
         m_tracking.store(Management::MNG_FALSE);
         m_tracking_error = std::vector<double>(m_virtual_axes, 0.0);
-        return status;
+        return;
     }
 
     bool is_tracking = true;
@@ -123,8 +125,6 @@ bool SRTProgramTrackMinorServoImpl::status()
     }
 
     m_tracking.store(is_tracking ? Management::MNG_TRUE : Management::MNG_FALSE);
-
-    return status;
 }
 
 SRTMinorServoZMQStatus* SRTProgramTrackMinorServoImpl::getSRTMinorServoZMQStatus(ACS::Time timestamp)
@@ -164,14 +164,25 @@ void SRTProgramTrackMinorServoImpl::programTrack(CORBA::Long trajectory_id, CORB
 {
     AUTO_TRACE("SRTProgramTrackMinorServoImpl::programTrack()");
 
-    checkLineStatus();
+    try
+    {
+        checkLineStatus();
+    }
+    catch(MinorServoErrors::CommunicationErrorExImpl& impl)
+    {
+        throw impl.getCommunicationErrorEx();
+    }
+    catch(MinorServoErrors::StatusErrorExImpl& impl)
+    {
+        throw impl.getStatusErrorEx();
+    }
 
     if(virtual_coordinates.length() != m_virtual_axes)
     {
         _EXCPT(MinorServoErrors::TrackingErrorExImpl, ex, (m_servo_name + "::programTrack()").c_str());
         ex.addData("Reason", "Wrong number of values for this servo system!");
         ex.log(LM_DEBUG);
-        throw ex.getMinorServoErrorsEx();
+        throw ex.getTrackingErrorEx();
     }
 
     std::vector<double> coordinates(virtual_coordinates.get_buffer(), virtual_coordinates.get_buffer() + virtual_coordinates.length());
@@ -186,17 +197,24 @@ void SRTProgramTrackMinorServoImpl::programTrack(CORBA::Long trajectory_id, CORB
             _EXCPT(MinorServoErrors::TrackingErrorExImpl, ex, (m_servo_name + "::programTrack()").c_str());
             ex.addData("Reason", "Resulting position out of range, check the offsets!");
             ex.log(LM_DEBUG);
-            throw ex.getMinorServoErrorsEx();
+            throw ex.getTrackingErrorEx();
         }
     }
 
-    if(!m_socket.sendCommand(SRTMinorServoCommandLibrary::programTrack(m_servo_name, trajectory_id, point_id, coordinates, point_id > 0 ? 0 : IRA::CIRATools::ACSTime2UNIXTime(point_time))).checkOutput())
+    try
     {
-        m_error_code.store(ERROR_COMMAND_ERROR);
-        _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::programTrack()").c_str());
-        ex.setReason("Received NAK in response to a PROGRAMTRACK command!");
-        ex.log(LM_DEBUG);
-        throw ex.getMinorServoErrorsEx();
+        if(!m_socket->sendCommand(SRTMinorServoCommandLibrary::programTrack(m_servo_name, trajectory_id, point_id, coordinates, point_id > 0 ? 0 : IRA::CIRATools::ACSTime2UNIXTime(point_time))).checkOutput())
+        {
+            m_error_code.store(ERROR_COMMAND_ERROR);
+            _EXCPT(MinorServoErrors::CommunicationErrorExImpl, ex, (m_servo_name + "::programTrack()").c_str());
+            ex.setReason("Received NAK in response to a PROGRAMTRACK command!");
+            ex.log(LM_DEBUG);
+            throw ex.getCommunicationErrorEx();
+        }
+    }
+    catch(MinorServoErrors::CommunicationErrorExImpl& impl)
+    {
+        throw impl.getCommunicationErrorEx();
     }
 
     m_trajectory_id.store(trajectory_id);
