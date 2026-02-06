@@ -71,7 +71,7 @@ class CommandLine:
        try:
           msg=self.query(cmd)
           commands=msg.split(';')
-          val=int(commands[0])# unit is MHZ,
+          val=float(commands[0])# unit is dbm,
           err_msg=commands[1]
           print("query err",msg)
           if err_msg != '0,\"No error\"\n': 
@@ -104,7 +104,7 @@ class CommandLine:
         try:
           msg=self.query(cmd)
           commands=msg.split(';')
-          val=int(commands[0])/1e6 # unit is MHZ,
+          val=float(commands[0])/1e6 # unit is MHZ,
           err_msg=commands[1]
           print("query err",msg)
           if err_msg != '0,\"No error\"\n': 

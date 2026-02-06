@@ -11,5 +11,5 @@
     Type="IDL:alma/MinorServo/MinorServoBoss:1.0"
     Container="MinorServoBossContainer"
 	Default="true"
-
+	KeepAliveTime="-1"
 />
