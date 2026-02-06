@@ -5,12 +5,12 @@
                 xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-                <MarkEntry><Feed>0</Feed><Polarization>LEFT</Polarization><Coefficients>2.91203e-12,-5.56662e-08,-0.00254511,61.7765</Coefficients></MarkEntry>
-                <MarkEntry><Feed>0</Feed><Polarization>RIGHT</Polarization><Coefficients>-6.08007e-12,5.48713e-07,-0.0158786,157.439</Coefficients></MarkEntry>
-                <MarkEntry><Feed>1</Feed><Polarization>LEFT</Polarization><Coefficients>-1.37991e-12,1.79576e-07,-0.00759659,115.554</Coefficients></MarkEntry>
-                <MarkEntry><Feed>1</Feed><Polarization>RIGHT</Polarization><Coefficients>-5.10537e-13,6.75199e-08,-0.00276572,46.2604</Coefficients></MarkEntry>
-                <MarkEntry><Feed>2</Feed><Polarization>LEFT</Polarization><Coefficients>7.07667e-12,-1.87764e-06,0.165695,-4847.92</Coefficients></MarkEntry>
-                <MarkEntry><Feed>2</Feed><Polarization>RIGHT</Polarization><Coefficients>8.19873e-12,-2.14901e-06,0.187488,-5430.99</Coefficients></MarkEntry>
-                <MarkEntry><Feed>3</Feed><Polarization>LEFT</Polarization><Coefficients>-6.91007e-12,2.17418e-06,-0.227097,7894.3</Coefficients></MarkEntry>
-                <MarkEntry><Feed>3</Feed><Polarization>RIGHT</Polarization><Coefficients>-9.93332e-12,3.11069e-06,-0.323526,11194.4</Coefficients></MarkEntry>
+                <MarkEntry><Feed>0</Feed><Polarization>LEFT</Polarization><Coefficients>-0.00000000,+0.00000006,-0.00003510,+0.00147281,+9.14705522</Coefficients></MarkEntry>
+                <MarkEntry><Feed>0</Feed><Polarization>RIGHT</Polarization><Coefficients>-0.00000000,-0.00000001,+0.00002361,-0.01655814,+10.71998739</Coefficients></MarkEntry>
+                <MarkEntry><Feed>1</Feed><Polarization>LEFT</Polarization><Coefficients>0.0000000000,+0.0000000008,-0.0000007577,+0.0002958237,-0.0470279427,+15.8093847939</Coefficients></MarkEntry>
+                <MarkEntry><Feed>1</Feed><Polarization>RIGHT</Polarization><Coefficients>-0.0000000000,+0.0000000001,-0.0000001050,+0.0000444356,-0.0106004657,+14.6366286925</Coefficients></MarkEntry>
+                <MarkEntry><Feed>2</Feed><Polarization>LEFT</Polarization><Coefficients>-0.0000000000,+0.0000000000,-0.0000000566,+0.0000284548,+0.0000832238,+15,0838542705</Coefficients></MarkEntry>
+                <MarkEntry><Feed>2</Feed><Polarization>RIGHT</Polarization><Coefficients>0.0000000000,+0.0000000011,-0.0000011038,+0.0005010688,-0.0947403930,+20.2119341921</Coefficients></MarkEntry>
+                <MarkEntry><Feed>3</Feed><Polarization>LEFT</Polarization><Coefficients>0.0000000000,-0.0000000024,+0.0000021125,-0.0008074997,+0.1256960437,+12.9500930966</Coefficients></MarkEntry>
+                <MarkEntry><Feed>3</Feed><Polarization>RIGHT</Polarization><Coefficients>0.0000000000,-0.0000000017,+0.0000016554,-0.0006752926,+0.1132637276,+14.0406605955</Coefficients></MarkEntry>
 </MarkCoefficientsLookUpTable>

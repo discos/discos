@@ -386,6 +386,273 @@ double CIRATools::getHWAzimuth(const double& current,const double& dest,const do
 	return newOne;
 }
 
+bool CIRATools::calculateIFlimits(double LO_freq, 
+                       double RF_min, double RF_max, 
+                       long injection,
+                       double& out_IF_min, double& out_IF_max,
+                       double& out_start_freq, double& out_bandwidth)
+{
+    // Basic input validation: Min RF cannot be greater than Max RF
+    if (RF_min>RF_max) return false;
+    if (injection == 1) { //LSI
+        out_IF_min = RF_min - LO_freq;
+        out_IF_max = RF_max - LO_freq;
+    } 
+    else if (injection == -1) { //HSI
+        // We calculate Min IF using Max RF.
+        out_IF_min = LO_freq - RF_max;
+        // We calculate Max IF using Min RF.
+        out_IF_max = LO_freq - RF_min;
+    } 
+    else {
+        // Invalid injection parameter provided
+        return false;
+    }
+    // Take the absolute value to handle physical frequencies.
+    // This manages cases where the user specifies a configuration 
+    // that might cross DC (0 Hz) or if the LO/RF relationship 
+    // differs from the specified injection type.
+    out_IF_min = std::abs(out_IF_min);
+    out_IF_max = std::abs(out_IF_max);
+
+    // Ensure that output Min is strictly less than Output Max.
+    // If negative frequencies were involved and abs() was applied, 
+    // the order might need to be swapped.
+    if (out_IF_min > out_IF_max) {
+        std::swap(out_IF_min, out_IF_max);
+    }
+    // --- STEP 3: Compute Start Frequency and Bandwidth ---
+    // The "Start Frequency" of a band is physically the lower limit.
+    if (injection == -1) {
+    	out_start_freq = - out_IF_min;
+    }
+    else {
+    	out_start_freq = out_IF_min;
+    }
+    // Bandwidth is the span between the upper and lower limits.
+    out_bandwidth = out_IF_max - out_IF_min; 
+    return true;
+}
+
+DoubleConversionResult CIRATools::calculateDualConversion(double current_ol1, double current_ol2,
+                                             double if2_min, double if2_max,
+                                             double if1_min, double if1_max,
+                                             long LO1_inj, long LO2_inj)
+{
+    DoubleConversionResult res;
+    res.valid = true;
+    res.error_msg = "OK";
+
+    // --- A. Setup Parametri IF2 ---
+    res.if2_min_freq = if2_min;
+    res.if2_max_freq = if2_max;
+    res.if2_bandwidth = if2_max - if2_min;
+
+    // --- B. Calcolo Inversione e OL Equivalente ---
+    int high_side_count = 0;
+    if (LO1_inj == -1) high_side_count++;
+    if (LO2_inj == -1) high_side_count++;
+    
+    res.spectrum_inverted = (high_side_count % 2 != 0);
+
+    if (LO1_inj == 1) {
+        res.eq_OL = current_ol1 + current_ol2;
+    } else {
+        res.eq_OL = current_ol1 - current_ol2;
+    }
+
+    // Gestione Zero Crossing / Frequenze Negative
+    //bool eq_inverted_flag = false; // Flag locale per correggere la logica se ol_eq < 0
+    if (res.eq_OL < 0) {
+        res.eq_OL = std::abs(res.eq_OL);
+        //eq_inverted_flag = true; 
+        // Se l'OL eq cambia segno, l'inversione spettrale si inverte
+        res.spectrum_inverted = !res.spectrum_inverted;
+    }
+
+    // --- C. Calcolo Frequenze RF ---
+    // Formula base: IF2 = |RF - OL_eq| (con varianti di segno)
+    // Ricaviamo RF da IF2:
+    
+    if (!res.spectrum_inverted) {
+        // Spettro Dritto: RF = OL_eq + IF2
+        res.rf_min_freq = res.eq_OL + if2_min;
+        res.rf_max_freq = res.eq_OL + if2_max;
+    } else {
+        // Spettro Invertito: RF = OL_eq - IF2
+        res.rf_min_freq = res.eq_OL - if2_max;
+        res.rf_max_freq = res.eq_OL - if2_min;
+        res.if2_min_freq= - res.if2_min_freq;
+    }
+    
+    res.rf_center_freq = (res.rf_min_freq + res.rf_max_freq) / 2.0;
+  
+    double if1_range_start, if1_range_end;
+
+    if (LO2_inj == 1) {
+        // LSI (2° stadio): IF2 = IF1 - OL2  =>  IF1 = IF2 + OL2
+        // Relazione lineare diretta (non inverte l'ordine locale)
+        if1_range_start = if2_min + current_ol2;
+        if1_range_end   = if2_max + current_ol2;
+    } else {
+        // HSI (2° stadio): IF2 = OL2 - IF1  =>  IF1 = OL2 - IF2
+        // Relazione inversa: IF2_max genera IF1_min
+        if1_range_start = current_ol2 - if2_max;
+        if1_range_end   = current_ol2 - if2_min;
+    }
+
+    res.if1_min_generated = if1_range_start;
+    res.if1_max_generated = if1_range_end;
+
+    // --- E. Validazione Finale ---
+    
+    // 1. Controllo validità fisica IF1 (non può essere negativa)
+    if (res.if1_min_generated < 0) {
+        res.valid = false;
+        res.error_msg = "First down conversion (IF1) is negative (impossible configuration)";
+    }
+    // 2. Controllo Limiti Filtro IF1 (Il segnale passa?)
+    // Verifichiamo se l'INTERO range generato passa nel filtro
+    else if (res.if1_min_generated < if1_min || res.if1_max_generated > if1_max) {
+        res.valid = false;
+        res.error_msg = "First conversion is outside the limits of the IF1 filter";
+    }
+    // 3. Controllo RF (non negativa)
+    else if (res.rf_min_freq < 0) {
+        res.valid = false;
+        res.error_msg = "Resulting RF is negative";
+    }
+    return res;
+}
+
+DoubleConversionAnalysis CIRATools::analyzeDualConversion(double RF_min, double RF_max,
+                                             double min_ol1, double max_ol1,
+                                             double min_if1, double max_if1,
+                                             double min_ol2, double max_ol2,
+                                             double min_if2, double max_if2,
+                                             long LO1_inj, long LO2_inj)
+{
+    DoubleConversionAnalysis res;
+    res.valid_configuration = true;
+    res.limited_by_IF1 = false;
+
+    // 1. Calcolo del Range dell'OL Equivalente (Fisico dei Sintetizzatori)
+    int high_side_count = 0;
+    if (LO1_inj == -1) high_side_count++;
+    if (LO2_inj == -1) high_side_count++;
+    res.spectrum_inverted = (high_side_count % 2 != 0);
+
+    if (LO1_inj == 1) { // LSI
+        res.min_OL_eq = min_ol1 + min_ol2;
+        res.max_OL_eq = max_ol1 + max_ol2;
+    } else { // HSI
+        res.min_OL_eq = min_ol1 - max_ol2; 
+        res.max_OL_eq = max_ol1 - min_ol2; 
+    }
+
+    // 2. Calcolo Banda RF Teorica
+    double theoretical_RF_min, theoretical_RF_max;
+    if (!res.spectrum_inverted) {
+        theoretical_RF_min = res.min_OL_eq + min_if2;
+        theoretical_RF_max = res.max_OL_eq + max_if2;
+    } else {
+        theoretical_RF_min = res.min_OL_eq - max_if2; 
+        theoretical_RF_max = res.max_OL_eq - min_if2;
+    }
+
+    // 3. Verifica IF1
+    double stage1_RF_min, stage1_RF_max;
+    if (LO1_inj == 1) { 
+        stage1_RF_min = min_ol1 + min_if1;
+        stage1_RF_max = max_ol1 + max_if1;
+    } else { 
+        stage1_RF_min = std::abs(min_ol1 - max_if1);
+        stage1_RF_max = std::abs(max_ol1 - min_if1);
+        if(stage1_RF_min > stage1_RF_max) std::swap(stage1_RF_min, stage1_RF_max);
+    }
+
+    // 4. Intersezione Finale (RF Utile)
+    double final_min = std::max({RF_min, theoretical_RF_min, stage1_RF_min});
+    double final_max = std::min({RF_max, theoretical_RF_max, stage1_RF_max});
+
+    if (final_min > std::max(RF_min, theoretical_RF_min) || 
+        final_max < std::min(RF_max, theoretical_RF_max)) {
+        res.limited_by_IF1 = true;
+    }
+
+    if (final_min > final_max) {
+        res.valid_configuration = false;
+        res.min_RF_converted = 0; res.max_RF_converted = 0;
+        res.min_OL_eq = 0; res.max_OL_eq = 0; // Reset anche OL
+        return res;
+    } 
+    
+    res.min_RF_converted = final_min;
+    res.max_RF_converted = final_max;
+
+    // --- FASE 5: RICALCOLO LIMITI OL (La correzione al tuo problema) ---
+    // Ritagliamo il range OL affinché corrisponda solo alla zona dove RF Hardware e RF Teorica si sovrappongono.
+    
+    double useful_OL_min, useful_OL_max;
+
+    // Calcoliamo quale range di OL è NECESSARIO per coprire i limiti hardware RF_min e RF_max
+    // Consideriamo valido un OL se ALMENO UNA PARTE della sua banda IF cade nel range RF Hardware.
+    
+    if (!res.spectrum_inverted) {
+        // Diritto: RF = OL + IF  ->  OL = RF - IF
+        // Per toccare RF_min (dal basso), l'OL deve essere almeno RF_min - IF_max
+        useful_OL_min = RF_min - max_if2;
+        // Per toccare RF_max (dall'alto), l'OL deve essere al massimo RF_max - min_if2
+        useful_OL_max = RF_max - min_if2;
+    } else {
+        // Invertito: RF = OL - IF  ->  OL = RF + IF
+        // Per toccare RF_min (che corrisponde all'IF alta), OL >= RF_min + IF_min
+        useful_OL_min = RF_min + min_if2;
+        // Per toccare RF_max (che corrisponde all'IF bassa), OL <= RF_max + max_if2
+        useful_OL_max = RF_max + max_if2;
+    }
+
+    // Ora intersechiamo questo range "Utile" con quello "Fisico" del sintetizzatore
+    res.min_OL_eq = std::max(res.min_OL_eq, useful_OL_min);
+    res.max_OL_eq = std::min(res.max_OL_eq, useful_OL_max);
+
+    // Controllo finale di validità su OL
+    if (res.min_OL_eq > res.max_OL_eq) {
+        res.valid_configuration = false;
+    }
+
+    return res;
+}
+
+bool CIRATools::skyFrequency(const double& bf,const double& bbw,const double& rf,const double& rbw,double lo,
+	double& iff,double& ifbw, double& RF1, double& RF2)
+{
+	bool inverted=false;	
+	if ((bf*rf)<0) inverted=true; //this is a trick to check if the combination of the two bands gives an inversion or not
+	double b1=std::abs(bf);	
+	double b2=b1+bbw;
+	double r1=std::abs(rf);
+	double r2=r1+rbw;
+	iff=MAX(b1,r1);
+	double if2=MIN(b2,r2);
+	ifbw=if2-iff;
+	if (ifbw<=0) {
+		iff=b1;
+		ifbw=0;
+		return false;
+	}
+	if (inverted) {
+		iff=-iff; // change the sign to respect the assumption of the input parameters (negative means inverted band)
+		RF1=lo+iff;
+		RF2=RF1-ifbw;
+	}
+	else {
+		RF1=lo+iff;
+		RF2=RF1+ifbw;
+	}
+	return true;
+}
+
 bool CIRATools::skyFrequency(const double& bf,const double& bbw,const double& rf,const double& rbw,double& f,double& bw)
 {
 	bool bside,rside;
@@ -1332,20 +1599,20 @@ bool CIRATools::matchRegExp(const IRA::CString& input,const IRA::CString& expr,s
 
 bool CIRATools::bandLimits(const double&f,const double& w,double& f1,double& f2,bool& upper)
 {
-	if (w<0) {
+	/*if (w<0) {
 		return false;
-	}
+	}*/
 	if (f>=0) {
 		f1=f;
 		f2=f+w;
 		upper=true;
 	}
 	else {
-		if (w>-f) {
+		/*if (w>-f) {
 			return false;
-		}
-		f1=-f-w;
-		f2=-f;
+		}*/
+		f1=f+w;
+		f2=f;
 		upper=false;
 	}
 	return true;
@@ -1359,29 +1626,65 @@ bool CIRATools::mergeBands(const double& rf1,const double& rf2,const bool& rside
 	if ((rf1>rf2) || (bf1>bf2)) {
 		return false;
 	}
-	startF=MAX(rf1,bf1);
-	stopF=MIN(rf2,bf2);
-	bw=stopF-startF;
-	if (bw<=0) {
-		f=rf1;
-		w=0;
-		return false;
-	}
 	if (rside && bside) { //UU
-		f=startF;
-		w=stopF-startF;
+		startF=MAX(rf1,bf1);
+		stopF=MIN(rf2,bf2);
+		bw=stopF-startF;
+		if (bw<=0) {
+			f=rf1;
+			w=0;
+			return false;
+		}
+		else {
+			f=startF;
+			w=bw;
+			return true;
+		}
 	}
 	else if (rside && !bside) {  //UL
-		f=stopF;
-		w=startF-stopF;
+		startF=MAX(rf1,-bf2);
+		stopF=MIN(rf2,-bf1);
+		bw=stopF-startF;
+		if (bw<=0) {
+			f=rf1;
+			w=0;
+			return false;
+		}
+		else {
+			f=-stopF;
+			w=-bw;
+			return true;
+		}	
 	}
 	else if (!rside && bside) {  //LU
-		f=-startF;
-		w=startF-stopF;
+		startF=MAX(-rf2,bf1);
+		stopF=MIN(-rf1,bf2);
+		bw=stopF-startF;
+		if (bw<=0) {
+			f=rf1;
+			w=0;
+			return false;
+		}
+		else {
+			f=-stopF;
+			w=-bw;
+			return true;
+		}
 	}
 	else if (!rside && !bside) { //LL
-		f=-stopF;
-		w=stopF-startF;
+		startF=MAX(-rf2,-bf2);
+		stopF=MIN(-rf1,-bf1);
+		bw=stopF-startF;
+		if (bw<=0) {
+			f=rf1;
+			w=0;
+			return false;
+		}
+		else {
+			f=startF;
+			w=bw;
+			return true;
+		}
 	}
 	return true;
 }

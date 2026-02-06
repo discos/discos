@@ -4,15 +4,19 @@ int main(int argc, char** argv)
 
 {
 
-   xephemlib::SolarSystemBody p =   xephemlib::SolarSystemBody(MERCURY);
+   xephemlib::SolarSystemBody p(MERCURY);
    std::cout << "New SolarSystemBody done" << std::endl;
    xephemlib::Site *site = new xephemlib::Site();
+   
+   std::cout << "Sito allocato" << "\n";
+   
    site -> setCoordinate(degrad(9.5),degrad(39.5),600);
    site -> setTime(59319.5) ;  
 //   Site *site = new Site(59319.5,degrad(9.5),degrad(39.5),600);
 
-
+      std::cout << "Sito allocato" << "\n";
    p.compute(site);
+   
    p.report();
    std::cout <<xephemlib::SolarSystemBody::getPlanetNameFromCode(JUPITER)<<std::endl;
    std::cout << xephemlib::SolarSystemBody::getPlanetCodeFromName("MERCURY")<<std::endl;

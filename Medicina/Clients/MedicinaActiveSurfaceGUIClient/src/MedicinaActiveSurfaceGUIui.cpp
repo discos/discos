@@ -12,7 +12,7 @@ MedicinaActiveSurfaceGUI::MedicinaActiveSurfaceGUI(QWidget *parent) : QWidget(pa
 {
     setupUi(this);
 
-    QObject::connect(&myMedicinaActiveSurfaceCore, SIGNAL(setGUIActuatorColor(int,int,bool,bool)), this, SLOT(changeGUIActuatorColor(int,int,bool,bool,bool)));
+    QObject::connect(&myMedicinaActiveSurfaceCore, SIGNAL(setGUIActuatorColor(int,int,bool,bool,bool)), this, SLOT(changeGUIActuatorColor(int,int,bool,bool,bool)));
     QObject::connect(&myMedicinaActiveSurfaceCore, SIGNAL(setGUIAllActuators(bool)), this, SLOT(changeGUIAllActuators(bool)));
     QObject::connect(&myMedicinaActiveSurfaceCore, SIGNAL(setGUIcircleORradius(bool)), this, SLOT(changeGUIcircleORradius(bool)));
     QObject::connect(&myMedicinaActiveSurfaceCore, SIGNAL(setGUIActuator(bool)), this, SLOT(changeGUIActuator(bool)));
@@ -494,6 +494,24 @@ void MedicinaActiveSurfaceGUI::startAS()
     StatuslineEdit_2->setText(QApplication::translate("MedicinaActiveSurfaceGUI", str.c_str(), 0, QApplication::UnicodeUTF8));
 }
 
+void NotoActiveSurfaceGUI::onAS()
+{
+    std::string str;
+    setallactuators();
+    myMedicinaActiveSurfaceCore.enableAutoUpdate();
+    str = "ON";
+    StatuslineEdit_2->setText(QApplication::translate("MedicinaActiveSurfaceGUI", str.c_str(), 0, QApplication::UnicodeUTF8));
+}
+
+void NotoActiveSurfaceGUI::offAS()
+{
+    std::string str;
+    setallactuators();
+    myMedicinaActiveSurfaceCore.disableAutoUpdate();
+    str = "OFF";
+    StatuslineEdit_2->setText(QApplication::translate("MedicinaActiveSurfaceGUI", str.c_str(), 0, QApplication::UnicodeUTF8));
+}
+
 void MedicinaActiveSurfaceGUI::stowAS()
 {
     std::string str;
@@ -508,7 +526,7 @@ void MedicinaActiveSurfaceGUI::stopAS()
     std::string str;
     setallactuators();
     //myMedicinaActiveSurfaceCore.stopUSD(thecircle,theactuator,theradius);
-    myMedicinaActiveSurfaceCore.setParabolicFixedProfile();
+    myMedicinaActiveSurfaceCore.setParabolicFixedProfile    str = "PARABOLIC FIXED";
     str = "PARABOLIC FIXED";
     StatuslineEdit_2->setText(QApplication::translate("MedicinaActiveSurfaceGUI", str.c_str(), 0, QApplication::UnicodeUTF8));
 }
@@ -730,7 +748,7 @@ void MedicinaActiveSurfaceGUI::changeGUIasProfileCode(int asProfileCode)
 
 void MedicinaActiveSurfaceGUI::changeGUIasLUTFileName(QString filename)
 {
-    //LUTLabelFileName->setText(filename);
+    LUTLabelFileName->setText(filename);
 }
 
 void MedicinaActiveSurfaceGUI::changeGUIActuatorStatusLabels()

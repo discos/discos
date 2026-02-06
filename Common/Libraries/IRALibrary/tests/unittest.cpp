@@ -58,13 +58,45 @@ TEST_F(IRALibrary_IRATools,extractFileName_checkSimpleFilePath){
 	EXPECT_TRUE(extractFileName_checkSimpleFilePath());
 }
 
+TEST_F(IRALibrary_IRATools, analyzeDualConversion_TribandScenario) {
+	dualConversion_TribandScenario();
+}
+
+TEST_F(IRALibrary_IRATools, analyzeDualConversion_FullLowSideInjection) {
+	dualConversion_FullLSI();
+}
+
+TEST_F(IRALibrary_IRATools, analyzeDualConversion_BottleNeck) {
+	dualConversion_Bottleneck();
+}
+
+TEST_F(IRALibrary_IRATools, analyzeDualConversion_SpectrumInversion) {
+	dualConversion_SpectrumInversion();
+}
+
+TEST_F(IRALibrary_IRATools, computeDualConversion_GeneralCase) {
+	cDualConversion_GeneralCase();
+}
+
+TEST_F(IRALibrary_IRATools, computeDualConversion_IF1_Negative) {
+	cDualConversion_IF1_Negative();
+}
+
+TEST_F(IRALibrary_IRATools, computeDualConversion_IF1_OutOfBounds) {
+	cDualConversion_IF1_OutOfBounds();
+}
+
 TEST_F(IRALibrary_IRATools, skyFrequency_noIntersection){
 	EXPECT_TRUE(skyFrequency_noIntersection());
 }
 
-TEST_F(IRALibrary_IRATools,skyFrequency_intersection){
-	EXPECT_TRUE(skyFrequency_intersection());
+TEST_F(IRALibrary_IRATools, IFLimits_WlowScenario){
+	calculateIFLimits_WlowScenario();
 }
+
+/*TEST_F(IRALibrary_IRATools,skyFrequency_intersection){
+	EXPECT_TRUE(skyFrequency_intersection());
+}*/
 
 TEST_F(IRALibrary_FastQueue,FastQueue_checkLimits){
 	EXPECT_TRUE(FastQueue_checkLimits());

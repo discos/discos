@@ -73,6 +73,38 @@ C11_IGNORE_WARNING_POP
  * have to "use" this namespace.
 */
 namespace IRA {
+	
+struct DoubleConversionAnalysis {
+    bool valid_configuration; // True se il sistema può convertire qualcosa
+    // Range dell'Oscillatore Locale Equivalente (OL_eq)
+    double min_OL_eq;
+    double max_OL_eq;
+    // Range RF effettivamente convertito (Banda Utile)
+    double min_RF_converted;
+    double max_RF_converted;
+    // Informazioni sullo stato
+    bool spectrum_inverted;   // True se lo spettro finale è invertito rispetto all'RF
+    bool limited_by_IF1;      // True se il filtro intermedio (IF1) taglia parte della banda
+};	
+
+// Struttura per i risultati puntuali
+struct DoubleConversionResult {
+    bool valid;                  // True se la configurazione è fisicamente possibile
+    IRA::CString error_msg;       // Messaggio di errore se valid == false
+    double eq_OL;                // equivalent OL
+    // 1. Frequenza RF Risultante
+    double rf_center_freq;       // Centro banda RF
+    double rf_min_freq;          // Inizio banda RF
+    double rf_max_freq;          // Fine banda RF
+    bool spectrum_inverted;      // True se lo spettro RF->IF2 è invertito
+    // 2. Banda IF Finale (IF2)
+    double if2_min_freq;
+    double if2_max_freq;
+    double if2_bandwidth;
+    // 3. Banda IF Intermedia (IF1) - Calcolata per debug/check
+    double if1_min_generated;    // Minima frequenza generata al primo stadio
+    double if1_max_generated;    // Massima frequenza generata al primo stadio
+};
 
 /**
  * This class is the unspecialized part of a template construct. This construct can be used to delcare a type according a condition.
@@ -341,9 +373,9 @@ public:
 	 * The band are defined by giving the start frequency and the bandwidth. If the start frequency is negative the method consider the corresponding band
 	 * to be inverted. In that case the results of the method is affected accordingly.
 	 * If we consider an RF band 1600-1800 MHz: a down conversion with an LO=1500 will produce a band f=100, bw=200
-	 * a down conversion with an LO=1900 will produce a band f=-300, bw=200. The same convention could be then adopted for backends Nyquist zones.
-	 * The rsulting band is extpressed in the form startFrequency(f) and bandwidth (bw). Up converting to RF band is always done by the following
-	 * formulas: f1=f+LO, f2=Lo+f+bw;
+	 * a down conversion with an LO=1900 will produce a band f=-100, bw=-200. The same convention could be then adopted for backends Nyquist zones.
+	 * The resulting band is expressed in the form startFrequency(f) and bandwidth (bw). Up converting to RF band is always done by the following
+	 * formulas: f1=f+LO, f2=LO+f+bw;
 	 * @param bf backend start frequency.
 	 * @param bbw backend bandwidth
 	 * @param rf receiver start frequency
@@ -353,6 +385,75 @@ public:
 	 * @return true if the two band produce a band (the intersection is not empty), false otherwise.
 	 */  
 	static bool skyFrequency(const double& bf,const double& bbw,const double& rf,const double& rbw,double& f,double& bw);
+	
+	/**
+	 * This function computes the intersection between two bands. Its use, for example, could be to compute the resulting band 
+	 * from the intersection between  an IF coming from a receiver and a filter applied before a backend.
+	 * The band are defined by giving the start frequency and the bandwidth. If the start frequency is negative the method consider the corresponding band
+	 * to be spectral inverted. In that case the results of the method is affected accordingly. This is a new an simplified implementation wrt
+	 * the overload twin function.
+	 * It also computes the corresponding RF band, provided a local oscillator is included.
+	 * @param bf backend start frequency. If negative the corresponding band is considered to be inverted
+	 * @param bbw backend bandwidth
+	 * @param rf receiver start frequency If negative the corresponding band is considered to be inverted
+	 * @param rbw receiver band width
+	 * @param lo local oscillator
+	 * @param iff start frequency of the resulting band. If negative the corresponding band is considered to be inverted
+	 * @param ifbw width of the resulting band
+	 * @param RF1, RF2 RF band limits corresponding to the resulting bandwidth. 
+	 * @return true if the two band produce a band (the intersection is not empty), false otherwise.
+	 */	
+	static bool skyFrequency(const double& bf,const double& bbw,const double& rf,const double& rbw,double lo,
+	  double& iff,double& ifbw,double& RF1, double& RF2);
+	
+	/**
+ 	* Calculates the resulting IF band limits, Start Frequency, and Bandwidth.
+ 	* @param LO_freq:        The frequency of the Local Oscillator.
+ 	* @param RF_min:         The lower bound of the RF band.
+ 	* @param RF_max:         The upper bound of the RF band.
+ 	* @param injection:      The injection type: 1 for Low-Side, -1 for High-Side.
+ 	* @param out_IF_min:     (Output) The resulting lower bound of the IF band.
+ 	* @param out_IF_max:     (Output) The resulting upper bound of the IF band.
+ 	* @param out_start_freq: (Output) The starting frequency of the IF band (physically the minimum).
+ 	* @param out_bandwidth:  (Output) The total bandwidth of the resulting IF signal.
+ 	* @return bool:          Returns false if input parameters are invalid.
+ 	*/
+	static bool calculateIFlimits(double LO_freq, 
+                             double RF_min, double RF_max, 
+                             long injection,
+                             double& out_IF_min, double& out_IF_max,
+                             double& out_start_freq, double& out_bandwidth);
+	
+	/**
+ 	* This function analyses  a double conversion system computing the resulting band ranges.
+ 	* @param RF_min, RF_max: Banda in uscita dal ricevitore (es. 80-98)
+ 	* @param min_ol1, max_ol1: Range sintonia primo OL
+	* @param min_if1, max_if1: Banda passante primo filtro IF (es. 2-18)
+	* @param min_ol2, max_ol2: Range sintonia secondo OL
+	* @param min_if2, max_if2: Banda passante secondo filtro IF (es. 0.375-0.650)
+	* @param LO1_inj: 1 (Low Side) o -1 (High Side)
+	* @param LO2_inj: 1 (Low Side) o -1 (High Side)
+	*/
+	static DoubleConversionAnalysis analyzeDualConversion(double RF_min, double RF_max,
+                                     double min_ol1, double max_ol1,
+                                     double min_if1, double max_if1,
+                                     double min_ol2, double max_ol2,
+                                     double min_if2, double max_if2,
+                                     long LO1_inj, long LO2_inj);
+
+	/**
+ 	* Compute the resulting frequencies given two local oscillators.
+ 	* @param current_ol1   Local oscillator 1
+	* @param current_ol2   Local oscillator 2
+	* @param if2_min, if2_max  Limit of the IF2 filter of the final conversion (ex. 0.375, 0.650)
+	* @param if1_min, if1_max Limit of the IF2 filter of the final conversion (ex. 2.0, 18.0)
+	* @param LO1_inj, LO2_inj  1 = Low Side injection, -1 = High Side injection
+ 	*/
+	static DoubleConversionResult calculateDualConversion(double current_ol1, double current_ol2,
+                                             double if2_min, double if2_max,
+                                             double if1_min, double if1_max,
+                                             long LO1_inj, long LO2_inj);                                     
+                                     
 	
 	/**
 	 * Use this function to divide a string into  separated tokens. The token delimiter can be specified.

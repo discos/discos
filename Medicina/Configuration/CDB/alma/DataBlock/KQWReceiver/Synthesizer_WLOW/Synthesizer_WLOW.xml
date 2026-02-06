@@ -5,8 +5,8 @@
 				xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-<SynthesizerEntry><Frequency>16330.0</Frequency><OutputPower>10</OutputPower></SynthesizerEntry>
+<SynthesizerEntry><Frequency>16000.0</Frequency><OutputPower>10</OutputPower></SynthesizerEntry>
 
-<SynthesizerEntry><Frequency>16660.0</Frequency><OutputPower>10</OutputPower></SynthesizerEntry>
+<SynthesizerEntry><Frequency>16330.0</Frequency><OutputPower>10</OutputPower></SynthesizerEntry>
 
 </LocalOscillatorLookUpTable>

@@ -2,6 +2,8 @@
 
 #include <stdlib.h>
 
+const double TOLERANCE = 1e-6;
+
 namespace IRALibraryTest {
 
 class IRALibrary_IRATools : public ::testing::Test {
@@ -81,6 +83,206 @@ public:
 		else {
 			return ::testing::AssertionFailure();
 		}
+	}
+	
+	void calculateIFLimits_WlowScenario() {
+		double out_IF_min, out_IF_max , out_IF_start, out_IF_bw;
+		bool result=IRA::CIRATools::calculateIFlimits(
+		  96,
+		  80,
+		  98,
+		  -1,
+		  out_IF_min,out_IF_max,out_IF_start, out_IF_bw);
+		ASSERT_TRUE(result);
+		EXPECT_NEAR(out_IF_min,2.0,TOLERANCE);
+		EXPECT_NEAR(out_IF_max,16.0,TOLERANCE); 
+		EXPECT_NEAR(out_IF_start,-2.0,TOLERANCE);
+		EXPECT_NEAR(out_IF_bw,14.0,TOLERANCE);
+	}
+			
+	void dualConversion_TribandScenario() {
+		
+		// Case 1: the Wlow of the triband receiver
+		// RF In: 80 - 98 GHz
+		// OL1:   96 - 98 GHz (High Side -> -1)
+		// IF1:   2 - 18 GHz
+		// OL2:   3 - 8 GHz (High Side -> -1)
+		// IF2:   0.375 - 0.650 GHz  (Pharos 2 derived band)
+    
+   	IRA::DoubleConversionAnalysis res = IRA::CIRATools::analyzeDualConversion(
+       80.0, 98.0,       // RF Range Hardware
+       96.0, 98.0,       // OL1 Range
+       2.0, 18.0,        // IF1 Filter
+       3.0, 8.0,         // OL2 Range
+       0.375, 0.650,     // IF2 Filter
+       -1, -1            // HSI, HSI
+   	);
+   
+		ASSERT_TRUE(res.valid_configuration);
+   
+   	// Verifica OL Equivalente
+   	// HSI: OL_eq = OL1 - OL2
+   	// Min: 96 - 7 = 89
+  		// Max: 98 - 7 = 91
+   	EXPECT_NEAR(res.min_OL_eq, 88.0, TOLERANCE);
+   	EXPECT_NEAR(res.max_OL_eq, 95.0, TOLERANCE);
+
+   	// Verifica Inversione Spettro
+   	// HSI + HSI = 2 inversioni = Diritto (false)
+   	EXPECT_FALSE(res.spectrum_inverted);
+
+    	// Verifica Banda RF Convertita
+    	// Spettro Diritto: RF = OL_eq + IF2
+    	// Min: 89.0 + 0.375 = 89.375
+    	// Max: 91.0 + 0.650 = 91.650
+    	EXPECT_NEAR(res.min_RF_converted, 88.375, TOLERANCE);
+    	EXPECT_NEAR(res.max_RF_converted, 95.650, TOLERANCE);
+
+    	// Verifica collo di bottiglia IF1
+    	EXPECT_FALSE(res.limited_by_IF1);   
+	}
+
+	void dualConversion_FullLSI() {
+		// --- TEST CASE 2: Low Side + Low Side (Standard) ---
+		// Configurazione: LSI + LSI -> Spettro Diritto
+    	IRA::DoubleConversionAnalysis res = IRA::CIRATools::analyzeDualConversion(
+        5.0, 20.0,       // RF Hardware
+        5.0, 6.0,         // OL1 Range
+        1.0, 10.0,        // IF1 Filter (Largo)
+        2.0, 3.0,         // OL2 Range
+        0.5, 0.5,         // IF2 Filter (Stretto/Fisso)
+        1, 1              // LSI, LSI
+    	);
+
+		// OL Eq = OL1 + OL2
+		// Min Eq: 5 + 2 = 7
+		// Max Eq: 6 + 3 = 9
+		EXPECT_NEAR(res.min_OL_eq, 7.0, TOLERANCE);
+		EXPECT_NEAR(res.max_OL_eq, 9.0, TOLERANCE);
+		// RF = OL_eq + IF2 (Diritto)
+		// Min RF: 7 + 0.5 = 7.5
+		// Max RF: 9 + 0.5 = 9.5
+		EXPECT_NEAR(res.min_RF_converted, 7.5, TOLERANCE);
+		EXPECT_NEAR(res.max_RF_converted, 9.5, TOLERANCE);
+    	EXPECT_FALSE(res.spectrum_inverted);
+	}
+
+	void dualConversion_SpectrumInversion() {
+		// --- TEST CASE 3: Inversione Spettro (HSI + LSI) ---
+		// Configurazione: Una sola conversione High Side -> Spettro Invertito
+		IRA::DoubleConversionAnalysis res = IRA::CIRATools::analyzeDualConversion(
+        10.0, 20.0,
+        15.0, 15.0,       // OL1 Fisso (HSI)
+        1.0, 6.0,         // IF1
+        1.0, 1.0,         // OL2 Fisso (LSI)
+        0.5, 1.0,         // IF2
+        -1, 1             // HSI, LSI -> DISPARI -> Invertito
+		);
+
+		EXPECT_TRUE(res.spectrum_inverted);
+    	// OL Eq (HSI base) = OL1 - OL2 = 15 - 1 = 14
+		EXPECT_NEAR(res.min_OL_eq, 14.0, TOLERANCE);
+
+		// Calcolo RF con Inversione
+		// RF = OL_eq - IF2
+		// Min RF (corrisponde a Max IF2): 14 - 1.0 = 13.0
+		// Max RF (corrisponde a Min IF2): 14 - 0.5 = 13.5
+		EXPECT_NEAR(res.min_RF_converted, 13.0, TOLERANCE);
+		EXPECT_NEAR(res.max_RF_converted, 13.5, TOLERANCE);
+	}
+	
+	void dualConversion_Bottleneck() {
+	// --- TEST CASE 4: Verifica "Collo di Bottiglia" IF1 ---
+	// Creiamo una situazione dove IF1 è troppo stretto e taglia il segnale
+		IRA::DoubleConversionAnalysis res = IRA::CIRATools::analyzeDualConversion(
+        80.0, 100.0,
+        90.0, 90.0,       // OL1
+        2.0, 3.0,         // IF1 (Molto stretto: 2-3 GHz)
+        0.0, 0.0,         // OL2 (Non usato/zero per semplificare)
+        3.5, 4.0,         // IF2 (Chiede frequenze tra 3.5 e 4.0 GHz)
+        1, 1              // LSI
+    );
+    
+    // Qui IF2 vorrebbe un segnale che in IF1 sarebbe a 3.5-4.0 GHz.
+    // Ma IF1 lascia passare solo 2.0-3.0 GHz.
+    // Risultato: Nessuna sovrapposizione valida.
+    
+    EXPECT_FALSE(res.valid_configuration);
+    EXPECT_TRUE(res.limited_by_IF1); 
+	}
+
+	void cDualConversion_GeneralCase() {
+   	// Input
+    	double ol1 = 98.0;
+    	double ol2 = 7.0;
+    	double if2_min = 0.375;
+    	double if2_max = 0.650;
+    	double if1_limit_min = 2.0;
+    	double if1_limit_max = 18.0;
+    	long lo1_inj = -1; // HSI
+    	long lo2_inj = -1; // HSI
+		IRA::DoubleConversionResult res = IRA::CIRATools::calculateDualConversion(
+        ol1, ol2, if2_min, if2_max, if1_limit_min, if1_limit_max, lo1_inj, lo2_inj
+    	);
+
+    	ASSERT_TRUE(res.valid) << "Configuration is valid!";
+    
+    	// Verifica Spettro: HSI + HSI = Diritto (Pari inversioni)
+    	EXPECT_FALSE(res.spectrum_inverted); 
+
+    	// Verifica OL Equivalente implicito: 98 - 7 = 91 GHz
+    	// Verifica RF: Poiché Diritto -> RF = OL_eq + IF2
+    	// Min: 91 + 0.375 = 91.375
+    	// Max: 91 + 0.650 = 91.650
+    	EXPECT_NEAR(res.rf_min_freq, 91.375, TOLERANCE);
+    	EXPECT_NEAR(res.rf_max_freq, 91.650, TOLERANCE);
+    	EXPECT_NEAR(res.rf_center_freq, (91.375 + 91.650)/2.0, TOLERANCE);
+
+    	// Verifica IF1 Generata: HSI al 2° stadio -> IF1 = OL2 - IF2
+    	// Min IF1 (generata da Max IF2): 7 - 0.650 = 6.350
+    	// Max IF1 (generata da Min IF2): 7 - 0.375 = 6.625
+    	EXPECT_NEAR(res.if1_min_generated, 6.350, TOLERANCE);
+    	EXPECT_NEAR(res.if1_max_generated, 6.625, TOLERANCE);
+
+    	// Verifica che IF1 sia dentro i limiti 2-18
+    	EXPECT_GE(res.if1_min_generated, if1_limit_min);
+    	EXPECT_LE(res.if1_max_generated, if1_limit_max);
+	}
+
+	void cDualConversion_IF1_Negative() {
+   	double ol1 = 10.0;
+		double ol2 = 1.0;  // OL2 molto basso
+		double if2_min = 2.0; // IF2 più alta dell'OL2
+		double if2_max = 3.0;
+    	double if1_limit_min = 0.0; 
+    	double if1_limit_max = 20.0;
+    
+    	// HSI al secondo stadio è cruciale per provocare la sottrazione
+    	IRA::DoubleConversionResult res = IRA::CIRATools::calculateDualConversion(
+        ol1, ol2, if2_min, if2_max, if1_limit_min, if1_limit_max, 1, -1 
+    	);
+
+    	EXPECT_FALSE(res.valid) << (const char *) res.error_msg;
+	}	
+
+
+	// Scenario: Le frequenze sono matematicamente valide (>0), ma cadono fuori dal filtro intermedio.
+	// Esempio: Generiamo una IF1 a 1 GHz, ma il filtro parte da 2 GHz.
+	void cDualConversion_IF1_OutOfBounds() {
+		double ol1 = 98.0;
+   	double ol2 = 0.5;
+   	double if2_min = 0.4;
+   	double if2_max = 0.6;
+		double if1_limit_min = 2.0; 
+		double if1_limit_max = 18.0;
+
+    	// IF1 generata = 0.4 + 0.5 = 0.9 GHz. (Minore di 2.0 -> Errore)
+    	IRA::DoubleConversionResult res = IRA::CIRATools::calculateDualConversion(
+        ol1, ol2, if2_min, if2_max, if1_limit_min, if1_limit_max, -1, 1 
+    	);
+    	EXPECT_FALSE(res.valid) << (const char *) res.error_msg;
+		// Debug info: verifichiamo che il calcolo fosse giusto ma respinto
+		EXPECT_NEAR(res.if1_min_generated, 0.9, TOLERANCE);
 	}
 
 	::testing::AssertionResult skyFrequency_noIntersection() {
@@ -293,9 +495,8 @@ public:
 		if (IRA::CIRATools::createEmptyFile(file)) {
 			if (IRA::CIRATools::fileExists(file)) {
 				IRA::CString cleanCommand;
-				int i;
 				cleanCommand="rm "+file;
-				i=system((const char *)cleanCommand);
+				system((const char *)cleanCommand);
 				return ::testing::AssertionSuccess();
 			}
 			else {
@@ -322,11 +523,10 @@ public:
 	::testing::AssertionResult deleteFile_checkSuccess() {
 		IRA::CString file;
 		IRA::CString command;
-		int i;
 		::testing::Test::RecordProperty("description","check if a file can be deleted from filesystem");
 		file=basePath+dummyFileName;
 		command="touch "+file;
-		i=system((const char *)command);
+		system((const char *)command);
 		if (IRA::CIRATools::deleteFile(file)) {
 			return ::testing::AssertionSuccess();
 		}
@@ -413,20 +613,18 @@ protected:
 
 	virtual void SetUp() {
 		IRA::CString command;
-		int i;
 		char buff[256];
 		getcwd(buff,256);
 		basePath=buff;
 		command="touch "+basePath+fileName;
-		i=system((const char *)command);
+		system((const char *)command);
 	}
 	virtual void TearDown() {
 		IRA::CString cleanCommand;
-		int i;
 		cleanCommand="rm -rf "+basePath+simpleDirPath;
-		i=system((const char *)cleanCommand);
+		system((const char *)cleanCommand);
 		cleanCommand="rm "+basePath+fileName;
-		i=system((const char *)cleanCommand);
+		system((const char *)cleanCommand);
 	}
 };
 

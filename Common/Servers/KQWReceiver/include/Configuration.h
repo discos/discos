@@ -57,6 +57,7 @@
 #define LOTABLE_Q_PATH CONFIG_PATH"/Synthesizer_Q"
 #define LOTABLE_WL_PATH CONFIG_PATH"/Synthesizer_WLOW"
 #define LOTABLE_WH_PATH CONFIG_PATH"/Synthesizer_WHIGH"
+#define LOTABLE_2IF_PATH CONFIG_PATH"/Synthesizer_2IF"
 #define MARKTABLE_PATH CONFIG_PATH"/MarkCoefficients"
 #define FEEDTABLE_PATH CONFIG_PATH"/Feeds"
 #define TAPERTABLE_PATH CONFIG_PATH"/Taper"
@@ -147,7 +148,7 @@ public:
 	 * @return the time allowed to the watch dog thread to complete an iteration and
 	 * respond to the thread manager (microseconds)
 	 */
-	inline const DWORD& getWarchDogResponseTime() const { return m_watchDogResponseTime; }
+	inline const DWORD& getWatchDogResponseTime() const { return m_watchDogResponseTime; }
 
 	/**
 	 * @return the time between two execution of the watch dog thread (microseconds)
@@ -189,6 +190,20 @@ public:
 	 * @return the instance of the WH-band local oscillator component  that the receiver will use to drive the set its LO
 	*/
 	inline const IRA::CString& getLocalOscillatorInstance_WH() const { return m_localOscillator_W2_Instance; }
+	
+	/**
+	 * @return the instance of the LO2 synth component  that the receiver will use to drive the set its LO
+	*/
+	inline const IRA::CString& getLocalOscillatorInstance_2IF() const { return m_localOscillator_2_Instance; }
+
+	/**
+	 * Return the synth table for the second conversion synthesizer
+	 * @param freq vector with the synthesizer frequencies. It must be freed by caller.
+	 * @param power corresponding powers for the frequencies vector. It must be freed by caller.
+	 * @return the size of the output vectors
+	 */
+	DWORD getSynthesizerTable_2IF(double * &freq,double *&power) const;
+
 
 	/**
 	 * Return the synth table for the K band
@@ -275,7 +290,6 @@ public:
 	 */
 	inline const DWORD getArrayLen() const { return m_feeds*m_IFs; }
 
-
 	/**
 	 * @return the lower limit of the RF coming from the K,Q,W1 and W2 band feed (MHz)
 	 */
@@ -287,14 +301,24 @@ public:
 	inline double const * const  getBandRFMax() const { return m_BandRFMax; }
 
 	/**
-	 * @return the start frequency of the IF coming from the K,Q,W1 and W2 band feed (MHz)
+	 * @return the Minimum frequency of the IF coming from the K,Q,W1 and W2 band feed (MHz)
 	 */
-	inline double const * const  getBandIFMin() const { return m_BandIFMin; }
+	//inline double const * const  getBandIFMin() const { return m_BandIFMin; }
 	
 	/**
-	 * @return the bandwidth of the IF coming from the K,Q,W1 and W2 band feed (MHz)
+	 * @return the Minimum frequency of the IF coming from the K,Q,W1 and W2 band feed (MHz)
 	 */
-	inline double const * const  getBandIFBandwidth() const{ return  m_BandIFBandwidth; }
+	//inline double const * const  getBandIFMax() const { return m_BandIFMax; }
+	
+	/**
+	 * @return the bandwidth of the resulting IFs (MHz)
+	 */
+	inline double const * const  getBandIFBandwidth() const{ return  m_IFBandWidth; }
+	
+	/**
+	 * @return the initial Frequency of the resulting IFs (MHz)
+	*/
+	inline double const * const  getIFStartFrequency() const{ return  m_IFStartFreq; }
 
 	/**
 	 * @return the number of IF chains for each feed
@@ -312,26 +336,50 @@ public:
 	inline const  DWORD& getFeeds() const { return m_feeds; }
 
 	/**
-	 * @return the default frequency for the local oscillators (MHz)
+	 * @return the default frequency for the first local oscillators (MHz)
 	 */
-	inline double const * const  getDefaultLO()  const { return m_DefaultLO; }
+	inline double const * const  getDefaultLO1()  const { return m_DefaultLO1; }
 	
 	/**
-	 * @return the current frequency for local Oscillator (MHz)
+	 * @return the default frequency for the second local oscillators (MHz)
 	 */
-	inline double const * const  getCurrentLOValue()  const { return m_currentLOValue; }
+	inline double const * const  getDefaultLO2()  const { return m_DefaultLO2; }
 	
-	/**
-	 * @return the current frequency for local Oscillator (MHz)
-	 */
-	//void setCurrentLOValue(const ACS::doubleSeq& lo);
+
+	/*
+	 * This method computes the synth values provided a target OLs list. It considers if second conversion is enabled. If it is enabled
+	 * it computes its value (for the first provided OL) and keep it fixed for all other values. 
+	**/
+	bool checkCurrentLOValue(const ACS::doubleSeq& lo,std::vector<double>& ol1,double& ol2);
+	bool computeCurrentLOValue(const double& val,const long& pos,double& ol1, double& ol2,bool fixedOl2);
 	
-	void setCurrentLOValue(const double& val,const long& pos);
+	inline bool is2IFEnabled() const {return m_2IFConversionEnabled; }
 
 	/**
-	 * @return the value of the fixed synthesizer used for the second conversion (MHz)
+	 * This methods sets the values of the local oscillators and computes the resulting OL. OL2 is considered only if the 2nd conversion is enabled
+	 * @return if the limit checks are ok (true) or not (false)
+	*/
+	bool setCurrentLOValue(const double& ol1,const double& ol2,const long& pos);
+	
+	/**
+	 * Return the resulting LO, given the combination of ol1 and ol2
+	**/ 	
+	double getResultingLO(const double& ol1,const double& ol2,const long& pos);
+
+	/**
+	 * @return the value of the synthesizer used for the second conversion (MHz)
 	 */
-	inline double const * const  getFixedLO2() const { return m_FixedLO2; }
+	inline double const * const  getCurrentLO2() const { return m_currentLO2Value; }
+	
+	/**
+	 * @return the current frequency for the first local Oscillator (MHz)
+	 */
+	inline double const * const  getCurrentLO1()  const { return m_currentLO1Value; }
+	
+	/**
+	 * @return the current frequency for local Oscillators (MHz)
+	 */
+	inline double const * const  getCurrentLO()  const { return m_currentLOValue; }
 
 	/**
 	 * @return lower limit for the synthesizer tuning (MHz)
@@ -342,6 +390,26 @@ public:
 	 * @return upper limit for  the  synthesizer tuning (MHz)
 	 */
 	inline double const * const  getLOMax() const { return  m_LOMax; }
+	
+	/**
+	 * @return lower limit for the second synthesizer tuning (MHz)
+	 */
+	inline double const * const  getLO1Min() const { return  m_LO1Min; }
+
+	/**
+	 * @return upper limit for  the second synthesizer tuning (MHz)
+	 */
+	inline double const * const  getLO1Max() const { return  m_LO1Max; }	
+	
+	/**
+	 * @return lower limit for the second synthesizer tuning (MHz)
+	 */
+	inline double const * const  getLO2Min() const { return  m_LO2Min; }
+
+	/**
+	 * @return upper limit for  the second synthesizer tuning (MHz)
+	 */
+	inline double const * const  getLO2Max() const { return  m_LO2Max; }
 	
 	/*
 	 * @return if the lan bypass mode has to be commanded to the receiver or not
@@ -379,21 +447,36 @@ private:
 	IRA::CString m_localOscillator_Q_Instance;
 	IRA::CString m_localOscillator_W1_Instance;
 	IRA::CString m_localOscillator_W2_Instance;
+	IRA::CString m_localOscillator_2_Instance;
+	
 	
 	T* m_services;
 	IRA::CString m_mode;
 	IRA::CString m_defaultMode;
 	double *m_BandRFMin;
 	double *m_BandRFMax;
-	double *m_BandIFMin;
-	double *m_BandIFBandwidth;
-	double *m_DefaultLO;
-	double *m_FixedLO2;
+	double *m_BandIF1Min;
+	double *m_BandIF1Max;
+	double *m_BandIF2Min;
+	double *m_BandIF2Max;	
+	double *m_IFStartFreq;
+	double *m_IFBandWidth;
+	double *m_DefaultLO1;
+	double *m_DefaultLO2;
+	long *m_LO1Injection;
+	long *m_LO2Injection;
 	double *m_currentLOValue;
+	double *m_currentLO1Value;
+	double *m_currentLO2Value;
 	double *m_LOMin;
 	double *m_LOMax;
+	double *m_LO1Min;
+	double *m_LO1Max;	
+	double *m_LO2Min;
+	double *m_LO2Max;
 	DWORD m_IFs;
 	bool m_lnaBypass;
+	bool m_2IFConversionEnabled;
 	std::bitset<4> m_bypassSwitchesPattern;
 	Receivers::TPolarization *m_BandPolarizations;
 	DWORD m_feeds;
@@ -404,6 +487,7 @@ private:
 	IRA::CDBTable *m_loTable_Q;
 	IRA::CDBTable *m_loTable_WL;
 	IRA::CDBTable *m_loTable_WH;
+	IRA::CDBTable *m_loTable_2IF;
 	
 	IRA::CDBTable *m_taperTable;
 	IRA::CDBTable *m_feedsTable;
@@ -413,17 +497,40 @@ private:
 	TLOValue * m_loVector_Q;
 	TLOValue * m_loVector_WL;
 	TLOValue * m_loVector_WH;
+	TLOValue * m_loVector_2IF;
 	DWORD m_loVectorLen_K;
 	DWORD m_loVectorLen_Q;
 	DWORD m_loVectorLen_WL;
 	DWORD m_loVectorLen_WH;
+	DWORD m_loVectorLen_2IF;
+	
 	DWORD m_markVectorLen;
 	TTaperValue * m_taperVector;
 	DWORD m_taperVectorLen;
 	TFeedValue * m_feedVector; // length given by m_feeds
 	
-	void updateBandWith();
+	bool updateIFLimits(const WORD &i);
 	WORD openSynthTable(IRA::CDBTable * &table, const IRA::CString &path, TLOValue * &loV);
+
+	/**
+     * Calcola OL1 e OL2 dato un target OL e i limiti [a,b] e [c,d].
+     * @param a       Limite minimo per OL1
+     * @param b       Limite massimo per OL1
+     * @param c       Limite minimo per OL2
+     * @param d       Limite massimo per OL2
+     * @param OL      Valore target (somma desiderata)\
+     * @param out_OL1 (Output) Variabile dove è salvato il risultato di OL1
+     * @param inout_OL2 (Output) Variabile dove è salvato il risultato di OL2, se OL2Fixed allora (INPUT), valore da utilizzare di OL2
+     * @param OL2Fixed true if the OL2 value does not have to change
+     * @param LO1Injection 1 if the ol is low injected, -1 if the ol is high injected
+     * @param LO2Injection 1 if the ol is low injected, -1 if the ol is high injected     
+     * @return        true se il calcolo è possibile, false se OL è fuori dai limiti
+    */ 
+	bool compute_OL_distribution(double a, double b, double c, double d, double OL, 
+                             double& out_OL1, double& inout_OL2, 
+                             long LO1Injection, long LO2Injection, 
+                             bool OL2Fixed);
+	
 };
 
 

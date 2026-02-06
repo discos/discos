@@ -183,7 +183,7 @@ void KQWBandReceiverImpl::execute()
     CComponentCore *temp = &m_core;
     try {
          m_monitor = getContainerServices()->getThreadManager()->create<CMonitorThread, CComponentCore*> (
-                 "WHATCHDOKBANDMF", temp, config->getWarchDogResponseTime(), config->getWatchDogSleepTime());
+                 "WHATCHDOKBANDMF", temp, config->getWatchDogResponseTime(), config->getWatchDogSleepTime());
     }
     catch (acsthreadErrType::acsthreadErrTypeExImpl& ex) {
         _ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl, _dummy, ex, "KQWBandReceiverImpl::execute()");

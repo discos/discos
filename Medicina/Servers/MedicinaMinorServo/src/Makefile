@@ -20,7 +20,7 @@ MedMinorServoControl_OBJECTS   = MedMinorServoConstants MedMinorServoControl Med
                                  MedMinorServoTime MedMinorServoModbus \
                                  PositionQueue
 
-MedMinorServoControl_LIBS   = baci acsnc IRALibrary ModbusChannel ManagmentDefinitionsStubs \
+MedMinorServoControl_LIBS   = baci maci acsnc IRALibrary ModbusChannel ManagmentDefinitionsStubs \
                               ManagementErrors \
                               ComponentErrors boost_thread-mt boost_system
 
@@ -58,6 +58,13 @@ real_to_virtual_LIBS = IRALibrary
 EXECUTABLES = scudisconnect
 scudisconnect_OBJECTS = scudisconnect MedMinorServoModbus MedMinorServoConstants MedMinorServoGeometry MedMinorServoTime MedMinorServoControl PositionQueue
 scudisconnect_LIBS = IRALibrary ModbusChannel boost_thread-mt boost_system
+
+#
+# Python stuff (public and local)
+# ----------------------------
+PY_SCRIPTS         = 
+PY_SCRIPTS_L       = poly_converter
+
 
 #
 # Configuration Database Files

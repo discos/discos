@@ -22,7 +22,7 @@ static const uint qt_meta_data_MedicinaActiveSurfaceGUI[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-      37,   14, // methods
+      39,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -50,23 +50,25 @@ static const uint qt_meta_data_MedicinaActiveSurfaceGUI[] = {
      172,   25,   25,   25, 0x0a,
      182,   25,   25,   25, 0x0a,
      191,   25,   25,   25, 0x0a,
-     200,   25,   25,   25, 0x0a,
-     218,   25,   25,   25, 0x0a,
-     230,   25,   25,   25, 0x0a,
-     242,   25,   25,   25, 0x0a,
-     261,  256,   25,   25, 0x08,
-     325,  308,   25,   25, 0x08,
-     353,   25,   25,   25, 0x28,
-     377,  308,   25,   25, 0x08,
-     407,   25,   25,   25, 0x28,
-     433,  308,   25,   25, 0x08,
-     457,   25,   25,   25, 0x28,
-     477,   25,   25,   25, 0x08,
-     512,   25,   25,   25, 0x08,
-     538,   25,   25,   25, 0x08,
-     570,   25,   25,   25, 0x08,
-     597,   25,   25,   25, 0x08,
-     625,   25,   25,   25, 0x08,
+     198,   25,   25,   25, 0x0a,
+     206,   25,   25,   25, 0x0a,
+     215,   25,   25,   25, 0x0a,
+     233,   25,   25,   25, 0x0a,
+     245,   25,   25,   25, 0x0a,
+     257,   25,   25,   25, 0x0a,
+     276,  271,   25,   25, 0x08,
+     340,  323,   25,   25, 0x08,
+     368,   25,   25,   25, 0x28,
+     392,  323,   25,   25, 0x08,
+     422,   25,   25,   25, 0x28,
+     448,  323,   25,   25, 0x08,
+     472,   25,   25,   25, 0x28,
+     492,   25,   25,   25, 0x08,
+     527,   25,   25,   25, 0x08,
+     553,   25,   25,   25, 0x08,
+     585,   25,   25,   25, 0x08,
+     612,   25,   25,   25, 0x08,
+     640,   25,   25,   25, 0x08,
 
        0        // eod
 };
@@ -77,9 +79,9 @@ static const char qt_meta_stringdata_MedicinaActiveSurfaceGUI[] = {
     "stop()\0up()\0down()\0top()\0bottom()\0"
     "calibrate()\0calVer()\0stow()\0setup()\0"
     "refPos()\0recoverUSD()\0setupAS()\0"
-    "startAS()\0stowAS()\0stopAS()\0"
-    "setallactuators()\0setradius()\0setcircle()\0"
-    "setactuator()\0,,,,\0"
+    "startAS()\0stowAS()\0onAS()\0offAS()\0"
+    "stopAS()\0setallactuators()\0setradius()\0"
+    "setcircle()\0setactuator()\0,,,,\0"
     "changeGUIActuatorColor(int,int,bool,bool,bool)\0"
     "callfromfunction\0changeGUIAllActuators(bool)\0"
     "changeGUIAllActuators()\0"
@@ -119,24 +121,26 @@ void MedicinaActiveSurfaceGUI::qt_static_metacall(QObject *_o, QMetaObject::Call
         case 16: _t->setupAS(); break;
         case 17: _t->startAS(); break;
         case 18: _t->stowAS(); break;
-        case 19: _t->stopAS(); break;
-        case 20: _t->setallactuators(); break;
-        case 21: _t->setradius(); break;
-        case 22: _t->setcircle(); break;
-        case 23: _t->setactuator(); break;
-        case 24: _t->changeGUIActuatorColor((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2])),(*reinterpret_cast< bool(*)>(_a[3])),(*reinterpret_cast< bool(*)>(_a[4])),(*reinterpret_cast< bool(*)>(_a[5]))); break;
-        case 25: _t->changeGUIAllActuators((*reinterpret_cast< bool(*)>(_a[1]))); break;
-        case 26: _t->changeGUIAllActuators(); break;
-        case 27: _t->changeGUIcircleORradius((*reinterpret_cast< bool(*)>(_a[1]))); break;
-        case 28: _t->changeGUIcircleORradius(); break;
-        case 29: _t->changeGUIActuator((*reinterpret_cast< bool(*)>(_a[1]))); break;
-        case 30: _t->changeGUIActuator(); break;
-        case 31: _t->changeGUIActuatorStatusEnblLabel(); break;
-        case 32: _t->changeGUIActuatorValues(); break;
-        case 33: _t->changeGUIActuatorStatusLabels(); break;
-        case 34: _t->changeGUIasStatusCode((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 35: _t->changeGUIasProfileCode((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 36: _t->changeGUIasLUTFileName((*reinterpret_cast< QString(*)>(_a[1]))); break;
+        case 19: _t->onAS(); break;
+        case 20: _t->offAS(); break;
+        case 21: _t->stopAS(); break;
+        case 22: _t->setallactuators(); break;
+        case 23: _t->setradius(); break;
+        case 24: _t->setcircle(); break;
+        case 25: _t->setactuator(); break;
+        case 26: _t->changeGUIActuatorColor((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2])),(*reinterpret_cast< bool(*)>(_a[3])),(*reinterpret_cast< bool(*)>(_a[4])),(*reinterpret_cast< bool(*)>(_a[5]))); break;
+        case 27: _t->changeGUIAllActuators((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 28: _t->changeGUIAllActuators(); break;
+        case 29: _t->changeGUIcircleORradius((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 30: _t->changeGUIcircleORradius(); break;
+        case 31: _t->changeGUIActuator((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 32: _t->changeGUIActuator(); break;
+        case 33: _t->changeGUIActuatorStatusEnblLabel(); break;
+        case 34: _t->changeGUIActuatorValues(); break;
+        case 35: _t->changeGUIActuatorStatusLabels(); break;
+        case 36: _t->changeGUIasStatusCode((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 37: _t->changeGUIasProfileCode((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 38: _t->changeGUIasLUTFileName((*reinterpret_cast< QString(*)>(_a[1]))); break;
         default: ;
         }
     }
@@ -176,9 +180,9 @@ int MedicinaActiveSurfaceGUI::qt_metacall(QMetaObject::Call _c, int _id, void **
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 37)
+        if (_id < 39)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 37;
+        _id -= 39;
     }
     return _id;
 }

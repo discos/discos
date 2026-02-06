@@ -52,6 +52,9 @@ Common/Misc/PMUpdate/src/PMUpdate_gui.py
 Medicina/Interfaces/MedicinaActiveSurfaceInterface/idl/MedicinaActiveSurfaceBoss.idl
 Noto/Errors/NotoActiveSurfaceErrors/idl/ASErrors.idl
 Noto/Interfaces/NotoActiveSurfaceInterface/idl/NotoActiveSurfaceBoss.idl
+Noto/Clients/NotoActiveSurfaceGUIClient/include/NotoActiveSurfaceGUI.h
+Noto/Clients/NotoActiveSurfaceGUIClient/src/moc_NotoActiveSurfaceCore.cpp
+Noto/Clients/NotoActiveSurfaceGUIClient/src/moc_NotoActiveSurfaceGUIui.cpp
 SRT/Clients/SRTActiveSurfaceGUIClient/include/SRTActiveSurfaceGUI.h
 SRT/Clients/SRTActiveSurfaceGUIClient/src/moc_SRTActiveSurfaceCore.cpp
 SRT/Clients/SRTActiveSurfaceGUIClient/src/moc_SRTActiveSurfaceGUIui.cpp

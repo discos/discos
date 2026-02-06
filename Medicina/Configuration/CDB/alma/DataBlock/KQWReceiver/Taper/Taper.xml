@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
 
-<!--Values are not precise I got them from slide 93 do document 10. test report -->
+<!--Values are not precise I got them from slide 89 do document 10. test report -->
 
 <KQWBandTaperLookUpTable xmlns="urn:schemas-cosylab-com:KQWBandTaperLookUpTable:1.0"
              	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
