@@ -1,7 +1,8 @@
 #include <baciDB.h>
-#include <usdImpl.h>
+#include <ActiveSurfaceUSDImpl.h>
 #include <maciContainerImpl.h>
-#include <usdDevIO.i>
+#include <usdDevIO.h>
+
 
 /************************************************************************************************************************/
 /* "@(#) $Id: usdImpl.cpp,v 1.1 2011-03-24 09:18:26 c.migoni Exp $"                                                     */
@@ -23,11 +24,10 @@ using namespace maci;
 
 USDImpl::USDImpl(const ACE_CString& CompName, maci::ContainerServices* containerServices) :
         CharacteristicComponentImpl(CompName,containerServices),
-        m_available(false),
-        m_pLan(ActiveSurface::lan::_nil()),
-        actuatorsCorrections(NULL),
-        elevations(NULL),
-        m_status(0),
+        m_available(true),
+        actuatorsCorrections(nullptr),
+        elevations(nullptr),
+        m_status(UNAV),
         m_delay_sp(this),
         m_cmdPos_sp(this),
         m_Fmin_sp(this),
@@ -41,17 +41,34 @@ USDImpl::USDImpl(const ACE_CString& CompName, maci::ContainerServices* container
         m_type_sp(this),
         m_gravCorr_sp(this),
         m_userOffset_sp(this),
-        m_sector(getCDBValue<long>(containerServices, "sector")),
-        m_lanNum(getCDBValue<long>(containerServices, "lan")),
-        m_addr(getCDBValue<long>(containerServices, "serialAddress")),
-        m_lanStatus(lanStatus::getInstance(m_lanNum))
+        m_backoff_time(MIN_BACKOFF),
+        m_next_retry_time(getTimeStamp())
 {
     ACS_SHORT_LOG((LM_INFO,"::USDImpl::USDImpl: constructor;Constructor!"));
 
-    m_usdStatus.id = m_addr;
-    m_usdStatus.available = m_available;
-    m_usdStatus.status = UNAV;
-    m_lanStatus.write(m_usdStatus);
+    if(parseName(std::string(CompName.c_str()), m_sector, m_lanNum, m_addr))
+    {
+        m_lanStatus = &lanStatus::getInstance(m_lanNum);
+
+        m_usdStatus.id = m_addr;
+        m_usdStatus.available = m_available;
+        m_usdStatus.status = m_status;
+
+        m_lanStatus->write(m_usdStatus);
+
+        std::stringstream lanNameStream;
+        lanNameStream.fill('0');
+        lanNameStream << "AS/SECTOR" << std::setw(2) << (int)m_sector;
+        lanNameStream << "/LAN" << std::setw(2) << (int)m_lanNum;
+        lanCobName = lanNameStream.str();
+
+        m_pLan.setContainerServices(containerServices);
+        m_pLan.setComponentName(lanCobName.c_str());
+    }
+    else
+    {
+        ACS_SHORT_LOG((LM_ERROR, "::USDImpl::USDImpl: Failed to parse IDs from name: %s", CompName));
+    }
 }
 
 template <typename T> T USDImpl::getCDBValue(maci::ContainerServices* containerServices, const char* fieldName)
@@ -68,59 +85,63 @@ template <typename T> T USDImpl::getCDBValue(maci::ContainerServices* containerS
     return temp;
 }
 
+bool USDImpl::parseName(const std::string name, BYTE& sector, BYTE& lan, BYTE& addr)
+{
+    size_t posSector = name.find("SECTOR");
+    size_t posLan = name.find("LAN");
+    size_t posUsd = name.find("USD");
+
+    if (posSector == std::string::npos || posLan == std::string::npos || posUsd == std::string::npos)
+    {
+        return false;
+    }
+
+    sector = std::atoi(name.c_str() + posSector + 6);
+    lan = std::atoi(name.c_str() + posLan + 3);
+    addr = std::atoi(name.c_str() + posUsd + 3);
+
+    return (sector > 0 && lan > 0 && addr > 0);
+}
+
 void USDImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 {
     cs = getContainerServices();
 
-    IRA::CString accepted_profiles;
-    if(CIRATools::getDBValue(cs,"fullRange",(long&)m_fullRange) &&
-        CIRATools::getDBValue(cs,"zeroRef",(long&)m_zeroRef) &&
-        CIRATools::getDBValue(cs,"cammaLen",(double&)m_cammaLen) &&
-        CIRATools::getDBValue(cs,"cammaPos",(double&)m_cammaPos) &&
-        CIRATools::getDBValue(cs,"step_giro",(long&)m_step_giro) &&
-        CIRATools::getDBValue(cs,"step_res",(long&) m_rs) &&
-        CIRATools::getDBValue(cs,"calibrate",(long&)m_calibrate) &&
-        CIRATools::getDBValue(cs,"accepted_profiles",accepted_profiles))
-    {
-        ACS_SHORT_LOG((LM_INFO,"USD%d: CDB parameter read",m_addr));
+    m_fullRange = getCDBValue<long>(cs, "fullRange");
+    m_zeroRef = getCDBValue<long>(cs, "zeroRef");
+    m_cammaLen = getCDBValue<double>(cs, "cammaLen");
+    m_cammaPos = getCDBValue<double>(cs, "cammaPos");
+    m_step_giro = getCDBValue<long>(cs, "step_giro");
+    m_rs = getCDBValue<long>(cs, "step_res");
+    m_calibrate = getCDBValue<long>(cs, "calibrate");
 
-        m_step2deg = (double)(360. / m_step_giro);
-        m_step_res = (double)(1. / pow(2, m_rs));
-        m_top = -m_zeroRef;
-        m_bottom = m_fullRange-m_zeroRef;
-        m_lastCmdStep = 0;
-        //m_lastCmdStep = m_top + 1; // a value outside of full range will never be commanded, so the next commanded position will for sure be different
-        std::stringstream ss((const char *)accepted_profiles);
-        int buffer;
-        while(ss >> buffer)
-            m_accepted_profiles.insert(buffer);
-    }
-    else
-    {
-        ACS_LOG(LM_SOURCE_INFO,"USDImpl:initialize()",(LM_ERROR,"Error reading CDB!"));
-        ASErrors::CDBAccessErrorExImpl exImpl(__FILE__,__LINE__,"USDImpl::initialize() - Error reading CDB parameters");
-        throw acsErrTypeLifeCycle::LifeCycleExImpl(exImpl,__FILE__,__LINE__,"USDImpl::initialize()");
-    }
+    m_step2deg = (double)(360. / m_step_giro);
+    m_step_res = (double)(1. / pow(2, m_rs));
+    m_top = -m_zeroRef;
+    m_bottom = m_fullRange - m_zeroRef;
+    m_lastCmdStep = 0;
 
-    // Activate the LAN component
-    lanCobName.Format("AS/SECTOR%02d/LAN%02d", m_sector, m_lanNum);
+    IRA::CString accepted_profiles = getCDBValue<IRA::CString>(cs, "accepted_profiles");
+    std::stringstream ss((const char*)accepted_profiles);
+    int buffer;
+    while(ss >> buffer)
+    {
+        m_accepted_profiles.insert(buffer);
+    }
+    ACS_SHORT_LOG((LM_INFO,"%s: CDB parameters loaded successfully", name()));
 
     // Use container to activate the object
-    ACS_SHORT_LOG((LM_INFO, "Getting component: %s", (const char*)lanCobName));
+    ACS_SHORT_LOG((LM_INFO, "Getting component: %s", lanCobName.c_str()));
     try
     {
-        m_pLan = cs->getComponent<ActiveSurface::lan>((const char *)lanCobName);
+        m_pLan.load();
+        ACS_SHORT_LOG((LM_INFO, "LAN component linked successfully!"));
     }
-    catch (maciErrType::CannotGetComponentExImpl)
+    catch(...)
     {
-        ACS_LOG(LM_SOURCE_INFO,"USDImpl:initialize()",(LM_ERROR,"Error linking lan component!"));
-        ASErrors::CannotGetUSDExImpl exImpl(__FILE__,__LINE__,"USDImpl::initialize()");
-        throw acsErrTypeLifeCycle::LifeCycleExImpl(exImpl,__FILE__,__LINE__,"USDImpl::initialize()");
+        ACS_SHORT_LOG((LM_WARNING, "Cannot link LAN component immediately. Running in disconnected mode. Auto-reconnect active."));
     }
-    ACS_SHORT_LOG((LM_INFO,"lan linked!"));
 
-    m_available = true;
-    m_usdStatus.available = m_available;
     m_failures = 0;
 
     ACE_CString CompName(this->name());
@@ -149,8 +170,10 @@ void USDImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 
     try
     {
+        _GET_PROP(status, m_status, "usdImpl::initialize()")
+
         stop(); // terminate any ongoing movement
-        _GET_PROP(status,m_status,"usdImpl::initialize()")
+
         if(!(m_calibrate && m_status&ENBL))
         {
             reset(); // load the default params.
@@ -167,8 +190,6 @@ void USDImpl::initialize() throw (ACSErr::ACSbaseExImpl)
         _GET_PROP(status,m_status,"usdImpl::initialize()")
         _GET_PROP(actPos,m_currentStep,"usdImpl::initialize()")
 
-        m_usdStatus.status = m_status;
-        m_usdStatus.currentPosition = m_currentStep;
         _GET_PROP(delay, m_usdStatus.delay, "usdImpl::initialize()");
         _GET_PROP(Fmin, m_usdStatus.minimumFrequency, "usdImpl::initialize()");
         _GET_PROP(Fmax, m_usdStatus.maximumFrequency, "usdImpl::initialize()");
@@ -176,20 +197,28 @@ void USDImpl::initialize() throw (ACSErr::ACSbaseExImpl)
         _GET_PROP(softVer, m_usdStatus.softwareVersion, "usdImpl::initialize()");
         _GET_PROP(type, m_usdStatus.type, "usdImpl::initialize()");
         _GET_PROP(cmdPos, m_usdStatus.commandedPosition, "usdImpl::initialize()");
-        m_lanStatus.write(m_usdStatus);
+
+        m_available = true;
+        m_usdStatus.status = m_status;
+        m_usdStatus.currentPosition = m_currentStep;
+
+        ACS_SHORT_LOG((LM_INFO, "%s: initialized successfully.", name()));
     }
     catch (ASErrors::ASErrorsEx& ex)
     {
-        _THROW_EXCPT_FROM_EXCPT(acsErrTypeLifeCycle::LifeCycleExImpl,ex,"usdImpl::initialize()")
+        ACS_SHORT_LOG((LM_WARNING, "%s: initialization failed. Starting disconnected.", name()));
     }
     catch (CORBA::SystemException& ex)
     {
-        _THROW_EXCPT(acsErrTypeLifeCycle::LifeCycleExImpl,"usdImpl::initialize()")
+        ACS_SHORT_LOG((LM_WARNING, "%s: CORBA Exception during initialization. Starting disconnected.", name()));
     }
     catch (...)
     {
         ACS_DEBUG("::usdImpl::initialize", "Unknown exception!");
     }
+
+    m_usdStatus.available = m_available;
+    m_lanStatus->write(m_usdStatus);
 }
 
 void USDImpl::execute() throw (ACSErr::ACSbaseExImpl)
@@ -283,12 +312,12 @@ void USDImpl::cleanUp()
 {
     // There is no need to release the LAN component since it is a HierarchicalComponent and will be released when all USDs have been released
 
-    if(actuatorsCorrections != NULL)
+    if(actuatorsCorrections != nullptr)
     {
         delete [] actuatorsCorrections;
     }
 
-    if(elevations != NULL)
+    if(elevations != nullptr)
     {
         delete [] elevations;
     }
@@ -299,12 +328,12 @@ void USDImpl::aboutToAbort()
 {
     // There is no need to release the LAN component since it is a HierarchicalComponent and will be released when all USDs have been released
 
-    if(actuatorsCorrections != NULL)
+    if(actuatorsCorrections != nullptr)
     {
         delete [] actuatorsCorrections;
     }
 
-    if(elevations != NULL)
+    if(elevations != nullptr)
     {
         delete [] elevations;
     }
@@ -323,7 +352,7 @@ void USDImpl::readStatus() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
         m_usdStatus.status = m_status;
         _GET_PROP(actPos, m_currentStep, "usdImpl::readStatus()")
         m_usdStatus.currentPosition = m_currentStep;
-        m_lanStatus.write(m_usdStatus);
+        m_lanStatus->write(m_usdStatus);
     }
     _CATCH_EXCP_THROW_EX(CORBA::SystemException, corbaError, "::usdImpl::readStatus()", m_addr)
     _CATCH_EXCP_THROW_EX(ASErrors::DevIOErrorEx, DevIOError, "::usdImpl::readStatus()", m_addr) // for _GET_PROP
@@ -354,7 +383,7 @@ void USDImpl::reset() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
         _GET_PROP(Fmin, m_usdStatus.minimumFrequency, "usdImpl::initialize()");
         _GET_PROP(Fmax, m_usdStatus.maximumFrequency, "usdImpl::initialize()");
         _GET_PROP(acc, m_usdStatus.accelerationFactor, "usdImpl::initialize()");
-        m_lanStatus.write(m_usdStatus);
+        m_lanStatus->write(m_usdStatus);
 
         action(RESL, m_rs, 1); // resolution
     }
@@ -385,7 +414,7 @@ void USDImpl::calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 
         _SET_PROP(Fmax, 100, "usdImpl::calibrate()")
         m_usdStatus.maximumFrequency = 100;
-        m_lanStatus.write(m_usdStatus);
+        m_lanStatus->write(m_usdStatus);
         ACS_DEBUG_PARAM("::usdImpl::calibrate", "Fmax set to:%d", 100);
 
         action(HSTOP, 9, 1); // sets the stop @ camma on
@@ -406,7 +435,7 @@ void USDImpl::calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
         }
         _GET_PROP(actPos, cammaBegin, "usdImpl::calibrate()")
         m_usdStatus.currentPosition = cammaBegin;
-        m_lanStatus.write(m_usdStatus);
+        m_lanStatus->write(m_usdStatus);
         ACS_DEBUG_PARAM("::usdImpl::calibrate", "Camma begin at: %ld", cammaBegin);
 
         action(HSTOP, 0, 1); // disable HW stop
@@ -414,7 +443,7 @@ void USDImpl::calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
         move(-10); // moves 10 steps further to avoid istheresis zone
         m_lastCmdStep = m_currentStep - 10;
         m_usdStatus.commandedPosition = m_lastCmdStep;
-        m_lanStatus.write(m_usdStatus);
+        m_lanStatus->write(m_usdStatus);
         CIRATools::Wait(1, 0);
 
         action(HSTOP, 1, 1); // sets the stop @ camma off
@@ -427,7 +456,7 @@ void USDImpl::calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
         CIRATools::Wait(3, 0);
         _GET_PROP(status, m_status, "usdImpl::calibrate()")
         m_usdStatus.status = m_status;
-        m_lanStatus.write(m_usdStatus);
+        m_lanStatus->write(m_usdStatus);
         if(m_status&MRUN)
         {
             ACS_DEBUG("::usdImpl::calibrate", "camma end not found!");
@@ -437,7 +466,7 @@ void USDImpl::calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 
         _GET_PROP(actPos, cammaEnd, "usdImpl::calibrate()")
         m_usdStatus.currentPosition = cammaEnd;
-        m_lanStatus.write(m_usdStatus);
+        m_lanStatus->write(m_usdStatus);
         ACS_DEBUG_PARAM("::usdImpl::calibrate", "Camma end at: %ld", cammaEnd);
 
         m_cammaLen = cammaBegin - cammaEnd;
@@ -456,7 +485,7 @@ void USDImpl::calibrate() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
         m_lastCmdStep = m_cammaPos;
         m_usdStatus.maximumFrequency = 500;
         m_usdStatus.commandedPosition = m_lastCmdStep;
-        m_lanStatus.write(m_usdStatus);
+        m_lanStatus->write(m_usdStatus);
 
         CIRATools::Wait(1, 0); // 1 sec
         action(LCNTR, m_top<<USxS, 4); // load the top_scale value on counter
@@ -482,7 +511,7 @@ void USDImpl::calVer() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
         action(CPOS, m_top<<USxS, 4); // top
         _GET_PROP(status, m_status, "usdImpl::calibrate()")
         m_usdStatus.status = m_status;
-        m_lanStatus.write(m_usdStatus);
+        m_lanStatus->write(m_usdStatus);
 
         ifp = 10;
         if(stillRunning(m_top))
@@ -511,7 +540,7 @@ void USDImpl::calVer() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
         ifp = 20;
         _GET_PROP(status, m_status, "usdImpl::calibrate()")
         m_usdStatus.status = m_status;
-        m_lanStatus.write(m_usdStatus);
+        m_lanStatus->write(m_usdStatus);
 
         if(stillRunning(m_bottom))
         {
@@ -529,7 +558,7 @@ void USDImpl::calVer() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
         ifp = 30;
         _GET_PROP(status, m_status, "usdImpl::calibrate()")
         m_usdStatus.status = m_status;
-        m_lanStatus.write(m_usdStatus);
+        m_lanStatus->write(m_usdStatus);
 
         if(stillRunning(0))
         {
@@ -566,11 +595,11 @@ void USDImpl::posTable(const ACS::doubleSeq& theActuatorsCorrections, CORBA::Lon
     deltaEL = theDeltaEL;
     threshold = theThreshold;
 
-    if(actuatorsCorrections != NULL)
+    if(actuatorsCorrections != nullptr)
     {
         delete [] actuatorsCorrections;
     }
-    if(elevations != NULL)
+    if(elevations != nullptr)
     {
         delete [] elevations;
     }
@@ -597,13 +626,13 @@ void USDImpl::update(CORBA::Double elevation) throw (CORBA::SystemException, ASE
         m_usdStatus.status = m_status;
         _GET_PROP(actPos, m_currentStep, "usdImpl::update()")
         m_usdStatus.currentPosition = m_currentStep;
-        m_lanStatus.write(m_usdStatus);
+        m_lanStatus->write(m_usdStatus);
 
         if(m_status&MRUN)
         {
             return;
         }
-        if(actuatorsCorrections == NULL) // No profile set yet, return without doing anything else
+        if(actuatorsCorrections == nullptr) // No profile set yet, return without doing anything else
         {
             return;
         }
@@ -647,106 +676,72 @@ void USDImpl::update(CORBA::Double elevation) throw (CORBA::SystemException, ASE
         _SET_PROP(cmdPos, updatePos, "usdImpl::update()")
         m_lastCmdStep = updatePos;
         m_usdStatus.commandedPosition = m_lastCmdStep;
-        m_lanStatus.write(m_usdStatus);
+        m_lanStatus->write(m_usdStatus);
     }
     _CATCH_EXCP_THROW_EX(CORBA::SystemException, corbaError, "::usdImpl::update()", m_addr)    // for CORBA
     _CATCH_EXCP_THROW_EX(ASErrors::DevIOErrorEx, DevIOError, "::usdImpl::update()", m_addr)    // for _GET_PROP
     _CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl, USDError, "::usdImpl::update()", m_addr)    // for local USD excp
 }
 
-void USDImpl::exImplCheck(ASErrors::ASErrorsExImpl ex)
+void USDImpl::exImplCheck(ASErrors::ASErrorsExImpl ex, const char* routine)
 {
     ACS_TRACE("USDImpl::exImplCheck()");
 
-    int err;
+    int err = ex.getErrorCode();
+    std::string errorMessage;
+    ACE_Log_Priority logLevel;
 
-    switch (err = ex.getErrorCode())
+    switch(err)
     {
         // warnings
         case ASErrors::SocketReconn:
-        {
-            //_THROW_EX(SocketReconn,"::usdImpl::exImplCheck()",err);
-            ACS_SHORT_LOG((LM_WARNING, "Warning exception %d", err));
-            break;
-        }
         case ASErrors::Incomplete:
-        {
-            //_THROW_EX(Incomplete,"::usdImpl::exImplCheck()",err);
-            ACS_SHORT_LOG((LM_WARNING, "Warning exception %d", err));
-            break;
-        }
         case ASErrors::USDUnavailable:
-        {
-            //_THROW_EX(USDUnavailable,"::usdImpl::exImplCheck()",err);
-            ACS_SHORT_LOG((LM_WARNING, "Warning exception %d", err));
-            break;
-        }
         case ASErrors::Nak:
-        {
-            //_THROW_EX(Nak,"::usdImpl::exImplCheck()",err);
-            ACS_SHORT_LOG((LM_WARNING, "Warning exception %d", err));
-            break;
-        }
         case ASErrors::USDunCalibrated:
         {
-            //_THROW_EX(USDunCalibrated,"::usdImpl::exImplCheck()",err);
-            ACS_SHORT_LOG((LM_WARNING, "Warning exception %d", err));
+            logLevel = LM_WARNING;
+            errorMessage = "Warning exception ";
             break;
         }
-
         //critical errors compromising the USD working
         case ASErrors::LibrarySocketError:
-        {
-            //_THROW_EX(LibrarySocketError,"::usdImpl::exImplCheck()",err);
-            ACS_SHORT_LOG((LM_CRITICAL, "Critical exception %d", err));
-            m_failures++;
-            break;
-        }
         case ASErrors::USDConnectionError:
-        {
-            //_THROW_EX(USDConnectionError,"::usdImpl::exImplCheck()",err);
-            ACS_SHORT_LOG((LM_CRITICAL, "Critical exception %d", err));
-            m_failures++;
-            break;
-        }
         case ASErrors::USDTimeout:
-        {
-             //_THROW_EX(USDTimeout,"::usdImpl::exImplCheck()",err);
-            ACS_SHORT_LOG((LM_CRITICAL, "Critical exception %d", err));
-            m_failures++;
-            break;
-        }
         case ASErrors::SocketTOut:
-        {
-            //_THROW_EX(SocketTOut,"::usdImpl::exImplCheck()",err);
-            ACS_SHORT_LOG((LM_CRITICAL, "Critical exception %d", err));
-            m_failures++;
-            break;
-        }
         case ASErrors::SocketFail:
+        case ASErrors::SocketNotRdy:
         {
-            //_THROW_EX(SocketFail,"::usdImpl::exImplCheck()",err);
-            ACS_SHORT_LOG((LM_CRITICAL, "Critical exception %d", err));
-            m_failures++;
+            logLevel = LM_CRITICAL;
+            errorMessage = "Critical exception ";
+            if(m_failures < MAX_FAILURES)
+            {
+                m_failures++;
+            }
             break;
         }
-        //  errors
+        // Other errors
         default:
         {
-            //_THROW_EX(USDError,"::usdImpl::exImplCheck()",err);
-            ACS_SHORT_LOG((LM_ERROR, "Error exception %d", err));
+            logLevel = LM_ERROR;
+            errorMessage = "Error exception ";
             break;
         }
     }
-    if(m_failures == MAX_FAILURES)
+    if(m_failures == MAX_FAILURES && m_available)
     {
+        ACS_LOG(LM_FULL_INFO, routine, (LM_ERROR, "USD unavailable."));
+
         m_available = false;
+        m_status = UNAV;
         m_usdStatus.available = m_available;
         m_usdStatus.status = UNAV;
-        m_lanStatus.write(m_usdStatus);
+        m_lanStatus->write(m_usdStatus);
     }
+    errorMessage += std::to_string(err);
 
-    ex.log();
+    ACS_LOG(LM_FULL_INFO, "USDImpl::exImplCheck()", (LM_DEBUG, errorMessage.c_str()));
+    ex.log(LM_DEBUG);
 }
 
 void USDImpl::exCheck(ASErrors::ASErrorsEx ex)
@@ -764,6 +759,8 @@ bool USDImpl::compCheck(ACSErr::CompletionImpl& comp)
     if(comp.isErrorFree())
     {
         m_failures = 0;
+        m_available = true;
+        m_backoff_time = MIN_BACKOFF;
         return false;
     }
     else
@@ -778,7 +775,11 @@ void USDImpl::action(int act, int par, int nb) throw (ASErrors::ASErrorsExImpl)
 {
     ACS_TRACE("usdImpl::action()");
 
-    _VAR_CHK_EXIMPL(m_available, USDUnavailable, "usdImpl::action()"); //throw USD unuvailable excpt
+    ACS::Time now = getTimeStamp();
+    if(!m_available && now < m_next_retry_time)
+    {
+        throw ASErrors::USDUnavailableExImpl(__FILE__, __LINE__, "usdImpl::action()");
+    }
 
     try
     {
@@ -804,7 +805,7 @@ bool USDImpl::stillRunning(long pos) throw (ASErrors::ASErrorsExImpl)
         _GET_PROP(actPos, startpos, "usdImpl::stillRunning()")
         int tout = labs(pos - startpos) / fmax + 2; // adds two secs for safety
 
-        for(time_t endt = time(NULL) + tout; time(NULL) < endt; CIRATools::Wait(0, 500000)) // loop every 1/2 sec
+        for(time_t endt = time(nullptr) + tout; time(nullptr) < endt; CIRATools::Wait(0, 500000)) // loop every 1/2 sec
         {
             _GET_PROP(status, m_status, "usdImpl::stillRunning()")
             if(!(m_status&MRUN))

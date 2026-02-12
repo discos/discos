@@ -7,7 +7,7 @@
 #include <acstime.h>
 #include <SRTActiveSurfaceCore.h>
 
-// mask pattern for status 
+// mask pattern for status
 #define UNAV    0xFF000000
 #define MRUN    0x000080
 #define CAMM    0x000100
@@ -164,8 +164,8 @@ void SRTActiveSurfaceCore::setactuator(int circle, int actuator)
     CORBA::Long acc_val;
     CORBA::Long delay_val;
     CORBA::Long status;
-    bool active;
-    bool statusColor;
+    bool active = false;
+    bool statusColor = false;
 
     /*
     ActuatorNumber_str = QString("%1_%2").arg(circle).arg(actuator);
@@ -188,7 +188,7 @@ void SRTActiveSurfaceCore::setactuator(int circle, int actuator)
         tGUI->ManagerLabel->setText(ActuatorNumber_str);
         qApp->unlock();
     }
-        
+
     clearactuatorslineedit();
     */
     //theCircle = circle;
@@ -198,31 +198,27 @@ void SRTActiveSurfaceCore::setactuator(int circle, int actuator)
 
     try {
         tASBoss->usdStatus4GUIClient(circle, actuator, status);
-        active = true;
+        active = !(status == UNAV);
     }
     catch (ComponentErrors::ComponentNotActiveExImpl& ex) {
-        active = false;
         ex.log(LM_DEBUG);
     }
     catch (ComponentErrors::ComponentErrorsExImpl& ex) {
         //clearactuatorslineedit();
-        active = false;
         ex.log(LM_DEBUG);
     }
     catch (CORBA::SystemException& sysEx) {
-        active = false;
         _EXCPT(ClientErrors::CORBAProblemExImpl,impl,"SRTActiveSurfaceGUIClient::SRTActiveSurfaceCore::setactuator()");
         impl.setName(sysEx._name());
         impl.setMinor(sysEx.minor());
         impl.log();
     }
     catch (...) {
-        active = false;
         _EXCPT(ClientErrors::UnknownExImpl,impl,"SRTActiveSurfaceGUIClient::SRTActiveSurfaceCore::setactuator()");
         impl.log();
     }
 
-    if (active == true)
+    if (active)
     {
         //if ((status & ENBL) == 0) {
         /*qApp->lock();
@@ -276,7 +272,7 @@ void SRTActiveSurfaceCore::setactuator(int circle, int actuator)
             ActuatorAcceleration_str.setNum(acc_val);
             //tGUI->ActuatorAccelerationlineEdit->clear();
             //tGUI->ActuatorAccelerationlineEdit->insert(ActuatorAcceleration_str);
-    
+
             emit setGUIActuatorValues();
 
             //ActuatorStatus_color.setRgb( 0, 170, 0 );
@@ -340,7 +336,6 @@ void SRTActiveSurfaceCore::setactuator(int circle, int actuator)
             }
             else {
                 ActuatorStatusCalLabelCode = 1;
-                statusColor = false;
                 //tGUI->ActuatorStatusCalLabel->clear();
                 //tGUI->ActuatorStatusCalLabel->setText("CALIBRATED");
             }
@@ -366,8 +361,6 @@ void SRTActiveSurfaceCore::setactuator(int circle, int actuator)
         }
     }
     else {
-        active = false;
-        statusColor = true;
         ActuatorStatusRunLabelCode = 0;
         ActuatorStatusEnblLabelCode = -1;
         ActuatorStatusCammLabelCode = 0;
@@ -605,7 +598,7 @@ void SRTActiveSurfaceCore::calibrate(int circle, int actuator, int radius)
     char str[28];
 
     sprintf(str,"SRTAS_Calibration %d %d %d &", circle, actuator, radius);
-    system(str); // external SRTAS_Calibration tool 
+    system(str); // external SRTAS_Calibration tool
 
     if (circle == 0 && actuator == 0 && radius == 0)
         //setallactuators(); // ALL

@@ -21,288 +21,18 @@
 #include <baciRWlong.h>
 #include <baciROpattern.h>
 #include <baciSmartPropertyPointer.h>
-#include <IRA>
 
-//CORBA stubs
-#include <usdS.h>			
-#include <lanS.h>
-#include <ActiveSurfaceCommonS.h>
+
+#include "ActiveSurfaceUSDCommon.h"
+#include "usdDevIO.h"
 
 //error
-#include <ASErrors.h>
 #include <ManagementErrors.h>
 
 //others
 #include <time.h>
 #include <math.h> //used for pow()
-#include <usdDevIO.h>
 #include <lanStatus.h>
-
-/// ustep to step exp. 2 factor (2^7=128)
-#define USxS	7
-
-// mask pattern for status 
-#define UNAV	0xFF000000
-#define MRUN	0x000080
-#define CAMM	0x000100
-#define ENBL	0x002000
-#define PAUT	0x000800
-#define CAL 	0x008000
-
-// USD driver command
-#define RESET   0x01
-#define STOP 	0x11
-#define	FMIN	0x20
-#define	FMAX	0x21
-#define	ACCL	0x22
-#define LCNTR   0x23
-#define UBIT	0x25
-#define	RESL	0x26
-#define	DELAY	0x28
-#define HSTOP   0x2A
-#define	APOS	0x12
-#define STAT	0x13
-#define	SVER	0x10
-#define	USDT	0x14
-#define CPOS	0x30
-#define RPOS	0x31
-#define GO		0x32
-
-#define MM2STEP	1400 //(42000 STEP / 30 MM)
-
-#define MAX_FAILURES 5
-
-// specific macros
-
-/** @#define _ADD_MEMBER(OBJ, MEMB)
-*	This macro add extra data to an error/compl. object. MEMB must be real variable or constant
-*	@param OBJ error or completion object
-*	@param MEMB costant or variable added as (name,value) pair
-*/
-#define _ADD_MEMBER(OBJ, MEMB)\
-{\
-	CString mName(#MEMB);\
-	CString mVal;\
-	mVal.Format("%02x", MEMB);\
-	_ADD_EXTRA(OBJ, mName, mVal);\
-}
-
-/** @#define _THROW_EX(ERR, ROUTINE, VAR)
-*	Create and launch a remote (CORBA) exception, adding USD address and VAR as addedd data
-*	@param ERR error
-*	@param ROUTINE the calling routine
-*	@param VAR costant or variable added as (name,value) pair
-*/
-#define _THROW_EX(ERR, ROUTINE, VAR)\
-{\
-	ASErrors::ERR##ExImpl exImpl(__FILE__, __LINE__, ROUTINE);\
-	_ADD_MEMBER(exImpl, m_addr);\
-	_ADD_MEMBER(exImpl, VAR);\
-	throw exImpl.getASErrorsEx();\
-}
-
-/** @#define _VAR_CHK_EXIMPL(VAR, ERR, ROUTINE)
-*	Launch a local exception if VAR is not true.
-*	@param VAR variable to be checked
-*	@param ERR error
-*	@param ROUTINE the calling routine
-*/
-#define _VAR_CHK_EXIMPL(VAR, ERR, ROUTINE)\
-{\
-	if(!VAR)\
-	{\
-		throw ASErrors::ERR##ExImpl(__FILE__, __LINE__, ROUTINE);\
-	}\
-}
-
-/** @#define _VAR_CHK_EX(VAR, ERR, ROUTINE)
-*	Launch a remote(CORBA) exception if VAR is not true.
-*	@param VAR variable to be checked
-*	@param ERR error
-*	@param ROUTINE the calling routine
-*/
-#define _VAR_CHK_EX(VAR, ERR, ROUTINE) \
-{\
-	if(!VAR)\
-	{\
-		throw ASErrors::ERR##ExImpl(__FILE__, __LINE__, ROUTINE).getASErrorsEx();\
-	}\
-}
-
-/** @#define _COMPL_CHK_THROW_EX(CP_SP, OUT_TYPE, ROUTINE)
-*	Check a remote(CORBA) completion_var. Launch an remotem OUT_TYPE CORBA exception 
-*	if it is not error free.
-*	@param CP_SP Complition_var smart pointer 
-*	@param OUT_TYPE out type exception 
-*	@param ROUTINE the calling routine 
-*/
-#define _COMPL_CHK_THROW_EX(CP_SP, OUT_TYPE, ROUTINE)\
-{\
-	ACSErr::CompletionImpl comp(CP_SP.in());\
-	if(compCheck(comp))\
-	{\
-		throw ASErrors::OUT_TYPE##ExImpl(comp, __FILE__, __LINE__, ROUTINE).getASErrorsEx();\
-	}\
-}
-
-/** @#define _SET_CDB(PROP, LVAL, ROUTINE) throw (ASErrors::CDBAccessErrorExImpl)
-*	Set a long CDB property or attribute.
-*	@param PROP property to be setted
-*	@param LVAL the value 
-*	@param ROUTINE the calling routine 
-*/
-#define _SET_CDB(PROP, LVAL, ROUTINE)\
-{\
-	maci::ContainerServices* cs = getContainerServices();\
-	if(!CIRATools::setDBValue(cs, #PROP, (const long&)LVAL))\
-	{\
-		ASErrors::CDBAccessErrorExImpl exImpl(__FILE__, __LINE__, ROUTINE);\
-		exImpl.setFieldName(#PROP);\
-		throw exImpl;\
-	}\
-}
-
-/** @#define _SET_CDB_D(PROP, LVAL, ROUTINE) throw (ASErrors::CDBAccessErrorExImpl)
-*	Set a double CDB property or attribute.
-*	@param PROP property to be setted
-*	@param LVAL the value 
-*	@param ROUTINE the calling routine 
-*/
-#define _SET_CDB_D(PROP, LVAL, ROUTINE)\
-{\
-	maci::ContainerServices* cs = getContainerServices();\
-	if(!CIRATools::setDBValue(cs, #PROP, (const double&)LVAL))\
-	{\
-		ASErrors::CDBAccessErrorExImpl exImpl(__FILE__, __LINE__, ROUTINE);\
-		exImpl.setFieldName(#PROP);\
-		throw exImpl;\
-	}\
-}
-
-/** @#define _GET_PROP(PROP, RETVAR, ROUTINE)
-*	Get a property value.
-*	@param PROP property to be read
-*	@param RETVAR the value 
-*	@param ROUTINE the calling routine 
-*	@throw a DevIOError remote exception if return completion is not error free
-*/
-#define _GET_PROP(PROP, RETVAR, ROUTINE)\
-{\
-	ACSErr::Completion_var sm_cp;\
-	RETVAR = m_##PROP##_sp->get_sync(sm_cp.out()); \
-	ACSErr::CompletionImpl comp(sm_cp.in());\
-	if (compCheck(comp))\
-	{\
-		throw ASErrors::DevIOErrorExImpl(comp, __FILE__, __LINE__, ROUTINE).getDevIOErrorEx();\
-	}\
-}
-
-/** @#define _SET_PROP(PROP, RETVAR, ROUTINE)
-*	Set a property value.
-*	@param PROP property to be read
-*	@param VALUE property value to be changed
-*	@param ROUTINE the calling routine 
-*	@throw a DevIOError remote exception if return completion is not error free
-*/
-#define _SET_PROP(PROP, VALUE, ROUTINE)\
-{\
-	ACSErr::CompletionImpl comp = m_##PROP##_sp->set_sync(VALUE);\
-	if (compCheck(comp))\
-	{\
-		throw ASErrors::DevIOErrorExImpl(comp, __FILE__, __LINE__, ROUTINE).getDevIOErrorEx();\
-	}\
-}
-
-/** @#define _SET_LDEF(PROP, ROUTINE)
-*	Set the default value for given property. All type except double.
-*	Launch a remote exception if set_sync return completion is not error free.
-*	@param PROP property 
-*	@param ROUTINE the calling routine 
-*/
-#define _SET_LDEF(PROP, ROUTINE)\
-{\
-	long tmpd;\
-	ACSErr::CompletionImpl comp;\
-	maci::ContainerServices* cs = getContainerServices();\
-	if (!CIRATools::getDBValue(cs, #PROP"/default_value", tmpd)) \
-	{\
-		ASErrors::CDBAccessErrorExImpl ex = ASErrors::CDBAccessErrorExImpl(__FILE__, __LINE__, ROUTINE);\
-		ex.setFieldName(#PROP"/default_value");\
-		throw ex.getASErrorsEx();\
-	}\
-	else\
-	{\
-		comp = m_##PROP##_sp->set_sync(tmpd);\
-	}\
-	if (compCheck(comp))\
-	{\
-		throw ASErrors::USDErrorExImpl(__FILE__, __LINE__, ROUTINE).getASErrorsEx();\
-	}\
-}
-
-/** @#define _CATCH_ACS_EXCP_THROW_EXIMPL(IN_TYPE,OUT_TYPE,ROUTINE,VAR)
-*	Catch an ACS(with error trace) exception and launch a local one (ExImpl).
-*	@param IN_TYPE the exception to catch 
-*	@param OUT_TYPE the exception to be launched 
-*	@param VAR variable name and value added as addiotional data 
-*	@param ROUTINE the calling routine 
-*/
-#define _CATCH_ACS_EXCP_THROW_EXIMPL(IN_TYPE, OUT_TYPE, ROUTINE,VAR)\
-catch(IN_TYPE& Ex)\
-{\
-	OUT_TYPE exImpl(Ex, __FILE__, __LINE__, ROUTINE);\
-	_ADD_MEMBER(exImpl, m_addr);\
-	_ADD_MEMBER(exImpl, VAR);\
-	throw exImpl;\
-}
-
-/** @#define _CATCH_EXCP_THROW_EXIMPL(IN_TYPE,OUT_TYPE,ROUTINE,VAR)
-*	Catch an CORBA(w/o error trace) exception and launch a local one (ExImpl).
-*	@param IN_TYPE the exception to catch 
-*	@param OUT_TYPE the exception to be launched 
-*	@param VAR variable name and value added as addiotional data 
-*	@param ROUTINE the calling routine 
-*/
-#define _CATCH_EXCP_THROW_EXIMPL(IN_TYPE, OUT_TYPE, ROUTINE, VAR)\
-catch(IN_TYPE& Ex)\
-{\
-	OUT_TYPE exImpl(__FILE__, __LINE__, ROUTINE);\
-	_ADD_MEMBER(exImpl, m_addr);\
-	_ADD_MEMBER(exImpl, VAR);\
-	throw exImpl;\
-}
-
-/** @#define _CATCH_ACS_EXCP_THROW_EX(IN_TYPE,OUT_TYPE,ROUTINE,VAR)
-*	Catch an ACS(with error trace) exception and launch a remote one (Ex).
-*	@param IN_TYPE the exception to catch 
-*	@param OUT_TYPE the exception to be launched 
-*	@param VAR variable name and value added as additional data 
-*	@param ROUTINE the calling routine 
-*/
-#define _CATCH_ACS_EXCP_THROW_EX(IN_TYPE, _ERR, ROUTINE, VAR)\
-catch(IN_TYPE& Ex)\
-{\
-	ASErrors::_ERR##ExImpl exImpl(Ex, __FILE__, __LINE__, ROUTINE);\
-	_ADD_MEMBER(exImpl, m_addr);\
-	_ADD_MEMBER(exImpl, VAR);\
-	throw exImpl.getASErrorsEx();\
-}
-		
-/** @#define _CATCH_EXCP_THROW_EX(IN_TYPE,OUT_TYPE,ROUTINE,VAR)
-*	Catch an CORBA(w/o error trace) exception and launch a remote one (Ex).
-*	@param IN_TYPE the exception to catch 
-*	@param OUT_TYPE the exception to be launched 
-*	@param VAR variable name and value added as addiotional data 
-*	@param ROUTINE the calling routine 
-*/
-#define _CATCH_EXCP_THROW_EX(IN_TYPE, _ERR, ROUTINE, VAR)\
-catch(IN_TYPE& Ex)\
-{\
-	ASErrors::_ERR##ExImpl exImpl(__FILE__, __LINE__, ROUTINE);\
-	_ADD_MEMBER(exImpl, m_addr);\
-	_ADD_MEMBER(exImpl, VAR);\
-	throw exImpl.getASErrorsEx();\
-}
 
 
 using namespace baci;
@@ -320,13 +50,14 @@ using namespace std;
 * This class USDImpl implements the single actuator of SRT AS.
 * It provides some asynchronous methods: up,down, stop, reset.
 * It also provides the property rappresenting some important characteristic.
-* 
+*
 * @author <a href=mailto:g.maccaferri@ira.cnr.it>Giuseppe Maccaferri</a>,
 * IRA, Bologna<br>
 * @version "@(#) $Id: usdImpl.h,v 1.1 2011-03-24 09:18:00 c.migoni Exp $"
 */
 class USDImpl: public CharacteristicComponentImpl, public virtual POA_ActiveSurface::USD
 {
+    template <class T> friend class USDDevIO;
 public:
 	/**
 	* Constructor
@@ -340,7 +71,7 @@ public:
 	* Destructor
 	*/
 	virtual ~USDImpl();
-	
+
 	/* Override component lifecycle methods */
 	virtual void initialize() throw (ACSErr::ACSbaseExImpl);
 	virtual void execute() throw (ACSErr::ACSbaseExImpl);
@@ -350,8 +81,8 @@ public:
 	void getStatus(CORBA::Long_out status);
 
 	/**
-	* Following functions returns a reference to the property implementation of IDL interface 
-	*/ 
+	* Following functions returns a reference to the property implementation of IDL interface
+	*/
 	virtual ACS::RWlong_ptr delay() throw (CORBA::SystemException);
 	virtual ACS::RWlong_ptr cmdPos() throw (CORBA::SystemException);
 	virtual ACS::RWlong_ptr Fmin() throw (CORBA::SystemException);
@@ -377,7 +108,7 @@ public:
 			action(STOP);
 		}
 		_CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl, USDError, "USDImpl::stop()", m_status)
-	} 
+	}
 
 	void up() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 	{
@@ -386,7 +117,7 @@ public:
 			action(GO, 1, 1);
 		}
 		_CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl, USDError, "USDImpl::up()", m_status)
-	} 
+	}
 
 	void down() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 	{
@@ -411,7 +142,7 @@ public:
 			_SET_PROP(cmdPos, m_bottom, "USDImpl::bottom()");
 			m_lastCmdStep = m_bottom;
 			m_usdStatus.commandedPosition = m_lastCmdStep;
-			m_lanStatus.write(m_usdStatus);
+			m_lanStatus->write(m_usdStatus);
 		}
 		_CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl, USDError, "USDImpl::bottom()", m_status)
 	}
@@ -422,7 +153,7 @@ public:
 			_SET_PROP(cmdPos, m_top, "USDImpl::top()");
 			m_lastCmdStep = m_top;
 			m_usdStatus.commandedPosition = m_lastCmdStep;
-			m_lanStatus.write(m_usdStatus);
+			m_lanStatus->write(m_usdStatus);
 		}
 		_CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl, USDError, "USDImpl::top()", m_status)
 	}
@@ -440,8 +171,8 @@ public:
 			action(RPOS, incr<<USxS, 4);
 		}
 		_CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl, USDError, "USDImpl::move()", m_status)
-	} 
-	
+	}
+
 	/**
 	* Calibrate the scale. USD already must be already against the uppermost edge.
 	* This function moves the actuator back untill the camma trailing edge.
@@ -471,7 +202,7 @@ public:
 	* This function gets parameters useful for update function
 	*/
 	void posTable(const ACS::doubleSeq& theActuatorsCorrections, CORBA::Long theParPositions, CORBA::Double theDeltaEL, CORBA::Long theThreshold);
-			 
+
 	/**
 	* home. bring the USD to zero reference position.
 	* This function moves the actuator to zero reference position, tipically at usd middlescale
@@ -483,11 +214,11 @@ public:
 			_SET_PROP(cmdPos, 0, "USDImpl::refPos()");
 			m_lastCmdStep = 0;
 			m_usdStatus.commandedPosition = m_lastCmdStep;
-			m_lanStatus.write(m_usdStatus);
+			m_lanStatus->write(m_usdStatus);
 		}
 		_CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl, USDError, "USDImpl::refPos()", m_status)
-	} 
-	 
+	}
+
 	/**
 	* setProfile().  Set the surface active profile.
 	* @param prof	0 shaped, 1 shaped fixed, 2 parabolic, 3 parabolic fixed
@@ -503,11 +234,11 @@ public:
 			_THROW_EX(UnknownProfile,"::usdImpl::setProfile()", prof);
 		}
 	}
-	 
+
 	/**
 	* correction().The last minute coorection to be applied.
 	* They will be added to actual computed USD position
-	* @param corr	the correction in mm 
+	* @param corr	the correction in mm
 	*/
 	void correction(CORBA::Double corr) throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 	{
@@ -516,7 +247,7 @@ public:
 		{
 			comp = lmCorr()->set_sync(corr);
 		}
-		catch (CORBA::SystemException& Ex) 
+		catch (CORBA::SystemException& Ex)
 		{
 			ACS_SHORT_LOG((LM_CRITICAL, "CORBA::SystemException thrown!"));
 		}
@@ -525,7 +256,7 @@ public:
 	/**
 	* update(). Applay the antenna elevation dependant corrections.
 	* They are the gravity and user-offset
-	* @param elevation	antenna elevation in degrees. 
+	* @param elevation	antenna elevation in degrees.
 	*/
 	void update(CORBA::Double elevation) throw (CORBA::SystemException, ASErrors::ASErrorsEx);
 
@@ -541,16 +272,16 @@ public:
 			action(STOP);
 		}
 		_CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl, USDError, "USDImpl::stow()", m_status)
-			 
+
 		try
 		{
 			_SET_PROP(cmdPos, m_bottom, "USDImpl::stow()");
 			m_lastCmdStep = m_bottom;
 			m_usdStatus.commandedPosition = m_bottom;
-			m_lanStatus.write(m_usdStatus);
+			m_lanStatus->write(m_usdStatus);
 		}
 		_CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl, USDError, "USDImpl::stow()", m_status)
-				 
+
 	}
 	void setup() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 	{
@@ -565,7 +296,7 @@ public:
 			_SET_PROP(cmdPos, 0, "USDImpl::stow()");
 			m_lastCmdStep = 0;
 			m_usdStatus.commandedPosition = m_bottom;
-			m_lanStatus.write(m_usdStatus);
+			m_lanStatus->write(m_usdStatus);
 		}
 		_CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl, USDError, "USDImpl::setup()", m_status)
 	}
@@ -592,25 +323,25 @@ public:
 	*/
 	int m_failures;
 
-	/** 
+	/**
 	* flag rappresenting the availability of the module.
 	* It is available if is comunicating. After five times USD doesn't respond, the flag is set to FALSE to inhibit any further activity.
-	*/	
+	*/
 	bool m_available;
 
-	/** 
+	/**
 	* stepper motor positioning resolution (step)
-	*/	
+	*/
 	double m_step_res;
 
-	/** 
+	/**
 	* calibrate flag
-	*/	
+	*/
 	BYTE m_calibrate;
 
-	/** 
+	/**
 	* position loop on
-	*/	
+	*/
 	BYTE m_ploop;
 
 private:
@@ -627,27 +358,27 @@ private:
 	/**
 	* pointer to LAN/485 component
 	*/
-	ActiveSurface::lan_ptr m_pLan;
-	
-	/** 
+	ActiveSurface::lan_proxy m_pLan;
+
+	/**
 	* sector of usd
-	*/	
+	*/
 	BYTE m_sector;
 
 	/**
-	* lan address of usd. 
+	* lan address of usd.
 	* Each lan rappresent a radius. Looking frontally at parabola, the first start from north and the other follow in cw mode.
-	*/	
+	*/
 	BYTE m_lanNum;
 
-	/** 
+	/**
 	* serial address of usd
-	*/	
+	*/
 	BYTE m_addr;
 
-	/** 
+	/**
 	* camma lenght in step
-	*/	
+	*/
 	int m_cammaLen;
 
 	/**
@@ -698,14 +429,14 @@ private:
 	*/
 	int m_zeroRef;
 
-	/** 
+	/**
 	* step x turn (step)
-	*/	
+	*/
 	int m_step_giro;
 
-	/** 
+	/**
 	* step resolution (1/2^rs) pag 7 manuale USD
-	*/	
+	*/
 	BYTE m_rs;
 
 	/**
@@ -736,20 +467,20 @@ private:
  	* @return true if still running 0 if stopped.
 	*/
 	bool stillRunning(long pos) throw (ASErrors::ASErrorsExImpl);
-	
+
  	/**
  	* Check calibration comparing quote and cal status
 	* Must be used only when not running
  	* @return true if calibrated 0 if not.
 	*/
 	bool chkCal() throw (ASErrors::ASErrorsExImpl);
-	
+
 	/**
  	* Check the thrown exception and logging it.
- 	* Basing on  thrown C++ exception, it set to FALSE the m_available flag to inhibit any further activity 
+ 	* Basing on  thrown C++ exception, it set to FALSE the m_available flag to inhibit any further activity
  	* @param exImpl C++ exception.
 	*/
-	void exImplCheck(ASErrors::ASErrorsExImpl);
+	void exImplCheck(ASErrors::ASErrorsExImpl, const char* routine="USDImpl::exImplCheck()");
 
   	/**
 	* Perform an action on USD
@@ -765,12 +496,14 @@ private:
 	void operator=(const USDImpl&);
 
 	template <typename T> T getCDBValue(maci::ContainerServices* containerServices, const char* fieldName);
- 
+
+    static bool parseName(const std::string name, BYTE& sector, BYTE& lan, BYTE& addr);
+
  	/**
 	* cob name of the LAN component.
 	*/
- 	IRA::CString lanCobName;
-	
+    std::string lanCobName;
+
 	/**
 	* pointer to Container Services
 	*/
@@ -778,7 +511,10 @@ private:
 
 	ActiveSurface::USDStatus m_usdStatus;
 
-	lanStatus& m_lanStatus;
+	lanStatus* m_lanStatus;
+
+    ACS::TimeInterval m_backoff_time;
+    ACS::Time m_next_retry_time;
 
 protected:
 	SmartPropertyPointer<RWlong> m_delay_sp;
