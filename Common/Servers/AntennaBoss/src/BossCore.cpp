@@ -1281,30 +1281,32 @@ bool CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,Co
 		}
 	}
 
-	m_zmqDictionary["target"] = std::string(getTargetName()) == "none" ? "" : std::string(getTargetName());
+	ZMQ::ZMQDictionary target;
+
+	target["name"] = std::string(getTargetName()) == "none" ? "" : std::string(getTargetName());
 	IRA::CIRATools::radToSexagesimalAngle(getTargetDeclination(), str_buffer);
-	m_zmqDictionary["targetDeclination"] = (const char*)str_buffer;
-	m_zmqDictionary["targetFlux"] = getTargetFlux();
+	target["catalogDeclination"] = (const char*)str_buffer;
 	IRA::CIRATools::radToHourAngle(getTargetRightAscension(), str_buffer);
-	m_zmqDictionary["targetRightAscension"] = (const char*)str_buffer;
-	m_zmqDictionary["targetVrad"] = getTargetVrad();
+	target["catalogRightAscension"] = (const char*)str_buffer;
+	target["flux"] = getTargetFlux();
+	target["radialVelocity"] = getTargetVrad();
 
 	// vradDefinition enum
 	switch (getVradDefinition()) {
 		case Antenna::ANT_RADIO : {
-			m_zmqDictionary["vradDefinition"] = "RADIO";
+			target["radialVelocityDefinition"] = "RADIO";
 			break;
 		}
 		case Antenna::ANT_OPTICAL : {
-			m_zmqDictionary["vradDefinition"] = "OPTICAL";
+			target["radialVelocityDefinition"] = "OPTICAL";
 			break;
 		}
 		case Antenna::ANT_REDSHIFT : {
-			m_zmqDictionary["vradDefinition"] = "REDSHIFT";
+			target["radialVelocityDefinition"] = "REDSHIFT";
 			break;
 		}
 		default: { //Antenna::ANT_UNDEF_DEF
-			m_zmqDictionary["vradDefinition"] = "UNDEFINED";
+			target["radialVelocityDefinition"] = "UNDEFINED";
 			break;
 		}
 	}
@@ -1312,35 +1314,81 @@ bool CBossCore::updateAttributes() throw (ComponentErrors::CORBAProblemExImpl,Co
 	// vradReferenceFrame enum
 	switch (getReferenceFrame()) {
 		case Antenna::ANT_TOPOCEN : {
-			m_zmqDictionary["vradReferenceFrame"] = "TOPOCENTRIC";
+			target["radialVelocityFrame"] = "TOPOCENTRIC";
 			break;
 		}
 		case Antenna::ANT_BARY : {
-			m_zmqDictionary["vradReferenceFrame"] = "BARYCENTRIC";
+			target["radialVelocityFrame"] = "BARYCENTRIC";
 			break;
 		}
 		case Antenna::ANT_LSRK : {
-			m_zmqDictionary["vradReferenceFrame"] = "KINEMATIC LOCAL STANDARD OF REST";
+			target["radialVelocityFrame"] = "KINEMATIC LOCAL STANDARD OF REST";
 			break;
 		}
 		case Antenna::ANT_LSRD : {
-			m_zmqDictionary["vradReferenceFrame"] = "DYNAMIC LOCAL STANDARD OF REST";
+			target["radialVelocityFrame"] = "DYNAMIC LOCAL STANDARD OF REST";
 			break;
 		}
 		case Antenna::ANT_GALCEN : {
-			m_zmqDictionary["vradReferenceFrame"] = "GALACTIC CENTER";
+			target["radialVelocityFrame"] = "GALACTIC CENTER";
 			break;
 		}
 		case Antenna::ANT_LGROUP : {
-			m_zmqDictionary["vradReferenceFrame"] = "LOCAL GROUP";
+			target["radialVelocityFrame"] = "LOCAL GROUP";
 			break;
 		}
 		default: { //Antenna::ANT_UNDEF_FRAME
-			m_zmqDictionary["vradReferenceFrame"] = "UNDEFINED";
+			target["radialVelocityFrame"] = "UNDEFINED";
 			break;
 		}
 	}
 
+	double genAz = 0;
+	double genEl = 0;
+	double genRa = 0;
+	double genDec = 0;
+	double genLon = 0;
+	double genLat = 0;
+	double genJep = 0;
+	double genPa = 0;
+
+	if((!CORBA::is_nil(m_generator)) && (m_generatorType != Antenna::ANT_NONE))
+	{
+		try
+		{
+			m_generator->getAllCoordinates(time, genAz, genEl, genRa, genDec, genJep, genLon, genLat);
+		}
+		catch(...) {}
+	}
+
+	target["julianEpoch"] = genJep;
+	target["apparentAzimuth"] = genAz*DR2D;
+	target["apparentElevation"] = genEl*DR2D;
+
+	IRA::CIRATools::radToHourAngle(genRa, str_buffer);
+	target["apparentRightAscension"] = (const char*)str_buffer;
+
+	IRA::CIRATools::radToSexagesimalAngle(genDec, str_buffer);
+	target["apparentDeclination"] = (const char*)str_buffer;
+
+	IRA::CIRATools::radToSexagesimalAngle(genLon, str_buffer);
+	target["apparentGalLongitude"] = (const char*)str_buffer;
+
+	IRA::CIRATools::radToSexagesimalAngle(genLat, str_buffer);
+	target["apparentGalLatitude"] = (const char*)str_buffer;
+
+	if(genJep != 0.0)
+	{
+		try
+		{
+			genPa = IRA::CSkySource::paralacticAngle(dateTime, m_site, genAz, genEl);
+		}
+		catch(...) {}
+	}
+
+	target["parallacticAngle"] = genPa*DR2D;
+
+	m_zmqDictionary["target"] = target;
 	m_zmqDictionary["waveLength"] = getWaveLength();
 	m_zmqDictionary["tracking"] = m_tracking;
 

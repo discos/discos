@@ -281,7 +281,7 @@ void SkySourceImpl::getAllCoordinates(ACS::Time time,CORBA::Double_out az,CORBA:
 	m_source.getApparentEquatorial(rae,dece,jepoche);
 	m_source.getApparentGalactic(lone,late);
 	az=azi; el=ele;
-	ra=rae; dec=dece; jepoch=jepoch;
+	ra=rae; dec=dece; jepoch=jepoche;
 	lon=lone; lat=late;
 }
 
