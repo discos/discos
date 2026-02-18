@@ -1,4 +1,5 @@
-void CCore::_wait(const double& seconds) throw (ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl)
+//throw (ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl)
+void CCore::_wait(const double& seconds)
 {
 	long done=0;
 	TIMEVALUE now,check;
@@ -29,7 +30,8 @@ void CCore::_wait(const double& seconds) throw (ComponentErrors::TimerErrorExImp
 	}
 }
 
-void CCore::_waitUntil(const ACS::Time& time) throw (ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl)
+//throw (ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl)
+void CCore::_waitUntil(const ACS::Time& time) 
 {
 	long done=0;
 	long *pdone=&done;
@@ -74,7 +76,8 @@ void CCore::_nop() const
 	return;
 }
 
-void CCore::_waitOnSource() throw (ManagementErrors::AbortedByUserExImpl)
+// throw (ManagementErrors::AbortedByUserExImpl)
+void CCore::_waitOnSource()
 {
 	m_abortCurrentOperation=false;
 	while (!isOnSource()) {
@@ -87,8 +90,8 @@ void CCore::_waitOnSource() throw (ManagementErrors::AbortedByUserExImpl)
 		IRA::CIRATools::Wait(25000);
 	}
 }
-
-void CCore::_waitTracking() throw (ManagementErrors::AbortedByUserExImpl)
+// throw (ManagementErrors::AbortedByUserExImpl)
+void CCore::_waitTracking() 
 {
 	m_abortCurrentOperation=false;
 	while (!isTracking()) {
@@ -102,9 +105,9 @@ void CCore::_waitTracking() throw (ManagementErrors::AbortedByUserExImpl)
 	}
 }
 
-void CCore::_lonOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration) throw (
-		ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
-		ManagementErrors::CloseTelescopeScanErrorExImpl)
+//throw (ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
+//		ManagementErrors::CloseTelescopeScanErrorExImpl)
+void CCore::_lonOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration) 
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	ACS::Time startTime=0; // start asap
@@ -119,8 +122,9 @@ void CCore::_lonOTF(const Antenna::TCoordinateFrame& scanFrame,const double& spa
 	m_subScanEpoch=startTime;
 }
 
-void CCore::_latOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration) throw (
-		ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,ManagementErrors::CloseTelescopeScanErrorExImpl)
+//throw ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
+// ManagementErrors::CloseTelescopeScanErrorExImpl
+void CCore::_latOTF(const Antenna::TCoordinateFrame& scanFrame,const double& span,const ACS::TimeInterval& duration)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	ACS::Time startTime=0; // start asap
@@ -135,9 +139,9 @@ void CCore::_latOTF(const Antenna::TCoordinateFrame& scanFrame,const double& spa
 	m_subScanEpoch=startTime;
 }
 
-void CCore::_skydipOTF(const double& el1,const double& el2,const ACS::TimeInterval& duration) throw (
-		ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
-		ManagementErrors::CloseTelescopeScanErrorExImpl)
+//throw ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
+//		ManagementErrors::CloseTelescopeScanErrorExImpl)
+void CCore::_skydipOTF(const double& el1,const double& el2,const ACS::TimeInterval& duration) 
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	ACS::Time startTime=0; // start asap
@@ -152,8 +156,9 @@ void CCore::_skydipOTF(const double& el1,const double& el2,const ACS::TimeInterv
 	m_subScanEpoch=startTime;
 }
 
-void CCore::_track(const char *targetName) throw (ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
-		ManagementErrors::CloseTelescopeScanErrorExImpl)
+//throw (ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
+//		ManagementErrors::CloseTelescopeScanErrorExImpl)
+void CCore::_track(const char *targetName) 
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	ACS::Time startTime=0; // start asap
@@ -168,8 +173,9 @@ void CCore::_track(const char *targetName) throw (ManagementErrors::TelescopeSub
 	m_subScanEpoch=startTime;
 }
 
-void CCore::_moon() throw (ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
-		ManagementErrors::CloseTelescopeScanErrorExImpl)
+//throw (ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
+//		ManagementErrors::CloseTelescopeScanErrorExImpl)
+void CCore::_moon() 
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	ACS::Time startTime=0; // start asap
@@ -184,8 +190,9 @@ void CCore::_moon() throw (ManagementErrors::TelescopeSubScanErrorExImpl,Managem
 	m_subScanEpoch=startTime;
 }
 
-void CCore::_sun() throw (ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
-		ManagementErrors::CloseTelescopeScanErrorExImpl)
+//throw (ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
+//		ManagementErrors::CloseTelescopeScanErrorExImpl)
+void CCore::_sun() 
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	ACS::Time startTime=0; // start asap
@@ -199,8 +206,9 @@ void CCore::_sun() throw (ManagementErrors::TelescopeSubScanErrorExImpl,Manageme
 	startScan(startTime,&primary,&secondary,&servo,&receievers,subConf); //ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl
 	m_subScanEpoch=startTime;
 }
-void CCore::_planet(const char * planetName) throw (ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
-		ManagementErrors::CloseTelescopeScanErrorExImpl)
+//throw (ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
+//		ManagementErrors::CloseTelescopeScanErrorExImpl
+void CCore::_planet(const char * planetName) 
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	ACS::Time startTime=0; // start asap
@@ -219,9 +227,9 @@ void CCore::_planet(const char * planetName) throw (ManagementErrors::TelescopeS
 
 
 
-
-void CCore::_sidereal(const char * targetName,const double& ra,const double& dec,const Antenna::TSystemEquinox& eq,const Antenna::TSections& section) throw (
-	ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,ManagementErrors::CloseTelescopeScanErrorExImpl)
+//throw ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
+//ManagementErrors::CloseTelescopeScanErrorExImpl)
+void CCore::_sidereal(const char * targetName,const double& ra,const double& dec,const Antenna::TSystemEquinox& eq,const Antenna::TSections& section) 
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	ACS::Time startTime=0; // start asap
@@ -236,8 +244,9 @@ void CCore::_sidereal(const char * targetName,const double& ra,const double& dec
 	m_subScanEpoch=startTime;
 }
 
-void CCore::_goTo(const double& azimuth,const double& elevation) throw (ManagementErrors::TelescopeSubScanErrorExImpl,
-		ManagementErrors::TargetOrSubscanNotFeasibleExImpl,ManagementErrors::CloseTelescopeScanErrorExImpl)
+//throw (ManagementErrors::TelescopeSubScanErrorExImpl,
+//		ManagementErrors::TargetOrSubscanNotFeasibleExImpl,ManagementErrors::CloseTelescopeScanErrorExImpl)
+void CCore::_goTo(const double& azimuth,const double& elevation) 
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	ACS::Time startTime=0; // start asap
@@ -253,9 +262,10 @@ void CCore::_goTo(const double& azimuth,const double& elevation) throw (Manageme
 	m_subScanEpoch=startTime;
 }
 
-void CCore::_peaker(const char* axis,const double& span,const ACS::TimeInterval& duration) throw (
-		ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
-		ManagementErrors::CloseTelescopeScanErrorExImpl,ComponentErrors::ValidationErrorExImpl)
+// throw (
+//ManagementErrors::TelescopeSubScanErrorExImpl,ManagementErrors::TargetOrSubscanNotFeasibleExImpl,
+//ManagementErrors::CloseTelescopeScanErrorExImpl,ComponentErrors::ValidationErrorExImpl)
+void CCore::_peaker(const char* axis,const double& span,const ACS::TimeInterval& duration)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	ACS::Time startTime=0; // start asap
@@ -276,7 +286,8 @@ void CCore::_peaker(const char* axis,const double& span,const ACS::TimeInterval&
 	m_subScanEpoch=startTime;
 }
 
-void CCore::_chooseDefaultBackend(const char *bckName) throw (ComponentErrors::CouldntGetComponentExImpl,ManagementErrors::BackendNotAvailableExImpl)
+//throw (ComponentErrors::CouldntGetComponentExImpl,ManagementErrors::BackendNotAvailableExImpl)
+void CCore::_chooseDefaultBackend(const char *bckName)
 {
 	//************************************************************** /
 	/* It should be forbidden is a schedule is running or recording is active */
@@ -297,7 +308,8 @@ void CCore::_chooseDefaultBackend(const char *bckName) throw (ComponentErrors::C
 	}
 }
 
-void CCore::_chooseDefaultDataRecorder(const char *rcvInstance) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl)
+//throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl)
+void CCore::_chooseDefaultDataRecorder(const char *rcvInstance)
 {
 	//************************************************************** /
 	/* It should be forbidden is a schedule is running or recording is active */
@@ -312,7 +324,8 @@ void CCore::_chooseDefaultDataRecorder(const char *rcvInstance) throw (Component
 	}
 }
 
-void CCore::_changeLogFile(const char *fileName) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl)
+//throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl)
+void CCore::_changeLogFile(const char *fileName) 
 {
 	baci::ThreadSyncGuard guard(&m_mutex); // redundant....it is already in method logFile, but it does not afflict us
 	logFile((const char *)m_config->getLogDirectory(),fileName);
@@ -324,8 +337,9 @@ void CCore::_logMessage(const char *message) {
     CUSTOM_LOG(LM_FULL_INFO,"CCore::_logMessage",(LM_NOTICE, message));
 }
 
-void CCore::_getWeatherStationParameters(double &temp,double& hum,double& pres, double& wind,double& windDir) throw (ComponentErrors::CouldntGetComponentExImpl,
-		ManagementErrors::WeatherStationErrorExImpl,ComponentErrors::CORBAProblemExImpl)
+//throw (ComponentErrors::CouldntGetComponentExImpl,ManagementErrors::WeatherStationErrorExImpl,
+//       ComponentErrors::CORBAProblemExImpl)
+void CCore::_getWeatherStationParameters(double &temp,double& hum,double& pres, double& wind,double& windDir)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	loadWeatherStation(m_weatherStation,m_weatherStationError); // throw ComponentErrors::CouldntGetComponentExImpl
@@ -354,8 +368,9 @@ void CCore::_getWeatherStationParameters(double &temp,double& hum,double& pres, 
 	windDir=m_weatherPar.winddir;
 }
 
-void CCore::_initRecording(const long& scanid) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,
-		ComponentErrors::CORBAProblemExImpl,ManagementErrors::NotAllowedDuringScheduleExImpl)
+// throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,
+//		ComponentErrors::CORBAProblemExImpl,ManagementErrors::NotAllowedDuringScheduleExImpl)
+void CCore::_initRecording(const long& scanid) 
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	if (m_schedExecuter) {
@@ -383,10 +398,11 @@ void CCore::_initRecording(const long& scanid) throw (ComponentErrors::CouldntGe
 	m_scanID=scanid;
 }
 
-void CCore::_startRecording(const long& subScanId,const ACS::TimeInterval& duration) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::ComponentNotActiveExImpl,
-		ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,
-		ManagementErrors::DataTransferSetupErrorExImpl,ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl,
-		ManagementErrors::NotAllowedDuringScheduleExImpl,ManagementErrors::RecordingAlreadyActiveExImpl)
+// throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::ComponentNotActiveExImpl,
+//		ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::OperationErrorExImpl,ManagementErrors::BackendNotAvailableExImpl,
+//		ManagementErrors::DataTransferSetupErrorExImpl,ComponentErrors::TimerErrorExImpl,ManagementErrors::AbortedByUserExImpl,
+//		ManagementErrors::NotAllowedDuringScheduleExImpl,ManagementErrors::RecordingAlreadyActiveExImpl)
+void CCore::_startRecording(const long& subScanId,const ACS::TimeInterval& duration) 
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	IRA::CString fullSubscanFileName;
@@ -456,7 +472,9 @@ void CCore::_startRecording(const long& subScanId,const ACS::TimeInterval& durat
 	}
 }
 
-void CCore::_terminateScan() throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntGetComponentExImpl)
+//throw (ComponentErrors::OperationErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,
+//ComponentErrors::CouldntGetComponentExImpl)
+void CCore::_terminateScan() 
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	m_scanID=0; m_subScanID=0;
@@ -479,7 +497,7 @@ void CCore::_setRestFrequency(const ACS::doubleSeq& in)
 	ACS_LOG(LM_FULL_INFO,"CCore::_setRestFrequency()",(LM_NOTICE,"Rest frequency : %s",(const char *)out));
 }
 
-void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
+/*void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
 		ManagementErrors::InvalidRestFrequencyExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::ValidationErrorExImpl,
 		ComponentErrors::UnexpectedExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntCallOperationExImpl)
 {
@@ -560,11 +578,6 @@ void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponent
 		impl.setComponentName(backend->name());
 		throw impl;
 	}
-	/*for (unsigned t=0;t<bckinputFreq->length();t++) {
-		printf("bck freq :%lf\n",bckinputFreq[t]);
-		printf("bck bw:%lf\n",bckinputBW[t]);
-
-	}*/
 	if (inputSection->length()!=(unsigned)inputs) {
 		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCore::_fTrack()");
 		impl.setReason("inconsistent data from the backend inputs number");
@@ -644,10 +657,6 @@ void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponent
 		impl.setReason("inconsistent data from the receivers if outputs");
 		throw impl;
 	}
-	/*for (unsigned t=0;t<fndoutputFreq->length();t++) {
-		printf("Frequency :%lf\n",fndoutputFreq[t]);
-		printf("BandWidth :%lf\n",fndoutputBw[t]);
-	}*/
 	//---------------------------------------------------------------------------------------------------
 	//5) let's start with some computations  -----------------------------------------------------------------------------
 	sectionFreq.length(sections);
@@ -768,9 +777,253 @@ void CCore::_fTrack(const char *dev) throw (ComponentErrors::CouldntGetComponent
 			}
 		}
 	}
+}*/
+
+// throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
+//		ManagementErrors::InvalidRestFrequencyExImpl,ComponentErrors::OperationErrorExImpl,ComponentErrors::ValidationErrorExImpl,
+//		ComponentErrors::UnexpectedExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::CouldntCallOperationExImpl)
+void CCore::_fTrack(const char *dev) {
+	baci::ThreadSyncGuard guard(&m_mutex);
+	Backends::GenericBackend_var backend;
+	ACS::ROlong_var sectionsNumberRO;
+	ACS::ROlongSeq_var inputSectionRO;
+	ACS::ROlong_var IFNumberRO;
+	ACS::longSeq_var inputSection;
+	ACSErr::Completion_var comp;
+	long sections;
+	long inputs;
+	//long IFNumber;
+	long digits;
+	ACS::longSeq_var bckinputIF,bckinputFeed,fndoutputPol;
+	ACS::doubleSeq_var bckinputBW,bckinputFreq,fndoutputLO,fndoutputBw,fndoutputFreq,topocentricFreq;
+	ACS::doubleSeq sectionFreq,inputLO;
+	IRA::CString device(dev);
+	IRA::CString logMessage;
+
+	//1) preliminary checks----------------------------------------------------------------------------------
+	if (m_restFrequency.length()==0) {
+		_EXCPT(ManagementErrors::InvalidRestFrequencyExImpl,impl,"CCore::_fTrack()");
+		throw impl;
+	}
+	device.MakeUpper();
+	if ((device!="ALL") && (device!="LO") & (device!="BCK")) {
+		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCore::_fTrack()");
+		impl.setReason("parameter differs from ALL,LO,BCK");
+		throw impl;
+	}
+	//2) initializations--------------------------------------------------------------------------------------
+	loadDefaultBackend();// throw (ComponentErrors::CouldntGetComponentExImpl);
+	backend=m_defaultBackend;
+	loadReceiversBoss(m_receiversBoss,m_receiversBossError); // throw ComponentErrors::CouldntGetComponentExImpl)
+	loadAntennaBoss(m_antennaBoss,m_antennaBossError); // throw ComponentErrors::CouldntGetComponentExImpl)
+	digits=m_config->getFTrackDigits();
+	//3) info from backend----------------------------------------------------------------------------------
+	try {
+		sectionsNumberRO=backend->sectionsNumber();
+		inputSectionRO=backend->inputSection();
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::_fTrack()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		throw impl;
+	}
+	sections=sectionsNumberRO->get_sync(comp.out()); // number of backend sections
+	inputSection=inputSectionRO->get_sync(comp.out());
+	if ((m_restFrequency.length()>1)) {   // check at least one rest frequency
+		_EXCPT(ManagementErrors::InvalidRestFrequencyExImpl,impl,"CCore::_fTrack()");
+		throw impl;
+	}
+	try {
+		inputs=backend->getInputs(bckinputFreq.out(),bckinputBW.out(),bckinputFeed.out(),bckinputIF.out());
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::_fTrack()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		m_defaultBackendError=true;
+		throw impl;
+	}
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CCore::_fTrack()");
+		impl.setOperationName("getInputs()");
+		impl.setComponentName(backend->name());
+		throw impl;
+	}
+	catch (BackendsErrors::BackendsErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CCore::_fTrack()");
+		impl.setOperationName("getInputs()");
+		impl.setComponentName(backend->name());
+		throw impl;
+	}
+	if (inputSection->length()!=(unsigned)inputs) {
+		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCore::_fTrack()");
+		impl.setReason("inconsistent data from the backend inputs number");
+		throw impl;
+	}
+	//4) info from antenna--------------------------------------------------------------------------------
+	try {
+		m_antennaBoss->getTopocentricFrequency(m_restFrequency,topocentricFreq.out());
+	}
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CCore::_fTrack()");
+		impl.setOperationName("getTopocentricFrequency()");
+		impl.setComponentName(m_antennaBoss->name());
+		throw impl;
+	}
+	catch (AntennaErrors::AntennaErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CCore::_fTrack()");
+		impl.setOperationName("getTopocentricFrequency()");
+		impl.setComponentName(m_antennaBoss->name());
+		throw impl;
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::_fTrack()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		m_antennaBossError=true;
+		throw impl;
+	}
+	catch (...) {
+		m_antennaBossError=true;
+		_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::_fTrack()");
+		throw impl;
+	}
+	// just to make sure the topocentric sequence has the right dimension!
+	if (topocentricFreq->length()!=m_restFrequency.length()) {
+		topocentricFreq->length(m_restFrequency.length());
+	}
+	//5) info from receivers-------------------------------------------------------------------------------
+	try {
+		m_receiversBoss->getIFOutput(bckinputFeed,bckinputIF,fndoutputFreq.out(),fndoutputBw.out(),fndoutputPol.out(),fndoutputLO.out());
+	}
+	catch (CORBA::SystemException& ex) {
+		_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::_fTrack()");
+		impl.setName(ex._name());
+		impl.setMinor(ex.minor());
+		m_receiversBossError=true;
+	}
+	catch (ComponentErrors::ComponentErrorsEx& ex) {
+		_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CCore::_fTrack()");
+		impl.setOperationName("getIFOutput");
+		impl.setComponentName(m_receiversBoss->name());
+		throw impl;
+	}
+	catch (ReceiversErrors::ReceiversErrorsEx & ex) {
+		_ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,ex,"CCore::_fTrack()");
+		impl.setOperationName("getIFOutput");
+		impl.setComponentName(m_receiversBoss->name());
+		throw impl;
+	}
+	if (fndoutputFreq->length()!=(unsigned)inputs) {
+		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCore::_fTrack()");
+		impl.setReason("inconsistent data from the receivers if outputs");
+		throw impl;
+	}
+	//6) let's start with some computations  -----------------------------------------------------------------------------
+	bool result;
+	long currentSection;	
+	sectionFreq.length(sections);
+	inputLO.length(inputs);
+	
+	for (long j=0;j<inputs;j++) {
+		double synth,bckStartFreq;
+		currentSection=inputSection[j];
+		//apply computation only if the rest frequency is provided for the section
+		if (currentSection>=m_restFrequency.length() && m_restFrequency[currentSection]>0.0) { 
+			synth=fndoutputLO[j];
+			bckStartFreq=bckinputFreq[j];
+			result=IRA::CIRATools::tuneLocalOscillator(fndoutputFreq[j],fndoutputBw[j],synth,bckStartFreq,
+		 	  bckinputBW[j],topocentricFreq[currentSection],device);
+			if (result) {
+				sectionFreq[currentSection]=bckStartFreq;
+				inputLO[j]=IRA::CIRATools::roundNearest(synth,digits);
+				ACS_LOG(LM_FULL_INFO,"CCore::_ftrack()",(LM_DEBUG,"Section %ld, %lf MHz",currentSection,sectionFreq[currentSection]));
+				ACS_LOG(LM_FULL_INFO,"CCore::_ftrack()",(LM_DEBUG,"Input %ld, Local oscillator %lf MHz",j,inputLO[j]));
+			}
+			else {
+				_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CCore::_fTrack()");
+				IRA::CString msg;
+				msg.Format("the rest frequency of section %ld cannot be tracked in current configuration",currentSection);
+				impl.setReason((const char *)msg);
+				throw impl;
+			}
+		}
+		else {
+			inputLO[j]=-1.0; // if the input is not involved in the computation we keep unchanged the Local Oscillator
+			sectionFreq[currentSection]=-1.0;
+		}
+	}
+	//7) now lets command the new values  -----------------------------------------------------------------------------
+	if ((device=="ALL") || (device=="LO")) {
+		try {
+			m_receiversBoss->setLO(inputLO);
+		}
+		catch (ComponentErrors::ComponentErrorsEx& ex) {
+			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::_fTrack()");
+			impl.setReason("Could not set local oscillator");
+			throw impl;
+		}
+		catch (ReceiversErrors::ReceiversErrorsEx& ex) {
+			_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::_fTrack()");
+			impl.setReason("Could not set local oscillator");
+			throw impl;
+		}
+		catch (CORBA::SystemException& ex) {
+			_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::_fTrack()");
+			impl.setName(ex._name());
+			impl.setMinor(ex.minor());
+			m_receiversBossError=true;
+			throw impl;
+		}
+		catch (...) {
+			_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::_fTrack()");
+			m_receiversBossError=true;
+			throw impl;
+		}
+	}
+	if ((device=="ALL") || (device=="BCK")) {
+		for (long j=0;j<sections;j++) {
+			try {
+				if (sectionFreq[j]!=-1.0) {
+					backend->setSection(j,sectionFreq[j],-1.0,-1,-1,-1.0,-1);
+					ACS_LOG(LM_FULL_INFO,"CCore::_ftrack()",(LM_DEBUG,"Section %ld changed to %lf MHz",j,sectionFreq[j]));
+				}
+			}
+			catch (ComponentErrors::ComponentErrorsEx& ex) {
+				_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::_fTrack()");
+				impl.setReason("Could not set the backend sections");
+				throw impl;
+			}
+			catch (BackendsErrors::BackendsErrorsEx& ex) {
+				_ADD_BACKTRACE(ComponentErrors::OperationErrorExImpl,impl,ex,"CCore::_fTrack()");
+				impl.setReason("Could not set backend sections");
+				throw impl;
+			}
+			catch (CORBA::SystemException& ex) {
+				_EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CCore::_fTrack()");
+				impl.setName(ex._name());
+				impl.setMinor(ex.minor());
+				m_defaultBackendError=true;
+				throw impl;
+			}
+			catch (...) {
+				_EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CCore::_fTrack()");
+				m_defaultBackendError=true;
+				throw impl;
+			}
+		}
+	}
+	logMessage="FTrack completed on the following topocentric frequencies (MHz):";
+	for (long k=0;k<topocentricFreq->length();k++) {
+		logMessage=logMessage+" ";
+		logMessage.Concat(topocentricFreq[k]);
+	}
+	CUSTOM_LOG(LM_FULL_INFO,"CCore::_fTrack()",(LM_NOTICE,(const char *)logMessage));
 }
 
-void CCore::_setProjectCode(const char* code,IRA::CString& message) throw (ManagementErrors::UnkownProjectCodeErrorExImpl)
+//throw (ManagementErrors::UnkownProjectCodeErrorExImpl)
+void CCore::_setProjectCode(const char* code,IRA::CString& message) 
 {
 	IRA::CString newCode(code);
 	if (newCode=="''") { // if '' given...maps to default user
@@ -794,7 +1047,8 @@ void CCore::_setProjectCode(const char* code,IRA::CString& message) throw (Manag
     message.Format("STR %s", msg.c_str());
 }
 
-/*void CCore::_winkingMark(const char *arg) throw (ComponentErrors::ValidationErrorExImpl);
+//throw (ComponentErrors::ValidationErrorExImpl)
+/*void CCore::_winkingMark(const char *arg) 
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	IRA::CString par(arg);
@@ -815,8 +1069,9 @@ void CCore::_setProjectCode(const char* code,IRA::CString& message) throw (Manag
 	}
 }*/
 
-void CCore::_setDevice(const long& deviceID) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::ValidationErrorExImpl,
-		ComponentErrors::OperationErrorExImpl,ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl)
+// throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::ValidationErrorExImpl,
+//		ComponentErrors::OperationErrorExImpl,ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl)
+void CCore::_setDevice(const long& deviceID) 
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	//ACS::Time timestamp;
@@ -937,8 +1192,10 @@ void CCore::_setDevice(const long& deviceID) throw (ComponentErrors::CouldntGetC
 	ACS_LOG(LM_FULL_INFO,"CCore::setDevice()",(LM_NOTICE,"DEFAULT_DEVICE: %ld",m_currentDevice));
 }
 
-void CCore::_callTSys(ACS::doubleSeq& tsys) throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl,
-		ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl)
+
+//throw (ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::OperationErrorExImpl,
+//		ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::UnexpectedExImpl)
+void CCore::_callTSys(ACS::doubleSeq& tsys)
 {
 	Backends::GenericBackend_var backend;
 	ACS::doubleSeq_var freq;
@@ -1201,10 +1458,11 @@ void CCore::_haltSchedule()
 	}
 }
 
-void CCore::_startSchedule(const char* scheduleFile,const char * startSubScan) throw (ManagementErrors::ScheduleErrorExImpl,ManagementErrors::AlreadyRunningExImpl,
-		ComponentErrors::MemoryAllocationExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
-		ManagementErrors::LogFileErrorExImpl,ManagementErrors::ScheduleNotExistExImpl,ManagementErrors::CannotClosePendingTaskExImpl,
-		ManagementErrors::ScheduleProjectNotMatchExImpl)
+//throw (ManagementErrors::ScheduleErrorExImpl,ManagementErrors::AlreadyRunningExImpl,
+//		ComponentErrors::MemoryAllocationExImpl,ComponentErrors::CouldntGetComponentExImpl,
+//      ComponentErrors::CORBAProblemExImpl,ManagementErrors::LogFileErrorExImpl,ManagementErrors::ScheduleNotExistExImpl,
+//      ManagementErrors::CannotClosePendingTaskExImpl,ManagementErrors::ScheduleProjectNotMatchExImpl)
+void CCore::_startSchedule(const char* scheduleFile,const char * startSubScan) 
 {
 	//no need to get the mutex, because it is already done inside the Schedule Executor thread
 	if (m_schedExecuter) {
