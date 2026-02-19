@@ -4,8 +4,13 @@
 void CBossCore::goOff(const Antenna::TCoordinateFrame& frame,const double& beams) throw (ComponentErrors::CouldntReleaseComponentExImpl,
 		ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
 		ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntCallOperationExImpl,ComponentErrors::OperationErrorExImpl,AntennaErrors::ScanErrorExImpl,AntennaErrors::SecondaryScanErrorExImpl,
-		AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl,AntennaErrors::NoTargetCommandedYetExImpl)
+		AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl,AntennaErrors::NoTargetCommandedYetExImpl,AntennaErrors::OperationNotPermittedExImpl)
 {
+	if (!m_siteInitialized) {
+		_EXCPT(AntennaErrors::OperationNotPermittedExImpl,impl,"BossCore::goOff");
+		impl.setReason("Site info not initialized");
+		throw impl;
+	}
 	// this is a workaround in order to make sure there is a target already commanded
 	if (m_rawCoordinates.isEmpty()) {
 		_EXCPT(AntennaErrors::NoTargetCommandedYetExImpl,impl,"CBossCore::goOff");

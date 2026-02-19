@@ -58,9 +58,22 @@ void CActiveSurfaceBossCore::initialize()
 
     LANs_per_sector = ACTUATORS / SECTORS;
 
-    usd.resize(CIRCLES + 1, std::vector<ActiveSurface::USD_var>(ACTUATORS + 1, ActiveSurface::USD::_nil()));
-    lanradius.resize(CIRCLES + 1, std::vector<ActiveSurface::USD_var>(ACTUATORS + 1, ActiveSurface::USD::_nil()));
-    lan.resize(SECTORS, std::vector<ActiveSurface::lan_var>(LANs_per_sector, ActiveSurface::lan::_nil()));
+    usdMap.clear();
+
+    lan.resize(SECTORS);
+
+    for(int i = 0; i < SECTORS; i++)
+    {
+        lan[i].resize(LANs_per_sector);
+
+        for(int j = 0; j < LANs_per_sector; j++)
+        {
+            char bufferName[64];
+            std::snprintf(bufferName, sizeof(bufferName), "AS/SECTOR%02d/LAN%02d", i + 1, j + 1);
+            lan[i][j].setContainerServices(m_services);
+            lan[i][j].setComponentName(bufferName);
+        }
+    }
 
     std::istringstream iss(std::string(str_buffer1).c_str());
     std::string token;
@@ -110,9 +123,9 @@ void CActiveSurfaceBossCore::initialize()
     }
 
     m_initialized = false;
-    m_enable = true;
-    m_tracking = false;
-    m_status = Management::MNG_WARNING;
+    m_enable.store(true);
+    m_tracking.store(false);
+    m_status.store(Management::MNG_WARNING);
     m_lut = USDTABLECORRECTIONS;
     AutoUpdate = false;
     actuatorcounter = circlecounter = totacts = 1;
@@ -120,13 +133,13 @@ void CActiveSurfaceBossCore::initialize()
     m_profileSetted = false;
     m_ASup = false;
     m_newlut = false;
-    for(size_t i = 1; i <= SECTORS; i++)
+    for(int i = 1; i <= SECTORS; i++)
     {
         std::ostringstream sector_key;
         sector_key << "SECTOR" << std::setw(2) << std::setfill('0') << i;
         m_zmqDictionary[sector_key.str()] = ZMQ::ZMQDictionary();
 
-        for(size_t j = 1; j <= LANs_per_sector; j++)
+        for(int j = 1; j <= LANs_per_sector; j++)
         {
             std::ostringstream lan_key;
             lan_key << "LAN" << std::setw(2) << std::setfill('0') << j;
@@ -145,55 +158,6 @@ void CActiveSurfaceBossCore::execute() throw (ComponentErrors::CouldntGetCompone
 void CActiveSurfaceBossCore::cleanUp()
 {
     ACS_LOG(LM_FULL_INFO, "CActiveSurfaceBossCore::cleanUp()", (LM_INFO, "CActiveSurfaceBossCore::cleanUp"));
-
-    ACS_LOG(LM_FULL_INFO, "CActiveSurfaceBossCore::cleanUp()", (LM_INFO, "Releasing USDs...wait"));
-    for (size_t i = 0; i < usd.size(); i++)
-    {
-        for (size_t l = 0; l < usd[i].size(); l++)
-        {
-            if(!CORBA::is_nil(usd[i][l]))
-            {
-                std::string name = usd[i][l]->name();
-                try
-                {
-                    std::cout << "Relasing " << name << "...";
-                    m_services->releaseComponent(name.c_str());
-                    std::cout << "done." << std::endl;
-                }
-                catch(maciErrType::CannotReleaseComponentExImpl& ex)
-                {
-                    std::cout << "failed!" << std::endl;
-                    _ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CActiveSurfaceBossCore::cleanUp()");
-                    Impl.setComponentName(name.c_str());
-                    Impl.log(LM_DEBUG);
-                }
-            }
-        }
-    }
-
-    for(size_t i = 0; i < SECTORS; i++)
-    {
-        for(size_t j = 0; j < LANs_per_sector; j++)
-        {
-            if(!CORBA::is_nil(lan[i][j]))
-            {
-                std::string name = lan[i][j]->name();
-                try
-                {
-                    std::cout << "Relasing " << name << "...";
-                    m_services->releaseComponent(name.c_str());
-                    std::cout << "done." << std::endl;
-                }
-                catch(maciErrType::CannotReleaseComponentExImpl& ex)
-                {
-                    std::cout << "failed!" << std::endl;
-                    _ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CActiveSurfaceBossCore::cleanUp()");
-                    Impl.setComponentName(name.c_str());
-                    Impl.log(LM_DEBUG);
-                }
-            }
-        }
-    }
 }
 
 void CActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius) throw (ComponentErrors::UnexpectedExImpl, ComponentErrors::CouldntCallOperationExImpl, ComponentErrors::CORBAProblemExImpl)
@@ -209,18 +173,16 @@ void CActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius) th
         {
             for (l = 1; l <= actuatorsInCircle[i]; l++)
             {
-                if(!CORBA::is_nil(usd[i][l]))
+                try
                 {
-                    try
-                    {
-                        usd[i][l]->top();
-                        printf ("actuator n.%d_%d top\n", i, l);
-                    }
-                    catch (ASErrors::ASErrorsEx & Ex)
-                    {
-                        checkASerrors ("actuator", i, l, Ex);
-                    }
+                    usdMap.get(i, l)->top();
+                    printf ("actuator n.%d_%d top\n", i, l);
                 }
+                catch (ASErrors::ASErrorsEx & Ex)
+                {
+                    checkASerrors ("actuator", i, l, Ex);
+                }
+                catch(...) {} // Proxy cannot be loaded
             }
         }
         ACE_OS::sleep (90);
@@ -230,18 +192,16 @@ void CActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius) th
         {
             for (l = 1; l <= actuatorsInCircle[i]; l++)
             {
-                if(!CORBA::is_nil(usd[i][l]))
+                try
                 {
-                    try
-                    {
-                        usd[i][l]->move(1400);
-                        printf ("actuator n.%d_%d move\n", i, l);
-                    }
-                    catch (ASErrors::ASErrorsEx & Ex)
-                    {
-                        checkASerrors ("actuator", i, l, Ex);
-                    }
+                    usdMap.get(i, l)->move(1400);
+                    printf ("actuator n.%d_%d move\n", i, l);
                 }
+                catch (ASErrors::ASErrorsEx & Ex)
+                {
+                    checkASerrors ("actuator", i, l, Ex);
+                }
+                catch(...) {} // Proxy cannot be loaded
             }
         }
         ACE_OS::sleep (5);
@@ -251,18 +211,16 @@ void CActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius) th
         {
             for (l = 1; l <= actuatorsInCircle[i]; l++)
             {
-                if(!CORBA::is_nil(usd[i][l]))
+                try
                 {
-                    try
-                    {
-                        usd[i][l]->stop();
-                        printf ("actuator n.%d_%d stop\n", i, l);
-                    }
-                    catch (ASErrors::ASErrorsEx & Ex)
-                    {
-                        checkASerrors ("actuator", i, l, Ex);
-                    }
+                    usdMap.get(i, l)->stop();
+                    printf ("actuator n.%d_%d stop\n", i, l);
                 }
+                catch (ASErrors::ASErrorsEx & Ex)
+                {
+                    checkASerrors ("actuator", i, l, Ex);
+                }
+                catch(...) {} // Proxy cannot be loaded
             }
         }
         ACE_OS::sleep (1);*/
@@ -272,18 +230,16 @@ void CActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius) th
         {
             for (l = 1; l <= actuatorsInCircle[i]; l++)
             {
-                if(!CORBA::is_nil(usd[i][l]))
+                try
                 {
-                    try
-                    {
-                        usd[i][l]->calibrate ();
-                        printf ("actuator n.%d_%d calibrate\n", i, l);
-                    }
-                    catch (ASErrors::ASErrorsEx & Ex)
-                    {
-                        checkASerrors ("actuator", i, l, Ex);
-                    }
+                    usdMap.get(i, l)->calibrate ();
+                    printf ("actuator n.%d_%d calibrate\n", i, l);
                 }
+                catch (ASErrors::ASErrorsEx & Ex)
+                {
+                    checkASerrors ("actuator", i, l, Ex);
+                }
+                catch(...) {} // Proxy cannot be loaded
             }
         }
         ACE_OS::sleep (15);
@@ -293,17 +249,14 @@ void CActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius) th
         {
             for (l = 1; l <= actuatorsInCircle[i]; l++)
             {
-                if(!CORBA::is_nil(usd[i][l]))
+                try
                 {
-                    try
-                    {
-                        usd[i][l]->stop();
-                        printf ("actuator n.%d_%d stop\n", i, l);
-                    }
-                    catch (ASErrors::ASErrorsEx & Ex)
-                    {
-                        checkASerrors ("actuator", i, l, Ex);
-                    }
+                    usdMap.get(i, l)->stop();
+                    printf ("actuator n.%d_%d stop\n", i, l);
+                }
+                catch (ASErrors::ASErrorsEx & Ex)
+                {
+                    checkASerrors ("actuator", i, l, Ex);
                 }
             }
         }
@@ -314,18 +267,16 @@ void CActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius) th
         {
             for (l = 1; l <= actuatorsInCircle[i]; l++)
             {
-                if(!CORBA::is_nil(usd[i][l]))
+                try
                 {
-                    try
-                    {
-                        usd[i][l]->calVer ();
-                        printf ("actuator n.%d_%d calVer\n", i, l);
-                    }
-                    catch (ASErrors::ASErrorsEx & Ex)
-                    {
-                        checkASerrors ("actuator", i, l, Ex);
-                    }
+                    usdMap.get(i, l)->calVer ();
+                    printf ("actuator n.%d_%d calVer\n", i, l);
                 }
+                catch (ASErrors::ASErrorsEx & Ex)
+                {
+                    checkASerrors ("actuator", i, l, Ex);
+                }
+                catch(...) {} // Proxy cannot be loaded
             }
         }
         ACE_OS::sleep (150);
@@ -335,18 +286,16 @@ void CActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius) th
         {
             for (l = 1; l <= actuatorsInCircle[i]; l++)
             {
-                if(!CORBA::is_nil(usd[i][l]))
+                try
                 {
-                    try
-                    {
-                        usd[i][l]->stop();
-                        printf ("actuator n.%d_%d stop\n", i, l);
-                    }
-                    catch (ASErrors::ASErrorsEx & Ex)
-                    {
-                        checkASerrors ("actuator", i, l, Ex);
-                    }
+                    usdMap.get(i, l)->stop();
+                    printf ("actuator n.%d_%d stop\n", i, l);
                 }
+                catch (ASErrors::ASErrorsEx & Ex)
+                {
+                    checkASerrors ("actuator", i, l, Ex);
+                }
+                catch(...) {} // Proxy cannot be loaded
             }
         }
         ACE_OS::sleep (1);*/
@@ -356,19 +305,17 @@ void CActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius) th
         {
             for (l = 1; l <= actuatorsInCircle[i]; l++)
             {
-                if(!CORBA::is_nil(usd[i][l]))
+                try
                 {
-                    try
-                    {
-                        CIRATools::Wait(LOOPTIME);
-                        usd[i][l]->writeCalibration(cammaLen,cammaPos,calibrated);
-                        printf ("actuator %02d_%02d %04.1f %05.1f %d\n", i, l, cammaLen, cammaPos, calibrated);
-                    }
-                    catch (ASErrors::ASErrorsEx & Ex)
-                    {
-                        checkASerrors ("actuator", i, l, Ex);
-                    }
+                    CIRATools::Wait(LOOPTIME);
+                    usdMap.get(i, l)->writeCalibration(cammaLen,cammaPos,calibrated);
+                    printf ("actuator %02d_%02d %04.1f %05.1f %d\n", i, l, cammaLen, cammaPos, calibrated);
                 }
+                catch (ASErrors::ASErrorsEx & Ex)
+                {
+                    checkASerrors ("actuator", i, l, Ex);
+                }
+                catch(...) {} // Proxy cannot be loaded
             }
         }
         ACE_OS::sleep (1);
@@ -378,142 +325,126 @@ void CActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius) th
         printf("top.....\n");
         for (l = 1; l <= actuatorsInCircle[circle]; l++)
         {
-            if(!CORBA::is_nil(usd[circle][l]))
+            try
             {
-                try
-                {
-                    usd[circle][l]->top();
-                    printf ("actuator n.%d_%d top\n", circle, l);
-                }
-                catch (ASErrors::ASErrorsEx & Ex)
-                {
-                    checkASerrors ("actuator", circle, l, Ex);
-                }
+                usdMap.get(circle, l)->top();
+                printf ("actuator n.%d_%d top\n", circle, l);
             }
+            catch (ASErrors::ASErrorsEx & Ex)
+            {
+                checkASerrors ("actuator", circle, l, Ex);
+            }
+            catch(...) {} // Proxy cannot be loaded
         }
         ACE_OS::sleep (90);
 
         printf("move to upper mechanical position.....\n");
         for (l = 1; l <= actuatorsInCircle[circle]; l++)
         {
-            if(!CORBA::is_nil(usd[circle][l]))
+            try
             {
-                try
-                {
-                    usd[circle][l]->move(1400);
-                    printf ("actuator n.%d_%d move\n", circle, l);
-                }
-                catch (ASErrors::ASErrorsEx & Ex)
-                {
-                    checkASerrors ("actuator", circle, l, Ex);
-                }
+                usdMap.get(circle, l)->move(1400);
+                printf ("actuator n.%d_%d move\n", circle, l);
             }
+            catch (ASErrors::ASErrorsEx & Ex)
+            {
+                checkASerrors ("actuator", circle, l, Ex);
+            }
+            catch(...) {} // Proxy cannot be loaded
         }
         ACE_OS::sleep (5);
 
         /*printf("stop.....\n");
         for (l = 1; l <= actuatorsInCircle[circle]; l++)
         {
-            if(!CORBA::is_nil(usd[circle][l]))
+            try
             {
-                try
-                {
-                    usd[circle][l]->stop();
-                    printf ("actuator n.%d_%d stop\n", circle, l);
-                }
-                catch (ASErrors::ASErrorsEx & Ex)
-                {
-                    checkASerrors ("actuator", circle, l, Ex);
-                }
+                usdMap.get(circle, l)->stop();
+                printf ("actuator n.%d_%d stop\n", circle, l);
             }
+            catch (ASErrors::ASErrorsEx & Ex)
+            {
+                checkASerrors ("actuator", circle, l, Ex);
+            }
+            catch(...) {} // Proxy cannot be loaded
         }
         ACE_OS::sleep (1);*/
 
         printf("calibration.....\n");
         for (l = 1; l <= actuatorsInCircle[circle]; l++)
         {
-            if(!CORBA::is_nil(usd[circle][l]))
+            try
             {
-                try
-                {
-                    usd[circle][l]->calibrate ();
-                    printf ("actuator n.%d_%d calibrate\n", circle, l);
-                }
-                catch (ASErrors::ASErrorsEx & Ex) {
-                    checkASerrors ("actuator", circle, l, Ex);
-                }
+                usdMap.get(circle, l)->calibrate ();
+                printf ("actuator n.%d_%d calibrate\n", circle, l);
             }
+            catch (ASErrors::ASErrorsEx & Ex) {
+                checkASerrors ("actuator", circle, l, Ex);
+            }
+            catch(...) {} // Proxy cannot be loaded
         }
         ACE_OS::sleep (15);
 
         /*printf("stop.....\n");
         for (l = 1; l <= actuatorsInCircle[circle]; l++)
         {
-            if(!CORBA::is_nil(usd[circle][l]))
+            try
             {
-                try
-                {
-                    usd[circle][l]->stop();
-                    printf ("actuator n.%d_%d stop\n", circle, l);
-                }
-                catch (ASErrors::ASErrorsEx & Ex)
-                {
-                    checkASerrors ("actuator", circle, l, Ex);
-                }
+                usdMap.get(circle, l)->stop();
+                printf ("actuator n.%d_%d stop\n", circle, l);
             }
+            catch (ASErrors::ASErrorsEx & Ex)
+            {
+                checkASerrors ("actuator", circle, l, Ex);
+            }
+            catch(...) {} // Proxy cannot be loaded
         }
         ACE_OS::sleep (1);*/
 
         printf ("calibration verification.....\n");
         for (l = 1; l <= actuatorsInCircle[circle]; l++)
         {
-            if(!CORBA::is_nil(usd[circle][l]))
+            try
             {
-                try
-                {
-                    usd[circle][l]->calVer ();
-                    printf ("actuator n.%d_%d calVer\n", circle, l);
-                }
-                catch (ASErrors::ASErrorsEx & Ex) {
-                    checkASerrors ("actuator", circle, l, Ex);
-                }
+                usdMap.get(circle, l)->calVer ();
+                printf ("actuator n.%d_%d calVer\n", circle, l);
             }
+            catch (ASErrors::ASErrorsEx & Ex) {
+                checkASerrors ("actuator", circle, l, Ex);
+            }
+            catch(...) {} // Proxy cannot be loaded
         }
         ACE_OS::sleep (150);
 
         /*printf("stop.....\n");
         for (l = 1; l <= actuatorsInCircle[circle]; l++)
         {
-            if(!CORBA::is_nil(usd[circle][l]))
+            try
             {
-                try
-                {
-                    usd[circle][l]->stop();
-                    printf ("actuator n.%d_%d stop\n", circle, l);
-                }
-                catch (ASErrors::ASErrorsEx & Ex)
-                {
-                    checkASerrors ("actuator", circle, l, Ex);
-                }
+                usdMap.get(circle, l)->stop();
+                printf ("actuator n.%d_%d stop\n", circle, l);
             }
+            catch (ASErrors::ASErrorsEx & Ex)
+            {
+                checkASerrors ("actuator", circle, l, Ex);
+            }
+            catch(...) {} // Proxy cannot be loaded
         }
         ACE_OS::sleep (1);*/
 
         printf ("write calibration results.....\n");
         for (l = 1; l <= actuatorsInCircle[circle]; l++)
         {
-            if(!CORBA::is_nil(usd[circle][l]))
+            try
             {
-                try
-                {
-                    CIRATools::Wait(LOOPTIME);
-                    usd[circle][l]->writeCalibration(cammaLen,cammaPos,calibrated);
-                    printf ("actuator %02d_%02d %04.1f %05.1f %d\n", circle, l, cammaLen, cammaPos, calibrated);
-                }
-                catch (ASErrors::ASErrorsEx & Ex) {
-                    checkASerrors ("actuator", circle, l, Ex);
-                }
+                CIRATools::Wait(LOOPTIME);
+                usdMap.get(circle, l)->writeCalibration(cammaLen,cammaPos,calibrated);
+                printf ("actuator %02d_%02d %04.1f %05.1f %d\n", circle, l, cammaLen, cammaPos, calibrated);
             }
+            catch (ASErrors::ASErrorsEx & Ex) {
+                checkASerrors ("actuator", circle, l, Ex);
+            }
+            catch(...) {} // Proxy cannot be loaded
         }
         ACE_OS::sleep (1);
     }
@@ -531,18 +462,16 @@ void CActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius) th
             {
                 jumpradius++;  // 17 circle
             }
-            if(!CORBA::is_nil(lanradius[l+jumpradius][radius]))
+            try
             {
-                try
-                {
-                    lanradius[l+jumpradius][radius]->top();
-                    printf ("actuator n.%d_%d top\n", l+jumpradius, radius);
-                }
-                catch (ASErrors::ASErrorsEx &Ex)
-                {
-                    checkASerrors("actuator", l+jumpradius, radius, Ex);
-                }
+                usdMap.getByRadius(l+jumpradius, radius)->top();
+                printf ("actuator n.%d_%d top\n", l+jumpradius, radius);
             }
+            catch (ASErrors::ASErrorsEx &Ex)
+            {
+                checkASerrors("actuator", l+jumpradius, radius, Ex);
+            }
+            catch(...) {} // Proxy cannot be loaded
         }
         ACE_OS::sleep (90);
 
@@ -553,18 +482,16 @@ void CActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius) th
             {
                 jumpradius++;  // 17 circle
             }
-            if(!CORBA::is_nil(lanradius[l+jumpradius][radius]))
+            try
             {
-                try
-                {
-                    lanradius[l+jumpradius][radius]->move(1400);
-                    printf ("actuator n.%d_%d move\n", l+jumpradius, radius);
-                }
-                catch (ASErrors::ASErrorsEx &Ex)
-                {
-                    checkASerrors("actuator", l+jumpradius, radius, Ex);
-                }
+                usdMap.getByRadius(l+jumpradius, radius)->move(1400);
+                printf ("actuator n.%d_%d move\n", l+jumpradius, radius);
             }
+            catch (ASErrors::ASErrorsEx &Ex)
+            {
+                checkASerrors("actuator", l+jumpradius, radius, Ex);
+            }
+            catch(...) {} // Proxy cannot be loaded
         }
         ACE_OS::sleep (5);
 
@@ -597,18 +524,16 @@ void CActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius) th
             {
                 jumpradius++;  // 17 circle
             }
-            if(!CORBA::is_nil(lanradius[l+jumpradius][radius]))
+            try
             {
-                try
-                {
-                    lanradius[l+jumpradius][radius]->calibrate();
-                    printf ("actuator n.%d_%d calibrate\n", l+jumpradius, radius);
-                }
-                catch (ASErrors::ASErrorsEx &Ex)
-                {
-                    checkASerrors("actuator", l+jumpradius, radius, Ex);
-                }
+                usdMap.getByRadius(l+jumpradius, radius)->calibrate();
+                printf ("actuator n.%d_%d calibrate\n", l+jumpradius, radius);
             }
+            catch (ASErrors::ASErrorsEx &Ex)
+            {
+                checkASerrors("actuator", l+jumpradius, radius, Ex);
+            }
+            catch(...) {} // Proxy cannot be loaded
         }
         ACE_OS::sleep (15);
 
@@ -641,18 +566,16 @@ void CActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius) th
             {
                 jumpradius++;  // 17 circle
             }
-            if(!CORBA::is_nil(lanradius[l+jumpradius][radius]))
+            try
             {
-                try
-                {
-                    lanradius[l+jumpradius][radius]->calVer();
-                    printf ("actuator n.%d_%d calVer\n", l+jumpradius, radius);
-                }
-                catch (ASErrors::ASErrorsEx &Ex)
-                {
-                    checkASerrors("actuator", l+jumpradius, radius, Ex);
-                }
+                usdMap.getByRadius(l+jumpradius, radius)->calVer();
+                printf ("actuator n.%d_%d calVer\n", l+jumpradius, radius);
             }
+            catch (ASErrors::ASErrorsEx &Ex)
+            {
+                checkASerrors("actuator", l+jumpradius, radius, Ex);
+            }
+            catch(...) {} // Proxy cannot be loaded
         }
         ACE_OS::sleep (150);
 
@@ -685,30 +608,30 @@ void CActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius) th
             {
                 jumpradius++;  // 17 circle
             }
-            if(!CORBA::is_nil(lanradius[l+jumpradius][radius]))
+            try
             {
-                try
-                {
-                    CIRATools::Wait(LOOPTIME);
-                    lanradius[l+jumpradius][radius]->writeCalibration(cammaLen,cammaPos,calibrated);
-                    printf ("actuator %02d_%02d %04.1f %05.1f %d\n", l+jumpradius, radius, cammaLen, cammaPos, calibrated);
-                }
-                catch (ASErrors::ASErrorsEx &Ex)
-                {
-                    checkASerrors("actuator", l+jumpradius, radius, Ex);
-                }
+                CIRATools::Wait(LOOPTIME);
+                usdMap.getByRadius(l+jumpradius, radius)->writeCalibration(cammaLen,cammaPos,calibrated);
+                printf ("actuator %02d_%02d %04.1f %05.1f %d\n", l+jumpradius, radius, cammaLen, cammaPos, calibrated);
             }
+            catch (ASErrors::ASErrorsEx &Ex)
+            {
+                checkASerrors("actuator", l+jumpradius, radius, Ex);
+            }
+            catch(...) {} // Proxy cannot be loaded
         }
         ACE_OS::sleep (1);
     }
     else
     {
-        if(!CORBA::is_nil(usd[circle][actuator])) // SINGLE ACTUATOR
+        try
         {
+            ActiveSurface::USD_proxy proxy = usdMap.get(circle, actuator);
+
             printf("top.....\n");
             try
             {
-                usd[circle][actuator]->top();
+                proxy->top();
                 printf ("actuator n.%d_%d top\n", circle, actuator);
             }
             catch (ASErrors::ASErrorsEx &Ex)
@@ -719,7 +642,7 @@ void CActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius) th
             printf("move to upper mechanical position.....\n");
             try
             {
-                usd[circle][actuator]->move(1400);
+                proxy->move(1400);
                 printf ("actuator n.%d_%d move\n", circle, actuator);
             }
             catch (ASErrors::ASErrorsEx &Ex)
@@ -730,7 +653,7 @@ void CActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius) th
             /*printf("stop.....\n");
             try
             {
-                usd[circle][actuator]->stop();
+                proxy->stop();
                 printf ("actuator n.%d_%d stop\n", circle, actuator);
             }
             catch (ASErrors::ASErrorsEx &Ex)
@@ -741,7 +664,7 @@ void CActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius) th
             printf("calibration.....\n");
             try
             {
-                usd[circle][actuator]->calibrate();
+                proxy->calibrate();
                 printf ("actuator n.%d_%d calibrate\n", circle, actuator);
             }
             catch (ASErrors::ASErrorsEx &Ex)
@@ -752,7 +675,7 @@ void CActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius) th
             /*printf("stop.....\n");
             try
             {
-                usd[circle][actuator]->stop();
+                proxy->stop();
                 printf ("actuator n.%d_%d stop\n", circle, actuator);
             }
             catch (ASErrors::ASErrorsEx &Ex)
@@ -763,7 +686,7 @@ void CActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius) th
             printf ("calibration verification.....\n");
             try
             {
-                usd[circle][actuator]->calVer();
+                proxy->calVer();
                 printf ("actuator n.%d_%d calVer\n", circle, actuator);
             }
             catch (ASErrors::ASErrorsEx &Ex)
@@ -774,7 +697,7 @@ void CActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius) th
             printf ("write calibration results.....\n");
             try
             {
-                usd[circle][actuator]->writeCalibration(cammaLen,cammaPos,calibrated);
+                proxy->writeCalibration(cammaLen,cammaPos,calibrated);
                 printf ("actuator %02d_%02d %04.1f %05.1f %d\n", circle, actuator, cammaLen, cammaPos, calibrated);
             }
             catch (ASErrors::ASErrorsEx &Ex)
@@ -783,6 +706,7 @@ void CActiveSurfaceBossCore::calibrate (int circle, int actuator, int radius) th
             }
             ACE_OS::sleep (1);
         }
+        catch(...){} // Proxy cannot be loaded
     }
 
 /*
@@ -1044,104 +968,96 @@ void CActiveSurfaceBossCore::calVer (int circle, int actuator, int radius) throw
 */
 }
 
-void CActiveSurfaceBossCore::singleUSDonewayAction(ActiveSurface::TASOneWayAction action, ActiveSurface::USD_var usd, double elevation, double correction, long incr, ActiveSurface::TASProfile profile)
+void CActiveSurfaceBossCore::singleUSDonewayAction(ActiveSurface::TASOneWayAction action, ActiveSurface::USD_proxy proxy, double elevation, double correction, long incr, ActiveSurface::TASProfile profile)
 {
-    if(!CORBA::is_nil(usd))
+    std::string operationName = "onewayAction(";
+    try
     {
-        std::string operationName = "onewayAction(";
-        try
+        switch (action)
         {
-            switch (action)
-            {
-                case ActiveSurface::AS_STOP:
-                    operationName += "AS_STOP)";
-                    usd->stop();
-                    break;
-                case ActiveSurface::AS_SETUP:
-                    operationName += "AS_SETUP)";
-                    usd->setup();
-                    break;
-                case ActiveSurface::AS_STOW:
-                    operationName += "AS_STOW)";
-                    usd->stow();
-                    break;
-                case ActiveSurface::AS_REFPOS:
-                    operationName += "AS_REFPOS)";
-                    usd->refPos();
-                    break;
-                case ActiveSurface::AS_UP:
-                    operationName += "AS_UP)";
-                    usd->up();
-                    break;
-                case ActiveSurface::AS_DOWN:
-                    operationName += "AS_DOWN)";
-                    usd->down();
-                    break;
-                case ActiveSurface::AS_BOTTOM:
-                    operationName += "AS_BOTTOM)";
-                    usd->bottom();
-                    break;
-                case ActiveSurface::AS_TOP:
-                    operationName += "AS_TOP)";
-                    usd->top();
-                    break;
-                case ActiveSurface::AS_UPDATE:
-                    operationName += "AS_UPDATE)";
-                    usd->update(elevation);
-                    break;
-                case ActiveSurface::AS_CORRECTION:
-                    operationName += "AS_CORRECTION)";
-                    usd->correction(correction*MM2STEP);
-                    break;
-                case ActiveSurface::AS_MOVE:
-                    operationName += "AS_MOVE)";
-                    usd->move(incr*MM2STEP);
-                    break;
-                case ActiveSurface::AS_PROFILE:
-                    operationName += "AS_PROFILE)";
-                    usd->setProfile(profile);
-                    break;
-                case ActiveSurface::AS_RESET:
-                    operationName += "AS_RESET)";
-                    usd->reset();
-                    CIRATools::Wait(LOOPTIME);
-                    break;
-                case ActiveSurface::AS_STATUS:
-                    operationName += "AS_STATUS)";
-                    usd->readStatus();
-                    break;
-            }
-        }
-        catch (ASErrors::ASErrorsEx& E)
-        {
-            _ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,E,"CActiveSurfaceBossCore::singleUSDonewayAction()");
-            impl.setComponentName((const char*)usd->name());
-            impl.setOperationName(operationName.c_str());
-            impl.log();
-        }
-        catch(CORBA::SystemException &E)
-        {
-            _EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CActiveSurfaceBossCore::singleUSDonewayAction()");
-            impl.setName(E._name());
-            impl.setMinor(E.minor());
-            impl.log();
-        }
-        catch(...)
-        {
-            _EXCPT(ComponentErrors::UnexpectedExImpl,impl,"CActiveSurfaceBossCore::singleUSDonewayAction()");
-            impl.log();
+            case ActiveSurface::AS_STOP:
+                operationName += "AS_STOP)";
+                proxy->stop();
+                break;
+            case ActiveSurface::AS_SETUP:
+                operationName += "AS_SETUP)";
+                proxy->setup();
+                break;
+            case ActiveSurface::AS_STOW:
+                operationName += "AS_STOW)";
+                proxy->stow();
+                break;
+            case ActiveSurface::AS_REFPOS:
+                operationName += "AS_REFPOS)";
+                proxy->refPos();
+                break;
+            case ActiveSurface::AS_UP:
+                operationName += "AS_UP)";
+                proxy->up();
+                break;
+            case ActiveSurface::AS_DOWN:
+                operationName += "AS_DOWN)";
+                proxy->down();
+                break;
+            case ActiveSurface::AS_BOTTOM:
+                operationName += "AS_BOTTOM)";
+                proxy->bottom();
+                break;
+            case ActiveSurface::AS_TOP:
+                operationName += "AS_TOP)";
+                proxy->top();
+                break;
+            case ActiveSurface::AS_UPDATE:
+                operationName += "AS_UPDATE)";
+                proxy->update(elevation);
+                break;
+            case ActiveSurface::AS_CORRECTION:
+                operationName += "AS_CORRECTION)";
+                proxy->correction(correction*MM2STEP);
+                break;
+            case ActiveSurface::AS_MOVE:
+                operationName += "AS_MOVE)";
+                proxy->move(incr*MM2STEP);
+                break;
+            case ActiveSurface::AS_PROFILE:
+                operationName += "AS_PROFILE)";
+                proxy->setProfile(profile);
+                break;
+            case ActiveSurface::AS_RESET:
+                operationName += "AS_RESET)";
+                proxy->reset();
+                CIRATools::Wait(LOOPTIME);
+                break;
+            case ActiveSurface::AS_STATUS:
+                operationName += "AS_STATUS)";
+                proxy->readStatus();
+                break;
         }
     }
-    else if(m_initialized)
+    catch (ASErrors::ASErrorsEx& E)
     {
-        printf("not active\n");
-        _EXCPT(ComponentErrors::ComponentNotActiveExImpl,impl,"CActiveSurfaceBossCore::singleUSDonewayAction()");
+        _ADD_BACKTRACE(ComponentErrors::CouldntCallOperationExImpl,impl,E,"CActiveSurfaceBossCore::singleUSDonewayAction()");
+        impl.setComponentName((const char*)proxy->name());
+        impl.setOperationName(operationName.c_str());
         impl.log();
     }
+    catch(CORBA::SystemException &E)
+    {
+        _EXCPT(ComponentErrors::CORBAProblemExImpl,impl,"CActiveSurfaceBossCore::singleUSDonewayAction()");
+        impl.setName(E._name());
+        impl.setMinor(E.minor());
+        impl.log();
+    }
+    catch(...) {} // Proxy cannot be loaded
 }
 
 void CActiveSurfaceBossCore::onewayAction(ActiveSurface::TASOneWayAction action, int circle, int actuator, int radius, double elevation, double correction, long incr, ActiveSurface::TASProfile profile)
 {
+    if(!m_initialized)
+    {
+        return;
+    }
+
     if(action == ActiveSurface::AS_UPDATE && !m_profileSetted)
     {
         printf("you must set the profile first\n");
@@ -1154,7 +1070,8 @@ void CActiveSurfaceBossCore::onewayAction(ActiveSurface::TASOneWayAction action,
         {
             for (int l = 1; l <= actuatorsInCircle[i]; l++)
             {
-                singleUSDonewayAction(action, usd[i][l], elevation, correction, incr, profile);
+                singleUSDonewayAction(action, usdMap.get(i, l), elevation, correction, incr, profile);
+                //singleUSDonewayAction(action, usd[i][l], elevation, correction, incr, profile);
                 //printf("i = %d, l = %d\n", i, l);
             }
         }
@@ -1164,7 +1081,7 @@ void CActiveSurfaceBossCore::onewayAction(ActiveSurface::TASOneWayAction action,
         std::cout << "onewayaction CIRCLE" << std::endl;
         for (int l = 1; l <= actuatorsInCircle[circle]; l++)
         {
-            singleUSDonewayAction(action, usd[circle][l], elevation, correction, incr, profile);
+            singleUSDonewayAction(action, usdMap.get(circle, l), elevation, correction, incr, profile);
         }
     }
     else if(circle == 0 && actuator == 0 && radius != 0 && action != ActiveSurface::AS_UPDATE && action != ActiveSurface::AS_PROFILE) // RADIUS
@@ -1181,13 +1098,16 @@ void CActiveSurfaceBossCore::onewayAction(ActiveSurface::TASOneWayAction action,
                 jumpradius++;  // 17 circle
             }
 
-            singleUSDonewayAction(action, lanradius[l+jumpradius][radius], elevation, correction, incr, profile);
+            int targetCircleIndex = l + jumpradius;
+
+            singleUSDonewayAction(action, usdMap.get(targetCircleIndex, l), elevation, correction, incr, profile);
         }
     }
     else if(action != ActiveSurface::AS_UPDATE && action != ActiveSurface::AS_PROFILE) // SINGLE
     {
         std::cout << "onewayaction SINGLE" << std::endl;
-        singleUSDonewayAction(action, usd[circle][actuator], elevation, correction, incr, profile);
+
+        singleUSDonewayAction(action, usdMap.get(circle, actuator), elevation, correction, incr, profile);
     }
 }
 
@@ -1257,9 +1177,9 @@ void CActiveSurfaceBossCore::onewayAction(ActiveSurface::TASOneWayAction action,
             corbaEx = true;
             usdCounter--;
             if (usdCounter < (int)lastUSD*WARNINGUSDPERCENT)
-                m_status=Management::MNG_WARNING;
+                m_status.store(Management::MNG_WARNING);
             if (usdCounter < (int)lastUSD*ERRORUSDPERCENT)
-                m_status=Management::MNG_FAILURE;
+                m_status.store(Management::MNG_FAILURE);
         }
     }
     else
@@ -1304,21 +1224,21 @@ void CActiveSurfaceBossCore::workingActiveSurface()
         try
         {
             m_antennaBoss->getRawCoordinates(getTimeStamp(), azimuth, elevation);
-            onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, elevation * DR2D, 0, 0, m_profile);
-            m_enable = true;
-            m_status = Management::MNG_OK;
+            onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, elevation * DR2D, 0, 0, m_profile.load(std::memory_order_relaxed));
+            m_enable.store(true);
+            m_status.store(Management::MNG_OK);
         }
         catch(ComponentErrors::CouldntGetComponentExImpl& exImpl)
         {
             _IRA_LOGFILTER_LOG(LM_WARNING, "CActiveSurfaceBossCore::workingActiveSurface()", "ANTENNA/Boss component unavailable, cannot update the Active Surface!");
-            m_status = Management::MNG_WARNING;
-            m_enable = false;
+            m_status.store(Management::MNG_WARNING);
+            m_enable.store(false);
         }
         catch(CORBA::SystemException& ex)
         {
             _IRA_LOGFILTER_LOG(LM_ERROR, "CActiveSurfaceBossCore::workingActiveSurface()", "CORBA::SystemException in working thread!");
-            m_status = Management::MNG_FAILURE;
-            m_enable = false;
+            m_status.store(Management::MNG_FAILURE);
+            m_enable.store(false);
         }
     }
     else
@@ -1369,10 +1289,11 @@ void CActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newProf
                     actuatorsCorrections[s] = tmp;
                     //printf("i = %d, l = %d, pos = %f in setProfile\n", i, l, actuatorsCorrections[s]);
                 }
-                if(!CORBA::is_nil(usd[i][l]))
+                try
                 {
-                    usd[i][l]->posTable(actuatorsCorrections, NPOSITIONS, DELTAEL, THRESHOLDPOS);
+                    usdMap.get(i, l)->posTable(actuatorsCorrections, NPOSITIONS, DELTAEL, THRESHOLDPOS);
                 }
+                catch(...) {} // Proxy cannot be loaded
 
             }
         }
@@ -1385,15 +1306,15 @@ void CActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newProf
         }
 
         m_ASup=true;
-        m_status=Management::MNG_OK;
+        m_status.store(Management::MNG_OK);
 
         if(usdCounter < (int)lastUSD*WARNINGUSDPERCENT)
         {
-            m_status=Management::MNG_WARNING;
+            m_status.store(Management::MNG_WARNING);
         }
         if(usdCounter < (int)lastUSD*ERRORUSDPERCENT)
         {
-            m_status=Management::MNG_FAILURE;
+            m_status.store(Management::MNG_FAILURE);
             m_ASup=false;
         }
     }
@@ -1403,7 +1324,7 @@ void CActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newProf
         asOff();
         CIRATools::Wait(1000000);
         _SET_CDB_CORE(profile, newProfile,"ActiveSurfaceBossCore::setProfile")
-        m_profile = newProfile;
+        m_profile.store(newProfile);
         try
         {
             onewayAction(ActiveSurface::AS_PROFILE, 0, 0, 0, 0, 0, 0, newProfile);
@@ -1422,7 +1343,7 @@ void CActiveSurfaceBossCore::asSetup() throw (ComponentErrors::ComponentErrorsEx
 {
     try
     {
-        onewayAction(ActiveSurface::AS_SETUP, 0, 0, 0, 0, 0, 0, m_profile);
+        onewayAction(ActiveSurface::AS_SETUP, 0, 0, 0, 0, 0, 0, m_profile.load(std::memory_order_relaxed));
     }
     catch (ComponentErrors::ComponentErrorsExImpl& ex)
     {
@@ -1435,19 +1356,20 @@ void CActiveSurfaceBossCore::asOn()
 {
     if(m_profileSetted == true)
     {
-        if((m_profile != ActiveSurface::AS_PARABOLIC_FIXED) && (m_profile != ActiveSurface::AS_SHAPED_FIXED) && (m_profile != ActiveSurface::AS_PARK))
+        ActiveSurface::TASProfile profile = m_profile.load(std::memory_order_relaxed);
+        if((profile != ActiveSurface::AS_PARABOLIC_FIXED) && (profile != ActiveSurface::AS_SHAPED_FIXED) && (profile != ActiveSurface::AS_PARK))
         {
             enableAutoUpdate();
-            m_tracking = true;
+            m_tracking.store(true);
         }
         else
         {
             asOff();
             CIRATools::Wait(1000000);
-            m_tracking = false;
+            m_tracking.store(false);
             try
             {
-                onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, 45.0, 0, 0, m_profile);
+                onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, 45.0, 0, 0, profile);
             }
             catch (ComponentErrors::ComponentErrorsExImpl& ex)
             {
@@ -1467,13 +1389,13 @@ void CActiveSurfaceBossCore::asPark() throw (ComponentErrors::ComponentErrorsEx)
     if(m_profileSetted == true)
     {
         asOff();
-        m_tracking = false;
+        m_tracking.store(false);
         CIRATools::Wait(1000000);
         _SET_CDB_CORE(profile, ActiveSurface::AS_PARK,"ActiveSurfaceBossCore::asPark()")
-        m_profile = ActiveSurface::AS_PARK;
+        m_profile.store(ActiveSurface::AS_PARK);
         try
         {
-            onewayAction(ActiveSurface::AS_REFPOS, 0, 0, 0, 0.0, 0, 0, m_profile);
+            onewayAction(ActiveSurface::AS_REFPOS, 0, 0, 0, 0.0, 0, 0, m_profile.load(std::memory_order_relaxed));
         }
         catch (ComponentErrors::ComponentErrorsExImpl& ex)
         {
@@ -1494,7 +1416,7 @@ void CActiveSurfaceBossCore::asOff() throw (ComponentErrors::ComponentErrorsEx)
         disableAutoUpdate();
         try
         {
-            onewayAction(ActiveSurface::AS_STOP, 0, 0, 0, 0, 0, 0, m_profile);
+            onewayAction(ActiveSurface::AS_STOP, 0, 0, 0, 0, 0, 0, m_profile.load(std::memory_order_relaxed));
         }
         catch (ComponentErrors::ComponentErrorsExImpl& ex)
         {
@@ -1510,8 +1432,9 @@ void CActiveSurfaceBossCore::asOff() throw (ComponentErrors::ComponentErrorsEx)
 
 void CActiveSurfaceBossCore::setActuator(int circle, int actuator, long int& actPos, long int& cmdPos, long int& Fmin, long int& Fmax, long int& acc,long int& delay) throw (ComponentErrors::PropertyErrorExImpl, ComponentErrors::ComponentNotActiveExImpl)
 {
-    if(!CORBA::is_nil(usd[circle][actuator]))
+    try
     {
+        ActiveSurface::USD_proxy proxy = usdMap.get(circle, actuator);
         ACSErr::Completion_var completion;
         ACS::ROlong_var actPos_var;
         ACS::RWlong_var cmdPos_var;
@@ -1520,7 +1443,7 @@ void CActiveSurfaceBossCore::setActuator(int circle, int actuator, long int& act
         ACS::RWlong_var acc_var;
         ACS::RWlong_var delay_var;
 
-        actPos_var = usd[circle][actuator]->actPos ();
+        actPos_var = proxy->actPos ();
         if(actPos_var.ptr() != ACS::ROlong::_nil())
         {
             actPos = actPos_var->get_sync (completion.out ());
@@ -1532,7 +1455,7 @@ void CActiveSurfaceBossCore::setActuator(int circle, int actuator, long int& act
             throw impl;
         }
 
-        cmdPos_var = usd[circle][actuator]->cmdPos ();
+        cmdPos_var = proxy->cmdPos ();
         if(cmdPos_var.ptr() != ACS::RWlong::_nil())
         {
             cmdPos = cmdPos_var->get_sync (completion.out ());
@@ -1544,7 +1467,7 @@ void CActiveSurfaceBossCore::setActuator(int circle, int actuator, long int& act
             throw impl;
         }
 
-        Fmin_var = usd[circle][actuator]->Fmin ();
+        Fmin_var = proxy->Fmin ();
         if(Fmin_var.ptr() != ACS::RWlong::_nil())
         {
             Fmin = Fmin_var->get_sync (completion.out ());
@@ -1556,7 +1479,7 @@ void CActiveSurfaceBossCore::setActuator(int circle, int actuator, long int& act
             throw impl;
         }
 
-        Fmax_var = usd[circle][actuator]->Fmax ();
+        Fmax_var = proxy->Fmax ();
         if(Fmax_var.ptr() != ACS::RWlong::_nil())
         {
             Fmax = Fmax_var->get_sync (completion.out ());
@@ -1568,7 +1491,7 @@ void CActiveSurfaceBossCore::setActuator(int circle, int actuator, long int& act
             throw impl;
         }
 
-        acc_var = usd[circle][actuator]->acc ();
+        acc_var = proxy->acc ();
         if(acc_var.ptr() != ACS::RWlong::_nil())
         {
             acc = acc_var->get_sync (completion.out ());
@@ -1580,7 +1503,7 @@ void CActiveSurfaceBossCore::setActuator(int circle, int actuator, long int& act
             throw impl;
         }
 
-        delay_var = usd[circle][actuator]->delay ();
+        delay_var = proxy->delay ();
         if(delay_var.ptr() != ACS::RWlong::_nil())
         {
             delay = delay_var->get_sync (completion.out ());
@@ -1592,7 +1515,7 @@ void CActiveSurfaceBossCore::setActuator(int circle, int actuator, long int& act
             throw impl;
         }
     }
-    else
+    catch(...) // Proxy cannot be loaded
     {
         _THROW_EXCPT(ComponentErrors::ComponentNotActiveExImpl,"CActiveSurfaceBossCore::setActuator()");
     }
@@ -1600,11 +1523,11 @@ void CActiveSurfaceBossCore::setActuator(int circle, int actuator, long int& act
 
 void CActiveSurfaceBossCore::usdStatus4GUIClient(int circle, int actuator, CORBA::Long_out status) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl)
 {
-    if(!CORBA::is_nil(usd[circle][actuator]))
+    try
     {
-        usd[circle][actuator]->getStatus(status);
+        usdMap.get(circle, actuator)->getStatus(status);
     }
-    else
+    catch(...) // Proxy cannot be loaded
     {
         _THROW_EXCPT(ComponentErrors::ComponentNotActiveExImpl,"CActiveSurfaceBossCore::usdStatus4GUIClient()");
     }
@@ -1615,7 +1538,7 @@ void CActiveSurfaceBossCore::publishZMQDictionary(ACS::Time now)
     m_zmqDictionary["timestamp"] = ZMQ::ZMQTimeStamp::fromACSTime(now);
     m_zmqDictionary["LUTFilename"] = getLUTfilename();
 
-    switch(m_status)
+    switch(m_status.load(std::memory_order_relaxed))
     {
         case Management::MNG_OK:
         {
@@ -1665,13 +1588,13 @@ void CActiveSurfaceBossCore::publishZMQDictionary(ACS::Time now)
 
     m_zmqDictionary["tracking"] = getTracking();
 
-    for(size_t i = 0; i < SECTORS; i++)
+    for(int i = 0; i < SECTORS; i++)
     {
         std::ostringstream sector_key_ss;
         sector_key_ss << "SECTOR" << std::setw(2) << std::setfill('0') << i + 1;
         std::string sector_key = sector_key_ss.str();
 
-        for(size_t j = 0; j < LANs_per_sector; j++)
+        for(int j = 0; j < LANs_per_sector; j++)
         {
             std::ostringstream lan_key_ss;
             lan_key_ss << "LAN" << std::setw(2) << std::setfill('0') << j + 1;
@@ -1679,27 +1602,31 @@ void CActiveSurfaceBossCore::publishZMQDictionary(ACS::Time now)
 
             ZMQ::ZMQDictionary l;
             bool connected = false;
+            ActiveSurface::USDStatusSeq_var seq;
 
-            if(!CORBA::is_nil(lan[i][j]))
+            try
             {
-                ActiveSurface::USDStatusSeq_var seq;
                 lan[i][j]->getLanStatus(connected, seq);
+            }
+            catch(...)
+            {
+                seq = usdMap.setLanDown(i, j);
+            }
 
-                for(size_t k = 0; k < seq->length(); k++)
+            for(size_t k = 0; k < seq->length(); k++)
+            {
+                std::ostringstream usd_key_ss;
+                usd_key_ss << "USD" << std::setw(2) << std::setfill('0') << seq[k].id;
+                std::string usd_key = usd_key_ss.str();
+                std::string usd_map_key = "AS/" + sector_key + "/" + lan_key + "/" + usd_key;
+
+                ZMQ::ZMQDictionary usdStatus = getUSDStatusDiff(usd_map_key, seq[k]);
+                if(!usdStatus.empty())
                 {
-                    std::ostringstream usd_key_ss;
-                    usd_key_ss << "USD" << std::setw(2) << std::setfill('0') << seq[k].id;
-                    std::string usd_key = usd_key_ss.str();
-                    std::string usd_map_key = "AS/" + sector_key + "/" + lan_key + "/" + usd_key;
-
-                    ZMQ::ZMQDictionary usdStatus = getUSDStatusDiff(usd_map_key, seq[k]);
-                    if(!usdStatus.empty())
-                    {
-                        l[usd_key] = usdStatus;
-                    }
-
-                    usdStatusMap[usd_map_key] = seq[k];
+                    l[usd_key] = usdStatus;
                 }
+
+                usdMap.updateStatus(usd_map_key, seq[k]);
             }
 
             l["connected"] = connected;
@@ -1709,26 +1636,6 @@ void CActiveSurfaceBossCore::publishZMQDictionary(ACS::Time now)
     }
 
     m_zmqPublisher.publish(m_zmqDictionary);
-}
-
-void CActiveSurfaceBossCore::recoverUSD(int circleIndex, int usdCircleIndex) throw (ComponentErrors::CouldntGetComponentExImpl)
-{
-    char serial_usd[23];
-    int lanIndex;
-    setserial (circleIndex, usdCircleIndex, lanIndex, serial_usd);
-
-    usd[circleIndex][usdCircleIndex] = ActiveSurface::USD::_nil();
-    try
-    {
-        usd[circleIndex][usdCircleIndex] = m_services->getComponent<ActiveSurface::USD>(serial_usd);
-        lanradius[circleIndex][lanIndex] = usd[circleIndex][usdCircleIndex];
-    }
-    catch (maciErrType::CannotGetComponentExImpl& ex)
-    {
-        _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CActiveSurfaceBossCore::recoverUSD()");
-        Impl.setComponentName(serial_usd);
-        Impl.log(LM_DEBUG);
-    }
 }
 
 void CActiveSurfaceBossCore::setradius(int radius, int &actuatorsradius, int &jumpradius)
@@ -1910,23 +1817,21 @@ void CActiveSurfaceBossCore::checkASerrors(const char* str, int circle, int actu
 ZMQ::ZMQDictionary CActiveSurfaceBossCore::getUSDStatusDiff(const std::string& key, const ActiveSurface::USDStatus& n)
 {
     ZMQ::ZMQDictionary diff;
+    ActiveSurface::USDStatus old;
 
-    auto it = usdStatusMap.find(key);
-    bool initialize = false;
+    bool initialize = !usdMap.getStatusByName(key, old);
 
-    if(it == usdStatusMap.end())                                            initialize = true;
-    if(initialize || it->second.id                 != n.id)                 diff["id"] = n.id;
-    if(initialize || it->second.available          != n.available)          diff["available"] = n.available;
-    if(!n.available)                                                        return diff;
-    if(initialize || it->second.accelerationFactor != n.accelerationFactor) diff["accelerationFactor"] = n.accelerationFactor;
-    if(initialize || it->second.commandedPosition  != n.commandedPosition)  diff["commandedPosition"] = n.commandedPosition;
-    if(initialize || it->second.currentPosition    != n.currentPosition)    diff["currentPosition"] = n.currentPosition;
-    if(initialize || it->second.delay              != n.delay)              diff["delay"] = n.delay == 255 ? -1 : 512 * n.delay;
-    if(initialize || it->second.maximumFrequency   != n.maximumFrequency)   diff["maximumFrequency"] = n.maximumFrequency / 10;
-    if(initialize || it->second.minimumFrequency   != n.minimumFrequency)   diff["minimumFrequency"] = n.minimumFrequency / 10;
-    if(initialize || it->second.softwareVersion    != n.softwareVersion)    diff["softwareVersion"] = std::to_string((n.softwareVersion >> 4) & 0xF) + "." + std::to_string(n.softwareVersion & 0xF);
-    if(initialize || it->second.type               != n.type)               diff["USDType"] = n.type == 0x20 ? "USD50xxx" : "USD60xxx";
-    if(initialize || it->second.status             != n.status)
+    if(initialize || old.available          != n.available)             diff["available"] = n.available;
+    if(!n.available)                                                    return diff;
+    if(initialize || old.accelerationFactor != n.accelerationFactor)    diff["accelerationFactor"] = n.accelerationFactor;
+    if(initialize || old.commandedPosition  != n.commandedPosition)     diff["commandedPosition"] = n.commandedPosition;
+    if(initialize || old.currentPosition    != n.currentPosition)       diff["currentPosition"] = n.currentPosition;
+    if(initialize || old.delay              != n.delay)                 diff["delay"] = n.delay == 255 ? -1 : 512 * n.delay;
+    if(initialize || old.maximumFrequency   != n.maximumFrequency)      diff["maximumFrequency"] = n.maximumFrequency / 10;
+    if(initialize || old.minimumFrequency   != n.minimumFrequency)      diff["minimumFrequency"] = n.minimumFrequency / 10;
+    if(initialize || old.softwareVersion    != n.softwareVersion)       diff["softwareVersion"] = std::to_string((n.softwareVersion >> 4) & 0xF) + "." + std::to_string(n.softwareVersion & 0xF);
+    if(initialize || old.type               != n.type)                  diff["USDType"] = n.type == 0x20 ? "USD50xxx" : "USD60xxx";
+    if(initialize || old.status             != n.status)
     {
         diff["calibrated"] = (n.status & CAL) != 0;
         diff["enabled"] = (n.status & ENBL) != 0;

@@ -18,6 +18,7 @@
 #include <DateTime.h>
 #include <usdC.h>
 #include <lanC.h>
+#include <ActiveSurfaceProxy.h>
 #include <AntennaProxy.h>
 #include <ComponentErrors.h>
 #include <ManagementErrors.h>
@@ -31,7 +32,9 @@
 #include <vector>
 #include <SP_parser.h>
 #include <LogFilter.h>
+#include <atomic>
 #include "ZMQLibrary.hpp"
+#include "USDMap.h"
 
 _IRA_LOGFILTER_IMPORT;
 
@@ -171,24 +174,22 @@ public:
 
     void setActuator(int circle, int actuator, long int& actPos, long int& cmdPos, long int& Fmin, long int& Fmax, long int& acc, long int& delay) throw (ComponentErrors::PropertyErrorExImpl, ComponentErrors::ComponentNotActiveExImpl);
 
-    void recoverUSD(int circle, int actuator) throw (ComponentErrors::CouldntGetComponentExImpl);
-
     /**
      * This function returns the status of the Active Surface subsystem; this indicates if the system is working correctly or there are some
      * possible problems or a failure has been encoutered. This flag takes also into consideration the status of the Boss.
      */
-    inline const Management::TSystemStatus& getStatus() const { return m_status; };
+    inline const Management::TSystemStatus getStatus() const { return m_status.load(std::memory_order_relaxed); };
 
     /**
      * This function returns the enable flags, this flag is true if the boss is enable to send command to the antenna. Viceversa if false the component
      * works in a sort of simulation mode.
      * @return a boolean value that is true if the antenna is enabled
     */
-    inline bool getEnable() const { return m_enable; }
+    inline bool getEnable() const { return m_enable.load(std::memory_order_relaxed); }
 
-    inline const ActiveSurface::TASProfile& getProfile() const { return m_profile; };
+    inline const ActiveSurface::TASProfile getProfile() const { return m_profile.load(std::memory_order_relaxed); };
 
-    inline bool getTracking() const { return m_tracking; }
+    inline bool getTracking() const { return m_tracking.load(std::memory_order_relaxed); }
 
     inline bool validProfile(const ActiveSurface::TASProfile& profile) const { return m_acceptedProfiles.count(profile) > 0; }
 
@@ -231,10 +232,8 @@ private:
     std::map<int, std::string> m_error_strings;
     ContainerServices* m_services;
 
-    std::vector<std::vector<ActiveSurface::USD_var>> usd;
-    std::vector<std::vector<ActiveSurface::USD_var>> lanradius;
-    std::vector<std::vector<ActiveSurface::lan_var>> lan;
-    std::map<std::string, ActiveSurface::USDStatus> usdStatusMap;
+    std::vector<std::vector<ActiveSurface::lan_proxy>> lan;
+    USDMap usdMap;
 
     int usdCounter;
     std::vector<int> usdCounters;
@@ -244,13 +243,13 @@ private:
     /**
      * This represents the status of the whole Active Surface subsystem, it also includes and summarizes the status of the boss component
      */
-    Management::TSystemStatus m_status;
+    std::atomic<Management::TSystemStatus> m_status;
 
     /**
      * if this flag is false the active surface isn't active during
      * observations
     */
-    bool m_enable;
+    std::atomic<bool> m_enable;
 
     bool AutoUpdate;
 
@@ -258,14 +257,14 @@ private:
 
     void setserial (int circle, int actuator, int &lanIndex, char *serial_usd);
 
-    void singleUSDonewayAction(ActiveSurface::TASOneWayAction action, ActiveSurface::USD_var usd, double elevation, double correction, long incr, ActiveSurface::TASProfile profile);
+    void singleUSDonewayAction(ActiveSurface::TASOneWayAction action, ActiveSurface::USD_proxy usd, double elevation, double correction, long incr, ActiveSurface::TASProfile profile);
 
     Antenna::AntennaBoss_proxy m_antennaBoss;
 
-    ActiveSurface::TASProfile m_profile;
+    std::atomic<ActiveSurface::TASProfile> m_profile;
     std::set<ActiveSurface::TASProfile> m_acceptedProfiles;
 
-    bool m_tracking;
+    std::atomic<bool> m_tracking;
 
     char *s_usdTable;
 
@@ -274,7 +273,7 @@ private:
     bool m_profileSetted;
 
     bool m_ASup;
-    
+
     bool m_newlut;
 
     bool m_initialized;

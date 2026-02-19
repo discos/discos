@@ -96,8 +96,9 @@ void CBossCore::initialize() throw (ComponentErrors::UnexpectedExImpl)
 	m_callbackStow->setBossCore(this);
 	m_callbackSetup->setBossCore(this);
 	m_targetName=IRA::CString("none");
-	m_bossStatus=Management::MNG_OK;
-	m_status=Management::MNG_OK;
+	m_bossStatus=Management::MNG_WARNING;
+	m_status=Management::MNG_WARNING;
+	m_siteInitialized=false;
 	m_lastStatusChange.value((long double)0.0);
 	m_currentAxis=Management::MNG_NO_AXIS;
 	ACS_LOG(LM_FULL_INFO,"CBossCore::initialize()",(LM_INFO,"AntennaBoss::CONNECTING_NOTIFICATION_CHANNEL"));
@@ -128,115 +129,87 @@ void CBossCore::initialize() throw (ComponentErrors::UnexpectedExImpl)
 void CBossCore::execute() throw (ComponentErrors::CouldntGetComponentExImpl,
 		ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntReleaseComponentExImpl)
 {
-	Antenna::TSiteInformation_var site;
-	Antenna::Observatory_var observatory=Antenna::Observatory::_nil();
 	_IRA_LOGFILTER_ACTIVATE(m_config->getRepetitionCacheTime(),m_config->getRepetitionExpireTime());
+	m_slewCheck.initMount(m_config->getMaxAzimuthRate(),m_config->getMaxElevationRate(),m_config->getMinElevation(),m_config->getMaxElevation(),
+			m_config->getMaxAzimuthAcceleration(),m_config->getMaxElevationAcceleration(),m_config->getMinSuggestedElevation(),m_config->getMaxSuggestedElevation());
+}
+
+void CBossCore::initObservatory() throw (ComponentErrors::CouldntGetComponentExImpl)
+{
 	try {
-		observatory=m_services->getDefaultComponent<Antenna::Observatory>((const char*)m_config->getObservatoryComponent());
+		Antenna::Observatory_var observatory=m_services->getDefaultComponent<Antenna::Observatory>((const char*)m_config->getObservatoryComponent());
+		ACS_LOG(LM_FULL_INFO,"CBossCore::execute()",(LM_INFO,"AntennaBoss::OBSERVATORY_LOCATED"));
+
+		Antenna::TSiteInformation_var site=observatory->getSiteSummary();
+		ACSErr::Completion_var comp;
+		std::string site_name=std::string(observatory->observatoryName()->get_sync(comp.out()));
+		m_site=CSite(site.out());
+		m_dut1=site->DUT1;
+		m_slewCheck.initSite(m_site,m_dut1);
+		ACS_LOG(LM_FULL_INFO,"CBossCore::execute()",(LM_INFO,"AntennaBoss::SITE_INITIALIZED"));
+
+		m_services->releaseComponent((const char*)observatory->name());
+		ACS_LOG(LM_FULL_INFO,"CBossCore::execute()",(LM_INFO,"AntennaBoss::OBSERVATORY_RELEASED"));
+
+		IRA::CString str_buffer;
+
+		ZMQ::ZMQDictionary site_info;
+		site_info["name"] = site_name;
+		IRA::CIRATools::radToSexagesimalAngle(m_site.getLongitude(), str_buffer);
+		site_info["longitude"] = (const char*)str_buffer;
+		IRA::CIRATools::radToSexagesimalAngle(m_site.getLatitude(), str_buffer);
+		site_info["latitude"] = (const char*)str_buffer;
+		site_info["height"] = m_site.getHeight();
+		site_info["xPosition"] = m_site.getXPos();
+		site_info["yPosition"] = m_site.getYPos();
+		site_info["zPosition"] = m_site.getZPos();
+		site_info["xPolarMotion"] = m_site.getXPoleMotion();
+		site_info["yPolarMotion"] = m_site.getYPoleMotion();
+		site_info["DUT1"] = m_dut1;
+
+		switch (m_site.getEllipsoid()) {
+			case CSite::WGS84 : {
+				site_info["ellipsoid"] = "WGS84";
+				break;
+			}
+			case CSite::GRS80 : {
+				site_info["ellipsoid"] = "GRS80";
+				break;
+			}
+			case CSite::MERIT83 : {
+				site_info["ellipsoid"] = "MERIT83";
+				break;
+			}
+			case CSite::OSU91A : {
+				site_info["ellipsoid"] = "OSU91A";
+				break;
+			}
+			case CSite::SOVIET85 : {
+				site_info["ellipsoid"] = "SOVIET85";
+				break;
+			}
+		}
+
+		m_zmqDictionary["site"] = site_info;
+		m_siteInitialized = true;
+		changeBossStatus(Management::MNG_OK);
+		m_status=Management::MNG_OK;
 	}
-	catch (maciErrType::CannotGetComponentExImpl& ex) {
-		_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CBossCore::execute()");
-		Impl.setComponentName((const char*)m_config->getObservatoryComponent());
-		throw Impl;
-	}
-	catch (maciErrType::NoPermissionExImpl& ex) {
-		_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CBossCore::execute()");
+	catch(maciErrType::CannotGetComponentExImpl& ex) {
+		_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CBossCore::initObservatory()");
 		Impl.setComponentName((const char*)m_config->getObservatoryComponent());
 		throw Impl;
 	}
 	catch (maciErrType::NoDefaultComponentExImpl& ex) {
-		_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CBossCore::execute()");
+		_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CBossCore::initObservatory()");
 		Impl.setComponentName((const char*)m_config->getObservatoryComponent());
 		throw Impl;
 	}
-	ACS_LOG(LM_FULL_INFO,"CBossCore::execute()",(LM_INFO,"AntennaBoss::OBSERVATORY_LOCATED"));
-	/*try {
-		m_pointingModel=m_services->getComponent<Antenna::PointingModel>((const char*)m_config->getPointingModelInstance());
-	}
-	catch (maciErrType::CannotGetComponentExImpl& ex) {
-		_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CBossCore::execute()");
-		Impl.setComponentName((const char*)m_config->getPointingModelInstance());
+	catch(...) {
+		_EXCPT(ComponentErrors::CouldntGetComponentExImpl,Impl,"CBossCore::initObservatory()");
+		Impl.setComponentName((const char*)m_config->getObservatoryComponent());
 		throw Impl;
 	}
-	ACS_LOG(LM_FULL_INFO,"CBossCore::execute()",(LM_INFO,"AntennaBoss::POINTING_MODEL_LOCATED"));
-	try {
-		m_refraction=m_services->getComponent<Antenna::Refraction>((const char *)m_config->getRefractionInstance());
-	}
-	catch (maciErrType::CannotGetComponentExImpl& ex) {
-		_ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,"CBossCore::execute()");
-		Impl.setComponentName((const char*)m_config->getRefractionInstance());
-		throw Impl;
-	}
-	ACS_LOG(LM_FULL_INFO,"CBossCore::execute()",(LM_INFO,"AntennaBoss::REFRACTION_LOCATED"));*/
-	std::string site_name;
-	try	{
-		site=observatory->getSiteSummary();  //throw CORBA::SYSTEMEXCEPTION
-		ACSErr::Completion_var comp;
-		site_name=std::string(observatory->observatoryName()->get_sync(comp.out()));
-	}
-	catch (CORBA::SystemException& ex)	{
-		_EXCPT(ComponentErrors::CORBAProblemExImpl,__dummy,"CBossCore::execute()");
-		__dummy.setName(ex._name());
-		__dummy.setMinor(ex.minor());
-		throw __dummy;
-	}
-	m_site=CSite(site.out());
-	m_dut1=site->DUT1;
-	ACS_LOG(LM_FULL_INFO,"CBossCore::execute()",(LM_INFO,"AntennaBoss::SITE_INITIALIZED"));
-	try {
-		m_services->releaseComponent((const char*)observatory->name());
-	}
-	catch  (maciErrType::CannotReleaseComponentExImpl& ex) {
-		_ADD_BACKTRACE(ComponentErrors::CouldntReleaseComponentExImpl,Impl,ex,"CBossCore::execute()");
-		Impl.setComponentName((const char*)observatory->name());
-		throw Impl;
-	}
-
-	IRA::CString str_buffer;
-
-	ZMQ::ZMQDictionary site_info;
-	site_info["name"] = site_name;
-	IRA::CIRATools::radToSexagesimalAngle(m_site.getLongitude(), str_buffer);
-	site_info["longitude"] = (const char*)str_buffer;
-	IRA::CIRATools::radToSexagesimalAngle(m_site.getLatitude(), str_buffer);
-	site_info["latitude"] = (const char*)str_buffer;
-	site_info["height"] = m_site.getHeight();
-	site_info["xPosition"] = m_site.getXPos();
-	site_info["yPosition"] = m_site.getYPos();
-	site_info["zPosition"] = m_site.getZPos();
-	site_info["xPolarMotion"] = m_site.getXPoleMotion();
-	site_info["yPolarMotion"] = m_site.getYPoleMotion();
-	site_info["DUT1"] = m_dut1;
-
-	switch (m_site.getEllipsoid()) {
-		case CSite::WGS84 : {
-			site_info["ellipsoid"] = "WGS84";
-			break;
-		}
-		case CSite::GRS80 : {
-			site_info["ellipsoid"] = "GRS80";
-			break;
-		}
-		case CSite::MERIT83 : {
-			site_info["ellipsoid"] = "MERIT83";
-			break;
-		}
-		case CSite::OSU91A : {
-			site_info["ellipsoid"] = "OSU91A";
-			break;
-		}
-		case CSite::SOVIET85 : {
-			site_info["ellipsoid"] = "SOVIET85";
-			break;
-		}
-	}
-
-	m_zmqDictionary["site"] = site_info;
-
-	ACS_LOG(LM_FULL_INFO,"CBossCore::execute()",(LM_INFO,"AntennaBoss::OBSERVATORY_RELEASED"));
-	m_slewCheck.initSite(m_site,m_dut1);
-	m_slewCheck.initMount(m_config->getMaxAzimuthRate(),m_config->getMaxElevationRate(),m_config->getMinElevation(),m_config->getMaxElevation(),
-			m_config->getMaxAzimuthAcceleration(),m_config->getMaxElevationAcceleration(),m_config->getMinSuggestedElevation(),m_config->getMaxSuggestedElevation());
 }
 
 void CBossCore::cleanUp()
@@ -271,8 +244,13 @@ void CBossCore::cleanUp()
 	unloadMount(m_mount);
 }
 
-void CBossCore::getObservedHorizontal(TIMEVALUE& time,TIMEDIFFERENCE& duration,double& az,double& el) const
+void CBossCore::getObservedHorizontal(TIMEVALUE& time,TIMEDIFFERENCE& duration,double& az,double& el) const throw (AntennaErrors::OperationNotPermittedExImpl)
 {
+	if (!m_siteInitialized) {
+		_EXCPT(AntennaErrors::OperationNotPermittedExImpl,impl,"BossCore::getObservedHorizontal");
+		impl.setReason("Site info not initialized");
+		throw impl;
+	}
 	if (duration.value().value>m_config->getCoordinateIntegrationPeriod()) {
 		double ra,dec;
 		IRA::CSkySource converter;
@@ -306,8 +284,13 @@ void CBossCore::getObservedEquatorial(TIMEVALUE& time,TIMEDIFFERENCE& duration,d
 	}
 }
 
-void CBossCore::getObservedGalactic(TIMEVALUE& time,TIMEDIFFERENCE& duration,double &lng,double& lat) const
+void CBossCore::getObservedGalactic(TIMEVALUE& time,TIMEDIFFERENCE& duration,double &lng,double& lat) const throw (AntennaErrors::OperationNotPermittedExImpl)
 {
+	if (!m_siteInitialized) {
+		_EXCPT(AntennaErrors::OperationNotPermittedExImpl,impl,"BossCore::getObservedGalactic");
+		impl.setReason("Site info not initialized");
+		throw impl;
+	}
 	if (duration.value().value>m_config->getCoordinateIntegrationPeriod()) {
 		double ra,dec;
 		IRA::CSkySource converter;
@@ -637,6 +620,11 @@ void CBossCore::radialVelocity(const double& val,const Antenna::TReferenceFrame&
 
 void CBossCore::getTopocentricFrequency(const ACS::doubleSeq& rest,ACS::doubleSeq& topo) throw (AntennaErrors::OperationNotPermittedExImpl)
 {
+	if (!m_siteInitialized) {
+		_EXCPT(AntennaErrors::OperationNotPermittedExImpl,impl,"BossCore::getTopocentricFrequency");
+		impl.setReason("Site info not initialized");
+		throw impl;
+	}
 	if (rest.length()==0) {
 		topo.length(0);
 		return;
@@ -808,8 +796,13 @@ void CBossCore::stop() throw (ComponentErrors::UnexpectedExImpl,ComponentErrors:
 bool CBossCore::checkScan(const ACS::Time& startUt,const Antenna::TTrackingParameters& par,const Antenna::TTrackingParameters& secondary,Antenna::TRunTimeParameters_out rTime,
  const double& minElLimit,const double& maxElLimit) throw (
  ComponentErrors::CouldntGetComponentExImpl,AntennaErrors::ScanErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntCallOperationExImpl,
- AntennaErrors::ScanErrorExImpl,AntennaErrors::SecondaryScanErrorExImpl,AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl)
+ AntennaErrors::ScanErrorExImpl,AntennaErrors::SecondaryScanErrorExImpl,AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl,AntennaErrors::OperationNotPermittedExImpl)
 {
+	if (!m_siteInitialized) {
+		_EXCPT(AntennaErrors::OperationNotPermittedExImpl,impl,"BossCore::checkScan");
+		impl.setReason("Site info not initialized");
+		throw impl;
+	}
 	double azimuth,elevation,stopElevation,stopAzimuth,hwAzimuth;
 	Antenna::TSections section;
 	ACS::Time startTime=startUt; //it can be changed in the prepareScan routine

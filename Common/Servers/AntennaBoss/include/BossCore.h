@@ -114,7 +114,7 @@ public:
 	void startScan(ACS::Time& startUt,const Antenna::TTrackingParameters& parameters,const Antenna::TTrackingParameters& secondary) throw(
 			ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
 			ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntCallOperationExImpl,ComponentErrors::OperationErrorExImpl,AntennaErrors::ScanErrorExImpl,AntennaErrors::SecondaryScanErrorExImpl,
-			AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl);
+			AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl,AntennaErrors::OperationNotPermittedExImpl);
 
 	/**
 	 * This function immediately starts a skydip scan starting from the current azimuth position.
@@ -161,7 +161,7 @@ public:
 	 */
 	void goOff(const Antenna::TCoordinateFrame& frame,const double& beams) throw (ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
 		ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntCallOperationExImpl,ComponentErrors::OperationErrorExImpl,AntennaErrors::ScanErrorExImpl,AntennaErrors::SecondaryScanErrorExImpl,
-		AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl,AntennaErrors::NoTargetCommandedYetExImpl);
+		AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl,AntennaErrors::NoTargetCommandedYetExImpl,AntennaErrors::OperationNotPermittedExImpl);
 
 
 	/**
@@ -382,7 +382,7 @@ public:
 	 * @param az the requested azimuth coordinate
 	 * @param el the reqeusted elevation coordinate
 	 */
-	void getObservedHorizontal(TIMEVALUE& time,TIMEDIFFERENCE& duration,double& az,double& el) const;
+	void getObservedHorizontal(TIMEVALUE& time,TIMEDIFFERENCE& duration,double& az,double& el) const throw (AntennaErrors::OperationNotPermittedExImpl);
 
 	/**
 	 * This function can be called to get the observed  coordinates at any given time. This coordinates are computed starting from the
@@ -393,7 +393,7 @@ public:
 	 * @param lng  the requested galactic longitude coordinate.
 	 * @param lat the requested galactic latitude coordinate.
 	 */
-	void getObservedGalactic(TIMEVALUE& time,TIMEDIFFERENCE& duration,double &lng,double& lat) const;
+	void getObservedGalactic(TIMEVALUE& time,TIMEDIFFERENCE& duration,double &lng,double& lat) const throw (AntennaErrors::OperationNotPermittedExImpl);
 
 	/**
 	 * This function is called in order to get the raw horizontal coordinates at a given epoch. If the epoch is not present in the buffer the returned point is the
@@ -443,7 +443,7 @@ public:
 	bool checkScan(const ACS::Time& startUt,const Antenna::TTrackingParameters& par,const Antenna::TTrackingParameters& secondary,Antenna::TRunTimeParameters_out rTime,
 		const double& minElLimit=-1.0,const double& maxElLimit=-1.0) throw (
 		ComponentErrors::CouldntGetComponentExImpl,AntennaErrors::ScanErrorExImpl,ComponentErrors::CORBAProblemExImpl,ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntCallOperationExImpl,
-		AntennaErrors::ScanErrorExImpl,AntennaErrors::SecondaryScanErrorExImpl,AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl);
+		AntennaErrors::ScanErrorExImpl,AntennaErrors::SecondaryScanErrorExImpl,AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl,AntennaErrors::OperationNotPermittedExImpl);
 
 	/**
 	 *
@@ -871,6 +871,11 @@ private:
 	ZMQ::ZMQDictionary m_zmqDictionary;
 
 	/**
+	 * Indicates whether the Observatory component was found and loaded
+	 */
+	bool m_siteInitialized;
+
+	/**
 	 * This method loads into the mount a coordinate for a given time. It uses the commanded generator in order to provide the required coordinates.
 	 * The coordinates are corrected for pointing model and refraction (if <i>m_correctionEnable</i> is set) then commanded to the mount (if the flag
 	 * <i>m_enable</i> is set).
@@ -966,6 +971,12 @@ private:
 	 * @throw ComponentErrors::CouldntGetComponentExImpl
 	 */
 	void preset(const double& az,const double& el) throw (ComponentErrors::CORBAProblemExImpl,ComponentErrors::CouldntCallOperationExImpl,ComponentErrors::CouldntGetComponentExImpl);
+
+	/*
+	 * This function is used to load the reference to the observatory component and initialize the site attribute.
+	 * @throw ComponentErrors::CouldntGetComponentExImpl
+	 */
+	void initObservatory() throw (ComponentErrors::CouldntGetComponentExImpl);
 
 	/**
 	 * This function is used to keep up to date the reference to the mount component.

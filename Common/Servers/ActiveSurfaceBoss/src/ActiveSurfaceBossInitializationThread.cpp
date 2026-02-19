@@ -80,16 +80,17 @@ void CActiveSurfaceBossInitializationThread::runLoop()
     {
         for(int actuator = 1; actuator <= m_boss->actuatorsInCircle[circle]; actuator++)
         {
-            if(!CORBA::is_nil(m_boss->usd[circle][actuator]))
+            try
             {
                 int usdStatus = 0;
-                m_boss->usd[circle][actuator]->getStatus(usdStatus);
+                m_boss->usdMap.get(circle, actuator)->getStatus(usdStatus);
 
                 if(!(usdStatus & CAL))
                 {
-                    CIRATools::setDBValue(m_boss->m_services, "calibrate", (const long)0, "alma/", m_boss->usd[circle][actuator]->name());
+                    CIRATools::setDBValue(m_boss->m_services, "calibrate", (const long)0, "alma/", m_boss->usdMap.get(circle, actuator)->name());
                 }
             }
+            catch(...) {}
         }
     }
 

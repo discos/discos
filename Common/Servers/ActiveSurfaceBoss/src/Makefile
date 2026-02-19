@@ -53,14 +53,14 @@ USER_LIB =	-lACE \
 #
 # MODULE CODE DESCRIPTION:
 # ------------------------
-# As a general rule:  public file are "cleaned" and "installed"  
+# As a general rule:  public file are "cleaned" and "installed"
 #                     local (_L) are not "installed".
 
 #
 # C programs (public and local)
 # -----------------------------
-EXECUTABLES     = 
-#EXECUTABLES_L   = TestClient 
+EXECUTABLES     =
+#EXECUTABLES_L   = TestClient
 
 #
 # <brief description of xxxxx program>
@@ -69,7 +69,7 @@ EXECUTABLES     =
 
 #
 # special compilation flags for single c sources
-#yyyyy_CFLAGS   = 
+#yyyyy_CFLAGS   =
 
 #
 # Includes (.h) files (public only)
@@ -83,8 +83,8 @@ LIBRARIES       = ActiveSurfaceBossImpl
 LIBRARIES_L     =
 #
 # <brief description of lllll library>
-ActiveSurfaceBossImpl_OBJECTS = ActiveSurfaceBossImpl ActiveSurfaceBossCore ActiveSurfaceBossWorkingThread ActiveSurfaceBossInitializationThread ActiveSurfaceBossSectorThread
-ActiveSurfaceBossImpl_LIBS = lanStubs usdStubs ActiveSurfaceBossStubs ActiveSurfaceBossStubs AntennaDefinitionsStubs ManagmentDefinitionsStubs AntennaBossStubs ComponentErrors ASErrors ManagementErrors AntennaErrors IRALibrary ParserErrors DiscosVersion ZMQLibrary
+ActiveSurfaceBossImpl_OBJECTS = ActiveSurfaceBossImpl ActiveSurfaceBossCore ActiveSurfaceBossWorkingThread ActiveSurfaceBossInitializationThread ActiveSurfaceBossSectorThread USDMap
+ActiveSurfaceBossImpl_LIBS = lanStubs usdStubs ActiveSurfaceBossStubs ActiveSurfaceBossStubs AntennaDefinitionsStubs ManagmentDefinitionsStubs AntennaBossStubs ComponentErrors ASErrors ManagementErrors AntennaErrors IRALibrary ParserErrors DiscosVersion ZMQLibrary boost_thread
 
 #
 # Scripts (public and local)
@@ -114,8 +114,8 @@ pppppp_MODULES	   =
 #
 # <brief description of tttttt tcl-script>
 tttttt_OBJECTS  =
-tttttt_TCLSH    = 
-tttttt_LIBS     = 
+tttttt_TCLSH    =
+tttttt_LIBS     =
 
 #
 # TCL libraries (public and local)
@@ -125,32 +125,32 @@ TCL_LIBRARIES_L =
 
 #
 # <brief description of tttlll library>
-tttlll_OBJECTS  = 
+tttlll_OBJECTS  =
 
 #
 # Configuration Database Files
 # ----------------------------
 CDB_SCHEMAS =
 
-# 
+#
 # IDL Files and flags
-# 
+#
 IDL_FILES =
 IDL_TAO_FLAGS =
 USER_IDL =
 #
 # Jarfiles and their directories
 #
-JARFILES= 
+JARFILES=
 jjj_DIRS=
-jjj_EXTRAS= 
+jjj_EXTRAS=
 #
 # java sources in Jarfile on/off
-DEBUG= 
+DEBUG=
 #
 # ACS XmlIdl generation on/off
 #
-XML_IDL= 
+XML_IDL=
 #
 # Java Component Helper Classes generation on/off
 #
@@ -180,7 +180,7 @@ MANl =
 #
 # ASCII file to be converted into Framemaker-MIF
 # --------------------
-ASCII_TO_MIF = 
+ASCII_TO_MIF =
 
 #
 # other files to be installed
@@ -212,15 +212,15 @@ endif
 # TARGETS
 # -------
 all:	do_all
-	@echo " . . . 'all' done" 
+	@echo " . . . 'all' done"
 
-clean : clean_all 
+clean : clean_all
 	@echo " . . . clean done"
 
-clean_dist : clean_all clean_dist_all 
+clean_dist : clean_all clean_dist_all
 	@echo " . . . clean_dist done"
 
-man   : do_man 
+man   : do_man
 	@echo " . . . man page(s) done"
 
 install : install_all

@@ -28,6 +28,8 @@ USDImpl::USDImpl(const ACE_CString& CompName, maci::ContainerServices* container
         actuatorsCorrections(nullptr),
         elevations(nullptr),
         m_status(UNAV),
+        m_backoff_time(MIN_BACKOFF),
+        m_next_retry_time(getTimeStamp()),
         m_delay_sp(this),
         m_cmdPos_sp(this),
         m_Fmin_sp(this),
@@ -40,9 +42,7 @@ USDImpl::USDImpl(const ACE_CString& CompName, maci::ContainerServices* container
         m_softVer_sp(this),
         m_type_sp(this),
         m_gravCorr_sp(this),
-        m_userOffset_sp(this),
-        m_backoff_time(MIN_BACKOFF),
-        m_next_retry_time(getTimeStamp())
+        m_userOffset_sp(this)
 {
     ACS_SHORT_LOG((LM_INFO,"::USDImpl::USDImpl: constructor;Constructor!"));
 
@@ -310,7 +310,9 @@ void USDImpl::execute() throw (ACSErr::ACSbaseExImpl)
  // Building Destructor
 void USDImpl::cleanUp()
 {
-    // There is no need to release the LAN component since it is a HierarchicalComponent and will be released when all USDs have been released
+    m_available = false;
+    m_usdStatus.available = m_available;
+    m_lanStatus->write(m_usdStatus);
 
     if(actuatorsCorrections != nullptr)
     {
@@ -326,7 +328,9 @@ void USDImpl::cleanUp()
 
 void USDImpl::aboutToAbort()
 {
-    // There is no need to release the LAN component since it is a HierarchicalComponent and will be released when all USDs have been released
+    m_available = false;
+    m_usdStatus.available = m_available;
+    m_lanStatus->write(m_usdStatus);
 
     if(actuatorsCorrections != nullptr)
     {
