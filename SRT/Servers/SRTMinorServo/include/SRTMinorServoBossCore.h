@@ -297,8 +297,8 @@ private:
      * Method that clears the error status from the system.
      * This will show the system cleared the error status and is ready to be configured again.
      */
-    void reset(bool force=false);
-    void servoReset() { reset(); }
+    void reset(bool vbrain_reset=false);
+    void servoReset() { reset(true); }
 
     /**
      * Method that updates and publishes the ZMQ dictionary and the NotificationChannel object.

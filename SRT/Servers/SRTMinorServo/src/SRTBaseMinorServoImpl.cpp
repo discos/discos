@@ -156,7 +156,7 @@ void SRTBaseMinorServoImpl::status()
             std::pair<ACS::Time, const std::vector<double>> previous_point = m_positions_queue.get(m_status.getTimestamp());
             for(size_t i = 0; i < m_virtual_axes; i++)
             {
-                m_c_s[i] = (current_point[i] - previous_point.second[i]) * ((double(m_status.getTimestamp() - previous_point.first)) / 10000000);
+                m_c_s[i] = (current_point[i] - previous_point.second[i]) / ((double(m_status.getTimestamp() - previous_point.first)) / 10000000);
             }
         }
         catch(std::logic_error&)
@@ -206,13 +206,45 @@ SRTMinorServoZMQStatus* SRTBaseMinorServoImpl::getSRTMinorServoZMQStatus(ACS::Ti
         status->systemOffsets[i] = m_system_offsets[i];
     }
 
-    status->blocked = m_status.isBlocked() == Management::MNG_TRUE;
     status->currentSetup = m_current_setup.c_str();
-    status->driveCabinetStatus = m_status.getDriveCabinetStatus();
-    status->enabled = m_status.isEnabled() == Management::MNG_TRUE;
     status->errorCode = m_error_code.load();
     status->inUse = m_in_use.load() == Management::MNG_TRUE;
-    status->operativeMode = m_status.getOperativeMode();
+
+    try
+    {
+        status->blocked = m_status.isBlocked() == Management::MNG_TRUE;
+    }
+    catch(std::out_of_range&)
+    {
+        status->blocked = false;
+    }
+
+    try
+    {
+        status->driveCabinetStatus = m_status.getDriveCabinetStatus();
+    }
+    catch(std::out_of_range&)
+    {
+        status->driveCabinetStatus = DRIVE_CABINET_WARNING;
+    }
+
+    try
+    {
+        status->enabled = m_status.isEnabled() == Management::MNG_TRUE;
+    }
+    catch(std::out_of_range&)
+    {
+        status->enabled = false;
+    }
+
+    try
+    {
+        status->operativeMode = m_status.getOperativeMode();
+    }
+    catch(std::out_of_range&)
+    {
+        status->operativeMode = OPERATIVE_MODE_UNKNOWN;
+    }
 
     return status;
 }
@@ -793,7 +825,7 @@ ACS::TimeInterval SRTBaseMinorServoImpl::getTravelTime(const ACS::doubleSeq& _s_
         if(std::signbit(c_s[i]) != std::signbit(d[i]) && c_s[i] != 0)
         {
             inversion_time = std::abs(c_s[i]) / m_a[i];
-            inversion_distance = std::abs(c_s[i]) * inversion_time + 0.5 * m_a[i] * std::pow(inversion_time, 2);
+            inversion_distance = std::abs(c_s[i]) * inversion_time - 0.5 * m_a[i] * std::pow(inversion_time, 2);
             // In this case, we can calculate the next acceleration ramp using a starting speed of 0
             c_s = std::vector<double>(c_s.size(), 0.0);
         }
@@ -804,7 +836,7 @@ ACS::TimeInterval SRTBaseMinorServoImpl::getTravelTime(const ACS::doubleSeq& _s_
         // Total time = eventual inversion time + calculated acceleration ramp time + full deceleration time + linear movement time
         // Linear movement time = linear movement distance / maximum speed
         // Linear movement distance = distance + eventual inversion distance - acceleration ramp distance - full deceleration ramp distance
-        double t = inversion_time + accel_ramp_time + m_r_t[i] + (std::abs(d[i]) + inversion_distance - accel_ramp_distance - m_r_d[i]) / m_m_s[i];
+        double t = inversion_time + accel_ramp_time + m_r_t[i] + std::max(0.0, std::abs(d[i]) + inversion_distance - accel_ramp_distance - m_r_d[i]) / m_m_s[i];
 
         total_time = std::max(total_time, t);
 

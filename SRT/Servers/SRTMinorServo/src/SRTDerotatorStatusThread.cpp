@@ -36,14 +36,15 @@ void SRTDerotatorStatusThread::runLoop()
 
     unsigned long sleep_time = 10000000;
 
-    if(m_component.updateStatus())
+    bool status_ok = m_component.updateStatus();
+    m_component.publishZMQDictionary();
+
+    if(status_ok)
     {
         if(m_next_time == 0)
         {
             m_next_time = getTimeStamp();
         }
-
-        m_component.publishZMQDictionary();
 
         m_next_time += m_sleep_time;
 

@@ -175,8 +175,8 @@ int lanSocket::reConnect(int error)
 		}
 		case FAIL:
 		case 0: {	//socket remotely closed. Try to reconnect...
-			m_Error.Reset();
 			Close(m_Error);
+			m_Error.Reset();
 			m_soStat = NOTRDY;
 			err=Init(m_slanAddress,m_wlanPort);
 			if(err == 0) m_soStat = READY;

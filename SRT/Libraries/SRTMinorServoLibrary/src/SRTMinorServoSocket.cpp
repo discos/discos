@@ -178,7 +178,7 @@ SRTMinorServoAnswerMap SRTMinorServoSocket::sendCommand(std::string command, std
     map_answer.put("PLAIN_COMMAND", command);
     if(map)
     {
-        map->get() = map_answer;
+        map->get() += map_answer;
     }
 
     return map_answer;

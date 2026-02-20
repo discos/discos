@@ -212,7 +212,7 @@ bool SRTDerotatorImpl::updateStatus()
         try
         {
             std::pair<ACS::Time, const std::vector<double>> previous_point = m_positions_queue.get(last_timestamp);
-            m_c_s = (current_point - previous_point.second[0]) * ((double(last_timestamp - previous_point.first)) / 10000000);
+            m_c_s = (current_point - previous_point.second[0]) / ((double(last_timestamp - previous_point.first)) / 10000000);
         }
         catch(...)
         {
@@ -232,24 +232,30 @@ bool SRTDerotatorImpl::updateStatus()
             }
         }
 
-
         m_positions_queue.put(last_timestamp, { current_point });
         m_zmqDictionary["commandedPosition"] = m_commanded_position.load();
         m_zmqDictionary["currentPosition"] = current_point;
         m_zmqDictionary["ready"] = ready;
         m_zmqDictionary["slewing"] = isSlewing();
+        m_zmqDictionary["socketConnected"] = true;
         m_zmqDictionary["tracking"] = isTracking();
         m_zmqDictionary["trackingError"] = m_position_difference.load();
         m_zmqDictionary["timestamp"] = ZMQ::ZMQTimeStamp::fromACSTime(last_timestamp);
     }
-    catch(...)
+    catch(MinorServoErrors::CommunicationErrorExImpl&)
     {
         // Communication error, sets failure, communication error and not ready bits
         status |= (1L << 1);
         status |= (1L << 2);
         status |= (1L << 3);
-
         m_status_pattern.store(status);
+
+        m_zmqDictionary["ready"] = false;
+        m_zmqDictionary["slewing"] = false;
+        m_zmqDictionary["tracking"] = false;
+        m_zmqDictionary["socketConnected"] = false;
+        m_zmqDictionary["timestamp"] = ZMQ::ZMQTimeStamp::now();
+
         return false;
     }
 

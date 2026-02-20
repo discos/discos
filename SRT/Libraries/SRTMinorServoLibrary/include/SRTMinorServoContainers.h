@@ -230,10 +230,8 @@ namespace MinorServo
             }
             catch(std::out_of_range& ex)
             {
-                std::cout << "PLAIN_COMMAND: " << this->getPlainCommand();
-                std::cout << "PLAIN_ANSWER: " << this->getPlainAnswer();
-                std::cout << "KEY: " << key << std::endl;
-                throw ex;
+                std::string error = "PLAIN_COMMAND: " + this->_getPlainCommand() + "\nPLAIN_ANSWER: " + this->_getPlainAnswer() + "\nKEY: " + key;
+                throw std::out_of_range(error);
             }
         }
 
@@ -329,7 +327,7 @@ namespace MinorServo
         const std::string getPlainCommand() const
         {
             std::shared_lock<std::shared_mutex> lock(m_mutex);
-            return this->count("PLAIN_COMMAND") > 0 ? this->get<std::string>("PLAIN_COMMAND") : "";
+            return this->_getPlainCommand();
         }
 
         /**
@@ -339,7 +337,7 @@ namespace MinorServo
         const std::string getPlainAnswer() const
         {
             std::shared_lock<std::shared_mutex> lock(m_mutex);
-            return this->count("PLAIN_ANSWER") > 0 ? this->get<std::string>("PLAIN_ANSWER") : "";
+            return this->_getPlainAnswer();
         }
 
     protected:
@@ -347,6 +345,24 @@ namespace MinorServo
          * Shared mutex to control read and write accesses. Multiple reading access are permitted and will only block writing access. Writing access will block all accesses
          */
         mutable std::shared_mutex m_mutex;
+    private:
+        /**
+         * This method returns the plain command sent using the socket. Useful for log purposes.
+         * @return a std::string containing the plain command sent using the socket.
+         */
+        const std::string _getPlainCommand() const
+        {
+            return this->count("PLAIN_COMMAND") > 0 ? this->get<std::string>("PLAIN_COMMAND") : "";
+        }
+
+        /**
+         * This method returns the plain answer received from the socket. Useful for log purposes.
+         * @return a std::string containing the plain answer received from the socket.
+         */
+        const std::string _getPlainAnswer() const
+        {
+            return this->count("PLAIN_ANSWER") > 0 ? this->get<std::string>("PLAIN_ANSWER") : "";
+        }
     };
 
     /**

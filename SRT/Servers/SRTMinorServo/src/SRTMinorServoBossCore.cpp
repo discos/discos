@@ -45,7 +45,7 @@ void SRTMinorServoBossCore::initialize()
     m_elevation_tracking_enabled = getCDBConfiguration("elevation_tracking_enabled");
     m_socket_configuration = &SRTMinorServoSocketConfiguration::getInstance(m_component.getContainerServices());
     m_socket = &SRTMinorServoSocket::getInstance(m_socket_configuration->m_ip_address, m_socket_configuration->m_port, m_socket_configuration->m_timeout);
-    m_socket_connected = m_socket->isConnected() ? Management::MNG_TRUE : Management::MNG_FALSE;
+    m_socket_connected.store(m_socket->isConnected() ? Management::MNG_TRUE : Management::MNG_FALSE);
     //m_servos["PFP"] = m_component.getContainerServices()->getComponent<SRTBaseMinorServo>("MINORSERVO/PFP");
     m_servos["SRP"] = m_component.getContainerServices()->getComponent<SRTBaseMinorServo>("MINORSERVO/SRP");
     m_servos["GFR"] = m_component.getContainerServices()->getComponent<SRTBaseMinorServo>("MINORSERVO/GFR");
@@ -59,6 +59,12 @@ void SRTMinorServoBossCore::initialize()
 void SRTMinorServoBossCore::execute()
 {
     AUTO_TRACE("SRTMinorServoBossCore::execute()");
+    if(m_socket_connected.load() == Management::MNG_FALSE)
+    {
+        ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::execute()", (LM_CRITICAL, "Starting with socket disconnected."));
+        setError(ERROR_NOT_CONNECTED);
+    }
+
     startThread(m_status_thread, (ACS::TimeInterval)(getCDBValue<double>(m_component.getContainerServices(), "status_thread_period") * 10000000));
 }
 
@@ -97,14 +103,14 @@ bool SRTMinorServoBossCore::status()
             ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::status()", (LM_NOTICE, "Socket connected."));
             // We just reconnected, we can try to reset the error automatically, if there is another error in the following code the reset will simply be overridden
             m_socket_connected.store(Management::MNG_TRUE);
-            reset(true);
+            reset();
         }
     }
-    catch(MinorServoErrors::MinorServoErrorsEx& ex)
+    catch(MinorServoErrors::CommunicationErrorExImpl& impl)
     {
         if(m_socket_connected.load() == Management::MNG_TRUE)
         {
-            ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::status()", (LM_CRITICAL, (std::string("Socket disconnected: ") + getReasonFromEx(ex)).c_str()));
+            ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::status()", (LM_CRITICAL, "Socket disconnected: %s", impl.getReason().c_str()));
             m_socket_connected.store(Management::MNG_FALSE);
 
             stopThread(m_setup_thread);
@@ -123,9 +129,9 @@ bool SRTMinorServoBossCore::status()
     {
         checkLineStatus();
     }
-    catch(MinorServoErrors::MinorServoErrorsEx& ex)
+    catch(MinorServoErrors::StatusErrorExImpl& impl)
     {
-        _IRA_LOGFILTER_LOG(LM_ERROR, "SRTMinorServoBossCore::status()", getReasonFromEx(ex));
+        _IRA_LOGFILTER_LOG(LM_ERROR, "SRTMinorServoBossCore::status()", impl.getReason());
         return false;
     }
 
@@ -189,15 +195,46 @@ bool SRTMinorServoBossCore::status()
 
 void SRTMinorServoBossCore::publishData()
 {
-    m_zmqDictionary["timestamp"] = ZMQ::ZMQTimeStamp::fromUNIXTime(m_status.getPLCTime());
     m_zmqDictionary["socketConnected"] = m_socket_connected.load() == Management::MNG_TRUE;
+
+    if(!m_zmqDictionary["socketConnected"])
+    {
+        m_zmqDictionary["timestamp"] = ZMQ::ZMQTimeStamp::now();
+    }
+    else
+    {
+        m_zmqDictionary["timestamp"] = ZMQ::ZMQTimeStamp::fromUNIXTime(m_status.getPLCTime());
+    }
+
     m_zmqDictionary["tracking"] = m_tracking.load() == Management::MNG_TRUE;
-    m_zmqDictionary["emergency"] = m_status.emergencyPressed() == Management::MNG_TRUE;
     m_zmqDictionary["scanning"] = m_scanning.load() == Management::MNG_TRUE;
     m_zmqDictionary["currentSetup"] = m_actual_setup;
     m_zmqDictionary["trackingEnabled"] = m_elevation_tracking_enabled.load() == Management::MNG_TRUE;
-    m_zmqDictionary["maintenanceMode"] = m_status.getControl() == CONTROL_VBRAIN;
-    m_zmqDictionary["PLCFirmwareVersion"] = m_status.getPLCVersion().c_str();
+
+    try
+    {
+        m_zmqDictionary["emergency"] = m_status.emergencyPressed() == Management::MNG_TRUE;
+    }
+    catch(std::out_of_range&)
+    {
+        m_zmqDictionary["emergency"] = false;
+    }
+    try
+    {
+        m_zmqDictionary["maintenanceMode"] = m_status.getControl() == CONTROL_VBRAIN;
+    }
+    catch(std::out_of_range&)
+    {
+        m_zmqDictionary["maintenanceMode"] = false;
+    }
+    try
+    {
+        m_zmqDictionary["PLCFirmwareVersion"] = m_status.getPLCVersion().c_str();
+    }
+    catch(std::out_of_range&)
+    {
+        m_zmqDictionary["PLCFirmwareVersion"] = "";;
+    }
 
     // error_code enum
     switch(m_error_code.load())
@@ -249,24 +286,31 @@ void SRTMinorServoBossCore::publishData()
         }
     }
 
-    // gregorian cover enum
-    switch(m_status.getGregorianCoverPosition())
+    try
     {
-        case COVER_STATUS_UNKNOWN :
+        // gregorian cover enum
+        switch(m_status.getGregorianCoverPosition())
         {
-            m_zmqDictionary["gregorianCoverPosition"] = "UNKNOWN";
-            break;
+            case COVER_STATUS_UNKNOWN :
+            {
+                m_zmqDictionary["gregorianCoverPosition"] = "UNKNOWN";
+                break;
+            }
+            case COVER_STATUS_CLOSED :
+            {
+                m_zmqDictionary["gregorianCoverPosition"] = "CLOSED";
+                break;
+            }
+            case COVER_STATUS_OPEN :
+            {
+                m_zmqDictionary["gregorianCoverPosition"] = "OPEN";
+                break;
+            }
         }
-        case COVER_STATUS_CLOSED :
-        {
-            m_zmqDictionary["gregorianCoverPosition"] = "CLOSED";
-            break;
-        }
-        case COVER_STATUS_OPEN :
-        {
-            m_zmqDictionary["gregorianCoverPosition"] = "OPEN";
-            break;
-        }
+    }
+    catch(std::out_of_range&)
+    {
+        m_zmqDictionary["gregorianCoverPosition"] = "UNKNOWN";
     }
 
     // motion info enum
@@ -331,7 +375,7 @@ void SRTMinorServoBossCore::publishData()
 
     for(const auto& [name, servo] : m_servos)
     {
-        SRTMinorServoZMQStatus status = *servo->getSRTMinorServoZMQStatus(m_status.getPLCTime());
+        SRTMinorServoZMQStatus status = *servo->getSRTMinorServoZMQStatus(m_zmqDictionary["timestamp"]["unix_time"]);
 
         ZMQ::ZMQDictionary servo_status;
         servo_status["blocked"] = status.blocked;
@@ -477,7 +521,7 @@ void SRTMinorServoBossCore::publishData()
     static TIMEVALUE lastEvent(0UL);
     static MinorServoDataBlock prvData = {0UL, false, false, false, false, Management::MNG_WARNING};
 
-    TIMEVALUE now(ACS::Time(IRA::CIRATools::UNIXTime2ACSTime(m_status.getPLCTime())));
+    TIMEVALUE now(ACS::Time(IRA::CIRATools::UNIXTime2ACSTime(m_zmqDictionary["timestamp"]["unix_time"])));
 
     if(IRA::CIRATools::timeDifference(now, lastEvent) < 1000000 && prvData.tracking == (m_tracking.load() == Management::MNG_TRUE) && prvData.status == m_subsystem_status.load())
     {
@@ -1928,7 +1972,7 @@ void SRTMinorServoBossCore::setError(SRTMinorServoError error)
     m_error_code.store(error);
 }
 
-void SRTMinorServoBossCore::reset(bool force)
+void SRTMinorServoBossCore::reset(bool vbrain_reset)
 {
     AUTO_TRACE("SRTMinorServoBossCore::reset()");
 
@@ -1937,64 +1981,67 @@ void SRTMinorServoBossCore::reset(bool force)
         return;
     }
 
-    try
+    if(vbrain_reset)
     {
-        std::string protocol = getCDBValue<std::string>(m_component.getContainerServices(), "Protocol", "MINORSERVO/VBrain");
-        std::string address = getCDBValue<std::string>(m_component.getContainerServices(), "IPAddress", "MINORSERVO/VBrain");
-        std::string port = getCDBValue<std::string>(m_component.getContainerServices(), "Port", "MINORSERVO/VBrain");
-
-        std::string baseUrl = protocol + "://" + address + ":" + port + "/Exporting/json/ExecuteCommand?name";
-        std::string emergencyUrl = baseUrl + "=INAF_SRT_OR7_EMG_RESET_CMD";
-        std::string alarmsUrl = baseUrl + "=INAF_SRT_OR7_RESET_CMD";
-
-        CURL* curl = curl_easy_init();
-        if(curl)
+        try
         {
-            curl_easy_setopt(curl, CURLOPT_TIMEOUT, 3L);
-            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
-                +[](void* contents, size_t size, size_t nmemb, void* userp) -> size_t
+            std::string protocol = getCDBValue<std::string>(m_component.getContainerServices(), "Protocol", "MINORSERVO/VBrain");
+            std::string address = getCDBValue<std::string>(m_component.getContainerServices(), "IPAddress", "MINORSERVO/VBrain");
+            std::string port = getCDBValue<std::string>(m_component.getContainerServices(), "Port", "MINORSERVO/VBrain");
+
+            std::string baseUrl = protocol + "://" + address + ":" + port + "/Exporting/json/ExecuteCommand?name";
+            std::string emergencyUrl = baseUrl + "=INAF_SRT_OR7_EMG_RESET_CMD";
+            std::string alarmsUrl = baseUrl + "=INAF_SRT_OR7_RESET_CMD";
+
+            CURL* curl = curl_easy_init();
+            if(curl)
+            {
+                curl_easy_setopt(curl, CURLOPT_TIMEOUT, 3L);
+                curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+                curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+                curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
+                    +[](void* contents, size_t size, size_t nmemb, void* userp) -> size_t
+                    {
+                        return size * nmemb;
+                    }
+                );
+
+                ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::reset()", (LM_DEBUG, "Sending VBrain emergency reset"));
+                curl_easy_setopt(curl, CURLOPT_URL, emergencyUrl.c_str());
+
+                CURLcode res = curl_easy_perform(curl);
+                if(res != CURLE_OK)
                 {
-                    return size * nmemb;
+                    std::string err = "VBrain emergency reset failed: " + std::string(curl_easy_strerror(res));
+                    ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::reset()", (LM_WARNING, err.c_str()));
                 }
-            );
 
-            ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::reset()", (LM_DEBUG, "Sending VBrain emergency reset"));
-            curl_easy_setopt(curl, CURLOPT_URL, emergencyUrl.c_str());
+                IRA::CIRATools::Wait(3, 0);
 
-            CURLcode res = curl_easy_perform(curl);
-            if(res != CURLE_OK)
-            {
-                std::string err = "VBrain emergency reset failed: " + std::string(curl_easy_strerror(res));
-                ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::reset()", (LM_WARNING, err.c_str()));
+                ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::reset()", (LM_DEBUG, "Sending VBrain alarms reset"));
+                curl_easy_setopt(curl, CURLOPT_URL, alarmsUrl.c_str());
+
+                res = curl_easy_perform(curl);
+                if(res != CURLE_OK)
+                {
+                    std::string err = "VBrain alarms reset failed: " + std::string(curl_easy_strerror(res));
+                    ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::reset()", (LM_WARNING, err.c_str()));
+                }
+
+                curl_easy_cleanup(curl);
             }
-
-            IRA::CIRATools::Wait(3, 0);
-
-            ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::reset()", (LM_DEBUG, "Sending VBrain alarms reset"));
-            curl_easy_setopt(curl, CURLOPT_URL, alarmsUrl.c_str());
-
-            res = curl_easy_perform(curl);
-            if(res != CURLE_OK)
+            else
             {
-                std::string err = "VBrain alarms reset failed: " + std::string(curl_easy_strerror(res));
-                ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::reset()", (LM_WARNING, err.c_str()));
+                ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::reset()", (LM_WARNING, "Failed to initialize libcurl for VBrain reset"));
             }
-
-            curl_easy_cleanup(curl);
         }
-        else
+        catch (...)
         {
-            ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::reset()", (LM_WARNING, "Failed to initialize libcurl for VBrain reset"));
+            ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::reset()", (LM_WARNING, "Exception ignored during VBrain HTTP reset logic."));
         }
     }
-    catch (...)
-    {
-        ACS_LOG(LM_FULL_INFO, "SRTMinorServoBossCore::reset()", (LM_WARNING, "Exception ignored during VBrain HTTP reset logic."));
-    }
 
-    if(m_error_code.load() == ERROR_NOT_CONNECTED && !force)
+    if(m_socket_connected.load() == Management::MNG_FALSE)
     {
         // If we are still not connected we should not proceed with the reset
         return;

@@ -28,6 +28,11 @@ CSocket::OperationResult CSocket::Create(CError& Err,SocketType Type,WORD Socket
 {
 	struct sockaddr_in addr;
 	if (!Err.isNoError()) return FAIL;
+	// check if a socket is already created, otherwise there might be a leakage of file descriptors
+	if (m_iSocket != 0 || getStatus() != NOTCREATED) {
+		_SET_ERROR(Err,CError::SocketType,CError::OperationNPermitted,"CSocket::Create()");
+		return FAIL;
+	}
 	// convert address from dotted, human readable format to a network byte order 32 bit integer
 	if (IPAddr==NULL) {  // use the address of the local host.
 		addr.sin_addr.s_addr=htonl(INADDR_ANY);
@@ -435,9 +440,10 @@ CSocket::OperationResult CSocket::EventSelect(CError& Err,AsyncEvent Event,bool 
 
 CSocket::OperationResult CSocket::Close(CError& Err)
 {
-	if (!Err.isNoError()) return FAIL;
 	if (getStatus()==NOTCREATED) {
-		_SET_ERROR(Err,CError::SocketType,CError::SocketNCreated,"CSocket::Close()");
+		if(Err.isNoError()) {
+			_SET_ERROR(Err,CError::SocketType,CError::SocketNCreated,"CSocket::Close()");
+		}
 		return FAIL;
 	}
 	if (m_iSocket!=0) close(m_iSocket);
