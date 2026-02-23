@@ -1,198 +1,161 @@
-from __future__ import print_function
 import socket
-import time
+import ReceiversErrorsImpl
 
-
+FREQCMD = "FREQ "
+POWERCMD = "POWER "
 QUERYERROR="SYST:ERR? \n"
-
-FREQCMD="FREQ "
-QUERYFREQ="FREQ?;"+QUERYERROR
-QUERYPOWER="POW?\n"
-RFONCMD="OUTP:STAT ON\n"
-RFOFFCMD="OUTP:STAT OFF\n"
-QUERYRF="OUTP:STAT?\n"
-FREQUNIT=" MHZ\n"
-POWERUNIT=" dBM\n"
-
-class CommandLineError(Exception):
-   def __init__(self, value):
-
-      self.value = value
-   def __str__(self):
-      return repr(self.value)
+QUERYFREQ = "FREQ?;" + QUERYERROR
+QUERYPOWER = "POW?\n"
+RFONCMD = "OUTP:STAT ON\n"
+RFOFFCMD = "OUTP:STAT OFF\n"
+QUERYRF = "OUTP:STAT?\n"
+FREQUNIT = " MHZ\n"
+POWERUNIT = " dBM\n"
 
 
 class CommandLine:
-   
-   def __init__(self):
-       try: 
-          self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-       except socket.error as msg:
-          print(msg)
-          self.sock=None
 
-   def __del__(self):
-       pass
-   
-   def configure(self,ip,port):
-      '''
-      Connect to the HW
-      Clear query error
-      
-      '''
-      try:
-         self.sock.connect((ip,port))
-         msg ='OK' 
-         self.sendCmd('*CLS\n')
-         return msg
-      except socket.error as msg:
-         print(msg)
-         print("connect error: " ,msg)
-         return msg
-   
-   def init(self,reply):
-     pass
-   
-   def setPower(self,power):
-       POWERCMD="POWER "
-       cmd= POWERCMD + str(power) + POWERUNIT
-       try:
-           err=self.sendCmd(cmd)
-           msg=self.query(QUERYERROR)
-           return msg,err
-       except socket.error as msg:
-          print("connect error: " ,msg)
-          return msg,False
-          self.sock=None
-   
-   def getPower(self):
-       QUERYPOWER="POWER?;SYST:ERR?\n"
-       cmd=QUERYPOWER
-       try:
-          msg=self.query(cmd)
-          commands=msg.split(';')
-          val=float(commands[0])# unit is dbm,
-          err_msg=commands[1]
-          print("query err",msg)
-          if err_msg != '0,\"No error\"\n': 
-                print("exception",err_msg)
-                raise CommandLineError(err_msg)   
-          return err_msg,val
-       except socket.error as msg:
-          print("connect error: " ,msg)
-          return msg,-1
-          self.sock=None
-       except CommandLineError as msg:
-          raise
-       except ValueError as msg:
-          raise CommandLineError(msg)   
-     
-   def setFrequency(self,freq):
-       cmd= FREQCMD + str(freq) + FREQUNIT
- 
-       try:
-           err=self.sendCmd(cmd)
-           msg=self.query(QUERYERROR)
-           return msg,err
-       except socket.error as msg:
-          print("connect error: " ,msg)
-          return msg,False
-          self.sock=None
-   
-   def getFrequency(self):
-        cmd= QUERYFREQ
+    def __init__(self, ip, port):
+        self.sock = None
+        self.ip = ip
+        self.port = port
+        self._rf_on = True
+        self.connected = False
+
+    def __del__(self):
+        self.close()
+
+    def _connect(self):
+        if self.sock is not None:
+            return True
+        if self.ip is None or self.port is None:
+            return False
         try:
-          msg=self.query(cmd)
-          commands=msg.split(';')
-          val=float(commands[0])/1e6 # unit is MHZ,
-          err_msg=commands[1]
-          print("query err",msg)
-          if err_msg != '0,\"No error\"\n': 
-                print("exception",err_msg)
-                raise CommandLineError(err_msg)   
-          return err_msg,val
-   
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.settimeout(2.0)
+            self.sock.connect((self.ip, self.port))
+            self._raw_send('*CLS\n')
+            if self._rf_on:
+                self._raw_send(RFONCMD)
+            else:
+                self._raw_send(RFOFFCMD)
+            self.connected = True
+            return True
         except socket.error as msg:
-          print("connect error: " ,msg)
-          return msg,-1
-          self.sock=None
-        except CommandLineError as msg:
-          raise
-        except ValueError as msg:
-          raise CommandLineError(msg)   
-   
-   def readStatus(self):
-       ''' 
-       Query the error code of the synt.      
-       '''       
-       try:
-           
-          msg=self.query(QUERYERROR)
-          print("query err",msg)
-          if msg != '0,\"No error\"\n': 
-                print("exception",msg)
-                raise CommandLineError(msg)   
-          return msg
-       except socket.error as msg:
-          print("connect error: " ,msg)
-          return msg
-          
-   def rfOn(self):
-       cmd= RFONCMD
-       try:
-           err=self.sendCmd(cmd)
-           msg=self.query(QUERYERROR)
-           return msg,err
-       except socket.error as msg:
-          print("connect error: " ,msg)
-          return msg,False
-          self.sock=None
-   
-   def rfOff(self):
-       cmd= RFOFFCMD
-       try:
-           err=self.sendCmd(cmd)
-           msg=self.query(QUERYERROR)
-           return msg,err
-       except socket.error as msg:
-          print("connect error: " ,msg)
-          return msg,False
-          self.sock=None
+            if self.sock:
+                self.sock.close()
+            self.sock = None
+            self.connected = False
+            return False
 
-   def isRfOn(self):
-       cmd=QUERYRF
-       try:
-           return bool(int(self.query(cmd).strip()))
-       except socket.error as msg:
-          print("connect error: " ,msg)
-          self.sock=None
-          raise msg
-       except:
-          print("wrong answer")
-          raise
-   
-   def sendCmd(self,msg):
-       try:
-           self.sock.sendall(msg.encode())
-           return True
-       
-       except socket.error as msg:
-          print("connect error: " ,msg)
-          raise msg
-          self.sock=None
-          return False
-   
-   def close(self):
-       self.sock.close()
+    def _raw_send(self, msg):
+        self.sock.sendall(msg.encode())
 
-   def query(self,cmd):
-       try:
-           self.sock.sendall(cmd.encode())
-           msg = self.sock.recv(1024).decode()
-           print('query:received:',msg)
-           return msg
-       
-       except socket.error as msg:
-          print("connect error: " ,msg)
-          raise
-          return msg
+    def sendCmd(self, cmd):
+        if not self._connect():
+            exc = ReceiversErrorsImpl.SynthetiserErrorExImpl()
+            exc.setDetails("Socket not connected")
+            raise exc
+        try:
+            self._raw_send(cmd)
+            return True
+        except socket.error as ex:
+            self.sock.close()
+            self.sock = None
+            self.connected = False
+            exc = ReceiversErrorsImpl.SynthetiserErrorExImpl(exception=ex)
+            exc.setDetails(f"Socket error while sending command: {cmd}")
+            raise exc
+
+    def query(self, cmd):
+        if not self._connect():
+            exc = ReceiversErrorsImpl.SynthetiserErrorExImpl()
+            exc.setDetails("Socket not connected")
+            raise exc
+        try:
+            self._raw_send(cmd)
+            msg = self.sock.recv(1024).decode()
+            return msg
+        except socket.error as ex:
+            self.sock.close()
+            self.sock = None
+            self.connected = False
+            exc = ReceiversErrorsImpl.SynthetiserErrorExImpl(exception=ex)
+            exc.setDetails(f"Socket error while querying: {cmd}")
+            raise exc
+
+    def setPower(self,power):
+        err = self.sendCmd(POWERCMD + str(power) + POWERUNIT)
+        msg = self.query(QUERYERROR)
+        return msg, err
+
+    def getPower(self):
+        msg = self.query("POWER?;SYST:ERR?\n")
+        try:
+            commands = msg.split(';')
+            err = commands[1]
+            if err != '0,\"No error\"\n':
+                exc = ReceiversErrorsImpl.SynthetiserErrorExImpl()
+                exc.setDetails(f"Hardware error: {err}")
+                raise exc
+            val = float(commands[0])
+            return err, val
+        except (ValueError, IndexError) as ex:
+            exc = ReceiversErrorsImpl.SynthetiserErrorExImpl(exception=ex)
+            exc.setDetails(f"Malformed response: {msg}")
+            raise exc
+
+    def setFrequency(self,freq):
+        err = self.sendCmd(FREQCMD + str(freq) + FREQUNIT)
+        msg = self.query(QUERYERROR)
+        return msg, err
+
+    def getFrequency(self):
+        msg = self.query(QUERYFREQ)
+        try:
+            commands = msg.split(';')
+            err = commands[1]
+            if err != '0,\"No error\"\n':
+                exc = ReceiversErrorsImpl.SynthetiserErrorExImpl()
+                exc.setDetails(err)
+                raise exc
+            val = float(commands[0]) / 1e6
+            return err, val
+        except (ValueError, IndexError) as ex:
+            exc = ReceiversErrorsImpl.SynthetiserErrorExImpl(exception=ex)
+            exc.setDetails(f"Malformed response: {msg}")
+            raise exc
+
+    def readStatus(self):
+        msg = self.query(QUERYERROR)
+        if msg != '0,\"No error\"\n':
+            exc = ReceiversErrorsImpl.SynthetiserErrorExImpl()
+            exc.setDetails(f"Hardware error: {msg}")
+            raise exc
+        return msg
+
+    def rfOn(self):
+        self._rf_on = True
+        err = self.sendCmd(RFONCMD)
+        msg = self.query(QUERYERROR)
+        return msg, err
+
+    def rfOff(self):
+        self._rf_on = False
+        err = self.sendCmd(RFOFFCMD)
+        msg = self.query(QUERYERROR)
+        return msg, err
+
+    def isRfOn(self):
+        try:
+            return bool(int(self.query(QUERYRF).strip()))
+        except ValueError as ex:
+            exc = ReceiversErrorsImpl.SynthetiserErrorExImpl(exception=ex)
+            exc.setDetails("Malformed response for RF state")
+            raise exc
+
+    def close(self):
+        if self.sock:
+            self.sock.close()
+            self.sock = None
+            self.connected = False

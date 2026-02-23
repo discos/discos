@@ -7,4 +7,5 @@
         <frequency units="MHz"/>
 	<amplitude units="dBm"/>
 	<isLocked/>
+    <connected/>
       </LocalOscillatorEthernet>

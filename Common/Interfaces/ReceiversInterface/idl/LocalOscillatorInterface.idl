@@ -31,6 +31,7 @@ module Receivers {
 	/** check if actual values are equal to set ones */
 
         readonly attribute ACS::ROlong isLocked;
+        readonly attribute ACS::ROlong connected;
 	/**
 	 set the LO parameters 
 	 

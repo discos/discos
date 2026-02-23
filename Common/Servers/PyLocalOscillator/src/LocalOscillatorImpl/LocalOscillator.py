@@ -47,89 +47,82 @@
 #
 #------------------------------------------------------------------------
 #
-from __future__ import print_function
-
-import time
-from math import radians
 import Receivers__POA
+import Receivers
+import ReceiversErrorsImpl
+import Acspy.Util.ACSCorba
 from Acspy.Servants.CharacteristicComponent import CharacteristicComponent
 from Acspy.Servants.ContainerServices import ContainerServices 
 from Acspy.Servants.ComponentLifecycle import ComponentLifecycle 
 from Acspy.Util.BaciHelper import addProperty
-from Acspy.Clients.SimpleClient import PySimpleClient
-from Acspy.Nc.Supplier import Supplier
-from Acspy.Common.TimeHelper import getTimeStamp
-from maciErrType import CannotGetComponentEx
-from ACSErrTypeCommonImpl import CORBAProblemExImpl
-from LocalOscillatorImpl.devios import amplitudeDevIO,frequencyDevIO,isLockedDevIO
-import Acspy.Util.ACSCorba
-
-import Receivers
-import ComponentErrorsImpl
-import ComponentErrors
- 
+from LocalOscillatorImpl.devios import amplitudeDevIO, frequencyDevIO, isLockedDevIO, connectedDevIO
 from LocalOscillatorImpl import CommandLine
 from IRAPy import logger
-
-#IP, PORT = "192.168.201.149", 5025 #real hw
 
  
 class LocalOscillator(Receivers__POA.LocalOscillator, CharacteristicComponent, ContainerServices, ComponentLifecycle):
 
-   def __init__(self):
-      CharacteristicComponent.__init__(self)
-      ContainerServices.__init__(self)
-      self.cl=CommandLine.CommandLine() 
-      self.freq=0.  
-      self.power=0.
+    def __init__(self):
+        CharacteristicComponent.__init__(self)
+        ContainerServices.__init__(self)
+        self.cl = None
+        self.freq = 0.0  
+        self.power = 0.0
       
-# ___oOo___
-   def cleanUp(self):
-      self.cl.close()
+    def cleanUp(self):
+        if self.cl:
+            self.cl.close()
    
-   def initialize(self):
-       name= self.getName()
-       dal = Acspy.Util.ACSCorba.cdb()
-       dao=dal.get_DAO_Servant("alma/"+name)
-       IP=  dao.get_string("IP")
-       PORT = int(dao.get_double("PORT"))
-       
-       msg = self.cl.configure(IP,PORT)
-       if msg != 'OK' :
-              reason = "cannot get Synthetizer IP %s component: %s" %(IP,msg)
-              logger.logError(reason)
-              exc = ComponentErrorsImpl.SocketErrorExImpl()
-              exc.setData('reason',msg)
-              raise exc.getComponentErrorsEx()
-       
-       addProperty(self, 'frequency', devio_ref=frequencyDevIO(self.cl))
-       addProperty(self, 'amplitude', devio_ref=amplitudeDevIO(self.cl))
-       addProperty(self, 'isLocked', devio_ref=isLockedDevIO(self,self.cl))
-       self.rfon()
-   
-   def set(self,rf_power,rf_freq):
-     try:
-        self.cl.setPower(rf_power)
-        self.cl.setFrequency(rf_freq)
-        self.freq=rf_freq
-        self.power=rf_power
-        logger.logNotice('SYNT FREQ  set to %f ' %self.freq)
-        logger.logNotice('SYNT POWER set to %f ' %self.power)
-     except CommandLine.CommandLineError as ex :
-        logger.logError(ex,message)
+    def initialize(self):
+        name = self.getName()
+        dal = Acspy.Util.ACSCorba.cdb()
+        dao = dal.get_DAO_Servant("alma/" + name)
+        IP = dao.get_string("IP")
+        PORT = int(dao.get_double("PORT"))
 
-   def get(self):
-       msg,power=self.cl.getPower()
-       msg,freq= self.cl.getFrequency()
-       print(power)
-       print(freq)
-       return (power,freq)
-  
-   def rfon(self):
-       self.cl.rfOn()
-  
-   def rfoff(self):
-       self.cl.rfOff()
+        self.cl = CommandLine.CommandLine(IP, PORT)
+
+        addProperty(self, 'frequency', devio_ref=frequencyDevIO(self.cl))
+        addProperty(self, 'amplitude', devio_ref=amplitudeDevIO(self.cl))
+        addProperty(self, 'isLocked', devio_ref=isLockedDevIO(self, self.cl))
+        addProperty(self, 'connected', devio_ref=connectedDevIO(self.cl))
+
+        try:
+            self.cl.rfOn()
+            logger.logNotice("Synthetiser connected and RF turned on.")
+        except ReceiversErrorsImpl.SynthetiserErrorExImpl as ex:
+            logger.logWarning(
+                "Could not reach hardware during initialization,"
+                f"starting disconnected. {ex.getDetails()}"
+            )
    
-   def getInternalFrequency(self):
-       return self.freq
+    def set(self, rf_power, rf_freq):
+        try:
+            self.cl.setPower(rf_power)
+            self.cl.setFrequency(rf_freq)
+            self.freq = rf_freq
+            self.power = rf_power
+            logger.logNotice('SYNT FREQ  set to %f ' %self.freq)
+            logger.logNotice('SYNT POWER set to %f ' %self.power)
+        except ReceiversErrorsImpl.SynthetiserErrorExImpl as exc:
+            raise exc.getReceiversErrorsEx()
+
+    def get(self):
+        try:
+            msg, power = self.cl.getPower()
+            msg, freq = self.cl.getFrequency()
+            return (power, freq)
+        except ReceiversErrorsImpl.SynthetiserErrorExImpl as exc:
+            raise exc.getReceiversErrorsEx()
+  
+    def rfon(self):
+        try:
+            self.cl.rfOn()
+        except ReceiversErrorsImpl.SynthetiserErrorExImpl as exc:
+            raise exc.getReceiversErrorsEx()
+  
+    def rfoff(self):
+        try:
+            self.cl.rfOff()
+        except ReceiversErrorsImpl.SynthetiserErrorExImpl as exc:
+            raise exc.getReceiversErrorsEx()
