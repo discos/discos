@@ -85,6 +85,113 @@ public:
 		}
 	}
 	
+	void tuneLocalOscillator_checkSeveralCombinations() {
+		double fs=-375;
+		double fbw=275;
+		double bs=0;
+		double bbw=800;
+	 	double lo=21000;
+	 	double topo=22080;
+	 	IRA::CString dev="LO";
+		bool res=IRA::CIRATools::tuneLocalOscillator(fs,fbw,lo,bs,bbw,topo,dev);
+		ASSERT_TRUE(res);
+		EXPECT_NEAR(lo,22480.0,TOLERANCE);
+		EXPECT_NEAR(bs,0.0,TOLERANCE);
+		
+		fs=-375;
+		fbw=275;
+		bs=0;
+		bbw=1400;
+	 	lo=21000;
+	 	topo=22080;
+	 	dev="ALL";
+		res=IRA::CIRATools::tuneLocalOscillator(fs,fbw,lo,bs,bbw,topo,dev);
+		ASSERT_FALSE(res) << "Backend center band is outside the IF boundaries";
+		
+		fs=-375;
+		fbw=275;
+		bs=0;
+		bbw=1200;
+	 	lo=21000;
+	 	topo=22080;
+	 	dev="ALL";
+		res=IRA::CIRATools::tuneLocalOscillator(fs,fbw,lo,bs,bbw,topo,dev);
+		ASSERT_TRUE(res);
+		EXPECT_NEAR(lo,22680.0,TOLERANCE);
+		EXPECT_NEAR(bs,0.0,TOLERANCE);
+		
+		fs=-375;
+		fbw=800;
+		bs=-100;
+		bbw=1200;
+	 	lo=21000;
+	 	topo=22080;
+	 	dev="LO";
+		res=IRA::CIRATools::tuneLocalOscillator(fs,fbw,lo,bs,bbw,topo,dev);	
+		ASSERT_TRUE(res);
+		EXPECT_NEAR(lo,22780.0,TOLERANCE);
+		EXPECT_NEAR(bs,-100.0,TOLERANCE);
+		
+		fs=-375;
+		fbw=800;
+		bs=-100;
+		bbw=1200;
+	 	lo=21000;
+	 	topo=22080;
+	 	dev="BCK";
+		res=IRA::CIRATools::tuneLocalOscillator(fs,fbw,lo,bs,bbw,topo,dev);		
+		ASSERT_FALSE(res) << "Target topocentric frequency could not be reached without moving the LO";	
+		
+		fs=-375;
+		fbw=800;
+		bs=-100;
+		bbw=1200;
+	 	lo=22800;
+	 	topo=22080;
+	 	dev="BCK";
+		res=IRA::CIRATools::tuneLocalOscillator(fs,fbw,lo,bs,bbw,topo,dev);		
+		ASSERT_TRUE(res);
+		EXPECT_NEAR(lo,22800.0,TOLERANCE);
+		EXPECT_NEAR(bs,-120.0,TOLERANCE);	
+		
+		fs=-375;
+		fbw=800;
+		bs=-100;
+		bbw=1200;
+	 	lo=22800;
+	 	topo=22080;
+	 	dev="ALL";
+		res=IRA::CIRATools::tuneLocalOscillator(fs,fbw,lo,bs,bbw,topo,dev);	
+		ASSERT_TRUE(res);
+		EXPECT_NEAR(lo,22780.0,TOLERANCE);
+		EXPECT_NEAR(bs,-100.0,TOLERANCE);		
+		
+		fs=-375;
+		fbw=275;
+		bs=400;
+		bbw=64;
+	 	lo=21000;
+	 	topo=22080;
+	 	dev="LO";
+		res=IRA::CIRATools::tuneLocalOscillator(fs,fbw,lo,bs,bbw,topo,dev);
+		ASSERT_TRUE(res);
+		EXPECT_NEAR(lo,22512.0,TOLERANCE);
+		EXPECT_NEAR(bs,400.0,TOLERANCE);
+		
+		fs=-375;
+		fbw=275;
+		bs=300;
+		bbw=64;
+	 	lo=21000;
+	 	topo=22080;
+	 	dev="ALL";
+		res=IRA::CIRATools::tuneLocalOscillator(fs,fbw,lo,bs,bbw,topo,dev);
+		ASSERT_TRUE(res);
+		EXPECT_NEAR(lo,22592.5,TOLERANCE);
+		EXPECT_NEAR(bs,480.5,TOLERANCE);	
+		
+	}
+	
 	void calculateIFLimits_WlowScenario() {
 		double out_IF_min, out_IF_max , out_IF_start, out_IF_bw;
 		bool result=IRA::CIRATools::calculateIFlimits(
@@ -109,27 +216,27 @@ public:
 		// OL2:   3 - 8 GHz (High Side -> -1)
 		// IF2:   0.375 - 0.650 GHz  (Pharos 2 derived band)
     
-   	IRA::DoubleConversionAnalysis res = IRA::CIRATools::analyzeDualConversion(
-       80.0, 98.0,       // RF Range Hardware
-       96.0, 98.0,       // OL1 Range
-       2.0, 18.0,        // IF1 Filter
-       3.0, 8.0,         // OL2 Range
-       0.375, 0.650,     // IF2 Filter
-       -1, -1            // HSI, HSI
-   	);
+   		IRA::DoubleConversionAnalysis res = IRA::CIRATools::analyzeDualConversion(
+       	 80.0, 98.0,       // RF Range Hardware
+       	 96.0, 98.0,       // OL1 Range
+       	 2.0, 18.0,        // IF1 Filter
+       	 3.0, 8.0,         // OL2 Range
+       	 0.375, 0.650,     // IF2 Filter
+       	 -1, -1            // HSI, HSI
+   		);
    
 		ASSERT_TRUE(res.valid_configuration);
    
-   	// Verifica OL Equivalente
-   	// HSI: OL_eq = OL1 - OL2
-   	// Min: 96 - 7 = 89
+   		// Verifica OL Equivalente
+   		// HSI: OL_eq = OL1 - OL2
+   		// Min: 96 - 7 = 89
   		// Max: 98 - 7 = 91
-   	EXPECT_NEAR(res.min_OL_eq, 88.0, TOLERANCE);
-   	EXPECT_NEAR(res.max_OL_eq, 95.0, TOLERANCE);
+   		EXPECT_NEAR(res.min_OL_eq, 88.0, TOLERANCE);
+   		EXPECT_NEAR(res.max_OL_eq, 95.0, TOLERANCE);
 
-   	// Verifica Inversione Spettro
-   	// HSI + HSI = 2 inversioni = Diritto (false)
-   	EXPECT_FALSE(res.spectrum_inverted);
+   		// Verifica Inversione Spettro
+   		// HSI + HSI = 2 inversioni = Diritto (false)
+   		EXPECT_FALSE(res.spectrum_inverted);
 
     	// Verifica Banda RF Convertita
     	// Spettro Diritto: RF = OL_eq + IF2

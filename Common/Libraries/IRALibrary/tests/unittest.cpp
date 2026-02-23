@@ -94,6 +94,11 @@ TEST_F(IRALibrary_IRATools, IFLimits_WlowScenario){
 	calculateIFLimits_WlowScenario();
 }
 
+TEST_F(IRALibrary_IRATools, tuneLocalOscillator_checkSeveralCombinations){
+	tuneLocalOscillator_checkSeveralCombinations();
+}
+
+
 /*TEST_F(IRALibrary_IRATools,skyFrequency_intersection){
 	EXPECT_TRUE(skyFrequency_intersection());
 }*/

@@ -16,6 +16,14 @@
 /* Andrea Orlati(aorlati@ira.inaf.it)  08/04/2014     added initRecording(), StartRecording(), StopRecording and TerminateRecording().*/
 /* Andrea Orlati(aorlati@ira.inaf.it)  08/04/2014     implemented the skidip scan.*/
 
+#include <Cplusplus11Helper.h>
+
+C11_IGNORE_WARNING_PUSH
+C11_IGNORE_WARNING("-Wdeprecated-declarations")
+C11_IGNORE_WARNING("-Wmisleading-indentation")
+C11_IGNORE_WARNING("-Wcatch-value=")
+C11_IGNORE_WARNING("-Wsequence-point")
+
 
 #include <acsContainerServices.h>
 #include <ManagementErrors.h>
@@ -35,6 +43,9 @@
 #include <StationConfig.h>
 #include "Configuration.h"
 #include "Schedule.h"
+
+C11_IGNORE_WARNING_POP
+
 
 #define MINOR_SERVO_AVAILABLE m_config->getMinorServoBossComponent()!=""
 
