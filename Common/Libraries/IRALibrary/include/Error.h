@@ -67,7 +67,8 @@ public:
 		ReceiveError=0x08,
 		UnspecifiedHost=0x09,
 		SockConfiguration=0x0a,
-		OperationNPermitted=0x0b
+		OperationNPermitted=0x0b,
+		SocketAlreadyCreated=0x0c
 	};
 	/**
 	 * List of all possible dataset errors 

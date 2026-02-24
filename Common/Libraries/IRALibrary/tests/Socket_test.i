@@ -23,6 +23,18 @@ public:
             return ::testing::AssertionFailure();
     }
 
+    ::testing::AssertionResult doubleCreateSocket() {
+        IRA::CError error;
+        IRA::CSocket socket;
+        socket.Create(error);
+        if (error.isNoError())  { // first creation ok
+            if (socket.Create(error))==IRA::CSocket::FAIL) { // second creation should fail;
+                return ::testing::AssertionSuccess();
+            else return ::testing::AssertionFailure(); // 
+        }
+        else return ::testing::AssertionFailure();
+    }
+
 protected:
     static void TearDownTestCase() {
     }
