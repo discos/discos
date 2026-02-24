@@ -440,10 +440,9 @@ CSocket::OperationResult CSocket::EventSelect(CError& Err,AsyncEvent Event,bool 
 
 CSocket::OperationResult CSocket::Close(CError& Err)
 {
+	if (!Err.isNoError()) return FAIL;
 	if (getStatus()==NOTCREATED) {
-		if(Err.isNoError()) {
-			_SET_ERROR(Err,CError::SocketType,CError::SocketNCreated,"CSocket::Close()");
-		}
+		_SET_ERROR(Err,CError::SocketType,CError::SocketNCreated,"CSocket::Close()");
 		return FAIL;
 	}
 	if (m_iSocket!=0) close(m_iSocket);
