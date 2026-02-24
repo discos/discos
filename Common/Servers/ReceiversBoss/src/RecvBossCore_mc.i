@@ -221,7 +221,7 @@ void CRecvBossCore::setLO(const ACS::doubleSeq& lo) throw (ComponentErrors::Vali
 	//***********************************************************************/
 	// range checks must be performed, Also the resulting bandwidth, according the lo value and the RF ranges must be recomputed
 	//**********************************************************************/
-	if (m_currentRecvCode=="KKC") {
+	if ((m_currentRecvCode=="KKC") || (m_currentRecvCode=="KQW")) {
 		loadReceiver(); //  ComponentErrors::CouldntGetComponentExImpl
 		try {
 			m_currentRecv->setLO(lo);

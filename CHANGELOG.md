@@ -106,6 +106,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/
     project #2 - Completed integration of new SRT Minor Servos
     issue #2   - Completed integration of solar system planets, sun and moon tracking. Other bodies will be added in the future.
     issue #936 - Added minor servos user and system offsets inside the FITS files SERVO TABLE
+    issue #956 - Added control of the TRIband Receiver. Also included the 2IF convertion system support. The configuration related to this support is now based
+                 on the PHAROS2 WS systems. New avilable RF/IF limits are also available. Support for the spectral inversion added.
+
 
 ## Fixed
 ## Changed
@@ -113,3 +116,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/
     issue #621 - The maximum number of chars of the schedule file name is now 37 (extension included). This is done for fits file and archive issue with the lenght of the schedule name.
     issue #853 - The setSection command can now accept a wildcard (*) as section identifier. This will allow to configure all backend sections with a single command
     issue #895 - FitZilla version 1.23 released, the rest frequency is also added in the header of the Section table
+    issue #960 - FTrack reviewed in order to support spectral inversion in cases where e Upper Side Injection in present in the IF chain.

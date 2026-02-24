@@ -454,23 +454,30 @@ void CComponentCore::setLO(const ACS::doubleSeq& ilo)
 	ACS::doubleSeq lo;
 	double ol2;
 	DWORD k;
+	WORD inputLen;
 	
 	IRA::CString bandCode;
 	baci::ThreadSyncGuard guard(&m_mutex);
-	if (ilo.length()==0) {
+	inputLen=ilo.length();
+	if (inputLen==0) {
 		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::setLO");
 		impl.setReason("at least one value must be provided");
 		throw impl;
 	}
-	if (ilo.length()>m_configuration.getFeeds()) {
+	if (inputLen>m_configuration.getArrayLen()) {
 		_EXCPT(ComponentErrors::ValidationErrorExImpl,impl,"CComponentCore::setLO");
-		impl.setReason("too many values provided, one for each receiver is required");
-   	throw impl;
+		impl.setReason("too many values, maximum one value for each IF chain could be provided");
+   		throw impl;
 	}
 	lo.length(m_configuration.getFeeds());
+	//This is a workaround. The semantics of setLO allows to set a local oscillator for ifchain but
+	//this competent supports only one OL for Feed. 
+	DWORD pos; 
 	for (WORD i=0;i<m_configuration.getFeeds();i++) {
-		if (i<ilo.length()) {
-			lo[i]=ilo[i];
+		if (inputLen<=m_configuration.getFeeds()) pos=i; // 0 < inputLen <= Feeds
+		else pos=m_configuration.getArrayIndex(i); // inputLen > Feeds
+		if (pos<inputLen) {
+			lo[i]=ilo[pos];
 		}
 		else {
 			lo[i]=-1;
@@ -516,7 +523,6 @@ void CComponentCore::setLO(const ACS::doubleSeq& ilo)
 	}
    setLO(lo,ol1,ol2);
 }
-
 
 /*
 throw (
@@ -763,6 +769,7 @@ void CComponentCore::getCalibrationMark(
             	f2=f1+realBw;
             }          
             f1/=1000.0; f2/=1000.0; //frequencies in giga Hertz
+            realFreq=f1; // I need the start RF frequency
             ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"Resulting left IF band %lf %lf",realFreq,realBw));
             ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"Resulting left RF band %lf %lf",f1,f2));
             if (f1>f2) std::swap(f1,f2);
@@ -788,6 +795,7 @@ void CComponentCore::getCalibrationMark(
             	f2=f1+realBw;
             }          
             f1/=1000.0; f2/=1000.0; //frequencies in giga Hertz
+            realFreq=f1; // I need the start RF frequency
             ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"Resulting right IF band %lf %lf",realFreq,realBw));
             ACS_LOG(LM_FULL_INFO,"CComponentCore::getCalibrationMark()",(LM_DEBUG,"Resulting right RF band %lf %lf",f1,f2));
             if (f1>f2) std::swap(f1,f2);

@@ -383,7 +383,126 @@ double CIRATools::getHWAzimuth(const double& current,const double& dest,const do
 				newOne=tmpDest;
 			}
 	}
-	return newOne;
+	return newOne;	
+}
+
+bool CIRATools::tuneLocalOscillator(const double& fstartFreq, const double& fbw, double& fol, 
+                double& bstartFreq, const double& bbw, 
+                const double& topoFreq, const IRA::CString& dev)
+{
+    // --- 1. Normalization and Initial Setup ---
+    // Determine Spectral Inversion flags based on input signs
+    bool fe_IsHSI = (fstartFreq < 0); // Frontend Hardware configuration
+    bool be_IsHSI = (bstartFreq < 0); // Backend Hardware configuration (preserve intent)
+    // Convert frequencies to absolute values (Physical IF Domain)
+    double f_abs_start = std::abs(fstartFreq);
+    double f_abs_end   = f_abs_start + fbw;
+  
+    // Current Backend absolute limits
+    double b_abs_start = std::abs(bstartFreq);
+    double b_abs_end   = b_abs_start + bbw;
+
+    // Target IF: We want the signal to appear at the center of the Backend
+    double if_target_center = b_abs_start + (bbw / 2.0);
+
+    IRA::CString mode = dev;
+
+    // --- 2. Handle "ALL" Mode ---
+    if (mode == "ALL") {
+        // Priority: Try to tune using only the LO first.
+        // Check if the current backend center (target IF) is physically within the Frontend passband.
+        
+        if (if_target_center < f_abs_start || if_target_center > f_abs_end) {
+            // The current backend position is invalid or outside the frontend window.
+            // Strategy: Recenter the backend to the middle of the frontend passband.
+            double f_center = f_abs_start + (fbw / 2.0);
+            double new_b_start = f_center - (bbw / 2.0);
+            
+            if (new_b_start < 0) return false;
+            
+            // Apply the new start frequency while preserving the original backend sign (inversion status)
+            bstartFreq = be_IsHSI ? -new_b_start : new_b_start;
+            
+            // Update local working variables for the subsequent LO calculation
+            b_abs_start = new_b_start;
+            b_abs_end   = new_b_start + bbw;
+            if_target_center = b_abs_start + (bbw / 2.0);
+        }
+        
+        // Now proceed as if it were a standard "LO" request
+        mode = "LO";
+    }
+    // --- 3. Execute Mode ---
+    if (mode == "LO") {
+        // --- Adjust Frontend Local Oscillator (fol) ---
+        
+        // Calculate the required LO frequency based on the injection side
+        if (!fe_IsHSI) {
+            // Low Side Injection (LSI): RF = LO + IF  =>  LO = RF - IF
+            fol = topoFreq - if_target_center;
+        } else {
+            // High Side Injection (HSI): IF = LO - RF  =>  LO = RF + IF
+            fol = topoFreq + if_target_center;
+        }
+
+
+        // Validation: Oscillator frequency cannot be negative
+        if (fol < 0) return false;
+
+        // --- INTERSECTION CHECK ---
+        // 1. Calculate the physical overlap between Frontend and Backend
+        double overlapStart = std::max(f_abs_start, b_abs_start);
+        double overlapEnd   = std::min(f_abs_end, b_abs_end);
+
+        // 2. Check if an intersection actually exists (non-zero width)
+        if (overlapStart >= overlapEnd) return false;
+
+        // 3. Verify that the specific target frequency falls within the valid overlap
+        if (if_target_center < overlapStart || if_target_center > overlapEnd) {
+            return false;
+        }
+    }
+    else if (mode == "BCK") {
+        // --- Adjust Backend Frequency (bstartFreq) ---
+        
+        // Calculate the resulting IF coming out of the mixer with the fixed LO
+        double current_if_signal;
+        
+        if (!fe_IsHSI) {
+            // LSI: IF = RF - LO
+            current_if_signal = topoFreq - fol;
+        } else {
+            // HSI: IF = LO - RF
+            current_if_signal = fol - topoFreq;
+        }
+
+        // Validation: IF cannot be negative (implies unreachable with current injection side)
+        if (current_if_signal < 0) return false;
+
+        // Calculate new Backend start to center this IF
+        double new_b_abs_start = current_if_signal - (bbw / 2.0);
+        double new_b_abs_end   = new_b_abs_start + bbw;
+
+        // --- INTERSECTION CHECK ---
+        // Verify if the new Backend position overlaps with the Frontend
+        double overlapStart = std::max(f_abs_start, new_b_abs_start);
+        double overlapEnd   = std::min(f_abs_end, new_b_abs_end);
+
+        if (overlapStart >= overlapEnd) return false;
+
+        // Verify that the signal falls within the valid overlap region
+        if (current_if_signal < overlapStart || current_if_signal > overlapEnd) {
+            return false;
+        }
+
+        // Apply result: Assign new start frequency, preserving the original Backend sign
+        bstartFreq = be_IsHSI ? -new_b_abs_start : new_b_abs_start;
+    }
+    else {
+        // Invalid mode string
+        return false; 
+    }
+    return true;
 }
 
 bool CIRATools::calculateIFlimits(double LO_freq, 

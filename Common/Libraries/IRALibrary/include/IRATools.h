@@ -405,6 +405,24 @@ public:
 	 */	
 	static bool skyFrequency(const double& bf,const double& bbw,const double& rf,const double& rbw,double lo,
 	  double& iff,double& ifbw,double& RF1, double& RF2);
+	  
+	/**
+	* Calculates the Local Oscillator (LO) frequency and/or Backend start frequency
+	* to tune a specific RF frequency (topoFreq) to the center of the Backend.
+	*
+	* @param fstartFreq Frontend start frequency (negative value implies High Side Injection/Spectral Inversion).
+	* @param fbw        Frontend bandwidth.
+	* @param fol        [Output/Input] Local Oscillator frequency.
+	* @param bstartFreq [Output/Input] Backend start frequency (negative value implies Spectral Inversion).
+	* @param bbw        Backend bandwidth.
+	* @param topoFreq   The RF frequency to tune.
+	* @param dev        Control mode: "LO" (adjust oscillator only), "BCK" (adjust backend only), 
+	* or "ALL" (adjust both, prioritizing LO).
+ 	* @return           True if tuning is possible and valid, False otherwise.
+	*/
+	static bool tuneLocalOscillator(const double& fstartFreq, const double& fbw, double& fol, 
+                double& bstartFreq, const double& bbw, 
+                const double& topoFreq, const IRA::CString& dev); 
 	
 	/**
  	* Calculates the resulting IF band limits, Start Frequency, and Bandwidth.
