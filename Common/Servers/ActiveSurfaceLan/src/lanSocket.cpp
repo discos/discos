@@ -10,7 +10,8 @@ lanSocket::lanSocket() : CSocket()
 
 lanSocket::~lanSocket()
 {
-	Close(m_Error);
+	CError tmpErr;
+	Close(tmpErr);
 }
 
 int lanSocket::Init(CString Address,WORD Port)
@@ -30,7 +31,8 @@ int lanSocket::Init(CString Address,WORD Port)
 	if ((err=Connect(m_Error,m_slanAddress,m_wlanPort))==FAIL) {
 		ACS_DEBUG("::lanSocket::lanSocket","Error connecting socket");
 		m_soStat=TOUT;
-		Close(m_Error);
+		CError tmpErr;
+		Close(tmpErr);
 		return err;
 	} else {
 		ACS_SHORT_LOG((LM_INFO,"::lanSocket::lanSocket:Socket connected"));
@@ -38,7 +40,8 @@ int lanSocket::Init(CString Address,WORD Port)
 		if((err=setSockMode(m_Error,BLOCKINGTIMEO,TIMEO,TIMEO))!=SUCCESS) {
 			ACS_DEBUG("::lanSocket::lanSocket","Error configuring the socket");
 			m_soStat=NOTRDY;
-			Close(m_Error);
+			CError tmpErr;
+			Close(tmpErr);
 			return err;
 		}
 
@@ -46,7 +49,8 @@ int lanSocket::Init(CString Address,WORD Port)
 		if ((err=setSockOption(m_Error,SO_SNDBUF,&Val,sizeof(int))) != SUCCESS) {
 			ACS_DEBUG("::lanSocket::lanSocket","Error configuring buffer size");
 			m_soStat=NOTRDY;
-			Close(m_Error);
+			CError tmpErr;
+			Close(tmpErr);
 			return err;
 		}
 		ACS_SHORT_LOG((LM_INFO,"::lanSocket::lanSocket: Socket succesfully configured"));
@@ -175,8 +179,8 @@ int lanSocket::reConnect(int error)
 		}
 		case FAIL:
 		case 0: {	//socket remotely closed. Try to reconnect...
-			Close(m_Error);
 			m_Error.Reset();
+			Close(m_Error);
 			m_soStat = NOTRDY;
 			err=Init(m_slanAddress,m_wlanPort);
 			if(err == 0) m_soStat = READY;
