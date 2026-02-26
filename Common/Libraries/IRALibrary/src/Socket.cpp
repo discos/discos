@@ -28,6 +28,10 @@ CSocket::OperationResult CSocket::Create(CError& Err,SocketType Type,WORD Socket
 {
 	struct sockaddr_in addr;
 	if (!Err.isNoError()) return FAIL;
+	if (getStatus()!=NOTCREATED) {
+		_SET_ERROR(Err,CError::SocketType,CError::SocketAlreadyCreated,"CSocket::Create()");
+		return FAIL;
+	}
 	// convert address from dotted, human readable format to a network byte order 32 bit integer
 	if (IPAddr==NULL) {  // use the address of the local host.
 		addr.sin_addr.s_addr=htonl(INADDR_ANY);
