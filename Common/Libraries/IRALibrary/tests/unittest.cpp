@@ -115,6 +115,10 @@ TEST_F(IRALibrary_Socket,sendWithoutConnection){
 	EXPECT_TRUE(sendWithoutConnection());
 }
 
+TEST_F(IRALibrary_Socket,doubleCreateSocket){
+	EXPECT_TRUE(doubleCreateSocket());
+}
+
 TEST_F(IRALibrary_CError,copyConstructor_segfault){
 	EXPECT_TRUE(copyConstructor_segfault());
 }
