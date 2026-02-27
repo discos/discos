@@ -3,11 +3,11 @@ template <class T> T USDDevIO<T>::read(ACS::Time &timestamp) throw (ASErrors::AS
     ACS_TRACE("::USDDevIO::read()");
 
     ACS::Time now = getTimeStamp();
-    if(!m_pusd.m_available && now < m_pusd.m_next_retry_time)
+    if(!m_pusd.m_available)
     {
-        if(m_cmd != STAT)
+        if(now < m_pusd.m_next_retry_time || m_cmd != STAT)
         {
-            throw ASErrors::USDUnavailableExImpl(__FILE__, __LINE__, "USDDevIO::read()").getASErrorsEx();
+            throw ASErrors::USDUnavailableExImpl(__FILE__, __LINE__, "USDDevIO::read()");
         }
     }
 
@@ -61,10 +61,9 @@ template <class T> void USDDevIO<T>::write(const T& value, ACS::Time &timestamp)
     CORBA::Long par;
     ACS_TRACE("::USDDevIO::write()");
 
-    ACS::Time now = getTimeStamp();
-    if(!m_pusd.m_available && now < m_pusd.m_next_retry_time)
+    if(!m_pusd.m_available)
     {
-        throw ASErrors::USDUnavailableExImpl(__FILE__, __LINE__, "USDDevIO::read()").getASErrorsEx();
+        throw ASErrors::USDUnavailableExImpl(__FILE__, __LINE__, "USDDevIO::write()");
     }
 
     if(m_wLen == 0)

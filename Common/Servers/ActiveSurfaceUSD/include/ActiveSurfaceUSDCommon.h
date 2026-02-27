@@ -173,20 +173,24 @@
     try\
     {\
         RETVAR = m_##PROP##_sp->getDevIO()->read(timestamp);\
-        if(!m_available && m_failures == MAX_FAILURES)\
+        if(!m_available)\
         {\
-            ACS_LOG(LM_FULL_INFO, ROUTINE, (LM_NOTICE, "USD available again."));\
+            if(m_failures > 0)\
+            {\
+                ACS_LOG(LM_FULL_INFO, ROUTINE, (LM_NOTICE, "USD available again."));\
+            }\
             m_available = true;\
             m_usdStatus.available = true;\
             m_lanStatus->write(m_usdStatus);\
             m_backoff_time = MIN_BACKOFF;\
+            m_hwInitialized = false;\
         }\
         m_failures = 0;\
     }\
     catch(ASErrors::ASErrorsExImpl& exImpl)\
     {\
         exImplCheck(exImpl, ROUTINE);\
-        if(!m_available)\
+        if(!m_available && exImpl.getErrorCode() != ASErrors::USDUnavailable)\
         {\
             m_next_retry_time = getTimeStamp() + m_backoff_time;\
             m_backoff_time = std::min(m_backoff_time * 2, MAX_BACKOFF);\
@@ -214,7 +218,7 @@
     catch(ASErrors::ASErrorsExImpl& exImpl)\
     {\
         exImplCheck(exImpl, ROUTINE);\
-        if(!m_available)\
+        if(!m_available && exImpl.getErrorCode() != ASErrors::USDUnavailable)\
         {\
             m_next_retry_time = getTimeStamp() + m_backoff_time;\
             m_backoff_time = std::min(m_backoff_time * 2, MAX_BACKOFF);\

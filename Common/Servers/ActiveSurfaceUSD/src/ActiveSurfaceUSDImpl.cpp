@@ -24,12 +24,14 @@ using namespace maci;
 
 USDImpl::USDImpl(const ACE_CString& CompName, maci::ContainerServices* containerServices) :
         CharacteristicComponentImpl(CompName,containerServices),
-        m_available(true),
+        m_available(false),
         actuatorsCorrections(nullptr),
         elevations(nullptr),
         m_status(UNAV),
         m_backoff_time(MIN_BACKOFF),
         m_next_retry_time(getTimeStamp()),
+        m_hwInitialized(false),
+        m_isInitializing(false),
         m_delay_sp(this),
         m_cmdPos_sp(this),
         m_Fmin_sp(this),
@@ -53,7 +55,6 @@ USDImpl::USDImpl(const ACE_CString& CompName, maci::ContainerServices* container
         m_usdStatus.id = m_addr;
         m_usdStatus.available = m_available;
         m_usdStatus.status = m_status;
-
         m_lanStatus->write(m_usdStatus);
 
         std::stringstream lanNameStream;
@@ -170,51 +171,11 @@ void USDImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 
     try
     {
-        _GET_PROP(status, m_status, "usdImpl::initialize()")
-
-        stop(); // terminate any ongoing movement
-
-        if(!(m_calibrate && m_status&ENBL))
-        {
-            reset(); // load the default params.
-        }
-        else
-        {
-            //* restore defaults *//
-            _SET_LDEF(delay, "USDImpl::initialize()");
-            _SET_LDEF(Fmax,  "USDImpl::initialize()");
-            _SET_LDEF(Fmin,  "USDImpl::initialize()");
-            _SET_LDEF(acc,   "USDImpl::initialize()");
-            _SET_LDEF(uBits, "USDImpl::initialize()");
-        }
-        _GET_PROP(status,m_status,"usdImpl::initialize()")
-        _GET_PROP(actPos,m_currentStep,"usdImpl::initialize()")
-
-        _GET_PROP(delay, m_usdStatus.delay, "usdImpl::initialize()");
-        _GET_PROP(Fmin, m_usdStatus.minimumFrequency, "usdImpl::initialize()");
-        _GET_PROP(Fmax, m_usdStatus.maximumFrequency, "usdImpl::initialize()");
-        _GET_PROP(acc, m_usdStatus.accelerationFactor, "usdImpl::initialize()");
-        _GET_PROP(softVer, m_usdStatus.softwareVersion, "usdImpl::initialize()");
-        _GET_PROP(type, m_usdStatus.type, "usdImpl::initialize()");
-        _GET_PROP(cmdPos, m_usdStatus.commandedPosition, "usdImpl::initialize()");
-
-        m_available = true;
-        m_usdStatus.status = m_status;
-        m_usdStatus.currentPosition = m_currentStep;
-
-        ACS_SHORT_LOG((LM_INFO, "%s: initialized successfully.", name()));
-    }
-    catch (ASErrors::ASErrorsEx& ex)
-    {
-        ACS_SHORT_LOG((LM_WARNING, "%s: initialization failed. Starting disconnected.", name()));
-    }
-    catch (CORBA::SystemException& ex)
-    {
-        ACS_SHORT_LOG((LM_WARNING, "%s: CORBA Exception during initialization. Starting disconnected.", name()));
+        setupHardware();
     }
     catch (...)
     {
-        ACS_DEBUG("::usdImpl::initialize", "Unknown exception!");
+        ACS_SHORT_LOG((LM_WARNING, "%s: initialization failed. Starting disconnected.", name()));
     }
 
     m_usdStatus.available = m_available;
@@ -223,91 +184,9 @@ void USDImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 
 void USDImpl::execute() throw (ACSErr::ACSbaseExImpl)
 {
-/*    // Activate the LAN component
-    lanCobName.Format("AS/SECTOR%02d/LAN%02d",m_sector,m_lanNum);
-
-    // Use container to activate the object
-    ACS_SHORT_LOG((LM_INFO, "Getting component: %s", (const char*)lanCobName) );
-    //MOD_LAN::lan_var obj=MOD_LAN::lan::_nil();
-    SRTActiveSurface::lan_var obj=SRTActiveSurface::lan::_nil();
-    try {
-        obj=cs->getComponent<SRTActiveSurface::lan>((const char *)lanCobName);
-    }
-    catch (maciErrType::CannotGetComponentExImpl)
-    {
-        ACS_LOG(LM_SOURCE_INFO,"USDImpl:initialize()",(LM_ERROR,"Error linking lan component!"));
-        ASErrors::CannotGetUSDExImpl exImpl(__FILE__,__LINE__,"USDImpl::initialize()");
-        throw acsErrTypeLifeCycle::LifeCycleExImpl(exImpl,__FILE__,__LINE__,"USDImpl::initialize()");
-    }
-
-    //m_pLan = MOD_LAN::lan::_narrow(obj.in());
-    m_pLan = SRTActiveSurface::lan::_narrow(obj.in());
-    ACS_SHORT_LOG((LM_INFO,"lan linked!"));
-
-    m_available = true;
-
-    ACE_CString CompName(this->name());
-
-    ACS_SHORT_LOG((LM_INFO,"Property creation..."));
-    try {
-        m_delay_sp = new RWlong(CompName+":delay",getComponent(),new USDDevIO<Long>(this,m_pLan,m_addr,DELAY,1,0),true);
-        m_Fmin_sp=new RWlong(CompName+":Fmin",getComponent(),new USDDevIO<Long>(this,m_pLan,m_addr,FMIN,2,0),true);
-        m_Fmax_sp=new RWlong(CompName+":Fmax",getComponent(),new USDDevIO<Long>(this,m_pLan,m_addr,FMAX,2,0),true);
-        m_acc_sp=new RWlong(CompName+":acc",getComponent(),new USDDevIO<Long>(this,m_pLan,m_addr,ACCL,1,0),true);
-        m_uBits_sp=new RWlong(CompName+":uBits",getComponent(),new USDDevIO<Long>(this,m_pLan,m_addr,UBIT,1,0),true);
-        m_actPos_sp=new ROlong(CompName+":actPos",getComponent(),new USDDevIO<Long>(this,m_pLan,m_addr,APOS,0,4),true);
-        m_status_sp=new ROpattern(CompName+":status",getComponent(),new USDDevIO<ACS::pattern>(this,m_pLan,m_addr,STAT,0,3),true);
-        m_softVer_sp=new ROlong(CompName+":softVer",getComponent(),new USDDevIO<Long>(this,m_pLan,m_addr,SVER,0,1),true);
-        m_type_sp=new ROlong(CompName+":type",getComponent(),new USDDevIO<Long>(this,m_pLan,m_addr,USDT,0,1),true);
-        m_cmdPos_sp= new RWlong(CompName+":cmdPos",getComponent(),new USDDevIO<Long>(this,m_pLan,m_addr,CPOS,4,0),true);
-        m_gravCorr_sp=new  RWdouble(CompName+":gravCorr",getComponent());
-        m_lmCorr_sp=new  RWdouble(CompName+":lmCorr",getComponent());
-        m_userOffset_sp=new  RWdouble(CompName+":userOffset",getComponent());
-    }
-    catch (ASErrors::ASErrorsExImpl ex)
-    {
-        _THROW_EXCPT_FROM_EXCPT(acsErrTypeLifeCycle::LifeCycleExImpl,ex,"usdImpl::initialize()")
-    }
-
-    try {
-        stop();            // terminate any ongoing movement
-        printf("calibrate = %d\n", m_calibrate);
-        printf("ENBL      = %d\n", m_status&ENBL);
-        _GET_PROP(status,m_status,"usdImpl::initialize()")
-        printf("calibrate = %d\n", m_calibrate);
-        printf("ENBL      = %d\n", m_status&ENBL);
-        if(!(m_calibrate && m_status&ENBL)) {
-            reset(); // load the default params.
-            printf("calibrate = %d\n", m_calibrate);
-            printf("ENBL      = %d\n", m_status&ENBL);
-        }
-    }
-    catch (ASErrors::ASErrorsEx& ex)
-    {
-        _THROW_EXCPT_FROM_EXCPT(acsErrTypeLifeCycle::LifeCycleExImpl,ex,"usdImpl::initialize()")
-    }
-    catch (CORBA::SystemException& ex)
-    {
-        _THROW_EXCPT(acsErrTypeLifeCycle::LifeCycleExImpl,"usdImpl::initialize()")
-    }
-    catch (...)
-    {
-        ACS_DEBUG("::usdImpl::initialize","Not captuerd exception!");
-    }
-    ////////////////////////////////////////// 22 giugno 2009
-    //_SET_PROP(Fmax,250,"usdImpl::calibrate()")
-    ////////////////////////////////////////// calibration test; by CM
-    printf ("RS0        in execute = %d\n", m_status&0x000001);
-    printf ("RS1        in execute = %d\n", m_status&0x000002);
-    printf ("RS2        in execute = %d\n", m_status&0x000004);
-    printf ("resolution in execute = %d\n", m_status&0x000008);
-    printf ("m_rs in initialize    = %d\n", m_rs);
-*/
-
     ACS_SHORT_LOG((LM_INFO,"::USDImpl::execute(): USD component ready!"));
 }
 
- // Building Destructor
 void USDImpl::cleanUp()
 {
     m_available = false;
@@ -324,7 +203,6 @@ void USDImpl::cleanUp()
         delete [] elevations;
     }
 }
-
 
 void USDImpl::aboutToAbort()
 {
@@ -343,6 +221,64 @@ void USDImpl::aboutToAbort()
     }
 }
 
+void USDImpl::setupHardware() throw (CORBA::SystemException, ASErrors::ASErrorsEx)
+{
+    if(m_hwInitialized || m_isInitializing)
+    {
+        return;
+    }
+
+    m_isInitializing = true;
+
+    try
+    {
+        _GET_PROP(status, m_status, "usdImpl::setupHardware()")
+
+        stop(); // terminate any ongoing movement
+
+        if(!(m_calibrate && m_status&ENBL))
+        {
+            reset(); // load the default params.
+        }
+        else
+        {
+            //* restore defaults *//
+            _SET_LDEF(delay, "USDImpl::setupHardware()");
+            _SET_LDEF(Fmax,  "USDImpl::setupHardware()");
+            _SET_LDEF(Fmin,  "USDImpl::setupHardware()");
+            _SET_LDEF(acc,   "USDImpl::setupHardware()");
+            _SET_LDEF(uBits, "USDImpl::setupHardware()");
+        }
+        _GET_PROP(status,m_status,"usdImpl::setupHardware()")
+        _GET_PROP(actPos,m_currentStep,"usdImpl::setupHardware()")
+
+        _GET_PROP(delay, m_usdStatus.delay, "usdImpl::setupHardware()");
+        _GET_PROP(Fmin, m_usdStatus.minimumFrequency, "usdImpl::setupHardware()");
+        _GET_PROP(Fmax, m_usdStatus.maximumFrequency, "usdImpl::setupHardware()");
+        _GET_PROP(acc, m_usdStatus.accelerationFactor, "usdImpl::setupHardware()");
+        _GET_PROP(softVer, m_usdStatus.softwareVersion, "usdImpl::setupHardware()");
+        _GET_PROP(type, m_usdStatus.type, "usdImpl::setupHardware()");
+        _GET_PROP(cmdPos, m_usdStatus.commandedPosition, "usdImpl::setupHardware()");
+
+        m_available = true;
+        m_usdStatus.status = m_status;
+        m_usdStatus.currentPosition = m_currentStep;
+        m_usdStatus.available = m_available;
+        m_lanStatus->write(m_usdStatus);
+
+        m_hwInitialized = true;
+        m_isInitializing = false;
+
+        ACS_SHORT_LOG((LM_INFO, "%s: initialized successfully.", name()));
+    }
+    catch (...)
+    {
+        m_hwInitialized = false;
+        m_isInitializing = false;
+        throw;
+    }
+}
+
 void USDImpl::getStatus(int& status)
 {
     status = m_status;
@@ -350,6 +286,17 @@ void USDImpl::getStatus(int& status)
 
 void USDImpl::readStatus() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 {
+    if(!m_hwInitialized)
+    {
+        try
+        {
+            setupHardware();
+        }
+        catch(...)
+        {
+        }
+    }
+
     try
     {
         _GET_PROP(status, m_status, "usdImpl::readStatus()")
@@ -391,7 +338,6 @@ void USDImpl::reset() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 
         action(RESL, m_rs, 1); // resolution
     }
-
     _CATCH_ACS_EXCP_THROW_EX(ASErrors::ASErrorsExImpl, USDError, "USDImpl::reset()", m_addr)
 
     ACS_SHORT_LOG((LM_WARNING, "USD %d resetted and initialized!", m_addr));
@@ -624,18 +570,15 @@ void USDImpl::update(CORBA::Double elevation) throw (CORBA::SystemException, ASE
     double updatePosMM = 0.0;
     long updatePos;
 
+    readStatus();
+
+    if(m_status&MRUN)
+    {
+        return;
+    }
+
     try
     {
-        _GET_PROP(status, m_status, "usdImpl::update()")
-        m_usdStatus.status = m_status;
-        _GET_PROP(actPos, m_currentStep, "usdImpl::update()")
-        m_usdStatus.currentPosition = m_currentStep;
-        m_lanStatus->write(m_usdStatus);
-
-        if(m_status&MRUN)
-        {
-            return;
-        }
         if(actuatorsCorrections == nullptr) // No profile set yet, return without doing anything else
         {
             return;
@@ -762,6 +705,10 @@ bool USDImpl::compCheck(ACSErr::CompletionImpl& comp)
 
     if(comp.isErrorFree())
     {
+        if(!m_available)
+        {
+            m_hwInitialized = false;
+        }
         m_failures = 0;
         m_available = true;
         m_backoff_time = MIN_BACKOFF;
@@ -783,6 +730,18 @@ void USDImpl::action(int act, int par, int nb) throw (ASErrors::ASErrorsExImpl)
     if(!m_available && now < m_next_retry_time)
     {
         throw ASErrors::USDUnavailableExImpl(__FILE__, __LINE__, "usdImpl::action()");
+    }
+
+    if(!m_hwInitialized)
+    {
+        try
+        {
+            setupHardware();
+        }
+        catch(...)
+        {
+            throw ASErrors::USDUnavailableExImpl(__FILE__, __LINE__, "usdImpl::action()");
+        }
     }
 
     try

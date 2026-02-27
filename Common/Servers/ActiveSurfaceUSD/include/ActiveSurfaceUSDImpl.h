@@ -137,6 +137,18 @@ public:
 	*/
 	void bottom() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 	{
+        if(!m_hwInitialized)
+        {
+            try
+            {
+                setupHardware();
+            }
+            catch(...)
+            {
+                throw ASErrors::USDUnavailableExImpl(__FILE__, __LINE__, "usdImpl::bottom()");
+            }
+        }
+
 		try
 		{
 			_SET_PROP(cmdPos, m_bottom, "USDImpl::bottom()");
@@ -148,6 +160,18 @@ public:
 	}
 	void top() throw (CORBA::SystemException,ASErrors::ASErrorsEx)
 	{
+        if(!m_hwInitialized)
+        {
+            try
+            {
+                setupHardware();
+            }
+            catch(...)
+            {
+                throw ASErrors::USDUnavailableExImpl(__FILE__, __LINE__, "usdImpl::top()");
+            }
+        }
+
 		try
 		{
 			_SET_PROP(cmdPos, m_top, "USDImpl::top()");
@@ -209,6 +233,18 @@ public:
 	*/
 	void refPos() throw (CORBA::SystemException, ASErrors::ASErrorsEx)
 	{
+        if(!m_hwInitialized)
+        {
+            try
+            {
+                setupHardware();
+            }
+            catch(...)
+            {
+                throw ASErrors::USDUnavailableExImpl(__FILE__, __LINE__, "usdImpl::refPos()");
+            }
+        }
+
 		try
 		{
 			_SET_PROP(cmdPos, 0, "USDImpl::refPos()");
@@ -515,6 +551,11 @@ private:
 
     ACS::TimeInterval m_backoff_time;
     ACS::Time m_next_retry_time;
+
+    bool m_hwInitialized;
+    bool m_isInitializing;
+
+    void setupHardware() throw (CORBA::SystemException, ASErrors::ASErrorsEx);
 
 protected:
 	SmartPropertyPointer<RWlong> m_delay_sp;

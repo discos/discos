@@ -33,13 +33,6 @@
 
 #define LOOPSTATUSTIME 10000000 // 1.0 second
 
-#define _SET_CDB(PROP,LVAL,ROUTINE) {	\
-	maci::ContainerServices* cs=getContainerServices();\
-		if (!CIRATools::setDBValue(cs,#PROP,(const long&) LVAL)) \
-		{ ASErrors::CDBAccessErrorExImpl exImpl(__FILE__,__LINE__,ROUTINE); \
-			exImpl.setFieldName(#PROP); throw exImpl; \
-		} \
-}
 /*
 #define _GET_CDB(PROP,LVAL,ROUTINE) {	\
 	maci::ContainerServices* cs=getContainerServices();\

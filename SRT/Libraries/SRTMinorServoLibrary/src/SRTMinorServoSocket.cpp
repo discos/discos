@@ -56,7 +56,7 @@ SRTMinorServoSocket::SRTMinorServoSocket(std::string ip_address, int port, doubl
 SRTMinorServoSocket::~SRTMinorServoSocket()
 {
     std::lock_guard<std::recursive_mutex> guard(m_mutex);
-    CError tmpErr;
+    IRA::CError tmpErr;
     Close(tmpErr);
 }
 
@@ -73,7 +73,7 @@ void SRTMinorServoSocket::connect()
     Close(m_error);
     if(Create(m_error, STREAM) == FAIL)
     {
-        CError tmpErr;
+        IRA::CError tmpErr;
         Close(tmpErr);
         _EXCPT(MinorServoErrors::CommunicationErrorExImpl, impl, "SRTMinorServoSocket::SRTMinorServoSocket()");
         impl.setReason("Cannot create the socket.");
@@ -83,7 +83,7 @@ void SRTMinorServoSocket::connect()
     if(setSockMode(m_error, BLOCKINGTIMEO, m_timeout, m_timeout) != SUCCESS)
     {
         m_socket_status = NOTREADY;
-        CError tmpErr;
+        IRA::CError tmpErr;
         Close(tmpErr);
         _EXCPT(MinorServoErrors::CommunicationErrorExImpl, impl, "SRTMinorServoSocket::SRTMinorServoSocket()");
         impl.setReason("Cannot set the socket to non-blocking.");
@@ -93,7 +93,7 @@ void SRTMinorServoSocket::connect()
     if(Connect(m_error, m_ip_address.c_str(), m_port) == FAIL)
     {
         m_socket_status = TIMEOUT;
-        CError tmpErr;
+        IRA::CError tmpErr;
         Close(tmpErr);
         _EXCPT(MinorServoErrors::CommunicationErrorExImpl, impl, "SRTMinorServoSocket::SRTMinorServoSocket()");
         impl.setReason("Cannot connect the socket.");
@@ -126,7 +126,7 @@ SRTMinorServoAnswerMap SRTMinorServoSocket::sendCommand(std::string command, std
         else if(res == WOULDBLOCK)
         {
             m_socket_status = TIMEOUT;
-            CError tmpErr;
+            IRA::CError tmpErr;
             Close(tmpErr);
             _EXCPT(MinorServoErrors::CommunicationErrorExImpl, impl, "SRTMinorServoSocket::sendCommand()");
             impl.setReason("Timeout when sending command.");
@@ -135,7 +135,7 @@ SRTMinorServoAnswerMap SRTMinorServoSocket::sendCommand(std::string command, std
         else
         {
             m_socket_status = NOTREADY;
-            CError tmpErr;
+            IRA::CError tmpErr;
             Close(tmpErr);
             _EXCPT(MinorServoErrors::CommunicationErrorExImpl, impl, "SRTMinorServoSocket::sendCommand()");
             impl.setReason((const char *)m_error.getFullDescription());
@@ -158,7 +158,7 @@ SRTMinorServoAnswerMap SRTMinorServoSocket::sendCommand(std::string command, std
         else if(res == WOULDBLOCK)
         {
             m_socket_status = TIMEOUT;
-            CError tmpErr;
+            IRA::CError tmpErr;
             Close(tmpErr);
             _EXCPT(MinorServoErrors::CommunicationErrorExImpl, impl, "SRTMinorServoSocket::sendCommand()");
             impl.setReason("Timeout when receiving answer.");
@@ -167,7 +167,7 @@ SRTMinorServoAnswerMap SRTMinorServoSocket::sendCommand(std::string command, std
         else
         {
             m_socket_status = NOTREADY;
-            CError tmpErr;
+            IRA::CError tmpErr;
             Close(tmpErr);
             _EXCPT(MinorServoErrors::CommunicationErrorExImpl, impl, "SRTMinorServoSocket::sendCommand()");
             if(res == 0)

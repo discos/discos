@@ -1323,7 +1323,7 @@ void CActiveSurfaceBossCore::setProfile(const ActiveSurface::TASProfile& newProf
     {
         asOff();
         CIRATools::Wait(1000000);
-        _SET_CDB_CORE(profile, newProfile,"ActiveSurfaceBossCore::setProfile")
+        _SET_CDB(profile, newProfile,"ActiveSurfaceBossCore::setProfile")
         m_profile.store(newProfile);
         try
         {
@@ -1391,7 +1391,7 @@ void CActiveSurfaceBossCore::asPark() throw (ComponentErrors::ComponentErrorsEx)
         asOff();
         m_tracking.store(false);
         CIRATools::Wait(1000000);
-        _SET_CDB_CORE(profile, ActiveSurface::AS_PARK,"ActiveSurfaceBossCore::asPark()")
+        _SET_CDB(profile, ActiveSurface::AS_PARK,"ActiveSurfaceBossCore::asPark()")
         m_profile.store(ActiveSurface::AS_PARK);
         try
         {

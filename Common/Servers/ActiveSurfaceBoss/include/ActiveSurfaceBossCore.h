@@ -59,7 +59,7 @@ _IRA_LOGFILTER_IMPORT;
 #define PAUT    0x000800
 #define CAL     0x008000
 
-#define _SET_CDB_CORE(PROP,LVAL,ROUTINE) {    \
+#define _SET_CDB(PROP,LVAL,ROUTINE) {    \
         if (!CIRATools::setDBValue(m_services,#PROP,(const long&) LVAL)) \
         { ASErrors::CDBAccessErrorExImpl exImpl(__FILE__,__LINE__,ROUTINE); \
             exImpl.setFieldName(#PROP); throw exImpl; \
