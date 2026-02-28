@@ -55,7 +55,6 @@ private:
     ACS::TimeInterval m_sleepTime;
     ACS::Time m_nextTime;
     IRA::CSecureArea<CActiveSurfaceBossCore> *m_core;
-    unsigned int m_status;
 };
 
 #endif /*_ACTIVESURFACEBOSSWORKINGTHREAD_H_*/

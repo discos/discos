@@ -15,13 +15,8 @@ CActiveSurfaceBossWorkingThread::~CActiveSurfaceBossWorkingThread()
 void CActiveSurfaceBossWorkingThread::onStart()
 {
     AUTO_TRACE("CActiveSurfaceBossWorkingThread::onStart()");
-    // We divide sleep time by 2 so that we can perform 2 steps:
-    // 1 - update the AS
-    // 2 - publish the ZMQ message
-    // By sleeping half of the original sleeptime we allow the USD statuses to be updated between each movement
-    m_sleepTime = ACS::TimeInterval(this->getSleepTime() / 2);
+    m_sleepTime = ACS::TimeInterval(this->getSleepTime());
     m_nextTime = getTimeStamp();
-    m_status = 0;
 }
 
 void CActiveSurfaceBossWorkingThread::onStop()
@@ -32,23 +27,23 @@ void CActiveSurfaceBossWorkingThread::onStop()
 void CActiveSurfaceBossWorkingThread::runLoop()
 {
     IRA::CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
-
-    switch(m_status)
-    {
-        case 0:
-        {
-            resource->workingActiveSurface();
-            m_status = 1;
-            break;
-        }
-        case 1:
-        {
-            resource->publishZMQDictionary(m_nextTime);
-            m_status = 0;
-            break;
-        }
-    }
+    resource->workingActiveSurface();
+    resource->publishZMQDictionary(m_nextTime);
 
     m_nextTime += m_sleepTime;
-    this->setSleepTime(ACS::TimeInterval(std::max(long(0), long(m_nextTime - getTimeStamp()))));
+    ACS::Time now = getTimeStamp();
+
+    if(m_nextTime < now)
+    {
+        ACS::TimeInterval diff = now - m_nextTime;
+        unsigned int missed_ticks = static_cast<unsigned int>(diff / m_sleepTime);
+
+        if((diff % m_sleepTime) > 0)
+        {
+            missed_ticks++;
+        }
+
+        m_nextTime += missed_ticks * m_sleepTime;
+    }
+    this->setSleepTime(ACS::TimeInterval(m_nextTime - now));
 }

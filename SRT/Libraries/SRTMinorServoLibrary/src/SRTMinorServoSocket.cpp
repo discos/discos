@@ -70,10 +70,11 @@ void SRTMinorServoSocket::connect()
     }
 
     m_error.Reset();
-    Close(m_error);
+    IRA::CError tmpErr;
+    Close(tmpErr);
     if(Create(m_error, STREAM) == FAIL)
     {
-        IRA::CError tmpErr;
+        tmpErr.Reset();
         Close(tmpErr);
         _EXCPT(MinorServoErrors::CommunicationErrorExImpl, impl, "SRTMinorServoSocket::SRTMinorServoSocket()");
         impl.setReason("Cannot create the socket.");
@@ -83,7 +84,7 @@ void SRTMinorServoSocket::connect()
     if(setSockMode(m_error, BLOCKINGTIMEO, m_timeout, m_timeout) != SUCCESS)
     {
         m_socket_status = NOTREADY;
-        IRA::CError tmpErr;
+        tmpErr.Reset();
         Close(tmpErr);
         _EXCPT(MinorServoErrors::CommunicationErrorExImpl, impl, "SRTMinorServoSocket::SRTMinorServoSocket()");
         impl.setReason("Cannot set the socket to non-blocking.");
@@ -93,7 +94,7 @@ void SRTMinorServoSocket::connect()
     if(Connect(m_error, m_ip_address.c_str(), m_port) == FAIL)
     {
         m_socket_status = TIMEOUT;
-        IRA::CError tmpErr;
+        tmpErr.Reset();
         Close(tmpErr);
         _EXCPT(MinorServoErrors::CommunicationErrorExImpl, impl, "SRTMinorServoSocket::SRTMinorServoSocket()");
         impl.setReason("Cannot connect the socket.");

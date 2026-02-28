@@ -8,13 +8,17 @@
 #include <boost/thread/locks.hpp>
 #include <ActiveSurfaceProxy.h>
 #include <usdC.h>
+#include <ZMQLibrary.hpp>
+#include "Definitions.h"
 
-#define UNAV 0xFF000000
+
+namespace ZMQ = ZMQLibrary;
 
 struct USDData {
     ActiveSurface::USD_proxy proxy;
     ActiveSurface::USDStatus status;
     std::string name;
+    std::string zmqKey;
     int circle;
     int actuator;
     int sectorIndex;
@@ -58,7 +62,7 @@ public:
     bool hasCircle(int circle) const;
     int countActuators(int circle) const;
 
-    ActiveSurface::USDStatusSeq* setLanDown(int sectorIndex, int lanIndex);
+    ZMQ::ZMQDictionary updateLanStatus(int sector, int lan, const ActiveSurface::USDStatusSeq* seq = nullptr);
 
 private:
     mutable boost::shared_mutex m_mutex;
@@ -67,6 +71,7 @@ private:
     std::map<std::string, size_t> m_mapName;
     std::map<std::pair<int, int>, size_t> m_mapRadius;
     std::map<std::pair<int, int>, std::vector<size_t>> m_mapLan;
+    ZMQ::ZMQDictionary calculateUSDDiff(const ActiveSurface::USDStatus& o, const ActiveSurface::USDStatus& n) const;
 };
 
 #endif

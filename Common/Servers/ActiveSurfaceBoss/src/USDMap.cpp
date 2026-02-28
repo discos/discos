@@ -11,6 +11,9 @@ void USDMap::add(int circle, int actuator, int radiusIndex, int sectorIndex, int
     USDData data;
     data.proxy = proxy;
     data.name = name;
+    char buf[16];
+    std::snprintf(buf, sizeof(buf), "USD%02d", circle);
+    data.zmqKey = buf;
     data.circle = circle;
     data.actuator = actuator;
     data.sectorIndex = sectorIndex;
@@ -122,24 +125,73 @@ int USDMap::countActuators(int circle) const
     return count;
 }
 
-ActiveSurface::USDStatusSeq* USDMap::setLanDown(int sectorIndex, int lanIndex)
+ZMQ::ZMQDictionary USDMap::updateLanStatus(int sector, int lan, const ActiveSurface::USDStatusSeq* seq)
 {
+    ZMQ::ZMQDictionary lanDiff;
     boost::unique_lock<boost::shared_mutex> lock(m_mutex);
-    ActiveSurface::USDStatusSeq_var seq = new ActiveSurface::USDStatusSeq();
 
-    auto it = m_mapLan.find(std::make_pair(sectorIndex, lanIndex));
-    if (it != m_mapLan.end())
+    auto it = m_mapLan.find(std::make_pair(sector, lan));
+    if(it == m_mapLan.end())
     {
-        seq->length(it->second.size());
-        unsigned int count = 0;
-
-        for (size_t idx : it->second)
-        {
-            m_data[idx].status.status = UNAV;
-            m_data[idx].status.available = false;
-            seq[count] = m_data[idx].status;
-            count++;
-        }
+        return lanDiff;
     }
-    return seq._retn();
+
+    for(size_t idx : it->second)
+    {
+        USDData& data = m_data[idx];
+        ActiveSurface::USDStatus targetStatus;
+        bool useRealData = false;
+
+        if(seq && seq->length() > 0)
+        {
+            for(size_t k = 0; k < seq->length(); k++)
+            {
+                if((*seq)[k].id == data.circle)
+                {
+                    targetStatus = (*seq)[k];
+                    useRealData = true;
+                    break;
+                }
+            }
+        }
+        if(!useRealData)
+        {
+            targetStatus.id = data.circle;
+            targetStatus.status = UNAV;
+            targetStatus.available = false;
+        }
+
+        ZMQ::ZMQDictionary d = calculateUSDDiff(data.status, targetStatus);
+        if(!d.empty())
+        {
+            lanDiff[data.zmqKey] = d;
+        }
+        data.status = targetStatus;
+    }
+    return lanDiff;
+}
+
+ZMQ::ZMQDictionary USDMap::calculateUSDDiff(const ActiveSurface::USDStatus& o, const ActiveSurface::USDStatus& n) const
+{
+    ZMQ::ZMQDictionary diff;
+    bool initialize = (o.status == UNAV && !o.available);
+
+    if(initialize || o.available          != n.available)           diff["available"] = n.available;
+    if(!n.available)                                                return diff;
+    if(initialize || o.accelerationFactor != n.accelerationFactor)  diff["accelerationFactor"] = n.accelerationFactor;
+    if(initialize || o.commandedPosition  != n.commandedPosition)   diff["commandedPosition"] = n.commandedPosition;
+    if(initialize || o.currentPosition    != n.currentPosition)     diff["currentPosition"] = n.currentPosition;
+    if(initialize || o.delay              != n.delay)               diff["delay"] = n.delay == 255 ? -1 : 512 * n.delay;
+    if(initialize || o.maximumFrequency   != n.maximumFrequency)    diff["maximumFrequency"] = n.maximumFrequency / 10;
+    if(initialize || o.minimumFrequency   != n.minimumFrequency)    diff["minimumFrequency"] = n.minimumFrequency / 10;
+    if(initialize || o.softwareVersion    != n.softwareVersion)     diff["softwareVersion"] = std::to_string((n.softwareVersion >> 4) & 0xF) + "." + std::to_string(n.softwareVersion & 0xF);
+    if(initialize || o.type               != n.type)                diff["USDType"] = n.type == 0x20 ? "USD50xxx" : "USD60xxx";
+    if(initialize || o.status             != n.status)
+    {
+        diff["calibrated"] = (n.status & CAL) != 0;
+        diff["enabled"] = (n.status & ENBL) != 0;
+        diff["running"] = (n.status & MRUN) != 0;
+    }
+
+    return diff;
 }

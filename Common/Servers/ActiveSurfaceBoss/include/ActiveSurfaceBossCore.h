@@ -33,38 +33,11 @@
 #include <SP_parser.h>
 #include <LogFilter.h>
 #include <atomic>
-#include "ZMQLibrary.hpp"
+#include <ZMQLibrary.hpp>
 #include "USDMap.h"
+#include "Definitions.h"
 
 _IRA_LOGFILTER_IMPORT;
-
-#define firstUSD 1
-#define LOOPTIME 100000 // 0,10 sec
-#define CDBPATH std::string(getenv("ACS_CDB")) + "/CDB/"
-#define USDTABLE CDBPATH + "alma/AS/tab_convUSD.txt"
-#define USDTABLECORRECTIONS CDBPATH + "alma/AS/act_rev02.txt"
-#define MM2HSTEP    350 //(10500 HSTEP / 30 MM)
-#define MM2STEP     1400 //(42000 STEP / 30 MM)
-#define WARNINGUSDPERCENT 0.95
-#define ERRORUSDPERCENT 0.90
-#define THRESHOLDPOS 16 // 12 micron in step
-#define NPOSITIONS 7
-#define DELTAEL 15.0
-
-// mask pattern for status
-#define UNAV    0xFF000000
-#define MRUN    0x000080
-#define CAMM    0x000100
-#define ENBL    0x002000
-#define PAUT    0x000800
-#define CAL     0x008000
-
-#define _SET_CDB(PROP,LVAL,ROUTINE) {    \
-        if (!CIRATools::setDBValue(m_services,#PROP,(const long&) LVAL)) \
-        { ASErrors::CDBAccessErrorExImpl exImpl(__FILE__,__LINE__,ROUTINE); \
-            exImpl.setFieldName(#PROP); throw exImpl; \
-        } \
-}
 
 using namespace IRA;
 using namespace baci;
@@ -224,11 +197,6 @@ public:
     void publishZMQDictionary(ACS::Time now);
 
 private:
-    /**
-     * Utility function used to check if a USD status was updated or not.
-     */
-    ZMQ::ZMQDictionary getUSDStatusDiff(const std::string& key, const ActiveSurface::USDStatus& b);
-
     std::map<int, std::string> m_error_strings;
     ContainerServices* m_services;
 
@@ -287,6 +255,9 @@ private:
     ZMQ::ZMQPublisher m_zmqPublisher;
 
     ZMQ::ZMQDictionary m_zmqDictionary;
+
+    std::vector<std::string> m_sectorKeys;
+    std::vector<std::string> m_lanKeys;
 };
 
 #endif /*ACTIVESURFACEBOSSCORE_H_*/

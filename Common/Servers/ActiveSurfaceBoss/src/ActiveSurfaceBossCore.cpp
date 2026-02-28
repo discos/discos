@@ -62,8 +62,15 @@ void CActiveSurfaceBossCore::initialize()
 
     lan.resize(SECTORS);
 
+    m_sectorKeys.resize(SECTORS);
+    m_lanKeys.resize(LANs_per_sector);
+
     for(int i = 0; i < SECTORS; i++)
     {
+        char buf[16];
+        std::snprintf(buf, sizeof(buf), "SECTOR%02d", i + 1);
+        m_sectorKeys[i] = buf;
+
         lan[i].resize(LANs_per_sector);
 
         for(int j = 0; j < LANs_per_sector; j++)
@@ -72,6 +79,12 @@ void CActiveSurfaceBossCore::initialize()
             std::snprintf(bufferName, sizeof(bufferName), "AS/SECTOR%02d/LAN%02d", i + 1, j + 1);
             lan[i][j].setContainerServices(m_services);
             lan[i][j].setComponentName(bufferName);
+
+            if(m_lanKeys[j].empty())
+            {
+                std::snprintf(buf, sizeof(buf), "LAN%02d", j + 1);
+                m_lanKeys[j] = buf;
+            }
         }
     }
 
@@ -1590,15 +1603,11 @@ void CActiveSurfaceBossCore::publishZMQDictionary(ACS::Time now)
 
     for(int i = 0; i < SECTORS; i++)
     {
-        std::ostringstream sector_key_ss;
-        sector_key_ss << "SECTOR" << std::setw(2) << std::setfill('0') << i + 1;
-        std::string sector_key = sector_key_ss.str();
+        const std::string& sector_key = m_sectorKeys[i];
 
         for(int j = 0; j < LANs_per_sector; j++)
         {
-            std::ostringstream lan_key_ss;
-            lan_key_ss << "LAN" << std::setw(2) << std::setfill('0') << j + 1;
-            std::string lan_key = lan_key_ss.str();
+            const std::string& lan_key = m_lanKeys[j];
 
             ZMQ::ZMQDictionary l;
             bool connected = false;
@@ -1608,27 +1617,9 @@ void CActiveSurfaceBossCore::publishZMQDictionary(ACS::Time now)
             {
                 lan[i][j]->getLanStatus(connected, seq);
             }
-            catch(...)
-            {
-                seq = usdMap.setLanDown(i, j);
-            }
+            catch(...) {}
 
-            for(size_t k = 0; k < seq->length(); k++)
-            {
-                std::ostringstream usd_key_ss;
-                usd_key_ss << "USD" << std::setw(2) << std::setfill('0') << seq[k].id;
-                std::string usd_key = usd_key_ss.str();
-                std::string usd_map_key = "AS/" + sector_key + "/" + lan_key + "/" + usd_key;
-
-                ZMQ::ZMQDictionary usdStatus = getUSDStatusDiff(usd_map_key, seq[k]);
-                if(!usdStatus.empty())
-                {
-                    l[usd_key] = usdStatus;
-                }
-
-                usdMap.updateStatus(usd_map_key, seq[k]);
-            }
-
+            l = usdMap.updateLanStatus(i, j, seq.ptr());
             l["connected"] = connected;
 
             m_zmqDictionary[sector_key][lan_key] = l;
@@ -1812,31 +1803,4 @@ void CActiveSurfaceBossCore::checkASerrors(const char* str, int circle, int actu
     {
         std::cout << "checkASerrors: " << str << " " << circle << "_" << actuator << " " << m_error_strings[code] << std::endl;
     }
-}
-
-ZMQ::ZMQDictionary CActiveSurfaceBossCore::getUSDStatusDiff(const std::string& key, const ActiveSurface::USDStatus& n)
-{
-    ZMQ::ZMQDictionary diff;
-    ActiveSurface::USDStatus old;
-
-    bool initialize = !usdMap.getStatusByName(key, old);
-
-    if(initialize || old.available          != n.available)             diff["available"] = n.available;
-    if(!n.available)                                                    return diff;
-    if(initialize || old.accelerationFactor != n.accelerationFactor)    diff["accelerationFactor"] = n.accelerationFactor;
-    if(initialize || old.commandedPosition  != n.commandedPosition)     diff["commandedPosition"] = n.commandedPosition;
-    if(initialize || old.currentPosition    != n.currentPosition)       diff["currentPosition"] = n.currentPosition;
-    if(initialize || old.delay              != n.delay)                 diff["delay"] = n.delay == 255 ? -1 : 512 * n.delay;
-    if(initialize || old.maximumFrequency   != n.maximumFrequency)      diff["maximumFrequency"] = n.maximumFrequency / 10;
-    if(initialize || old.minimumFrequency   != n.minimumFrequency)      diff["minimumFrequency"] = n.minimumFrequency / 10;
-    if(initialize || old.softwareVersion    != n.softwareVersion)       diff["softwareVersion"] = std::to_string((n.softwareVersion >> 4) & 0xF) + "." + std::to_string(n.softwareVersion & 0xF);
-    if(initialize || old.type               != n.type)                  diff["USDType"] = n.type == 0x20 ? "USD50xxx" : "USD60xxx";
-    if(initialize || old.status             != n.status)
-    {
-        diff["calibrated"] = (n.status & CAL) != 0;
-        diff["enabled"] = (n.status & ENBL) != 0;
-        diff["running"] = (n.status & MRUN) != 0;
-    }
-
-    return diff;
 }

@@ -75,24 +75,5 @@ void CActiveSurfaceBossInitializationThread::runLoop()
         }
     }
 
-    // Set CDB calibrate parameter to 0 where needed
-    for(int circle = 1; circle <= m_boss->CIRCLES; circle++)
-    {
-        for(int actuator = 1; actuator <= m_boss->actuatorsInCircle[circle]; actuator++)
-        {
-            try
-            {
-                int usdStatus = 0;
-                m_boss->usdMap.get(circle, actuator)->getStatus(usdStatus);
-
-                if(!(usdStatus & CAL))
-                {
-                    CIRATools::setDBValue(m_boss->m_services, "calibrate", (const long)0, "alma/", m_boss->usdMap.get(circle, actuator)->name());
-                }
-            }
-            catch(...) {}
-        }
-    }
-
     this->setStopped();
 }
