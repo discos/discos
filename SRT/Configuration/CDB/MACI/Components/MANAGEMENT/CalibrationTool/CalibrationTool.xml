@@ -15,4 +15,5 @@
 	Default="false"
 	KeepAliveTime="-1"
     ImplLang="cpp"
+    Autostart="true"
 />

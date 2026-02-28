@@ -14,4 +14,5 @@
 	Container="TotalPowerContainer"
 	KeepAliveTime="-1"
     ImplLang="cpp"
+    Autostart="true"
 />

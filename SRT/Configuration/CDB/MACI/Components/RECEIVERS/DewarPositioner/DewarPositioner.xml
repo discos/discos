@@ -13,4 +13,5 @@
     Container="DerotatorPositionerContainer"
     ImplLang="py"
 	Default="true"
+    Autostart="true"
 />

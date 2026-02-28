@@ -11,4 +11,5 @@
     Type="IDL:alma/MinorServo/SRTDerotator:1.0"
     Container="MinorServoContainer"
     Default="false"
+    Autostart="true"
 />
