@@ -12,6 +12,7 @@ list of modules:
 from . import customlogging
 import ACSLog
 from .Connection import Connection
+from .ComponentProxy import ComponentProxy
 
 #Some comments required here. The custom logger mechanism is not working in python. 
 #do the way to separate the system logs to the ones do be shown to the user is to use different
