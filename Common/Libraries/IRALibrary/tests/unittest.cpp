@@ -139,6 +139,10 @@ TEST_F(IRALibrary_String,string_Find) {
 	EXPECT_TRUE(string_Find());
 }
 
+TEST_F(IRALibrary_String,string_checkConcat) {
+	EXPECT_TRUE(string_checkConcat());
+}
+
 TEST_F(IRALibrary_BaseConverter,decToBin_checkConversion) {
 	EXPECT_TRUE(decToBin_checkConversion());
 }
@@ -154,4 +158,3 @@ TEST_F(IRALibrary_CIRATools_regression,radToSexagesimalAngle_badconversion) {
 TEST_F(IRALibrary_CIRATools_regression,radToHourAngle_badconversion) {
 	EXPECT_TRUE(radToHourAngle_badconversion());
 }
-

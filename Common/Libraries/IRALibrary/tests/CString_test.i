@@ -65,6 +65,21 @@ public:
 		return ::testing::AssertionSuccess();
 	}
 
+	::testing::AssertionResult string_checkConcat() {
+		RecordProperty("description","check how CString handle string concatenation");
+		IRA::CString base("Hello");		
+		IRA::CString token(" World");
+		base.Concat(token);
+		if (base.GetLength()!=11) {
+			return ::testing::AssertionFailure() << " the length of the string does not match";
+		}
+		if (base!="Hello World") {
+			return ::testing::AssertionFailure() << " unexpected function output, the resulting string is '"
+			  << (const char *)base << "' instead of 'Hello World'";
+		}		
+		return ::testing::AssertionSuccess();
+	}
+
 protected:
 	virtual void SetUp() {
 	}
