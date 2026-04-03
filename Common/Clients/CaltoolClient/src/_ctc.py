@@ -70,6 +70,11 @@ class MyWorker(QThread):
         self.newrecordingstatus=False
         self.azimuthOffset=self.boss._get_azimuthOffset()
         self.elevationOffset=self.boss._get_elevationOffset()
+        self.rightAscensionOffset=self.boss._get_rightAscensionOffset()
+        self.declinationOffset=self.boss._get_declinationOffset()
+        
+        raOffset=self.boss._get_azimuthOffset()
+        self.elevationOffset=self.boss._get_elevationOffset()
 
 
     def run (self):
@@ -120,8 +125,14 @@ class MyWorker(QThread):
                 self.emit(Qt.SIGNAL("scanAxis"),scanaxis)
                 (azOffset,_)=self.azimuthOffset.get_sync()
                 (elOffset,_)=self.elevationOffset.get_sync()
+                (raOffset,_)=self.rightAscensionOffset.get_sync()
+                (decOffset,_)=self.declinationOffset.get_sync()
+                
                 self.emit(Qt.SIGNAL("azoffset"),f'{azOffset/math.pi*180:.3f}')
                 self.emit(Qt.SIGNAL("eloffset"),f'{elOffset/math.pi*180:.3f}')
+                self.emit(Qt.SIGNAL("raoffset"),f'{raOffset/math.pi*180:.3f}')
+                self.emit(Qt.SIGNAL("decoffset"),f'{decOffset/math.pi*180:.3f}')
+                declinationOffset
 
                 rec= self.caltool.isRecording()
                 if rec==True:
@@ -259,6 +270,8 @@ class Application(Qt.QDialog,calibrationtool_ui.Ui_CalibrationToolDialog):
         self.connect(self.thread,Qt.SIGNAL("scanAxis"),self.scanAxis)
         self.connect(self.thread,Qt.SIGNAL("eloffset"),self.elOffsetlineEdit.setText)
         self.connect(self.thread,Qt.SIGNAL("azoffset"),self.azOffsetlineEdit.setText)
+        self.connect(self.thread,Qt.SIGNAL("raoffset"),self.raOffsetlineEdit.setText)
+        self.connect(self.thread,Qt.SIGNAL("decoffset"),self.decOffsetlineEdit.setText)
 
     @pyqtSlot(Qt.QObject,name="isRecording")
     def isRecording(self,rec):
