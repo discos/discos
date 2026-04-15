@@ -4,8 +4,13 @@
 void CBossCore::startScan(ACS::Time& startUt,const Antenna::TTrackingParameters& parameters,const Antenna::TTrackingParameters& secondary) throw(
 		ComponentErrors::CouldntReleaseComponentExImpl,ComponentErrors::CouldntGetComponentExImpl,ComponentErrors::CORBAProblemExImpl,
 		ComponentErrors::UnexpectedExImpl,ComponentErrors::CouldntCallOperationExImpl,ComponentErrors::OperationErrorExImpl,AntennaErrors::ScanErrorExImpl,AntennaErrors::SecondaryScanErrorExImpl,
-		AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl)
+		AntennaErrors::MissingTargetExImpl,AntennaErrors::LoadGeneratorErrorExImpl,AntennaErrors::OperationNotPermittedExImpl)
 {
+	if (!m_siteInitialized) {
+		_EXCPT(AntennaErrors::OperationNotPermittedExImpl,impl,"BossCore::startScan");
+		impl.setReason("Site info not initialized");
+		throw impl;
+	}
 	Antenna::TSections section;
 	double ra,dec,vrad,lon,lat;
 	Antenna::TReferenceFrame velFrame;

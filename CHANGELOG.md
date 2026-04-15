@@ -64,7 +64,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/
 ### Fixed
     issue #433 - limited refraction correction values to a meaningful range in order to avoid flooding the jlog with warning messages whenever the elevation is close to 90 degrees
     issue #502 - removed last service daemon reference from Manager.xml io SRT production line
-    
+
 
 ## [discos1.0.5] - 09-03-2020
 ## Added
@@ -76,26 +76,26 @@ and this project adheres to [Semantic Versioning](http://semver.org/
 ## Fixed
     issue #518 - In case of communication error we set a dummy value (100000) for the temperature properties, and the related timestamp keeps the value of the last communication timestamp.
     issue #525 - When in LOCAL mode the receivers can turn on/off the noise mark and LNAs. There is no more MNG_FAILURE logging in case of LOCAL mode: only the LOCAL/REMOTE status (during component activation) and the change of status (LOCAL to REMOTE and viceversa) are written to the logfile.
-## Changed  
+## Changed
     issue #545 - Oscillation checks enabled for Mc and Nt telescopes, this setting is now under control of a CDB argument
 
 ## [discos1.0.6] - 09-02-2022
 ## Added
     issue #655 - ACU Component for Noto and Medicina is now capable to prevent seldom mode changes coming from ACU reset
-    issue #653 - added a couple of scriptsto ease vnc conection from remote a file copying. The scripts support 
+    issue #653 - added a couple of scriptsto ease vnc conection from remote a file copying. The scripts support
                  linux and macos
-	issue #588 - added the control of the new Noto subreflector and primary focus receiver box servo system.     
+    issue #588 - added the control of the new Noto subreflector and primary focus receiver box servo system.
     issue #758 - Sardara enabled for Medicina
-    
+
 ## Fixed
     issue #448 - Added Sky Offsets to calibration tool client
     issue #585 - Fixed misshandled schedule with NULL as backend (Dry Run)
 ## Changed
     issues #481, #484, #486, #487, #491, #493, #497. SRT Active Surface module has been improved in order to speed up its booting time and optimize its overall behavior
-	 issue #604 - The control software will not allow anymore that a schedule, belonging to another project, could be run. In that case a warning message is sent to user console
-	              and the execution aborted.
-	              
-## [Next Release] - 
+     issue #604 - The control software will not allow anymore that a schedule, belonging to another project, could be run. In that case a warning message is sent to user console
+                  and the execution aborted.
+
+## [Next Release] -
 ## Added
     issue #625 - Added Medicina Active Surface. Both component and GUIs were implemented.
     issue #791 - Nodding added for TotalPower and Sardara components via the `enable` command. This command can only be issued from a schedule and not via the operatorInput CLI.
@@ -108,11 +108,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/
     issue #936 - Added minor servos user and system offsets inside the FITS files SERVO TABLE
     issue #956 - Added control of the TRIband Receiver. Also included the 2IF convertion system support. The configuration related to this support is now based
                  on the PHAROS2 WS systems. New avilable RF/IF limits are also available. Support for the spectral inversion added.
-
-
+    issue #896 - Added a ZMQ publishing mechanism. Each important component provides real-time telemetry data via some ZMQ publisher socket. A telemetry proxy has been added under
+                 Common/Misc, it acts as a concentrator and data relay. Publishers must be authenticated so that no garbage data can be injected into the proxy and relayed to the
+                 clients. Subscription is unauthenticated since it`s a process of passively reading data. More information regarding the data schemas here:
+                 https://discosclient.readthedocs.io/en/latest/schemas/schemas.html.
+                 A ZMQ relay for commands has also been implemented. It relays commands to the ManagementContainer just like the OperatorInput default behavior.
+                 More information regarding the whole ZMQ layer here: https://discosclient.readthedocs.io/en/latest/index.html
 ## Fixed
+    issue #940 - The SRTMinorServo components has been reworked in order to correctly handle socket reconnections. The component can now start as disconnected and still provide
+                 information regarding its status via ZMQ.
+    issue #963 - CSocket::Create now fails if a socket was already created and not closed before calling Create again.
 ## Changed
-	issue #689 - The dataset provided by weather station has been enlarged by the wind direction. The correctponding RAL 'wx' command will noe provided wind direction readout, as well
+    issue #689 - The dataset provided by weather station has been enlarged by the wind direction. The correctponding RAL 'wx' command will noe provided wind direction readout, as well
     issue #621 - The maximum number of chars of the schedule file name is now 37 (extension included). This is done for fits file and archive issue with the lenght of the schedule name.
     issue #853 - The setSection command can now accept a wildcard (*) as section identifier. This will allow to configure all backend sections with a single command
     issue #895 - FitZilla version 1.23 released, the rest frequency is also added in the header of the Section table

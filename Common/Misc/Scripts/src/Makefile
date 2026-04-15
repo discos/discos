@@ -31,7 +31,7 @@
 #
 # Python stuff (public and local)
 # ----------------------------
-PY_SCRIPTS         =
+PY_SCRIPTS         = telemetry_proxy rpc_proxy
 PY_SCRIPTS_L       = 
 
 PY_MODULES         =

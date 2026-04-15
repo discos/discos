@@ -45,4 +45,10 @@
 
 <ErrorCode name="InvalidConfiguration" shortDescription="The configuration is unknown or not supported" description=" "/>
 
+<ErrorCode name="BusyError" shortDescription="Another client has control" description=" " />
+
+<ErrorCode name="DISCOSOfflineError" shortDescription="DISCOS is offline" description=" " />
+
+<ErrorCode name="DISCOSUnreachableError" shortDescription="DISCOS is unreachable" description=" " />
+
 </Type>

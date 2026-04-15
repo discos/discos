@@ -20,6 +20,8 @@ C11_IGNORE_WARNING_POP
  * Use this macro to make a logging event interceptable by our custom logging system.
  * the synthax is equal to ACS LOG macro but it automatically adds a Key-Value pair to
  * the log record.
+ * EDIT by giuseppe.carboni@inaf.it, added the manual clean of the LoggingProxy Thread Server Storage.
+ * Without this addition, sometimes source=custom appeared in regular ACS_LOG messages
  */
 #define CUSTOM_LOG(flags, routine, X) \
 { \
@@ -28,6 +30,9 @@ C11_IGNORE_WARNING_POP
     Logging::LogSvcHandler::DeprecatedLogInfo tStruct; \
     tStruct = Logging::LogSvcHandler::unformatted2formatted X; \
     LOG(tStruct.priority, routine, tStruct.message); \
+    if(LoggingProxy::getTSS()) { \
+        (*LoggingProxy::getTSS())->clear(); \
+    } \
 } 
 
 /**
@@ -37,6 +42,9 @@ C11_IGNORE_WARNING_POP
 { \
     LoggingProxy::AddData(CUSTOM_LOGGING_DATA_NAME, CUSTOM_LOGGING_DATA_VALUE); \
     Logging::Logger::getStaticLogger()->log(priority, text, __FILE__, __LINE__, routine); \
+    if(LoggingProxy::getTSS()) { \
+        (*LoggingProxy::getTSS())->clear(); \
+    } \
 }
 
 /**

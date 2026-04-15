@@ -3,12 +3,13 @@
 
 /* ************************************************************************ */
 /* OAC Osservatorio Astronomico di Cagliari                                 */
-/* $Id: ActiveSurfaceBossCore.h,v 1.6 2011-03-11 12:30:53 c.migoni Exp $ */
+/* $Id: ActiveSurfaceBossCore.h,v 1.6 2011-03-11 12:30:53 c.migoni Exp $    */
 /*                                                                          */
 /* This code is under GNU General Public Licence (GPL).                     */
 /*                                                                          */
-/* Who                                  when        What                    */
-/* Carlo Migoni (migoni@ca.astro.it)   26/01/2009  Creation                 */
+/* Who                                   when        What                   */
+/* Carlo Migoni (migoni@ca.astro.it)     26/01/2009  Creation               */
+/* G. Carboni (giuseppe.carboni@inaf.it) 10/10/2025  Added ZMQ publishing   */
 
 #include <acsContainerServices.h>
 #include <maciContainerServices.h>
@@ -17,6 +18,7 @@
 #include <DateTime.h>
 #include <usdC.h>
 #include <lanC.h>
+#include <ActiveSurfaceProxy.h>
 #include <AntennaProxy.h>
 #include <ComponentErrors.h>
 #include <ManagementErrors.h>
@@ -30,42 +32,20 @@
 #include <vector>
 #include <SP_parser.h>
 #include <LogFilter.h>
+#include <atomic>
+#include <ZMQLibrary.hpp>
+#include "USDMap.h"
+#include "Definitions.h"
 
 _IRA_LOGFILTER_IMPORT;
-
-#define firstUSD 1
-#define LOOPTIME 100000 // 0,10 sec
-#define CDBPATH std::string(getenv("ACS_CDB")) + "/CDB/"
-#define USDTABLE CDBPATH + "alma/AS/tab_convUSD.txt"
-#define USDTABLECORRECTIONS CDBPATH + "alma/AS/act_rev02.txt"
-#define MM2HSTEP    350 //(10500 HSTEP / 30 MM)
-#define MM2STEP     1400 //(42000 STEP / 30 MM)
-#define WARNINGUSDPERCENT 0.95
-#define ERRORUSDPERCENT 0.90
-#define THRESHOLDPOS 16 // 12 micron in step
-#define NPOSITIONS 7
-#define DELTAEL 15.0
-
-// mask pattern for status
-#define UNAV    0xFF000000
-#define MRUN    0x000080
-#define CAMM    0x000100
-#define ENBL    0x002000
-#define PAUT    0x000800
-#define CAL     0x008000
-
-#define _SET_CDB_CORE(PROP,LVAL,ROUTINE) {    \
-        if (!CIRATools::setDBValue(m_services,#PROP,(const long&) LVAL)) \
-        { ASErrors::CDBAccessErrorExImpl exImpl(__FILE__,__LINE__,ROUTINE); \
-            exImpl.setFieldName(#PROP); throw exImpl; \
-        } \
-}
 
 using namespace IRA;
 using namespace baci;
 using namespace maci;
 using namespace ComponentErrors;
 using namespace std;
+
+namespace ZMQ = ZMQLibrary;
 
 class ActiveSurfaceBossImpl;
 //class CActiveSurfaceBossWatchingThread;
@@ -165,28 +145,24 @@ public:
 
     void usdStatus4GUIClient(int circle, int actuator, CORBA::Long_out status) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl);
 
-    void asStatus4GUIClient(ACS::longSeq& status) throw (ComponentErrors::CORBAProblemExImpl, ComponentErrors::CouldntGetAttributeExImpl, ComponentErrors::ComponentNotActiveExImpl);
-
     void setActuator(int circle, int actuator, long int& actPos, long int& cmdPos, long int& Fmin, long int& Fmax, long int& acc, long int& delay) throw (ComponentErrors::PropertyErrorExImpl, ComponentErrors::ComponentNotActiveExImpl);
-
-    void recoverUSD(int circle, int actuator) throw (ComponentErrors::CouldntGetComponentExImpl);
 
     /**
      * This function returns the status of the Active Surface subsystem; this indicates if the system is working correctly or there are some
      * possible problems or a failure has been encoutered. This flag takes also into consideration the status of the Boss.
      */
-    inline const Management::TSystemStatus& getStatus() const { return m_status; };
+    inline const Management::TSystemStatus getStatus() const { return m_status.load(std::memory_order_relaxed); };
 
     /**
      * This function returns the enable flags, this flag is true if the boss is enable to send command to the antenna. Viceversa if false the component
      * works in a sort of simulation mode.
      * @return a boolean value that is true if the antenna is enabled
     */
-    inline bool getEnable() const { return m_enable; }
+    inline bool getEnable() const { return m_enable.load(std::memory_order_relaxed); }
 
-    inline const ActiveSurface::TASProfile& getProfile() const { return m_profile; };
+    inline const ActiveSurface::TASProfile getProfile() const { return m_profile.load(std::memory_order_relaxed); };
 
-    inline bool getTracking() const { return m_tracking; }
+    inline bool getTracking() const { return m_tracking.load(std::memory_order_relaxed); }
 
     inline bool validProfile(const ActiveSurface::TASProfile& profile) const { return m_acceptedProfiles.count(profile) > 0; }
 
@@ -218,15 +194,14 @@ public:
 
     void asSetLUT(const char* newlut);
 
+    void publishZMQDictionary(ACS::Time now);
+
 private:
     std::map<int, std::string> m_error_strings;
     ContainerServices* m_services;
 
-    std::vector<std::vector<ActiveSurface::USD_var>> usd;
-    std::vector<std::vector<ActiveSurface::USD_var>> lanradius;
-    std::vector<std::vector<ActiveSurface::lan_var>> lan;
-
-    IRA::CString lanCobName;
+    std::vector<std::vector<ActiveSurface::lan_proxy>> lan;
+    USDMap usdMap;
 
     int usdCounter;
     std::vector<int> usdCounters;
@@ -234,15 +209,15 @@ private:
     ACS::doubleSeq actuatorsCorrections;
 
     /**
-     * This represents the status of the whole Active Surface subsystem, it also includes and sammerizes the status of the boss component
+     * This represents the status of the whole Active Surface subsystem, it also includes and summarizes the status of the boss component
      */
-    Management::TSystemStatus m_status;
+    std::atomic<Management::TSystemStatus> m_status;
 
     /**
      * if this flag is false the active surface isn't active during
      * observations
     */
-    bool m_enable;
+    std::atomic<bool> m_enable;
 
     bool AutoUpdate;
 
@@ -250,14 +225,14 @@ private:
 
     void setserial (int circle, int actuator, int &lanIndex, char *serial_usd);
 
-    void singleUSDonewayAction(ActiveSurface::TASOneWayAction action, ActiveSurface::USD_var usd, double elevation, double correction, long incr, ActiveSurface::TASProfile profile);
+    void singleUSDonewayAction(ActiveSurface::TASOneWayAction action, ActiveSurface::USD_proxy usd, double elevation, double correction, long incr, ActiveSurface::TASProfile profile);
 
     Antenna::AntennaBoss_proxy m_antennaBoss;
 
-    ActiveSurface::TASProfile m_profile;
+    std::atomic<ActiveSurface::TASProfile> m_profile;
     std::set<ActiveSurface::TASProfile> m_acceptedProfiles;
 
-    bool m_tracking;
+    std::atomic<bool> m_tracking;
 
     char *s_usdTable;
 
@@ -266,16 +241,23 @@ private:
     bool m_profileSetted;
 
     bool m_ASup;
-    
+
     bool m_newlut;
 
     bool m_initialized;
 
     std::string m_lut;
 
-    long SECTORS, CIRCLES, ACTUATORS, lastUSD;
+    long SECTORS, CIRCLES, ACTUATORS, lastUSD, LANs_per_sector;
 
     std::vector<int> actuatorsInCircle;
+
+    ZMQ::ZMQPublisher m_zmqPublisher;
+
+    ZMQ::ZMQDictionary m_zmqDictionary;
+
+    std::vector<std::string> m_sectorKeys;
+    std::vector<std::string> m_lanKeys;
 };
 
 #endif /*ACTIVESURFACEBOSSCORE_H_*/

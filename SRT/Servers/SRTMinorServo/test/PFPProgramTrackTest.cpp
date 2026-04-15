@@ -52,7 +52,7 @@ protected:
 
         long unsigned int counter = 0;
 
-        double tn = CIRATools::getUNIXEpoch();
+        double tn = CIRATools::getUNIXTime();
 
         while(!terminate.load())
         {
@@ -76,7 +76,7 @@ protected:
             counter++;
 
             tn += STATUS_PERIOD;
-            std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, tn - CIRATools::getUNIXEpoch()))));
+            std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, tn - CIRATools::getUNIXTime()))));
         }
 
         statusFile.close();
@@ -93,7 +93,7 @@ protected:
         std::string status;
         try
         {
-            status = serializeCoordinates(CIRATools::ACSTime2UNIXEpoch(map.getTimestamp()), getCoordinates(map));
+            status = serializeCoordinates(CIRATools::ACSTime2UNIXTime(map.getTimestamp()), getCoordinates(map));
         }
         catch(std::bad_variant_access const& ex)
         {
@@ -249,7 +249,7 @@ protected:
 
     void SetUp() override
     {
-        srand((int)CIRATools::getUNIXEpoch());
+        srand((int)CIRATools::getUNIXTime());
         std::cout << std::fixed << std::setprecision(6);
 
         SRTMinorServoSocket& socket = SRTMinorServoTestingSocket::getInstance(ADDRESS, PORT, 0.2);
@@ -341,7 +341,7 @@ protected:
 
 TEST_F(PFPProgramTrackTest, ContinuousMovementTest)
 {
-    double start_time = CIRATools::getUNIXEpoch() + ADVANCE_TIMEGAP;
+    double start_time = CIRATools::getUNIXTime() + ADVANCE_TIMEGAP;
     std::cout << "PRESET position reached, starting PROGRAMTRACK with start time: " << start_time << std::endl;
     long unsigned int trajectory_id = int(start_time);
     unsigned int point_id = 0;
@@ -372,7 +372,7 @@ TEST_F(PFPProgramTrackTest, ContinuousMovementTest)
     {
         next_expected_time += TIMEGAP;
 
-        std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXEpoch()))));
+        std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXTime()))));
         point_id++;
 
         if(idle)
@@ -401,7 +401,7 @@ TEST_F(PFPProgramTrackTest, ContinuousMovementTest)
 
 TEST_F(PFPProgramTrackTest, AllAxesMovementTest)
 {
-    double start_time = CIRATools::getUNIXEpoch() + ADVANCE_TIMEGAP;
+    double start_time = CIRATools::getUNIXTime() + ADVANCE_TIMEGAP;
     std::cout << "PRESET position reached, starting PROGRAMTRACK with start time: " << start_time << std::endl;
     long unsigned int trajectory_id = int(start_time);
     unsigned int point_id = 0;
@@ -431,7 +431,7 @@ TEST_F(PFPProgramTrackTest, AllAxesMovementTest)
     {
         next_expected_time += TIMEGAP;
 
-        std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXEpoch()))));
+        std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXTime()))));
         point_id++;
 
         for(size_t axis = 0; axis < 3; axis++)
@@ -470,7 +470,7 @@ TEST_F(PFPProgramTrackTest, AllAxesMovementTest)
 
 TEST_F(PFPProgramTrackTest, SineWaveMovementTest)
 {
-    double start_time = CIRATools::getUNIXEpoch() + ADVANCE_TIMEGAP;
+    double start_time = CIRATools::getUNIXTime() + ADVANCE_TIMEGAP;
     std::cout << "PRESET position reached, starting PROGRAMTRACK with start time: " << start_time << std::endl;
     long unsigned int trajectory_id = int(start_time);
     unsigned int point_id = 0;
@@ -511,7 +511,7 @@ TEST_F(PFPProgramTrackTest, SineWaveMovementTest)
         next_expected_time += TIMEGAP;
         double time_delta = next_expected_time - start_time;
 
-        std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXEpoch()))));
+        std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXTime()))));
         point_id++;
 
         for(size_t axis = 0; axis < 3; axis++)
@@ -550,7 +550,7 @@ TEST_F(PFPProgramTrackTest, SeparateMovementTest)
 
     while(!terminate.load())
     {
-        double start_time = CIRATools::getUNIXEpoch() + ADVANCE_TIMEGAP;
+        double start_time = CIRATools::getUNIXTime() + ADVANCE_TIMEGAP;
         std::cout << "starting PROGRAMTRACK with timestamp " << std::to_string(start_time) << std::endl;
         long unsigned int trajectory_id = int(start_time);
         double next_expected_time = start_time;
@@ -572,7 +572,7 @@ TEST_F(PFPProgramTrackTest, SeparateMovementTest)
         {
             next_expected_time += TIMEGAP;
 
-            std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXEpoch()))));
+            std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXTime()))));
             point_id++;
 
             if(idle)
@@ -631,7 +631,7 @@ TEST_F(PFPProgramTrackTest, RapidTrajectoryTest)
         std::vector<double> programTrackCoordinates = startingCoordinates;
         programTrackCoordinates[axis_to_move] = MAX_RANGES[axis_to_move];
 
-        double start_time = CIRATools::getUNIXEpoch() + ADVANCE_TIMEGAP;
+        double start_time = CIRATools::getUNIXTime() + ADVANCE_TIMEGAP;
         long unsigned int trajectory_id = int(start_time);
         double next_expected_time = start_time;
         unsigned int point_id = 0;
@@ -650,7 +650,7 @@ TEST_F(PFPProgramTrackTest, RapidTrajectoryTest)
         {
             next_expected_time += TIMEGAP;
 
-            std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXEpoch()))));
+            std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXTime()))));
             point_id++;
 
             if(idle)

@@ -14,5 +14,6 @@
 	Container="FitsZillaContainer"
 	Default="false"
 	KeepAliveTime="-1"
-    ImplLang="cpp"
+	ImplLang="cpp"
+	Autostart="true"
 />

@@ -59,6 +59,8 @@ public:
 
 protected:
 	CSecureArea<CCommandLine>* m_pData;
+	ACS::TimeInterval m_sleepTime;
+	ACS::Time m_nextTime;
 };
 
 

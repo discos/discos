@@ -3,12 +3,13 @@
 
 /* **************************************************************************************************** */
 /* IRA Istituto di Radioastronomia                                                                      */
-/* $Id: CommandLine.h,v 1.1 2011-03-14 14:15:07 a.orlati Exp $																								*/
+/* $Id: CommandLine.h,v 1.1 2011-03-14 14:15:07 a.orlati Exp                                            */
 /*                                                                                                      */
 /* This code is under GNU General Public Licence (GPL).                                                 */
 /*                                                                                                      */
 /* Who                                when            What                                              */
-/* Andrea Orlati(aorlati@ira.inaf.it)     01/10/2008      Creation                                         */
+/* Andrea Orlati(aorlati@ira.inaf.it)     01/10/2008      Creation                                      */
+/* G. Carboni (giuseppe.carboni@inaf.it)  06/11/2025      Added ZMQ publishing                          */
 
 #include <IRA>
 #include <ComponentErrors.h>
@@ -17,6 +18,9 @@
 #include "Common.h"
 #include "Protocol.h"
 #include "Configuration.h"
+#include "ZMQLibrary.hpp"
+
+namespace ZMQ = ZMQLibrary;
 
 /**
  * This class is inherited from the IRA::CSocket class. It takes charge of setting the configuration to the backend.
@@ -44,9 +48,9 @@ public:
 	virtual ~CCommandLine();
 	
 	/**
-     * This member function is used to enstablish and configure the communication channel. 
-     * The first connection is performed in blocking mode(if it fails the component fails to load), the the socket is
-     * trasformed in non-blocking mode.
+	 * This member function is used to enstablish and configure the communication channel. 
+	 * The first connection is performed in blocking mode(if it fails the component fails to load), the the socket is
+	 * trasformed in non-blocking mode.
 	 * This must be the first call before using any other function of this class.
 	 * @param config pointer to the component configuration data structure
 	 * @throw ComponentErrors::SocketError
@@ -467,6 +471,11 @@ public:
 	 * @return true if the resulting integration has to be rounded to match the two input parameters
 	 */
 	static bool resultingSampleRate(const long& integration,const double& sr,long& result);
+
+	/**
+	 * This method is used to update and publish the ZMQ dictionary
+	 */
+	void publishZMQData(ACS::Time now);
 protected:
 	/**
 	 * Automatically called by the framework as a result of a connection request. See super-class for more details.
@@ -648,6 +657,12 @@ private:
 	 * It stores the last measure of zero TPI
 	 */
 	double m_tpiZero[MAX_SECTION_NUMBER];
+
+	/**
+	 * Objects used for publishing the component properties over ZMQ
+	 */
+	ZMQ::ZMQPublisher m_zmqPublisher;
+	ZMQ::ZMQDictionary m_zmqDictionary;
 	
 	/**
 	 * Pointer to the configuration table, every record of the table stores a possible backend setup.
@@ -738,7 +753,6 @@ private:
 	 * This function will unset (cleared) the status bit corresponding to the given field 
 	 */
 	inline void clearStatusField(TstatusFields field) { m_backendStatus &= ~(1 << field); }
-	
 };
 
 #endif /*_COMMANDLINE_H_*/

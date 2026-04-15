@@ -24,6 +24,8 @@
 #include <MinorServoErrors.h>
 #include <ManagementErrors.h>
 #include <ComponentErrors.h>
+#include <acsncSimpleSupplier.h>
+#include <curl/curl.h>
 #include "SRTMinorServoSocket.h"
 #include "MSDevIOs.h"
 #include "SRTMinorServoBossImpl.h"
@@ -33,11 +35,13 @@
 #include "SRTMinorServoTrackingThread.h"
 #include "SRTMinorServoScanThread.h"
 #include "SRTMinorServoContainers.h"
+#include "ZMQLibrary.hpp"
 
 
 _IRA_LOGFILTER_IMPORT;
 
 using namespace MinorServo;
+namespace ZMQ = ZMQLibrary;
 
 class SRTMinorServoBossImpl;
 class SRTMinorServoStatusThread;
@@ -77,6 +81,10 @@ public:
     virtual ~SRTMinorServoBossCore();
 
 private:
+    void initialize();
+    void execute();
+    void cleanUp();
+
     /**
      * Reads the overall status from the hardware.
      * @return true when the status is OK, false otherwise.
@@ -88,7 +96,7 @@ private:
      * @param configuration a mnemonic code identifying the desired configuration.
      * @throw ManagementErrors::ConfigurationErrorEx when something went wrong while performing the setup procedure or if checkLineStatus throws.
      */
-    void setup(std::string configuration);
+    void setup(const char* commanded_setup_c);
 
     /**
      * Performs a park procedure.
@@ -101,14 +109,14 @@ private:
      * @param configuration the desired elevation tracking configuration, allowed values are 'on', 'ON', 'off' and 'OFF'.
      * @throw MinorServoErrors::MinorServoErrorsEx when a scan is waiting to be completed or when the passed configuration is unknown.
      */
-    void setElevationTracking(std::string configuration);
+    void setElevationTracking(const char* configuration_c);
 
     /**
      * Enables or disables the use of ASACTIVE configurations.
      * @param configuration the desired active surface configuration, allowed values are 'on', 'ON', 'off' and 'OFF'.
      * @throw MinorServoErrors::MinorServoErrorsEx when a scan is waiting to be completed or when the passed configuration is unknown.
      */
-    void setASConfiguration(std::string configuration);
+    void setASConfiguration(const char* configuration_c);
 
     /**
      * Opens or closes the gregorian cover.
@@ -116,7 +124,7 @@ private:
      * @throw MinorServoErrors::MinorServoErrorsEx when the commanded position is unknown, when the system is not parked or parking, 
      *                                             when anything goes wrong in the lower communication level or if checkLineStatus throws.
      */
-    void setGregorianCoverPosition(std::string position);
+    void setGregorianCoverPosition(const char* position_c);
 
     /**
      * Sets the gregorian air blade status.
@@ -124,7 +132,7 @@ private:
      * @throw MinorServoErrors::MinorServoErrorsEx when the commanded status is unknown or the gregorian cover is currently closed,
      *                                             when anything goes wrong in the lower communication level or if checkLineStatus throws.
      */
-    void setGregorianAirBladeStatus(std::string status);
+    void setGregorianAirBladeStatus(const char* status_c);
 
     /**
      * Configures the whole minor servo system to a desired position.
@@ -140,17 +148,20 @@ private:
      * @throw MinorServoErrors::MinorServoErrorsEx when a scan is waiting to be completed, when the system is not configured yet, when the given servo_name is unknown,
      *                                             when the given servo is not used in the current focal configuration or when checkLineStatus throws.
      */
-    void clearUserOffsets(std::string servo_name);
+    void clearUserOffsets(const char* servo_name_c);
+    void clearUserOffsets()
+    {
+        clearUserOffsets("ALL");
+    }
 
     /**
      * Sets the given axis' user offset.
      * @param servo_axis_name the minor servo and axis names, connected by a _ character.
      * @param offset the desired user offset to be loaded for the given axis.
-     * @param log a boolean indicating whether the call comes from the SimpleParser or from outside sources. In case it comes from the SimpleParser, we will log the action, otherwise we won't.
      * @throw MinorServoErrors::MinorServoErrorsEx when a scan is waiting to be completed, when the system is not configured yet, when the given servo or axis name are unknown,
      *                                             when the given servo is not used in the current focal configuration or when checkLineStatus throws.
      */
-    void setUserOffset(std::string servo_axis_name, double offset, bool log = false);
+    void setUserOffset(const char* servo_axis_name_c, const double& offset);
 
     /**
      * Retrieves all the current user offsets.
@@ -166,7 +177,7 @@ private:
      * @throw MinorServoErrors::MinorServoErrorsEx when a scan is waiting to be completed, when the system is not configured yet, when the given servo_name is unknown,
      *                                             when the given servo is not used in the current focal configuration or when checkLineStatus throws.
      */
-    void clearSystemOffsets(std::string servo_name);
+    void clearSystemOffsets(const char* servo_name_c);
 
     /**
      * Sets the given axis' system offset.
@@ -175,7 +186,7 @@ private:
      * @throw MinorServoErrors::MinorServoErrorsEx when a scan is waiting to be completed, when the system is not configured yet, when the given servo or axis name are unknown,
      *                                             when the given servo is not used in the current focal configuration or when checkLineStatus throws.
      */
-    void setSystemOffset(std::string servo_axis_name, double offset);
+    void setSystemOffset(const char* servo_axis_name_c, double offset);
 
     /**
      * Retrieves all the current system offsets.
@@ -286,7 +297,13 @@ private:
      * Method that clears the error status from the system.
      * This will show the system cleared the error status and is ready to be configured again.
      */
-    void reset(bool force=false);
+    void reset(bool vbrain_reset=false);
+    void servoReset() { reset(true); }
+
+    /**
+     * Method that updates and publishes the ZMQ dictionary and the NotificationChannel object.
+     */
+    void publishData();
 
     /**
      * Method that loads the focal configurations names when the boss is started
@@ -418,12 +435,12 @@ private:
     /**
      * Configuration of the socket object.
      */
-    const SRTMinorServoSocketConfiguration& m_socket_configuration;
+    SRTMinorServoSocketConfiguration* m_socket_configuration;
 
     /**
-     * Socket object.
+     * Socket pointer.
      */
-    SRTMinorServoSocket& m_socket;
+    SRTMinorServoSocket* m_socket;
 
     /**
      * Boolean indicating whether the socket is connected or not.
@@ -433,12 +450,12 @@ private:
     /**
      * Map containing all the servos in the minor servo system.
      */
-    const std::map<std::string, SRTBaseMinorServo_ptr> m_servos;
+    std::map<std::string, SRTBaseMinorServo_ptr> m_servos;
 
     /**
      * Map containing all the tracking servos in the minor servo system.
      */
-    const std::map<std::string, SRTProgramTrackMinorServo_ptr> m_tracking_servos;
+    std::map<std::string, SRTProgramTrackMinorServo_ptr> m_tracking_servos;
 
     /**
      * Map that will dynamically be updated containing the current configuration's minor servos.
@@ -453,7 +470,7 @@ private:
     /**
      * Map that contains the possible focal configurations
      */
-    const std::map<std::string, std::string> m_DISCOS_2_LDO_configurations;
+    std::map<std::string, std::string> m_DISCOS_2_LDO_configurations;
 
     /**
      * Current scan parameters.
@@ -464,6 +481,21 @@ private:
      * Last scan parameters.
      */
     SRTMinorServoScan m_last_scan;
+
+    /**
+     * The ACS notification channel simple supplier object.
+     */
+    nc::SimpleSupplier* m_notification_channel;
+
+    /**
+     * ZMQ Dictionary object.
+     */
+    ZMQ::ZMQDictionary m_zmqDictionary;
+
+    /**
+     * ZMQ Publisher object.
+     */
+    ZMQ::ZMQPublisher m_zmqPublisher;
 };
 
 #endif

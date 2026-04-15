@@ -18,7 +18,7 @@ void SRTMinorServoParkThread::onStart()
 {
     AUTO_TRACE("SRTMinorServoParkThread::onStart()");
     this->setSleepTime(500000);   // 50 milliseconds
-    m_start_time = IRA::CIRATools::getUNIXEpoch();
+    m_start_time = IRA::CIRATools::getUNIXTime();
 
     m_status = 0;
 
@@ -40,14 +40,14 @@ void SRTMinorServoParkThread::runLoop()
     {
         m_core.checkLineStatus();
     }
-    catch(MinorServoErrors::MinorServoErrorsEx& ex)
+    catch(MinorServoErrors::MinorServoErrorsExImpl& impl)
     {
-        ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
+        impl.log(LM_ERROR);
         this->setStopped();
         return;
     }
 
-    if(IRA::CIRATools::getUNIXEpoch() - m_start_time >= PARK_TIMEOUT)
+    if(IRA::CIRATools::getUNIXTime() - m_start_time >= PARK_TIMEOUT)
     {
         ACS_LOG(LM_FULL_INFO, "SRTMinorServoParkThread::runLoop()", (LM_CRITICAL, "Timeout while performing a park operation."));
         m_core.setError(ERROR_CONFIG_ERROR);

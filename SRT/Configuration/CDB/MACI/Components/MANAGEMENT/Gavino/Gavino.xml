@@ -14,4 +14,5 @@
 	Container="ManagementContainer"
 	Default="true"
     ImplLang="cpp"
+    Autostart="true"
 />

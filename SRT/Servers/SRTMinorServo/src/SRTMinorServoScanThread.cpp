@@ -28,7 +28,7 @@ void SRTMinorServoScanThread::onStart()
     size_t pre_scan_points = std::floor((m_core.m_current_scan.start_time - (getTimeStamp() + PROGRAM_TRACK_FUTURE_TIME)) / PROGRAM_TRACK_TIMEGAP);
     m_point_time = m_core.m_current_scan.start_time - pre_scan_points * PROGRAM_TRACK_TIMEGAP;
     m_point_id = 0;
-    m_trajectory_id = (unsigned int)(IRA::CIRATools::ACSTime2UNIXEpoch(m_point_time));
+    m_trajectory_id = (unsigned int)(IRA::CIRATools::ACSTime2UNIXTime(m_point_time));
 
     // How many points in the scan trajectory?
     // We don't check the modulo of the division, we assume all the scans duration is always expressed in seconds, therefore the modulo should always be 0
@@ -51,7 +51,7 @@ void SRTMinorServoScanThread::onStart()
     auto servo = m_core.m_tracking_servos.at(m_core.m_current_scan.servo_name);
     m_starting_coordinates = *servo->getAxesPositions(0);
 
-    ACS_LOG(LM_FULL_INFO, "SRTMinorServoScanThread::onStart()", (LM_DEBUG,
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoScanThread::onStart()", (LM_NOTICE,
         ("SCAN THREAD STARTED, SCANNING " + std::to_string((int)m_core.m_current_scan.scan_range) + "MM IN " + std::to_string((int)(m_core.m_current_scan.scan_duration / 10000000)) + " SECONDS ALONG " + m_core.m_current_scan.servo_name + " " + m_core.m_current_scan.axis_name + " AXIS").c_str()
     ));
 }
@@ -60,7 +60,7 @@ void SRTMinorServoScanThread::onStop()
 {
     AUTO_TRACE("SRTMinorServoScanThread::onStop()");
 
-    ACS_LOG(LM_FULL_INFO, "SRTMinorServoScanThread::onStop()", (LM_DEBUG, "SCAN THREAD STOPPED"));
+    ACS_LOG(LM_FULL_INFO, "SRTMinorServoScanThread::onStop()", (LM_NOTICE, "SCAN THREAD STOPPED"));
 
     m_core.m_scanning.store(Management::MNG_FALSE);
 
@@ -131,9 +131,9 @@ void SRTMinorServoScanThread::runLoop()
     {
         m_core.checkLineStatus();
     }
-    catch(MinorServoErrors::MinorServoErrorsEx& ex)
+    catch(MinorServoErrors::MinorServoErrorsExImpl& impl)
     {
-        ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
+        impl.log(LM_ERROR);
         m_error = true;
         this->setStopped();
         return;
@@ -181,9 +181,14 @@ void SRTMinorServoScanThread::runLoop()
         {
             elevation = m_core.getElevation(m_point_time);
         }
-        catch(ComponentErrors::ComponentErrorsEx& ex)
+        catch(ComponentErrors::ComponentErrorsExImpl&)
         {
-            _IRA_LOGFILTER_LOG(LM_WARNING, "SRTMinorServoScanThread::runLoop()", (std::string(getErrorFromEx(ex)) + " Using a fixed elevation of " + std::to_string(elevation) + "° as scan central coordinate!").c_str());
+            _IRA_LOGFILTER_LOG(LM_WARNING, "SRTMinorServoScanThread::runLoop()", ("AntennaBoss component unreachable: using a fixed elevation of " + std::to_string(elevation) + "° as scan central coordinate!").c_str());
+            m_core.m_elevation_tracking.store(Management::MNG_FALSE);
+        }
+        catch(CORBA::Exception&)
+        {
+            _IRA_LOGFILTER_LOG(LM_WARNING, "SRTMinorServoScanThread::runLoop()", ("CORBA Problem: using a fixed elevation of " + std::to_string(elevation) + "° as scan central coordinate!").c_str());
             m_core.m_elevation_tracking.store(Management::MNG_FALSE);
         }
     }
@@ -200,7 +205,19 @@ void SRTMinorServoScanThread::runLoop()
 
         if(m_core.m_motion_status.load() == MOTION_STATUS_TRACKING)
         {
-            coordinates = *servo->calcCoordinates(elevation);
+            try
+            {
+                coordinates = *servo->calcCoordinates(elevation);
+            }
+            catch(MinorServoErrors::MinorServoErrorsEx& ex)
+            {
+                // Weird case, it should never get here since the servo should be already configured
+                ACS_SHORT_LOG((LM_ERROR, ex.errorTrace.routine));
+                m_error = true;
+                m_core.setError(ERROR_CONFIG_ERROR);
+                this->setStopped();
+                return;
+            }
         }
 
         if(servo_name == m_core.m_current_scan.servo_name)
@@ -210,7 +227,7 @@ void SRTMinorServoScanThread::runLoop()
                 // Ask for the offset in the exact m_point_time (we don't want to interpolate or retrieve any value before or after the scan time span)
                 coordinates[m_core.m_current_scan.axis_index] += m_scan_offsets.get(m_point_time, true).second[0];
             }
-            catch(...)
+            catch(std::out_of_range&)
             {
                 // No offset found for this point_time, ignore
             }

@@ -14,5 +14,6 @@
 	Container="SRT7GHzContainer"
 	KeepAliveTime="-1"
 	Default="false"
-   ImplLang="cpp"
+    ImplLang="cpp"
+    Autostart="true"
 />

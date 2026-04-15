@@ -8,7 +8,7 @@
 	xmlns:log="urn:schemas-cosylab-com:LoggingConfig:1.0"
 	Timeout="600.0"
 	ImplLang="cpp"
-	ServerThreads="5">
+	ServerThreads="20">
 
 	<Autoload>
 		<cdb:e string="baci" />

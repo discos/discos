@@ -631,7 +631,7 @@ module Antenna {
 		 * @param ra the returned observed galactic longitude in radians 
 		 * @param dec the returned observed galactic latitude in radians
 		*/
-		void getObservedGalactic(in ACS::Time timestamp,in ACS::TimeInterval duration, out double longitude,out double latitude);
+		void getObservedGalactic(in ACS::Time timestamp,in ACS::TimeInterval duration, out double longitude,out double latitude) raises (AntennaErrors::AntennaErrorsEx);
 		
 		/** 
 		 * This method should only be used internally to know the observed horizontal coordinates. A timestamp to which the coordinates
@@ -644,7 +644,7 @@ module Antenna {
 		 * @param ra the returned observed azimuth in radians 
 		 * @param dec the returned observed elevation in radians
 		*/		
-		void getObservedHorizontal(in ACS::Time timestamp,in ACS::TimeInterval duration,out double az,out double el);
+		void getObservedHorizontal(in ACS::Time timestamp,in ACS::TimeInterval duration,out double az,out double el) raises (AntennaErrors::AntennaErrorsEx);
 		
 		/**
 		 * This method should only be used internally to know the offsets currently commanded. i.e. the sum of all offset types

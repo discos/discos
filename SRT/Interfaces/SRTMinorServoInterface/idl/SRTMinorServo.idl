@@ -54,7 +54,7 @@ module MinorServo
          * @throw MinorServoErrors::MinorServoErrorsEx when trying to reset the offsets when they don't match the ones loaded into the hardware
          * @return true if the servo is not in an error state, false otherwise
          */
-        boolean status() raises (MinorServoErrors::MinorServoErrorsEx);
+        void status() raises (MinorServoErrors::MinorServoErrorsEx);
 
         /**
          * This method commands a STOW operation to the servo
@@ -171,7 +171,7 @@ module MinorServo
          *        when receiving a destination position sequence of lenght different from the number of virtual axes of the servo
          * @return an ACS::TimeInterval object representing the total duration of the movement from the starting position to the destination position
          */
-        ACS::TimeInterval getTravelTime(in ACS::doubleSeq starting_position, in ACS::doubleSeq destination_position);
+        ACS::TimeInterval getTravelTime(in ACS::doubleSeq starting_position, in ACS::doubleSeq destination_position) raises (MinorServoErrors::MinorServoErrorsEx);
 
         /**
          * This method returns the minimum and maximun ranges for all the servo axes in the given sequence passed by reference
@@ -190,6 +190,11 @@ module MinorServo
          * This command resets the error status inside the component.
          */
         void reset();
+
+        /**
+         * Retrieves the ZMQ status object
+         */
+        SRTMinorServoZMQStatus getSRTMinorServoZMQStatus(in ACS::Time timestamp);
     };
 
     /**
@@ -241,7 +246,7 @@ module MinorServo
          * @throw MinorServoErrorsEx when the length of the coordinates sequence does not match the number of virtual axis of the servo system,
          *        when there has been a communication error or when the command was not accepted
          */
-        void programTrack(in long trajectory_id, in long point_id, in ACS::Time point_time, in ACS::doubleSeq coordinates);
+        void programTrack(in long trajectory_id, in long point_id, in ACS::Time point_time, in ACS::doubleSeq coordinates) raises (MinorServoErrors::CommunicationErrorEx, MinorServoErrors::TrackingErrorEx, MinorServoErrors::StatusErrorEx);
 
         /**
          * This method returns a boolean indicating if the servo is tracking or not

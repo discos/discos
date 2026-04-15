@@ -17,48 +17,43 @@
 using namespace baci;
 
 /**
- * This  class is derived from the template DevIO. 
+ * This  class is derived from the template DevIO.
  * @author <a href=mailto:migoni@ca.astro.it>Carlo Migoni</a>,
  * Osservatorio Astronomico di Cagliari, Italia<br>
- */ 
+ */
 class ActiveSurfaceBossImplDevIOEnable: public virtual DevIO<Management::TBoolean>
 {
 public:
-	
-	ActiveSurfaceBossImplDevIOEnable(IRA::CSecureArea<CActiveSurfaceBossCore>* core): m_core(core) { 
+
+	ActiveSurfaceBossImplDevIOEnable(CActiveSurfaceBossCore* core): m_core(core) {
 		AUTO_TRACE("ActiveSurfaceBossImplDevIOEnable::ActiveSurfaceBossImplDevIOEnable()");
 	}
-	
+
 	~ActiveSurfaceBossImplDevIOEnable() {
 		AUTO_TRACE("ActiveSurfaceBossImplDevIOEnable::~ActiveSurfaceBossImplDevIOEnable()");
 	}
-	
-	bool initializeValue() 
+
+	bool initializeValue()
 	{
 		return false;
 	}
-	
+
 	Management::TBoolean  read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
 	{
-		bool val;
-		CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
 		AUTO_TRACE("ActiveSurfaceBossImplDevIOEnable::read()");
 		timestamp=getTimeStamp();
-		val=resource->getEnable();
-		if (val) {
+		if (m_core->getEnable())
 			return Management::MNG_TRUE;
-		}
-		else {
+		else
 			return Management::MNG_FALSE;
-		}
     }
-	
+
     void write(const CORBA::Long& value, ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
     	AUTO_TRACE("ActiveSurfaceBossImplDevIOEnable::write()");
 	}
-    
+
 private:
-	IRA::CSecureArea<CActiveSurfaceBossCore> *m_core;
+	CActiveSurfaceBossCore* m_core;
 };
 
 #endif /*DEVIOENABLE_H_*/

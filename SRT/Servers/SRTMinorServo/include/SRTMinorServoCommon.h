@@ -22,17 +22,4 @@
     return tmp._retn(); \
 }
 
-/**
- * Macro used to show the error on the operatorInput and on the jlog since the parser does not log Ex type exceptions
- */
-#define LOG_EX(EXTYPE) \
-{ \
-    EXTYPE##Impl impl(ex); \
-    std::string _command(cmd); \
-    std::string error = _command.substr(0, _command.find('=')) + "?"; \
-    SP::CFormatter<decltype(impl)>::exceptionToUser(impl, out); \
-    error += out; \
-    out = error.c_str(); \
-}
-
 #endif

@@ -78,7 +78,8 @@ WeatherStationImpl_LIBS      =ComponentErrors \
 			SchedulerStubs \
 			AntennaDefinitionsStubs\
 			AntennaErrors \
-			DiscosVersion
+			DiscosVersion \
+			ZMQLibrary
 			
 			
 

@@ -27,11 +27,13 @@
 #include "MSDevIOs.h"
 #include "SRTDerotatorStatusThread.h"
 #include <SRTDerotatorS.h>
+#include "ZMQLibrary.hpp"
 
 class SRTDerotatorStatusThread;
 
 
 using namespace MinorServo;
+namespace ZMQ = ZMQLibrary;
 
 /**
  * This class implements the base ACS::CharacteristicComponent CORBA interface for a SRTDerotator component.
@@ -86,13 +88,22 @@ public:
      */
     void setup();
 
-    // TODO: this should be a simple preset command
+    /**
+     * Commands a position to the derotator with the PRESET command.
+     * @param position the desired position
+     */
     void setPosition(CORBA::Double position);
 
-    // TODO easy implementation, return last commanded preset or programTrack position
+    /**
+     * Returns the last commanded position
+     * @return a double object containing the derotator last commanded position
+     */
     double getCmdPosition() { return m_commanded_position.load(); };
 
-    // TODO return current position, just read the devio or the AnswerMap
+    /**
+     * Returns the current derotator position
+     * @return a double object containing the derotator current position
+     */
     double getActPosition() { return getPositionFromHistory(0); };
 
     /**
@@ -104,14 +115,16 @@ public:
      */
     double getPositionFromHistory(ACS::Time acs_time);
 
-    // TODO: easy implementation, return the min and max values read from the CDB
+    /**
+     * Respectively return the minimum and maximum limit of the derotator
+     * @return a double containing the minimum or maximum limit of the derotator
+     */
     double getMinLimit() { return m_min; };
     double getMaxLimit() { return m_max; };
 
     // TODO: degrees between 2 lateral feeds. How to implement this with new receivers?
     double getStep() { return m_step; };
 
-    // TODO: easy implementation
     bool isReady();
     bool isSlewing();
 
@@ -119,7 +132,7 @@ public:
      * Returns the tracking status of the minor servo.
      * @return true if the minor servo is tracking within the tracking error, false otherwise
      */
-    bool isTracking() { return m_tracking.load() == Management::MNG_TRUE; }
+    bool isTracking();
 
     /**
      * This method loads a position that has to be tracked by the derotator
@@ -305,6 +318,11 @@ private:
      * Updates the status of the component by asking the hardware its status.
      */
     bool updateStatus();
+
+    /**
+     * Publishes the ZMQ dictionary
+     */
+    void publishZMQDictionary();
 
     /**
      * Checks if the socket is connected and if the minor servo system is in a good state.
@@ -540,6 +558,9 @@ private:
      * Pointer to the status thread.
      */
     SRTDerotatorStatusThread* m_status_thread;
+
+    ZMQ::ZMQPublisher m_zmqPublisher;
+    ZMQ::ZMQDictionary m_zmqDictionary;
 };
 
 #endif

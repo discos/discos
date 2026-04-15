@@ -33,13 +33,6 @@
 
 #define LOOPSTATUSTIME 10000000 // 1.0 second
 
-#define _SET_CDB(PROP,LVAL,ROUTINE) {	\
-	maci::ContainerServices* cs=getContainerServices();\
-		if (!CIRATools::setDBValue(cs,#PROP,(const long&) LVAL)) \
-		{ ASErrors::CDBAccessErrorExImpl exImpl(__FILE__,__LINE__,ROUTINE); \
-			exImpl.setFieldName(#PROP); throw exImpl; \
-		} \
-}
 /*
 #define _GET_CDB(PROP,LVAL,ROUTINE) {	\
 	maci::ContainerServices* cs=getContainerServices();\
@@ -55,16 +48,16 @@ using namespace ASErrors;
 using namespace ComponentErrors;
 
 /**
- * This class implements the ActiveSurface::ActiveSurfaceBoss CORBA interface and the ACS Component.  
+ * This class implements the ActiveSurface::ActiveSurfaceBoss CORBA interface and the ACS Component.
  * @author <a href=mailto:migoni@ca.astro.it>Carlo Migoni</a>
  * Osservatorio Astronomico di Cagliari, Italia
- * <br> 
+ * <br>
  */
 class ActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl, public virtual POA_ActiveSurface::ActiveSurfaceBoss
 {
 	public:
-	
-	/** 
+
+	/**
 	* Constructor.
 	* @param CompName component's name. This is also the name that will be used to find the configuration data for the component in the Configuration Database.
 	* @param containerServices pointer to the class that exposes all services offered by container
@@ -74,10 +67,10 @@ class ActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl, public 
 	/**
 	 * Destructor.
 	*/
-	virtual ~ActiveSurfaceBossImpl(); 
+	virtual ~ActiveSurfaceBossImpl();
 
-	/** 
-	 * Called to give the component time to initialize itself. The component reads in configuration files/parameters, builds up connection. 
+	/**
+	 * Called to give the component time to initialize itself. The component reads in configuration files/parameters, builds up connection.
 	 * Called before execute. It is implemented as a synchronous (blocking) call.
 	 * @throw ACSErr::ACSbaseExImpl
 	 * @arg \c ComponentErrors::MemoryAllocation
@@ -85,21 +78,21 @@ class ActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl, public 
 	virtual void initialize() throw (ACSErr::ACSbaseExImpl);
 
 	/**
- 	 * Called after <i>initialize()</i> to tell the component that it has to be ready to accept incoming functional calls any time. 
+ 	 * Called after <i>initialize()</i> to tell the component that it has to be ready to accept incoming functional calls any time.
 	 * Must be implemented as a synchronous (blocking) call. In this class the default implementation only logs the COMPSTATE_OPERATIONAL
 	 * @throw ACSErr::ACSbaseExImpl
 	 * @arg \c ComponentErrors::CDBAccess
 	*/
 	virtual void execute() throw (ACSErr::ACSbaseExImpl);
-	
-	/** 
+
+	/**
 	 * Called by the container before destroying the server in a normal situation. This function takes charge of releasing all resources.
 	*/
 	virtual void cleanUp();
-	/** 
+	/**
 	 * Called by the container in case of error or emergency situation. This function tries to free all resources even though there is no
 	 * warranty that the function is completely executed before the component is destroyed.
-	*/	
+	*/
 	virtual void aboutToAbort();
 
 	/**
@@ -107,7 +100,7 @@ class ActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl, public 
 	 * @return pointer to read-only ROTSystemStatus property status
 	*/
 	virtual Management::ROTSystemStatus_ptr status() throw (CORBA::SystemException);
-	
+
 	/**
 	 * Returns a reference to the enable property implementation of IDL interface.
 	 * @return pointer to read-only ROTBoolean  property enabled
@@ -134,14 +127,14 @@ class ActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl, public 
 
 	/**
 	 *  This method can be called in order to disable the automatic update of the surface.
-	 * @throw CORBA::SystemException 
-	*/	
+	 * @throw CORBA::SystemException
+	*/
 	void asOff() throw (CORBA::SystemException);
-		
+
 	/**
 	 *  This method can be called in order to enable the automatic update of the surface.
-	 * @throw CORBA::SystemException 
-	*/		
+	 * @throw CORBA::SystemException
+	*/
 	void asOn() throw (CORBA::SystemException);
 
 	/**
@@ -158,7 +151,7 @@ class ActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl, public 
 	/**
 	 * This method is used to park (i.e. reference position) the active surface).
 	 * @throw CORBA::SystemExcpetion
-	 * @throw ManagementErrors::ParkingErrorEx  
+	 * @throw ManagementErrors::ParkingErrorEx
 	 */
 	void park() throw (CORBA::SystemException, ManagementErrors::ParkingErrorEx);
 
@@ -205,8 +198,6 @@ class ActiveSurfaceBossImpl: public virtual CharacteristicComponentImpl, public 
 	void calibrate ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
 
 	void calVer ( CORBA::Long circle,  CORBA::Long actuator,  CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
-
-	void recoverUSD( CORBA::Long circle,  CORBA::Long actuator) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx );
 
 	private:
 	/**

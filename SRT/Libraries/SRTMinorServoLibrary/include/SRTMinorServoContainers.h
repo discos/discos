@@ -114,7 +114,7 @@ namespace MinorServo
     using SRTMinorServoCoefficientsTable = std::map<std::string, std::vector<double>>;
 
 
-    class SRTMinorServoAnswerMap : private std::map<std::string, std::variant<long, double, std::string>>
+    class SRTMinorServoAnswerMap : protected std::map<std::string, std::variant<long, double, std::string>>
     {
         /**
          * This class privately extends the type std::map<std::string, std::variant<long, double, std::string>>.
@@ -230,9 +230,8 @@ namespace MinorServo
             }
             catch(std::out_of_range& ex)
             {
-                std::cout << "PLAIN_COMMAND: " << this->getPlainCommand();
-                std::cout << "PLAIN_ANSWER:" << this->getPlainAnswer();
-                throw ex;
+                std::string error = "PLAIN_COMMAND: " + this->_getPlainCommand() + "\nPLAIN_ANSWER: " + this->_getPlainAnswer() + "\nKEY: " + key;
+                throw std::out_of_range(error);
             }
         }
 
@@ -318,7 +317,7 @@ namespace MinorServo
         const ACS::Time getTimestamp() const
         {
             std::shared_lock<std::shared_mutex> lock(m_mutex);
-            return IRA::CIRATools::UNIXEpoch2ACSTime(this->get<double>("TIMESTAMP"));
+            return IRA::CIRATools::UNIXTime2ACSTime(this->get<double>("TIMESTAMP"));
         }
 
         /**
@@ -328,7 +327,7 @@ namespace MinorServo
         const std::string getPlainCommand() const
         {
             std::shared_lock<std::shared_mutex> lock(m_mutex);
-            return this->count("PLAIN_COMMAND") > 0 ? this->get<std::string>("PLAIN_COMMAND") : "";
+            return this->_getPlainCommand();
         }
 
         /**
@@ -338,7 +337,7 @@ namespace MinorServo
         const std::string getPlainAnswer() const
         {
             std::shared_lock<std::shared_mutex> lock(m_mutex);
-            return this->count("PLAIN_ANSWER") > 0 ? this->get<std::string>("PLAIN_ANSWER") : "";
+            return this->_getPlainAnswer();
         }
 
     protected:
@@ -346,6 +345,24 @@ namespace MinorServo
          * Shared mutex to control read and write accesses. Multiple reading access are permitted and will only block writing access. Writing access will block all accesses
          */
         mutable std::shared_mutex m_mutex;
+    private:
+        /**
+         * This method returns the plain command sent using the socket. Useful for log purposes.
+         * @return a std::string containing the plain command sent using the socket.
+         */
+        const std::string _getPlainCommand() const
+        {
+            return this->count("PLAIN_COMMAND") > 0 ? this->get<std::string>("PLAIN_COMMAND") : "";
+        }
+
+        /**
+         * This method returns the plain answer received from the socket. Useful for log purposes.
+         * @return a std::string containing the plain answer received from the socket.
+         */
+        const std::string _getPlainAnswer() const
+        {
+            return this->count("PLAIN_ANSWER") > 0 ? this->get<std::string>("PLAIN_ANSWER") : "";
+        }
     };
 
     /**
@@ -387,7 +404,7 @@ namespace MinorServo
          */
         ACE_CString getPLCVersion() const
         {
-            return this->get<std::string>("PLC_VERSION").c_str();
+            return ACE_CString(this->get<std::string>("PLC_VERSION").c_str());
         }
 
         /**
@@ -482,6 +499,26 @@ namespace MinorServo
             m_virtual_positions(virtual_positions),
             m_virtual_offsets(virtual_offsets)
         {}
+
+        SRTMinorServoStatus(const std::string& servo_name) : SRTMinorServoAnswerMap(), m_servo_name(servo_name)
+        {}
+
+        SRTMinorServoStatus& operator=(const SRTMinorServoStatus& other)
+        {
+            if(this != &other)
+            {
+                std::unique_lock<std::shared_mutex> lockThis(m_mutex, std::defer_lock);
+                std::shared_lock<std::shared_mutex> lockOther(other.m_mutex, std::defer_lock);
+                std::lock(lockThis, lockOther);
+                static_cast<std::map <std::string, std::variant<long, double, std::string>>&>(*this) = static_cast<const std::map<std::string, std::variant<long, double, std::string>>&>(other);
+                m_physical_axes_enabled = other.m_physical_axes_enabled;
+                m_physical_positions = other.m_physical_positions;
+                m_virtual_positions = other.m_virtual_positions;
+                m_virtual_offsets = other.m_virtual_offsets;
+            }
+
+            return *this;
+        }
 
         /**
          * Returns a boolean indicating whether the servo is enabled.
@@ -611,22 +648,22 @@ namespace MinorServo
         /**
          * The labels for the enabled value of each physical axis.
          */
-        const std::vector<std::string> m_physical_axes_enabled;
+        std::vector<std::string> m_physical_axes_enabled;
 
         /**
          * The labels for the positions of each physical axis.
          */
-        const std::vector<std::string> m_physical_positions;
+        std::vector<std::string> m_physical_positions;
 
         /**
          * The labels for the positions of each virtual axis.
          */
-        const std::vector<std::string> m_virtual_positions;
+        std::vector<std::string> m_virtual_positions;
 
         /**
          * The labels for the offsets of each virtual axis.
          */
-        const std::vector<std::string> m_virtual_offsets;
+        std::vector<std::string> m_virtual_offsets;
     };
 
     /**

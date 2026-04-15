@@ -41,7 +41,9 @@
 
 #include <ComponentProxy.h>
 #include "AntennaDefinitionsC.h"
+#include "ZMQLibrary.hpp"
 
+namespace ZMQ = ZMQLibrary;
 
 
 /*
@@ -106,6 +108,8 @@ private:
     int loopCounter_m;
     int m_threshold; // wind threshold in km/h
     WeatherStationImpl* m_weatherstation_p;
+    ACS::TimeInterval m_sleepTime;
+    ACS::Time m_nextTime;
 };
 
 
@@ -223,6 +227,8 @@ private:
     void operator=(const WeatherStationImpl&);
     Weather::parameters m_parameters;
     BACIMutex m_meteoParametersMutex;
+    ZMQ::ZMQPublisher m_zmqPublisher;
+    ZMQ::ZMQDictionary m_zmqDictionary;
 };
 
 #endif

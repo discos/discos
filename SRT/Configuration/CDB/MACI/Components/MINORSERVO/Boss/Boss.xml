@@ -11,4 +11,5 @@
     Type="IDL:alma/MinorServo/SRTMinorServoBoss:1.0"
     Container="MinorServoContainer"
     Default="true"
+    Autostart="true"
 />

@@ -285,6 +285,7 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 	_GET_DWORD_ATTRIBUTE("RepetitionCacheTime","Log repetition filter cache time (uSec) ",m_repetitionCacheTime);
 	_GET_DWORD_ATTRIBUTE("RepetitionExpireTime","Log repetition filter expire time (uSec) ",m_repetitionExpireTime);
 	_GET_DWORD_ATTRIBUTE("ScheduleExecutorSleepTime","Schedule executor sleep time (uSec) ",m_scheduleExecutorSleepTime);
+	_GET_DWORD_ATTRIBUTE("MonitorThreadSleepTime","Monitor thread sleep time (uSec) ",m_monitorThreadSleepTime);
 	_GET_STRING_ATTRIBUTE("ProceduresLocation","The CDB location of procedures is",m_proceduresLocation);
 	_GET_STRING_ATTRIBUTE("DefaultProceduresFile","The default procedures file is ",m_defaultProceduresFile);
 	_GET_STRING_ATTRIBUTE("DefaultProjectCode","The default project code is ",m_defaultProjectCode);

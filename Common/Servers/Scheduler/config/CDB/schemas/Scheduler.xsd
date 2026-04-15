@@ -60,6 +60,8 @@
 		<xs:attribute name="RepetitionExpireTime" type="xs:unsignedLong" use="required" />
 		<!-- sleep time of the executor thread in microseconds -->
 		<xs:attribute name="ScheduleExecutorSleepTime" type="xs:unsignedLong" use="required" />
+		<!-- sleep time of the monitor thread in microseconds -->
+		<xs:attribute name="MonitorThreadSleepTime" type="xs:unsignedLong" use="optional" default="1000000" />
 		<!-- This the gap (microseconds) that the scheduler must respects for a transition of the calibration diode. Used in Tsys computation. -->
 		<xs:attribute name="TsysTransitionGap" type="xs:unsignedLong" use="required" />								
 		<!-- here a list of used component follows -->

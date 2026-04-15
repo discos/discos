@@ -11,8 +11,9 @@
 	Name="LO_CLOW"
 	Code="LocalOscillatorImpl.LocalOscillator"
 	Type="IDL:alma/Receivers/LocalOscillator:1.0"
-	Container="LocalOscillatorKContainer"
+	Container="LocalOscillatorCContainer"
 	KeepAliveTime="10"
 	Default="false"
     ImplLang="py"
+    Autostart="true"
 />
