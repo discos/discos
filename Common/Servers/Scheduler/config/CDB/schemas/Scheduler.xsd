@@ -28,6 +28,8 @@
 			<xs:element name="scheduleName" type="baci:ROstring"/>
 			<xs:element name="scanID" type="baci:ROlong" />
 			<xs:element name="subScanID" type="baci:ROlong" />
+			<xs:element name="lastScanID" type="baci:ROlong" />
+			<xs:element name="lastSubScanID" type="baci:ROlong" />
 			<xs:element name="currentDevice" type="baci:ROlong" />
 			<xs:element name="status" type="mng:SystemStatusType" />
 			<xs:element name="tracking" type="mng:BooleanType" />	

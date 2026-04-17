@@ -27,6 +27,17 @@ void CCore::getCurrentIdentifiers(DWORD& scanID,DWORD& subScanID)
 	}
 }
 
+void CCore::getLastIdentifiers(DWORD& lastScanID, DWORD& lastSubScanID)
+{
+	if ((m_schedExecuter) && (m_schedExecuter->isScheduleActive())) {
+		m_schedExecuter->getLastIdentifiers(lastScanID, lastSubScanID);
+	}
+	else {
+		lastScanID = 0;
+		lastSubScanID = 0;
+	}
+}
+
 void CCore::getCurrentBackend(IRA::CString& bck)
 {
 	/*Backends::GenericBackend_var backend;

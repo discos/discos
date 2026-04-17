@@ -2,6 +2,7 @@
 #include "SchedulerImpl.h"
 #include "Core.h"
 #include "DevIOScanNumber.h"
+#include "DevIOLastScanNumber.h"
 #include "DevIOScheduleName.h"
 #include "DevIOStatus.h"
 #include "DevIOTracking.h"
@@ -20,6 +21,8 @@ SchedulerImpl::SchedulerImpl(const ACE_CString &CompName,maci::ContainerServices
 	m_pstatus(this),
 	m_pscanID(this),
 	m_psubScanID(this),
+	m_plastScanID(this),
+	m_plastSubScanID(this),
 	m_ptracking(this),
 	m_pcurrentDevice(this),
 	m_pprojectCode(this),
@@ -59,6 +62,8 @@ void SchedulerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 				new DevIOStatus(m_core),true);
 		m_pscanID=new ROlong(getContainerServices()->getName()+":scanID",getComponent(),new DevIOScanNumber(m_core,DevIOScanNumber::SCANID),true);
 		m_psubScanID=new ROlong(getContainerServices()->getName()+":subScanID",getComponent(),new DevIOScanNumber(m_core,DevIOScanNumber::SUBSCANID),true);
+		m_plastScanID=new ROlong(getContainerServices()->getName()+":lastScanID",getComponent(),new DevIOLastScanNumber(m_core,DevIOLastScanNumber::SCANID),true);
+		m_plastSubScanID=new ROlong(getContainerServices()->getName()+":lastSubScanID",getComponent(),new DevIOLastScanNumber(m_core,DevIOLastScanNumber::SUBSCANID),true);
 		m_ptracking=new ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean>(getContainerServices()->getName()+":tracking",getComponent(),
 				new DevIOTracking(m_core),true);
 		m_pcurrentDevice=new ROlong(getContainerServices()->getName()+":currentDevice",getComponent(),new DevIOCurrentDevice(m_core),true);
@@ -625,6 +630,8 @@ _PROPERTY_REFERENCE_CPP(SchedulerImpl,Management::ROTSystemStatus,m_pstatus,stat
 _PROPERTY_REFERENCE_CPP(SchedulerImpl,ACS::ROstring,m_pscheduleName,scheduleName);
 _PROPERTY_REFERENCE_CPP(SchedulerImpl,ACS::ROlong,m_pscanID,scanID);
 _PROPERTY_REFERENCE_CPP(SchedulerImpl,ACS::ROlong,m_psubScanID,subScanID);
+_PROPERTY_REFERENCE_CPP(SchedulerImpl,ACS::ROlong,m_plastScanID,lastScanID);
+_PROPERTY_REFERENCE_CPP(SchedulerImpl,ACS::ROlong,m_plastSubScanID,lastSubScanID);
 _PROPERTY_REFERENCE_CPP(SchedulerImpl,Management::ROTBoolean,m_ptracking,tracking);
 _PROPERTY_REFERENCE_CPP(SchedulerImpl,ACS::ROlong,m_pcurrentDevice,currentDevice);
 _PROPERTY_REFERENCE_CPP(SchedulerImpl,ACS::ROstring,m_pprojectCode,projectCode);

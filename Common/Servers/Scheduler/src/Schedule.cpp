@@ -541,9 +541,10 @@ bool CProcedureList::checkProcedure(const IRA::CString& conf,WORD args)
 
 CSchedule::CSchedule(const IRA::CString& path,const IRA::CString& fileName) : CBaseSchedule(path,fileName),m_projectName(""),m_observer(""),
 	m_scanList(""),m_configList(""),m_backendList(""),m_layoutFile(""),m_scanListUnit(NULL),m_preScanUnit(NULL),m_postScanUnit(NULL),m_backendListUnit(NULL),m_layoutListUnit(NULL),
-	m_mode(LST),m_repetitions(0),m_lowerElevationLimit(-1.0),m_upperElevationLimit(-1.0),m_scanTag(-1),m_modeDone(false),m_initProc(_SCHED_NULLTARGET),m_initProcArgs(0)
+	m_mode(LST),m_repetitions(0),m_lowerElevationLimit(-1.0),m_upperElevationLimit(-1.0),m_scanTag(-1),m_modeDone(false),m_initProc(_SCHED_NULLTARGET),m_initProcArgs(0),m_lastScanID(0)
 {
 	m_schedule.clear();
+	m_lastSubscans.clear();
 	m_currentScanDef.valid=false;
 	m_currentScanDef.line=m_currentScanDef.id=0;
 	m_currentScanDef.backendProc=m_currentScanDef.layout=m_currentScanDef.writerInstance=m_currentScanDef.suffix="";
@@ -1103,6 +1104,8 @@ bool CSchedule::parseScans(const IRA::CString& line,const DWORD& lnNumber,IRA::C
 					return false;
 				}
 				m_currentScanDef.id=tempId;
+
+				m_lastScanID = std::max(m_lastScanID, tempId);
 			}
 			if (!IRA::CIRATools::getNextToken(line,start,SEPARATORS,ret,false)) { //suffix
 				errorMsg="scan suffix cannot be found";
@@ -1168,6 +1171,7 @@ bool CSchedule::parseScans(const IRA::CString& line,const DWORD& lnNumber,IRA::C
 				errorMsg="subscan identifier cannot be zero";
 				return false;
 			}
+			m_lastSubscans[scanid] = std::max(m_lastSubscans[scanid], subscanid);
 			counter=m_schedule.size()+1; // subscan enumerations must start from 1
 			p=new TRecord;
 			p->line=lnNumber;
@@ -1206,6 +1210,7 @@ bool CSchedule::parseScans(const IRA::CString& line,const DWORD& lnNumber,IRA::C
 				errorMsg="subscan identifier cannot be zero";
 				return false;
 			}
+			m_lastSubscans[scanid] = std::max(m_lastSubscans[scanid], subscanid);
 			counter=m_schedule.size()+1; // subscan enumerations must start from 1
 			p=new TRecord;
 			p->line=lnNumber;

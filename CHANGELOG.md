@@ -114,6 +114,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/
                  https://discosclient.readthedocs.io/en/latest/schemas/schemas.html.
                  A ZMQ relay for commands has also been implemented. It relays commands to the ManagementContainer just like the OperatorInput default behavior.
                  More information regarding the whole ZMQ layer here: https://discosclient.readthedocs.io/en/latest/index.html
+    issue #973 - Added lastScanID and lastSubScanID to Scheduler component
 ## Fixed
     issue #940 - The SRTMinorServo components has been reworked in order to correctly handle socket reconnections. The component can now start as disconnected and still provide
                  information regarding its status via ZMQ.

@@ -46,6 +46,13 @@ void getScanCounter(DWORD& cc);
  */
 void getCurrentIdentifiers(DWORD& scanID,DWORD& subScanID);
 
+/**
+ * This function reports the last identifiers of the current schedule and the current scan
+ * @param lastScanID last scan identifier in the schedule
+ * @param lastSubScanID last subscan identifier for the currently running scan
+ */
+void getLastIdentifiers(DWORD& lastScanID, DWORD& lastSubScanID);
+
 /**.
  * @param dv returns back  the current active data receiver
  */
