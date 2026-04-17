@@ -924,16 +924,16 @@ public:
 	/**
 	 * @return the highest scan identifier parsed in the schedule
 	 */
-	DWORD getLastScanID() const { return m_lastScanID; }
+	DWORD getMaxScanID() const { return m_maxScanID; }
 
 	/**
 	 * @param scanID identifier of the scan
 	 * @return the highest subscan identifier for the given scan. Returns 0 if scan is not found.
 	 *
 	 */
-	DWORD getLastSubScanID(const DWORD& scanID) {
-		if (m_lastSubscans.find(scanID) != m_lastSubscans.end()) {
-			return m_lastSubscans[scanID];
+	DWORD getMaxSubScanID(const DWORD& scanID) {
+		if (m_maxSubscans.find(scanID) != m_maxSubscans.end()) {
+			return m_maxSubscans[scanID];
 		}
 		return 0;
 	}
@@ -970,8 +970,8 @@ private:
 		IRA::CString suffix;
 		IRA::CString layout;
 	} m_currentScanDef;
-	DWORD m_lastScanID;
-	std::map<DWORD, DWORD> m_lastSubscans;
+	DWORD m_maxScanID;
+	std::map<DWORD, DWORD> m_maxSubscans;
 
 
 

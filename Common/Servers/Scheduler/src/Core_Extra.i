@@ -212,8 +212,8 @@ void CCore::publishZMQDictionary()
 	m_zmqDictionary["scanID"] = dwb1;
 	m_zmqDictionary["subScanID"] = dwb2;
 	getLastIdentifiers(dwb1, dwb2);
-	m_zmqDictionary["lastScanID"] = dwb1;
-	m_zmqDictionary["lastSubScanID"] = dwb2;
+	m_zmqDictionary["maxScanID"] = dwb1;
+	m_zmqDictionary["maxSubScanID"] = dwb2;
 	getScheduleName(str_buffer);
 	m_zmqDictionary["scheduleName"] = (const char*)str_buffer;
 

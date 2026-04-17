@@ -47,11 +47,11 @@ void getScanCounter(DWORD& cc);
 void getCurrentIdentifiers(DWORD& scanID,DWORD& subScanID);
 
 /**
- * This function reports the last identifiers of the current schedule and the current scan
- * @param lastScanID last scan identifier in the schedule
- * @param lastSubScanID last subscan identifier for the currently running scan
+ * This function reports the highest identifiers of the current schedule and the current scan
+ * @param maxScanID highest scan identifier in the schedule
+ * @param maxSubScanID highest subscan identifier for the currently running scan
  */
-void getLastIdentifiers(DWORD& lastScanID, DWORD& lastSubScanID);
+void getMaxIdentifiers(DWORD& maxScanID, DWORD& maxSubScanID);
 
 /**.
  * @param dv returns back  the current active data receiver

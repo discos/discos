@@ -27,14 +27,14 @@ void CCore::getCurrentIdentifiers(DWORD& scanID,DWORD& subScanID)
 	}
 }
 
-void CCore::getLastIdentifiers(DWORD& lastScanID, DWORD& lastSubScanID)
+void CCore::getMaxIdentifiers(DWORD& maxScanID, DWORD& maxSubScanID)
 {
 	if ((m_schedExecuter) && (m_schedExecuter->isScheduleActive())) {
-		m_schedExecuter->getLastIdentifiers(lastScanID, lastSubScanID);
+		m_schedExecuter->getMaxIdentifiers(maxScanID, maxSubScanID);
 	}
 	else {
-		lastScanID = 0;
-		lastSubScanID = 0;
+		maxScanID = 0;
+		maxSubScanID = 0;
 	}
 }
 

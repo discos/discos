@@ -523,7 +523,7 @@ void CScheduleExecutor::getCurrentScanIdentifers(DWORD& scanID,DWORD& subScanID)
 	}
 }
 
-void CScheduleExecutor::getLastIdentifiers(DWORD& lastScanID, DWORD& lastSubScanID)
+void CScheduleExecutor::getMaxIdentifiers(DWORD& maxScanID, DWORD& maxSubScanID)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 
@@ -532,12 +532,12 @@ void CScheduleExecutor::getLastIdentifiers(DWORD& lastScanID, DWORD& lastSubScan
 
 		m_schedule->getIdentifiers(m_scheduleCounter, currentScanID, currentSubScanID);
 
-		lastScanID = m_schedule->getLastScanID();
-		lastSubScanID = m_schedule->getLastSubScanID(currentScanID);
+		maxScanID = m_schedule->getMaxScanID();
+		maxSubScanID = m_schedule->getMaxSubScanID(currentScanID);
 	}
 	else {
-		lastScanID = 0;
-		lastSubScanID = 0;
+		maxScanID = 0;
+		maxSubScanID = 0;
 	}
 }
 
