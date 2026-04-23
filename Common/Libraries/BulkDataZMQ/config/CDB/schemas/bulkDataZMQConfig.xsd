@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!-- Authors: Andrea Orlati, andrea.orlati@inaf.it -->
+
+<xs:schema
+	targetNamespace="urn:schemas-cosylab-com:bulkDataZMQConfig:1.0"
+	xmlns="urn:schemas-cosylab-com:bulkDataZMQConfig:1.0"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+	xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+	elementFormDefault="qualified"
+	attributeFormDefault="unqualified">
+	<xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+	<xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+	
+	<xs:complexType name="TTableHeader">
+ 		<xs:sequence>
+            <xs:element name="BackendName" type="xs:string" />
+ 			<xs:element name="EndPoint" type="xs:string" />
+ 			<xs:element name="FlowNumber" type="xs:unsignedInt" />
+            <!-- Disable Nagles algorithm, only for tcp type endpoint -->
+ 			<xs:element name="TCPNoDelay" type="xs:boolean" />
+            <!--  Force network management thread to be run in one cpu only -->
+ 			<xs:element name="CPUAffinity" type="xs:boolean" />
+ 		</xs:sequence>
+ 	</xs:complexType>
+ 	
+ 	<xs:complexType name="TTable">
+		<xs:sequence>
+			<xs:element name="FlowRecord" type="TTableHeader"  minOccurs="1" maxOccurs="unbounded" />
+		</xs:sequence>
+ 	</xs:complexType>
+ 	
+ 	<xs:element name="FlowTable" type="TTable" />	
+	
+</xs:schema>

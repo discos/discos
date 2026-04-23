@@ -1,0 +1,48 @@
+#ifndef _BULKDATAZMQ_SENDER_IDL_
+#define _BULKDATAZMQ_SENDER_IDL_
+
+/*******************************************************************************
+ * "@(#)"
+ *
+ * who            when      what
+ * --------       --------  ----------------------------------------------
+ * Andrea Orlati  03/04/26  created
+ */
+
+#include <baci.idl>
+#include <bulkDataZMQReceiver.idl>
+#include "ACSBulkDataError.idl"
+
+#pragma prefix "alma"
+
+module bulkdataZMQ
+{
+    
+    /** @interface BulkDataZMQSender
+     *  Defines the interface for the Bulk Data Sender Component.
+     */
+    interface BulkDataZMQSender
+	{
+	/** 
+	 *  Initializes the ZMQ strame and creates the Sender Stream End Point
+	 *  It retrieves the Receiver Stream End Point and binds the two streams.
+	 *  In order to guaratee backward (with TAO AV) we keep using the same errors.
+	 *  @param receiver reference of the BulkDataZMQReceiver component.
+	 *  @return void
+	 *  @throw ACSBulkDataError::AVConnectErrorEx
+	*/
+	void connect(in BulkDataZMQReceiver receiver) raises (ACSBulkDataError::AVConnectErrorEx);
+
+	/**
+	 *  Closes the ZMQ stream and releases the Sender Stream End Point.
+	 *  In order to guarantee backward (with TAO AV) we keep using the same errors.
+	 *  @return void
+	 *  @throw ACSBulkDataError::AVDisconnectErrorEx
+	*/
+	void disconnect() raises (ACSBulkDataError::AVDisconnectErrorEx);
+
+	};
+  
+};
+
+#endif
