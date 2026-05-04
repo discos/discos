@@ -15,8 +15,8 @@
 #define _GENERICBACKEND_IDL
 
 #include <baci.idl>
-#include <bulkData.idl>
-#include <bulkDataSender.idl>
+//#include <bulkData.idl>
+#include <bulkDataZMQSender.idl>
 #include <BackendsDefinitions.idl>
 #include <ManagmentDefinitions.idl>
 #include <ComponentErrors.idl>
@@ -98,7 +98,7 @@ module Backends {
 	 * Istituto di Radioastronomia, Italia
 	 * <br> 
 	*/
-	interface GenericBackend: bulkdata::BulkDataSender,Management::CommandInterpreter, Backends::BackendAttenuation  {
+	interface GenericBackend: bulkdataZMQ::BulkDataZMQSender,Management::CommandInterpreter, Backends::BackendAttenuation  {
 		
 		/**
 		 * This attribute is hte current time in the backend. It is represented as the number of 

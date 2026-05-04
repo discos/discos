@@ -21,7 +21,7 @@ module bulkdataZMQ
     /** @interface BulkDataZMQSender
      *  Defines the interface for the Bulk Data Sender Component.
      */
-    interface BulkDataZMQSender
+    interface BulkDataZMQSender : ACS::CharacteristicComponent
 	{
 	/** 
 	 *  Initializes the ZMQ strame and creates the Sender Stream End Point

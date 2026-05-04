@@ -22,15 +22,17 @@
 #include "DevIOSectionsNumber.h"
 #include "SenderThread.h"
 
-static char *rcsId="@(#) $Id: TotalPowerImpl.cpp,v 1.1 2011-03-14 14:15:07 a.orlati Exp $";
-static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
+//static char *rcsId="@(#) $Id: TotalPowerImpl.cpp,v 1.1 2011-03-14 14:15:07 a.orlati Exp $";
+//static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
 
 using namespace SimpleParser;
 
 _IRA_LOGFILTER_DECLARE;
 
+//baci::CharacteristicComponentImpl(CompName, containerServices),
+
 TotalPowerImpl::TotalPowerImpl(const ACE_CString &CompName,maci::ContainerServices *containerServices) :
-	BulkDataSenderDefaultImpl(CompName,containerServices),
+	bulkdataZMQImpl::BulkDataZMQSenderImpl(CompName,containerServices),
 	m_ptime(this),
 	m_pbackendName(this),
 	m_pbandWidth(this),
@@ -62,7 +64,7 @@ TotalPowerImpl::~TotalPowerImpl()
 	if (!m_initialized) deleteAll();
 }
 
-void TotalPowerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
+void TotalPowerImpl::initialize()
 {
 	CError Err;
 	CSenderThread::TSenderParameter threadPar;
@@ -204,7 +206,7 @@ void TotalPowerImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	ACS_LOG(LM_FULL_INFO,"TotalPowerImpl::initialize()",(LM_INFO,"COMPSTATE_INITIALIZED"));
 }
 
-void TotalPowerImpl::execute() throw (ACSErr::ACSbaseExImpl)
+void TotalPowerImpl::execute()
 {
 	AUTO_TRACE("TotalPowerImpl::execute()");
 	ACS::Time time;
@@ -298,8 +300,7 @@ void TotalPowerImpl::aboutToAbort()
 	deleteAll();
 }
 
-void TotalPowerImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx, 
-		ComponentErrors::ComponentErrorsEx)
+void TotalPowerImpl::sendHeader()
 {
 	AUTO_TRACE("TotalPowerImpl::sendHeader()");
 	Backends::TMainHeader header;
@@ -408,8 +409,7 @@ void TotalPowerImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors:
 	}
 }
 
-void TotalPowerImpl::terminate() throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx,
-		ComponentErrors::ComponentErrorsEx)
+void TotalPowerImpl::terminate()
 {
 	AUTO_TRACE("TotalPowerImpl::terminate()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
@@ -431,8 +431,7 @@ void TotalPowerImpl::terminate() throw (CORBA::SystemException, BackendsErrors::
 	}
 }
 
-void TotalPowerImpl::sendData(ACS::Time startTime) throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx,
-		ComponentErrors::ComponentErrorsEx)
+void TotalPowerImpl::sendData(ACS::Time startTime)
 {
 	AUTO_TRACE("TotalPowerImpl::sendData()");
 	TIMEVALUE now;
@@ -462,8 +461,7 @@ void TotalPowerImpl::sendData(ACS::Time startTime) throw (CORBA::SystemException
 	m_senderThread->resumeTransfer();
 }
 
-void TotalPowerImpl::sendStop() throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx,
-		ComponentErrors::ComponentErrorsEx)
+void TotalPowerImpl::sendStop()
 {	
 	AUTO_TRACE("TotalPowerImpl::sendStop()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
@@ -525,8 +523,7 @@ void TotalPowerImpl::sendStop() throw (CORBA::SystemException, BackendsErrors::B
 }*/
 
 
-void TotalPowerImpl::setSection(CORBA::Long input,CORBA::Double freq,CORBA::Double bw,CORBA::Long feed,CORBA::Long pol,CORBA::Double sr,CORBA::Long bins) throw (
-				CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx)
+void TotalPowerImpl::setSection(CORBA::Long input,CORBA::Double freq,CORBA::Double bw,CORBA::Long feed,CORBA::Long pol,CORBA::Double sr,CORBA::Long bins)
 {
 	AUTO_TRACE("TotalPowerImpl::setSection()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
@@ -548,8 +545,7 @@ void TotalPowerImpl::setSection(CORBA::Long input,CORBA::Double freq,CORBA::Doub
 	}		
 }
 
-ACS::doubleSeq *TotalPowerImpl::getTpi() throw (CORBA::SystemException,
-		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx)
+ACS::doubleSeq *TotalPowerImpl::getTpi()
 {
 	AUTO_TRACE("TotalPowerImpl::getTpi()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
@@ -573,8 +569,7 @@ ACS::doubleSeq *TotalPowerImpl::getTpi() throw (CORBA::SystemException,
 	return tpi._retn();
 }
 
-ACS::doubleSeq * TotalPowerImpl::getZero () throw (CORBA::SystemException,
-		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx)
+ACS::doubleSeq * TotalPowerImpl::getZero ()
 {
 	AUTO_TRACE("TotalPowerImpl::getZero()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
@@ -598,7 +593,7 @@ ACS::doubleSeq * TotalPowerImpl::getZero () throw (CORBA::SystemException,
 	return tpi._retn();
 }
 
-void TotalPowerImpl::setKelvinCountsRatio(const ACS::doubleSeq& ratio, const ACS::doubleSeq& tsys) throw (CORBA::SystemException)
+void TotalPowerImpl::setKelvinCountsRatio(const ACS::doubleSeq& ratio, const ACS::doubleSeq& tsys)
 {
 	AUTO_TRACE("TotalPowerImpl::setKelvinCountsRatio()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
@@ -609,8 +604,7 @@ void TotalPowerImpl::setKelvinCountsRatio(const ACS::doubleSeq& ratio, const ACS
 	//}
 }
 
-void TotalPowerImpl::enableChannels(const ACS::longSeq& enable) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
-		BackendsErrors::BackendsErrorsEx)
+void TotalPowerImpl::enableChannels(const ACS::longSeq& enable)
 {
 	AUTO_TRACE("TotalPowerImpl::enableChannels()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
@@ -632,8 +626,7 @@ void TotalPowerImpl::enableChannels(const ACS::longSeq& enable) throw (CORBA::Sy
 	}			
 }
 
-void TotalPowerImpl::setTargetFileName (const char * fileName) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
-		BackendsErrors::BackendsErrorsEx)
+void TotalPowerImpl::setTargetFileName (const char * fileName)
 {
 	// nothing to do
 }
@@ -660,8 +653,7 @@ void TotalPowerImpl::setTargetFileName (const char * fileName) throw (CORBA::Sys
 	}
 }*/
 
-void TotalPowerImpl::setTime() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
-		BackendsErrors::BackendsErrorsEx)
+void TotalPowerImpl::setTime()
 {
 	AUTO_TRACE("TotalPowerImpl::setTime()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
@@ -683,7 +675,7 @@ void TotalPowerImpl::setTime() throw (CORBA::SystemException,ComponentErrors::Co
 	}		
 }
 
-void TotalPowerImpl::setAttenuation(CORBA::Long input,CORBA::Double att) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx)
+void TotalPowerImpl::setAttenuation(CORBA::Long input,CORBA::Double att)
 {
 	AUTO_TRACE("TotalPowerImpl::setAttenutation()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
@@ -705,8 +697,7 @@ void TotalPowerImpl::setAttenuation(CORBA::Long input,CORBA::Double att) throw (
 	}		
 }
 
-CORBA::Long TotalPowerImpl::getInputs(ACS::doubleSeq_out freq,ACS::doubleSeq_out bandWidth,ACS::longSeq_out feed,ACS::longSeq_out ifNumber) throw (CORBA::SystemException,
-		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx)
+CORBA::Long TotalPowerImpl::getInputs(ACS::doubleSeq_out freq,ACS::doubleSeq_out bandWidth,ACS::longSeq_out feed,ACS::longSeq_out ifNumber)
 {
 	long inputs;
 	ACS::longSeq pol;
@@ -726,8 +717,7 @@ CORBA::Long TotalPowerImpl::getInputs(ACS::doubleSeq_out freq,ACS::doubleSeq_out
 }
 
 
-void TotalPowerImpl::activateNoiseCalibrationSwitching(const char *argument) throw (CORBA::SystemException,
-		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx)
+void TotalPowerImpl::activateNoiseCalibrationSwitching(const char *argument)
 {
 	AUTO_TRACE("TotalPowerImpl::activateNoiseCalibrationSwitching()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
@@ -749,8 +739,7 @@ void TotalPowerImpl::activateNoiseCalibrationSwitching(const char *argument) thr
 	}			
 }
 
-void TotalPowerImpl::calOn() throw (CORBA::SystemException,
-		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx)
+void TotalPowerImpl::calOn()
 {
 	AUTO_TRACE("TotalPowerImpl::calOn()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
@@ -772,8 +761,7 @@ void TotalPowerImpl::calOn() throw (CORBA::SystemException,
 	}			
 }
 
-void TotalPowerImpl::calOff() throw (CORBA::SystemException,
-		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx)
+void TotalPowerImpl::calOff()
 {
 	AUTO_TRACE("TotalPowerImpl::calOff()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
@@ -795,8 +783,7 @@ void TotalPowerImpl::calOff() throw (CORBA::SystemException,
 	}			
 }
 
-void TotalPowerImpl::initialize(const char * configuration) throw (CORBA::SystemException,
-		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx)
+void TotalPowerImpl::initialize(const char * configuration)
 {
 	AUTO_TRACE("TotalPowerImpl::initialize()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
@@ -818,8 +805,7 @@ void TotalPowerImpl::initialize(const char * configuration) throw (CORBA::System
 	}				
 }
 
-void TotalPowerImpl::setIntegration(CORBA::Long Integration) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
-		BackendsErrors::BackendsErrorsEx)
+void TotalPowerImpl::setIntegration(CORBA::Long Integration)
 {
 	AUTO_TRACE("TotalPowerImpl::setIntegration()");
 	CSecAreaResourceWrapper<CCommandLine> line=m_commandLine->Get();
@@ -841,7 +827,7 @@ void TotalPowerImpl::setIntegration(CORBA::Long Integration) throw (CORBA::Syste
 	}		
 }
 
-CORBA::Boolean TotalPowerImpl::command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException)
+CORBA::Boolean TotalPowerImpl::command(const char *cmd,CORBA::String_out answer)
 {
 	AUTO_TRACE("TotalPowerImpl::command()");
 	IRA::CString out;

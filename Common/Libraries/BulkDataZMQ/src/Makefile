@@ -76,7 +76,8 @@ testBulkDataZMQPubSub_LIBS      = zmq IRALibrary ACSBulkDataError
 #
 # Includes (.h) files (public only)
 # ---------------------------------
-INCLUDES        =
+INCLUDES        =  bulkDataZMQReceiverImpl.h bulkDataZMQSenderImpl.h bulkDataZMQ.h bulkDataZMQConfiguration.h \
+bulkDataZMQPubSub.h bulkDataZMQCallback.h bulkDataZMQReceiverImpl.i bulkDataZMQConfiguration.tpp
 
 #
 # Libraries (public and local)

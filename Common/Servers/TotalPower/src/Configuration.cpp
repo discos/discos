@@ -113,7 +113,8 @@ bool CConfiguration::getInputPortsBW(const IRA::CString& conf,double* inputBW,co
 	return true;
 }
 
-bool CConfiguration::getSetupFromID(const IRA::CString setupID,TBackendSetup& setup) throw (ComponentErrors::CDBAccessExImpl)
+//throw (ComponentErrors::CDBAccessExImpl)
+bool CConfiguration::getSetupFromID(const IRA::CString setupID,TBackendSetup& setup)
 {
 	bool done=false;
 	CString inputPorts;
@@ -187,7 +188,8 @@ bool CConfiguration::getSetupFromID(const IRA::CString setupID,TBackendSetup& se
 	}
 }
 
-void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::IRALibraryResourceExImpl)
+// throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::IRALibraryResourceExImpl)
+void CConfiguration::init(maci::ContainerServices *Services)
 {
 	_GET_STRING_ATTRIBUTE("IPAddress","TCP/IP address is: ",m_sAddress);
 	_GET_DWORD_ATTRIBUTE("Port","Port is: ",m_wPort);

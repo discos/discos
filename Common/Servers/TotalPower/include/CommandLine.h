@@ -56,9 +56,7 @@ public:
 	 * @throw BackendsErrors::ConnectionExImpl
 	 * @throw BackendsErrors::NakExImpl
 	*/
-	void Init(CConfiguration *config) throw (ComponentErrors::SocketErrorExImpl,
-			ComponentErrors::ValidationErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
-			ComponentErrors::CDBAccessExImpl);
+	void Init(CConfiguration *config);
 	
 	/**
 	 * Call this function to get the number of inputs
@@ -137,9 +135,8 @@ public:
 	 * @throw BackendsErrors::MalformedAnswerExImpl
 	 * @throw BackendsErrors::ConnectionExImp
 	 */
-	void getAttenuation(ACS::doubleSeq& att) throw (ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,
-			BackendsErrors::MalformedAnswerExImpl,BackendsErrors::ConnectionExImpl);
-	
+	void getAttenuation(ACS::doubleSeq& att);
+
 	/**
 	 * Call this function in order to get the current band width of each input.
 	 * @param bw this is a sequence of double values that correspond to the bandwidth of each analog input.
@@ -149,8 +146,7 @@ public:
 	 * @throw BackendsErrors::MalformedAnswerExImpl
 	 * @throw BackendsErrors::ConnectionExImp
 	 */
-	void getBandWidth(ACS::doubleSeq& bw) throw (ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,
-			BackendsErrors::MalformedAnswerExImpl,BackendsErrors::ConnectionExImpl);
+	void getBandWidth(ACS::doubleSeq& bw);
 	
 	/**
 	 * Call this function in order to get the time clock reported by the backend. 
@@ -161,8 +157,7 @@ public:
 	 * @throw BackendsErrors::MalformedAnswerExImpl
 	 * @throw BackendsErrors::ConnectionExImp
 	 */
-	void getTime(ACS::Time& tt) throw (ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,
-			BackendsErrors::MalformedAnswerExImpl,BackendsErrors::ConnectionExImpl);
+	void getTime(ACS::Time& tt);
 	
 	/**
 	 * Call this function in order to set the time of the backend FPGA. The time will be set according to the local computer
@@ -175,9 +170,7 @@ public:
 	 * @throw BackendsErrors::MalformedAnswerExImpl
 	 * @throw BackendsErrors::BackendBusyExImpl
 	 */
-	void setTime()  throw (ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
-			ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,BackendsErrors::MalformedAnswerExImpl,
-			BackendsErrors::BackendBusyExImpl);
+	void setTime();
 	
 	/**
 	 * This function is called by the control thread in order to check the backend clock matches with the host computer clock. In the two times do not
@@ -188,49 +181,65 @@ public:
 	 * @throw BackendsErrors::ConnectionExImp
 	 * @throw BackendsErrors::MalformedAnswerExImpl
 	*/
-	void checkTime() throw (BackendsErrors::ConnectionExImpl,BackendsErrors::MalformedAnswerExImpl,
-			ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl);
+	void checkTime();
 	
 	/**
 	 * This method starts the calibration diode switching.
 	 * @param argument this will control the switching mode.
+	 * @throw BackendsErrors::BackendBusyExImpl
+	 * @throw ComponentErrors::NotAllowedExImpl
+	 * @throw BackendsErrors::NakExImpl
+	 * @throw ComponentErrors::IRALibraryResourceExImpl
+	 * @throw ComponentErrors::SocketErrorExImpl
+	 * @throw ComponentErrors::TimeoutExImpl
+	 * @throw BackendsErrors::ConnectionExImpl
+	 * @throw ComponentErrors::ValidationErrorExImpl
 	 */
-	void activateCalSwitching(const char *argument) throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::NotAllowedExImpl,
-			BackendsErrors::NakExImpl,ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,
-			BackendsErrors::ConnectionExImpl,ComponentErrors::ValidationErrorExImpl);
+	void activateCalSwitching(const char *argument);
+	/*
+	 * This method is used to turn on and off the calibration diode. It is intended to be used for non periodic switching where a complete acquisition is performed keeping the noise mark active.
+	 * @throw BackendsErrors::BackendBusyExImpl
+	 * @throw ComponentErrors::NotAllowedExImpl
+	 * @throw BackendsErrors::NakExImpl
+	 * @throw ComponentErrors::IRALibraryResourceExImpl
+	 * @throw ComponentErrors::SocketErrorExImpl
+	 * @throw ComponentErrors::TimeoutExImpl
+	 * @throw BackendsErrors::ConnectionExImpl
+	 * @throw ComponentErrors::ValidationErrorExImpl
+	*/
+	void calOn();
 
-	void calOn() throw (BackendsErrors::BackendBusyExImpl,
-                            ComponentErrors::NotAllowedExImpl,
-			    BackendsErrors::NakExImpl,
-                            ComponentErrors::IRALibraryResourceExImpl,
-                            ComponentErrors::SocketErrorExImpl,
-                            ComponentErrors::TimeoutExImpl,
-			    BackendsErrors::ConnectionExImpl,
-                            ComponentErrors::ValidationErrorExImpl);
-
-	void calOff() throw (BackendsErrors::BackendBusyExImpl,
-                            ComponentErrors::NotAllowedExImpl,
-			    BackendsErrors::NakExImpl,
-                            ComponentErrors::IRALibraryResourceExImpl,
-                            ComponentErrors::SocketErrorExImpl,
-                            ComponentErrors::TimeoutExImpl,
-			    BackendsErrors::ConnectionExImpl,
-                            ComponentErrors::ValidationErrorExImpl);
+	/*
+	 * This method is used to turn off the calibration diode.
+	 * @throw BackendsErrors::BackendBusyExImpl
+	 * @throw ComponentErrors::NotAllowedExImpl
+	 * @throw BackendsErrors::NakExImpl
+	 * @throw ComponentErrors::IRALibraryResourceExImpl
+	 * @throw ComponentErrors::SocketErrorExImpl
+	 * @throw ComponentErrors::TimeoutExImpl
+	 * @throw BackendsErrors::ConnectionExImpl
+	 * @throw ComponentErrors::ValidationErrorExImpl
+	 */
+	void calOff();
 	
 	/**
 	 * This function must be called in order to change the integration time
 	 * @throw  (BackendsErrors::BackendBusyExImpl
 	 * @param integration new integration time in milliseconds. A negative value has no effect.
 	 */
-	void setIntegration(const long& integration) throw (BackendsErrors::BackendBusyExImpl);
+	void setIntegration(const long& integration);
 	
 	/**
 	 * This method allows to turn on and off the noise mark switching from external sources.
 	 * @param on 0 turns off, 1 turns on
+	 * @throw BackendErrors::BackendBusyExImpl
+	 * @throw ComponentErrors::NotAllowedExImpl
+	 * @throw BackendsErrors::NakExImpl
+	 * @throw ComponentErrors::IRALibraryResourceExImpl
+	 * @throw ComponentErrors::SocketErrorExImpl
+	 * @throw ComponentErrors::TimeoutExImpl
 	 */
-	void externalCalibrationSwitching(const long& on) throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::NotAllowedExImpl,
-			BackendsErrors::NakExImpl,ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,
-			BackendsErrors::ConnectionExImpl);
+	void externalCalibrationSwitching(const long& on);
 
 	/**
 	 * This method will change the current value of the <i>m_enabled</i> array.
@@ -238,23 +247,25 @@ public:
 	 * @param en new values sequence for the <i>m_enabled</i> elements. A value grater than zero correspond to a true,
 	 *                a zero match to a false, while a negative will keep the things unchanged. 
 	 */ 
-	void setEnabled(const ACS::longSeq& en) throw (BackendsErrors::BackendBusyExImpl);
-	
+	void setEnabled(const ACS::longSeq& en);
+
 	/**
 	 * This function can be called in order to load an initial setup for the backend. Some parameter are fixed and cannot be changed during normal
 	 * operation. In order for this call to succeed the backend must be ready and not busy with other operation. This operation will also reset all configuration
 	 * to the defaults.
-	 * @throw BackendsErrors::BackendBusyExImpl
+	 * @throw BackendsErrors::BackendBusyExImpl 
 	 * @throw BackendsErrors::ConfigurationErrorExImpl
 	 * @throw ComponentErrors::TimeoutExImpl
 	 * @throw BackendsErrors::ConnectionExImpl
 	 * @throw ComponentErrors::SocketErrorExImpl
 	 * @throw BackendsErrors::NakExImpl
+	 * @throw ComponentErrors::ComponentErrors::CDBAccessExImpl
+	 * @throw ComponentErrors::NotAllowedExImpl
+	 * @throw IRALibraryResourceExImpl
+	 * @throw ComponentErrors::TimeoutExImpl
 	 * @param conf identifier of the configuration to be loaded
 	 */ 
-	void setup(const char *conf) throw (BackendsErrors::BackendBusyExImpl,BackendsErrors::ConfigurationErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
-			ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,ComponentErrors::CDBAccessExImpl,ComponentErrors::NotAllowedExImpl,ComponentErrors::IRALibraryResourceExImpl,
-			ComponentErrors::TimeoutExImpl);
+	void setup(const char *conf);
 	
 	/**
 	 * This function can be used to set up an input of the backend. The input is identified by its numeric value. If a configuration
@@ -263,11 +274,12 @@ public:
 	 * @throw ComponentErrors::SocketErrorExImpl
 	 *		 @arg \c ComponentErrors::IRALibraryResource
 	 * @throw ComponentErrors::TimeoutExImpl
-	 * @throw BackendsErrors::ConnectionExImp
+	 * @throw BackendsErrors::ConnectionExImpl
 	 * @throw BackendsErrors::NakExImpl
 	 * @throw ComponentErrors::ValueOutOfRangeExImpl
 	 * @throw ComponentErrors::ValidationErrorExImpl
 	 * @throw BackendErrors::BackendBusyExImpl
+	 * @throw ComponentErrors::SocketErrorExImpl
 	 * @param inputId identifier of the input. If negative all the inputs are configured in one shot, otherwise 
 	 *    it must be between 0 and the number of inputs.
 	 * @param freq initial frequency of the input filter. This parameter is ignored. It is expected a negative, otherwise a warning message is logged.
@@ -277,10 +289,7 @@ public:
 	 * @param sr new sample rate, the maximum allowed value is 0.001 MHz. 
 	 * @param bins number of bins of the input, it can only be 1, so it is ignored. It is expected a negative, otherwise a warning message is logged.
 	 */
-	void setConfiguration(const long& inputId,const double& freq,const double& bw,const long& feed,const long& pol, const double& sr,const long& bins) throw (
-			ComponentErrors::ValidationErrorExImpl,BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
-			ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::ValueOutofRangeExImpl,
-			BackendsErrors::BackendBusyExImpl);
+	void setConfiguration(const long& inputId,const double& freq,const double& bw,const long& feed,const long& pol, const double& sr,const long& bins);
 	
 	/**
 	 * This function will start an acquisition job. The job will be created suspended and requires an explicit
@@ -288,12 +297,11 @@ public:
 	 * @throw ComponentErrors::SocketErrorExImpl
 	 *		 @arg \c ComponentErrors::IRALibraryResource
 	 * @throw ComponentErrors::TimeoutExImpl
-	 * @throw BackendsErrors::ConnectionExImp
+	 * @throw BackendsErrors::ConnectionExImpl
 	 * @throw BackendsErrors::NakExImpl
 	 * @throw BackendErrors::BackendBusyExImpl
 	 */
-	void startDataAcquisition() throw (BackendsErrors::BackendBusyExImpl,BackendsErrors::ConnectionExImpl,
-			BackendsErrors::NakExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl);
+	void startDataAcquisition();
 
 	/**
 	 * This function will stop the current acquisition job. 
@@ -304,8 +312,7 @@ public:
 	 * @throw BackendsErrors::NakExImpl
 	 * @throw ComponentErrors::NotAllowedExImpl
 	 */	
-	void stopDataAcquisition() throw (BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
-			ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::NotAllowedExImpl);
+	void stopDataAcquisition();
 	
 	/**
 	 * This function will stop the current acquisition job without caring about the component or the backend status
@@ -316,8 +323,7 @@ public:
 	 * @throw BackendsErrors::NakExImpl
 	 * @throw ComponentErrors::NotAllowedExImpl
 	 */		
-	void stopDataAcquisitionForced() throw (BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
-			ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::NotAllowedExImpl);
+	void stopDataAcquisitionForced();
 	
 	/**
 	 * This function will resume an acquisition job. This function will also check if the backend latency time is respected.
@@ -326,14 +332,13 @@ public:
 	 * @throw ComponentErrors::SocketErrorExImpl
 	 *		 @arg \c ComponentErrors::IRALibraryResource
 	 * @throw ComponentErrors::TimeoutExImpl
-	 * @throw BackendsErrors::ConnectionExImp
+	 * @throw BackendsErrors::ConnectionExImpl
 	 * @throw BackendsErrors::NakExImpl
 	 * @throw ComponentErrors::NotAllowedExImpl
 	 * @param startT epoch at which the acquisition is supposed to start
 	 * @return the epoch of the real expected start time.
 	 */
-	ACS::Time resumeDataAcquisition(const ACS::Time& startT) throw (BackendsErrors::ConnectionExImpl,ComponentErrors::NotAllowedExImpl,
-		BackendsErrors::NakExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl);
+	ACS::Time resumeDataAcquisition(const ACS::Time& startT);
 	
 	/**
 	 * This function will suspend the data acquisition job.
@@ -344,15 +349,14 @@ public:
 	 * @throw BackendsErrors::NakExImpl
 	 * @throw ComponentErrors::NotAllowedExImpl
 	 */
-	void suspendDataAcquisition() throw (BackendsErrors::ConnectionExImpl,ComponentErrors::NotAllowedExImpl,
-			BackendsErrors::NakExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl);
+	void suspendDataAcquisition();
 	
 	/**
 	 * Called to get a single measure of the total power for each in channel. The measure is done by the slow mode of the backend
 	 * @throw ComponentErrors::SocketErrorExImpl
 	 *		 @arg \c ComponentErrors::IRALibraryResource
 	 * @throw ComponentErrors::TimeoutExImpl
-	 * @throw BackendsErrors::ConnectionExImp
+	 * @throw BackendsErrors::ConnectionExImpl
 	 * @throw BackendsErrors::NakExImpl
 	 * @throw BackendsErrors::MalformedAnswerExImpl
 	 * @throw BackendsErrors::BackendBusyExImpl
@@ -361,9 +365,8 @@ public:
 	 * @param  zero if true the returned measure refers to a backend configuration in which the signal is coming from the 50 Ohm input. In that
 	 *                 case the answer is delayed by an ammount of time that allows the signal to settled down.
 	 */ 
-	void getSample(ACS::doubleSeq& tpi,bool zero) throw (ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
-	ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,BackendsErrors::MalformedAnswerExImpl,BackendsErrors::BackendBusyExImpl);
-	
+	void getSample(ACS::doubleSeq& tpi,bool zero); 
+
 	/**
 	 * This a wrapper function of the <i>getSample()</i> method. In this case the sample correspond th the total power measurment in each channel.
 	 * @throw ComponentErrors::SocketErrorExImpl
@@ -376,8 +379,7 @@ public:
 	 * @param tpi this is a sequence (allocated by the caller) of at least N positions, where N is the number of channels. Each element
 	 *               of the vector cointains the total power of the corresponding channel. 
 	 */ 
-	void getTpi(ACS::doubleSeq& tpi) throw (ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
-			ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,BackendsErrors::MalformedAnswerExImpl,BackendsErrors::BackendBusyExImpl);
+	void getTpi(ACS::doubleSeq& tpi);
 
 	
 	/**
@@ -392,10 +394,8 @@ public:
 	 * @param tpi this is a sequence (allocated by the caller) of at least N positions, where N is the number of channels. Each element
 	 *               of the vector cointains the total power of the corresponding channel. 
 	 */ 	
-	void getZero(ACS::doubleSeq& tpi) throw (ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
-			ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,BackendsErrors::MalformedAnswerExImpl,BackendsErrors::BackendBusyExImpl);
+	void getZero(ACS::doubleSeq& tpi);
 
-	
 	/**
 	 * Called to get the TPI measure when the attenuators are all in. Differently from <i>getSample()</i> it will return the counts returned
 	 * by the backend for the configured sample rate. The measure also is not normalized for the integration time.
@@ -408,9 +408,7 @@ public:
 	 * @throw BackendsErrors::BackendBusyExImpl
 	 * @param tpi array that contains for each element the tpi value for any input channel.
 	 */
-	void getZeroTPI(DWORD *tpi) throw (ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
-			ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,BackendsErrors::MalformedAnswerExImpl,
-			BackendsErrors::BackendBusyExImpl);
+	void getZeroTPI(DWORD *tpi);
 	
 	/**
 	 * Called to configure the attenuation level for each input of the backend.
@@ -425,11 +423,18 @@ public:
 	 * @param identifier of the input.
 	 * @param attenuation new input level. It must lay between 0 and 15. A negative will keep the previous value;
 	 */
-	void setAttenuation(const long&inputId, const double& attenuation)  throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,BackendsErrors::NakExImpl,
-			ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl);
+	void setAttenuation(const long&inputId, const double& attenuation);
 
-    void backendPark() throw (BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
-		ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::NotAllowedExImpl,BackendsErrors::BackendFailExImpl);
+	/**
+	 * Called to park the backend.
+	 *  @throw BackendsErrors::NakExImpl
+	 *	@throw ComponentErrors::SocketErrorExImpl
+	 *	@throw ComponentErrors::TimeoutExImpl
+	 *	@throw BackendsErrors::ConnectionExImpl
+	 *	@throw ComponentErrors::NotAllowedExImpl
+	 *	@throw BackendsErrors::BackendFailExImpl
+	 */
+    void backendPark();
 	
 	/**
 	 * Called by the component to fill the <i>Backends::TMainHeader</i> with the proper informations.
@@ -661,20 +666,22 @@ private:
 	 * @throw ComponentErrors::SocketErrorExImpl
 	 *		 @arg \c ComponentErrors::IRALibraryResource
 	 * @throw ComponentErrors::TimeoutExImpl
-	 * @throw BackendsErrors::ConnectionExImp
+	 * @throw BackendsErrors::ConnectionExImpl
 	 * @throw BackendsErrors::NakExImpl
+	 * @throw BackendsErrors::BackendBusyExImpl
+	 * @throw ComponentErrors::NotAllowedExImpl
+	 * @throw ComponentErrors::IRALibraryResourceExImpl
 	 */
-	void setDefaultConfiguration() throw (ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
-		ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,BackendsErrors::BackendBusyExImpl,ComponentErrors::NotAllowedExImpl,
-		ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::TimeoutExImpl);
+	void setDefaultConfiguration();
 	
 	/**
 	 * This method is called to set up the component in order to get the desired configuration. Defaults  and
 	 * hard coded values are set according to the configuration.
+	 * @throw ComponentErrors::CDBAccessExImpl
 	 * @param config name of the configuration to be loaded
 	 * @return false if the configuration name is not coded or known
 	 */ 
-	bool initializeConfiguration(const IRA::CString & config) throw (ComponentErrors::CDBAccessExImpl);
+	bool initializeConfiguration(const IRA::CString & config);
 	
 	/**
 	 * Check if the connection is still up and ready. If a previuos call timed out it will check the status of the connection.

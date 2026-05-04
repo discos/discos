@@ -56,7 +56,7 @@ public:
 	 * @throw ReceiversErrors::ModeErrorExImpl
 	 * @param Services pointer to the container services object or to simpleClient
 	 */
-	void init(const T *Services);
+	void init(T *Services);
 
     /**
      * Returns the configuration for a specific flow number.
@@ -77,7 +77,7 @@ public:
 
 private:	
 
-	const T* m_services;
+	T* m_services;
 
 	IRA::CDBTable *m_table;
 	

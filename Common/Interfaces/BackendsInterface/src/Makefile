@@ -37,7 +37,7 @@ IDL_FILES = GenericBackend BackendsBoss TotalPower NoiseGenerator DigitalXCorrel
 IDL_TAO_FLAGS =
 USER_IDL =
 
-GenericBackendStubs_LIBS = baciStubs bulkDataStubs bulkDataSenderStubs BackendsDefinitionsStubs \
+GenericBackendStubs_LIBS = baciStubs bulkDataZMQSenderStubs BackendsDefinitionsStubs \
     ManagmentDefinitionsStubs ComponentErrorsStubs BackendsErrorsStubs ReceiversDefinitionsStubs
 BackendsBossStubs_LIBS = baciStubs BackendsDefinitionsStubs ManagmentDefinitionsStubs \
     ComponentErrorsStubs

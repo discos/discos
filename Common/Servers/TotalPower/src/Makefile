@@ -62,9 +62,11 @@ LIBRARIES       = TotalPowerImpl
 LIBRARIES_L     =
 
 TotalPowerImpl_OBJECTS = TotalPowerImpl Configuration CommandLine Protocol SenderThread ControlThread
-TotalPowerImpl_LIBS = IRALibrary GenericBackendStubs TotalPowerStubs ManagmentDefinitionsStubs ReceiversDefinitionsStubs BackendsDefinitionsStubs bulkDataStubs bulkDataSenderStubs \
-  bulkDataReceiverStubs ACSBulkDataError ComponentErrors BackendsErrors ParserErrors ManagementErrors DiscosVersion
-
+TotalPowerImpl_LIBS = IRALibrary GenericBackendStubs TotalPowerStubs ManagmentDefinitionsStubs \
+ReceiversDefinitionsStubs BackendsDefinitionsStubs bulkDataZMQSenderStubs bulkDataZMQReceiverStubs \
+ACSBulkDataError ComponentErrors BackendsErrors ParserErrors ManagementErrors \
+bulkDataZMQLibrary DiscosVersion 
+TotalPowerImpl_LDFLAGS = -Wfatal-errors
 #
 # <brief description of lllll library>
 lllll_OBJECTS   =

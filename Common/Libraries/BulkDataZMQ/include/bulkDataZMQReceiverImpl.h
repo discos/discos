@@ -12,12 +12,18 @@ C11_IGNORE_WARNING("-Wdeprecated-declarations")
 C11_IGNORE_WARNING("-Wmisleading-indentation")
 C11_IGNORE_WARNING("-Wcatch-value=")
 #include <baciDB.h>
+#include <baciCharacteristicComponentImpl.h>
+#include <baci.h>
+#include "bulkDataZMQReceiverS.h"
 C11_IGNORE_WARNING_POP
 
 //#include "ACSBulkDataStatus.h"
 
-#include "bulkDataZMQReceiverS.h"
+
 #include "bulkDataZMQCallback.h"
+#include "bulkDataZMQConfiguration.h"
+#include "bulkDataZMQPubSub.h"
+#include <ACSBulkDataError.h>
 
 
 
@@ -33,7 +39,7 @@ namespace bulkdataZMQImpl
 
 
 template<class TCallback>
-class BulkDataZMQReceiverImpl : public virtual POA_bulkdataZMQ::BulkDataZMQReceiver
+class BulkDataZMQReceiverImpl :  public baci::CharacteristicComponentImpl, public virtual POA_bulkdataZMQ::BulkDataZMQReceiver
 {
   public:
     
@@ -47,17 +53,40 @@ class BulkDataZMQReceiverImpl : public virtual POA_bulkdataZMQ::BulkDataZMQRecei
      */
     virtual ~BulkDataZMQReceiverImpl();
 
-    /**
-    */
-    virtual void openReceiver() ;
+    virtual void openReceiver(CORBA::Long flowNumber) ;
     
     virtual void closeReceiver();
 
     void resetReceiver();
 
+    BulkDataZMQSubscriber* getReceiver();
+
   protected: 
 
   private:
+
+    /**
+    * Flag indicating whether the receiver is connected to a sender.
+    */
+    bool m_connected;
+
+    /**
+    * Subscriber object responsible for receiving bulk data via ZeroMQ.
+    * Handles the actual data reception and socket management.
+    */
+    BulkDataZMQSubscriber m_subscriber;
+
+    /**
+    * Configuration object for ZeroMQ settings and container services.
+    * Manages connection parameters and service references.
+    */
+    CZMQConfiguration<maci::ContainerServices> m_config;
+    /**
+     * Configuration struct for ZeroMQ settings, such as endpoint, flow number, etc.
+     */
+    bulkdataZMQImpl::TZMQConfig m_zmqconfig;
+
+    TCallback m_callback; ///< Pointer to the callback interface for handling received data and events
 
 };
 

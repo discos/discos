@@ -19,14 +19,14 @@ CZMQConfiguration<T>::~CZMQConfiguration()
    ComponentErrors::MemoryAllocationExImpl,
 */
 template <class T>
-void CZMQConfiguration<T>::init(const T *Services)
+void CZMQConfiguration<T>::init(T *Services)
 {
     m_services = Services;
     IRA::CError error;
     IRA::CString field;
     IRA::CString buffer;
     try {
-        m_table = new IRA::CDBTable(const_cast<const T*>(Services),"FlowRecord",CONFIG_PATH);
+        m_table = new IRA::CDBTable(Services,"FlowRecord",CONFIG_PATH);
     }
     catch (std::bad_alloc& ex) {
         _EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"CZMQConfiguration::init()");
