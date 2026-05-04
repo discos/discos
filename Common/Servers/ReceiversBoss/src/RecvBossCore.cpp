@@ -1970,7 +1970,7 @@ void CRecvBossCore::updateZMQDictionary()
 	if(m_config->getReceiver(currentSetup.c_str(), component, derotator))
 	{
 		m_zmqDictionary["currentSetup"] = currentSetup;
-        std::string currentReceiver = (const char *)component;
+		std::string currentReceiver = (const char *)component;
 		m_zmqDictionary["currentReceiver"] = currentReceiver.substr(currentReceiver.find_last_of('/') != std::string::npos ? currentReceiver.find_last_of('/') + 1 : 0);
 	}
 	else
@@ -1979,7 +1979,7 @@ void CRecvBossCore::updateZMQDictionary()
 		m_zmqDictionary["currentReceiver"] = "";
 	}
 
-	m_zmqDictionary["timestamp"] = ZMQ::ZMQTimeStamp::now();
+	m_zmqDictionary["availableReceivers"] = m_config->getAvailableReceivers();
 
 	// status enum
 	switch (getStatus()) {
@@ -1996,6 +1996,8 @@ void CRecvBossCore::updateZMQDictionary()
 			break;
 		}
 	}
+
+	m_zmqDictionary["timestamp"] = ZMQ::ZMQTimeStamp::now();
 }
 
 void CRecvBossCore::publishData() throw (ComponentErrors::NotificationChannelErrorExImpl)

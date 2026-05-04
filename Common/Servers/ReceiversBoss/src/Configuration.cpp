@@ -86,6 +86,12 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
 			break;
 		}
 		m_receiver[m_receiverNum].component=strVal;
+
+		std::string compName = (const char*)strVal;
+		size_t pos = compName.find_last_of('/');
+		std::string receiverName = (pos != std::string::npos) ? compName.substr(pos + 1) : compName;
+		m_availableReceivers.insert(receiverName);
+
 		m_receiverNum++;
 	}
 	ACS_DEBUG_PARAM("CConfiguration::Init()","Total available receivers: %d",m_receiverNum);
@@ -108,4 +114,3 @@ bool CConfiguration::getReceiver(const IRA::CString& code,IRA::CString& componen
 	}
 	return false;
 }
-
