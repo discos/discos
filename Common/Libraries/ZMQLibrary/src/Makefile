@@ -38,7 +38,7 @@ PY_PACKAGES = ZMQLibrary
 #
 # Includes (.h) files (public only)
 # ---------------------------------
-INCLUDES = ZMQLibrary.hpp ZMQDictionary.hpp ZMQPublisher.hpp PyZMQPublisher.hpp ZMQTimeStamp.hpp PyZMQTimeStamp.hpp
+INCLUDES = ZMQLibrary.hpp ZMQDictionary.hpp ZMQContext.hpp ZMQPublisher.hpp PyZMQPublisher.hpp ZMQTimeStamp.hpp PyZMQTimeStamp.hpp
 
 #
 # Libraries (public and local)
