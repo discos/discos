@@ -120,6 +120,18 @@ public:
 	virtual ACS::ROlong_ptr subScanID() throw (CORBA::SystemException);
 
 	/**
+	 * Returns a reference to the maxScanID property implementation of IDL interface.
+	 * @return pointer to read-only ROlong property status
+	 */
+	virtual ACS::ROlong_ptr maxScanID() throw (CORBA::SystemException);
+
+	/**
+	 * Returns a reference to the maxSubscanID property implementation of IDL interface.
+	 * @return pointer to read-only ROlong property status
+	 */
+	virtual ACS::ROlong_ptr maxSubScanID() throw (CORBA::SystemException);
+
+	/**
      * Returns a reference to the tracking property implementation of IDL interface.
 	 * @return pointer to read-only ROTBoolean property tracking
 	*/
@@ -484,6 +496,8 @@ private:
 	baci::SmartPropertyPointer < ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus),POA_Management::ROTSystemStatus> > m_pstatus;
 	baci::SmartPropertyPointer<baci::ROlong> m_pscanID;
 	baci::SmartPropertyPointer<baci::ROlong> m_psubScanID;
+	baci::SmartPropertyPointer<baci::ROlong> m_pmaxScanID;
+	baci::SmartPropertyPointer<baci::ROlong> m_pmaxSubScanID;
 	baci::SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean> > m_ptracking;
 	baci::SmartPropertyPointer<baci::ROlong> m_pcurrentDevice;
 	baci::SmartPropertyPointer<baci::ROstring> m_pprojectCode;

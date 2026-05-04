@@ -523,6 +523,24 @@ void CScheduleExecutor::getCurrentScanIdentifers(DWORD& scanID,DWORD& subScanID)
 	}
 }
 
+void CScheduleExecutor::getMaxIdentifiers(DWORD& maxScanID, DWORD& maxSubScanID)
+{
+	baci::ThreadSyncGuard guard(&m_mutex);
+
+	if (m_schedule != NULL) {
+		DWORD currentScanID, currentSubScanID;
+
+		m_schedule->getIdentifiers(m_scheduleCounter, currentScanID, currentSubScanID);
+
+		maxScanID = m_schedule->getMaxScanID();
+		maxSubScanID = m_schedule->getMaxSubScanID(currentScanID);
+	}
+	else {
+		maxScanID = 0;
+		maxSubScanID = 0;
+	}
+}
+
 void CScheduleExecutor::initialize(maci::ContainerServices *services,const double& dut1,const IRA::CSite& site,CConfiguration* config)
 { 
 	 m_services=services;

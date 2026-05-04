@@ -36,6 +36,8 @@
 <scheduleName/>
 <scanID/>
 <subScanID/>
+<maxScanID/>
+<maxSubScanID/>
 <currentDevice/>
 <status/>
 <tracking/>
