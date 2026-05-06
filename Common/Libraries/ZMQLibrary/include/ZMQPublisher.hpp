@@ -5,6 +5,7 @@
 #include <limits.h>
 #include <zmq.hpp>
 #include <zmq_addon.hpp>
+#include "ZMQContext.hpp"
 #include "ZMQDictionary.hpp"
 
 #define DEFAULT_ADDRESS std::string("127.0.0.1")

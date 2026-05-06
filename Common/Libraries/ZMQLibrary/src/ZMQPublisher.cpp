@@ -5,7 +5,7 @@ namespace ZMQLibrary
     ZMQPublisher::ZMQPublisher(const std::string& topic, const std::string address, const unsigned int port) :
         topic(topic),
         m_topic(this->topic.data(), this->topic.size()),
-        m_context(std::make_shared<zmq::context_t>()),
+        m_context(ZMQContext::getInstance()),
         m_socket(create_socket(m_context))
     {
         m_socket->set(zmq::sockopt::linger, 0);
