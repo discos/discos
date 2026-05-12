@@ -2,7 +2,9 @@
 
 #define NUMBER_OF_STAGES 5 // Amplification stages
 
-SRTKBandMFCore::SRTKBandMFCore() {
+SRTKBandMFCore::SRTKBandMFCore() :
+    m_zmqPublisher("receivers")
+{
     voltage2mbar=voltage2mbarF;
     voltage2Kelvin=voltage2KelvinF;
     voltage2Celsius=voltage2CelsiusF;
@@ -20,6 +22,8 @@ void SRTKBandMFCore::initialize(maci::ContainerServices* services)
     m_vgStageValues = std::vector<IRA::ReceiverControl::StageValues>(NUMBER_OF_STAGES);
 
     CComponentCore::initialize(services);
+    std::string componentName = services->getName().c_str();
+    m_componentName = componentName.substr(componentName.find_last_of('/') != std::string::npos ? componentName.find_last_of('/') + 1 : 0);
 }
 
 ACS::doubleSeq SRTKBandMFCore::getStageValues(const IRA::ReceiverControl::FetValue& control, DWORD ifs, DWORD stage)
@@ -216,3 +220,55 @@ void SRTKBandMFCore::updateVgLNAControls() throw (ReceiversErrors::ReceiverContr
     clearStatusBit(CONNECTIONERROR); // The communication was ok so clear the CONNECTIONERROR bit
 }
 
+void SRTKBandMFCore::publishZMQData()
+{
+    m_zmqDictionary["timestamp"] = ZMQ::ZMQTimeStamp::now();
+    m_zmqDictionary["cryoTemperatureCoolHead"] = getCryoCoolHead().temperature;
+    m_zmqDictionary["cryoTemperatureCoolHeadWindow"] = getCryoCoolHeadWin().temperature;
+    m_zmqDictionary["cryoTemperatureLNA"] = getCryoLNA().temperature;
+    m_zmqDictionary["cryoTemperatureLNAWindow"] = getCryoLNAWin().temperature;
+    m_zmqDictionary["environmentTemperature"] = getVertexTemperature().temperature;
+    m_zmqDictionary["vacuum"] = getVacuum();
+    m_zmqDictionary["operativeMode"] = (const char *)getSetupMode();
+
+    unsigned int feeds, IFs = 0;
+    ACS::doubleSeq lo, sf, bw;
+    ACS::longSeq pol;
+    feeds = getFeeds();
+    IFs = getIFs();
+    getLO(lo);
+    getStartFrequency(sf);
+    getBandwidth(bw);
+    getPolarization(pol);
+
+    m_zmqDictionary["channels"] = std::vector<ZMQ::ZMQDictionary>();
+
+    for(WORD s = 0; s < feeds * IFs; s++)
+    {
+        ZMQ::ZMQDictionary section;
+        section["id"] = s;
+        section["localOscillator"] = lo[s];
+        section["startFrequency"] = sf[s];
+        section["bandWidth"] = bw[s];
+        section["polarization"] = pol[s] == 0 ? "LHCP" : "RHCP";
+        m_zmqDictionary["channels"].push_back(section);
+    }
+
+    // status enum
+    switch (getComponentStatus()) {
+        case Management::MNG_OK : {
+            m_zmqDictionary["status"] = "OK";
+            break;
+        }
+        case Management::MNG_WARNING : {
+            m_zmqDictionary["status"] = "WARNING";
+            break;
+        }
+        default: { //Management::MNG_FAILURE
+            m_zmqDictionary["status"] = "FAILURE";
+            break;
+        }
+    }
+
+    m_zmqPublisher.publish(ZMQ::ZMQDictionary{{ m_componentName, m_zmqDictionary }});
+}

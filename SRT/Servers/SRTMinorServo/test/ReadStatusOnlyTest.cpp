@@ -47,7 +47,7 @@ protected:
 
         long unsigned int counter = 0;
 
-        double tn = CIRATools::getUNIXEpoch();
+        double tn = CIRATools::getUNIXTime();
 
         while(!terminate)
         {
@@ -75,7 +75,7 @@ protected:
             counter++;
 
             tn += STATUS_PERIOD;
-            std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, tn - CIRATools::getUNIXEpoch()))));
+            std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, tn - CIRATools::getUNIXTime()))));
         }
 
         SRPStatusFile.close();

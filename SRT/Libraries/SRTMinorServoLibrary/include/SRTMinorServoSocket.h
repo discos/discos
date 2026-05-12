@@ -12,9 +12,12 @@
 #include <ComponentErrors.h>
 #include <MinorServoErrors.h>
 #include <optional>
+#include <thread>
+#include <chrono>
 #include "SRTMinorServoCommandLibrary.h"
 
 #define SOCKET_TIMEOUT  0.1
+#define SOCKET_INTERVAL 0.001
 #define CONFIG_DOMAIN   "alma/"
 #define CONFIG_DIRNAME  "/MINORSERVO/Socket"
 
@@ -113,14 +116,14 @@ namespace MinorServo
         int m_port;
 
         /**
-         * Timeout for communication operations
+         * Timeout for communication operations, microseconds
          */
-        double m_timeout;
+        long m_timeout;
 
         /**
          * Mutex object used to syncronize communications and prevent collisions between multiple threads
          */
-        std::mutex m_mutex;
+        std::recursive_mutex m_mutex;
 
         /**
          * Library mutex, used only to synchronize the getInstance methods
@@ -176,7 +179,7 @@ namespace MinorServo
         int m_port;
 
         /**
-         * Timeout for communication operations
+         * Timeout for communication operations, seconds
          */
         double m_timeout;
 

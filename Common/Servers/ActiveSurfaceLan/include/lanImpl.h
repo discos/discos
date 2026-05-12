@@ -13,6 +13,7 @@
 #include <lanSocket.h>
 #include <ASErrors.h>
 #include <lanS.h>
+#include "lanStatus.h"
 
 using namespace baci;
 using namespace IRA;
@@ -43,7 +44,7 @@ using namespace ASErrors;
 class lanImpl: public CharacteristicComponentImpl,public virtual POA_ActiveSurface::lan
 //class lanImpl: public CharacteristicComponentImpl,public virtual POA_MOD_LAN::lan
 {
-  public:
+public:
     lanImpl(const ACE_CString&,maci::ContainerServices*);
 
     virtual ~lanImpl();
@@ -69,26 +70,31 @@ class lanImpl: public CharacteristicComponentImpl,public virtual POA_ActiveSurfa
     virtual void recUSDPar(CORBA::Long cmd,CORBA::Long addr,CORBA::Long nBytes,CORBA::Long& par) throw (CORBA::SystemException,ASErrors::ASErrorsEx);
 	
 
-    virtual ACS::RWdouble_ptr 	delay() 			throw (CORBA::SystemException);
-    virtual ACS::ROlong_ptr 	status()				throw (CORBA::SystemException);
+    virtual ACS::RWdouble_ptr 	delay()     throw (CORBA::SystemException);
+    virtual ACS::ROlong_ptr 	status()    throw (CORBA::SystemException);
 
- /* Override component lifecycle methods*/
+    /* Override component lifecycle methods*/
     virtual void initialize() throw (ACSErr::ACSbaseExImpl);
     virtual void execute() throw (ACSErr::ACSbaseExImpl);
-    virtual void cleanUp ();
-    virtual void aboutToAbort ();
+    virtual void cleanUp();
+    virtual void aboutToAbort();
 
+    /**
+     * Returns the overall status of the LAN
+     * @param connected returns if the component is connected to the Ethernet to serial converter
+     * @param usdStatusSeq sequence of usd statuses
+     */
+    void getLanStatus(bool& connected, ActiveSurface::USDStatusSeq_out usdStatusSeq);
 
-  private:
-
+private:
     /* 
      * lan socket pointer
      */
     lanSocket* m_psock;
 
     /*
-    *  protected socket pointer
-    */
+     *  protected socket pointer
+     */
     CSecureArea<lanSocket>* m_sock;
 
     /**
@@ -96,7 +102,14 @@ class lanImpl: public CharacteristicComponentImpl,public virtual POA_ActiveSurfa
      */
     void operator=(const lanImpl&);
 
-  protected:
+    const unsigned int m_lanIndex;
+
+    /**
+     * lanStatus singleton object to aggregate USD statuses
+     */
+    lanStatus& m_lanStatus;
+
+protected:
     SmartPropertyPointer<RWdouble> m_delay_sp;
     SmartPropertyPointer<ROlong> m_status_sp;
 };

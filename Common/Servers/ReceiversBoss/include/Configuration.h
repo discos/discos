@@ -79,6 +79,12 @@ public:
 	 */
 	inline const IRA::CString& dewarPositionerInterface() const {  return m_dewarPositionerInterface; }
 
+	/**
+	 * Retrieves the list of all available receivers codes.
+	 * @return set containing the available receiver codes
+	 */
+	const std::set<std::string>& getAvailableReceivers() const { return m_availableReceivers; }
+
 private:
 	TReceiver * m_receiver;
 	WORD m_receiverNum;
@@ -87,6 +93,7 @@ private:
 	DDWORD m_statusPersistenceTime;
 	DDWORD m_propertiesUpdateTime;
 	IRA::CString m_dewarPositionerInterface;
+	std::set<std::string> m_availableReceivers;
 };
 
 

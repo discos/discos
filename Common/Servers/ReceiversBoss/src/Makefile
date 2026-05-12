@@ -56,11 +56,11 @@ ifeq ($(STATION),Noto)
 	ReceiversBossImpl_LIBS      = IRALibrary ComponentErrors CommonReceiverInterfaceStubs ReceiversBossStubs ReceiversDefinitionsStubs AntennaDefinitionsStubs GenericReceiverStubs \
 				      DewarPositionerStubs ManagmentDefinitionsStubs DewarPositionerDefinitionsStubs ManagementErrors ParserErrors ReceiversErrors acsnc \
 				      BackendsDefinitionsStubs TotalPowerStubs GenericBackendStubs BackendsErrors bulkDataStubs bulkDataReceiverStubs \
-				      bulkDataCallback bulkDataSenderStubs DiscosVersion
+				      bulkDataCallback bulkDataSenderStubs DiscosVersion ZMQLibrary
 else
 	ReceiversBossImpl_LIBS      = IRALibrary ComponentErrors CommonReceiverInterfaceStubs ReceiversBossStubs ReceiversDefinitionsStubs AntennaDefinitionsStubs GenericReceiverStubs \
 				      DewarPositionerStubs ManagmentDefinitionsStubs DewarPositionerDefinitionsStubs ManagementErrors ParserErrors ReceiversErrors acsnc DiscosVersion \
-				      CalDiodeControllerStubs CalMuxStubs
+				      CalDiodeControllerStubs CalMuxStubs ZMQLibrary
 
 endif
 

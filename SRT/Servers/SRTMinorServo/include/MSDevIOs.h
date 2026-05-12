@@ -278,25 +278,50 @@ namespace MinorServo
             {
                 return (m_map.*m_method)();
             }
-            catch(std::out_of_range& ex)
+            catch(const std::out_of_range& ex)
             {
-                _EXCPT(ComponentErrors::PropertyErrorExImpl, impl, "MSAnswerMapDevIO::read()");
-                impl.setPropertyName(m_property_name.c_str());
-                impl.setReason("Property is missing from the map!");
-                throw impl;
+                if constexpr(std::is_same_v<X, Management::TBoolean>)
+                {
+                    return Management::MNG_FALSE;
+                }
+                else if constexpr(std::is_same_v<X, CORBA::Double> || std::is_same_v<X, double>)
+                {
+                    return 0.0;
+                }
+                else if constexpr(std::is_same_v<X, CORBA::Long> || std::is_same_v<X, long>)
+                {
+                    return 0;
+                }
+                else if constexpr(std::is_same_v<X, ACE_CString>)
+                {
+                    return ACE_CString("UNKNOWN");
+                }
+                else if constexpr(std::is_same_v<X, ACS::booleanSeq>)
+                {
+                    ACS::booleanSeq seq;
+                    seq.length(0);
+                    return seq;
+                }
+                else if constexpr(std::is_same_v<X, ACS::doubleSeq>)
+                {
+                    ACS::doubleSeq seq;
+                    seq.length(0);
+                    return seq;
+                }
+                else if constexpr(std::is_enum_v<X>)
+                {
+                    return static_cast<X>(0);
+                }
+                else
+                {
+                    return X();
+                }
             }
-            catch(std::bad_variant_access& ex)
+            catch(const std::bad_variant_access& ex)
             {
                 _EXCPT(ComponentErrors::PropertyErrorExImpl, impl, "MSAnswerMapDevIO::read()");
                 impl.setPropertyName(m_property_name.c_str());
                 impl.setReason("Attempt to access the property with the wrong variant type!");
-                throw impl;
-            }
-            catch(ACSErr::ACSbaseExImpl& ex)
-            {
-                _ADD_BACKTRACE(ComponentErrors::PropertyErrorExImpl, impl, ex, "MSAnswerMapDevIO::read()");
-                impl.setPropertyName(m_property_name.c_str());
-                impl.setReason("Property could not be read!");
                 throw impl;
             }
         }

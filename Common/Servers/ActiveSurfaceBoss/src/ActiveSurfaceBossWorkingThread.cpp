@@ -1,40 +1,49 @@
 #include "ActiveSurfaceBossWorkingThread.h"
 
-CActiveSurfaceBossWorkingThread::CActiveSurfaceBossWorkingThread(const ACE_CString& name, IRA::CSecureArea<CActiveSurfaceBossCore> *param, const ACS::TimeInterval& responseTime, const ACS::TimeInterval& sleepTime) :
+CActiveSurfaceBossWorkingThread::CActiveSurfaceBossWorkingThread(const ACE_CString& name, IRA::CSecureArea<CActiveSurfaceBossCore> *core, const ACS::TimeInterval& responseTime, const ACS::TimeInterval& sleepTime) :
     ACS::Thread(name, responseTime, sleepTime),
-    m_core(param)
+    m_core(core)
 {
-	AUTO_TRACE("CActiveSurfaceBossWorkingThread::CActiveSurfaceBossWorkingThread()");
+    AUTO_TRACE("CActiveSurfaceBossWorkingThread::CActiveSurfaceBossWorkingThread()");
 }
 
 CActiveSurfaceBossWorkingThread::~CActiveSurfaceBossWorkingThread()
 {
-	AUTO_TRACE("CActiveSurfaceBossWorkingThread::~CActiveSurfaceBossWorkingThread()");
+    AUTO_TRACE("CActiveSurfaceBossWorkingThread::~CActiveSurfaceBossWorkingThread()");
 }
 
 void CActiveSurfaceBossWorkingThread::onStart()
 {
-	AUTO_TRACE("CActiveSurfaceBossWorkingThread::onStart()");
-	m_sleepTime = this->getSleepTime();
+    AUTO_TRACE("CActiveSurfaceBossWorkingThread::onStart()");
+    m_sleepTime = ACS::TimeInterval(this->getSleepTime());
+    m_nextTime = getTimeStamp();
 }
 
 void CActiveSurfaceBossWorkingThread::onStop()
 {
-	 AUTO_TRACE("CActiveSurfaceBossWorkingThread::onStop()");
+    AUTO_TRACE("CActiveSurfaceBossWorkingThread::onStop()");
 }
 
 void CActiveSurfaceBossWorkingThread::runLoop()
 {
-	TIMEVALUE now;
-	IRA::CIRATools::getTime(now);
-	ACS::Time t0 = now.value().value;
+    IRA::CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
+    resource->workingActiveSurface();
+    resource->publishZMQDictionary(m_nextTime);
 
-	IRA::CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
-	resource->workingActiveSurface();
-	resource.Release();
+    m_nextTime += m_sleepTime;
+    ACS::Time now = getTimeStamp();
 
-	IRA::CIRATools::getTime(now);
-	ACS::Time t1 = now.value().value;
-	ACS::TimeInterval elapsed = t1 - t0;
-	this->setSleepTime(std::max(long(m_sleepTime - elapsed), (long)0));
+    if(m_nextTime < now)
+    {
+        ACS::TimeInterval diff = now - m_nextTime;
+        unsigned int missed_ticks = static_cast<unsigned int>(diff / m_sleepTime);
+
+        if((diff % m_sleepTime) > 0)
+        {
+            missed_ticks++;
+        }
+
+        m_nextTime += missed_ticks * m_sleepTime;
+    }
+    this->setSleepTime(ACS::TimeInterval(m_nextTime - now));
 }

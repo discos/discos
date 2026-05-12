@@ -21,7 +21,7 @@ void binder(const CCommonData *data)
 	CACUProtocol::TAxisStatus *azimuthStatus=data->azimuthStatus();
 	CACUProtocol::TAxisStatus *elevationStatus=data->elevationStatus();
 	CACUProtocol::TPointingStatus * pointingStatus=data->pointingStatus();
-	currentTime=pointingStatus->actualTime();
+	currentTime=pointingStatus->actualACSTime();
 	IRA::CIRATools::timeToStr(currentTime,strTime);
 	printf("Time: %s\n",(const char *)strTime);
 	if (pastTime!=0) {

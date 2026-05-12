@@ -58,7 +58,7 @@ protected:
 
         long unsigned int counter = 0;
 
-        double tn = CIRATools::getUNIXEpoch();
+        double tn = CIRATools::getUNIXTime();
 
         while(!terminate)
         {
@@ -77,7 +77,7 @@ protected:
             counter++;
 
             tn += STATUS_PERIOD;
-            std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, tn - CIRATools::getUNIXEpoch()))));
+            std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, tn - CIRATools::getUNIXTime()))));
         }
 
         SRPStatusFile.close();
@@ -94,7 +94,7 @@ protected:
 
         long unsigned int counter = 0;
 
-        double tn = CIRATools::getUNIXEpoch();
+        double tn = CIRATools::getUNIXTime();
 
         while(!terminate)
         {
@@ -107,7 +107,7 @@ protected:
             counter++;
 
             tn += STATUS_PERIOD;
-            std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, tn - CIRATools::getUNIXEpoch()))));
+            std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, tn - CIRATools::getUNIXTime()))));
         }
 
         statusFile.close();
@@ -123,7 +123,7 @@ protected:
 
         long unsigned int counter = 0;
 
-        double tn = CIRATools::getUNIXEpoch();
+        double tn = CIRATools::getUNIXTime();
 
         while(!terminate)
         {
@@ -136,7 +136,7 @@ protected:
             counter++;
 
             tn += STATUS_PERIOD;
-            std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, tn - CIRATools::getUNIXEpoch()))));
+            std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, tn - CIRATools::getUNIXTime()))));
         }
 
         statusFile.close();
@@ -240,7 +240,7 @@ protected:
 
     void SetUp() override
     {
-        srand((int)CIRATools::getUNIXEpoch());
+        srand((int)CIRATools::getUNIXTime());
         std::cout << std::fixed << std::setprecision(6);
 
         try
@@ -367,7 +367,7 @@ TEST_F(CombinedProgramTrackTest, SineWaveMovementTest)
     SRTMinorServoSocket& socket = SRTMinorServoSocket::getInstance();
     SRTMinorServoAnswerMap SRPStatus, DerotatorStatus;
 
-    double start_time = CIRATools::getUNIXEpoch() + ADVANCE_TIMEGAP;
+    double start_time = CIRATools::getUNIXTime() + ADVANCE_TIMEGAP;
     std::cout << "PRESET position reached, starting PROGRAMTRACK with start time: " << start_time << std::endl;
     long unsigned int trajectory_id = int(start_time);
     unsigned int point_id = 0;
@@ -420,7 +420,7 @@ TEST_F(CombinedProgramTrackTest, SineWaveMovementTest)
         next_expected_time += TIMEGAP;
         double time_delta = next_expected_time - start_time;
 
-        std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXEpoch()))));
+        std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXTime()))));
         point_id++;
 
         for(size_t axis = 0; axis < 6; axis++)
@@ -456,7 +456,7 @@ TEST_F(CombinedProgramTrackTest, SineWaveSeparateMovementTest)
 
     while(!terminate)
     {
-        double start_time = CIRATools::getUNIXEpoch() + ADVANCE_TIMEGAP;
+        double start_time = CIRATools::getUNIXTime() + ADVANCE_TIMEGAP;
         std::cout << "Starting new trajectory with start time: " << start_time << std::endl;
         long unsigned int trajectory_id = int(start_time);
         unsigned int point_id = 0;
@@ -504,7 +504,7 @@ TEST_F(CombinedProgramTrackTest, SineWaveSeparateMovementTest)
             next_expected_time += TIMEGAP;
             double time_delta = next_expected_time - start_time;
 
-            std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXEpoch()))));
+            std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXTime()))));
             point_id++;
 
             for(size_t axis = 0; axis < 6; axis++)

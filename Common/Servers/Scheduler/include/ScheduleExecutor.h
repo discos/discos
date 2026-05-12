@@ -121,6 +121,11 @@ public:
      void getCurrentScanIdentifers(DWORD& scanID,DWORD& subScanID);
 
      /**
+      * @return the highest identifiers of the current schedule and the current scan.
+      */
+     void getMaxIdentifiers(DWORD& maxScanID, DWORD& maxSubScanID);
+
+     /**
       * Method is almost atomic, no sync required
       * @return true if a schedule is currently running
       */

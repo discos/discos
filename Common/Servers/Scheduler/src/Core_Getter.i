@@ -27,6 +27,17 @@ void CCore::getCurrentIdentifiers(DWORD& scanID,DWORD& subScanID)
 	}
 }
 
+void CCore::getMaxIdentifiers(DWORD& maxScanID, DWORD& maxSubScanID)
+{
+	if ((m_schedExecuter) && (m_schedExecuter->isScheduleActive())) {
+		m_schedExecuter->getMaxIdentifiers(maxScanID, maxSubScanID);
+	}
+	else {
+		maxScanID = 0;
+		maxSubScanID = 0;
+	}
+}
+
 void CCore::getCurrentBackend(IRA::CString& bck)
 {
 	/*Backends::GenericBackend_var backend;

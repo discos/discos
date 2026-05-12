@@ -6,7 +6,8 @@ _IRA_LOGFILTER_IMPORT;
 // speed of light in meters per second
 #define LIGHTSPEED 299792458.0
 
-CComponentCore::CComponentCore()
+CComponentCore::CComponentCore() :
+    m_zmqPublisher("receivers")
 {
 
 }
@@ -31,6 +32,8 @@ void CComponentCore::initialize(maci::ContainerServices* services) noexcept
     m_fetValues.VDL=m_fetValues.IDL=m_fetValues.VGL=m_fetValues.VDR=m_fetValues.IDR=m_fetValues.VGR=0.0;
     m_statusWord=0;
     m_ioMarkError = false;
+    std::string componentName = m_services->getName().c_str();
+    m_componentName = componentName.substr(componentName.find_last_of('/') != std::string::npos ? componentName.find_last_of('/') + 1 : 0);
 }
 //throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::SocketErrorExImpl)
 CConfiguration const * const  CComponentCore::execute() 
@@ -717,6 +720,59 @@ void CComponentCore::checkLocalOscillator()
     }
     if (!isLocked) setStatusBit(UNLOCKED);
     else clearStatusBit(UNLOCKED);
+}
+
+void CComponentCore::publishZMQData()
+{
+    m_zmqDictionary["timestamp"] = ZMQ::ZMQTimeStamp::now();
+    m_zmqDictionary["cryoTemperatureCoolHead"] = getCryoCoolHead().temperature;
+    m_zmqDictionary["cryoTemperatureCoolHeadWindow"] = getCryoCoolHeadWin().temperature;
+    m_zmqDictionary["cryoTemperatureLNA"] = getCryoLNA().temperature;
+    m_zmqDictionary["cryoTemperatureLNAWindow"] = getCryoLNAWin().temperature;
+    m_zmqDictionary["environmentTemperature"] = getEnvironmentTemperature().temperature;
+    m_zmqDictionary["vacuum"] = getVacuum();
+    m_zmqDictionary["operativeMode"] = (const char *)getSetupMode();
+
+    unsigned int feeds, IFs = 0;
+    ACS::doubleSeq lo, sf, bw;
+    ACS::longSeq pol;
+    feeds = getFeeds();
+    IFs = getIFs();
+    getLO(lo);
+    getStartFrequency(sf);
+    getBandwidth(bw);
+    getPolarization(pol);
+
+    m_zmqDictionary["channels"] = std::vector<ZMQ::ZMQDictionary>();
+
+    for(WORD s = 0; s < feeds * IFs; s++)
+    {
+        ZMQ::ZMQDictionary section;
+        section["id"] = s;
+        section["localOscillator"] = lo[s];
+        section["startFrequency"] = sf[s];
+        section["bandWidth"] = bw[s];
+        section["polarization"] = pol[s] == 0 ? "LHCP" : "RHCP";
+        m_zmqDictionary["channels"].push_back(section);
+    }
+
+    // status enum
+    switch (getComponentStatus()) {
+        case Management::MNG_OK : {
+            m_zmqDictionary["status"] = "OK";
+            break;
+        }
+        case Management::MNG_WARNING : {
+            m_zmqDictionary["status"] = "WARNING";
+            break;
+        }
+        default: { //Management::MNG_FAILURE
+            m_zmqDictionary["status"] = "FAILURE";
+            break;
+        }
+    }
+
+    m_zmqPublisher.publish(ZMQ::ZMQDictionary{{ m_componentName, m_zmqDictionary }});
 }
 
 void CComponentCore::updateComponent()

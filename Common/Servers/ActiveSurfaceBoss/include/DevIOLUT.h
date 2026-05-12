@@ -17,41 +17,40 @@
 using namespace baci;
 
 /**
- * This  class is derived from the template DevIO. 
+ * This  class is derived from the template DevIO.
  * @author <a href=mailto:giuseppe.carboni@inaf.it>Giuseppe Carboni</a>,
  * Osservatorio Astronomico di Cagliari, Italia<br>
- */ 
+ */
 class ActiveSurfaceBossImplDevIOLUT: public virtual DevIO<ACE_CString>
 {
 public:
-	
-	ActiveSurfaceBossImplDevIOLUT(IRA::CSecureArea<CActiveSurfaceBossCore>* core): m_core(core) { 
+
+	ActiveSurfaceBossImplDevIOLUT(CActiveSurfaceBossCore* core): m_core(core) {
 		AUTO_TRACE("ActiveSurfaceBossImplDevIOLUT::ActiveSurfaceBossImplDevIOLUT()");
 	}
-	
+
 	~ActiveSurfaceBossImplDevIOLUT() {
 		AUTO_TRACE("ActiveSurfaceBossImplDevIOLUT::~ActiveSurfaceBossImplDevIOLUT()");
 	}
-	
-	bool initializeValue() 
+
+	bool initializeValue()
 	{
 		return false;
 	}
-	
+
 	ACE_CString read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
 	{
-		CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
 		AUTO_TRACE("ActiveSurfaceBossImplDevIOLUT::read()");
 		timestamp=getTimeStamp();
-		return resource->getLUTfilename().c_str();
-    }
-	
-    void write(const CORBA::Long& value, ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
-    	AUTO_TRACE("ActiveSurfaceBossImplDevIOLUT::write()");
+		return m_core->getLUTfilename().c_str();
 	}
-    
+
+	void write(const CORBA::Long& value, ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl) {
+		AUTO_TRACE("ActiveSurfaceBossImplDevIOLUT::write()");
+	}
+
 private:
-	IRA::CSecureArea<CActiveSurfaceBossCore> *m_core;
+	CActiveSurfaceBossCore* m_core;
 };
 
 #endif /*DEVIOLUT_H_*/

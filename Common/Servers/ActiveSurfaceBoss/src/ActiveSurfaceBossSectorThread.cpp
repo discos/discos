@@ -1,7 +1,7 @@
 #include "ActiveSurfaceBossSectorThread.h"
 
 CActiveSurfaceBossSectorThread::CActiveSurfaceBossSectorThread(const ACE_CString& name,CActiveSurfaceBossCore *param,
-            const ACS::TimeInterval& responseTime,const ACS::TimeInterval& sleepTime) : ACS::Thread(name,responseTime,sleepTime), m_boss(param)
+            const ACS::TimeInterval& responseTime,const ACS::TimeInterval& sleepTime) : ACS::Thread(name,responseTime,sleepTime), m_boss(param), m_state(0), m_containerUp(false)
 {
     m_sector = std::atoi(name.substring(name.length()-1).c_str())-1;
     std::stringstream thread_name;
@@ -22,11 +22,11 @@ void CActiveSurfaceBossSectorThread::onStart()
 {
     AUTO_TRACE(std::string(m_thread_name + "::onStart()").c_str());
 
-    this->setSleepTime(0); // No sleeping
+    m_state = 0;
+    m_currentLanIndex = 0;
 
-    TIMEVALUE now;
-    CIRATools::getTime(now);
-    this->timestart = now.value().value;
+    this->setSleepTime(10000000);
+    this->timestart = getTimeStamp();
 
     std::stringstream table;
     table << CDBPATH;
@@ -49,40 +49,70 @@ void CActiveSurfaceBossSectorThread::onStop()
     if (m_usdTable.is_open())
     {
         m_usdTable.close();
-        TIMEVALUE now;
-        CIRATools::getTime(now);
-        double elapsed = (double)(now.value().value - this->timestart) / 10000000;
-        ACS_LOG(LM_FULL_INFO,std::string(m_thread_name + "::onStop()").c_str(), (LM_NOTICE, "Total boot time: %.3fs", elapsed));
     }
+
+    double elapsed = (double)(getTimeStamp() - this->timestart) / 10000000;
+    ACS_LOG(LM_FULL_INFO,std::string(m_thread_name + "::onStop()").c_str(), (LM_NOTICE, "Total boot time: %.3fs", elapsed));
 }
 
 void CActiveSurfaceBossSectorThread::runLoop()
 {
-    std::string serial_usd, graf, mecc;
-    int lanIndex;
-    int circleIndex;
-    int usdCircleIndex;
-
-    if(m_usdTable >> lanIndex >> circleIndex >> usdCircleIndex >> serial_usd >> graf >> mecc)
+    switch(m_state)
     {
-        ActiveSurface::USD_var current_usd = ActiveSurface::USD::_nil();
-
-        try
+        case 0:
         {
-            current_usd = m_boss->m_services->getComponent<ActiveSurface::USD>(serial_usd.c_str());
-        }
-        catch (maciErrType::CannotGetComponentExImpl& ex)
-        {
-            _ADD_BACKTRACE(ComponentErrors::CouldntGetComponentExImpl,Impl,ex,std::string(m_thread_name + "::runLoop()").c_str());
-            Impl.setComponentName(serial_usd.c_str());
-            Impl.log(LM_DEBUG);
-        }
+            try
+            {
+                m_boss->lan[m_sector][m_currentLanIndex].load();
+                m_currentLanIndex++;
+                // LAN loaded correctly, it means that the LAN container is up, we can ignore other LANs failures
+                this->setSleepTime(0);
+                if(!m_containerUp)
+                {
+                    m_containerUp = true;
+                }
+            }
+            catch(...)
+            {
+                if(m_containerUp)
+                {
+                    m_currentLanIndex++;
+                }
+            }
 
-        m_boss->lanradius[circleIndex][lanIndex] = m_boss->usd[circleIndex][usdCircleIndex] = current_usd;
-        m_boss->usdCounters[m_sector]++;
-    }
-    else
-    {
-        this->setStopped();
+            if(m_currentLanIndex == m_boss->LANs_per_sector)
+            {
+                m_state = 1;
+                this->setSleepTime(0);
+            }
+
+            break;
+        }
+        case 1:
+        {
+            std::string serial_usd, graf, mecc;
+            int lanIndex;
+            int circleIndex;
+            int usdCircleIndex;
+
+            if(m_usdTable >> lanIndex >> circleIndex >> usdCircleIndex >> serial_usd >> graf >> mecc)
+            {
+                ActiveSurface::USD_proxy proxy;
+                proxy.setContainerServices(m_boss->m_services);
+                proxy.setComponentName(serial_usd.c_str());
+                int normalizedLanIndex = (lanIndex - 1) % m_boss->LANs_per_sector;
+                m_boss->usdMap.add(circleIndex, usdCircleIndex, lanIndex, m_sector, normalizedLanIndex, serial_usd, proxy);
+                try
+                {
+                    proxy.load();
+                }
+                catch(...) {}
+                m_boss->usdCounters[m_sector]++;
+            }
+            else
+            {
+                this->setStopped();
+            }
+        }
     }
 }

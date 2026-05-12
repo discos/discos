@@ -11,7 +11,6 @@
 #include <ComponentErrors.h>
 #include "SRTMinorServoSocket.h"
 #include "SRTMinorServoBossCore.h"
-#include <acsncSimpleSupplier.h>
 
 class SRTMinorServoBossCore;
 
@@ -58,30 +57,20 @@ public:
 
 private:
     /**
-     * Method that publishes the status onto the ACS notification channel.
-     */
-    void publish();
-
-    /**
      * The reference to the SRTMinorServoBossCore object.
      */
     SRTMinorServoBossCore& m_core;
 
     /**
-     * The current status of the finite-state machine.
-     */
-    unsigned int m_status;
-
-    /**
      * The sleeping time of the thread.
      * The thread should be cycling at a constant rate, therefore the inner sleeping time is always updated taking into account this and the thread execution time.
      */
-    ACS::TimeInterval m_sleep_time;
+    const ACS::TimeInterval m_sleep_time;
 
     /**
-     * The ACS notification channel simple supplier object.
+     * Variable containing the time of the next planned thread iteration.
      */
-    nc::SimpleSupplier* m_notification_channel;
+    ACS::Time m_next_time;
 };
 
 #endif /*_SRTMINORSERVOSTATUSTHREAD_H_*/

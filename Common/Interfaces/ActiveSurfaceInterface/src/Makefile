@@ -116,10 +116,10 @@ IDL_FILES = ActiveSurfaceBoss lan usd ActiveSurfaceCommon
 TAO_IDLFLAGS =
 USER_IDL =
 
-ActiveSurfaceBossStubs_LIBS = baciStubs ComponentErrorsStubs ASErrorsStubs ManagmentDefinitionsStubs ActiveSurfaceCommonStubs
-lanStubs_LIBS = baciStubs ASErrorsStubs
-usdStubs_LIBS = baciStubs ASErrorsStubs
 ActiveSurfaceCommonStubs_LIBS = baciStubs
+ActiveSurfaceBossStubs_LIBS = baciStubs ComponentErrorsStubs ASErrorsStubs ManagmentDefinitionsStubs ActiveSurfaceCommonStubs
+lanStubs_LIBS = baciStubs ASErrorsStubs ActiveSurfaceCommonStubs
+usdStubs_LIBS = baciStubs ASErrorsStubs
 
 
 #

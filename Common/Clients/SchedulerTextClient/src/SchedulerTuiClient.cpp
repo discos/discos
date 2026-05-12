@@ -143,6 +143,8 @@ int main(int argc, char *argv[]) {
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_ROSTRING> *schedule_field;
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(long)> *scanID_field;
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(long)> *subScanID_field;
+	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(long)> *maxScanID_field;
+	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(long)> *maxSubScanID_field;
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_ROSTRING> *currentBackend_field;
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_ROSTRING> *currentRecorder_field;
 	TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(long)> *currentDevice_field;
@@ -239,6 +241,8 @@ int main(int argc, char *argv[]) {
 		_GET_ACS_PROPERTY(ACS::ROstring,projectCode);
 		_GET_ACS_PROPERTY(ACS::ROlong,scanID);
 		_GET_ACS_PROPERTY(ACS::ROlong,subScanID);
+		_GET_ACS_PROPERTY(ACS::ROlong,maxScanID);
+		_GET_ACS_PROPERTY(ACS::ROlong,maxSubScanID);
 		_GET_ACS_PROPERTY(ACS::ROstring,scheduleName);
 		_GET_ACS_PROPERTY(ACS::ROstring,currentBackend);
 		_GET_ACS_PROPERTY(ACS::ROstring,currentRecorder);
@@ -256,6 +260,8 @@ int main(int argc, char *argv[]) {
 		schedule_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_ROSTRING>(scheduleName.in());
 		scanID_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(long)>(scanID.in());
 		subScanID_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(long)>(subScanID.in());
+		maxScanID_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(long)>(maxScanID.in());
+		maxSubScanID_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(long)>(maxSubScanID.in());
 		currentDevice_field=new TW::CPropertyText<_TW_PROPERTYCOMPONENT_T_RO(long)>(currentDevice.in());
 		tracking_display=new TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>(tracking.in());
 		status_box=new TW::CPropertyStatusBox<TEMPLATE_4_ROTSYSTEMSTATUS,Management::TSystemStatus>(status.in(),Management::MNG_OK) ;
@@ -278,20 +284,27 @@ int main(int argc, char *argv[]) {
 		strncpy(frm,"%04ld",8);
 		scanID_field->setFormatFunction(CFormatFunctions::integerFormat,static_cast<const void *>(frm));
 		scanID_field->setWAlign(CFrameComponent::RIGHT);
-		_TW_SET_COMPONENT(subScanID_field,25,2,4,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		subScanID_field->setFormatFunction(CFormatFunctions::integerFormat,static_cast<const void *>(frm));
-		_TW_SET_COMPONENT(currentBackend_field,20,3,24,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(currentRecorder_field,20,4,24,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
-		_TW_SET_COMPONENT(currentDevice_field,20,5,7,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(maxScanID_field,25,2,4,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		maxScanID_field->setFormatFunction(CFormatFunctions::integerFormat,static_cast<const void *>(frm));
 
-		_TW_SET_COMPONENT(restFrequency_text,20,6,WINDOW_WIDTH-18,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(subScanID_field,20,3,4,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		subScanID_field->setFormatFunction(CFormatFunctions::integerFormat,static_cast<const void *>(frm));
+		subScanID_field->setWAlign(CFrameComponent::RIGHT);
+		_TW_SET_COMPONENT(maxSubScanID_field,25,3,4,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		maxSubScanID_field->setFormatFunction(CFormatFunctions::integerFormat,static_cast<const void *>(frm));
+
+		_TW_SET_COMPONENT(currentBackend_field,20,4,24,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(currentRecorder_field,20,5,24,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(currentDevice_field,20,6,7,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
+
+		_TW_SET_COMPONENT(restFrequency_text,20,7,WINDOW_WIDTH-18,1,CColorPair::WHITE_BLACK,CStyle::BOLD,output_label);
 		restFrequency_text->setWAlign(CFrameComponent::LEFT);
 		restFrequency_text->setFormatFunction(CFormatFunctions::floatingPointFormat,"%.1lf");
-		tracking_display->setPosition(CPoint(20,7));
+		tracking_display->setPosition(CPoint(20,8));
 		tracking_display->setOrientation(TW::CPropertyLedDisplay<TEMPLATE_4_ROTBOOLEAN>::HORIZONTAL);
 		tracking_display->setFormatFunction(trackingFormat,NULL);
 		tracking_display->setLedStyle(0,TW::CStyle(CColorPair::GREEN_BLACK,0),TW::CStyle(CColorPair::RED_BLACK,0));
-		_TW_SET_COMPONENT(status_box,20,8,10,1,BLACK_GREEN,CStyle::BOLD,output_label);
+		_TW_SET_COMPONENT(status_box,20,9,10,1,BLACK_GREEN,CStyle::BOLD,output_label);
 		status_box->setStatusLook(Management::MNG_OK,CStyle(BLACK_GREEN,CStyle::BOLD));
 		status_box->setStatusLook(Management::MNG_WARNING,CStyle(BLACK_YELLOW,CStyle::BOLD));
 		status_box->setStatusLook(Management::MNG_FAILURE,CStyle(BLACK_RED,CStyle::BOLD));
@@ -309,6 +322,8 @@ int main(int argc, char *argv[]) {
 		_INSTALL_MONITOR(schedule_field,1000);
 		_INSTALL_MONITOR(scanID_field,1000);
 		_INSTALL_MONITOR(subScanID_field,1000);
+		_INSTALL_MONITOR(maxScanID_field,1000);
+		_INSTALL_MONITOR(maxSubScanID_field,1000);
 		_INSTALL_MONITOR(projectCode_field,1000);
 		_INSTALL_MONITOR(currentDevice_field,1000);
 		_INSTALL_MONITOR(tracking_display,200);
@@ -325,20 +340,24 @@ int main(int argc, char *argv[]) {
 		// Add all the static labels
 		_TW_ADD_LABEL("Project Code   :",0,0,16,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 		_TW_ADD_LABEL("Schedule       :",0,1,16,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("Scan/SubScan   :",0,2,16,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Scan/Max       :",0,2,16,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 		_TW_ADD_LABEL("/",24,2,1,1,CColorPair::WHITE_BLACK,0,window);
-		_TW_ADD_LABEL("Backend        :",0,3,16,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("Recorder       :",0,4,16,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("Device         :",0,5,16,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("Rest Freq.     :",0,6,16,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("Tracking       :",0,7,16,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
-		_TW_ADD_LABEL("Status         :",0,8,16,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("SubScan/Max    :",0,3,16,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("/",24,3,1,1,CColorPair::WHITE_BLACK,0,window);
+		_TW_ADD_LABEL("Backend        :",0,4,16,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Recorder       :",0,5,16,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Device         :",0,6,16,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Rest Freq.     :",0,7,16,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Tracking       :",0,8,16,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
+		_TW_ADD_LABEL("Status         :",0,9,16,1,CColorPair::WHITE_BLACK,CStyle::UNDERLINE,window);
 		// *************************
 		
 		// Add all required association: components/Frame
 		window.addComponent((CFrameComponent*)schedule_field);
 		window.addComponent((CFrameComponent*)scanID_field);
 		window.addComponent((CFrameComponent*)subScanID_field);
+		window.addComponent((CFrameComponent*)maxScanID_field);
+		window.addComponent((CFrameComponent*)maxSubScanID_field);
 		window.addComponent((CFrameComponent*)projectCode_field);
 		window.addComponent((CFrameComponent*)currentDevice_field);
 		window.addComponent((CFrameComponent*)tracking_display);

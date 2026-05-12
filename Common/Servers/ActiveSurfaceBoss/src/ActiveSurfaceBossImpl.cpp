@@ -44,16 +44,17 @@ void ActiveSurfaceBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
     try
     {
         boss=(CActiveSurfaceBossCore *)new CActiveSurfaceBossCore(getContainerServices(),this);
+        boss->initialize();
         m_core=new IRA::CSecureArea<CActiveSurfaceBossCore>(boss);
         m_pstatus=new ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus),POA_Management::ROTSystemStatus>
-            (getContainerServices()->getName()+":status",getComponent(),new ActiveSurfaceBossImplDevIOStatus(m_core),true);
+            (getContainerServices()->getName()+":status",getComponent(),new ActiveSurfaceBossImplDevIOStatus(boss),true);
         m_penabled=new ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean>
-            (getContainerServices()->getName()+":enabled",getComponent(),new ActiveSurfaceBossImplDevIOEnable(m_core),true);
+            (getContainerServices()->getName()+":enabled",getComponent(),new ActiveSurfaceBossImplDevIOEnable(boss),true);
         m_pprofile=new ROEnumImpl<ACS_ENUM_T(ActiveSurface::TASProfile),POA_ActiveSurface::ROTASProfile>
-            (getContainerServices()->getName()+":pprofile",getComponent(),new ActiveSurfaceBossImplDevIOProfile(m_core),true);
+            (getContainerServices()->getName()+":pprofile",getComponent(),new ActiveSurfaceBossImplDevIOProfile(boss),true);
         m_ptracking=new ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean>
-            (getContainerServices()->getName()+":tracking",getComponent(),new ActiveSurfaceBossImplDevIOTracking(m_core),true);
-        m_pLUT_filename=new ROstring(getContainerServices()->getName()+":LUT_filename",getComponent(),new ActiveSurfaceBossImplDevIOLUT(m_core),true);
+            (getContainerServices()->getName()+":tracking",getComponent(),new ActiveSurfaceBossImplDevIOTracking(boss),true);
+        m_pLUT_filename=new ROstring(getContainerServices()->getName()+":LUT_filename",getComponent(),new ActiveSurfaceBossImplDevIOLUT(boss),true);
 
         // create the parser for command line execution
         m_parser = new SimpleParser::CParser<CActiveSurfaceBossCore>(boss,10);
@@ -63,7 +64,6 @@ void ActiveSurfaceBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
         _EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"ActiveSurfaceBossImpl::initialize()");
         throw dummy;
     }
-    boss->initialize();
 
     long workingThreadTime;
     if(!CIRATools::getDBValue(cs, "profile", (long&)m_profile) ||
@@ -77,7 +77,7 @@ void ActiveSurfaceBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
     if(boss->validProfile(m_profile))
     {
         ACS_SHORT_LOG((LM_INFO,"ActiveSurfaceBoss: CDB %d profile parameter read", m_profile));
-        boss->m_profile = m_profile;
+        boss->m_profile.store(m_profile);
     }
     else
     {
@@ -240,7 +240,7 @@ void ActiveSurfaceBossImpl::park () throw (CORBA::SystemException, ManagementErr
         _EXCPT(ManagementErrors::ParkingErrorExImpl,ex,"ActiveSurfaceBossImpl::park()");
         throw ex.getParkingErrorEx();
     }
-    resource->m_tracking = false;
+    resource->m_tracking.store(false);
 }
 
 void ActiveSurfaceBossImpl::stow (CORBA::Long circle, CORBA::Long actuator, CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
@@ -432,10 +432,9 @@ void ActiveSurfaceBossImpl::usdStatus4GUIClient (CORBA::Long circle, CORBA::Long
 {
     AUTO_TRACE("ActiveSurfaceBossImpl::usdStatus4GUIClient()");
 
-    CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
     try
     {
-        resource->usdStatus4GUIClient(circle, actuator, status);
+        boss->usdStatus4GUIClient(circle, actuator, status);
     }
     catch (ComponentErrors::ComponentErrorsExImpl& ex)
     {
@@ -448,16 +447,17 @@ void ActiveSurfaceBossImpl::asStatus4GUIClient (ACS::longSeq_out status) throw (
 {
     AUTO_TRACE("ActiveSurfaceBossImpl::asStatus4GUIClient()");
 
-    CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
-    try
+    status = new ACS::longSeq;
+    status->length(boss->lastUSD);
+
+    unsigned int i = 0;
+
+    for (int circle = 1; circle <= boss->CIRCLES; circle++)
     {
-        status = new ACS::longSeq;
-        resource->asStatus4GUIClient(*status);
-    }
-    catch (ComponentErrors::ComponentErrorsExImpl& ex)
-    {
-        ex.log(LM_DEBUG);
-        throw ex.getComponentErrorsEx();
+        for (int actuator = 1; actuator <= boss->actuatorsInCircle[circle]; actuator++)
+        {
+            status[i++] = boss->usdMap.getStatus(circle, actuator);
+        }
     }
 }
 
@@ -467,10 +467,9 @@ void ActiveSurfaceBossImpl::setActuator (CORBA::Long circle, CORBA::Long actuato
 
     long int act, cmd, fmin, fmax, ac, del;
 
-    CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
     try
     {
-        resource->setActuator(circle, actuator, act, cmd, fmin, fmax, ac, del);
+        boss->setActuator(circle, actuator, act, cmd, fmin, fmax, ac, del);
     }
     catch (ComponentErrors::ComponentErrorsExImpl& ex)
     {
@@ -510,23 +509,6 @@ void ActiveSurfaceBossImpl::calVer (CORBA::Long circle, CORBA::Long actuator, CO
     try
     {
         resource->calVer(circle, actuator, radius);
-    }
-    catch (ComponentErrors::ComponentErrorsExImpl& ex)
-    {
-        ex.log(LM_DEBUG);
-        throw ex.getComponentErrorsEx();
-    }
-}
-
-
-void ActiveSurfaceBossImpl::recoverUSD (CORBA::Long circle, CORBA::Long actuator) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
-{
-    AUTO_TRACE("ActiveSurfaceBossImpl::recoverUSD()");
-
-    CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
-    try
-    {
-        //resource->recoverUSD(circle, actuator); TBC!!
     }
     catch (ComponentErrors::ComponentErrorsExImpl& ex)
     {

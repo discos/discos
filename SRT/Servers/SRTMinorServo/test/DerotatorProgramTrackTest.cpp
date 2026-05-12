@@ -46,7 +46,7 @@ protected:
 
         long unsigned int counter = 0;
 
-        double tn = CIRATools::getUNIXEpoch();
+        double tn = CIRATools::getUNIXTime();
 
         while(!terminate)
         {
@@ -59,7 +59,7 @@ protected:
             counter++;
 
             tn += STATUS_PERIOD;
-            std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, tn - CIRATools::getUNIXEpoch()))));
+            std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, tn - CIRATools::getUNIXTime()))));
         }
 
         statusFile.close();
@@ -128,7 +128,7 @@ protected:
 
     void SetUp() override
     {
-        srand((int)CIRATools::getUNIXEpoch());
+        srand((int)CIRATools::getUNIXTime());
         std::cout << std::fixed << std::setprecision(6);
 
         try
@@ -228,7 +228,7 @@ protected:
 
 TEST_F(DerotatorProgramTrackTest, ContinuousMovementTest)
 {
-    double start_time = CIRATools::getUNIXEpoch() + ADVANCE_TIMEGAP;
+    double start_time = CIRATools::getUNIXTime() + ADVANCE_TIMEGAP;
     std::cout << "PRESET position reached, starting PROGRAMTRACK with start time: " << start_time << std::endl;
     long unsigned int trajectory_id = int(start_time);
     unsigned int point_id = 0;
@@ -262,7 +262,7 @@ TEST_F(DerotatorProgramTrackTest, ContinuousMovementTest)
         {
             next_expected_time += TIMEGAP;
 
-            std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXEpoch()))));
+            std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXTime()))));
             point_id++;
 
             if(idle)
@@ -299,7 +299,7 @@ TEST_F(DerotatorProgramTrackTest, ContinuousMovementTest)
 
 TEST_F(DerotatorProgramTrackTest, SineWaveMovementTest)
 {
-    double start_time = CIRATools::getUNIXEpoch() + ADVANCE_TIMEGAP;
+    double start_time = CIRATools::getUNIXTime() + ADVANCE_TIMEGAP;
     std::cout << "PRESET position reached, starting PROGRAMTRACK with start time: " << start_time << std::endl;
     long unsigned int trajectory_id = int(start_time);
     unsigned int point_id = 0;
@@ -333,7 +333,7 @@ TEST_F(DerotatorProgramTrackTest, SineWaveMovementTest)
         next_expected_time += TIMEGAP;
         double time_delta = next_expected_time - start_time;
 
-        std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXEpoch()))));
+        std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXTime()))));
         point_id++;
 
         programTrackCoordinates[0] = center + amplitude * sin((time_delta + phase_shift) * 2 * M_PI / period);
@@ -367,7 +367,7 @@ TEST_F(DerotatorProgramTrackTest, SeparateMovementTest)
 
     while(!terminate)
     {
-        double start_time = CIRATools::getUNIXEpoch() + ADVANCE_TIMEGAP;
+        double start_time = CIRATools::getUNIXTime() + ADVANCE_TIMEGAP;
         long unsigned int trajectory_id = int(start_time);
         double next_expected_time = start_time;
         unsigned int point_id = 0;
@@ -386,7 +386,7 @@ TEST_F(DerotatorProgramTrackTest, SeparateMovementTest)
         {
             next_expected_time += TIMEGAP;
 
-            std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXEpoch()))));
+            std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXTime()))));
             point_id++;
 
             if(idle)
@@ -442,7 +442,7 @@ TEST_F(DerotatorProgramTrackTest, RapidTrajectoryTest)
         std::vector<double> programTrackCoordinates = startingCoordinates;
         programTrackCoordinates[0] = RANGES[1];
 
-        double start_time = CIRATools::getUNIXEpoch() + ADVANCE_TIMEGAP;
+        double start_time = CIRATools::getUNIXTime() + ADVANCE_TIMEGAP;
         long unsigned int trajectory_id = int(start_time);
         double next_expected_time = start_time;
         unsigned int point_id = 0;
@@ -461,7 +461,7 @@ TEST_F(DerotatorProgramTrackTest, RapidTrajectoryTest)
         {
             next_expected_time += TIMEGAP;
 
-            std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXEpoch()))));
+            std::this_thread::sleep_for(std::chrono::microseconds((int)round(1000000 * std::max(0.0, next_expected_time - ADVANCE_TIMEGAP - CIRATools::getUNIXTime()))));
             point_id++;
 
             if(idle)

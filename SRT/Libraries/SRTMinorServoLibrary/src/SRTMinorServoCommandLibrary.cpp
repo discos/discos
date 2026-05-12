@@ -144,6 +144,11 @@ SRTMinorServoAnswerMap SRTMinorServoCommandLibrary::parseAnswer(const std::strin
                     throw std::invalid_argument(std::string("Wrong TIMESTAMP value: " + value));
                 }
             }
+            else if (key == "PLC_VERSION")
+            {
+                // Forcefully treat the PLC version as a string
+                args.put(key, value);
+            }
             else
             {
                 size_t last_char;

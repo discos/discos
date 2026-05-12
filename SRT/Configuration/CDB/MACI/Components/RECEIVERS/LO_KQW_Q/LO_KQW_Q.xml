@@ -15,4 +15,5 @@
 	KeepAliveTime="10"
 	Default="false"
     ImplLang="py"
+    Autostart="true"
 />

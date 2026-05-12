@@ -378,7 +378,17 @@ module Management {
 		 * This attribute reports the subscan identifier currently played by the scheduler
 		 */
 		readonly attribute ACS::ROlong subScanID;
-		
+
+		/**
+		 * This attribute reports the highest scan identifier in the currently played schedule.
+		 */
+		readonly attribute ACS::ROlong maxScanID;
+
+		/**
+		 * This attribute reports the highest subscan identifier inside the scan currently played by the scheduler
+		 */
+		readonly attribute ACS::ROlong maxSubScanID;
+
 		/** 
 		 * This attribute reports the current schedule file name that the scheduler is executing.
 		 */

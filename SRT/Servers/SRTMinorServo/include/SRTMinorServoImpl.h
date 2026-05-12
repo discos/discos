@@ -75,10 +75,9 @@ public:
 
     /**
      * Asks the hardware the status of the servo system and updates the component properties.
-     * @return true if the communication succeeded, false otherwise.
      * @throw MinorServoErrors::MinorServoErrorsEx when trying to reset the offsets when they don't match the ones loaded into the hardware.
      */
-    bool status();
+    void status();
 
     /**
      * Asks the servo system to perform a STOW operation.
@@ -324,6 +323,11 @@ protected:
      */
     static std::vector<double> getMotionConstant(SRTBaseMinorServoImpl& object, const std::string& constant);
 
+    /**
+     * Returns the SRTMinorServoZMQStatus object.
+     */
+    SRTMinorServoZMQStatus* getSRTMinorServoZMQStatus(ACS::Time timestamp);
+
 private:
     /**
      * Static function used to retrieve a table from the CDB DataBlock directory. Used inside the initialization list.
@@ -352,23 +356,23 @@ protected:
     /**
      * Number of virtual axes of the servo system.
      */
-    const size_t m_virtual_axes;
+    size_t m_virtual_axes;
 private:
     /**
      * Number of physical axes of the servo system.
      */
-    const size_t m_physical_axes;
-
-    /**
-     * Name of the virtual axes of the servo system.
-     */
-    const std::vector<std::string> m_virtual_axes_names;
+    size_t m_physical_axes;
 
     /**
      * Units of the virtual axes of the servo system.
      */
-    const std::vector<std::string> m_virtual_axes_units;
+    std::vector<std::string> m_virtual_axes_units;
 protected:
+    /**
+     * Name of the virtual axes of the servo system.
+     */
+    std::vector<std::string> m_virtual_axes_names;
+
     /**
      * Dictionary containing the last status retrieved form the servo system.
      */
@@ -407,32 +411,32 @@ protected:
     /**
      * Minimum ranges of the axes of the servo system.
      */
-    const std::vector<double> m_min;
+    std::vector<double> m_min;
 
     /**
      * Maximum ranges of the axes of the servo system.
      */
-    const std::vector<double> m_max;
+    std::vector<double> m_max;
 private:
     /**
      * Maximum speeds of the axes of the servo system.
      */
-    const std::vector<double> m_m_s;
+    std::vector<double> m_m_s;
 
     /**
      * Accelerations of the axes of the servo system.
      */
-    const std::vector<double> m_a;
+    std::vector<double> m_a;
 
     /**
      * Times to perform a full acceleration ramp from 0 to maximum speed, for each axis.
      */
-    const std::vector<double> m_r_t;
+    std::vector<double> m_r_t;
 
     /**
      * Distances covered by a full acceleration ramp from 0 to maximum speed, for each axis.
      */
-    const std::vector<double> m_r_d;
+    std::vector<double> m_r_d;
 
     /**
      * Current speed of the axes of the servo system.
@@ -537,12 +541,12 @@ private:
     /**
      * Configuration of the socket object.
      */
-    const SRTMinorServoSocketConfiguration& m_socket_configuration;
+    SRTMinorServoSocketConfiguration* m_socket_configuration;
 protected:
     /**
-     * Socket object.
+     * Socket pointer.
      */
-    SRTMinorServoSocket& m_socket;
+    SRTMinorServoSocket* m_socket;
 };
 
 /**
@@ -619,12 +623,14 @@ public:
     /**
      * Status method definition. It simply calls and returns the SRTBaseMinorServoImpl method.
      */
-    bool status()                                                                               { return SRTBaseMinorServoImpl::status();                               }
+    void status()                                                                               { SRTBaseMinorServoImpl::status();                                      }
 
     /**
      * Setup method definition. It simply calls the SRTBaseMinorServoImpl method.
      */
     bool setup(const char* configuration_name = "", CORBA::Boolean as_off = false)              { return SRTBaseMinorServoImpl::setup(configuration_name, as_off);      }
+
+    SRTMinorServoZMQStatus* getSRTMinorServoZMQStatus(ACS::Time timestamp)                      { return SRTBaseMinorServoImpl::getSRTMinorServoZMQStatus(timestamp);   }
 
     /**
      * Declaration of all the other inherited methods.
@@ -668,7 +674,7 @@ public:
      * Overloaded status method. It calls the SRTBaseMinorServoImpl status method and performs some other routines.
      * @throw MinorServoErrors::MinorServoErrorsEx when trying to reset the offsets when they don't match the ones loaded into the hardware.
      */
-    bool status();
+    void status();
 
     /**
      * Overloaded setup method. It calls the SRTBaseMinorServoImpl status method and performs some other routines.
@@ -676,6 +682,11 @@ public:
      * @throw ComponentErrors::ComponentErrorsEx when there is an error while trying to load the table for the given configuration.
      */
     bool setup(const char* configuration_name = "", CORBA::Boolean as_off = false);
+
+    /**
+     * Returns the SRTMinorServoZMQStatus object.
+     */
+    SRTMinorServoZMQStatus* getSRTMinorServoZMQStatus(ACS::Time timestamp);
 
     /**
      * Declaration of all the other inherited methods.
@@ -744,7 +755,7 @@ private:
     /**
      * Tracking delta values for all minor servo system virtual axes.
      */
-    const std::vector<double> m_tracking_delta;
+    std::vector<double> m_tracking_delta;
 
     /**
      * Tracking error values for all minor servo system virtual axes.

@@ -12,7 +12,7 @@
                Port="5003"
                CommandLineTimeout="3500000"
                ConnectTimeout="3000000"
-               PropertyRefreshTime="1000000"
+               PropertyRefreshTime="950000"
                Configuration="CCB"
                TimeTollerance="250000"
                RepetitionCacheTime="2000000"
@@ -22,7 +22,7 @@
                DataLatency="3000000"
                SenderSleepTime="300000"
                SenderResponseTime="1000000"
-               ControlSleepTime="900000"
+               ControlSleepTime="1000000"
                ControlResponseTime="1000000"
                BoardsNumber="14"
                DataBufferSize="64">

@@ -10,13 +10,6 @@
     ServerThreads="15">
 
     <Startup>
-        <!--
-        <cdb:e string="MINORSERVO/GFR"/> 
-        <cdb:e string="MINORSERVO/M3R"/>
-        <cdb:e string="MINORSERVO/PFP"/>
-        <cdb:e string="MINORSERVO/SRP"/>
-        -->
-        <cdb:e string="MANAGEMENT/CustomLogger"/>
     </Startup>
 
     <ServiceComponents>

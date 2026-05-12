@@ -44,13 +44,13 @@ public:
     /**
      * This method is executed once when the thread stops.
      */
-     virtual void onStop();
+    virtual void onStop();
 
      /**
       * This method overrides the thread implementation class.
       * The thread can be exited by calling ACS::ThreadBase::stop or ACS::ThreadBase::exit command.
      */
-     virtual void runLoop();
+    virtual void runLoop();
 
 private:
     CActiveSurfaceBossCore *m_boss;
@@ -58,6 +58,9 @@ private:
     std::string m_thread_name;
     std::ifstream m_usdTable;
     ACS::Time timestart;
+    int m_currentLanIndex;
+    unsigned int m_state;
+    bool m_containerUp;
 };
 
 #endif /*_ACTIVESURFACEBOSSSECTORTHREAD_H_*/

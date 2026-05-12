@@ -404,10 +404,11 @@ public:
 		/**********************************************************/
 		inline TINT32 encoderElevation() const { return CACUProtocol::readStatusField<TINT32>(m_buffer,m_disp+28); }
 		/***********************************************************/
-		ACS::Time actualTime() const {
+		double actualMJD() const { return (double)CACUProtocol::readStatusField<TREAL64>(m_buffer,m_disp+57); }
+		ACS::Time actualACSTime() const {
 			IRA::CDateTime time; TIMEVALUE ret;
-			double mjd=(double)CACUProtocol::readStatusField<TREAL64>(m_buffer,m_disp+57);
-			time.setMJD(mjd); time.getDateTime(ret);
+			//double mjd=(double)CACUProtocol::readStatusField<TREAL64>(m_buffer,m_disp+57);
+			time.setMJD(actualMJD()); time.getDateTime(ret);
 			return ret.value().value;
 		}
 		double actualTimeOffset() const {
@@ -431,6 +432,9 @@ public:
 		inline TUINT16 hour() const { return CACUProtocol::readStatusField<TUINT16>(m_buffer,m_disp+81); }
 		inline TUINT16 minute() const { return CACUProtocol::readStatusField<TUINT16>(m_buffer,m_disp+83); }
 		inline TUINT16 second() const { return CACUProtocol::readStatusField<TUINT16>(m_buffer,m_disp+85); }
+		//inline double ptAzimuth() const { return CACUProtocol::readStatusField<TUINT32>(m_buffer,m_disp+87)/1000000.0; }
+		//inline double ptElevation() const { return CACUProtocol::readStatusField<TUINT32>(m_buffer,m_disp+91)/1000000.0; }
+		// Displacement 95, program track state, UINT16
 		/***************************************************************/
 		inline TErrorsTracking pointingErrors() const { return TErrorsTracking((TWORD)CACUProtocol::readStatusField<TWORD>(m_buffer,m_disp+97)); }
 		inline TINT32 pTTTimeOffset() const { return CACUProtocol::readStatusField<TUINT32>(m_buffer,m_disp+99); }

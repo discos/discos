@@ -66,7 +66,7 @@ LIBRARIES_L     =
 SRTKBandMFReceiverImpl_OBJECTS   =  SRTKBandMFReceiverImpl SRTKBandMFCore MonitorThread 
 SRTKBandMFReceiverImpl_LIBS = IRALibrary ComponentErrors ManagementErrors ReceiversErrors CommonReceiverInterfaceStubs \
 							  GenericReceiverStubs SRTKBandMFStubs MFKBandCore\
-                   LocalOscillatorInterfaceStubs ReceiversDefinitionsStubs ManagmentDefinitionsStubs
+                   LocalOscillatorInterfaceStubs ReceiversDefinitionsStubs ManagmentDefinitionsStubs ZMQLibrary
 
 # KBand Derotator decomissioned
 #SRTKBandDerotatorImpl_OBJECTS = SRTKBandDerotatorImpl sensorSocket icdSocket StatusUpdater

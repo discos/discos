@@ -920,6 +920,24 @@ public:
 	 * @param upper return back the upper value of the range, a negative means use system default
 	 */
 	void getElevationLimits(double&lower, double&upper) const { lower=m_lowerElevationLimit; upper=m_upperElevationLimit; }
+
+	/**
+	 * @return the highest scan identifier parsed in the schedule
+	 */
+	DWORD getMaxScanID() const { return m_maxScanID; }
+
+	/**
+	 * @param scanID identifier of the scan
+	 * @return the highest subscan identifier for the given scan. Returns 0 if scan is not found.
+	 *
+	 */
+	DWORD getMaxSubScanID(const DWORD& scanID) {
+		if (m_maxSubscans.find(scanID) != m_maxSubscans.end()) {
+			return m_maxSubscans[scanID];
+		}
+		return 0;
+	}
+
 private:
 	typedef std::vector<TRecord *> TSchedule;
 	typedef TSchedule::iterator TIterator;
@@ -952,6 +970,8 @@ private:
 		IRA::CString suffix;
 		IRA::CString layout;
 	} m_currentScanDef;
+	DWORD m_maxScanID;
+	std::map<DWORD, DWORD> m_maxSubscans;
 
 
 

@@ -7,7 +7,9 @@ using namespace IRA;
 
 _IRA_LOGFILTER_IMPORT;
 
-CCommonData::CCommonData() : m_statusBuffer(NULL), m_trackStack(CACUProtocol::PROGRAMTRACK_STACK_POSITIONS,false)
+CCommonData::CCommonData() :
+	m_statusBuffer(NULL),
+	m_trackStack(CACUProtocol::PROGRAMTRACK_STACK_POSITIONS,false)
 {
 	DWORD size=CACUProtocol::MESSAGE_FRAME_START_BYTE;
 	
@@ -230,7 +232,7 @@ void CCommonData::getAntennaErrors(double& azErr,double& elErr,ACS::Time& time)
 {
 	azErr=azimuthStatus()->commandedPosition()-azimuthStatus()->actualPosition();
 	elErr=elevationStatus()->commandedPosition()-elevationStatus()->actualPosition();
-	time=pointingStatus()->actualTime();
+	time=pointingStatus()->actualACSTime();
 }
 
 double CCommonData::getHWAzimuth(double destination,const Antenna::TSections& commandedSection,double azLowerLimit,double azUpperLimit,double azCwLimit)
@@ -252,7 +254,7 @@ void CCommonData::getEncodersCoordinates(double& az,double& el,double& azOff,dou
 	el=elevationStatus()->actualPosition();
 	azOff=azimuthStatus()->positionOffset();
 	elOff=elevationStatus()->positionOffset();
-	time=pointingStatus()->actualTime();
+	time=pointingStatus()->actualACSTime();
 	section=pointingStatus()->azimuthSector();
 }
 						
@@ -331,6 +333,8 @@ void CCommonData::reBind()
 	else {
 		clearStatusWord(PROGRAM_TRACK_DATA_ERROR);
 	}
+
+
 	// bind the azimuth status word
 	setAzimuthStatusWord(PRELIMIT_UP,m_azimuthStatus->warnings().preLimitUp());
 	setAzimuthStatusWord(PRELIMIT_DOWN,m_azimuthStatus->warnings().preLimitDown());
@@ -345,7 +349,8 @@ void CCommonData::reBind()
 	setAzimuthStatusWord(ACTIVE,m_azimuthStatus->axisState()==CACUProtocol::STATE_ACTIVE);
 	setAzimuthStatusWord(LOW_POWER_MODE,m_azimuthStatus->lowPowerMode());
 	setAzimuthStatusWord(STOWED,m_azimuthStatus->stowed());
-	// bind the azimuth status word
+
+	// bind the elevation status word
 	setElevationStatusWord(PRELIMIT_UP,m_elevationStatus->warnings().preLimitUp());
 	setElevationStatusWord(PRELIMIT_DOWN,m_elevationStatus->warnings().preLimitDown());
 	setElevationStatusWord(FINAL_LIMIT_UP,m_elevationStatus->warnings().finLimitUp());
@@ -359,6 +364,7 @@ void CCommonData::reBind()
 	setElevationStatusWord(ACTIVE,m_elevationStatus->axisState()==CACUProtocol::STATE_ACTIVE);
 	setElevationStatusWord(LOW_POWER_MODE,m_elevationStatus->lowPowerMode());
 	setElevationStatusWord(STOWED,m_elevationStatus->stowed());
+
 	//bind motors status word
 	TWORD motorSelection,brakesOpen,powerModuleOk;
 	motorSelection=m_azimuthStatus->motorSelection();
@@ -374,6 +380,7 @@ void CCommonData::reBind()
 		setMotorsStatusWord(i,BUS_ERROR,m_azimuthMotors[i]->busError());
 		//setMotorsStatusWord(i,POSITION_ERROR,m_azimuthMotors[i]->positionError());
 	}
+
 	motorSelection=m_elevationStatus->motorSelection();
 	brakesOpen=m_elevationStatus->brakesOpen();
 	powerModuleOk=m_elevationStatus->powerModuleOk();	
@@ -397,6 +404,7 @@ void CCommonData::reBind()
 	setMotorsStatusWord(CACUProtocol::AZIMUTH_MOTORS+CACUProtocol::ELEVATION_MOTORS,MOTOR_SERVO_ERROR,m_cableWrapMotor->servoError());
 	setMotorsStatusWord(CACUProtocol::AZIMUTH_MOTORS+CACUProtocol::ELEVATION_MOTORS,SENSOR_ERROR,m_cableWrapMotor->sensorError());
 	setMotorsStatusWord(CACUProtocol::AZIMUTH_MOTORS+CACUProtocol::ELEVATION_MOTORS,BUS_ERROR,m_cableWrapMotor->busError());
+
 	//setMotorsStatusWord(CACUProtocol::AZIMUTH_MOTORS+CACUProtocol::ELEVATION_MOTORS,POSITION_ERROR,m_cableWrapMotor->positionError());
 	//now let's compose the overall status..get it from : 
 	// m_statusSocketState;
@@ -519,4 +527,180 @@ void CCommonData::reBind()
 		setMountStatus(Management::MNG_FAILURE);
 		_IRA_LOGFILTER_LOG(LM_CRITICAL,"CCommonData::reBind()","ELEVATION_SERVO_FAILURE");
 	}
+}
+
+ZMQ::ZMQDictionary CCommonData::getZMQDictionary()
+{
+	ZMQ::ZMQDictionary dictionary;
+	dictionary["timestamp"] = ZMQ::ZMQTimeStamp::fromMJD(pointingStatus()->actualMJD());
+
+	dictionary["messageSyncError"] = static_cast<bool>(getStatusWord() & (1 << STATUS_MESSAGE_SYNC_ERROR));
+	dictionary["statusLineError"] = static_cast<bool>(getStatusWord() & (1 << STATUS_LINE_ERROR));
+	dictionary["controlLineError"] = static_cast<bool>(getStatusWord() & (1 << CONTROL_LINE_ERROR));
+	dictionary["remoteControlDisabled"] = static_cast<bool>(getStatusWord() & (1 << REMOTE_CONTROL_DISABLED));
+	dictionary["emergencyStop"] = static_cast<bool>(getStatusWord() & (1 << EMERGENCY_STOP));
+	dictionary["mainPowerError"] = static_cast<bool>(getStatusWord() & (1 << MAIN_POWER_ERROR));
+	dictionary["timeError"] = static_cast<bool>(getStatusWord() & (1 << TIME_ERROR));
+	dictionary["programTrackError"] = static_cast<bool>(getStatusWord() & (1 << PROGRAM_TRACK_DATA_ERROR));
+	dictionary["remoteCommandError"] = static_cast<bool>(getStatusWord() & (1 << REMOTE_COMMAND_ERROR));
+	dictionary["statusSocketConnected"] = getStatusLineState() == Antenna::ACU_CNTD;
+	dictionary["controlSocketConnected"] = getControlLineState() == Antenna::ACU_CNTD;
+	dictionary["status"] = getMountStatus() == Management::MNG_OK ? "OK" : getMountStatus() == Management::MNG_WARNING ? "WARNING" : "FAILURE";
+
+	dictionary["pointing"] = ZMQ::ZMQDictionary();
+	dictionary["pointing"]["remainingTrackingPoints"] = pointingStatus()->pTTLength() - pointingStatus()->pTTCurrentIndex();
+	dictionary["pointing"]["timeOffset"] = pointingStatus()->actualTimeOffset();
+	dictionary["pointing"]["sector"] = pointingStatus()->azimuthSector() == Antenna::ACU_CW ? "CW" : "CCW";
+	dictionary["pointing"]["azimuthEncoderPosition"] = pointingStatus()->encoderAzimuth();
+	dictionary["pointing"]["elevationEncoderPosition"] = pointingStatus()->encoderElevation();
+
+	dictionary["azimuth"] = ZMQ::ZMQDictionary();
+	dictionary["azimuth"]["currentPosition"] = azimuthStatus()->actualPosition();;
+	dictionary["azimuth"]["currentRate"] = azimuthStatus()->actualVelocity();
+	dictionary["azimuth"]["currentOffset"] = azimuthStatus()->positionOffset();
+	dictionary["azimuth"]["currentPositionError"] = azimuthStatus()->commandedPosition() - azimuthStatus()->actualPosition();
+	dictionary["azimuth"]["currentTrackingError"] = azimuthStatus()->positionError();
+	dictionary["azimuth"]["commandedPosition"] = azimuthStatus()->commandedPosition();
+	dictionary["azimuth"]["commandedRate"] = azimuthStatus()->commandedVelocity();
+	dictionary["azimuth"]["commandedOffset"] = m_commandedAzOff;
+	dictionary["azimuth"]["preLimitUp"] = azimuthStatus()->warnings().preLimitUp();
+	dictionary["azimuth"]["preLimitDown"] = azimuthStatus()->warnings().preLimitDown();;
+	dictionary["azimuth"]["finalLimitUp"] = azimuthStatus()->warnings().finLimitUp();
+	dictionary["azimuth"]["finalLimitDown"] = azimuthStatus()->warnings().finLimitDown();
+	dictionary["azimuth"]["rateLimit"] = azimuthStatus()->warnings().rateLimit();
+	dictionary["azimuth"]["stowPinExtracted"] = azimuthStatus()->warnings().stowPinExtracted();
+	dictionary["azimuth"]["encoderFailure"] = azimuthStatus()->errors().encoderFailure();
+	dictionary["azimuth"]["brakeError"] = azimuthStatus()->errors().brakeError();
+	dictionary["azimuth"]["servoError"] = azimuthStatus()->errors().servoError();
+	dictionary["azimuth"]["ready"] = azimuthStatus()->axisReady();
+	dictionary["azimuth"]["active"] = azimuthStatus()->axisState() == CACUProtocol::STATE_ACTIVE;
+	dictionary["azimuth"]["lowPowerMode"] = azimuthStatus()->lowPowerMode();
+	dictionary["azimuth"]["stowed"] = azimuthStatus()->stowed();
+	dictionary["azimuth"]["motors"] = std::vector<ZMQ::ZMQDictionary>();
+
+	TWORD motorSelection = azimuthStatus()->motorSelection();
+	TWORD brakesOpen = azimuthStatus()->brakesOpen();
+	TWORD powerModuleOk = azimuthStatus()->powerModuleOk();
+	for(WORD i = 0; i < CACUProtocol::AZIMUTH_MOTORS; i++)
+	{
+		ZMQ::ZMQDictionary motorStatus;
+		motorStatus["id"] = i + 1;
+		motorStatus["position"] = m_azimuthMotors[i]->actualPosition();
+		motorStatus["rpm"] = m_azimuthMotors[i]->actualVelocity();
+		motorStatus["torque"] = m_azimuthMotors[i]->actualTorque();
+		motorStatus["usage"] = m_azimuthMotors[i]->utilization();
+		motorStatus["enabled"] = (motorSelection & (1 << i)) != 0;
+		motorStatus["brakesOpen"] = (brakesOpen & (1 << i)) != 0;
+		motorStatus["powerModuleOk"] = (powerModuleOk & (1 << i)) == 0;
+		motorStatus["active"] = m_azimuthMotors[i]->active();
+		motorStatus["servoError"] = m_azimuthMotors[i]->servoError();
+		motorStatus["sensorError"] = m_azimuthMotors[i]->sensorError();
+		motorStatus["busError"] = m_azimuthMotors[i]->busError();
+		dictionary["azimuth"]["motors"].push_back(motorStatus);
+	}
+
+	dictionary["elevation"] = ZMQ::ZMQDictionary();
+	dictionary["elevation"]["currentPosition"] = elevationStatus()->actualPosition();;
+	dictionary["elevation"]["currentRate"] = elevationStatus()->actualVelocity();
+	dictionary["elevation"]["currentOffset"] = elevationStatus()->positionOffset();
+	dictionary["elevation"]["currentPositionError"] = elevationStatus()->commandedPosition() - elevationStatus()->actualPosition();
+	dictionary["elevation"]["currentTrackingError"] = elevationStatus()->positionError();
+	dictionary["elevation"]["commandedPosition"] = elevationStatus()->commandedPosition();
+	dictionary["elevation"]["commandedRate"] = elevationStatus()->commandedVelocity();
+	dictionary["elevation"]["commandedOffset"] = m_commandedElOff;
+	dictionary["elevation"]["preLimitUp"] = elevationStatus()->warnings().preLimitUp();
+	dictionary["elevation"]["preLimitDown"] = elevationStatus()->warnings().preLimitDown();
+	dictionary["elevation"]["finalLimitUp"] = elevationStatus()->warnings().finLimitUp();
+	dictionary["elevation"]["finalLimitDown"] = elevationStatus()->warnings().finLimitDown();
+	dictionary["elevation"]["rateLimit"] = elevationStatus()->warnings().rateLimit();
+	dictionary["elevation"]["stowPinExtracted"] = elevationStatus()->warnings().stowPinExtracted();
+	dictionary["elevation"]["encoderFailure"] = elevationStatus()->errors().encoderFailure();
+	dictionary["elevation"]["brakeError"] = elevationStatus()->errors().brakeError();
+	dictionary["elevation"]["servoError"] = elevationStatus()->errors().servoError();
+	dictionary["elevation"]["ready"] = elevationStatus()->axisReady();
+	dictionary["elevation"]["active"] = elevationStatus()->axisState() == CACUProtocol::STATE_ACTIVE;
+	dictionary["elevation"]["lowPowerMode"] = elevationStatus()->lowPowerMode();
+	dictionary["elevation"]["stowed"] = elevationStatus()->stowed();
+	dictionary["elevation"]["motors"] = std::vector<ZMQ::ZMQDictionary>();
+
+	motorSelection = elevationStatus()->motorSelection();
+	brakesOpen = elevationStatus()->brakesOpen();
+	powerModuleOk = elevationStatus()->powerModuleOk();
+	for(WORD i = 0; i < CACUProtocol::ELEVATION_MOTORS; i++)
+	{
+		ZMQ::ZMQDictionary motorStatus;
+		motorStatus["id"] = i + 1;
+		motorStatus["position"] = m_elevationMotors[i]->actualPosition();
+		motorStatus["rpm"] = m_elevationMotors[i]->actualVelocity();
+		motorStatus["torque"] = m_elevationMotors[i]->actualTorque();
+		motorStatus["usage"] = m_elevationMotors[i]->utilization();
+		motorStatus["enabled"] = (motorSelection & (1 << i)) != 0;
+		motorStatus["brakesOpen"] = (brakesOpen & (1 << i)) != 0;
+		motorStatus["powerModuleOk"] = (powerModuleOk & (1 << i)) == 0;
+		motorStatus["active"] = m_elevationMotors[i]->active();
+		motorStatus["servoError"] = m_elevationMotors[i]->servoError();
+		motorStatus["sensorError"] = m_elevationMotors[i]->sensorError();
+		motorStatus["busError"] = m_elevationMotors[i]->busError();
+		dictionary["elevation"]["motors"].push_back(motorStatus);
+	}
+
+	std::vector<Antenna::TCommonModes> axesModes(2);
+	getActualMode(axesModes[0], axesModes[1]);
+	for(size_t i = 0; i < axesModes.size(); i++)
+	{
+		std::string currentMode;
+		switch(axesModes[i])
+		{
+			case Antenna::ACU_STANDBY:
+				currentMode = "STANDBY";
+				break;
+			case Antenna::ACU_STOP:
+				currentMode = "STOP";
+				break;
+			case Antenna::ACU_PRESET:
+				currentMode = "PRESET";
+				break;
+			case Antenna::ACU_PROGRAMTRACK:
+				currentMode = "PROGRAM TRACK";
+				break;
+			case Antenna::ACU_RATE:
+				currentMode = "RATE";
+				break;
+			case Antenna::ACU_STOW:
+				currentMode = "STOW";
+				break;
+			case Antenna::ACU_UNSTOW:
+				currentMode = "UNSTOW";
+				break;
+			case Antenna::ACU_UNKNOWN:
+				currentMode = "UNKNOWN";
+				break;
+		}
+		dictionary[i == 0 ? "azimuth" : "elevation"]["currentMode"] = currentMode;
+	}
+
+	dictionary["cableWrap"] = ZMQ::ZMQDictionary();
+	dictionary["cableWrap"]["currentPosition"] = cableWrapStatus()->actualPosition();
+	dictionary["cableWrap"]["currentRate"] = cableWrapStatus()->actualVelocity();
+	dictionary["cableWrap"]["currentTrackingError"] = cableWrapStatus()->positionError();
+
+	motorSelection = cableWrapStatus()->motorSelection();
+	brakesOpen = cableWrapStatus()->brakesOpen();
+	powerModuleOk = cableWrapStatus()->powerModuleOk();	
+	ZMQ::ZMQDictionary CWMotorStatus;
+	CWMotorStatus["id"] = 1;
+	CWMotorStatus["position"] = m_cableWrapMotor->actualPosition();
+	CWMotorStatus["rpm"] = m_cableWrapMotor->actualVelocity();
+	CWMotorStatus["torque"] = m_cableWrapMotor->actualTorque();
+	CWMotorStatus["usage"] = m_cableWrapMotor->utilization();
+	CWMotorStatus["enabled"] = (motorSelection & (1 << 0)) != 0;
+	CWMotorStatus["brakesOpen"] = (brakesOpen & (1 << 0)) != 0;
+	CWMotorStatus["powerModuleOk"] = (powerModuleOk & (1 << 0)) == 0;
+	CWMotorStatus["active"] = m_cableWrapMotor->active();
+	CWMotorStatus["servoError"] = m_cableWrapMotor->servoError();
+	CWMotorStatus["sensorError"] = m_cableWrapMotor->sensorError();
+	CWMotorStatus["busError"] = m_cableWrapMotor->busError();
+	dictionary["cableWrap"]["motors"] = std::vector<ZMQ::ZMQDictionary>{CWMotorStatus};
+
+	return dictionary;
 }

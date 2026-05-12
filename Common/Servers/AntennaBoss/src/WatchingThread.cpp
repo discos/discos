@@ -28,6 +28,17 @@ void CWatchingThread::onStart()
 
  void CWatchingThread::runLoop()
  {
+		if(!boss->m_siteInitialized) {
+			try {
+			    boss->initObservatory();
+			}
+			catch (ACSErr::ACSbaseExImpl& E) {
+				_ADD_BACKTRACE(ComponentErrors::WatchDogErrorExImpl,_dummy,E,"CWatchingThread::runLoop()");
+				_dummy.setReason("Could not initialize Observatory component");
+				_IRA_LOGFILTER_LOG_EXCEPTION(_dummy,LM_ERROR);
+				return;
+			}
+		}
 		try {
 			if(!boss->updateAttributes()) return;
 		}
@@ -53,4 +64,4 @@ void CWatchingThread::onStart()
 			_IRA_LOGFILTER_LOG_EXCEPTION(_dummy,LM_ERROR);
 		}
  }
- 
+

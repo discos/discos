@@ -9,7 +9,7 @@
     xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
     xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    status_thread_period="0.05"
+    status_thread_period="0.1"
     active_surface_configuration="ON"
     elevation_tracking_enabled="ON">
 
