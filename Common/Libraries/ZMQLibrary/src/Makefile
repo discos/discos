@@ -47,7 +47,7 @@ LIBRARIES = ZMQLibrary PyZMQPublisher PyZMQTimeStamp
 LIBRARIES_L =
 
 ZMQLibrary_OBJECTS = ZMQPublisher ZMQTimeStamp
-ZMQLibrary_LIBS = IRALibrary
+ZMQLibrary_LIBS = IRALibrary z
 
 PyZMQPublisher_OBJECTS = PyZMQPublisher
 PyZMQPublisher_LIBS = ZMQLibrary boost_python3

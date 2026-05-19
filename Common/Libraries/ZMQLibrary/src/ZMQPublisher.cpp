@@ -25,9 +25,32 @@ namespace ZMQLibrary
 
     void ZMQPublisher::publish(const std::string& payload_str)
     {
-        zmq::const_buffer payload(payload_str.data(), payload_str.size());
+        const std::string data = compress(payload_str);
+        zmq::const_buffer payload(data.data(), data.size());
         std::array<zmq::const_buffer, 2> message = { m_topic, payload };
         zmq::send_multipart(*m_socket, message);
+    }
+
+    std::string ZMQPublisher::compress(const std::string& input)
+    {
+        uLongf bound = compressBound(static_cast<uLong>(input.size()));
+        std::vector<Bytef> output(bound);
+        uLongf actual_size = bound;
+
+        int rc = compress2(
+            output.data(),
+            &actual_size,
+            reinterpret_cast<const Bytef*>(input.data()),
+            static_cast<uLong>(input.size()),
+            Z_DEFAULT_COMPRESSION
+        );
+
+        if (rc != Z_OK)
+        {
+            throw std::runtime_error(std::string("zlib compression failed: ") + zError(rc));
+        }
+
+        return std::string(reinterpret_cast<char*>(output.data()), actual_size);
     }
 
     std::shared_ptr<zmq::socket_t> ZMQPublisher::create_socket(const std::shared_ptr<zmq::context_t>& context)
