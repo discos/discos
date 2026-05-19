@@ -37,18 +37,13 @@ namespace ZMQLibrary
         std::vector<Bytef> output(bound);
         uLongf actual_size = bound;
 
-        int rc = compress2(
+        compress2(
             output.data(),
             &actual_size,
             reinterpret_cast<const Bytef*>(input.data()),
             static_cast<uLong>(input.size()),
             Z_DEFAULT_COMPRESSION
         );
-
-        if (rc != Z_OK)
-        {
-            throw std::runtime_error(std::string("zlib compression failed: ") + zError(rc));
-        }
 
         return std::string(reinterpret_cast<char*>(output.data()), actual_size);
     }
