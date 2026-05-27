@@ -3,29 +3,18 @@
 
 using namespace bulkdataZMQImpl;
 
-void ZmqSender::captureError() {
-    last_error = zmq_strerror(zmq_errno());
-}
-
 bool ZmqSender::initialize(const std::string& endpoint) {
-    context = zmq_ctx_new();
-    if (!context) {
-        captureError();
+    try {
+        context = ZMQLibrary::ZMQContext::getInstance();
+        socket = std::make_shared<zmq::socket_t>(*context, zmq::socket_type::pub);
+        socket->bind(endpoint);
+        return true;
+    } catch (const zmq::error_t& e) {
+        captureError(e.what());
+        socket.reset();
+        context.reset();
         return false;
     }
-    socket = zmq_socket(context, ZMQ_PUB);
-    if (!socket) {
-        captureError();
-        close();
-        return false;
-    }
-    int rc = zmq_bind(socket, endpoint.c_str());
-    if (rc != 0) {
-        captureError();
-        close();
-        return false;
-    }
-    return true;
 }
 
 bool ZmqSender::send(const uint8_t* data, size_t size) {
@@ -33,12 +22,13 @@ bool ZmqSender::send(const uint8_t* data, size_t size) {
         last_error = "Socket is not initialized.";
         return false;
     }
-    int rc = zmq_send(socket, data, size, 0);
-    if (rc == -1) {
-        captureError();
+    try {
+        socket->send(zmq::const_buffer(data, size), zmq::send_flags::none);
+        return true;
+    } catch (const zmq::error_t& e) {
+        captureError(e.what());
         return false;
-    }        
-    return true;
+    }
 }
 
 bool ZmqSender::send(const std::string& message) {
@@ -47,40 +37,25 @@ bool ZmqSender::send(const std::string& message) {
 
 void ZmqSender::close() {
     if (socket) {
-        zmq_close(socket);
-        socket = nullptr;
+        socket->close();
+        socket.reset();
     }
-    if (context) {
-        zmq_ctx_term(context);
-        context = nullptr;
-    }
+    context.reset();
 }
 
 bool ZmqReceiver::initialize(const std::string& endpoint, const std::string& topic) {
-    context = zmq_ctx_new();
-    if (!context) {
-        captureError();
+    try {
+        context = ZMQLibrary::ZMQContext::getInstance();
+        socket = std::make_shared<zmq::socket_t>(*context, zmq::socket_type::sub);
+        socket->connect(endpoint);
+        socket->set(zmq::sockopt::subscribe, topic);
+        return true;
+    } catch (const zmq::error_t& e) {
+        captureError(e.what());
+        socket.reset();
+        context.reset();
         return false;
     }
-    socket = zmq_socket(context, ZMQ_SUB);
-    if (!socket) {
-        captureError();
-        close();
-        return false;
-    }
-    int rc = zmq_connect(socket, endpoint.c_str());
-    if (rc != 0) {
-        captureError();
-        close();
-        return false;
-    }
-    rc = zmq_setsockopt(socket, ZMQ_SUBSCRIBE, topic.c_str(), topic.size());
-    if (rc != 0) {
-        captureError();
-        close();
-        return false;
-    }
-    return true;
 }
 
 bool ZmqReceiver::receiveSync(std::vector<uint8_t>& out_buffer, long timeout_ms) {
@@ -88,19 +63,20 @@ bool ZmqReceiver::receiveSync(std::vector<uint8_t>& out_buffer, long timeout_ms)
         captureError("Socket is not initialized.");
         return false;
     }
-    zmq_pollitem_t items[] = { { socket, 0, ZMQ_POLLIN, 0 } };
-    int rc = zmq_poll(items, 1, timeout_ms);
-    if (rc == -1) {
-        captureError(); // Actual ZMQ error
-        return false; 
+    try {
+        zmq::pollitem_t items[] = { { static_cast<void*>(*socket), 0, ZMQ_POLLIN, 0 } };
+        int rc = zmq::poll(items, 1, std::chrono::milliseconds(timeout_ms));
+        if (rc == 0) {
+            return false;
+        }
+        if (items[0].revents & ZMQ_POLLIN) {
+            return readMessageFromSocket(out_buffer);
+        }
+        return false;
+    } catch (const zmq::error_t& e) {
+        captureError(e.what());
+        return false;
     }
-    if (rc == 0) {
-        return false;  // Timeout occurred (not treated as an error state)
-    }
-    if (items[0].revents & ZMQ_POLLIN) {
-        return readMessageFromSocket(out_buffer);
-    }
-    return false;
 }
 
 bool ZmqReceiver::startAsync(std::function<void(const std::vector<uint8_t>&)> callback) {
@@ -150,13 +126,10 @@ void ZmqReceiver::stopAsync() {
 void ZmqReceiver::close() {
     stopAsync();
     if (socket) {
-        zmq_close(socket);
-        socket = nullptr;
+        socket->close();
+        socket.reset();
     }
-    if (context) {
-        zmq_ctx_term(context);
-        context = nullptr;
-    }
+    context.reset();
 }
 
 void ZmqReceiver::printBuffer(const std::string message, const std::vector<uint8_t>& buffer) {
@@ -165,23 +138,23 @@ void ZmqReceiver::printBuffer(const std::string message, const std::vector<uint8
         std::cout << (int)byte << " ";
     }
     std::cout << std::endl;
-    }
+}
 
 bool ZmqReceiver::readMessageFromSocket(std::vector<uint8_t>& out_buffer) {
-    zmq_msg_t msg;
-    if (zmq_msg_init(&msg) != 0) {
-        captureError();
+    try {
+        zmq::message_t msg;
+        auto result = socket->recv(msg, zmq::recv_flags::none);
+        if (!result) {
+            captureError("recv returned no data (non-blocking EAGAIN).");
+            return false;
+        }
+        out_buffer.assign(
+            static_cast<uint8_t*>(msg.data()),
+            static_cast<uint8_t*>(msg.data()) + msg.size()
+        );
+        return true;
+    } catch (const zmq::error_t& e) {
+        captureError(e.what());
         return false;
     }
-    int rc = zmq_msg_recv(&msg, socket, 0);
-    if (rc == -1) {
-        captureError();
-        zmq_msg_close(&msg);
-        return false;
-    }
-    size_t size = zmq_msg_size(&msg);
-    uint8_t* data_ptr = static_cast<uint8_t*>(zmq_msg_data(&msg));
-    out_buffer.assign(data_ptr, data_ptr + size);
-    zmq_msg_close(&msg);
-    return true;
 }

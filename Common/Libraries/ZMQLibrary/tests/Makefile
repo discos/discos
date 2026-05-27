@@ -5,6 +5,7 @@ GMOCK_HOME=/usr/local/include/gmock
 GTEST_LIBS=gtest gtest_main
 
 USER_INC=-I$(GTEST_HOME) -I$(GMOCK_HOME)
+USER_LIBS=C++ pthread
 # END OF CPP UNIT TESTING SETUP
 #---------------------
 
@@ -14,10 +15,13 @@ USER_INC=-I$(GTEST_HOME) -I$(GMOCK_HOME)
 # unittest_OBJECTS = unittest
 # unittest_LIBS = $(GTEST_LIBS) <ComponentNameImpl>
 
-EXECUTABLES_L = example
+EXECUTABLES_L = example unittest
 
 example_OBJECTS = example
 example_LIBS = ZMQLibrary
+
+unittest_OBJECTS = unittest
+unittest_LIBS = $(GTEST_LIBS) IRALibrary ComponentErrors bulkDataZMQLibrary
 
 # END OF CUSTOMIZATION
 # do not edit below this line
@@ -39,7 +43,9 @@ endif
 
 do_unit: all
 	@echo "running cpp unit tests"
-	../bin/example --gtest_output=xml:results/cppexample.xml
+	#../bin/example --gtest_output=xml:results/cppexample.xml
+	../bin/unittest --gtest_output=xml:results/cppunittest.xml
+	cat results/cppunittest.xml
 
 do_pyunit:
 	@echo "running python unit tests"

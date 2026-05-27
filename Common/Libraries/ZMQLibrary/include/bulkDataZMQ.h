@@ -1,7 +1,8 @@
 #ifndef _BULKDATAZMQ_H
 #define _BULKDATAZMQ_H
 
-#include <zmq.h>
+#include <zmq.hpp>
+#include "ZMQContext.hpp"
 #include <string>
 #include <vector>
 #include <functional>
@@ -17,20 +18,22 @@ namespace bulkdataZMQImpl {
  */
 class ZmqSender {
 protected:
-    void* context; ///< ZeroMQ context pointer
-    void* socket;  ///< ZeroMQ socket pointer
+    std::shared_ptr<zmq::context_t> context; ///< ZeroMQ context pointer
+    std::shared_ptr<zmq::socket_t> socket;  ///< ZeroMQ socket pointer
     std::string last_error; ///< Stores the last error message encountered
 
     /**
      * @brief Helper to capture the last ZeroMQ error message.
      */
-    void captureError(); 
+    void captureError(const std::string& msg) {
+        last_error = msg;
+    }
 
 public:
     /**
      * @brief Constructor for ZmqSender.
      */
-    ZmqSender() : context(nullptr), socket(nullptr) {}
+    ZmqSender() {}
 
     /**
      * @brief Destructor for ZmqSender, ensures resources are closed.
@@ -52,7 +55,7 @@ public:
      * @return true if context and socket are set, false otherwise.
      */
     bool isInitialized() const {
-        return context != nullptr && socket != nullptr;
+        return socket != nullptr;
     }
 
     /**
@@ -90,8 +93,8 @@ public:
  */
 class ZmqReceiver {
 protected:
-    void* context; ///< ZeroMQ context pointer
-    void* socket;  ///< ZeroMQ socket pointer
+    std::shared_ptr<zmq::context_t> context; ///< ZeroMQ context pointer
+    std::shared_ptr<zmq::socket_t> socket;  ///< ZeroMQ socket pointer
     
     std::thread async_thread; ///< Thread handle for asynchronous reception
     std::atomic<bool> is_running; ///< Atomic flag to control the async thread lifecycle
@@ -101,15 +104,12 @@ protected:
 
     /**
      * @brief Thread-safe helper to capture ZeroMQ errors or set custom error messages.
-     * @param custom_msg Optional custom error string. If empty, zmq_strerror is used.
+     * @param msg Optional custom error string. If empty, zmq_strerror is used.
      */
-    void captureError(const std::string& custom_msg = "") {
+    void captureError(const std::string& msg = "") {
         std::lock_guard<std::mutex> lock(error_mutex);
-        if (!custom_msg.empty()) {
-            last_error = custom_msg;
-        } else {
-            int err = zmq_errno();
-            last_error = zmq_strerror(err);
+        if (!msg.empty()) {
+            last_error = msg;
         }
     }
     /**
@@ -122,7 +122,7 @@ public:
     /**
      * @brief Constructor for ZmqReceiver.
      */
-    ZmqReceiver() : context(nullptr), socket(nullptr), is_running(false) {}
+    ZmqReceiver() : is_running(false) {}
 
     /**
      * @brief Destructor for ZmqReceiver, ensures threads are stopped and resources are closed.
@@ -146,7 +146,7 @@ public:
      * @return true if context and socket are set, false otherwise.
      */
     bool isInitialized() const {
-        return context != nullptr && socket != nullptr;
+        return socket != nullptr;
     }
 
     /**
@@ -193,4 +193,3 @@ private:
 
 }
 #endif /*!_BULKDATAZMQ_H*/
-

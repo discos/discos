@@ -19,12 +19,13 @@ bool BulkDataZMQPublisher::initialize(const bulkdataZMQImpl::TZMQConfig& conf) {
         } */ 
     }
     if (m_configuration.cpuAffinity) {
-        uint64_t affinity = 1; // Pin to CPU core 0
-        if (zmq_setsockopt(socket, ZMQ_AFFINITY, &affinity, sizeof(affinity)) !=0) {
-            captureError();
+        try {
+            socket->set(zmq::sockopt::affinity, uint64_t(1));
+        } catch (const zmq::error_t& e) {
+            captureError(e.what());
             close();
             return false;
-        }   
+        }
     } 
     return true;
 }
