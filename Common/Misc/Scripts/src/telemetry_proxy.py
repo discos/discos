@@ -2,6 +2,9 @@
 import re
 import json
 import socket
+import zlib
+import threading
+from queue import Queue
 from pathlib import Path
 from argparse import ArgumentParser
 from collections import defaultdict
@@ -12,6 +15,24 @@ from zmq.auth import load_certificate
 from zmq.auth.thread import ThreadAuthenticator
 
 RX_BOOT = re.compile(r'^[0-9A-Za-z]{4}_[^\s]+$')
+_cache_queue = Queue()
+_cache_lock = threading.Lock()
+
+def _cache_worker():
+    while True:
+        topic, payload_bytes = _cache_queue.get()
+        try:
+            data = json.loads(zlib.decompress(payload_bytes))
+            with _cache_lock:
+                if topic not in cache or not isinstance(cache[topic], dict):
+                    cache[topic] = {}
+                deep_merge(cache[topic], data)
+        except Exception:
+            pass
+        except KeyboardInterrupt:
+            break
+
+threading.Thread(target=_cache_worker, daemon=True).start()
 
 def deep_merge(dst: dict, src: Mapping) -> dict:
     for k, v in src.items():
@@ -72,7 +93,7 @@ backend.setsockopt(zmq.TCP_KEEPALIVE_CNT, 4)
 backend.setsockopt(zmq.HEARTBEAT_IVL, 5000)
 backend.setsockopt(zmq.HEARTBEAT_TIMEOUT, 15000)
 backend.setsockopt(zmq.HEARTBEAT_TTL, 10000)
-backend.setsockopt(zmq.SNDHWM, 30)
+backend.setsockopt(zmq.SNDHWM, 300)
 
 auth = ThreadAuthenticator(context)
 auth.start()
@@ -119,14 +140,8 @@ try:
                 # We copy the inner message buffer into topic and payload
                 topic_f, payload_f = message
                 topic = memoryview(topic_f).tobytes().decode("ascii", "ignore")
-                payload = memoryview(payload_f).tobytes()
-
-                # Update the cached dictionary
-                if topic not in cache or not isinstance(cache[topic], dict):
-                    cache[topic] = {}
-                deep_merge(cache[topic], json.loads(payload))
+                _cache_queue.put_nowait((topic, memoryview(payload_f).tobytes()))
             except ValueError:
-                # Not enough values to unpack, malformed message
                 pass
 
         # The event involves the backend socket
@@ -155,10 +170,12 @@ try:
                     # If we already cached a value, send it to the client via
                     # the subscribed topic (ex.: '56_mount', we retrieve
                     # 'mount' from the cache)
-                    payload = json.dumps(cache.get(key, {}), separators=(",", ":"))
+                    with _cache_lock:
+                        payload = json.dumps(cache.get(key, {}), separators=(",", ":"))
+
                     backend.send_multipart([
                         topic.encode("ascii"),
-                        payload.encode("utf-8")
+                        zlib.compress(payload.encode("utf-8"))
                     ])
 except KeyboardInterrupt:
     # Service stopped or CTRL-C pressed

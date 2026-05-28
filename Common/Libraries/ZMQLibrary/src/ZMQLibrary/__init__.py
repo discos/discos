@@ -17,7 +17,7 @@ del sys
 # Add the actual 'publish' public method to the ZMQPublisher class.
 import json
 def publish(self, dictionary: dict):
-    self.__publish(json.dumps(dictionary))
+    self.__publish(json.dumps(dictionary, separators=(",", ":")))
 
 PyZMQPublisher.publish = publish
 

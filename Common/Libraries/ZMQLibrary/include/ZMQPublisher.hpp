@@ -5,6 +5,7 @@
 #include <limits.h>
 #include <zmq.hpp>
 #include <zmq_addon.hpp>
+#include <zlib.h>
 #include "ZMQContext.hpp"
 #include "ZMQDictionary.hpp"
 
@@ -59,6 +60,14 @@ namespace ZMQLibrary
         virtual void publish(const std::string& payload);
 
     private:
+        /**
+         * Compresses a string using zlib deflate at default compression level.
+         * @param input the raw string to compress.
+         * @return the compressed binary string.
+         * @throws std::runtime_error if compression fails.
+         */
+        static std::string compress(const std::string& input);
+
         /**
          * Function that creates and configures the socket
          */
