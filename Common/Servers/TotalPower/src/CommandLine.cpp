@@ -58,8 +58,10 @@ CCommandLine::~CCommandLine()
 	Close(m_Error);
 }
 
-void CCommandLine::Init(CConfiguration *config) throw (ComponentErrors::SocketErrorExImpl,
-		ComponentErrors::ValidationErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,ComponentErrors::CDBAccessExImpl)
+// throw (ComponentErrors::SocketErrorExImpl, ComponentErrors::ValidationErrorExImpl,
+// ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
+// BackendsErrors::NakExImpl,ComponentErrors::CDBAccessExImpl)
+void CCommandLine::Init(CConfiguration *config)
 {
 	AUTO_TRACE("CCommandLine::Init()");
 	m_configuration=config;
@@ -125,9 +127,9 @@ void CCommandLine::Init(CConfiguration *config) throw (ComponentErrors::SocketEr
 		
 	}
 }
-
-void CCommandLine::stopDataAcquisition() throw (BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
-		ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::NotAllowedExImpl)
+//throw (BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
+//		ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::NotAllowedExImpl)
+void CCommandLine::stopDataAcquisition()
 {
 	int res;
 	WORD len;
@@ -169,14 +171,16 @@ void CCommandLine::stopDataAcquisition() throw (BackendsErrors::ConnectionExImpl
 	}
 }
 
-void CCommandLine::backendPark() throw (BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
-		ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::NotAllowedExImpl,BackendsErrors::BackendFailExImpl)
+//throw (BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
+//		ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::NotAllowedExImpl,BackendsErrors::BackendFailExImpl)
+void CCommandLine::backendPark()
 {
 	ACS_LOG(LM_FULL_INFO,"CCommandLine::backendPark()",(LM_NOTICE,"backendPark"));
 }
 
-void CCommandLine::stopDataAcquisitionForced() throw (BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
-		ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::NotAllowedExImpl)
+// throw (BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
+//		ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::NotAllowedExImpl)
+void CCommandLine::stopDataAcquisitionForced()
 {
 	int res;
 	WORD len;
@@ -207,8 +211,9 @@ void CCommandLine::stopDataAcquisitionForced() throw (BackendsErrors::Connection
 	}
 }
 
-void CCommandLine::startDataAcquisition() throw (BackendsErrors::BackendBusyExImpl,BackendsErrors::ConnectionExImpl,
-		BackendsErrors::NakExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl)
+//  throw (BackendsErrors::BackendBusyExImpl,BackendsErrors::ConnectionExImpl,
+//		BackendsErrors::NakExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl)
+void CCommandLine::startDataAcquisition()
 {
 	int res;
 	WORD len;
@@ -252,8 +257,9 @@ void CCommandLine::startDataAcquisition() throw (BackendsErrors::BackendBusyExIm
 	}
 }
 
-ACS::Time CCommandLine::resumeDataAcquisition(const ACS::Time& startT) throw (BackendsErrors::ConnectionExImpl,ComponentErrors::NotAllowedExImpl,
-		BackendsErrors::NakExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl)
+// throw (BackendsErrors::ConnectionExImpl,ComponentErrors::NotAllowedExImpl,
+//		BackendsErrors::NakExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl)
+ACS::Time CCommandLine::resumeDataAcquisition(const ACS::Time& startT) 
 {
 	int res;
 	WORD len;
@@ -325,8 +331,9 @@ ACS::Time CCommandLine::resumeDataAcquisition(const ACS::Time& startT) throw (Ba
 	return expectedTime;
 }
 
-void CCommandLine::suspendDataAcquisition() throw (BackendsErrors::ConnectionExImpl,ComponentErrors::NotAllowedExImpl,
-			BackendsErrors::NakExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl)
+//  throw (BackendsErrors::ConnectionExImpl,ComponentErrors::NotAllowedExImpl,
+//	BackendsErrors::NakExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl)
+void CCommandLine::suspendDataAcquisition()
 {
 	int res;
 	WORD len;
@@ -367,8 +374,9 @@ void CCommandLine::suspendDataAcquisition() throw (BackendsErrors::ConnectionExI
 	}
 }
 
-void CCommandLine::setAttenuation(const long&inputId, const double& attenuation) throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,BackendsErrors::NakExImpl,
-		ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl)
+// throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::ValidationErrorExImpl,ComponentErrors::ValueOutofRangeExImpl,BackendsErrors::NakExImpl,
+// ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl)
+void CCommandLine::setAttenuation(const long&inputId, const double& attenuation) 
 {
 	AUTO_TRACE("CCommandLine::setAttenuation()");
 	int res;
@@ -439,10 +447,10 @@ void CCommandLine::setAttenuation(const long&inputId, const double& attenuation)
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setAttenuation()");
 	}		
 }
-
-void CCommandLine::externalCalibrationSwitching(const long& on) throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::NotAllowedExImpl,
-		BackendsErrors::NakExImpl,ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,
-		BackendsErrors::ConnectionExImpl)
+// throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::NotAllowedExImpl,
+//	BackendsErrors::NakExImpl,ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,
+//		BackendsErrors::ConnectionExImpl)
+void CCommandLine::externalCalibrationSwitching(const long& on) 
 {
 	if (getIsBusy()) {
 		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::externalCalibrationSwitching()");
@@ -485,11 +493,10 @@ void CCommandLine::externalCalibrationSwitching(const long& on) throw (BackendsE
 		ACS_LOG(LM_FULL_INFO,"CCommandLine::externalCalibrationSwitching()",(LM_INFO,"External mark switching is disabled"));
 	}
 }
-
-void CCommandLine::setConfiguration(const long& inputId,const double& freq,const double& bw,const long& feed,const long& pol, const double& sr,const long& bins) throw (
-		ComponentErrors::ValidationErrorExImpl,BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
-		ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::ValueOutofRangeExImpl,
-		BackendsErrors::BackendBusyExImpl)
+// throw (ComponentErrors::ValidationErrorExImpl,BackendsErrors::ConnectionExImpl,BackendsErrors::NakExImpl,
+//		ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,ComponentErrors::ValueOutofRangeExImpl,
+//		BackendsErrors::BackendBusyExImpl)
+void CCommandLine::setConfiguration(const long& inputId,const double& freq,const double& bw,const long& feed,const long& pol, const double& sr,const long& bins)
 {
 	AUTO_TRACE("CCommandLine::setConfiguration()");
 	int res;
@@ -614,9 +621,10 @@ void CCommandLine::setConfiguration(const long& inputId,const double& freq,const
 	}
 }
 
-void CCommandLine::getZeroTPI(DWORD *tpi) throw (ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
-		ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,BackendsErrors::MalformedAnswerExImpl,
-		BackendsErrors::BackendBusyExImpl)
+// throw (ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
+//		ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,BackendsErrors::MalformedAnswerExImpl,
+//		BackendsErrors::BackendBusyExImpl)
+void CCommandLine::getZeroTPI(DWORD *tpi) 
 {
 	AUTO_TRACE("CCommandLine::getZeroTPI()");
 	int res;
@@ -743,23 +751,26 @@ void CCommandLine::getZeroTPI(DWORD *tpi) throw (ComponentErrors::TimeoutExImpl,
 	}
 }
 
-void CCommandLine::getTpi(ACS::doubleSeq& tpi) throw (ComponentErrors::TimeoutExImpl,
-		BackendsErrors::ConnectionExImpl,ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,
-		BackendsErrors::MalformedAnswerExImpl,BackendsErrors::BackendBusyExImpl)
+// throw (ComponentErrors::TimeoutExImpl,
+//		BackendsErrors::ConnectionExImpl,ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,
+//		BackendsErrors::MalformedAnswerExImpl,BackendsErrors::BackendBusyExImpl)
+void CCommandLine::getTpi(ACS::doubleSeq& tpi) 
 {
 	getSample(tpi,false);
 }
 
-void CCommandLine::getZero(ACS::doubleSeq& tpi) throw (ComponentErrors::TimeoutExImpl,
-		BackendsErrors::ConnectionExImpl,ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,
-		BackendsErrors::MalformedAnswerExImpl,BackendsErrors::BackendBusyExImpl)
+// throw (ComponentErrors::TimeoutExImpl,
+//		BackendsErrors::ConnectionExImpl,ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,
+//		BackendsErrors::MalformedAnswerExImpl,BackendsErrors::BackendBusyExImpl)
+void CCommandLine::getZero(ACS::doubleSeq& tpi)
 {
 	getSample(tpi,true);
 }
 
-void CCommandLine::getSample(ACS::doubleSeq& tpi,bool zero) throw (ComponentErrors::TimeoutExImpl,
-		BackendsErrors::ConnectionExImpl,ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,
-		BackendsErrors::MalformedAnswerExImpl,BackendsErrors::BackendBusyExImpl)
+// throw (ComponentErrors::TimeoutExImpl,
+//  BackendsErrors::ConnectionExImpl,ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,
+//	BackendsErrors::MalformedAnswerExImpl,BackendsErrors::BackendBusyExImpl)
+void CCommandLine::getSample(ACS::doubleSeq& tpi,bool zero) 
 {
 	AUTO_TRACE("CCommandLine::getSample()");
 	int res;
@@ -899,9 +910,10 @@ void CCommandLine::getSample(ACS::doubleSeq& tpi,bool zero) throw (ComponentErro
 	}
 }
 
-void CCommandLine::setDefaultConfiguration() throw (ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
-		ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,BackendsErrors::BackendBusyExImpl,ComponentErrors::NotAllowedExImpl,
-		ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::TimeoutExImpl)
+// throw (ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
+//		ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,BackendsErrors::BackendBusyExImpl,ComponentErrors::NotAllowedExImpl,
+//		ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::TimeoutExImpl)
+void CCommandLine::setDefaultConfiguration() 
 {
 	AUTO_TRACE("CCommandLine::setDefaultConfiguration()");
 	int res;
@@ -1006,11 +1018,10 @@ void CCommandLine::setDefaultConfiguration() throw (ComponentErrors::TimeoutExIm
 	
 }
 
-void CCommandLine::setup(const char *conf) throw (BackendsErrors::BackendBusyExImpl,BackendsErrors::ConfigurationErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
-		ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,ComponentErrors::CDBAccessExImpl,ComponentErrors::NotAllowedExImpl,ComponentErrors::IRALibraryResourceExImpl,
-		ComponentErrors::TimeoutExImpl)
-		
-		
+// throw (BackendsErrors::BackendBusyExImpl,BackendsErrors::ConfigurationErrorExImpl,ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
+//		ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,ComponentErrors::CDBAccessExImpl,ComponentErrors::NotAllowedExImpl,ComponentErrors::IRALibraryResourceExImpl,
+//		ComponentErrors::TimeoutExImpl)
+void CCommandLine::setup(const char *conf)		
 {
 	AUTO_TRACE("CCommandLine::setup()");
 	if (getIsBusy()) {
@@ -1025,7 +1036,8 @@ void CCommandLine::setup(const char *conf) throw (BackendsErrors::BackendBusyExI
 	CUSTOM_LOG(LM_FULL_INFO,"CCommandLine::setup()",(LM_NOTICE,"Total Power configured: %s",conf)); 
 }
 
-void CCommandLine::checkTime() throw (BackendsErrors::ConnectionExImpl,BackendsErrors::MalformedAnswerExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl)
+// throw (BackendsErrors::ConnectionExImpl,BackendsErrors::MalformedAnswerExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl)
+void CCommandLine::checkTime() 
 {
 	char sBuff[SENDBUFFERSIZE];
 	char rBuff[RECBUFFERSIZE];
@@ -1066,9 +1078,10 @@ void CCommandLine::checkTime() throw (BackendsErrors::ConnectionExImpl,BackendsE
 	}
 }
 
-void CCommandLine::setTime()  throw (ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
-		ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,BackendsErrors::MalformedAnswerExImpl,
-		BackendsErrors::BackendBusyExImpl)
+// throw (ComponentErrors::TimeoutExImpl,BackendsErrors::ConnectionExImpl,
+//ComponentErrors::SocketErrorExImpl,BackendsErrors::NakExImpl,BackendsErrors::MalformedAnswerExImpl,
+//		BackendsErrors::BackendBusyExImpl)
+void CCommandLine::setTime() 
 {
 	AUTO_TRACE("CCommandLine::setTime()");
 	int res;
@@ -1114,15 +1127,15 @@ void CCommandLine::setTime()  throw (ComponentErrors::TimeoutExImpl,BackendsErro
 		_THROW_EXCPT(BackendsErrors::ConnectionExImpl,"CCommandLine::setTime()");
 	}
 }
-
-void CCommandLine::calOn() throw (BackendsErrors::BackendBusyExImpl,
-                            ComponentErrors::NotAllowedExImpl,
-			    BackendsErrors::NakExImpl,
-                            ComponentErrors::IRALibraryResourceExImpl,
-                            ComponentErrors::SocketErrorExImpl,
-                            ComponentErrors::TimeoutExImpl,
-			    BackendsErrors::ConnectionExImpl,
-                            ComponentErrors::ValidationErrorExImpl)
+// throw (BackendsErrors::BackendBusyExImpl,
+//              ComponentErrors::NotAllowedExImpl,
+//			    BackendsErrors::NakExImpl,
+//              ComponentErrors::IRALibraryResourceExImpl,
+//              ComponentErrors::SocketErrorExImpl,
+//              ComponentErrors::TimeoutExImpl,
+//			    BackendsErrors::ConnectionExImpl,
+//              ComponentErrors::ValidationErrorExImpl)
+void CCommandLine::calOn()
 {
 	AUTO_TRACE("CCommandLine::calOn()");
 	// no need to check the backend is busy: this command just turns the calibration mark off the receiver, non change in the backend configuration
@@ -1163,10 +1176,10 @@ void CCommandLine::calOn() throw (BackendsErrors::BackendBusyExImpl,
 	}
 	ACS_LOG(LM_FULL_INFO,"CCommandLine::calOn()",(LM_INFO,"Receiver mark switched on"));
 }
-
-void CCommandLine::calOff() throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::NotAllowedExImpl,BackendsErrors::NakExImpl,
-                            ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,
-                            BackendsErrors::ConnectionExImpl,ComponentErrors::ValidationErrorExImpl)
+// hrow (BackendsErrors::BackendBusyExImpl,ComponentErrors::NotAllowedExImpl,BackendsErrors::NakExImpl,
+//ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,
+ //                           BackendsErrors::ConnectionExImpl,ComponentErrors::ValidationErrorExImpl)
+void CCommandLine::calOff() 
 {
 	AUTO_TRACE("CCommandLine::calOn()");
 	// no need to check the backend is busy: this command just turns the calibration mark on the receiver, non change in the backend configuration
@@ -1209,10 +1222,10 @@ void CCommandLine::calOff() throw (BackendsErrors::BackendBusyExImpl,ComponentEr
 }
 
 
-
-void CCommandLine::activateCalSwitching(const char * argument) throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::NotAllowedExImpl,
-		BackendsErrors::NakExImpl,ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,
-		BackendsErrors::ConnectionExImpl,ComponentErrors::ValidationErrorExImpl)
+// throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::NotAllowedExImpl,
+//		BackendsErrors::NakExImpl,ComponentErrors::IRALibraryResourceExImpl,ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,
+//		BackendsErrors::ConnectionExImpl,ComponentErrors::ValidationErrorExImpl)
+void CCommandLine::activateCalSwitching(const char * argument) 
 {
 	AUTO_TRACE("CCommandLine::activateCalSwitching()");
 	if (getIsBusy()) {
@@ -1258,8 +1271,8 @@ void CCommandLine::activateCalSwitching(const char * argument) throw (BackendsEr
 		}
 	}
 }
-
-void CCommandLine::setEnabled(const ACS::longSeq& en) throw (BackendsErrors::BackendBusyExImpl)
+//  throw (BackendsErrors::BackendBusyExImpl)
+void CCommandLine::setEnabled(const ACS::longSeq& en)
 {
 	if (getIsBusy()) {
 		_EXCPT(BackendsErrors::BackendBusyExImpl,impl,"CCommandLine::setEnabled()");
@@ -1288,7 +1301,8 @@ void CCommandLine::setEnabled(const ACS::longSeq& en) throw (BackendsErrors::Bac
 	ACS_LOG(LM_FULL_INFO,"CCommandLine::setEnabled()",(LM_NOTICE,"CHANGED_ENABLED_CHANNEL"));
 }
 
-void CCommandLine::setIntegration(const long& integration)  throw (BackendsErrors::BackendBusyExImpl)
+// throw (BackendsErrors::BackendBusyExImpl)
+void CCommandLine::setIntegration(const long& integration)
 {
 	AUTO_TRACE("CCommandLine::setIntegration()");
 	if (getIsBusy()) {
@@ -1309,8 +1323,9 @@ void CCommandLine::setIntegration(const long& integration)  throw (BackendsError
 	}
 }
 
-void CCommandLine::getAttenuation(ACS::doubleSeq& att) throw (ComponentErrors::SocketErrorExImpl,
-		ComponentErrors::TimeoutExImpl,BackendsErrors::MalformedAnswerExImpl,BackendsErrors::ConnectionExImpl)
+//throw (ComponentErrors::SocketErrorExImpl,
+//		ComponentErrors::TimeoutExImpl,BackendsErrors::MalformedAnswerExImpl,BackendsErrors::ConnectionExImpl)
+void CCommandLine::getAttenuation(ACS::doubleSeq& att)
 {
 	AUTO_TRACE("CCommandLine::getAttenuation()");
 	int res;
@@ -1404,8 +1419,9 @@ void CCommandLine::getInputSection(ACS::longSeq& inpSection) const
 	}
 }
 
-void CCommandLine::getBandWidth(ACS::doubleSeq& bw) throw (ComponentErrors::SocketErrorExImpl,
-		ComponentErrors::TimeoutExImpl,BackendsErrors::MalformedAnswerExImpl,BackendsErrors::ConnectionExImpl)
+// throw (ComponentErrors::SocketErrorExImpl,
+//		ComponentErrors::TimeoutExImpl,BackendsErrors::MalformedAnswerExImpl,BackendsErrors::ConnectionExImpl)
+void CCommandLine::getBandWidth(ACS::doubleSeq& bw) 
 {
 	AUTO_TRACE("CCommandLine::getBandWidth()");
 	int res;
@@ -1422,8 +1438,9 @@ void CCommandLine::getBandWidth(ACS::doubleSeq& bw) throw (ComponentErrors::Sock
 	_CHECK_ERRORS("CommandLine::getBandWidth()");
 }
 
-void CCommandLine::getTime(ACS::Time& tt) throw (ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,
-		BackendsErrors::MalformedAnswerExImpl,BackendsErrors::ConnectionExImpl)
+// throw (ComponentErrors::SocketErrorExImpl,ComponentErrors::TimeoutExImpl,
+//		BackendsErrors::MalformedAnswerExImpl,BackendsErrors::ConnectionExImpl)
+void CCommandLine::getTime(ACS::Time& tt) 
 {
 	AUTO_TRACE("CCommandLine::getTime()");
 	int res;
@@ -1757,7 +1774,8 @@ bool CCommandLine::checkConnection()
 	}
 }
 
-bool CCommandLine::initializeConfiguration(const IRA::CString & config) throw (ComponentErrors::CDBAccessExImpl)
+//  throw (ComponentErrors::CDBAccessExImpl)
+bool CCommandLine::initializeConfiguration(const IRA::CString & config)
 {
 	int i;
 	CConfiguration::TBackendSetup setup;

@@ -55,12 +55,12 @@ public:
 	/**
     * This member function is used to configure component by reading the configuration parameter from the CDB.
 	 * This must be the first call before using any other function of this class.
-	 * @throw CDBAccess
-	 * @throw MemoryAllocation
-	 * @throw IRALibraryResource
+	 * @throw ComponentErrors::CDBAccessExImpl
+	 * @throw ComponentErrors::MemoryAllocationExImpl
+	 * @throw ComponentErrors::IRALibraryResourceExImpl
 	 * @param Services pointer to the container services object
 	*/
-	void init(maci::ContainerServices *Services) throw (ComponentErrors::CDBAccessExImpl,ComponentErrors::MemoryAllocationExImpl,ComponentErrors::IRALibraryResourceExImpl);
+	void init(maci::ContainerServices *Services);
 
 	/**
 	 * @return the port number
@@ -156,9 +156,10 @@ public:
 	 * This function returns the setups of the backend given the setup ID.
 	 * @param setupID setup identifier or mnemonic
 	 * @param setup structure containing the setup parameters.
+	 * @throw ComponentErrors::CDBAccessExImpl
 	 * @return true if the setup is present, false if not present or the configuration from the CDB is not correct
 	 */  
-	bool getSetupFromID(const IRA::CString setupID,TBackendSetup& setup) throw (ComponentErrors::CDBAccessExImpl);
+	bool getSetupFromID(const IRA::CString setupID,TBackendSetup& setup);
 	
 private:
 	WORD m_wPort;

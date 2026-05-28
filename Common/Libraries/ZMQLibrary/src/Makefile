@@ -24,8 +24,12 @@ USER_LIB = /usr/lib64/libzmq.so
 # C programs (public and local)
 # -----------------------------
 EXECUTABLES =
-EXECUTABLES_L =
+EXECUTABLES_L = testZMQ testBulkDataZMQPubSub
 
+testZMQ_OBJECTS = testBulkDataZMQ bulkDataZMQ
+
+testBulkDataZMQPubSub_OBJECTS = testBulkDataZMQPubSub bulkDataZMQPubSub bulkDataZMQ bulkDataZMQCallback
+testBulkDataZMQPubSub_LIBS = IRALibrary ACSBulkDataError
 
 PY_PACKAGES = ZMQLibrary
 #PY_SCRIPTS =
@@ -38,12 +42,12 @@ PY_PACKAGES = ZMQLibrary
 #
 # Includes (.h) files (public only)
 # ---------------------------------
-INCLUDES = ZMQLibrary.hpp ZMQDictionary.hpp ZMQContext.hpp ZMQPublisher.hpp PyZMQPublisher.hpp ZMQTimeStamp.hpp PyZMQTimeStamp.hpp
+INCLUDES = ZMQLibrary.hpp ZMQDictionary.hpp ZMQContext.hpp ZMQPublisher.hpp PyZMQPublisher.hpp ZMQTimeStamp.hpp PyZMQTimeStamp.hpp bulkDataZMQReceiverImpl.h bulkDataZMQSenderImpl.h bulkDataZMQ.h bulkDataZMQConfiguration.h bulkDataZMQPubSub.h bulkDataZMQCallback.h bulkDataZMQReceiverImpl.i bulkDataZMQConfiguration.tpp
 
 #
 # Libraries (public and local)
 # ----------------------------
-LIBRARIES = ZMQLibrary PyZMQPublisher PyZMQTimeStamp
+LIBRARIES = ZMQLibrary PyZMQPublisher PyZMQTimeStamp bulkDataZMQLibrary
 LIBRARIES_L =
 
 ZMQLibrary_OBJECTS = ZMQPublisher ZMQTimeStamp
@@ -54,6 +58,23 @@ PyZMQPublisher_LIBS = ZMQLibrary boost_python3
 
 PyZMQTimeStamp_OBJECTS = PyZMQTimeStamp
 PyZMQTimeStamp_LIBS = ZMQLibrary boost_python3
+
+bulkDataZMQLibrary_OBJECTS = bulkDataZMQReceiverImpl bulkDataZMQSenderImpl bulkDataZMQ bulkDataZMQConfiguration bulkDataZMQPubSub bulkDataZMQCallback
+bulkDataZMQLibrary_LIBS = baci IRALibrary ACSBulkDataError ComponentErrors bulkDataZMQReceiverStubs bulkDataZMQSenderStubs
+
+#
+# Configuration Database Files
+# ----------------------------
+CDB_SCHEMAS = bulkDataZMQConfig
+
+#
+# IDL Files and flags
+#
+IDL_FILES = bulkDataZMQReceiver bulkDataZMQSender
+TAO_IDLFLAGS =
+USER_IDL =
+bulkDataZMQReceiverStubs_LIBS = baciStubs maciStubs ACSBulkDataErrorStubs
+bulkDataZMQSenderStubs_LIBS = baciStubs maciStubs bulkDataZMQReceiverStubs ACSBulkDataErrorStubs
 
 
 #

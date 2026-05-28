@@ -55,10 +55,10 @@ public:
 	
 	/**
 	 * Used to read the property value.
-	 * @throw ComponentErrors::PropertyError
+	 * @throw ComponentErrors::PropertyErrorExImpl
 	 * @param timestamp epoch when the operation completes
 	*/ 
-	CORBA::Long read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
+	CORBA::Long read(ACS::Time& timestamp)
 	{
 		// get the CommandLine .......
 		CSecAreaResourceWrapper<CCommandLine> line=m_pLink->Get();
@@ -80,7 +80,7 @@ public:
 	/**
 	 * It writes values into controller. Unused because the properties are read-only.
 	*/ 
-	void write(const CORBA::Long& value, ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
+	void write(const CORBA::Long& value, ACS::Time& timestamp)
 	{
 		timestamp=getTimeStamp();
 		return;
