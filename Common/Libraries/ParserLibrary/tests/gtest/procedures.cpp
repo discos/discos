@@ -182,3 +182,82 @@ TEST_F(TestProcedureParsing, run_procedure_with_two_arguments)
     ASSERT_EQ((double)50, to.test_double[0]);
     ASSERT_EQ((double)60.2345, to.test_double[1]);
 }
+
+// --- Added tests for async callback correctness (ensure single callback with correct result) ---
+struct AsyncCallbackState {
+    int count;
+    std::vector<int> results;
+    AsyncCallbackState(): count(0), results() {}
+};
+
+static void async_callback(const void* param, const IRA::CString& name, const bool& result)
+{
+    AsyncCallbackState* state = static_cast<AsyncCallbackState*>(const_cast<void*>(param));
+    if (state!=NULL) {
+        state->count++;
+        state->results.push_back(result ? 1 : 0);
+    }
+}
+
+// Object whose command throws a ParserErrors exception
+class FailObject {
+public:
+    void fail_command()
+    {
+        ParserErrors::PackageErrorExImpl err(__FILE__, __LINE__, "fail_command");
+        throw err;
+    }
+};
+
+// Object whose command succeeds
+class SuccessObject {
+public:
+    void ok_command()
+    {
+        // do nothing, success
+    }
+};
+
+TEST(TestAsyncCallback, callback_is_called_once_on_failure)
+{
+    FailObject obj;
+    CParser<FailObject> parser(&obj, 8, true);
+
+    parser.add("fail_command",
+               new function0<FailObject, non_constant, void_type>(&obj, &FailObject::fail_command),
+               0);
+
+    AsyncCallbackState state;
+
+    parser.runAsync("fail_command", async_callback, &state);
+
+    // allow worker time to process
+    sleep(2);
+
+    ASSERT_EQ(1, state.count);
+    ASSERT_EQ(1u, state.results.size());
+    EXPECT_EQ(0, state.results[0]); // false
+}
+
+TEST(TestAsyncCallback, callback_is_called_once_on_success)
+{
+    SuccessObject obj;
+    CParser<SuccessObject> parser(&obj, 8, true);
+
+    parser.add("ok_command",
+               new function0<SuccessObject, non_constant, void_type>(&obj, &SuccessObject::ok_command),
+               0);
+
+    AsyncCallbackState state;
+
+    parser.runAsync("ok_command", async_callback, &state);
+
+    // allow worker time to process
+    sleep(2);
+
+    ASSERT_EQ(1, state.count);
+    ASSERT_EQ(1u, state.results.size());
+    EXPECT_EQ(1, state.results[0]); // true
+}
+
+// -------------------------------------------------------------------------------

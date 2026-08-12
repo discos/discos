@@ -317,23 +317,25 @@ void CParser<OBJ>::worker(void *threadParam)
 			IRA::CIRATools::getTime(start);
 			while (run && data->popCommand(elem)) {  // if run is false the popCommand is not executed so the next command in the list is not taken out
 				_SP_CALLBACK(cb)=elem->m_callBack;
+				bool result=true;
 				try {	
 					data->executeCommand(elem->m_command,instr);
 				}
 				catch (ParserErrors::ParserErrorsExImpl& ex) {
-					if (cb!=NULL) (*cb)(elem->m_parameter,elem->m_name,false);
+					result=false;
 					// the error related to the parser are not logged, they just appears as error messages to the user operator input. In that case the command is asynchronous, so nothing is returned to the user
 					//ex.log(LM_ERROR);
 				}
 				catch (ACSErr::ACSbaseExImpl& ex) {
-					if (cb!=NULL) (*cb)(elem->m_parameter,elem->m_name,false);
+					result=false;
 					ex.log(LM_ERROR);
 				}
-				if (cb!=NULL) (*cb)(elem->m_parameter,elem->m_name,true);
+				if (cb!=NULL) (*cb)(elem->m_parameter,elem->m_name,result);
 				IRA::CIRATools::getTime(stop);
 				if (IRA::CIRATools::timeDifference(start,stop)>=response) {
 					run=false;
 				}
+				delete elem;
 			}
 		}
 		myself->sleep();
