@@ -147,8 +147,9 @@ public:
 	/**
 	 * Used to read the property value.
 	 * @param timestamp epoch of the completions of the operation
+	 * @throws ACSErr::ACSbaseExImpl if the property value cannot be computed or the secure-area data cannot be accessed.
 	*/ 
-	T read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
+	T read(ACS::Time& timestamp) /* throw (ACSErr::ACSbaseExImpl) */
 	{
 		IRA::CString trace("ACUDevIO::read() ");
 		trace+=m_PropertyName;
@@ -260,8 +261,9 @@ public:
 	/**
 	 * It writes values into controller. An implementation is given only for LATITUDE,LONGITUDE and HEIGHT.
 	 * Even if these properties are read-only, they need to be initialized with the CDB default value.
+	 * @throws ACSErr::ACSbaseExImpl if the target property cannot be updated or the secure-area data cannot be accessed.
 	*/ 
-	void write(const T& value,ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
+	void write(const T& value,ACS::Time& timestamp) /* throw (ACSErr::ACSbaseExImpl) */
 	{
 		IRA::CString trace("ObsDevIO::write() ");
 		trace+=m_PropertyName;

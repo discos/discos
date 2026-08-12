@@ -27,14 +27,30 @@
  * @remarks Last compiled under ACS 8.2.0
  * @remarks compiler version is 4.1.2
 */
+
+#include <Cplusplus11Helper.h>
+
 #include <ObservatoryS.h>
+
+
+
+C11_IGNORE_WARNING_PUSH
+C11_IGNORE_WARNING("-Wdeprecated-declarations")
+C11_IGNORE_WARNING("-Wmisleading-indentation")
+C11_IGNORE_WARNING("-Wwrite-strings")
+C11_IGNORE_WARNING("-Wcatch-value=")
+C11_IGNORE_WARNING("-Wformat=")
+C11_IGNORE_WARNING("-Wsequence-point")
 #include <ComponentErrors.h>
 #include <baciCharacteristicComponentImpl.h>
+#include <enumpropROImpl.h>
+C11_IGNORE_WARNING_POP
+
 #include <baciSmartPropertyPointer.h>
 #include <baciROuLongLong.h>
 #include <baciROdouble.h>
 #include <baciROstring.h>
-#include <enumpropROImpl.h>
+
 #include <String.h>
 #include <SecureArea.h>
 #include <Site.h>
@@ -78,16 +94,17 @@ public:
 	/** 
 	 * Called to give the component time to initialize itself. The component reads into configuration files/parameters, builds up connection. 
 	 * Called before execute. It is implemented as a synchronous (blocking) call.
-	 * @throw ComponentCommonErrors::MemoryAllocationExImpl
+	* @throws ACSErr::ACSbaseExImpl if initialization fails while loading the component configuration or creating required resources.
 	*/
-	virtual void initialize() throw (ACSErr::ACSbaseExImpl);
+	virtual void initialize() /* throw (ACSErr::ACSbaseExImpl) */;
 
 	/**
  	 * Called after <i>initialize()</i> to tell the component that it has to be ready to accept incoming functional calls at any time. 
 	 * Must be implemented as a synchronous (blocking) call. 	 
 	 * In this class the default implementation only logs the COMPSTATE_OPERATIONAL
+	 * @throws ACSErr::ACSbaseExImpl if the execution startup step fails.
 	*/
-	virtual void execute() throw (ACSErr::ACSbaseExImpl);
+	virtual void execute() /* throw (ACSErr::ACSbaseExImpl) */;
 	 
 	/** 
 	 * Called by the container before destroying the server in a normal situation. This function takes charge of releasing all resources.
@@ -103,130 +120,151 @@ public:
 	/**
      * Returns a reference to the observatoryName property implementation of IDL interface.
 	 * @return pointer to read-only string property
+	 * @throws CORBA::SystemException if a CORBA system failure prevents the property reference from being returned.
 	*/
-	virtual ACS::ROstring_ptr observatoryName() throw (CORBA::SystemException);
+	virtual ACS::ROstring_ptr observatoryName() /* throw (CORBA::SystemException) */;
 	
 	/**
      * Returns a reference to the universalTime property implementation of IDL interface.
 	 * @return pointer to read-only long long property universalTime
+	 * @throws CORBA::SystemException if a CORBA system failure prevents the property reference from being returned.
 	*/
-	virtual ACS::ROuLongLong_ptr universalTime() throw (CORBA::SystemException);
+	virtual ACS::ROuLongLong_ptr universalTime() /* throw (CORBA::SystemException) */;
 
 	/**
      * Returns a reference to the implementation of the julianDay property of the IDL interface.
 	 * @return pointer to read-only double property julianDay
+	 * @throws CORBA::SystemException if a CORBA system failure prevents the property reference from being returned.
 	*/
-	virtual ACS::ROdouble_ptr julianDay() throw (CORBA::SystemException);
+	virtual ACS::ROdouble_ptr julianDay() /* throw (CORBA::SystemException) */;
 
 	/**
      * Returns a reference to the implementation of the MJD property of the IDL interface.
 	 * @return pointer to read-only double property MJD
+	 * @throws CORBA::SystemException if a CORBA system failure prevents the property reference from being returned.
 	*/
-	virtual ACS::ROdouble_ptr MJD() throw (CORBA::SystemException);
+	virtual ACS::ROdouble_ptr MJD() /* throw (CORBA::SystemException) */;
 	
 	/**
      * Returns a reference to the implementation of the GAST property of the IDL interface.
 	 * @return pointer to read-only long long property GST
+	 * @throws CORBA::SystemException if a CORBA system failure prevents the property reference from being returned.
 	*/
-	virtual ACS::ROuLongLong_ptr GAST() throw (CORBA::SystemException);	
+	virtual ACS::ROuLongLong_ptr GAST() /* throw (CORBA::SystemException) */;	
 	
 	/**
      * Returns a reference to the implementation of the LST property of the IDL interface.
 	 * @return pointer to read-only long long property LST
+	 * @throws CORBA::SystemException if a CORBA system failure prevents the property reference from being returned.
 	*/
-	virtual ACS::ROuLongLong_ptr LST() throw (CORBA::SystemException);		
+	virtual ACS::ROuLongLong_ptr LST() /* throw (CORBA::SystemException) */;		
 
 	/**
      * Returns a reference to the implementation of the DUT1 property of the IDL interface.
 	 * @return pointer to read-only double property DUT1
+	 * @throws CORBA::SystemException if a CORBA system failure prevents the property reference from being returned.
 	*/
-	virtual ACS::ROdouble_ptr DUT1() throw (CORBA::SystemException);
+	virtual ACS::ROdouble_ptr DUT1() /* throw (CORBA::SystemException) */;
 	
 	/**
      * Returns a reference to the implementation of the latitude property of the IDL interface.
 	 * @return pointer to read-only double property latitude.
+	 * @throws CORBA::SystemException if a CORBA system failure prevents the property reference from being returned.
 	*/
-	virtual ACS::ROdouble_ptr latitude() throw (CORBA::SystemException);
+	virtual ACS::ROdouble_ptr latitude() /* throw (CORBA::SystemException) */;
 
 	/**
      * Returns a reference to the implementation of the longitude property of the IDL interface.
 	 * @return pointer to read-only double property longitude
+	 * @throws CORBA::SystemException if a CORBA system failure prevents the property reference from being returned.
 	*/
-	virtual ACS::ROdouble_ptr longitude() throw (CORBA::SystemException);
+	virtual ACS::ROdouble_ptr longitude() /* throw (CORBA::SystemException) */;
 
 	/**
      * Returns a reference to the inplementation of the height property of the IDL interface.
 	 * @return pointer to read-only double property height
+	 * @throws CORBA::SystemException if a CORBA system failure prevents the property reference from being returned.
 	*/
-	virtual ACS::ROdouble_ptr height() throw (CORBA::SystemException);
+	virtual ACS::ROdouble_ptr height() /* throw (CORBA::SystemException) */;
 	
 	/**
      * Returns a reference to the inplementation of the yPolarMotion property of the IDL interface.
 	 * @return pointer to read-only double property yPolarMotion
+	 * @throws CORBA::SystemException if a CORBA system failure prevents the property reference from being returned.
 	*/
-	virtual ACS::ROdouble_ptr yPolarMotion() throw (CORBA::SystemException);
+	virtual ACS::ROdouble_ptr yPolarMotion() /* throw (CORBA::SystemException) */;
 
 	/**
      * Returns a reference to the inplementation of the height property of the IDL interface.
 	 * @return pointer to read-only double property xPolarMotion
+	 * @throws CORBA::SystemException if a CORBA system failure prevents the property reference from being returned.
 	*/
-	virtual ACS::ROdouble_ptr xPolarMotion() throw (CORBA::SystemException);
+	virtual ACS::ROdouble_ptr xPolarMotion() /* throw (CORBA::SystemException) */;
 
 	/**
      * Returns a reference to the inplementation of the xGeod property of the IDL interface.
 	 * @return pointer to read-only double property xGeod
+	 * @throws CORBA::SystemException if a CORBA system failure prevents the property reference from being returned.
 	*/
-	virtual ACS::ROdouble_ptr xGeod() throw (CORBA::SystemException);
+	virtual ACS::ROdouble_ptr xGeod() /* throw (CORBA::SystemException) */;
 
 	/**
      * Returns a reference to the inplementation of the yGeod property of the IDL interface.
 	 * @return pointer to read-only double property yGeod
+	 * @throws CORBA::SystemException if a CORBA system failure prevents the property reference from being returned.
 	*/
-	virtual ACS::ROdouble_ptr yGeod() throw (CORBA::SystemException);
+	virtual ACS::ROdouble_ptr yGeod() /* throw (CORBA::SystemException) */;
 
 	/**
      * Returns a reference to the inplementation of the zGeod property of the IDL interface.
 	 * @return pointer to read-only double property zGeod
+	 * @throws CORBA::SystemException if a CORBA system failure prevents the property reference from being returned.
 	*/
-	virtual ACS::ROdouble_ptr zGeod() throw (CORBA::SystemException);
+	virtual ACS::ROdouble_ptr zGeod() /* throw (CORBA::SystemException) */;
 
 	/**
      * Returns a reference to the inplementation of the geodeticModel property of the IDL interface.
 	 * @return pointer to read-only TGeodeticModel property geodeticModel
+	 * @throws CORBA::SystemException if a CORBA system failure prevents the property reference from being returned.
 	*/
-	virtual Antenna::ROTGeodeticModel_ptr geodeticModel() throw (CORBA::SystemException);
+	virtual Antenna::ROTGeodeticModel_ptr geodeticModel() /* throw (CORBA::SystemException) */;
 
-	Antenna::TSiteInformation getSiteSummary() throw (CORBA::SystemException);
+	/**
+	 * Returns a summary of the current site information as exposed by the component.
+	 * @return site summary object containing the observatory configuration values
+	 * @throws CORBA::SystemException if a CORBA system failure prevents the operation from returning the summary.
+	*/
+	Antenna::TSiteInformation getSiteSummary() /* throw (CORBA::SystemException) */;
 	
 	/** 
 	 * It allows the client to load a new value for the DUT1 property.
-	 * @throw ComponentCommonErrors::CDBAccessExImpl
-	 * @throw ComponentCommonErrors::PropertyErrorExImpl
+	 * @throws CORBA::SystemException if a CORBA system failure occurs while handling the request.
+	 * @throws ComponentErrors::ComponentErrorsEx if the new value cannot be validated or stored.
 	 * @param val new DUT1 value (fraction of day)
 	 * @param save if true the new value is saved into the Configuration Database
    	*/
-	void setDUT1(CORBA::Double val,CORBA::Boolean save) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);	
+	void setDUT1(CORBA::Double val,CORBA::Boolean save) /* throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx) */;	
 	
 	/** 
 	 * It allows the client to load a new value for the geodeticModel property.
-	 * @throw ComponentCommonErrors::CDBAccessExImpl
-	 * @throw ComponentCommonErrors::PropertyErrorExImpl
+	 * @throws CORBA::SystemException if a CORBA system failure occurs while handling the request.
+	 * @throws ComponentErrors::ComponentErrorsEx if the new value cannot be validated or stored.
 	 * @param model new geodeticModel value
 	 * @param save if true the new value is saved into the Configuration Database
    	*/
-	void setGeodeticModel(Antenna::TGeodeticModel model,CORBA::Boolean save) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
+	void setGeodeticModel(Antenna::TGeodeticModel model,CORBA::Boolean save) /* throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx) */;
 	
 	/**
 	 * It allows the caller to load new values for the xPolarMotion and yPolarMotion properties.
-	 * @throw ComponentCommonErrors::CDBAccessExImpl
-	 * @throw ComponentCommonErrors::PropertyErrorExImpl
+	 * @throws CORBA::SystemException if a CORBA system failure occurs while handling the request.
+	 * @throws ComponentErrors::ComponentErrorsEx if the new values cannot be validated or stored.
 	 * @param xP new value for the xPolarMotion property
 	 * @param yP new value for the yPolarMotion property
 	 * @param save if true the new value is saved into the Configuration Database
 	*/
-	void setPoleMotion(CORBA::Double xP,CORBA::Double yP,CORBA::Boolean save)  throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx);
+	void setPoleMotion(CORBA::Double xP,CORBA::Double yP,CORBA::Boolean save)  /* throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx) */;
 
-	/**
+	/** 
 	 * It converts from the local rappresentation of the geoid model to the remote one
 	 * @param model local rapresentation
 	 * @return the remote rapresentation of the model
