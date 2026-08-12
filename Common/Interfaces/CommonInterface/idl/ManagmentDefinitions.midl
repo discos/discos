@@ -105,9 +105,9 @@ module Management  {
 	/**
 	 * The definition of boolean type for an ACS property 
 	*/
-	enum TBoolean {   
-		MNG_TRUE,
-		MNG_FALSE
+	enum TBoolean {
+		MNG_FALSE,   
+		MNG_TRUE
 	};
 	
 	ACS_ENUM(TBoolean);
