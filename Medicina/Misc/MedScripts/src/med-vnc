@@ -2,9 +2,9 @@
 
 print_help() {
     echo " "
-    echo "`basename $0` v1.0"
+    echo "`basename $0` v1.1"
     echo " "
-    echo "Start a new session toward DISCOS control software"
+    echo "Start a new vnc session toward Medicina DISCOS control software"
     echo "Usage: '`basename $0` [OPTIONS] [-p|--port portnumber] <role>@<gatein>'"
     echo "       '`basename $0` -r|--roles'"
     echo "       '`basename $0` -h|--help'"
@@ -154,7 +154,7 @@ fi
 
 if [[ "$local_connection" = "TRUE" ]]; then
     echo "Connecting from local area...."
-    ssh -N -f -L $local_port:192.168.1.99:$remote_port $role@192.167.189.98
+    ssh -N -f -L $local_port:192.168.1.100:$remote_port $role@192.167.189.98
 else
     echo "Connecting from wide area....."
     ssh -N -f -p $ssh_port -L $local_port:192.167.189.98:$remote_port $role@$gatein
@@ -163,7 +163,7 @@ if [[ "$vnc_avail" == "TRUE" ]]; then
     echo "Starting vncviewer...."
     vncviewer localhost:$local_port $viewonly &>/dev/null
 else
-    echo "Connection is set, please use your preferred vnc client to connect to 'localhost', port "$local_port
+    echo "Connection is set, please use your favorite vnc client to connect to 'localhost', port "$local_port
 fi
 
 
