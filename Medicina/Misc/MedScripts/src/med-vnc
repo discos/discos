@@ -2,11 +2,11 @@
 
 print_help() {
     echo " "
-    echo "`basename $0` v1.0"
+    echo "`basename $0` v1.1"
     echo " "
     echo "Start a new session toward DISCOS control software"
     echo "Usage: '`basename $0` [OPTIONS] [-p|--port portnumber] <role>@<gatein>'"
-    echo "       '`basename $0` -r|--roles'"
+    echo "       '`basename $0` [OPTIONS] -r|--roles'"
     echo "       '`basename $0` -h|--help'"
     echo "<role> indicates the role (observer or administrative privileges) for which the connection is done"
     echo "<gatein> access point into the observatory LAN. This information is provided by local staff." 
@@ -28,11 +28,12 @@ role=""
 gatein=""
 remote_port=0
 current_system="LINUX"
+target_ws="192.168.1.100"
 
 # default production sessions
 remote_sessions=( "discos:9901:15001" "observer:9902:15002" )
 # development sessions (used when -d/--devel is given)
-remote_sessions_devel=( "discos_dev:8901:15001" "observer_dev:8902:15002" )
+remote_sessions_devel=( "discos:8901:15001" "observer:8902:15002" )
 
 # new flags
 devel="FALSE"
@@ -62,6 +63,7 @@ case $key in
     ;;
     -d|--devel)
     devel="TRUE"
+    target_ws="192.168.1.103"
     shift
     ;;
     *)
@@ -177,7 +179,7 @@ fi
 
 if [[ "$local_connection" = "TRUE" ]]; then
     echo "Connecting from local area...."
-    ssh -N -f -L $local_port:192.168.1.99:$remote_port $role@192.167.189.98
+    ssh -N -f -L $local_port:$target_ws:$remote_port $role@192.167.189.98
 else
     echo "Connecting from wide area....."
     ssh -N -f -p $ssh_port -L $local_port:192.167.189.98:$remote_port $role@$gatein
@@ -186,5 +188,5 @@ if [[ "$vnc_avail" == "TRUE" ]]; then
     echo "Starting vncviewer...."
     vncviewer localhost:$local_port $viewonly &>/dev/null
 else
-    echo "Connection is set, please use your preferred vnc client to connect to 'localhost', port "$local_port
+    echo "Connection is set, please use your favorite vnc client to connect to 'localhost', port "$local_port
 fi
