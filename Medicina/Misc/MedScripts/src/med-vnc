@@ -32,7 +32,7 @@ current_system="LINUX"
 # default production sessions
 remote_sessions=( "discos:9901:15001" "observer:9902:15002" )
 # development sessions (used when -d/--devel is given)
-remote_sessions_devel=( "discos_dev:9911:15011" "observer_dev:9912:15012" )
+remote_sessions_devel=( "discos_dev:8901:15001" "observer_dev:8902:15002" )
 
 # new flags
 devel="FALSE"
