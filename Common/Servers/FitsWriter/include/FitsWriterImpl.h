@@ -32,7 +32,7 @@
 #include <acscomponentImpl.h>
 #include <String.h>
 #include <SecureArea.h>
-#include <bulkDataReceiverImpl.h>
+#include <bulkDataZMQReceiverImpl.h>
 #include <baciCharacteristicComponentImpl.h>
 #include <baciSmartPropertyPointer.h>
 #include <enumpropROImpl.h>
@@ -49,7 +49,7 @@
 using namespace maci;
 using namespace baci;
 
-class FitsWriterImpl : public virtual BulkDataReceiverImpl<FitsWriter_private::ReceiverCallback>,
+class FitsWriterImpl : public virtual bulkdataZMQImpl::BulkDataZMQReceiverImpl<FitsWriter_private::ReceiverCallback>,
                        public virtual POA_Management::FitsWriter
 {
   public:

@@ -30,7 +30,7 @@ IDL_TAO_FLAGS =
 USER_IDL =
 
 DataReceiverStubs_LIBS = baciStubs maciStubs ManagmentDefinitionsStubs ManagementErrorsStubs \
-						 bulkDataReceiverStubs ComponentErrorsStubs
+						 bulkDataZMQReceiverStubs ComponentErrorsStubs
 FitsWriterStubs_LIBS = baciStubs maciStubs ManagmentDefinitionsStubs ManagementErrorsStubs \
 					   DataReceiverStubs
 MBFitsWriterStubs_LIBS = baciStubs maciStubs ManagmentDefinitionsStubs ManagementErrorsStubs \

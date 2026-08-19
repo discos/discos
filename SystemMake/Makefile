@@ -26,7 +26,7 @@ COMMON_DOC:=
 # Common errors, can all be compiled in parallel
 COMMON_ERRORS:=ClientErrors ComponentErrors AntennaErrors ParserErrors BackendsErrors ManagementErrors ReceiversErrors MetrologyErrors MinorServoErrors XBackendErrors ActiveSurfaceErrors
 # The CommonInterface is the only interface that has no other dependency, must be compiled first
-BASE_INTERFACES:=CommonInterface
+BASE_INTERFACES:=CommonInterface BulkDataZMQInterface
 # The following core interfaces has no dependency between them, they only depend on CommonInterface, therefore they can be compiled in parallel
 CORE_INTERFACES:=ManagmentInterface AntennaInterface BackendsInterface MinorServoInterface WeatherStationInterface ActiveSurfaceInterface
 # These common interfaces depends on some interface listed in the line above, must be compiled separately

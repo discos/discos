@@ -2,7 +2,9 @@
 
 
 template<class TCallback>
-BulkDataZMQReceiverImpl<TCallback>::BulkDataZMQReceiverImpl() {
+BulkDataZMQReceiverImpl<TCallback>::BulkDataZMQReceiverImpl(const ACE_CString& name,maci::ContainerServices* containerServices) :
+    CharacteristicComponentImpl(name,containerServices)
+{
     // Constructor implementation (if needed)
 }
   
@@ -56,4 +58,15 @@ void BulkDataZMQReceiverImpl<TCallback>::closeReceiver() {
 template <class TCallback>
 BulkDataZMQSubscriber* BulkDataZMQReceiverImpl<TCallback>::getReceiver() {
     return &m_subscriber;
+}
+
+template <class TCallback>
+void BulkDataZMQReceiverImpl<TCallback>::resetReceiver() {
+    ACS_TRACE("BulkDataZMQReceiverImpl::resetReceiver");
+    if (m_connected) {
+        m_subscriber.close();
+        m_connected = false;
+    }
+    m_callback = TCallback();
+    m_zmqconfig = bulkdataZMQImpl::TZMQConfig();
 }

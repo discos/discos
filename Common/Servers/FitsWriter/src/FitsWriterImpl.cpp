@@ -42,7 +42,7 @@ catch (...) { \
 
 
 FitsWriterImpl::FitsWriterImpl(const ACE_CString& name, maci::ContainerServices* containerServices): 
-	BulkDataReceiverImpl<FitsWriter_private::ReceiverCallback>(name,containerServices),
+	bulkdataZMQImpl::BulkDataZMQReceiverImpl<FitsWriter_private::ReceiverCallback>(name,containerServices),
 	m_pfileName(this),
 	m_pstatus(this),
 	m_pprojectName(this),
