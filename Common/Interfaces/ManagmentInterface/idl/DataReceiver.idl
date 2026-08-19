@@ -13,7 +13,7 @@
 #include <baci.idl>
 #include <ManagmentDefinitions.idl>
 #include <ComponentErrors.idl>
-#include <bulkDataReceiver.idl>
+#include <bulkDataZMQReceiver.idl>
 
 
 #pragma prefix "alma"
@@ -72,7 +72,7 @@ module Management {
 	 * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>,
  	 * Istituto di Radioastronomia, Italia
 	 */ 
-	interface DataReceiver : bulkdata::BulkDataReceiver {
+	interface DataReceiver : bulkdataZMQ::BulkDataZMQReceiver {
 		
 		/*
 		 *  Definition of file name that is currently written

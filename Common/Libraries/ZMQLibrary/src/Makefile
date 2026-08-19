@@ -70,11 +70,9 @@ CDB_SCHEMAS = bulkDataZMQConfig
 #
 # IDL Files and flags
 #
-IDL_FILES = bulkDataZMQReceiver bulkDataZMQSender
+IDL_FILES =
 TAO_IDLFLAGS =
 USER_IDL =
-bulkDataZMQReceiverStubs_LIBS = baciStubs maciStubs ACSBulkDataErrorStubs
-bulkDataZMQSenderStubs_LIBS = baciStubs maciStubs bulkDataZMQReceiverStubs ACSBulkDataErrorStubs
 
 
 #

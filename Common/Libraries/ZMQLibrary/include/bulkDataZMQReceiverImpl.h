@@ -46,7 +46,7 @@ class BulkDataZMQReceiverImpl :  public baci::CharacteristicComponentImpl, publi
     /**
      * Constructor
      */
-    BulkDataZMQReceiverImpl();
+    BulkDataZMQReceiverImpl(const ACE_CString& name,maci::ContainerServices* containerServices);
   
     /**
      * Destructor

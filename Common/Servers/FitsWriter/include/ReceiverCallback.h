@@ -9,7 +9,7 @@
 #ifndef RECEIVERCALLBACK_H_
 #define RECEIVERCALLBACK_H_
 
-#include <bulkDataCallback.h>
+#include <bulkDataZMQCallback.h>
 #include <DataCollection.h>
 #include <SecureArea.h>
 
@@ -20,7 +20,7 @@ namespace FitsWriter_private {
  * @author <a href=mailto:righin_s@ira.cnr.it>Simona Righini</a>,
  * <br> 
  */
-class ReceiverCallback: public BulkDataCallback {
+class ReceiverCallback: public bulkdataZMQImpl::BulkDataZMQCallback {
 public:
 	ReceiverCallback();
 	~ReceiverCallback();

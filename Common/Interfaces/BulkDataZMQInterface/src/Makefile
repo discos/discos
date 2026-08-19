@@ -1,13 +1,13 @@
 #*******************************************************************************
 # PPPPPPPP
 #
-# "@(#) $Id: Makefile,v 1.16 2011-06-21 16:38:41 a.orlati Exp $"
+# "@(#) $Id$"
 #
 # Makefile of ........
 #
 # who       when      what
 # --------  --------  ----------------------------------------------
-# simona  10/11/08  created
+# andrea  24/11/14  created
 #
 
 #*******************************************************************************
@@ -16,6 +16,7 @@
 # REMARKS
 #    None
 #------------------------------------------------------------------------
+MAKE_PDF = ON
 
 #
 # user definable C-compilation flags
@@ -23,8 +24,8 @@
 
 #
 # additional include and library search paths
-USER_INC = -I/usr/local/include/CCfits 
-USER_LIB = -lCCfits 
+#USER_INC = 
+#USER_LIB = 
 
 #
 # MODULE CODE DESCRIPTION:
@@ -32,39 +33,89 @@ USER_LIB = -lCCfits
 # As a general rule:  public file are "cleaned" and "installed"  
 #                     local (_L) are not "installed".
 
-EXECUTABLES_L     = testBulk testWriter testSummary
-
-testBulk_OBJECTS  = testBulkTransmission
-testBulk_LIBS     = IRALibrary FitsWriterStubs GenericBackendStubs ComponentErrors ClientErrors \
-	bulkDataZMQReceiverStubs ManagmentDefinitionsStubs DataReceiverStubs ReceiversDefinitionsStubs baci maci \
-	maciClient bulkDataSenderStubs MinorServoDefinitionsStubs BackendsErrors ManagementErrors
-
-testWriter_OBJECTS = TestWriter FitsWriter File SummaryWriter FitsTools
-testWriter_LIBS = IRALibrary 
-	
-testSummary_OBJECTS = TestSummary File SummaryWriter FitsTools
-testSummary_LIBS = IRALibrary DiscosVersion
-	
-
-# Libraries (public and local)
-# ----------------------------
-LIBRARIES       = FitsWriterImpl 
-LIBRARIES_L     =
+#
+# C programs (public and local)
+# -----------------------------
+EXECUTABLES     =
+EXECUTABLES_L   =
 
 #
-# <brief description of lllll library>
-FitsWriterImpl_OBJECTS   = FitsWriterImpl ReceiverCallback DataCollection EngineThread Configuration CommonTools\
-FitsWriter CollectorThread MetaData File SummaryWriter FitsTools
-FitsWriterImpl_LIBS = baci maci FitsWriterStubs DataReceiverStubs ComponentErrors ManagementErrors ReceiversErrors bulkDataZMQReceiverStubs\
-                 ManagmentDefinitionsStubs ACSBulkDataError IRALibrary bulkDataZMQLibrary \
-                 AntennaErrors AntennaDefinitionsStubs AntennaBossStubs MinorServoDefinitionsStubs \
-                 EphemGeneratorStubs BackendsDefinitionsStubs ObservatoryStubs MinorServoBossStubs MinorServoErrors\
-                 GenericWeatherStationStubs ReceiversBossStubs ReceiversDefinitionsStubs CommonReceiverInterfaceStubs SchedulerStubs ManagmentDefinitionsStubs DiscosVersion
+# <brief description of xxxxx program>
+xxxxx_OBJECTS   =	
+xxxxx_LDFLAGS   =
+xxxxx_LIBS      =
+
+#
+# special compilation flags for single c sources
+#yyyyy_CFLAGS   = 
+
+#
+# Includes (.h) files (public only)
+# ---------------------------------
+INCLUDES        =
 
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS = FitsWriter
+CDB_SCHEMAS =
+
+# 
+# IDL Files and flags
+# 
+IDL_FILES = bulkDataZMQReceiver bulkDataZMQSender
+TAO_IDLFLAGS =
+USER_IDL =
+bulkDataZMQReceiverStubs_LIBS = baciStubs maciStubs ACSBulkDataErrorStubs
+bulkDataZMQSenderStubs_LIBS = baciStubs maciStubs bulkDataZMQReceiverStubs ACSBulkDataErrorStubs
+
+#
+# Jarfiles and their directories
+#
+JARFILES= 
+jjj_DIRS=
+jjj_EXTRAS= 
+#
+# java sources in Jarfile on/off
+DEBUG= 
+#
+# ACS XmlIdl generation on/off
+#
+XML_IDL= 
+#
+# Java Component Helper Classes generation on/off
+#
+COMPONENT_HELPERS=
+#
+# Java Entity Classes generation on/off
+#
+XSDBIND=
+#
+# Schema Config files for the above
+#
+XSDBIND_INCLUDE=
+# man pages to be done
+# --------------------
+MANSECTIONS =
+MAN1 =
+MAN3 =
+MAN5 =
+MAN7 =
+MAN8 =
+
+#
+# local man pages
+# ---------------
+MANl =
+
+#
+# ASCII file to be converted into Framemaker-MIF
+# --------------------
+ASCII_TO_MIF = 
+
+#
+# other files to be installed
+#----------------------------
+INSTALL_FILES =
 
 #
 # list of all possible C-sources (used to create automatic dependencies)
