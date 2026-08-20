@@ -77,9 +77,9 @@ XBackendsImpl_OBJECTS = XBackendsImpl Configuration CommandLine \
 XarcosThread Timer XDataThread FitsWriter
 XBackendsImpl_LIBS =Xarcos maci baci IRALibrary GenericBackendStubs \
 XBackendsStubs ReceiversDefinitionsStubs BackendsDefinitionsStubs \
-ManagmentDefinitionsStubs bulkDataStubs bulkDataSenderStubs \
-bulkDataReceiverStubs ACSBulkDataError ComponentErrors BackendsErrors \
-ParserErrors ManagementErrors XBackendsErrors DiscosVersion
+ManagmentDefinitionsStubs bulkDataStubs bulkDataZMQSenderStubs bulkDataZMQReceiverStubs \
+ACSBulkDataError ComponentErrors BackendsErrors \
+ParserErrors ManagementErrors XBackendsErrors bulkDataZMQLibrary DiscosVersion
 #
 # <brief description of lllll library>
 lllll_OBJECTS   =

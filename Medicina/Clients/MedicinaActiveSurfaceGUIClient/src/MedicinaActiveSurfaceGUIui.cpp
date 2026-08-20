@@ -494,7 +494,7 @@ void MedicinaActiveSurfaceGUI::startAS()
     StatuslineEdit_2->setText(QApplication::translate("MedicinaActiveSurfaceGUI", str.c_str(), 0, QApplication::UnicodeUTF8));
 }
 
-void NotoActiveSurfaceGUI::onAS()
+void MedicinaActiveSurfaceGUI::onAS()
 {
     std::string str;
     setallactuators();
@@ -503,7 +503,7 @@ void NotoActiveSurfaceGUI::onAS()
     StatuslineEdit_2->setText(QApplication::translate("MedicinaActiveSurfaceGUI", str.c_str(), 0, QApplication::UnicodeUTF8));
 }
 
-void NotoActiveSurfaceGUI::offAS()
+void MedicinaActiveSurfaceGUI::offAS()
 {
     std::string str;
     setallactuators();
@@ -526,7 +526,7 @@ void MedicinaActiveSurfaceGUI::stopAS()
     std::string str;
     setallactuators();
     //myMedicinaActiveSurfaceCore.stopUSD(thecircle,theactuator,theradius);
-    myMedicinaActiveSurfaceCore.setParabolicFixedProfile    str = "PARABOLIC FIXED";
+    myMedicinaActiveSurfaceCore.setParabolicFixedProfile();
     str = "PARABOLIC FIXED";
     StatuslineEdit_2->setText(QApplication::translate("MedicinaActiveSurfaceGUI", str.c_str(), 0, QApplication::UnicodeUTF8));
 }

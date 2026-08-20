@@ -48,7 +48,7 @@ catch (...) { \
 
 
 CalibrationToolImpl::CalibrationToolImpl(const ACE_CString& name, maci::ContainerServices* containerServices): 
-	BulkDataReceiverImpl<CalibrationTool_private::ReceiverCallback>(name,containerServices),
+	bulkdataZMQImpl::BulkDataZMQReceiverImpl<CalibrationTool_private::ReceiverCallback>(name,containerServices),
 	m_pstatus(this),
 	m_pfileName(this),
     m_pprojectName(this),

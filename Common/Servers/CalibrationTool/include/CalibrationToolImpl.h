@@ -29,7 +29,7 @@
 #include <acscomponentImpl.h>
 #include <String.h>
 #include <SecureArea.h>
-#include <bulkDataReceiverImpl.h>
+#include <bulkDataZMQReceiverImpl.h>
 #include <baciCharacteristicComponentImpl.h>
 #include <baciSmartPropertyPointer.h>
 #include <enumpropROImpl.h>
@@ -45,7 +45,7 @@
 using namespace baci;
 using namespace maci;
 
-class CalibrationToolImpl : public virtual BulkDataReceiverImpl<CalibrationTool_private::ReceiverCallback>,
+class CalibrationToolImpl : public virtual bulkdataZMQImpl::BulkDataZMQReceiverImpl<CalibrationTool_private::ReceiverCallback>,
                        public virtual POA_Management::CalibrationTool
 {
   public:

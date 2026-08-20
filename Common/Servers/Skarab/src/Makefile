@@ -62,11 +62,12 @@ LIBRARIES       = SkarabImpl
 LIBRARIES_L     =
 
 SkarabImpl_OBJECTS = SkarabImpl Configuration CommandLine SenderThread ControlThread Protocol
-SkarabImpl_LIBS = IRALibrary GenericBackendStubs SkarabStubs TotalPowerStubs ManagmentDefinitionsStubs ReceiversDefinitionsStubs BackendsDefinitionsStubs bulkDataStubs bulkDataSenderStubs GenericIFDistributorStubs\
-  bulkDataReceiverStubs ACSBulkDataError ComponentErrors BackendsErrors ParserErrors ManagementErrors \
+SkarabImpl_LIBS = IRALibrary GenericBackendStubs SkarabStubs TotalPowerStubs ManagmentDefinitionsStubs ReceiversDefinitionsStubs \
+  BackendsDefinitionsStubs bulkDataZMQSenderStubs GenericIFDistributorStubs\
+  bulkDataZMQReceiverStubs ACSBulkDataError ComponentErrors BackendsErrors ParserErrors ManagementErrors \
   DiscosBackendProtocolLib DiscosVersion \
   CommonReceiverInterfaceStubs ReceiversBossStubs GenericReceiverStubs \
-  ManagmentDefinitionsStubs SchedulerStubs
+  ManagmentDefinitionsStubs SchedulerStubs bulkDataZMQLibrary
 
 #
 # <brief description of lllll library>

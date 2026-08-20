@@ -43,9 +43,9 @@ LIBRARIES_L     =
 # <brief description of lllll library>
 CalibrationToolImpl_OBJECTS   = CalibrationToolImpl ReceiverCallback DataCollection EngineThread Configuration CommonTools \
 								CollectorThread fit2 matin fgaus
-CalibrationToolImpl_LIBS = baci maci CalibrationToolStubs DataReceiverStubs ComponentErrors ManagementErrors bulkDataReceiverStubs\
-						   ManagmentDefinitionsStubs ACSBulkDataError bulkDataStubs IRALibrary \
-						   bulkDataCallback AntennaErrors AntennaDefinitionsStubs AntennaBossStubs \
+CalibrationToolImpl_LIBS = baci maci CalibrationToolStubs DataReceiverStubs ComponentErrors ManagementErrors bulkDataZMQReceiverStubs\
+						   ManagmentDefinitionsStubs ACSBulkDataError bulkDataZMQLibrary IRALibrary \
+						   AntennaErrors AntennaDefinitionsStubs AntennaBossStubs \
 						   EphemGeneratorStubs BackendsDefinitionsStubs SchedulerStubs ManagmentDefinitionsStubs \
 						   ObservatoryStubs MinorServoDefinitionsStubs MinorServoBossStubs MinorServoErrors
 

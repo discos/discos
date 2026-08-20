@@ -24,7 +24,7 @@
 #include <baciROdoubleSeq.h>
 #include <baciROlongSeq.h>
 #include <baciROpattern.h>
-#include <bulkDataSenderImpl.h>
+#include <bulkDataZMQSenderImpl.h>
 #include <XBackendsS.h>
 #include <ComponentErrors.h>
 #include <BackendsErrors.h>
@@ -50,7 +50,7 @@ using namespace ACSBulkDataError;
  *            stops to send data and the data flux control (toward bulk data receviver) handled by the component itself.
  * <br> 
  */
-class XBackendsImpl: public virtual BulkDataSenderDefaultImpl,
+class XBackendsImpl: public virtual bulkdataZMQImpl::BulkDataZMQSenderImpl,
 				   	 virtual POA_Backends::XBackends
 {
 public: 
