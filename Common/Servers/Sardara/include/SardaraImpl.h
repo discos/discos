@@ -26,7 +26,7 @@
 #include <baciROdoubleSeq.h>
 #include <baciROlongSeq.h>
 #include <baciROpattern.h>
-#include <bulkDataSenderImpl.h>
+#include <bulkDataZMQSenderImpl.h>
 #include <SardaraS.h>
 #include <ComponentErrors.h>
 #include <BackendsErrors.h>
@@ -97,7 +97,7 @@ class CSenderThread;
  *            stops to send data and the data flux control (toward bulk data receviver) handled by the component itself.
  * <br> 
  */
-class SardaraImpl: public virtual BulkDataSenderDefaultImpl, public virtual POA_Backends::Sardara
+class SardaraImpl: public virtual bulkdataZMQImpl::BulkDataZMQSenderImpl, public virtual POA_Backends::Sardara
 {
 public: 
 	/** 

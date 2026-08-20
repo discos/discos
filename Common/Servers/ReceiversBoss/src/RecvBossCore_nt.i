@@ -529,6 +529,9 @@ void CRecvBossCore::publishData() throw (ComponentErrors::NotificationChannelErr
 	static TIMEVALUE lastEvent(0.0L);
 	Receivers::ReceiversDataBlock data;
 	TIMEVALUE now;
+	// Always publish ZMQ message
+	m_zmqPublisher.publish(m_zmqDictionary);
+
 	baci::ThreadSyncGuard guard(&m_mutex);
 	IRA::CIRATools::getTime(now);
 	if (CIRATools::timeDifference(lastEvent,now)>=1000000) {  //one second from last event

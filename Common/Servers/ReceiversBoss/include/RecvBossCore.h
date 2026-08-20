@@ -58,9 +58,10 @@
 #include "Configuration.h"
 #include <ReceiversBossS.h>
 #include <acsncSimpleSupplier.h>
-#include "ZMQLibrary.hpp"
 
 #endif
+
+#include "ZMQLibrary.hpp"
 
 namespace ZMQ = ZMQLibrary;
 

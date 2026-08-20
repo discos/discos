@@ -10,7 +10,7 @@
 /* Who                                when            What                  */
 /* Carlo Migoni (migoni@ca.astro.it)  23/11/2010      Creation              */
 
-#include <bulkDataCallback.h>
+#include <bulkDataZMQCallback.h>
 #include <DataCollection.h>
 #include <SecureArea.h>
 
@@ -21,7 +21,7 @@ namespace CalibrationTool_private {
  * @author <a href=mailto:migoni@ca.astro.it>Carlo Migoni</a>
  * <br> 
  */
-class ReceiverCallback: public BulkDataCallback {
+class ReceiverCallback: public bulkdataZMQImpl::BulkDataZMQCallback {
 public:
 	ReceiverCallback();
 	~ReceiverCallback();

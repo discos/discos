@@ -10,9 +10,9 @@ CalibrationTool_private::CDataCollection * ReceiverCallback::m_dataCollection=NU
 
 _IRA_LOGFILTER_IMPORT;
 
-ReceiverCallback::ReceiverCallback() : BulkDataCallback()
+ReceiverCallback::ReceiverCallback() : bulkdataZMQImpl::BulkDataZMQCallback()
 {
-	setSafeTimeout(3000);
+	//setSafeTimeout(3000);
 	m_receivedBytes=0;
 	m_buffer=NULL;
 	m_bufferLen=m_bufferPointer=0;
@@ -43,7 +43,7 @@ int ReceiverCallback::cbReceive(ACE_Message_Block * frame_p)
 	Backends::TDumpHeader *dumpH;
 	DDWORD totalBytes;
 	
-	if (flowNumber_m==1) {
+	//if (flowNumber_m==1) {
 		if (m_buffer==NULL) {
 			m_buffer=new char[frame_p->total_length()];
 			m_bufferLen=frame_p->total_length();
@@ -78,7 +78,7 @@ int ReceiverCallback::cbReceive(ACE_Message_Block * frame_p)
 			m_bufferPointer=0;
 		}
 		m_receivedBytes+=totalBytes;
-	}
+	//}
 	return 0;		
 }
 

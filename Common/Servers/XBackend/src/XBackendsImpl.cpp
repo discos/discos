@@ -31,7 +31,7 @@ using namespace SimpleParser;
 _IRA_LOGFILTER_DECLARE;
 
 XBackendsImpl::XBackendsImpl(const ACE_CString &CompName,maci::ContainerServices *containerServices) :
-	BulkDataSenderDefaultImpl(CompName,containerServices),
+	bulkdataZMQImpl::BulkDataZMQSenderImpl(CompName,containerServices),
 	m_ptime(this),
 	m_pbackendName(this),
 	m_pbandWidth(this),
