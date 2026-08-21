@@ -19,7 +19,7 @@ def estrai_coefficienti_debug(polinomio_stringa):
     Gestisce caratteri sconosciuti, virgole e il termine noto (c0).
     """
     # Debug print:
-    #print(f"polinomio_stringa: {polinomio_stringa}")
+    # print(f"polinomio_stringa: {polinomio_stringa}")
 
     # 1. Pulizia e Preparazione
     pulito = polinomio_stringa.split('=', 1)[-1].strip()
@@ -29,7 +29,7 @@ def estrai_coefficienti_debug(polinomio_stringa):
     pulito = re.sub(r'(El)[^\^\+\-]', r'\1', pulito)
     
     # Debug print:
-    #print(f"pulito: {pulito}")
+    # print(f"pulito: {pulito}")
 
     # 2. Inizializzazione e Pattern
     coeffs = {0: 0.0, 1: 0.0, 2: 0.0, 3: 0.0, 4: 0.0}
@@ -41,7 +41,7 @@ def estrai_coefficienti_debug(polinomio_stringa):
         segno, numero_str, potenza_str = match.groups()
         
         # Debug print:
-        #print(f"segno, numero_str, potenza_str: {segno},{numero_str},{potenza_str}")
+        # print(f"segno, numero_str, potenza_str: {segno},{numero_str},{potenza_str}")
         
         ultimaposizione_El = match.end() # Aggiorna l'ultima posizione di match
 

@@ -42,7 +42,8 @@ COMMON_LIBRARIES:=TextWindowLibrary ParserLibrary XarcosLibrary ModbusChannel Co
 COMMON_SERVERS:=AntennaBoss Observatory OTF PointingModel Refraction SkySource SolarSystem Moon FitsWriter Scheduler ActiveSurfaceLan ReceiversBoss ExternalClients CalibrationTool TotalPower CustomLogger \
 				PyDewarPositioner ActiveSurfaceUSD Sardara Skarab PyLocalOscillator MFKBandBaseReceiver PyCalmux ActiveSurfaceBoss XBackend KQWReceiver
 # Same as servers
-COMMON_CLIENTS:=AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient CustomLoggingClient SchedulerTextClient MeteoClient
+COMMON_CLIENTS:=AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient CustomLoggingClient \
+            SchedulerTextClient MeteoClient MinorServoBossTextClient
 # Misc do not depend from one another, compile in parallel
 COMMON_MISC:=Plotter KStars Scripts getTemplateForTests PMUpdate InjectCommand UserTools
 # Same as servers and clients
@@ -56,7 +57,7 @@ SRT_ERRORS:=
 SRT_INTERFACES:=SRTAntennaInterface SRTActiveSurfaceInterface SRTMinorServoInterface SRTReceiversInterface
 SRT_LIBRARIES:=SRTMinorServoLibrary
 SRT_SERVERS:=SRTMount SRTMinorServo SRTKBandMFReceiver SRT7GHzReceiver SRT5GHzReceiver SRTLPBandReceiver SRTPyIFDistributor WeatherStation
-SRT_CLIENTS:=SRTActiveSurfaceGUIClient SRTMountTextClient MinorServoBossTextClient
+SRT_CLIENTS:=SRTActiveSurfaceGUIClient SRTMountTextClient
 SRT_MISC:=SRTScripts
 
 MED_DOC:=MEDDox

@@ -82,7 +82,7 @@ if [ "$CL_STOP" ] ; then
    killall -s SIGUSR1 -u $USER -q _tui_GenericBackendTextClient
    killall -s SIGUSR1 -u $USER -q _tui_ReceiversBossTextClient
    killall -s SIGUSR1 -u $USER -q _tui_SchedulerTextClient
-   #killall -s SIGUSR1 -u $USER -q _tui_MinorServoBossTextClient
+   killall -s SIGUSR1 -u $USER -q _tui_MinorServoBossTextClient 
 
    #close the operator input
    pkill -SIGUSR1 -u $USER -f _tui_SysTerm
@@ -91,24 +91,24 @@ if [ "$CL_STOP" ] ; then
    exit
 fi
 
-schedulerTui
+xterm -geometry 60x17+929+20 +sb -title Scheduler -e /bin/bash --login -c _tui_SchedulerTextClient &
 sleep 0.5s
-mountTui
+xterm -geometry 72x30+-10+20 +sb -title Mount -e /bin/bash --login -c _tui_MedicinaMountTextClient &
 sleep 0.5s
-observatoryTui
+xterm -geometry 73x17+1293+254 +sb -title Observatory -e /bin/bash --login -c _tui_ObservatoryTextClient &
 sleep 0.5s
-antennaBossTui
+xterm -geometry 82x32+430+20 +sb -title AntennaBoss -e /bin/bash --login -c _tui_AntennaBossTextClient &
 sleep 0.5s
-genericBackendTui BACKENDS/TotalPower
+xterm -geometry 101x28+921-68 +sb -title TotalPower -e /bin/bash --login -c "_tui_GenericBackendTextClient BACKENDS/TotalPower" &
 sleep 0.5s
-genericBackendTui BACKENDS/XBackends
+xterm -geometry 101x28+1107-68 +sb -title XArcos -e /bin/bash --login -c "_tui_GenericBackendTextClient BACKENDS/XBackends" &
 sleep 0.5s
-operatorInput
+xterm -geometry 152x20+-5+389 -sb -title OperatorInput -e /bin/bash --login -c "_tui_SysTerm" &
 sleep 0.5s
-receiversBossTui
+xterm -geometry 60x22+1299+20 +sb -title Receivers -e /bin/bash --login -c "_tui_ReceiversBossTextClient" &
 sleep 0.5s
-loggingDisplay
+_gui_customLoggingClient --geometry 4,686 &
 sleep 0.5s
-#minorservoBossTui
+xterm -geometry 60x15+929+282 +sb -title MinorServo -e /bin/bash --login -c "_tui_MinorServoBossTextClient" &
 #
 # ___oOo___

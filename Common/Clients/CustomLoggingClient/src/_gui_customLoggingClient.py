@@ -3,7 +3,6 @@ from __future__ import print_function
 """
 CustomLoggingClient implements a Tkinter interface that monitors in realtime the ACS custom
 logging events generated runtime.
-@TODO: implement window scrolling and window resize
 
 """
 import acscommon
@@ -14,6 +13,7 @@ import sys
 import logging
 import bisect
 import functools
+import argparse
 try:
     import Tkinter as tk
 except:
@@ -40,6 +40,7 @@ MAX_QUEUE_SIZE = 200
 The number of logging events displayed in the window
 """
 MAX_WINDOW_SIZE = 30
+
 
 class App:
     """Tkinter GUI application
@@ -78,18 +79,48 @@ class App:
 
 if __name__ == '__main__':
     from IRAPy import logger
+
+    # Parse command line options. Add --geometry to allow positioning the window
+    parser = argparse.ArgumentParser(description='Logging window GUI')
+    parser.add_argument('--geometry', help="Window position as 'X,Y' (pixels from top-left)")
+    args = parser.parse_args()
+
+    # Default width x height used previously in the code
+    DEFAULT_GEOMETRY = '934x256'
+
+    # Build the geometry string for root.geometry(). If --geometry is provided it is
+    # expected as 'X,Y' (e.g. 200,100). This will produce a geometry string like
+    # '934x256+200+100' which Tkinter accepts.
+    geom = DEFAULT_GEOMETRY
+    if args.geometry:
+        try:
+            parts = args.geometry.replace(',', ' ').split()
+            if len(parts) == 2:
+                x = int(parts[0])
+                y = int(parts[1])
+                geom = '{}+{}+{}'.format(DEFAULT_GEOMETRY, x, y)
+            else:
+                # invalid format; fall back to default but print a warning
+                print("Warning: --geometry should be in the form 'X,Y' (e.g. --geometry 200,100). Using default geometry.")
+        except Exception:
+            print("Warning: invalid --geometry value '{}'. Using default geometry.".format(args.geometry))
+
     try:
         root = tk.Tk()
-        root.wm_title("ACS custom logging client")
+        root.wm_title("Logging window")
         root.resizable(tk.YES, tk.YES)
-        root.geometry('934x256')
+        root.geometry(geom)
         app = App(root)
         consumer = Consumer(Management.CUSTOM_LOGGING_CHANNEL_NAME)
         consumer.addSubscription(Management.CustomLoggingData, app.handler)
         consumer.consumerReady()
     except Exception as ex:
         print("exception caught: ", ex) #TODO: throw excep
-        logger.logError(ex.message)
+        try:
+            logger.logError(ex.message)
+        except Exception:
+            # logger may not be available or have .logError/message
+            pass
     #try:
 
     def handle_signal(num, trace):
@@ -100,7 +131,11 @@ if __name__ == '__main__':
 
     signal.signal(signal.SIGINT, handle_signal)     
     signal.signal(signal.SIGUSR1, handle_signal)     
-    root.mainloop()    
+    try:
+        root.mainloop()
+    except NameError:
+        # root was not created due to earlier exception
+        pass
     #except KeyboardInterrupt as ki:
     #    pass
     #finally:

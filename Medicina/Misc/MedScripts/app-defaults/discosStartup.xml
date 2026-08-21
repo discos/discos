@@ -47,7 +47,7 @@
             <remoteAccount>discos</remoteAccount>
         </container>
         <container>
-            <name>AntennaContainer</name>
+            <name>ReceiversContainer</name>
             <type>cpp</type>
             <heapSizeMB></heapSizeMB>
             <useDedicatedSettings>true</useDedicatedSettings>
@@ -56,7 +56,7 @@
             <remoteAccount>discos</remoteAccount>
         </container>
         <container>
-            <name>ReceiversContainer</name>
+            <name>MinorServoBossContainer</name>
             <type>cpp</type>
             <heapSizeMB></heapSizeMB>
             <useDedicatedSettings>true</useDedicatedSettings>
@@ -109,6 +109,15 @@
             <remoteHost>MASTERHOST</remoteHost>
             <remoteAccount>discos</remoteAccount>
         </container>
+        <container>
+            <name>AntennaContainer</name>
+            <type>cpp</type>
+            <heapSizeMB></heapSizeMB>
+            <useDedicatedSettings>true</useDedicatedSettings>
+            <scriptBase>0</scriptBase>
+            <remoteHost>MASTERHOST</remoteHost>
+            <remoteAccount>discos</remoteAccount>
+        </container>        
         <container>
             <name>ManagementContainer</name>
             <type>cpp</type>

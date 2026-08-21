@@ -38,8 +38,9 @@
    -   Wed Sep 24 13:03:22 UTC 2025 modified by jDAL
    -   Wed Sep 24 13:37:23 UTC 2025 modified by jDAL
    -   Wed Sep 24 13:51:48 UTC 2025 modified by jDAL
+   -   Thu Aug 20 08:13:10 UTC 2026 modified by jDAL
 -->
-<ActiveSurfaceBoss xmlns="urn:schemas-cosylab-com:ActiveSurfaceBoss:1.0" xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" WatchingThreadTime="200000" WorkingThreadTime="500000" RepetitionCacheTime="2000000" RepetitionExpireTime="5000000" sectors="4" circles="7" LANs="48" lastUSD="268" actuatorsInCircle="0,24,48,48,48,48,48,4" acceptedProfiles="2,3,4" profile="4">
+<ActiveSurfaceBoss xmlns="urn:schemas-cosylab-com:ActiveSurfaceBoss:1.0" xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" WatchingThreadTime="200000" WorkingThreadTime="500000" RepetitionCacheTime="2000000" RepetitionExpireTime="5000000" sectors="4" circles="7" LANs="48" lastUSD="268" actuatorsInCircle="0,24,48,48,48,48,48,4" acceptedProfiles="2,3,4" profile="2">
 	<status />
 	<enabled />
 	<pprofile />
