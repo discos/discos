@@ -63,7 +63,7 @@ LIBRARIES_L     =
 
 NoiseGeneratorImpl_OBJECTS = NoiseGeneratorImpl Configuration CommandLine Protocol SenderThread
 NoiseGeneratorImpl_LIBS = IRALibrary GenericBackendStubs NoiseGeneratorStubs ManagmentDefinitionsStubs ReceiversDefinitionsStubs BackendsDefinitionsStubs bulkDataStubs bulkDataSenderStubs \
-  bulkDataReceiverStubs ACSBulkDataError ComponentErrors BackendsErrors ParserErrors ManagementErrors
+  bulkDataZMQReceiverStubs bulkDataZMQSenderStubs ACSBulkDataError ComponentErrors BackendsErrors ParserErrors ManagementErrors bulkDataZMQLibrary ZMQLibrary DiscosVersion
 
 #
 # <brief description of lllll library>

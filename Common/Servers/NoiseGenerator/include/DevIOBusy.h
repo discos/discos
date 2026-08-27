@@ -58,7 +58,7 @@ public:
 	 * @throw ComponentErrors::PropertyError
 	 * @param timestamp epoch when the operation completes
 	*/ 
-	Management::TBoolean read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
+	Management::TBoolean read(ACS::Time& timestamp)
 	{
 		// get the CommandLine .......
 		try {
@@ -82,7 +82,7 @@ public:
 	/**
 	 * It writes values into controller. Unused because the properties are read-only.
 	*/ 
-	void write(const Management::TBoolean& value, ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
+	void write(const Management::TBoolean& value, ACS::Time& timestamp)
 	{
 		timestamp=getTimeStamp();
 		return;

@@ -30,4 +30,12 @@
 <CPUAffinity>false</CPUAffinity>	
 </FlowRecord>
 
+<FlowRecord>
+<BackendName>BACKENDS/NoiseGenerator</BackendName>
+<EndPoint>ipc:///tmp/0mq-bulk-flow3-rep.sock</EndPoint>
+<FlowNumber>3</FlowNumber>
+<TCPNoDelay>false</TCPNoDelay>
+<CPUAffinity>false</CPUAffinity>	
+</FlowRecord>
+
 </FlowTable>

@@ -58,7 +58,7 @@ public:
 	 * @throw ComponentErrors::PropertyError
 	 * @param timestamp epoch when the operation completes
 	*/ 
-	ACS::doubleSeq read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
+	ACS::doubleSeq read(ACS::Time& timestamp)
 	{
 		try {
 			m_pLink->getBandWidth(m_val);
@@ -76,7 +76,7 @@ public:
 	/**
 	 * It writes values into controller. Unused because the properties are read-only.
 	*/ 
-	void write(const ACS::doubleSeq& value, ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
+	void write(const ACS::doubleSeq& value, ACS::Time& timestamp)
 	{
 		timestamp=getTimeStamp();
 		return;

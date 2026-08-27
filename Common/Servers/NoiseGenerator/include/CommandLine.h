@@ -42,7 +42,7 @@ public:;
 	 * @param config pointer to the component configuration data structure
 	 * @throw ComponentErrors::ValidationErrorExImpl
 	*/
-	void Init(CConfiguration *config) throw (ComponentErrors::ValidationErrorExImpl);
+	void Init(CConfiguration *config);
 	
 	/**
 	 * Call this function to get the number of virtual inputs of the backend
@@ -137,7 +137,7 @@ public:;
 	 * @throw  (BackendsErrors::BackendBusyExImpl
 	 * @param integration new integration time in milliseconds. A negative value has no effect.
 	 */
-	void setIntegration(const long& integration) throw (BackendsErrors::BackendBusyExImpl);
+	void setIntegration(const long& integration);
 	
 	/**
 	 * This methos will changes the current value of the <i>m_enabled</i> array.
@@ -145,7 +145,7 @@ public:;
 	 * @param en new values sequence for the <i>m_enabled</i> elements. A value grater than zero correspond to a true,
 	 *                a zero match to a false, while a negative will keep the things unchanged.
 	 */ 
-	void setEnabled(const ACS::longSeq& en) throw (BackendsErrors::BackendBusyExImpl);
+	void setEnabled(const ACS::longSeq& en);
 	
 	/**
 	 * Called to configure the attenuation level for each input of the backend.
@@ -154,7 +154,7 @@ public:;
 	 * @param identifier of the input.
 	 * @param attenuation new input level. A negative will keep the previous value;
 	 */
-	void setAttenuation(const long&inputId, const double& attenuation) throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::ValidationErrorExImpl);
+	void setAttenuation(const long&inputId, const double& attenuation);
 
 	/**
 	 * This function can be used to set up an input of the backend. The input is identified by its numeric value. If a configuration
@@ -169,34 +169,33 @@ public:;
 	 * @param sr new sample rate. 
 	 * @param bins number of bins of the section.
 	 */
-	void setConfiguration(const long& sectId,const double& freq,const double& bw,const long& feed,const long& pol, const double& sr,const long& bins) throw (
-			ComponentErrors::ValidationErrorExImpl,BackendsErrors::BackendBusyExImpl);
+	void setConfiguration(const long& sectId,const double& freq,const double& bw,const long& feed,const long& pol, const double& sr,const long& bins);
 	
 	/**
 	 * This function will start an acquisition job. The job will be created suspended and requires an explicit
 	 * resume in order to begin the data flow. 
 	 * @throw BackendErrors::BackendBusyExImpl
 	 */
-	void startDataAcquisition() throw (BackendsErrors::BackendBusyExImpl);
+	void startDataAcquisition();
 
 	/**
 	 * This function will stop the current acquisition job. 
 	 * @throw ComponentErrors::NotAllowedExImpl
 	 */	
-	void stopDataAcquisition() throw (ComponentErrors::NotAllowedExImpl);
+	void stopDataAcquisition();
 	
 	/**
 	 * This function will resume an acquisition job. 
 	 * @throw ComponentErrors::NotAllowedExImpl
 	 * @param startT epoch at which the acquisition is supposed to start
 	 */
-	void resumeDataAcquisition(const ACS::Time& startT) throw (ComponentErrors::NotAllowedExImpl);
+	void resumeDataAcquisition(const ACS::Time& startT);
 	
 	/**
 	 * This function will suspend the data acquisition job.
 	 * @throw ComponentErrors::NotAllowedExImpl
 	 */
-	void suspendDataAcquisition() throw (ComponentErrors::NotAllowedExImpl);
+	void suspendDataAcquisition();
 	
 	/**
 	 * Called to get a single measure of the total power for each in channel. The measure is done by the slow mode of the backend

@@ -58,7 +58,7 @@ public:
 	 * @throw ComponentErrors::PropertyError
 	 * @param timestamp epoch when the operation completes
 	*/ 
-	CORBA::ULongLong read(ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
+	CORBA::ULongLong read(ACS::Time& timestamp)
 	{
 		try {
 			ACS::Time time;
@@ -78,7 +78,7 @@ public:
 	/**
 	 * It writes values into controller. Unused because the properties are read-only.
 	*/ 
-	void write(const CORBA::ULongLong& value, ACS::Time& timestamp) throw (ACSErr::ACSbaseExImpl)
+	void write(const CORBA::ULongLong& value, ACS::Time& timestamp)
 	{
 		timestamp=getTimeStamp();
 		return;

@@ -21,13 +21,10 @@
 #include "DevIOSectionsNumber.h"
 #include "SenderThread.h"
 
-static char *rcsId="@(#) $Id: NoiseGeneratorImpl.cpp,v 1.1 2011-03-14 15:16:22 a.orlati Exp $";
-static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
-
 using namespace SimpleParser;
 
 NoiseGeneratorImpl::NoiseGeneratorImpl(const ACE_CString &CompName,maci::ContainerServices *containerServices) :
-	BulkDataSenderDefaultImpl(CompName,containerServices),
+	bulkdataZMQImpl::BulkDataZMQSenderImpl(CompName,containerServices),
 	m_ptime(this),
 	m_pbackendName(this),
 	m_pbandWidth(this),
@@ -58,7 +55,7 @@ NoiseGeneratorImpl::~NoiseGeneratorImpl()
 	if (!m_initialized) deleteAll();
 }
 
-void NoiseGeneratorImpl::initialize() throw (ACSErr::ACSbaseExImpl)
+void NoiseGeneratorImpl::initialize()
 {
 	CError Err;
 	CSenderThread::TSenderParameter threadPar;
@@ -145,7 +142,7 @@ void NoiseGeneratorImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	ACS_LOG(LM_FULL_INFO,"NoiseGeneratorImpl::initialize()",(LM_INFO,"COMPSTATE_INITIALIZED"));
 }
 
-void NoiseGeneratorImpl::execute() throw (ACSErr::ACSbaseExImpl)
+void NoiseGeneratorImpl::execute()
 {
 	AUTO_TRACE("NoiseGeneratorImpl::execute()");
 	ACS::Time time;
@@ -226,14 +223,13 @@ void NoiseGeneratorImpl::aboutToAbort()
 	deleteAll();
 }
 
-void NoiseGeneratorImpl::setTargetFileName (const char * fileName) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
-		BackendsErrors::BackendsErrorsEx)
+void NoiseGeneratorImpl::setTargetFileName (const char * fileName)
 {
 	// nothing to do
 }
 
 
-void NoiseGeneratorImpl::sendHeader() throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx, ComponentErrors::ComponentErrorsEx)
+void NoiseGeneratorImpl::sendHeader()
 {
 	AUTO_TRACE("NoiseGeneratorImpl::sendHeader()");
 	Backends::TMainHeader header;
@@ -276,8 +272,7 @@ void NoiseGeneratorImpl::sendHeader() throw (CORBA::SystemException, BackendsErr
 	m_senderThread->saveDataHeader(&header,chHeader);
 }
 
-void NoiseGeneratorImpl::terminate() throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx,
-		ComponentErrors::ComponentErrorsEx)
+void NoiseGeneratorImpl::terminate()
 {
 	AUTO_TRACE("NoiseGeneratorImpl::terminate()");
 	try {
@@ -289,8 +284,7 @@ void NoiseGeneratorImpl::terminate() throw (CORBA::SystemException, BackendsErro
 	}
 }
 
-void NoiseGeneratorImpl::sendData(ACS::Time startTime) throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx,
-		ComponentErrors::ComponentErrorsEx)
+void NoiseGeneratorImpl::sendData(ACS::Time startTime)
 {
 	AUTO_TRACE("NoiseGeneratorImpl::sendData()");
 	TIMEVALUE now;
@@ -312,8 +306,7 @@ void NoiseGeneratorImpl::sendData(ACS::Time startTime) throw (CORBA::SystemExcep
 	m_senderThread->resumeTransfer();
 }
 
-void NoiseGeneratorImpl::sendStop() throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx,
-		ComponentErrors::ComponentErrorsEx)
+void NoiseGeneratorImpl::sendStop()
 {	
 	AUTO_TRACE("NoiseGeneratorImpl::sendStop()");
 	try {
@@ -327,8 +320,7 @@ void NoiseGeneratorImpl::sendStop() throw (CORBA::SystemException, BackendsError
 }
 
 
-void NoiseGeneratorImpl::setSection(CORBA::Long input,CORBA::Double freq,CORBA::Double bw,CORBA::Long feed,CORBA::Long pol,CORBA::Double sr,CORBA::Long bins) throw (
-				CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx)
+void NoiseGeneratorImpl::setSection(CORBA::Long input,CORBA::Double freq,CORBA::Double bw,CORBA::Long feed,CORBA::Long pol,CORBA::Double sr,CORBA::Long bins)
 {
 	AUTO_TRACE("NoiseGeneratorImpl::setSection()");
 	try {
@@ -349,8 +341,7 @@ void NoiseGeneratorImpl::setSection(CORBA::Long input,CORBA::Double freq,CORBA::
 	}		
 }
 
-ACS::doubleSeq *NoiseGeneratorImpl::getTpi () throw (CORBA::SystemException,
-		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx)
+ACS::doubleSeq *NoiseGeneratorImpl::getTpi ()
 {
 	AUTO_TRACE("NoiseGeneratorImpl::getTpi()");
 	ACS::doubleSeq_var tpi=new ACS::doubleSeq;
@@ -373,8 +364,7 @@ ACS::doubleSeq *NoiseGeneratorImpl::getTpi () throw (CORBA::SystemException,
 	return tpi._retn();
 }
 
-ACS::doubleSeq * NoiseGeneratorImpl::getZero () throw (CORBA::SystemException,
-		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx)
+ACS::doubleSeq * NoiseGeneratorImpl::getZero ()
 {
 	AUTO_TRACE("NoiseGeneratorImpl::getZero()");
 	ACS::doubleSeq_var tpi=new ACS::doubleSeq;
@@ -397,7 +387,7 @@ ACS::doubleSeq * NoiseGeneratorImpl::getZero () throw (CORBA::SystemException,
 	return tpi._retn();
 }
 
-void NoiseGeneratorImpl::setKelvinCountsRatio(const ACS::doubleSeq& ratio, const ACS::doubleSeq& tsys) throw (CORBA::SystemException)
+void NoiseGeneratorImpl::setKelvinCountsRatio(const ACS::doubleSeq& ratio, const ACS::doubleSeq& tsys)
 {
 	AUTO_TRACE("NoiseGeneratorImpl::setKelvinCountsRatio()");
 	m_commandLine->saveTsys(tsys);
@@ -407,8 +397,7 @@ void NoiseGeneratorImpl::setKelvinCountsRatio(const ACS::doubleSeq& ratio, const
 	}
 }
 
-void NoiseGeneratorImpl::enableChannels(const ACS::longSeq& enable) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
-		BackendsErrors::BackendsErrorsEx)
+void NoiseGeneratorImpl::enableChannels(const ACS::longSeq& enable)
 {
 	AUTO_TRACE("NoiseGeneratorImpl::enableChannels()");
 	try {
@@ -425,21 +414,19 @@ void NoiseGeneratorImpl::enableChannels(const ACS::longSeq& enable) throw (CORBA
 	}			
 }
 
-void NoiseGeneratorImpl::setTime() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
-		BackendsErrors::BackendsErrorsEx)
+void NoiseGeneratorImpl::setTime()
 {
 	AUTO_TRACE("NoiseGeneratorImpl::setTime()");
 	m_commandLine->setTime();
 }
 
-void NoiseGeneratorImpl::setAttenuation(CORBA::Long input,CORBA::Double att) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx)
+void NoiseGeneratorImpl::setAttenuation(CORBA::Long input,CORBA::Double att)
 {
 	AUTO_TRACE("NoiseGeneratorImpl::setAttenutation()");
 	m_commandLine->setAttenuation(input,att);
 }
 
-CORBA::Long NoiseGeneratorImpl::getInputs(ACS::doubleSeq_out freq,ACS::doubleSeq_out bandWidth,ACS::longSeq_out feed,ACS::longSeq_out ifNumber) throw (CORBA::SystemException,
-		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx)
+CORBA::Long NoiseGeneratorImpl::getInputs(ACS::doubleSeq_out freq,ACS::doubleSeq_out bandWidth,ACS::longSeq_out feed,ACS::longSeq_out ifNumber)
 {
 	AUTO_TRACE("NoiseGeneratorImpl::getInputs()");
 	freq=new ACS::doubleSeq;
@@ -449,14 +436,13 @@ CORBA::Long NoiseGeneratorImpl::getInputs(ACS::doubleSeq_out freq,ACS::doubleSeq
 	return m_commandLine->getInputsConfiguration(*freq,*bandWidth,*feed,*ifNumber);	
 }
 
-void NoiseGeneratorImpl::setIntegration(CORBA::Long Integration) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
-		BackendsErrors::BackendsErrorsEx)
+void NoiseGeneratorImpl::setIntegration(CORBA::Long Integration) 
 {
 	AUTO_TRACE("NoiseGeneratorImpl::setIntegration()");
 	m_commandLine->setIntegration(Integration);
 }
 
-CORBA::Boolean NoiseGeneratorImpl::command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException)
+CORBA::Boolean NoiseGeneratorImpl::command(const char *cmd,CORBA::String_out answer)
 {
 	IRA::CString out;
 	bool res;

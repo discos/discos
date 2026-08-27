@@ -11,7 +11,7 @@
 	} \
 	else { \
 		FIELD=tmpw; \
-		ACS_DEBUG_PARAM("CConfiguration::Init()",DESCR" %lu",tmpw); \
+		ACS_DEBUG_PARAM("CConfiguration::Init()",DESCR" %u",tmpw); \
 	} \
 }
 
@@ -36,7 +36,7 @@ CConfiguration::~CConfiguration()
 {
 }
 
-void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErrors::CDBAccessExImpl)
+void CConfiguration::init(maci::ContainerServices *Services)
 {
 	_GET_DWORD_ATTRIBUTE("SenderSleepTime","The sender thread sleep time is (uSec)",m_dwSenderSleepTime);
 	_GET_DWORD_ATTRIBUTE("SenderResponseTime","The sender thread response time is (uSec)",m_dwSenderResponseTime);	

@@ -15,7 +15,7 @@ CCommandLine::~CCommandLine()
 	AUTO_TRACE("CCommandLine::~CCommandLine()");
 }
 
-void CCommandLine::Init(CConfiguration *config) throw (ComponentErrors::ValidationErrorExImpl)
+void CCommandLine::Init(CConfiguration *config)
 {
 	AUTO_TRACE("CCommandLine::Init()");
 	m_configuration=config;
@@ -26,7 +26,7 @@ void CCommandLine::Init(CConfiguration *config) throw (ComponentErrors::Validati
 	}
 }
 
-void CCommandLine::stopDataAcquisition() throw (ComponentErrors::NotAllowedExImpl)
+void CCommandLine::stopDataAcquisition()
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	if (!getIsBusy()) {
@@ -37,7 +37,7 @@ void CCommandLine::stopDataAcquisition() throw (ComponentErrors::NotAllowedExImp
 	clearStatusField(CCommandLine::BUSY);
 }
 
-void CCommandLine::startDataAcquisition() throw (BackendsErrors::BackendBusyExImpl)
+void CCommandLine::startDataAcquisition()
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	if (getIsBusy()) {
@@ -47,7 +47,7 @@ void CCommandLine::startDataAcquisition() throw (BackendsErrors::BackendBusyExIm
 	setStatusField(CCommandLine::BUSY);
 }
 
-void CCommandLine::resumeDataAcquisition(const ACS::Time& startT) throw (ComponentErrors::NotAllowedExImpl)
+void CCommandLine::resumeDataAcquisition(const ACS::Time& startT)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	if (!getIsBusy()) {
@@ -57,7 +57,7 @@ void CCommandLine::resumeDataAcquisition(const ACS::Time& startT) throw (Compone
 	}
 }
 
-void CCommandLine::suspendDataAcquisition() throw (ComponentErrors::NotAllowedExImpl)
+void CCommandLine::suspendDataAcquisition()
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	if (!getIsBusy()) { 
@@ -88,7 +88,7 @@ void CCommandLine::setTime()
 	AUTO_TRACE("CCommandLine::setTime()");
 }
 
-void CCommandLine::setEnabled(const ACS::longSeq& en) throw (BackendsErrors::BackendBusyExImpl)
+void CCommandLine::setEnabled(const ACS::longSeq& en)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	int bound;
@@ -109,8 +109,7 @@ void CCommandLine::setEnabled(const ACS::longSeq& en) throw (BackendsErrors::Bac
 	ACS_LOG(LM_FULL_INFO,"CCommandLine::setEnabled()",(LM_NOTICE,"CHANGED_ENABLED_CHANNEL"));
 }
 
-void CCommandLine::setConfiguration(const long& sectId,const double& freq,const double& bw,const long& feed,const long& pol,const double& sr,const long& bins) throw (
-		ComponentErrors::ValidationErrorExImpl,BackendsErrors::BackendBusyExImpl)
+void CCommandLine::setConfiguration(const long& sectId,const double& freq,const double& bw,const long& feed,const long& pol,const double& sr,const long& bins)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	if (getIsBusy()) {
@@ -171,12 +170,12 @@ void CCommandLine::setConfiguration(const long& sectId,const double& freq,const 
 	else {
 		temp="FULL_STOKES";
 	}
-	ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"SECTION_CONFIGURED %ld,FREQ=%lf,BW=%lf,FEED=%d,POL=%s,SR=%lf,BINS=%d",sectId,m_frequency[sectId],m_bandWidth[sectId],
+	ACS_LOG(LM_FULL_INFO,"CCommandLine::setConfiguration()",(LM_NOTICE,"SECTION_CONFIGURED %ld,FREQ=%lf,BW=%lf,FEED=%ld,POL=%s,SR=%lf,BINS=%ld",sectId,m_frequency[sectId],m_bandWidth[sectId],
 			m_feedNumber[sectId],(const char *)temp,m_sampleRate[sectId],m_bins[sectId]));		
 }
 
 
-void CCommandLine::setIntegration(const long& integration) throw (BackendsErrors::BackendBusyExImpl)
+void CCommandLine::setIntegration(const long& integration)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	if (getIsBusy()) {
@@ -189,7 +188,7 @@ void CCommandLine::setIntegration(const long& integration) throw (BackendsErrors
 	}
 }
 
-void CCommandLine::setAttenuation(const long& inputId,const double& attenuation) throw (BackendsErrors::BackendBusyExImpl,ComponentErrors::ValidationErrorExImpl)
+void CCommandLine::setAttenuation(const long& inputId,const double& attenuation)
 {
 	baci::ThreadSyncGuard guard(&m_mutex);
 	if (getIsBusy()) {

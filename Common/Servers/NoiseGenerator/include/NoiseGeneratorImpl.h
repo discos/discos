@@ -14,6 +14,15 @@
 #error This is a C++ include file and cannot be used from plain C
 #endif
 
+#include <Cplusplus11Helper.h>
+#define _CPLUSPLUS11_PORTING_
+
+C11_IGNORE_WARNING_PUSH
+C11_IGNORE_WARNING("-Wdeprecated-declarations")
+C11_IGNORE_WARNING("-Wmisleading-indentation")
+C11_IGNORE_WARNING("-Wcatch-value=")
+C11_IGNORE_WARNING("-Wsequence-point")
+
 #include <baciCharacteristicComponentImpl.h>
 #include <baciSmartPropertyPointer.h>
 #include <enumpropROImpl.h>
@@ -24,7 +33,8 @@
 #include <baciROdoubleSeq.h>
 #include <baciROlongSeq.h>
 #include <baciROpattern.h>
-#include <bulkDataSenderImpl.h>
+C11_IGNORE_WARNING_POP
+#include <bulkDataZMQSenderImpl.h>
 #include <NoiseGeneratorS.h>
 #include <ComponentErrors.h>
 #include <BackendsErrors.h>
@@ -77,11 +87,9 @@ public:
 
 /** 
  * @mainpage Noise generator component documentation
- * @date 10/06/2010
+ * @date 26/08/2026
  * @version 0.1.0
- * @author <a href=mailto:a.orlati@ira.inaf.it>Andrea Orlati</a>
- * @remarks Last compiled under ACS 7.0.2
- * @remarks compiler version is 3.4.6 
+ * @author <a href=mailto:andrea.orlati@inaf.it>Andrea Orlati</a>
 */
 
 class CSenderThread;
@@ -93,7 +101,7 @@ class CSenderThread;
  * Istituto di Radioastronomia, Italia
  * <br> 
  */
-class NoiseGeneratorImpl: public virtual BulkDataSenderDefaultImpl,
+class NoiseGeneratorImpl: public virtual bulkdataZMQImpl::BulkDataZMQSenderImpl,
 				   		  public virtual POA_Backends::NoiseGenerator
 {
 public: 
@@ -114,14 +122,14 @@ public:
 	 * Called before execute. It is implemented as a synchronous (blocking) call.
 	 * @throw ACSErr::ACSbaseExImpl
 	*/
-	virtual void initialize() throw (ACSErr::ACSbaseExImpl);
+	virtual void initialize();
 	
 	/**
  	 * Called after <i>initialize()</i> to tell the component that it has to be ready to accept incoming functional calls any time. 
 	 * Must be implemented as a synchronous (blocking) call. In this class the default implementation only logs the COMPSTATE_OPERATIONAL
 	 * @throw ACSErr::ACSbaseExImpl
 	*/
-	virtual void execute() throw (ACSErr::ACSbaseExImpl);
+	virtual void execute();
 	
 	/** 
 	 * Called by the container before destroying the server in a normal situation. This function takes charge of releasing all resources.
@@ -142,7 +150,7 @@ public:
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * 	   @arg \c ComponentErrors::UnexpectedEx
 	*/
-	virtual void sendHeader() throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx, ComponentErrors::ComponentErrorsEx);
+	virtual void sendHeader();
 	
 	/**
 	 * Starts effectively to send the bulk of data to the receiver. 
@@ -152,8 +160,7 @@ public:
 	 * 	   @arg \c ComponentErrors::UnexpectedEx
 	 * @param startTime represent the exact time that the acquisition should start. 
 	 */
-	virtual void sendData(ACS::Time startTiime) throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx,
-			ComponentErrors::ComponentErrorsEx);
+	virtual void sendData(ACS::Time startTiime);
 	
 	/**
 	 *  It suspend the data transfer. The backend must not be in suspend mode.
@@ -162,8 +169,7 @@ public:
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 * 	   @arg \c ComponentErrors::UnexpectedEx
 	 */
-	virtual void sendStop() throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx,
-			ComponentErrors::ComponentErrorsEx);
+	virtual void sendStop();
 	
 	/** 
 	 * This immediately terminates the transfer job (previously begun by the call to <i>sendHeader()</i>).
@@ -171,8 +177,7 @@ public:
 	 * @throw BackendsErrors::BackendsErrorsEx
 	 * @throw ComponentErrors::ComponentErrorsEx
 	 */
-	virtual void terminate() throw (CORBA::SystemException, BackendsErrors::BackendsErrorsEx,
-			ComponentErrors::ComponentErrorsEx);
+	virtual void terminate();
 	
 	/**
 	 * This method will configure an input channel of the backend. The input is identified by a numeric identifier.
@@ -190,8 +195,7 @@ public:
 	 * @param sr new sample rate value (Mhz). A negative keeps the previous value unchanged. 
 	 * @param bins number of bins produced for each input. 
 	 */
-    virtual void setSection(CORBA::Long input,CORBA::Double freq,CORBA::Double bw,CORBA::Long feed,CORBA::Long pol,CORBA::Double sr,CORBA::Long bins) throw (CORBA::SystemException,
-    				ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+    virtual void setSection(CORBA::Long input,CORBA::Double freq,CORBA::Double bw,CORBA::Long feed,CORBA::Long pol,CORBA::Double sr,CORBA::Long bins);
 
     /**
      * This method enables or disables the data streaming of the inputs. if a input is disable the input is not sampled and the
@@ -202,8 +206,7 @@ public:
      * @param enable this must be a sequence of exactly <i>inputsNumber</i> elements. The inputs are enabled (default) if
      *                the corresponding value is positive. A negative value disables the input, whilst a zero keep the current configuration.
      */
-    virtual void enableChannels(const ACS::longSeq& enable) throw (CORBA::SystemException,
-    		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+    virtual void enableChannels(const ACS::longSeq& enable);
         
 	/**
 	 * Sets the current integration time.
@@ -212,8 +215,7 @@ public:
 	 * @thorw BackendsErrors::BackendsErrorsEx
 	 * @param integration new integration value in milliseconds. A zero disables this feature, whilst a negative has not effect.
 	 */
-    virtual void setIntegration(CORBA::Long Integration) throw (CORBA::SystemException, 
-    		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+    virtual void setIntegration(CORBA::Long Integration);
 
 	/**
 	 * This method allows the client to interface the component by sending text commands. The command is parsed and executed according the
@@ -223,7 +225,7 @@ public:
 	 * @param  answer  the string that reports the command execution results or in case, errors
 	 * @return true if the command was executed correctly, false otherwise
 	 */
-    virtual CORBA::Boolean command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException);
+    virtual CORBA::Boolean command(const char *cmd,CORBA::String_out answer);
     
     /**
      * Call this function to set the current time (from the local computer) into the backend. 
@@ -234,10 +236,9 @@ public:
 	 *       @arg \c BackendsErrors::Connection
 	 *       @arg \c ComponentErrors::SocketError
      */
-    virtual void setTime() throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,
-    		BackendsErrors::BackendsErrorsEx);
+    virtual void setTime();
 
-    virtual void endSchedule() throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, BackendsErrors::BackendsErrorsEx) {AUTO_TRACE("TotalPowerImpl::endSchedule()"); };
+    virtual void endSchedule() {AUTO_TRACE("TotalPowerImpl::endSchedule()"); };
     /**
      * Call this function in order to get a total power measure for each input channel.
      * @thorw CORBA::SystemException
@@ -246,11 +247,12 @@ public:
      * @return a sequence of double values that reports for each input the total power measured.
      * 			  The caller must take care of freeing it.
      */
-    virtual ACS::doubleSeq * getTpi () throw (CORBA::SystemException,
-    		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
-    virtual ACS::doubleSeq * getRms () throw (CORBA::SystemException,
-    		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
-
+    virtual ACS::doubleSeq * getTpi ();
+    
+    virtual ACS::doubleSeq * getRms () {
+		return NULL;  
+	 };
+ 
     /**
      * Call this function in order to get a total power measure for each input channel. The measure is done when the inputs are directly
      * connected to the 50 Ohm.
@@ -260,8 +262,7 @@ public:
      * @return a sequence of double values that reports for each input the total power measured. 
      * 				  The caller must take care of freeing it.
      */
-    virtual ACS::doubleSeq * getZero (/*CORBA::Long integration*/) throw (CORBA::SystemException,
-    		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+    virtual ACS::doubleSeq * getZero (/*CORBA::Long integration*/);
    
     /**
      * This method is used to inform the component about the proper conversion factor between Kelvin and counts. This value is used for the tsys computation during
@@ -269,7 +270,7 @@ public:
      * @throw CORBA::SystemException
      * @param ratio this is the sequence of required values one for each channel.   
      */
-    virtual void setKelvinCountsRatio(const ACS::doubleSeq& ratio,const ACS::doubleSeq& tsys) throw (CORBA::SystemException);
+    virtual void setKelvinCountsRatio(const ACS::doubleSeq& ratio,const ACS::doubleSeq& tsys);
     
     /**
      * This method is used to tune the attenuation level of each of the virtual input of the system.
@@ -279,7 +280,7 @@ public:
      * @param input is the identifier number of the input that we want to configure.
      * @param att new attenuation level, It could be in the range 0-15. A negative will keep the previous value.  
      */
-    virtual void setAttenuation(CORBA::Long input,CORBA::Double att) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+    virtual void setAttenuation(CORBA::Long input,CORBA::Double att);
     
     /**
      * In order  to get the inputs definition in just one call. The returned argument contains the configuration sequentially, the first element corresponds to the first input and so on.
@@ -292,13 +293,15 @@ public:
      * @param ifNumber given the feed it selects IF number to which the input is connected to. Please notice this parameter has nothing to do with the polarization of the section.
      * @return the number of inputs, in other words is the lenght of the returned sequences
      */
-    virtual CORBA::Long getInputs(ACS::doubleSeq_out freq,ACS::doubleSeq_out bandWidth,ACS::longSeq_out feed,ACS::longSeq_out ifNumber) throw (CORBA::SystemException,
-    		ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+    virtual CORBA::Long getInputs(ACS::doubleSeq_out freq,ACS::doubleSeq_out bandWidth,ACS::longSeq_out feed,ACS::longSeq_out ifNumber);
 
     /**
      * This method is just a place holder for this implementation of the genericBackend interface
+     * @throw CORBA::SystemException
+     * @throw ComponentErrors::ComponentErrorsEx
+     * @throw BackendsErrors::BackendsErrorsEx
     */
-    virtual void setTargetFileName (const char * fileName) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx);
+    virtual void setTargetFileName (const char * fileName);
 
    /**
      * This method is used to set a range in the bandwith of the backend where calculate the Tsys.
@@ -309,110 +312,124 @@ public:
      * @param freq starting frequency.
      * @param bw bandwidth interval.
      */
-    virtual void setTsysRange(CORBA::Double freq,CORBA::Double bw) throw (CORBA::SystemException,ComponentErrors::ComponentErrorsEx,BackendsErrors::BackendsErrorsEx) {return 0;};
+    virtual void setTsysRange(CORBA::Double freq,CORBA::Double bw) {return;};
         
 	/** 
 	 * Returns a reference to the time  property Implementation of IDL interface.
 	 * @return pointer to read-only unsigned long long  property time
+	 * @throw CORBA::SystemException
 	*/
-    virtual ACS::ROuLongLong_ptr time() throw (CORBA::SystemException);
+    virtual ACS::ROuLongLong_ptr time();
         
 	/** 
 	 * Returns a reference to the backendName property Implementation of IDL interface.
 	 * @return pointer to read-only string property backendName
 	*/
-	virtual ACS::ROstring_ptr backendName() throw (CORBA::SystemException);
+	virtual ACS::ROstring_ptr backendName();
 	
 	/**
 	 * Returns a reference to the bandWidth property implementation of the IDL interface.
 	 * @return pointer to read-only double sequence property bandWidth
+	 * @throw CORBA::SystemException
 	*/	 
-	virtual ACS::ROdoubleSeq_ptr bandWidth() throw (CORBA::SystemException);
+	virtual ACS::ROdoubleSeq_ptr bandWidth();
 	
 	/**
 	 * Returns a reference to the frequency property implementation of the IDL interface.
 	 * @return pointer to read-only double sequence property frequency
+	 * @throw CORBA::SystemException
 	*/	 
-	virtual ACS::ROdoubleSeq_ptr frequency() throw (CORBA::SystemException);
+	virtual ACS::ROdoubleSeq_ptr frequency();
 	
 	/**
 	 * Returns a reference to the sampleRate property implementation of the IDL interface.
 	 * @return pointer to read-only double sequence property sampleRate
 	*/	 
-	virtual ACS::ROdoubleSeq_ptr sampleRate() throw (CORBA::SystemException);
+	virtual ACS::ROdoubleSeq_ptr sampleRate();
 	
 	/**
 	 * Returns a reference to the attenuation property implementation of the IDL interface.
 	 * @return pointer to read-only double sequence property attenuation
+	 * @throw CORBA::SystemException
 	*/	 
-	virtual ACS::ROdoubleSeq_ptr attenuation() throw (CORBA::SystemException);
+	virtual ACS::ROdoubleSeq_ptr attenuation();
 
 	/**
 	 * Returns a reference to the polarization property implementation of the IDL interface.
 	 * @return pointer to read-only long sequence property polarization
+    * @throw CORBA::SystemException
 	*/	 
-	virtual ACS::ROlongSeq_ptr polarization() throw (CORBA::SystemException);
+	virtual ACS::ROlongSeq_ptr polarization();
 	
 	/** 
 	 * Returns a reference to the bins property Implementation of IDL interface.
 	 * @return pointer to read-only long property binsNumber
+    * @throw CORBA::SystemException	 
 	*/
-	virtual ACS::ROlongSeq_ptr bins() throw (CORBA::SystemException);
+	virtual ACS::ROlongSeq_ptr bins();
 	
 	/** 
 	 * Returns a reference to the feed property Implementation of IDL interface.
 	 * @return pointer to read-only long sequence property feed
+    * @throw CORBA::SystemException	 
 	*/
-	virtual ACS::ROlongSeq_ptr feed() throw (CORBA::SystemException);	
+	virtual ACS::ROlongSeq_ptr feed();	
 
 	/** 
 	 * Returns a reference to the inputsNumber  property Implementation of IDL interface.
 	 * @return pointer to read-only long property inputsNumber
+    * @throw CORBA::SystemException	 
 	*/
-	virtual ACS::ROlong_ptr inputsNumber() throw (CORBA::SystemException);
+	virtual ACS::ROlong_ptr inputsNumber();
 	
 	/**
 	 * Returns a reference to the systemTemperature property implementation of the IDL interface.
 	 * @return pointer to read-only double sequence property systemTemperature
+    * @throw CORBA::SystemException	 
 	*/	 
-	virtual ACS::ROdoubleSeq_ptr systemTemperature() throw (CORBA::SystemException);
+	virtual ACS::ROdoubleSeq_ptr systemTemperature();
 		
 	/** 
 	 * Returns a reference to the integration  property Implementation of IDL interface.
 	 * @return pointer to read-only long property integration
+    * @throw CORBA::SystemException	 
 	*/
-	virtual ACS::ROlong_ptr integration() throw (CORBA::SystemException);
+	virtual ACS::ROlong_ptr integration();
 
 	/** 
 	 * Returns a reference to the sectionsNumber  property Implementation of IDL interface.
 	 * @return pointer to read-only long property sectionsNumber
+    * @throw CORBA::SystemException	 
 	*/
-	virtual ACS::ROlong_ptr sectionsNumber() throw (CORBA::SystemException);	
+	virtual ACS::ROlong_ptr sectionsNumber();	
 	
 	/** 
 	 * Returns a reference to the inputSection  property Implementation of IDL interface.
-	 * @return pointer to read-only long property inputSection 
+	 * @return pointer to read-only long property inputSection
+    * @throw CORBA::SystemException	 
 	*/
-	virtual ACS::ROlongSeq_ptr inputSection() throw (CORBA::SystemException);	
+	virtual ACS::ROlongSeq_ptr inputSection();	
 
 	/** 
 	 * Returns a reference to the status implementation of IDL interface.
 	 * @return pointer to read-only pattern property status
+    * @throw CORBA::SystemException	 
 	*/	
-	virtual ACS::ROpattern_ptr status() throw (CORBA::SystemException);
+	virtual ACS::ROpattern_ptr status();
 	
 	/** 
 	 * Returns a reference to the busy implementation of IDL interface.
 	 * @return pointer to read-only long property busy
+    * @throw CORBA::SystemException	 
 	*/	
-	virtual Management::ROTBoolean_ptr busy() throw (CORBA::SystemException);
+	virtual Management::ROTBoolean_ptr busy();
 	
 protected:
-    virtual void startSend()  throw (CORBA::SystemException, AVStartSendErrorEx) { };
+    virtual void startSend() { };
 
-    virtual void paceData()  throw (CORBA::SystemException, AVPaceDataErrorEx)  { };
+    virtual void paceData()  { };
 
-    virtual void stopSend()  throw (CORBA::SystemException, AVStopSendErrorEx) { };
+    virtual void stopSend() { };
 	
 private:
 	SmartPropertyPointer<ROuLongLong> m_ptime;
@@ -426,8 +443,7 @@ private:
 	SmartPropertyPointer<ROlong> m_pinputsNumber;
 	SmartPropertyPointer<ROlong> m_pintegration;
 	SmartPropertyPointer<ROpattern> m_pstatus;
-	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),
-		  POA_Management::ROTBoolean>  > m_pbusy;
+	SmartPropertyPointer< ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean>  > m_pbusy;
 	SmartPropertyPointer<ROlongSeq> m_pfeed;
 	SmartPropertyPointer<ROdoubleSeq> m_ptsys;
 	SmartPropertyPointer<ROlong> m_psectionsNumber;
