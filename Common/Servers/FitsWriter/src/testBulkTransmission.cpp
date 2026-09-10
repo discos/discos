@@ -167,6 +167,7 @@ int main(int argc, char *argv[])
 	ACS_LOG(LM_FULL_INFO,"::main()",(LM_INFO,"ALL_COMPONENTS_RETRIEVED"));
 	try {
 		recv->reset();
+		ACS_LOG(LM_FULL_INFO,"::main()",(LM_INFO,"Receiver is reset"));
 	}
 	catch (...) {
 		_EXCPT(ClientErrors::UnknownExImpl,impl,"::main()");
@@ -183,6 +184,7 @@ int main(int argc, char *argv[])
 	/*tv.set(RUNNING_SEC,0);*/
 	try {
 		sender->connect(recv.in());
+		ACS_LOG(LM_FULL_INFO,"::main()",(LM_INFO,"Receiver connected to backend"));
 		//sender->sendHeader();
 	}
 	catch (ACSBulkDataError::AVConnectErrorEx& ex) {
@@ -272,7 +274,9 @@ int main(int argc, char *argv[])
 		}
 		else if (strcmp(input,"stop")==0) {
 			try {
+				ACS_LOG(LM_FULL_INFO,"::main()",(LM_INFO,"Issuing stop command to the backend"));
 				sender->sendStop();
+				ACS_LOG(LM_FULL_INFO,"::main()",(LM_INFO,"stop command issued to the backend"));
 			}
 			catch (...) {
 				_EXCPT(ClientErrors::UnknownExImpl,impl,"::main()");
@@ -298,7 +302,9 @@ int main(int argc, char *argv[])
 	}
 	ACS_LOG(LM_FULL_INFO,"::main()",(LM_INFO,"TERMINATING"));
 	try {
+		ACS_LOG(LM_FULL_INFO,"::main()",(LM_INFO,"Issuing stopScan command to the receiver"));
 		recv->stopScan();
+		ACS_LOG(LM_FULL_INFO,"::main()",(LM_INFO,"stopScan command issued to the receiver"));
 	}
 	catch (CORBA::SystemException& ex) {
 		_EXCPT(ClientErrors::CORBAProblemExImpl,impl,"::main()");
