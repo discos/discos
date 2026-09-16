@@ -2,11 +2,11 @@
 
 print_help() {
     echo " "
-    echo "`basename $0` v1.0"
+    echo "`basename $0` v1.1"
     echo " "
     echo "Start a new session toward DISCOS control software"
     echo "Usage: '`basename $0` [OPTIONS] [-p|--port portnumber] <role>@<gatein>'"
-    echo "       '`basename $0` -r|--roles'"
+    echo "       '`basename $0` [OPTIONS] -r|--roles'"
     echo "       '`basename $0` -h|--help'"
     echo "<role> indicates the role (observer or administrative privileges) for which the connection is done"
     echo "<gatein> access point into the observatory LAN. This information is provided by local staff." 
@@ -16,6 +16,7 @@ print_help() {
     echo "-p | --port ssh port if different from the default one" 
     echo "Options:"
     echo "    -v | --viewonly           start the vncviewer in view only mode"
+    echo "    -d | --devel              use development remote sessions"
     exit 1
 }
 
@@ -27,9 +28,16 @@ role=""
 gatein=""
 remote_port=0
 current_system="LINUX"
+target_ws="192.168.1.100"
 
+# default production sessions
 remote_sessions=( "discos:9901:15001" "observer:9902:15002" )
+# development sessions (used when -d/--devel is given)
+remote_sessions_devel=( "discos:8901:15001" "observer:8902:15002" )
 
+# new flags
+devel="FALSE"
+show_roles="FALSE"
 
 while [[ $# -gt 0 ]]
 do
@@ -40,11 +48,9 @@ case $key in
     print_help
     ;;
     -r|--roles)
-    echo "Available roles are: "
-    for session in "${remote_sessions[@]}" ; do
-    	echo "${session%%:*}"
-    done
-    exit 0
+    # defer printing until we've seen all options (so -d can influence it)
+    show_roles="TRUE"
+    shift
     ;;
     -p|--port)
     ssh_port=$2
@@ -53,6 +59,11 @@ case $key in
     ;;
     -v|--viewonly)
     viewonly="-ViewOnly"
+    shift
+    ;;
+    -d|--devel)
+    devel="TRUE"
+    target_ws="192.168.1.103"
     shift
     ;;
     *)
@@ -74,6 +85,20 @@ case $key in
 esac
 done
 
+# pick correct sessions list depending on devel flag
+if [[ "$devel" == "TRUE" ]]; then
+    remote_sessions=( "${remote_sessions_devel[@]}" )
+fi
+
+# if user requested roles, list them now (reflects devel if -d was passed)
+if [[ "$show_roles" == "TRUE" ]]; then
+    echo "Available roles are: "
+    for session in "${remote_sessions[@]}" ; do
+        echo "${session%%:*}"
+    done
+    exit 0
+fi
+
 if [[ "$gatein" == "local" ]]; then
     local_connection="TRUE"
 fi
@@ -87,7 +112,7 @@ then
    echo -e "Mac OS is detected..."
    current_system="MACOS"
 else
-   echo -e "Not supported OS, some unpredictable results may happen!"	
+   echo -e "Not supported OS, some unpredictable results may happen!"   
 fi
 
 if ! hash vncviewer &>/dev/null; then
@@ -113,7 +138,7 @@ for session in "${remote_sessions[@]}" ; do
     lport="${ports#*:}"
     if [[ "$role" == "$role_name" ]]; then
         if [ "$local_connection" = "TRUE" ]; then
-        		#this is for local area connection when it will enabled
+                #this is for local area connection when it will enabled
             remote_port=$lport
             #remote_port=$rport
             ssh_port=22 
@@ -154,7 +179,7 @@ fi
 
 if [[ "$local_connection" = "TRUE" ]]; then
     echo "Connecting from local area...."
-    ssh -N -f -L $local_port:192.168.1.99:$remote_port $role@192.167.189.98
+    ssh -N -f -L $local_port:$target_ws:$remote_port $role@192.167.189.98
 else
     echo "Connecting from wide area....."
     ssh -N -f -p $ssh_port -L $local_port:192.167.189.98:$remote_port $role@$gatein
@@ -163,12 +188,5 @@ if [[ "$vnc_avail" == "TRUE" ]]; then
     echo "Starting vncviewer...."
     vncviewer localhost:$local_port $viewonly &>/dev/null
 else
-    echo "Connection is set, please use your preferred vnc client to connect to 'localhost', port "$local_port
+    echo "Connection is set, please use your favorite vnc client to connect to 'localhost', port "$local_port
 fi
-
-
-
-
-
-
-
