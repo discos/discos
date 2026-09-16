@@ -6,6 +6,10 @@
 #include <zmq.hpp>
 #include <zmq_addon.hpp>
 #include <zlib.h>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <queue>
 #include "ZMQContext.hpp"
 #include "ZMQDictionary.hpp"
 
@@ -78,6 +82,8 @@ namespace ZMQLibrary
          */
         static bool find_key(const std::string& file, const std::string& key_type, std::string& key);
 
+        void workerLoop();
+
         /**
          * ZMQ constant buffer which references the topic name.
          */
@@ -92,6 +98,12 @@ namespace ZMQLibrary
          * ZMQ socket shared pointer. We use a pointer since the socket must not be destroyed for communications to work properly.
          */
         std::shared_ptr<zmq::socket_t> m_socket;
+
+        std::mutex m_queueMutex;
+        std::condition_variable m_queueCV;
+        std::queue<ZMQDictionary> m_pendingDictionaries;
+        bool m_stopping;
+        std::thread m_worker;
     };
 }
 
