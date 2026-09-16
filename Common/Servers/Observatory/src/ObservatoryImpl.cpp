@@ -3,7 +3,7 @@
 #include "ObservatoryImpl.h"
 #include "ObservatoryDevIOs.h"
 
-#define GET_PROPERTY_REFERENCE(TYPE,PROPERTY,PROPERTYNAME) TYPE##_ptr ObservatoryImpl::PROPERTYNAME() throw (CORBA::SystemException) \
+#define GET_PROPERTY_REFERENCE(TYPE,PROPERTY,PROPERTYNAME) TYPE##_ptr ObservatoryImpl::PROPERTYNAME() /* throw (CORBA::SystemException) */ \
 { \
 	if (PROPERTY==0) return TYPE::_nil(); \
 	TYPE##_var tmp=TYPE::_narrow(PROPERTY->getCORBAReference()); \
@@ -32,7 +32,7 @@
 	} \
 	else { \
 		FIELD=tmpd; \
-		ACS_DEBUG_PARAM("OTFImpl::initialize()",DESCR" %lf",tmpd); \
+		ACS_DEBUG_PARAM("OTFImpl::initialize()",DESCR" %ld",tmpd); \
 	} \
 }
 
@@ -52,8 +52,8 @@
 using namespace ComponentErrors;
 using namespace IRA;
 
-static char *rcsId="@(#) $Id: ObservatoryImpl.cpp,v 1.6 2011-06-21 16:39:05 a.orlati Exp $";
-static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
+//static char *rcsId="@(#) $Id: ObservatoryImpl.cpp,v 1.6 2011-06-21 16:39:05 a.orlati Exp $";
+//static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
 
 ObservatoryImpl::ObservatoryImpl(const ACE_CString &CompName,maci::ContainerServices *containerServices) : 
 	CharacteristicComponentImpl(CompName,containerServices),
@@ -78,7 +78,7 @@ ObservatoryImpl::~ObservatoryImpl()
 	AUTO_TRACE("ObservatoryImpl::~ObservatoryImpl()");
 }
 
-void ObservatoryImpl::initialize() throw (ACSErr::ACSbaseExImpl)
+void ObservatoryImpl::initialize() /* throw (ACSErr::ACSbaseExImpl) */
 {
 	double dut1,longitude,latitude,height,yPolar,xPolar;
 	IRA::CString obsName;
@@ -167,7 +167,7 @@ void ObservatoryImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 	ACS_LOG(LM_FULL_INFO,"ObservatoryImpl::initialize()",(LM_INFO,"ObservatoryImpl::COMPSTATE_INITIALIZED"));	
 }
 
-void ObservatoryImpl::execute() throw (ACSErr::ACSbaseExImpl)
+void ObservatoryImpl::execute() /* throw (ACSErr::ACSbaseExImpl) */
 {
 	AUTO_TRACE("ObservatoryImpl::execute()");	
 	try {
@@ -236,7 +236,7 @@ GET_PROPERTY_REFERENCE(ACS::ROdouble,m_pzGeod,zGeod);
 
 GET_PROPERTY_REFERENCE(Antenna::ROTGeodeticModel,m_pgeodeticModel,geodeticModel);
 
-Antenna::TSiteInformation ObservatoryImpl::getSiteSummary() throw (CORBA::SystemException)
+Antenna::TSiteInformation ObservatoryImpl::getSiteSummary() /* throw (CORBA::SystemException) */
 {
 	AUTO_TRACE("ObservatoryImpl::getSiteSummary()");
 	CSecAreaResourceWrapper<T_DevDataBlock> data=m_data->Get();	
@@ -245,7 +245,7 @@ Antenna::TSiteInformation ObservatoryImpl::getSiteSummary() throw (CORBA::System
 	return tmp;	
 }
 
-void ObservatoryImpl::setDUT1(CORBA::Double val,CORBA::Boolean save) throw (CORBA::SystemException,ComponentErrorsEx)
+void ObservatoryImpl::setDUT1(CORBA::Double val,CORBA::Boolean save) /* throw (CORBA::SystemException,ComponentErrorsEx) */
 {
     ACS::Time timestamp;
 	AUTO_TRACE("ObservatoryImpl::setDUT1()");
@@ -271,7 +271,7 @@ void ObservatoryImpl::setDUT1(CORBA::Double val,CORBA::Boolean save) throw (CORB
 	}	
 }
 
-void ObservatoryImpl::setGeodeticModel(Antenna::TGeodeticModel model,CORBA::Boolean save) throw (CORBA::SystemException,ComponentErrorsEx)
+void ObservatoryImpl::setGeodeticModel(Antenna::TGeodeticModel model,CORBA::Boolean save) /* throw (CORBA::SystemException,ComponentErrorsEx) */
 {
     ACS::Time timestamp;
 	AUTO_TRACE("ObservatoryImpl::setGeodeticModel()");
@@ -297,8 +297,7 @@ void ObservatoryImpl::setGeodeticModel(Antenna::TGeodeticModel model,CORBA::Bool
 	}		
 }
 
-void ObservatoryImpl::setPoleMotion(CORBA::Double xP,CORBA::Double yP,CORBA::Boolean save) 
-  throw (CORBA::SystemException,ComponentErrorsEx)
+void ObservatoryImpl::setPoleMotion(CORBA::Double xP,CORBA::Double yP,CORBA::Boolean save)  /* throw (CORBA::SystemException,ComponentErrorsEx) */
 {
     ACS::Time timestamp;
 	AUTO_TRACE("ObservatoryImpl::setPoleMotion()");
