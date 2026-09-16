@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="3" failures="0" disabled="0" errors="0" timestamp="2026-04-10T14:35:51" time="0.149" name="AllTests">
+  <testsuite name="ZMQConfiguration_Configuration" tests="3" failures="0" disabled="0" errors="0" time="0.148">
+    <testcase name="InitializeConfiguration" status="run" time="0.083" classname="ZMQConfiguration_Configuration" />
+    <testcase name="ReadConfiguration" status="run" time="0.032" classname="ZMQConfiguration_Configuration" Flow0_Endpoint="tcp://127.0.0.1:5555" Flow0_Backend="BACKENDS/TotalPower" />
+    <testcase name="GetByComponentName" status="run" time="0.033" classname="ZMQConfiguration_Configuration" />
+  </testsuite>
+</testsuites>
