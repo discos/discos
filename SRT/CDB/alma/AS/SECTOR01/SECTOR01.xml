@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<ActiveSurfaceSector xmlns="urn:schemas-cosylab-com:ActiveSurfaceSector:1.0">
+    <index description="index of the sector"/>
+    <ready description="sector has completed boot"/>
+</ActiveSurfaceSector>

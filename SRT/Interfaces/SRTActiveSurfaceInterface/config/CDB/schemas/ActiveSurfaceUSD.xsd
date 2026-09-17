@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema
+  targetNamespace="urn:schemas-cosylab-com:ActiveSurfaceUSD:1.0"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns="urn:schemas-cosylab-com:ActiveSurfaceUSD:1.0"
+  xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+  xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified">
+
+  <xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+  <xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+
+  <xs:complexType name="typeActiveSurfaceUSD">
+   <xs:complexContent>
+    <xs:extension base="baci:CharacteristicComponent">
+     <xs:sequence>
+
+      <!-- On-reply delay in protocol units (512us each, range 0-255): 0 = immediate reply, 255 = no reply -->
+      <xs:element name="delay"  type="baci:RWlong"/>
+
+      <!-- Last commanded absolute position, in 1/128 step units -->
+      <xs:element name="cmdPos" type="baci:RWlong"/>
+
+      <!-- Minimum (start) frequency for the acceleration ramp, in Hz [20, 10000] -->
+      <xs:element name="Fmin"   type="baci:RWlong"/>
+
+      <!-- Maximum (top) frequency for the acceleration ramp, in Hz [20, 10000] -->
+      <xs:element name="Fmax"   type="baci:RWlong"/>
+
+      <!-- Acceleration factor. Relaxes the internal ramp by (factor+1) times -->
+      <xs:element name="acc"    type="baci:RWlong"/>
+
+      <!-- I/O user bits: bits[6:4]=DIO2..0 direction, bits[2:0]=IO2..0 value -->
+      <xs:element name="uBits"  type="baci:RWlong"/>
+
+      <!-- Current absolute position of the motor, in 1/128 step units -->
+      <xs:element name="actPos" type="baci:ROlong"/>
+
+      <!-- USD hardware and motion status flags -->
+      <xs:element name="status">
+       <xs:complexType>
+        <xs:complexContent>
+         <xs:restriction base="baci:ROpattern">
+          <xs:attribute name="resolution"     type="xs:unsignedLong" use="optional"
+                        default="65535"/>
+          <xs:attribute name="bitDescription" type="xs:string"       use="optional"
+                        default="cal,D2,D1,D0,auto,DFLT,DPWR,CAMMA,RUN,DIFF,RDY,STNBY,AUTO,RS2,RS1,RS0"/>
+          <xs:attribute name="whenSet"        type="xs:string"       use="optional"
+                        default="1,4,4,4,1,1,1,2,2,2,1,1,2,2,2,2"/>
+          <xs:attribute name="whenCleared"    type="xs:string"       use="optional"
+                        default="3,4,4,4,3,3,2,4,1,0,0,2,0,1,1,1"/>
+         </xs:restriction>
+        </xs:complexContent>
+       </xs:complexType>
+      </xs:element>
+
+      <!-- Firmware version. Must be 1.3 for correct operation -->
+      <xs:element name="softVer" type="baci:ROlong"/>
+
+      <!-- Hardware type code: 0x20=USD50xxx, 0x21=USD60xxx -->
+      <xs:element name="type"    type="baci:ROlong"/>
+
+     </xs:sequence>
+
+     <!-- Physical addressing -->
+     <xs:attribute name="sector"        type="xs:unsignedByte" use="required"/>
+     <xs:attribute name="lan"           type="xs:unsignedByte" use="required"/>
+     <xs:attribute name="serialAddress" type="xs:unsignedByte" use="required"/>
+
+     <!-- Calibration data (written by writeCalibration()) -->
+     <xs:attribute name="cammaLen"      type="xs:double"       use="required"/>
+     <xs:attribute name="cammaPos"      type="xs:double"       use="required"/>
+     <xs:attribute name="calibrate"     type="xs:unsignedByte" use="required"/>
+
+     <!-- Motion range parameters -->
+     <xs:attribute name="fullRange"     type="xs:int"          use="optional" default="-42000"/>
+     <xs:attribute name="zeroRef"       type="xs:int"          use="optional" default="-21000"/>
+     <xs:attribute name="step_giro"     type="xs:int"          use="optional" default="200"/>
+     <xs:attribute name="step_res"      type="xs:unsignedByte" use="optional" default="1"/>
+
+     <!-- Comma-separated list of accepted surface profile codes -->
+     <xs:attribute name="accepted_profiles" type="xs:string"   use="optional" default="0 1 2 3 4"/>
+
+    </xs:extension>
+   </xs:complexContent>
+  </xs:complexType>
+
+  <xs:element name="ActiveSurfaceUSD" type="typeActiveSurfaceUSD"/>
+
+</xs:schema>

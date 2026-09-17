@@ -1,0 +1,241 @@
+#ifndef _ACTIVESURFACE_LAN_IDL_
+#define _ACTIVESURFACE_LAN_IDL_
+
+/*********************************************************************/
+/* OAC Osservatorio Astronomico di Cagliari                          */
+/*                                                                   */
+/* This code is under GNU General Public Licence (GPL).              */
+/*                                                                   */
+/* Who                                          when        what     */
+/* Giuseppe Carboni (giuseppe.carboni@inaf.it)  2025        Redesign */
+/*********************************************************************/
+
+#include <baci.idl>
+#include <ASErrors.idl>
+#include <ComponentErrors.idl>
+#include <ActiveSurfaceCommon.idl>
+
+#pragma prefix "alma"
+
+module ActiveSurface
+{
+    /**
+     * This interface represents a single RS-485 serial line connecting
+     * a chain of USD actuators via a LAN/serial converter.
+     *
+     * It exposes only broadcast operations, i.e. commands that are sent
+     * simultaneously to all USDs on the line without expecting a response,
+     * as per the LAM Technologies USD50xxx/USD60xxx serial protocol.
+     *
+     * Unicast communication with individual USDs is handled intra-container
+     * via the shared ActiveSurface::Socket instance, without CORBA overhead.
+     *
+     * All methods are oneway (fire-and-forget) reflecting the broadcast
+     * nature of the underlying protocol: when a command is addressed to
+     * all drivers, no response is returned by any of them.
+     */
+    interface LAN : ACS::CharacteristicComponent
+    {
+        /**
+         * Connection status of the LAN/serial converter.
+         */
+        readonly attribute ACS::ROboolean connected;
+
+        // -------------------------------------------------------------------
+        // Control commands (protocol rev. 1.2)
+        // -------------------------------------------------------------------
+
+        /**
+         * 0x01 — Software reset of all USDs on the line.
+         * Restores factory defaults and stops all motors immediately.
+         * Wait at least 100ms before sending further commands.
+         * Can be sent at any time, including during motion.
+         */
+        oneway void reset();
+
+        /**
+         * 0x02 — Fire the software trigger on all USDs simultaneously.
+         * USDs that have a move command buffered (deferred execution mode,
+         * see setDelayedExecution) will start moving synchronously.
+         * Has no effect on USDs that are already moving or have no buffered command.
+         */
+        oneway void trigger();
+
+        /**
+         * 0x11 — Immediate stop of all USDs on the line.
+         * Each USD executes its programmed deceleration ramp; no steps are lost
+         * provided ramp slopes are correctly configured.
+         * Can be sent at any time.
+         */
+        oneway void stop();
+
+        /**
+         * 0x30 — Move all USDs to the same absolute position.
+         * Each USD travels the difference between the requested position
+         * and its own current position. No movement occurs if the difference is zero.
+         * @param position  Target position in 1/128 step units [-2147483648, 2147483647].
+         * Motor must be stopped on each USD; command is ignored otherwise.
+         */
+        oneway void setAbsolutePosition(in long position);
+
+        /**
+         * 0x31 — Move all USDs by the same relative offset from their current position.
+         * Direction is determined by the sign of the offset.
+         * @param offset  Displacement in 1/128 step units [-2147483648, 2147483647].
+         * Motor must be stopped on each USD; command is ignored otherwise.
+         */
+        oneway void setRelativePosition(in long offset);
+
+        /**
+         * 0x32 — Start continuous rotation on all USDs.
+         * Direction is given by the sign of direction. Stop with stop().
+         * @param direction  Any positive value = CW; any negative value = CCW.
+         * Motor must be stopped on each USD; command is ignored otherwise.
+         */
+        oneway void rotate(in long direction);
+
+        /**
+         * 0x35 — Set velocity reference on all USDs (open-loop speed control).
+         * No ramp is generated internally; the caller is responsible for ramping.
+         * Send 0 to stop all motors.
+         * @param velocity  Speed in tenths of Hz [-100000, 100000].
+         */
+        oneway void setVelocity(in long velocity);
+
+        // -------------------------------------------------------------------
+        // Configuration commands (protocol rev. 1.2)
+        // -------------------------------------------------------------------
+
+        /**
+         * 0x20 — Set minimum (start) frequency of the acceleration ramp on all USDs.
+         * @param frequency  Start frequency in Hz [20, 10000].
+         */
+        oneway void setMinFrequency(in long frequency);
+
+        /**
+         * 0x21 — Set maximum (top) frequency of the acceleration ramp on all USDs.
+         * @param frequency  Top frequency in Hz [20, 10000].
+         */
+        oneway void setMaxFrequency(in long frequency);
+
+        /**
+         * 0x22 — Set ramp slope multiplier on all USDs.
+         * 0 = steepest ramp (20→1000 Hz in 10ms). Higher values relax the ramp.
+         * @param multiplier  Slope multiplication factor [0, 255].
+         */
+        oneway void setSlopeMultiplier(in long multiplier);
+
+        /**
+         * 0x23 — Set absolute position reference (define home) on all USDs.
+         * Associates the given value with each USD's current physical position.
+         * Motor must be stopped on each USD; command is ignored otherwise.
+         * @param position  Value to assign to current position, in 1/128 step units.
+         */
+        oneway void setReferencePosition(in long position);
+
+        /**
+         * 0x25 — Configure I/O pin directions and output values on all USDs.
+         * @param io_byte  Packed direction+value byte: bits[6:4]=DIO2..0, bits[2:0]=IO2..0.
+         */
+        oneway void setIoPins(in long io_byte);
+
+        /**
+         * 0x26 — Set micro-stepping resolution on all USDs.
+         * @param res_byte  Packed byte: bit3=AutoMan (1=auto), bits[2:0]=RS2..RS0.
+         *   RS encoding: 000=full, 001=1/2, 010=1/4, 011=1/8,
+         *                100=1/16, 101=1/32, 110=1/64, 111=1/128.
+         */
+        oneway void setResolution(in long res_byte);
+
+        /**
+         * 0x27 — Configure standby current reduction on all USDs.
+         * @param standby_byte  Packed byte: bits[7:6]=StandbyMode (00/01=0%, 10=25%, 11=50%),
+         *                      bits[5:0]=time_standby (x4096 µs after motor stop).
+         */
+        oneway void reduceCurrent(in long standby_byte);
+
+        /**
+         * 0x28 — Set response delay on all USDs.
+         * Controls the delay between command reception and the driver reply.
+         * Base unit: 512 µs. Value 0 = immediate. Value 255 = no reply.
+         * Useful for RS-485 half-duplex line-turnaround timing.
+         * @param delay  Delay value [0, 255].
+         */
+        oneway void setResponseDelay(in long delay);
+
+        /**
+         * 0x29 — Configure deferred execution mode and trigger I/O lines on all USDs.
+         * When enabled, move commands are buffered until trigger() is called.
+         * Sending this command clears any previously buffered move command.
+         * @param enabled  Delayed execution is enabled or not.
+         */
+        oneway void setDelayedExecution(in boolean enabled);
+
+        // -------------------------------------------------------------------
+        // Rev. 1.3 commands
+        // -------------------------------------------------------------------
+
+        /**
+         * 0x2A — Configure hardware immediate-stop inputs on all USDs (rev. 1.3).
+         * bits[5:3]=active level for I/Ox. bits[2:0]=I/Ox enable.
+         * The motor executes the deceleration ramp when the condition is met.
+         * @param config_byte  Packed I/O configuration byte [0, 63].
+         */
+        oneway void setStopIo(in long config_byte);
+
+        /**
+         * 0x2B — Configure "in-position" output signals on all USDs (rev. 1.3).
+         * Selected I/O lines go to active level when target position is reached.
+         * bits[5:3]=active level. bits[2:0]=I/Ox enable.
+         * @param config_byte  Packed I/O configuration byte [0, 63].
+         */
+        oneway void setPositioningIo(in long config_byte);
+
+        /**
+         * 0x2C — Configure home-sensor inputs on all USDs (rev. 1.3).
+         * When enabled lines match the active level, the internal position
+         * counter is zeroed and the deceleration ramp is started.
+         * Set bits[2:0]=0 to disable.
+         * @param config_byte  Packed I/O configuration byte [0, 63].
+         */
+        oneway void setHomeIo(in long config_byte);
+
+        /**
+         * 0x2D — Set driver working mode options on all USDs (rev. 1.3).
+         * bit0 (BAUD0): 0=9600 baud, 1=19200 baud.
+         * @param mode_byte  Options byte.
+         */
+        oneway void setWorkingMode(in long mode_byte);
+
+        // -------------------------------------------------------------------
+        // Status
+        // -------------------------------------------------------------------
+
+        /**
+         * Reads fresh hardware state (actPos/status) for the USD at the given
+         * ordinal slot within this LAN's USD list, and returns its status.
+         * The slot is a position in the LAN's internally ordered USD list, not
+         * a physical USD address. If this LAN has fewer USDs than (slot + 1),
+         * the returned sequence is empty.
+         * @param slot      zero-based ordinal position within this LAN's USD list.
+         * @param usdStatus status of the polled USD
+         * @return true if the LAN has a USD at the given slot, false otherwise
+         */
+        boolean getSlotStatus(in long slot, out USDStatus status) raises (ComponentErrors::ComponentErrorsEx);
+
+        // -------------------------------------------------------------------
+        // LUT and profile management
+        // -------------------------------------------------------------------
+
+        void setLUT(in string LUTName) raises (ComponentErrors::ComponentErrorsEx);
+
+        void setProfile(in TASProfile profile) raises (ComponentErrors::ComponentErrorsEx, ASErrors::ASErrorsEx);
+
+        // -------------------------------------------------------------------
+        // tracking commands
+        // -------------------------------------------------------------------
+        void update(in double elevation, in long tickIndex, in boolean force) raises (ComponentErrors::ComponentErrorsEx, ASErrors::ASErrorsEx);
+    };
+};
+
+#endif /* _ACTIVESURFACE_LAN_IDL_ */

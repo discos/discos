@@ -27,13 +27,10 @@
       <xs:extension base="baci:CharacteristicComponent">
 		<xs:sequence>
 			<xs:element name="status" type="mng:SystemStatusType" />	
-			<xs:element name="enabled" type="mng:BooleanType" />
-			<xs:element name="pprofile" type="as:ActiveSurfaceProfileType" />	
+			<xs:element name="profile" type="as:ActiveSurfaceProfileType" />
 			<xs:element name="tracking" type="mng:BooleanType" />
-			<xs:element name="LUT_filename" type="baci:ROstring" />
+			<xs:element name="LUT" type="baci:ROstring" />
 		</xs:sequence>
-        <!-- sleep time of the watching thread (microseconds), this is the thread that keeps data up to date -->
-        <xs:attribute name="WatchingThreadTime" type="xs:unsignedLong" use="required" />
         <!-- sleep time of the working thread (microseconds), this is the thread that updated the AS -->
         <xs:attribute name="WorkingThreadTime" type="xs:unsignedLong" use="required" />
 		<!-- the cache time (microseconds) for logging repetition filter -->
@@ -41,12 +38,7 @@
 		<!-- the expire time (microseconds) for logging repetition filter -->
 		<xs:attribute name="RepetitionExpireTime" type="xs:unsignedLong" use="required" />
         <xs:attribute name="profile" 			type="xs:unsignedByte" 	use="required" />
-        <xs:attribute name="sectors" type="xs:unsignedLong" use="required" />
-        <xs:attribute name="circles" type="xs:unsignedLong" use="required" />
-        <xs:attribute name="LANs" type="xs:unsignedLong" use="required" />
-        <xs:attribute name="lastUSD" type="xs:unsignedLong" use="required" />
-        <xs:attribute name="actuatorsInCircle" type="xs:string" use="required" />
-        <!-- 0 SHAPED, 1 SHAPED FIXED, 2 PARABOLIC, 3 PARABOLIC FIXED, 4 PARK -->
+        <!-- 0 PARK, 1 SHAPED, 2 SHAPED FIXED, 3 PARABOLIC, 4 PARABOLIC FIXED -->
         <xs:attribute name="acceptedProfiles" type="xs:string" use="optional" default="0,1,2,3,4"/>
       </xs:extension>
      </xs:complexContent>

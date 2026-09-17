@@ -1,0 +1,230 @@
+#ifndef _ACTIVESURFACE_USD_IDL_
+#define _ACTIVESURFACE_USD_IDL_
+
+/*********************************************************************/
+/* OAC Osservatorio Astronomico di Cagliari                          */
+/*                                                                   */
+/* This code is under GNU General Public Licence (GPL).              */
+/*                                                                   */
+/* Who                                          when        what     */
+/* Giuseppe Maccaferri                          2005        Creation */
+/* Carlo Migoni (migoni@ca.astro.it)            2013        Revision */
+/* Giuseppe Carboni (giuseppe.carboni@inaf.it)  2019        Revision */
+/* Giuseppe Carboni (giuseppe.carboni@inaf.it)  2026        Redesign */
+/*********************************************************************/
+
+#include <baci.idl>
+#include <ASErrors.idl>
+#include <ComponentErrors.idl>
+#include <ActiveSurfaceCommon.idl>
+
+#pragma prefix "alma"
+
+module ActiveSurface
+{
+    /**
+     * This interface represents a single USD50xxx/USD60xxx stepper motor
+     * actuator device on the Active Surface primary mirror.
+     *
+     * In the redesigned architecture (Boss->Sector->LAN->USD), this component
+     * is responsible exclusively for hardware-level communication with a single
+     * physical USD driver. All higher-level logic (gravity corrections, user
+     * offsets, profile computation, lookup tables) has been moved up to the
+     * Sector component.
+     *
+     * Communication with the physical hardware is performed intra-container
+     * via the shared ActiveSurface::Socket instance (no CORBA overhead).
+     * Broadcast commands (sent to all USDs on the same serial line simultaneously)
+     * are handled by the LAN component.
+     */
+    interface USD : ACS::CharacteristicComponent
+    {
+        // -------------------------------------------------------------------
+        // Read-only hardware state
+        // -------------------------------------------------------------------
+
+        /**
+         * The actual absolute position of the motor, in 1/128 step units.
+         * Updated by readStatus().
+         */
+        readonly attribute ACS::ROlong actPos;
+
+        /**
+         * The status of the USD hardware.
+         * byte 2: unused.
+         * byte 1: n.u.(MSB), DIO2, DIO1, DIO0, n.u., fault, driv_on, zero.
+         * byte 0: run(MSB), differ_exec, ready, stnby, auto, RS2, RS1, RS0.
+         * Updated by readStatus().
+         */
+        readonly attribute ACS::ROpattern status;
+
+        /**
+         * The USD firmware version. Must be 1.3 for correct operation.
+         * Also used to check USD availability on the serial line.
+         */
+        readonly attribute ACS::ROlong softVer;
+
+        /**
+         * The USD hardware type code.
+         * Expected value: 0x21 (USD60xxx).
+         */
+        readonly attribute ACS::ROlong type;
+
+        // -------------------------------------------------------------------
+        // Configurable parameters (read-write, persisted in CDB)
+        // -------------------------------------------------------------------
+
+        /**
+         * The last commanded absolute position, in 1/128 step units.
+         */
+        readonly attribute ACS::RWlong cmdPos;
+
+        /**
+         * The starting (minimum) velocity for the acceleration ramp, in Hz.
+         * Valid range: [20, 10000].
+         */
+        readonly attribute ACS::RWlong Fmin;
+
+        /**
+         * The maximum (duty) velocity, in Hz. Maximum allowed: 10000 Hz.
+         * Valid range: [20, 10000].
+         */
+        readonly attribute ACS::RWlong Fmax;
+
+        /**
+         * The acceleration factor.
+         * The USD has a minimal internal ramp of ~100 KHz/sec.
+         * This factor relaxes the base ramp by (factor+1) times:
+         * e.g. 99 means an acceleration of ~1 KHz/sec.
+         */
+        readonly attribute ACS::RWlong acc;
+
+        /**
+         * The on-reply delay, in protocol units (512µs each, range 0-255).
+         * Controls the delay between command reception and the USD response.
+         * Value 0 = immediate reply, 255 = no reply.
+         */
+        readonly attribute ACS::RWlong delay;
+
+        /**
+         * USD I/O user bits configuration.
+         * Packed byte: bits[6:4]=DIO2..0 direction, bits[2:0]=IO2..0 value.
+         */
+        readonly attribute ACS::RWlong uBits;
+
+        // -------------------------------------------------------------------
+        // Motion commands
+        // -------------------------------------------------------------------
+
+        /**
+         * Immediate stop with deceleration ramp.
+         * The USD executes its programmed deceleration ramp.
+         * Can be sent at any time.
+         */
+        oneway void stop();
+
+        /**
+         * Move the actuator upward (outward) continuously until stop() is called.
+         * Motor must be stopped before issuing this command.
+         */
+        oneway void up();
+
+        /**
+         * Move the actuator downward (inward) continuously until stop() is called.
+         * Motor must be stopped before issuing this command.
+         */
+        oneway void down();
+
+        /**
+         * Move the actuator by a relative offset from the current position.
+         * @param incr  Displacement in 1/128 step units. Negative = downward.
+         * Motor must be stopped before issuing this command.
+         */
+        oneway void move(in long incr);
+
+        /**
+         * Move the actuator to the reference (home) position.
+         * Motor must be stopped before issuing this command.
+         */
+        oneway void refPos();
+
+        /**
+         * Move the actuator to the stow position.
+         * Motor must be stopped before issuing this command.
+         */
+        oneway void stow();
+
+        /**
+         * Move the actuator to the setup (operational) position.
+         * Motor must be stopped before issuing this command.
+         */
+        oneway void setup();
+
+        /**
+         * Move the actuator to the topmost physical position.
+         * Reached via subsequent movements of maximum run length.
+         * Motor must be stopped before issuing this command.
+         */
+        oneway void top();
+
+        /**
+         * Move the actuator to the bottommost physical position.
+         * Reached via subsequent movements of maximum run length.
+         * Motor must be stopped before issuing this command.
+         */
+        oneway void bottom();
+
+        // -------------------------------------------------------------------
+        // Hardware management commands
+        // -------------------------------------------------------------------
+
+        /**
+         * Software reset of the USD.
+         * Resets the position counter and restarts communication at 9600 bps.
+         * @throw ComponentErrors::ComponentErrorsEx on communication failure.
+         */
+        void reset() raises (ComponentErrors::ComponentErrorsEx);
+
+        /**
+         * Perform the scale calibration procedure.
+         * The actuator must be against the upper mechanical edge before calling.
+         */
+        oneway void calibrate();
+
+        /**
+         * Perform the scale verification procedure.
+         * @throw ASErrors::ASErrorsEx if the USD is unavailable or uncalibrated.
+         */
+        oneway void calVer();
+
+        /**
+         * Write calibration results to the CDB.
+         * @param cammaLenD   Length of the camma-on window.
+         * @param cammaPosD   Distance from top edge of the middle camma-on window.
+         * @param calibrated  true if the USD is correctly calibrated.
+         * @throw ASErrors::ASErrorsEx on failure.
+         */
+        void writeCalibration(out double cammaLenD, out double cammaPosD, out boolean calibrated) raises (ASErrors::ASErrorsEx);
+
+        // -------------------------------------------------------------------
+        // Status
+        // -------------------------------------------------------------------
+
+        /**
+         * Read the current status and position from the physical hardware.
+         * Updates actPos and status properties.
+         * Called periodically by the Sector monitor loop.
+         */
+        oneway void readStatus();
+
+        /**
+         * Return the last known status of this USD as a USDStatus struct.
+         * Does not communicate with hardware; returns cached values.
+         * @param usdStatus  The last known status.
+         * @throw ComponentErrors::ComponentErrorsEx on failure.
+         */
+        void getStatus(out USDStatus status) raises (ComponentErrors::ComponentErrorsEx);
+    };
+};
+
+#endif /* _ACTIVESURFACE_USD_IDL_ */

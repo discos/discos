@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xs:schema
+  targetNamespace="urn:schemas-cosylab-com:ActiveSurfaceLAN:1.0"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns="urn:schemas-cosylab-com:ActiveSurfaceLAN:1.0"
+  xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+  xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified">
+
+  <xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+  <xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+
+  <xs:complexType name="typeActiveSurfaceLAN">
+   <xs:complexContent>
+    <xs:extension base="baci:CharacteristicComponent">
+     <xs:sequence>
+      <xs:element name="connected" type="baci:ROboolean" />
+     </xs:sequence>
+
+     <!-- Socket connection parameters for the LAN/serial converter -->
+     <xs:attribute name="IPAddress" type="xs:string"        use="required"/>
+     <xs:attribute name="port"      type="xs:unsignedInt"   use="required"/>
+     <xs:attribute name="baudRate"  type="xs:unsignedLong"  use="optional" default="19200"/>
+
+     <!-- These parameters are common setup values for all USDs in each LAN -->
+     <!-- On-reply delay in protocol units (256us each, range 0-255): 0 = immediate reply, 255 = no reply -->
+     <xs:attribute name="delay"     type="xs:unsignedLong"  use="optional" default="3"/>
+
+     <!-- Minimum (start) frequency for the acceleration ramp, in Hz [20, 10000] -->
+     <xs:attribute name="Fmin"      type="xs:unsignedLong"  use="optional" default="100"/>
+
+     <!-- Maximum (top) frequency for the acceleration ramp, in Hz [20, 10000] -->
+     <xs:attribute name="Fmax"      type="xs:unsignedLong"  use="optional" default="500"/>
+
+     <!-- Acceleration factor. Relaxes the internal ramp by (factor+1) times -->
+     <xs:attribute name="acc"       type="xs:unsignedLong"  use="optional" default="50"/>
+
+     <!-- I/O user bits: bits[6:4]=DIO2..0 direction, bits[2:0]=IO2..0 value -->
+     <xs:attribute name="uBits"     type="xs:unsignedLong"  use="optional" default="34"/>
+
+     <!-- Micro-stepping resolution: 0=full, 1=1/2, 2=1/4, 3=1/8, 4=1/16, 5=1/32, 6=1/64, 7=1/128 -->
+     <xs:attribute name="step_res"  type="xs:unsignedLong"  use="optional" default="1"/>
+
+    </xs:extension>
+   </xs:complexContent>
+  </xs:complexType>
+
+  <xs:element name="ActiveSurfaceLAN" type="typeActiveSurfaceLAN"/>
+
+</xs:schema>

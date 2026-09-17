@@ -2,15 +2,17 @@
 #define ACTIVESURFACEPROXY_H
 
 #include <ActiveSurfaceBossC.h>
-#include <lanC.h>
-#include <usdC.h>
+#include <ActiveSurfaceUSDC.h>
+#include <ActiveSurfaceLANC.h>
+#include <ActiveSurfaceSectorC.h>
 
 #include "ComponentProxy.h"
 
 namespace ActiveSurface
 {
     PROXY_COMPONENT(ActiveSurfaceBoss);
-    PROXY_COMPONENT(lan);
+    PROXY_COMPONENT(Sector)
+    PROXY_COMPONENT(LAN);
     PROXY_COMPONENT(USD);
 };
 

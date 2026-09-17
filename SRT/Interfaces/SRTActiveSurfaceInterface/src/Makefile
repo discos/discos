@@ -125,7 +125,7 @@ tttlll_OBJECTS  =
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS = usd
+CDB_SCHEMAS = ActiveSurfaceUSD
 
 #
 # IDL Files and flags

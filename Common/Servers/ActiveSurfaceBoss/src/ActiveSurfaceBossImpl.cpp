@@ -1,28 +1,29 @@
-// $Id: ActiveSurfaceBossImpl.cpp,v 1.2 2010-07-26 12:37:07 c.migoni Exp $
-
-#include <new>
+#include <future>
+#include <cmath>
 #include "ActiveSurfaceBossImpl.h"
 #include "DevIOStatus.h"
-#include "DevIOEnable.h"
 #include "DevIOProfile.h"
 #include "DevIOTracking.h"
 #include "DevIOLUT.h"
 
-_IRA_LOGFILTER_DECLARE;
+namespace SP = SimpleParser;
 
-static char const *rcsId="@(#) $Id: ActiveSurfaceBossImpl.cpp,v 1.2 2010-07-26 12:37:07 c.migoni Exp $";
-static void *use_rcsId = ((void)&use_rcsId,(void *) &rcsId);
-
-using namespace SimpleParser;
-
-ActiveSurfaceBossImpl::ActiveSurfaceBossImpl(const ACE_CString &CompName, maci::ContainerServices *containerServices) :
-    CharacteristicComponentImpl(CompName,containerServices),
+ActiveSurfaceBossImpl::ActiveSurfaceBossImpl(const ACE_CString& CompName, maci::ContainerServices* containerServices) :
+    CharacteristicComponentImpl(CompName, containerServices),
+    m_containerServices(*containerServices),
+    m_parser(this, 1),
     m_pstatus(this),
-    m_penabled(this),
     m_pprofile(this),
     m_ptracking(this),
-    m_pLUT_filename(this),
-    m_core(NULL)
+    m_pLUT(this),
+    m_profile(ActiveSurface::AS_PARK),
+    m_status(Management::MNG_WARNING),
+    m_tracking(Management::MNG_FALSE),
+    m_trackingEnabled(true),
+    m_LUT("--"),
+    m_maxUSDCount(0),
+    m_zmqPublisher("active_surface"),
+    m_antennaBoss("IDL:alma/Antenna/AntennaBoss:1.0", containerServices)
 {
     AUTO_TRACE("ActiveSurfaceBossImpl::ActiveSurfaceBossImpl()");
 }
@@ -36,546 +37,576 @@ void ActiveSurfaceBossImpl::initialize() throw (ACSErr::ACSbaseExImpl)
 {
     AUTO_TRACE("ActiveSurfaceBossImpl::initialize()");
 
-    _IRA_LOGFILTER_ACTIVATE(10000000, 20000000);
+    long workingThreadTime;
+    IRA::CString buff;
+    if(!IRA::CIRATools::getDBValue(&m_containerServices, "WorkingThreadTime", (long&)workingThreadTime) ||
+       !IRA::CIRATools::getDBValue(&m_containerServices, "acceptedProfiles", buff))
+    {
+        ACS_LOG(LM_SOURCE_INFO, "ActiveSurfaceBossImpl::initialize()", (LM_ERROR, "Error reading CDB!"));
+        ASErrors::CDBAccessErrorExImpl exImpl(__FILE__, __LINE__, "ActiveSurfaceBossImpl::initialize() - Error reading CDB parameters");
+        throw acsErrTypeLifeCycle::LifeCycleExImpl(exImpl, __FILE__, __LINE__, "ActiveSurfaceBossImpl::initialize()");
+    }
 
-    cs = getContainerServices();
-    ACS_LOG(LM_FULL_INFO,"ActiveSurfaceBossImpl::initialize()",(LM_INFO,"COMPSTATE_INITIALIZING"));
+    std::istringstream iss(std::string(buff).c_str());
+    std::string token;
+
+    while(std::getline(iss, token, ','))
+    {
+        try
+        {
+            m_acceptedProfiles.insert((ActiveSurface::TASProfile)std::stoi(token));
+        }
+        catch(...)
+        {
+            ACS_LOG(LM_SOURCE_INFO, "ActiveSurfaceBossImpl::initialize()", (LM_ERROR, "Error reading CDB!"));
+            ASErrors::CDBAccessErrorExImpl exImpl(__FILE__, __LINE__, "ActiveSurfaceBossImpl::initialize() - Error reading CDB parameters");
+            throw acsErrTypeLifeCycle::LifeCycleExImpl(exImpl, __FILE__, __LINE__, "ActiveSurfaceBossImpl::initialize()");
+        }
+    }
+
+    if(m_acceptedProfiles.empty())
+    {
+        ACS_LOG(LM_SOURCE_INFO, "ActiveSurfaceBossImpl::initialize()", (LM_ERROR, "Error reading CDB!"));
+        ASErrors::CDBAccessErrorExImpl exImpl(__FILE__, __LINE__, "ActiveSurfaceBossImpl::initialize() - Error reading CDB parameters");
+        throw acsErrTypeLifeCycle::LifeCycleExImpl(exImpl, __FILE__, __LINE__, "ActiveSurfaceBossImpl::initialize()");
+    }
+
+    ACS_LOG(LM_FULL_INFO, "ActiveSurfaceBossImpl::initialize()", (LM_INFO, "COMPSTATE_INITIALIZING"));
 
     try
     {
-        boss=(CActiveSurfaceBossCore *)new CActiveSurfaceBossCore(getContainerServices(),this);
-        boss->initialize();
-        m_core=new IRA::CSecureArea<CActiveSurfaceBossCore>(boss);
-        m_pstatus=new ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus),POA_Management::ROTSystemStatus>
-            (getContainerServices()->getName()+":status",getComponent(),new ActiveSurfaceBossImplDevIOStatus(boss),true);
-        m_penabled=new ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean>
-            (getContainerServices()->getName()+":enabled",getComponent(),new ActiveSurfaceBossImplDevIOEnable(boss),true);
-        m_pprofile=new ROEnumImpl<ACS_ENUM_T(ActiveSurface::TASProfile),POA_ActiveSurface::ROTASProfile>
-            (getContainerServices()->getName()+":pprofile",getComponent(),new ActiveSurfaceBossImplDevIOProfile(boss),true);
-        m_ptracking=new ROEnumImpl<ACS_ENUM_T(Management::TBoolean),POA_Management::ROTBoolean>
-            (getContainerServices()->getName()+":tracking",getComponent(),new ActiveSurfaceBossImplDevIOTracking(boss),true);
-        m_pLUT_filename=new ROstring(getContainerServices()->getName()+":LUT_filename",getComponent(),new ActiveSurfaceBossImplDevIOLUT(boss),true);
-
-        // create the parser for command line execution
-        m_parser = new SimpleParser::CParser<CActiveSurfaceBossCore>(boss,10);
+        m_pstatus = new ROEnumImpl<ACS_ENUM_T(Management::TSystemStatus), POA_Management::ROTSystemStatus>
+            (m_containerServices.getName() + ":status", getComponent(), new ActiveSurfaceBossImplDevIOStatus(*this), true);
+        m_pprofile = new ROEnumImpl<ACS_ENUM_T(ActiveSurface::TASProfile), POA_ActiveSurface::ROTASProfile>
+            (m_containerServices.getName() + ":profile", getComponent(), new ActiveSurfaceBossImplDevIOProfile(*this), true);
+        m_ptracking = new ROEnumImpl<ACS_ENUM_T(Management::TBoolean), POA_Management::ROTBoolean>
+            (m_containerServices.getName() + ":tracking", getComponent(), new ActiveSurfaceBossImplDevIOTracking(*this), true);
+        m_pLUT = new ROstring(m_containerServices.getName() + ":LUT", getComponent(), new ActiveSurfaceBossImplDevIOLUT(*this), true);
     }
-    catch (std::bad_alloc& ex)
+    catch(std::bad_alloc& ex)
     {
-        _EXCPT(ComponentErrors::MemoryAllocationExImpl,dummy,"ActiveSurfaceBossImpl::initialize()");
+        _EXCPT(ComponentErrors::MemoryAllocationExImpl, dummy, "ActiveSurfaceBossImpl::initialize()");
         throw dummy;
     }
 
-    long workingThreadTime;
-    if(!CIRATools::getDBValue(cs, "profile", (long&)m_profile) ||
-       !CIRATools::getDBValue(cs, "WorkingThreadTime", (long&)workingThreadTime))
+    m_parser.add("asSetup", new SP::function1<ActiveSurfaceBossImpl, SP::non_constant, SP::void_type, SP::I<SP::string_type>>(this, &ActiveSurfaceBossImpl::_setup), 1);
+    m_parser.add("asOn", new SP::function0<ActiveSurfaceBossImpl, SP::non_constant, SP::void_type>(this, &ActiveSurfaceBossImpl::asOn), 0);
+    m_parser.add("asOff", new SP::function0<ActiveSurfaceBossImpl, SP::non_constant, SP::void_type>(this, &ActiveSurfaceBossImpl::asOff), 0);
+    m_parser.add("asPark", new SP::function0<ActiveSurfaceBossImpl, SP::non_constant, SP::void_type>(this, &ActiveSurfaceBossImpl::_park), 0);
+    m_parser.add("asSetLUT", new SP::function1<ActiveSurfaceBossImpl, SP::non_constant, SP::void_type, SP::I<SP::string_type>>(this, &ActiveSurfaceBossImpl::_setLUT), 1);
+
+    // Find the minimum and maximum USD indexes for this station
+    ACE_CString_Vector allUSDs = m_containerServices.findComponents("AS/SECTOR*/LAN*/USD*", "*");
+    std::map<std::string, unsigned int> usdCountPerLan;
+
+    for(const auto& n : allUSDs)
     {
-        ACS_LOG(LM_SOURCE_INFO,"ActiveSurfaceBossImpl:initialize()",(LM_ERROR,"Error reading CDB!"));
-        ASErrors::CDBAccessErrorExImpl exImpl(__FILE__,__LINE__,"USDImpl::initialize() - Error reading CDB parameters");
-        throw acsErrTypeLifeCycle::LifeCycleExImpl(exImpl,__FILE__,__LINE__,"USDImpl::initialize()");
+        std::string name(n.c_str());
+        std::size_t pos = name.rfind("/");
+
+        if(pos == std::string::npos)
+        {
+            continue;
+        }
+
+        std::string lanKey = name.substr(0, pos);
+        usdCountPerLan[lanKey]++;
     }
 
-    if(boss->validProfile(m_profile))
+    for(const auto& [lan, usdCount] : usdCountPerLan)
     {
-        ACS_SHORT_LOG((LM_INFO,"ActiveSurfaceBoss: CDB %d profile parameter read", m_profile));
-        boss->m_profile.store(m_profile);
-    }
-    else
-    {
-        ACS_LOG(LM_SOURCE_INFO,"ActiveSurfaceBossImpl:initialize()",(LM_ERROR,"Profile unknown or not accepted"));
-        ASErrors::UnknownProfileExImpl exImpl(__FILE__,__LINE__,"ActiveSurfaceBossImpl::initialize() - Profile unknown or not accepted");
-        throw acsErrTypeLifeCycle::LifeCycleExImpl(exImpl,__FILE__,__LINE__,"ActiveSurfaceBossImpl::initialize()");
+        m_maxUSDCount = std::max(m_maxUSDCount, usdCount);
     }
 
+    m_maxTickIndex = static_cast<unsigned int>(std::ceil(static_cast<double>(m_maxUSDCount) / TICK_DIVIDER));
+
+    // Start the working thread
     try
     {
-        m_workingThread=getContainerServices()->getThreadManager()->create<CActiveSurfaceBossWorkingThread,CSecureArea<CActiveSurfaceBossCore> *>("ACTIVESURFACEBOSSWORKER",m_core);
-        m_workingThread->setSleepTime(workingThreadTime*10);
+        m_workingThread = m_containerServices.getThreadManager()->create<ActiveSurfaceBossWorkingThread, ActiveSurfaceBossImpl&>(
+            "ActiveSurfaceBossWorkingThread", *this, ACS::ThreadBase::defaultResponseTime, ACS::TimeInterval(workingThreadTime * 10)
+        );
     }
-    catch (acsthreadErrType::acsthreadErrTypeExImpl& ex)
+    catch(acsthreadErrType::CanNotSpawnThreadExImpl& _impl)
     {
-        _ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,_dummy,ex,"ActiveSurfaceBossImpl::initialize()");
-        throw _dummy;
-    }
-    catch (...)
-    {
-        _THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"ActiveSurfaceBossImpl::initialize()");
+        _ADD_BACKTRACE(ComponentErrors::CanNotStartThreadExImpl, impl, _impl, "ActiveSurfaceBossImpl::initialize()");
+        impl.setThreadName("ActiveSurfaceBossWorkingThread");
+        impl.log(LM_DEBUG);
+        throw acsErrTypeLifeCycle::LifeCycleExImpl(impl, __FILE__, __LINE__, "ActiveSurfaceBossImpl::initialize()");
     }
 
-    try
-    {
-        m_initializationThread=getContainerServices()->getThreadManager()->create<CActiveSurfaceBossInitializationThread,CActiveSurfaceBossCore *>("ACTIVESURFACEBOSSINITTHREAD",boss);
-    }
-    catch (acsthreadErrType::acsthreadErrTypeExImpl& ex)
-    {
-        _ADD_BACKTRACE(ComponentErrors::ThreadErrorExImpl,_dummy,ex,"ActiveSurfaceBossImpl::initialize()");
-        throw _dummy;
-    }
-    catch (...)
-    {
-        _THROW_EXCPT(ComponentErrors::UnexpectedExImpl,"ActiveSurfaceBossImpl::initialize()");
-    }
-
-    // configure the parser.....
-    m_parser->add("asSetup",new function1<CActiveSurfaceBossCore,non_constant,void_type,I<enum_type<ActiveSurfaceProfile2String,ActiveSurface::TASProfile> > >(boss,&CActiveSurfaceBossCore::setProfile),1);
-    m_parser->add("asOn",new function0<CActiveSurfaceBossCore,non_constant,void_type >(boss,&CActiveSurfaceBossCore::asOn),0);
-    m_parser->add("asOff",new function0<CActiveSurfaceBossCore,non_constant,void_type >(boss,&CActiveSurfaceBossCore::asOff),0);
-    m_parser->add("asPark",new function0<CActiveSurfaceBossCore,non_constant,void_type >(boss,&CActiveSurfaceBossCore::asPark),0);
-    m_parser->add("asSetLUT",new function1<CActiveSurfaceBossCore,non_constant,void_type,I<string_type> >(boss,&CActiveSurfaceBossCore::asSetLUT),1 );
-
-    ACS_LOG(LM_FULL_INFO, "ActiveSurfaceBossImpl::initialize()", (LM_INFO,"COMPSTATE_INITIALIZED"));
+    ACS_LOG(LM_FULL_INFO, "ActiveSurfaceBossImpl::initialize()", (LM_INFO, "COMPSTATE_INITIALIZED"));
 }
 
 void ActiveSurfaceBossImpl::execute() throw (ACSErr::ACSbaseExImpl)
 {
     AUTO_TRACE("ActiveSurfaceBossImpl::execute()");
 
-    try
-    {
-        boss->execute();
-    }
-    catch (ACSErr::ACSbaseExImpl& E)
-    {
-        _ADD_BACKTRACE(ComponentErrors::InitializationProblemExImpl,_dummy,E,"ActiveSurfaceBossImpl::execute()");
-        throw _dummy;
-    }
-    m_workingThread->resume();
-    m_initializationThread->resume();
+    std::string search = "AS/SECTOR*";
+    ACE_CString_Vector allNames = m_containerServices.findComponents(search.c_str(), "*");
 
-    ACS_LOG(LM_FULL_INFO,"ActiveSurfaceBossImpl::execute()",(LM_INFO,"ActiveSurfaceBossImpl::COMPSTATE_OPERATIONAL"));
+    const std::string prefix = "AS/SECTOR";
+
+    for(const auto& n : allNames)
+    {
+        std::string name(n.c_str());
+        std::string relative = name.substr(3);
+    
+        if(relative.find('/') != std::string::npos)
+        {
+            continue;
+        }
+
+        unsigned int sectorIndex = static_cast<unsigned int>(std::atoi(name.c_str() + prefix.length()));
+        ActiveSurface::Sector_proxy proxy;
+        proxy.setContainerServices(&m_containerServices);
+        proxy.setComponentName(name.c_str());
+        m_sectors[sectorIndex] = proxy;
+
+        std::ostringstream sectorKey;
+        sectorKey << "SECTOR" << std::setw(2) << std::setfill('0') << sectorIndex;
+        ZMQ::ZMQDictionary& sectorDictionary = m_zmqDictionary[sectorKey.str()];
+
+        for(unsigned int lanIndex = 1; lanIndex <= LANS_PER_SECTOR; lanIndex++)
+        {
+            std::ostringstream lanKey;
+            lanKey << "LAN" << std::setw(2) << std::setfill('0') << lanIndex;
+            ZMQ::ZMQDictionary& lanDictionary = sectorDictionary[lanKey.str()];
+
+            lanDictionary["connected"] = false;
+
+            std::ostringstream lanSearch;
+            lanSearch << name << "/" << lanKey.str() << "/USD*";
+            ACE_CString_Vector allUSDs = m_containerServices.findComponents(lanSearch.str().c_str(), "*");
+
+            for(const auto& usdName : allUSDs)
+            {
+                std::string usdFullName(usdName.c_str());
+                std::size_t usdPos = usdFullName.rfind("USD");
+
+                if(usdPos == std::string::npos)
+                {
+                    continue;
+                }
+
+                std::string usdKey = usdFullName.substr(usdPos);
+                lanDictionary[usdKey]["available"] = false;
+            }
+        }
+    }
+
+    m_workingThread->resume();
 }
 
 void ActiveSurfaceBossImpl::cleanUp()
 {
     AUTO_TRACE("ActiveSurfaceBossImpl::cleanUp()");
-    if (m_workingThread!=NULL)
-    {
-        m_workingThread->suspend();
-        getContainerServices()->getThreadManager()->destroy(m_workingThread);
-    }
-    if (m_initializationThread!=NULL)
-    {
-        m_initializationThread->suspend();
-        getContainerServices()->getThreadManager()->destroy(m_initializationThread);
-    }
-    ACS_LOG(LM_FULL_INFO,"ActiveSurfaceBossImpl::cleanUp()",(LM_INFO,"ActiveSurfaceBossImpl::THREADS_TERMINATED"));
-    if (m_parser!=NULL) delete m_parser;
-    ACS_LOG(LM_FULL_INFO,"ActiveSurfaceBossImpl::cleanUp()",(LM_INFO,"ActiveSurfaceBossImpl::PARSER_FREED"));
-    CSecAreaResourceWrapper<CActiveSurfaceBossCore> core = m_core->Get();
-    core->cleanUp();
-    ACS_LOG(LM_FULL_INFO,"ActiveSurfaceBossImpl::cleanUp()",(LM_INFO,"ActiveSurfaceBossImpl::BOSS_CORE_FREED"));
-    _IRA_LOGFILTER_FLUSH;
-    _IRA_LOGFILTER_DESTROY;
     CharacteristicComponentImpl::cleanUp();
 }
 
 void ActiveSurfaceBossImpl::aboutToAbort()
 {
     AUTO_TRACE("ActiveSurfaceBossImpl::aboutToAbort()");
-    if (m_workingThread!=NULL)
-    {
-        m_workingThread->suspend();
-        getContainerServices()->getThreadManager()->destroy(m_workingThread);
-    }
-    CSecAreaResourceWrapper<CActiveSurfaceBossCore>  core=m_core->Get();
-    core->cleanUp();
-    if (m_parser!=NULL) delete m_parser;
+    CharacteristicComponentImpl::aboutToAbort();
 }
 
-void ActiveSurfaceBossImpl::stop (CORBA::Long circle, CORBA::Long actuator, CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
-{
-    AUTO_TRACE("ActiveSurfaceBossImpl::stop()");
-
-    CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
-    try
-    {
-        resource->onewayAction(ActiveSurface::AS_STOP, circle, actuator, radius, 0, 0, 0, m_profile);
-    }
-    catch (ComponentErrors::ComponentErrorsExImpl& ex)
-    {
-        ex.log(LM_DEBUG);
-        throw ex.getComponentErrorsEx();
-    }
-}
-
-void ActiveSurfaceBossImpl::setup (const char *config) throw (CORBA::SystemException, ManagementErrors::ConfigurationErrorEx)
+void ActiveSurfaceBossImpl::setup(const char* config) throw (ManagementErrors::ConfigurationErrorEx)
 {
     AUTO_TRACE("ActiveSurfaceBossImpl::setup()");
-    IRA::CString strVal(config);
-    strVal.MakeUpper();
-    try {
-        if (strVal=="S") {
-            setProfile(ActiveSurface::AS_SHAPED);
-        }
-        else if (strVal=="SF") {
-            setProfile(ActiveSurface::AS_SHAPED_FIXED);
-        }
-        else if (strVal=="P") {
-            setProfile(ActiveSurface::AS_PARABOLIC);
-        }
-        else if (strVal=="PF") {
-            setProfile(ActiveSurface::AS_PARABOLIC_FIXED);
-        }
-        else {
-            _EXCPT(ManagementErrors::ConfigurationErrorExImpl, ex, "ActiveSurfaceBossImpl::setup()");
-            throw ex.getConfigurationErrorEx();
-        }
+
+    try
+    {
+        _setup(config);
     }
-    catch (ASErrors::UnknownProfileEx& ex) {
-        _ADD_BACKTRACE(ManagementErrors::ConfigurationErrorExImpl, impl, ex, "ActiveSurfaceBossImpl::setup()");
-        impl.setSubsystem("ActiveSurfaceBoss");
+    catch(ManagementErrors::ConfigurationErrorExImpl& impl)
+    {
+        impl.log(LM_DEBUG);
         throw impl.getConfigurationErrorEx();
     }
 }
 
-void ActiveSurfaceBossImpl::park () throw (CORBA::SystemException, ManagementErrors::ParkingErrorEx)
+void ActiveSurfaceBossImpl::_setup(const char* config) throw (ManagementErrors::ConfigurationErrorExImpl)
+{
+    AUTO_TRACE("ActiveSurfaceBossImpl::_setup()");
+    IRA::CString strVal(config);
+    strVal.MakeUpper();
+    try
+    {
+        if(strVal == "S")
+        {
+            _setProfile(ActiveSurface::AS_SHAPED);
+        }
+        else if(strVal == "SF")
+        {
+            _setProfile(ActiveSurface::AS_SHAPED_FIXED);
+        }
+        else if(strVal == "P")
+        {
+            _setProfile(ActiveSurface::AS_PARABOLIC);
+        }
+        else if(strVal == "PF")
+        {
+            _setProfile(ActiveSurface::AS_PARABOLIC_FIXED);
+        }
+        else
+        {
+            _THROW_EXCPT(ASErrors::UnknownProfileExImpl, "ActiveSurfaceBossImpl::_setup()");
+        }
+    }
+    catch(ASErrors::UnknownProfileExImpl& ex)
+    {
+        _ADD_BACKTRACE(ManagementErrors::ConfigurationErrorExImpl, impl, ex, "ActiveSurfaceBossImpl::_setup()");
+        impl.setSubsystem("ActiveSurfaceBoss");
+        throw impl;
+    }
+}
+
+void ActiveSurfaceBossImpl::park() throw (ManagementErrors::ParkingErrorEx)
 {
     AUTO_TRACE("ActiveSurfaceBossImpl::park()");
-    CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
+
     try
     {
-        resource->asPark();
+        _park();
     }
-    catch (ComponentErrors::ComponentErrorsExImpl& ex)
+    catch(ManagementErrors::ParkingErrorExImpl& impl)
     {
-        _EXCPT(ManagementErrors::ParkingErrorExImpl,ex,"ActiveSurfaceBossImpl::park()");
-        throw ex.getParkingErrorEx();
+        impl.log(LM_DEBUG);
+        throw impl.getParkingErrorEx();
     }
-    resource->m_tracking.store(false);
 }
 
-void ActiveSurfaceBossImpl::stow (CORBA::Long circle, CORBA::Long actuator, CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
+void ActiveSurfaceBossImpl::_park() throw (ManagementErrors::ParkingErrorExImpl)
 {
-    AUTO_TRACE("ActiveSurfaceBossImpl::stow()");
+    AUTO_TRACE("ActiveSurfaceBossImpl::_park()");
 
-    CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
     try
     {
-        resource->onewayAction(ActiveSurface::AS_STOW, circle, actuator, radius, 0, 0, 0, m_profile);
+        _setProfile(ActiveSurface::AS_PARK);
     }
-    catch (ComponentErrors::ComponentErrorsExImpl& ex)
+    catch(ASErrors::UnknownProfileExImpl& ex)
     {
-        ex.log(LM_DEBUG);
-        throw ex.getComponentErrorsEx();
+        _ADD_BACKTRACE(ManagementErrors::ParkingErrorExImpl, impl, ex, "ActiveSurfaceBossImpl::park()");
+        impl.setSubsystem("ActiveSurfaceBoss");
+        throw impl;
     }
+
+    m_profile = ActiveSurface::AS_PARK;
 }
 
-void ActiveSurfaceBossImpl::refPos (CORBA::Long circle, CORBA::Long actuator, CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
-{
-    AUTO_TRACE("ActiveSurfaceBossImpl::refPos()");
-
-    CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
-    try
-    {
-        resource->onewayAction(ActiveSurface::AS_REFPOS, circle, actuator, radius, 0, 0, 0, m_profile);
-    }
-    catch (ComponentErrors::ComponentErrorsExImpl& ex)
-    {
-        ex.log(LM_DEBUG);
-        throw ex.getComponentErrorsEx();
-    }
-}
-
-void ActiveSurfaceBossImpl::update (CORBA::Double elevation) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
+void ActiveSurfaceBossImpl::update(unsigned long tickIndex) throw (ComponentErrors::ComponentErrorsEx)
 {
     AUTO_TRACE("ActiveSurfaceBossImpl::update()");
 
-    CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
-    if(resource->m_profileSetted)
+    double azimuth, elevation;
+
+    try
     {
-        try
+        m_antennaBoss->getRawCoordinates(getTimeStamp(), azimuth, elevation);
+    }
+    catch(ComponentErrors::CouldntGetComponentExImpl& ex)
+    {
+        ex.log(LM_WARNING);
+        m_status = Management::MNG_WARNING;
+        return;
+    }
+
+    m_status = Management::MNG_OK;
+
+    elevation = elevation * DR2D;
+
+    std::vector<std::future<void>> futures;
+
+    for(auto& [sectorIndex, sector] : m_sectors)
+    {
+        futures.push_back(std::async(std::launch::async, [sector, elevation, tickIndex]()
         {
-            resource->onewayAction(ActiveSurface::AS_UPDATE, 0, 0, 0, elevation, 0, 0, m_profile);
-        }
-        catch (ComponentErrors::ComponentErrorsExImpl& ex)
-        {
-            ex.log(LM_DEBUG);
-            throw ex.getComponentErrorsEx();
-        }
+            try
+            {
+                sector->update(elevation, tickIndex, false);
+            }
+            catch(ComponentErrors::ComponentErrorsEx& ex)
+            {
+                ComponentErrors::ComponentErrorsExImpl exImpl(ex);
+                exImpl.log(LM_WARNING);
+            }
+        }));
+    }
+
+    for(auto& f : futures)
+    {
+        f.wait();
     }
 }
 
-void ActiveSurfaceBossImpl::up (CORBA::Long circle, CORBA::Long actuator, CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
-{
-    AUTO_TRACE("ActiveSurfaceBossImpl::up()");
-
-    CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
-    try
-    {
-        resource->onewayAction(ActiveSurface::AS_UP, circle, actuator, radius, 0, 0, 0, m_profile);
-    }
-    catch (ComponentErrors::ComponentErrorsExImpl& ex)
-    {
-        ex.log(LM_DEBUG);
-        throw ex.getComponentErrorsEx();
-    }
-}
-
-void ActiveSurfaceBossImpl::down (CORBA::Long circle, CORBA::Long actuator, CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
-{
-    AUTO_TRACE("ActiveSurfaceBossImpl::down()");
-
-    CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
-    try
-    {
-        resource->onewayAction(ActiveSurface::AS_DOWN, circle, actuator, radius, 0, 0, 0, m_profile);
-    }
-    catch (ComponentErrors::ComponentErrorsExImpl& ex)
-    {
-        ex.log(LM_DEBUG);
-        throw ex.getComponentErrorsEx();
-    }
-}
-
-void ActiveSurfaceBossImpl::bottom (CORBA::Long circle, CORBA::Long actuator, CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
-{
-    AUTO_TRACE("ActiveSurfaceBossImpl::bottom()");
-
-    CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
-    try
-    {
-        resource->onewayAction(ActiveSurface::AS_BOTTOM, circle, actuator, radius, 0, 0, 0, m_profile);
-    }
-    catch (ComponentErrors::ComponentErrorsExImpl& ex)
-    {
-        ex.log(LM_DEBUG);
-        throw ex.getComponentErrorsEx();
-    }
-}
-
-void ActiveSurfaceBossImpl::top (CORBA::Long circle, CORBA::Long actuator, CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
-{
-    AUTO_TRACE("ActiveSurfaceBossImpl::top()");
-
-    CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
-    try
-    {
-        resource->onewayAction(ActiveSurface::AS_TOP, circle, actuator, radius, 0, 0, 0, m_profile);
-    }
-    catch (ComponentErrors::ComponentErrorsExImpl& ex)
-    {
-        ex.log(LM_DEBUG);
-        throw ex.getComponentErrorsEx();
-    }
-}
-
-void ActiveSurfaceBossImpl::move (CORBA::Long circle, CORBA::Long actuator, CORBA::Long radius, CORBA::Long incr) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
-{
-    AUTO_TRACE("ActiveSurfaceBossImpl::move()");
-
-    CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
-    try
-    {
-        resource->onewayAction(ActiveSurface::AS_MOVE, circle, actuator, radius, 0, 0, incr, m_profile);
-    }
-    catch (ComponentErrors::ComponentErrorsExImpl& ex)
-    {
-        ex.log(LM_DEBUG);
-        throw ex.getComponentErrorsEx();
-    }
-}
-
-void ActiveSurfaceBossImpl::correction (CORBA::Long circle, CORBA::Long actuator, CORBA::Long radius, CORBA::Double correction) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
-{
-    AUTO_TRACE("ActiveSurfaceBossImpl::correction()");
-
-    CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
-    try
-    {
-        resource->onewayAction(ActiveSurface::AS_CORRECTION, circle, actuator, radius, 0, correction, 0, m_profile);
-    }
-    catch (ComponentErrors::ComponentErrorsExImpl& ex)
-    {
-        ex.log(LM_DEBUG);
-        throw ex.getComponentErrorsEx();
-    }
-}
-
-void ActiveSurfaceBossImpl::reset (CORBA::Long circle, CORBA::Long actuator, CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
-{
-    AUTO_TRACE("ActiveSurfaceBossImpl::reset()");
-
-    CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
-    try
-    {
-        resource->onewayAction(ActiveSurface::AS_RESET, circle, actuator, radius, 0, 0, 0, m_profile);
-    }
-    catch (ComponentErrors::ComponentErrorsExImpl& ex)
-    {
-        ex.log(LM_DEBUG);
-        throw ex.getComponentErrorsEx();
-    }
-}
-
-void ActiveSurfaceBossImpl::setProfile (ActiveSurface::TASProfile newProfile) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx, ASErrors::UnknownProfileEx)
+void ActiveSurfaceBossImpl::setProfile(ActiveSurface::TASProfile newProfile) throw (ComponentErrors::ComponentErrorsEx, ASErrors::ASErrorsEx)
 {
     AUTO_TRACE("ActiveSurfaceBossImpl::setProfile()");
 
-    CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
     try
     {
-        resource->setProfile(newProfile);
-        m_profile = newProfile;
+        _setProfile(newProfile);
     }
-    catch (ComponentErrors::ComponentErrorsExImpl& ex)
+    catch(ASErrors::UnknownProfileExImpl& impl)
     {
-        ex.log(LM_DEBUG);
-        throw ex.getComponentErrorsEx();
-    }
-    catch (ASErrors::UnknownProfileExImpl& ex)
-    {
-        ex.log(LM_DEBUG);
-        throw ex.getUnknownProfileEx();
+        throw impl.getASErrorsEx();
     }
 }
 
-void ActiveSurfaceBossImpl::usdStatus4GUIClient (CORBA::Long circle, CORBA::Long actuator, CORBA::Long_out status) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
+void ActiveSurfaceBossImpl::_setProfile(ActiveSurface::TASProfile newProfile) throw (ComponentErrors::ComponentErrorsExImpl, ASErrors::ASErrorsExImpl)
 {
-    AUTO_TRACE("ActiveSurfaceBossImpl::usdStatus4GUIClient()");
+    AUTO_TRACE("ActiveSurfaceBossImpl::_setProfile()");
 
-    try
+    if(!checkProfile(newProfile))
     {
-        boss->usdStatus4GUIClient(circle, actuator, status);
+        _THROW_EXCPT(ASErrors::UnknownProfileExImpl, "ActiveSurfaceBossImpl::_setProfile()");
     }
-    catch (ComponentErrors::ComponentErrorsExImpl& ex)
+
+    for(const auto& [sectorIndex, sector] : m_sectors)
     {
-        ex.log(LM_DEBUG);
-        throw ex.getComponentErrorsEx();
-    }
-}
-
-void ActiveSurfaceBossImpl::asStatus4GUIClient (ACS::longSeq_out status) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
-{
-    AUTO_TRACE("ActiveSurfaceBossImpl::asStatus4GUIClient()");
-
-    status = new ACS::longSeq;
-    status->length(boss->lastUSD);
-
-    unsigned int i = 0;
-
-    for (int circle = 1; circle <= boss->CIRCLES; circle++)
-    {
-        for (int actuator = 1; actuator <= boss->actuatorsInCircle[circle]; actuator++)
+        try
         {
-            status[i++] = boss->usdMap.getStatus(circle, actuator);
+            sector->setProfile(newProfile);
+        }
+        catch(ComponentErrors::ComponentErrorsEx& ex)
+        {
+            ComponentErrors::ComponentErrorsExImpl exImpl(ex);
+            exImpl.log(LM_WARNING);
         }
     }
+
+    if(!IRA::CIRATools::setDBValue(&m_containerServices, "profile", static_cast<const long&>(newProfile)))
+    {
+        ASErrors::CDBAccessErrorExImpl exImpl(__FILE__, __LINE__, "ActiveSurfaceBossImpl::_setProfile()");
+        exImpl.setFieldName("profile");
+        throw exImpl;
+    }
+
+    m_profile = newProfile;
 }
 
-void ActiveSurfaceBossImpl::setActuator (CORBA::Long circle, CORBA::Long actuator, CORBA::Long_out actPos, CORBA::Long_out cmdPos, CORBA::Long_out Fmin, CORBA::Long_out Fmax, CORBA::Long_out acc, CORBA::Long_out delay) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
+void ActiveSurfaceBossImpl::setLUT(const char* LUTName) throw (ComponentErrors::ComponentErrorsEx, ASErrors::ASErrorsEx)
 {
-    AUTO_TRACE("ActiveSurfaceBossImpl::setActuator");
-
-    long int act, cmd, fmin, fmax, ac, del;
+    AUTO_TRACE("ActiveSurfaceBossImpl::setLUT()");
 
     try
     {
-        boss->setActuator(circle, actuator, act, cmd, fmin, fmax, ac, del);
+        _setLUT(LUTName);
     }
-    catch (ComponentErrors::ComponentErrorsExImpl& ex)
+    catch(ASErrors::UnknownLUTExImpl& impl)
     {
-        ex.log(LM_DEBUG);
-        throw ex.getComponentErrorsEx();
+        throw impl.getASErrorsEx();
     }
-    actPos = (CORBA::Long)act;
-    cmdPos = (CORBA::Long)cmd;
-    Fmin = (CORBA::Long)fmin;
-    Fmax = (CORBA::Long)fmax;
-    acc = (CORBA::Long)ac;
-    delay = (CORBA::Long)del;
 }
 
-
-void ActiveSurfaceBossImpl::calibrate (CORBA::Long circle, CORBA::Long actuator, CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
+void ActiveSurfaceBossImpl::_setLUT(const char* LUTName) throw (ComponentErrors::ComponentErrorsExImpl, ASErrors::ASErrorsExImpl)
 {
-    AUTO_TRACE("ActiveSurfaceBossImpl::calibrate()");
+    AUTO_TRACE("ActiveSurfaceBossImpl::_setLUT()");
 
-    CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
+    std::string LUT(LUTName);
+    std::transform(LUT.begin(), LUT.end(), LUT.begin(), ::toupper);
+
+    CDB::DAL_var dal = m_containerServices.getCDB();
     try
     {
-        resource->calibrate(circle, actuator, radius);
+        dal->get_DAO(("alma/DataBlock/ActiveSurface/" + LUT).c_str());
     }
-    catch (ComponentErrors::ComponentErrorsExImpl& ex)
+    catch(cdbErrType::CDBRecordDoesNotExistEx& ex)
     {
-        ex.log(LM_DEBUG);
-        throw ex.getComponentErrorsEx();
+        _ADD_BACKTRACE(ASErrors::UnknownLUTExImpl, impl, ex, "ActiveSurfaceBossImpl::setLUT()");
+        impl.log(LM_DEBUG);
+        throw impl;
     }
+
+    for(const auto& [sectorIndex, sector] : m_sectors)
+    {
+        try
+        {
+            sector->setLUT(LUT.c_str());
+        }
+        catch(ComponentErrors::ComponentErrorsEx& ex)
+        {
+            ComponentErrors::ComponentErrorsExImpl exImpl(ex);
+            exImpl.log(LM_WARNING);
+        }
+    }
+
+    m_LUT = LUT;
 }
 
-void ActiveSurfaceBossImpl::calVer (CORBA::Long circle, CORBA::Long actuator, CORBA::Long radius) throw (CORBA::SystemException, ComponentErrors::ComponentErrorsEx)
-{
-    AUTO_TRACE("ActiveSurfaceBossImpl::calibration verification()");
-
-    CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
-    try
-    {
-        resource->calVer(circle, actuator, radius);
-    }
-    catch (ComponentErrors::ComponentErrorsExImpl& ex)
-    {
-        ex.log(LM_DEBUG);
-        throw ex.getComponentErrorsEx();
-    }
-}
-
-void ActiveSurfaceBossImpl::asOn() throw (CORBA::SystemException)
+void ActiveSurfaceBossImpl::asOn()
 {
     AUTO_TRACE("ActiveSurfaceBossImpl::asOn()");
-    CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
-    try
-    {
-        resource->asOn();
-    }
-    catch (ComponentErrors::ComponentErrorsExImpl& ex)
-    {
-        ex.log(LM_DEBUG);
-        throw ex.getComponentErrorsEx();
-    }
+    m_trackingEnabled = true;
 }
 
-void ActiveSurfaceBossImpl::asOff() throw (CORBA::SystemException)
+void ActiveSurfaceBossImpl::asOff()
 {
     AUTO_TRACE("ActiveSurfaceBossImpl::asOff()");
-    CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
-    try
+    m_trackingEnabled = false;
+}
+
+void ActiveSurfaceBossImpl::pollSectorStatus(unsigned long tickIndex)
+{
+    AUTO_TRACE("ActiveSurfaceBossImpl::pollSectorStatus()");
+
+    std::vector<std::future<void>> futures;
+
+    for(auto& [sectorIndex, sector] : m_sectors)
     {
-        resource->asOff();
+        futures.push_back(std::async(std::launch::async, [this, sectorIndex, sector, tickIndex]()
+        {
+            try
+            {
+                CORBA::BooleanSeq_var connectedSeq;
+                ActiveSurface::USDStatusSeq_var USDSeq;
+                sector->getTickStatus(tickIndex, connectedSeq, USDSeq);
+
+                std::ostringstream sectorKey;
+                sectorKey << "SECTOR" << std::setw(2) << std::setfill('0') << sectorIndex;
+
+                for(size_t i = 0; i < LANS_PER_SECTOR; i++)
+                {
+                    unsigned int lanIndex = i + 1;
+                    std::ostringstream lanKey;
+                    lanKey << "LAN" << std::setw(2) << std::setfill('0') << lanIndex;
+
+                    ZMQ::ZMQDictionary& lan = m_zmqDictionary[sectorKey.str()][lanKey.str()];
+                    lan["connected"] = static_cast<bool>(connectedSeq[i]);
+
+                    for(size_t j = 0; j < TICK_DIVIDER; j++)
+                    {
+                        CORBA::ULong usdIndex = j * LANS_PER_SECTOR + i;
+
+                        if(USDSeq[usdIndex].id == -1)
+                        {
+                            continue;
+                        }
+
+                        std::ostringstream usdKey;
+                        usdKey << "USD" << std::setw(2) << std::setfill('0') << USDSeq[usdIndex].id;
+
+                        ZMQ::ZMQDictionary& usd = lan[usdKey.str()];
+
+                        usd["available"] = USDSeq[usdIndex].available;
+                        if(!USDSeq[usdIndex].available)
+                        {
+                            continue;
+                        }
+                        usd["accelerationFactor"] = USDSeq[usdIndex].accelerationFactor;
+                        usd["commandedPosition"] = USDSeq[usdIndex].commandedPosition;
+                        usd["currentPosition"] = USDSeq[usdIndex].currentPosition;
+                        usd["delay"] = USDSeq[usdIndex].delay == 255 ? -1 : 256 * USDSeq[usdIndex].delay;
+                        usd["maximumFrequency"] = USDSeq[usdIndex].maximumFrequency;
+                        usd["minimumFrequency"] = USDSeq[usdIndex].minimumFrequency;
+                        usd["softwareVersion"] = std::to_string((USDSeq[usdIndex].softwareVersion >> 4) & 0xF) + "." + std::to_string(USDSeq[usdIndex].softwareVersion & 0xF);
+                        usd["USDType"] = USDSeq[usdIndex].type == 0x20 ? "USD50xxx" : "USD60xxx";
+                        usd["calibrated"] = (USDSeq[usdIndex].status & CAL) != 0;
+                        usd["enabled"] = (USDSeq[usdIndex].status & ENBL) != 0;
+                        usd["running"] = (USDSeq[usdIndex].status & MRUN) != 0;
+                    }
+                }
+            }
+            catch(ComponentErrors::ComponentErrorsEx& ex)
+            {
+                ComponentErrors::ComponentErrorsExImpl exImpl(ex);
+                exImpl.log(LM_WARNING);
+            }
+        }));
     }
-    catch (ComponentErrors::ComponentErrorsExImpl& ex)
+
+    for(auto& f : futures)
     {
-        ex.log(LM_DEBUG);
-        throw ex.getComponentErrorsEx();
+        f.wait();
     }
 }
 
-CORBA::Boolean ActiveSurfaceBossImpl::command(const char *cmd,CORBA::String_out answer) throw (CORBA::SystemException)
+void ActiveSurfaceBossImpl::publishZMQDictionary(ACS::Time now)
+{
+    m_zmqDictionary["timestamp"] = ZMQ::ZMQTimeStamp::fromACSTime(now);
+    m_zmqDictionary["LUT"] = m_LUT;
+    m_zmqDictionary["tracking"] = m_tracking == Management::MNG_TRUE;
+
+    switch(m_status)
+    {
+        case Management::MNG_OK:
+        {
+            m_zmqDictionary["status"] = "OK";
+            break;
+        }
+        case Management::MNG_WARNING:
+        {
+            m_zmqDictionary["status"] = "WARNING";
+            break;
+        }
+        default: //Management::MNG_FAILURE
+        {
+            m_zmqDictionary["status"] = "FAILURE";
+            break;
+        }
+    }
+
+    switch(m_profile)
+    {
+        default: //ActiveSurface::AS_PARK
+        {
+            m_zmqDictionary["profile"] = "PARK";
+            break;
+        }
+        case ActiveSurface::AS_SHAPED:
+        {
+            m_zmqDictionary["profile"] = "SHAPED";
+            break;
+        }
+        case ActiveSurface::AS_SHAPED_FIXED:
+        {
+            m_zmqDictionary["profile"] = "SHAPED FIXED";
+            break;
+        }
+        case ActiveSurface::AS_PARABOLIC:
+        {
+            m_zmqDictionary["profile"] = "PARABOLIC";
+            break;
+        }
+        case ActiveSurface::AS_PARABOLIC_FIXED:
+        {
+            m_zmqDictionary["profile"] = "PARABOLIC FIXED";
+            break;
+        }
+    }
+
+    m_zmqPublisher.publish(m_zmqDictionary);
+}
+
+CORBA::Boolean ActiveSurfaceBossImpl::command(const char* cmd, CORBA::String_out answer)
 {
     AUTO_TRACE("AntennaBossImpl::command()");
     IRA::CString out;
-    bool res;
-    CSecAreaResourceWrapper<CActiveSurfaceBossCore> resource=m_core->Get();
+    bool res = false;
+
     try
     {
-        m_parser->run(cmd,out);
+        m_parser.run(cmd, out);
         res = true;
     }
-    catch (ParserErrors::ParserErrorsExImpl &ex)
+    catch(ParserErrors::ParserErrorsExImpl &impl)
     {
-        res = false;
+        // Parser errors are never logged
     }
-    catch (ACSErr::ACSbaseExImpl& ex)
+    catch(ACSErr::ACSbaseExImpl& impl)
     {
-        ex.log(LM_ERROR); // the errors resulting from the execution are logged here as stated in the documentation of CommandInterpreter interface, while the parser errors are never logged.
-        res=false;
+        // The errors resulting from the execution are logged here as stated in the documentation of CommandInterpreter interface
+        impl.log(LM_ERROR); 
     }
-    answer=CORBA::string_dup((const char *)out);
+
+    answer = CORBA::string_dup((const char*)out);
     return res;
 }
 
-_PROPERTY_REFERENCE_CPP(ActiveSurfaceBossImpl,Management::ROTSystemStatus,m_pstatus,status);
-_PROPERTY_REFERENCE_CPP(ActiveSurfaceBossImpl,Management::ROTBoolean,m_penabled,enabled);
-_PROPERTY_REFERENCE_CPP(ActiveSurfaceBossImpl,ActiveSurface::ROTASProfile,m_pprofile,pprofile);
-_PROPERTY_REFERENCE_CPP(ActiveSurfaceBossImpl,Management::ROTBoolean,m_ptracking,tracking);
-_PROPERTY_REFERENCE_CPP(ActiveSurfaceBossImpl,ACS::ROstring,m_pLUT_filename,LUT_filename);
+_PROPERTY_REFERENCE_CPP(ActiveSurfaceBossImpl, Management::ROTSystemStatus, m_pstatus, status);
+_PROPERTY_REFERENCE_CPP(ActiveSurfaceBossImpl, ActiveSurface::ROTASProfile, m_pprofile, profile);
+_PROPERTY_REFERENCE_CPP(ActiveSurfaceBossImpl, Management::ROTBoolean, m_ptracking, tracking);
+_PROPERTY_REFERENCE_CPP(ActiveSurfaceBossImpl, ACS::ROstring, m_pLUT, LUT);
 /* --------------- [ MACI DLL support functions ] -----------------*/
 #include <maciACSComponentDefines.h>
 MACI_DLL_SUPPORT_FUNCTIONS(ActiveSurfaceBossImpl)

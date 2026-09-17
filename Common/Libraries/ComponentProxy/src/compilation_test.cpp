@@ -29,7 +29,9 @@ int main()
     Weather::GenericWeatherStation_proxy m_genericWeatherStationProxy;
     Antenna::Mount_proxy m_mount;
 
-    ActiveSurface::lan_proxy m_asLANProxy;
+    ActiveSurface::Sector_proxy m_asSectorProxy;
+    m_asSectorProxy.setComponentName("AS/SECTOR01");
+    ActiveSurface::LAN_proxy m_asLANProxy;
     m_asLANProxy.setComponentName("AS/SECTOR01/LAN01");
     ActiveSurface::USD_proxy m_asUSDProxy;
     m_asUSDProxy.setComponentName("AS/SECTOR01/LAN01/USD03");

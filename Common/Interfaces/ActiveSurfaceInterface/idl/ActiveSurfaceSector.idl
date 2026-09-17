@@ -1,0 +1,104 @@
+#ifndef _ACTIVESURFACE_SECTOR_IDL_
+#define _ACTIVESURFACE_SECTOR_IDL_
+
+/*********************************************************************/
+/* OAC Osservatorio Astronomico di Cagliari                          */
+/*                                                                   */
+/* This code is under GNU General Public Licence (GPL).              */
+/*                                                                   */
+/* Who                                          when        what     */
+/* Giuseppe Carboni (giuseppe.carboni@inaf.it)  2026        Creation */
+/*********************************************************************/
+
+#include <baci.idl>
+#include <ASErrors.idl>
+#include <ComponentErrors.idl>
+#include <ActiveSurfaceCommon.idl>
+
+#pragma prefix "alma"
+
+module ActiveSurface
+{
+    /**
+     * This interface represents a single sector of the Active Surface
+     * primary mirror. Each sector orchestrates 12 LAN lines and their
+     * associated USD actuators, all running intra-container.
+     *
+     * Addressing convention (lanIndex, circleIndex):
+     *   (0, 0) → all USDs in this sector
+     *   (0, N) → arc N: all USDs with serial address N across all LANs
+     *   (N, 0) → radius N: all USDs on LAN N (broadcast on the serial line)
+     *   (N, M) → single USD with serial address M on LAN N
+     *
+     * This convention maps naturally onto the hardware protocol where
+     * address 0 is reserved for broadcast, so 0 is a valid sentinel
+     * for "all" at both levels.
+     *
+     * The Boss communicates exclusively with Sector components.
+     * To address a full circle, the Boss sends the same command with
+     * (lanIndex, circleIndex) to all 8 Sector components.
+     */
+    interface Sector : ACS::CharacteristicComponent
+    {
+        // -------------------------------------------------------------------
+        // Attributes
+        // -------------------------------------------------------------------
+
+        /**
+         * The sector index (0-N).
+         */
+        readonly attribute ACS::ROlong index;
+
+        /**
+         * Sector has been fully initialized.
+         */
+        readonly attribute ACS::ROboolean ready;
+
+        // -------------------------------------------------------------------
+        // Observation commands
+        // -------------------------------------------------------------------
+
+        /**
+         * Recalculate and apply the target position to the addressed USDs
+         * based on the current antenna elevation and the active profile.
+         * This is the primary periodic command, called every ~500ms by the Boss.
+         * Always applies to the entire sector regardless of addressing —
+         * partial update would leave the mirror surface inconsistent.
+         * @param elevation  Current antenna elevation in degrees.
+         * @throw ComponentErrors::ComponentErrorsEx on failure.
+         */
+        void update(in double elevation, in long tickIndex, in boolean force) raises (ComponentErrors::ComponentErrorsEx);
+
+        /**
+         * Set the active surface profile for this sector.
+         * @param profile  The desired profile (shaped, parabolic, park, ...).
+         * @throw ComponentErrors::ComponentErrorsEx on failure.
+         * @throw ASErrors::UnknownProfileEx if the profile is not available.
+         */
+        void setProfile(in TASProfile profile) raises (ComponentErrors::ComponentErrorsEx, ASErrors::UnknownProfileEx);
+
+        /**
+         * Load the given LUT coefficients to all LANs and USDs of the sector
+         * @param LUTName name of the desired LUT
+         * @throw ComponentErrors::ComponentErrorsEx when the desired LUT is not found in the CDB
+         */
+        void setLUT(in string LUTName) raises (ComponentErrors::ComponentErrorsEx);
+
+        void park() raises (ComponentErrors::ComponentErrorsEx, ASErrors::ASErrorsEx);
+
+        /**
+         * Reads and returns the status of 4 USDs located at the given tickIndex * 4 and counting, within each LAN of this sector.
+         * The USDs statuses returned are within each LAN's internally ordered list of USD components, not a physical USD addresses.
+         * LANs with fewer USDs than desired simply contribute no entry for that call. Calling this method also refreshes the hardware
+         * state (actPos/status) of the polled USDs.
+         *
+         * @param tickIndex tick index of the Boss thread.
+         * @param connected boolean stating if the LAN socket is connected.
+         * @param USDSeq    sequence with the status of every 4 USDs found at the given tickIndex * 4.
+         * @throw ComponentErrors::ComponentErrorsEx on communication failure.
+         */
+        void getTickStatus(in long tickIndex, out CORBA::BooleanSeq connected, out USDStatusSeq USDSeq) raises (ComponentErrors::ComponentErrorsEx);
+    };
+};
+
+#endif /* _ACTIVESURFACE_SECTOR_IDL_ */

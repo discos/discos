@@ -107,19 +107,20 @@ tttlll_OBJECTS  =
 #
 # Configuration Database Files
 # ----------------------------
-CDB_SCHEMAS = ActiveSurface lan ActiveSurfaceBoss
+CDB_SCHEMAS = ActiveSurface ActiveSurfaceLAN ActiveSurfaceBoss ActiveSurfaceCorrections ActiveSurfaceSector
 
 # 
 # IDL Files and flags
 # 
-IDL_FILES = ActiveSurfaceBoss lan usd ActiveSurfaceCommon
+IDL_FILES = ActiveSurfaceBoss ActiveSurfaceSector ActiveSurfaceLAN ActiveSurfaceUSD ActiveSurfaceCommon
 TAO_IDLFLAGS =
 USER_IDL =
 
 ActiveSurfaceCommonStubs_LIBS = baciStubs
-ActiveSurfaceBossStubs_LIBS = baciStubs ComponentErrorsStubs ASErrorsStubs ManagmentDefinitionsStubs ActiveSurfaceCommonStubs
-lanStubs_LIBS = baciStubs ASErrorsStubs ActiveSurfaceCommonStubs
-usdStubs_LIBS = baciStubs ASErrorsStubs
+ActiveSurfaceBossStubs_LIBS   = baciStubs ASErrorsStubs ActiveSurfaceCommonStubs ComponentErrorsStubs ManagmentDefinitionsStubs
+ActiveSurfaceSectorStubs_LIBS = baciStubs ASErrorsStubs ActiveSurfaceCommonStubs ComponentErrorsStubs
+ActiveSurfaceLANStubs_LIBS    = baciStubs ASErrorsStubs ActiveSurfaceCommonStubs ComponentErrorsStubs
+ActiveSurfaceUSDStubs_LIBS    = baciStubs ASErrorsStubs ActiveSurfaceCommonStubs ComponentErrorsStubs
 
 
 #

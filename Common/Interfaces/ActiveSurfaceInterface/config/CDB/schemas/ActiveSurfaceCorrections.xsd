@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+    Author: Giuseppe Carboni, giuseppe.carboni@inaf.it
+-->
+<xs:schema
+    targetNamespace="urn:schemas-cosylab-com:ActiveSurfaceCorrections:1.0"
+    xmlns="urn:schemas-cosylab-com:ActiveSurfaceCorrections:1.0"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+
+    <xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd" />
+    <xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd" />
+
+    <xs:complexType name="ActiveSurfaceUSDCorrectionType">
+     <xs:sequence>
+      <xs:element name="id"     type="xs:string" /> <!-- USD serial address (es: USD01) -->
+      <xs:element name="el15"   type="xs:string" /> <!-- polynomial coefficients a0,a1,... for elevation section 15-30 deg -->
+      <xs:element name="el30"   type="xs:string" /> <!-- polynomial coefficients a0,a1,... for elevation section 30-45 deg -->
+      <xs:element name="el45"   type="xs:string" /> <!-- polynomial coefficients a0,a1,... for elevation section 45-60 deg -->
+      <xs:element name="el60"   type="xs:string" /> <!-- polynomial coefficients a0,a1,... for elevation section 60-75 deg -->
+      <xs:element name="el75"   type="xs:string" /> <!-- polynomial coefficients a0,a1,... for elevation section 75-90 deg -->
+      <xs:element name="p"      type="xs:string" /> <!-- polynomial coefficients for parabolic offset (currently degree 0) -->
+     </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ActiveSurfaceCorrectionTableType">
+     <xs:sequence>
+      <xs:element name="usd" type="ActiveSurfaceUSDCorrectionType" minOccurs="0" maxOccurs="unbounded" />
+     </xs:sequence>
+    </xs:complexType>
+
+    <xs:element name="ActiveSurfaceCorrectionTable" type="ActiveSurfaceCorrectionTableType" />
+
+</xs:schema>

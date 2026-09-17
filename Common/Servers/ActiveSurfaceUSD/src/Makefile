@@ -84,7 +84,8 @@ LIBRARIES_L     =
 #
 # <brief description of lllll library>
 ActiveSurfaceUSDImpl_OBJECTS = ActiveSurfaceUSDImpl
-ActiveSurfaceUSDImpl_LIBS= usdStubs lanStubs lanStatus IRALibrary ASErrors ComponentErrors boost_thread
+ActiveSurfaceUSDImpl_CFLAGS = -std=c++17
+ActiveSurfaceUSDImpl_LIBS = ActiveSurfaceUSDStubs ActiveSurfaceUSDCore ASErrors ComponentErrors
 #
 # error file
 # ----------------------------

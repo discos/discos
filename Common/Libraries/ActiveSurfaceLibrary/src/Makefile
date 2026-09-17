@@ -38,16 +38,20 @@ PY_PACKAGES =
 #
 # Includes (.h) files (public only)
 # ---------------------------------
-INCLUDES = lanStatus.h
+INCLUDES = ActiveSurfaceCommandLibrary.hpp ActiveSurfaceSocket.hpp ActiveSurfaceUSDCore.hpp ActiveSurfaceCommon.h
 
 #
 # Libraries (public and local)
 # ----------------------------
-LIBRARIES = lanStatus
+LIBRARIES = ActiveSurfaceSocket ActiveSurfaceUSDCore
 LIBRARIES_L =
 
-lanStatus_OBJECTS = lanStatus
-lanStatus_LIBS = ActiveSurfaceCommonStubs boost_thread
+ActiveSurfaceSocket_OBJECTS = ActiveSurfaceSocket
+ActiveSurfaceSocket_LIBS = IRALibrary ComponentErrors ASErrors
+
+ActiveSurfaceUSDCore_OBJECTS = ActiveSurfaceUSDCore
+ActiveSurfaceUSDCore_LIBS = ActiveSurfaceSocket IRALibrary
+ActiveSurfaceUSDCore_CFLAGS = -std=c++17
 
 #
 # list of all possible C-sources (used to create automatic dependencies)

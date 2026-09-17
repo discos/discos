@@ -34,13 +34,16 @@ EXTENDED_INTERFACES:=ReceiversInterface XBackendInterface
 # These libraries must be compiled sequentially, since the DiscosVersion library depends on the IRALibrary which depends on the SlaLibrary
 COMMON_SEQ_LIBS:=SlaLibrary IRALibrary DiscosVersion
 # All these other libraries only depend on the libraries listed above, therefore they can be compiled in parallel
-COMMON_LIBRARIES:=TextWindowLibrary ParserLibrary XarcosLibrary ModbusChannel ComponentProxy DiscosLocals XEphemAstroLib DiscosBackendProtocol PyTestingLibrary ZMQLibrary ActiveSurfaceLibrary
+COMMON_LIBRARIES:=TextWindowLibrary ParserLibrary XarcosLibrary ModbusChannel ComponentProxy DiscosLocals XEphemAstroLib \
+                  DiscosBackendProtocol PyTestingLibrary ZMQLibrary ActiveSurfaceLibrary
 # All the common servers are independend from one another, they only depend on interfaces, therefore we can compile them in parallel.
 # There may be some hidden dependency between servers, but it may never come up since each core compiles a single cpp file.
 # Issues may only arise if we use a very high number of cores, which is unlikely.
 # If we'll ever face this problem we will split the SERVERS into more groups, with the latter one having servers which depends on some other servers in the first group.
-COMMON_SERVERS:=AntennaBoss Observatory OTF PointingModel Refraction SkySource SolarSystem Moon FitsWriter Scheduler ActiveSurfaceLan ReceiversBoss ExternalClients CalibrationTool TotalPower CustomLogger \
-				PyDewarPositioner ActiveSurfaceUSD Sardara Skarab PyLocalOscillator MFKBandBaseReceiver PyCalmux ActiveSurfaceBoss XBackend KQWReceiver
+COMMON_SERVERS:=AntennaBoss Observatory OTF PointingModel Refraction SkySource SolarSystem Moon FitsWriter Scheduler \
+				ReceiversBoss ExternalClients CalibrationTool TotalPower CustomLogger \
+				PyDewarPositioner Sardara Skarab PyLocalOscillator MFKBandBaseReceiver PyCalmux XBackend KQWReceiver \
+				ActiveSurfaceUSD ActiveSurfaceLAN ActiveSurfaceSector ActiveSurfaceBoss
 # Same as servers
 COMMON_CLIENTS:=AntennaBossTextClient ObservatoryTextClient GenericBackendTextClient ReceiversBossTextClient SystemTerminal CaltoolClient CustomLoggingClient SchedulerTextClient MeteoClient
 # Misc do not depend from one another, compile in parallel
@@ -56,7 +59,9 @@ SRT_ERRORS:=
 SRT_INTERFACES:=SRTAntennaInterface SRTActiveSurfaceInterface SRTMinorServoInterface SRTReceiversInterface
 SRT_LIBRARIES:=SRTMinorServoLibrary
 SRT_SERVERS:=SRTMount SRTMinorServo SRTKBandMFReceiver SRT7GHzReceiver SRT5GHzReceiver SRTLPBandReceiver SRTPyIFDistributor WeatherStation
-SRT_CLIENTS:=SRTActiveSurfaceGUIClient SRTMountTextClient MinorServoBossTextClient
+SRT_CLIENTS:=SRTMountTextClient MinorServoBossTextClient
+#TODO handle the clients
+SRT_CLIENTS:=SRTMountTextClient MinorServoBossTextClient #SRTActiveSurfaceGUIClient
 SRT_MISC:=SRTScripts
 
 MED_DOC:=MEDDox
@@ -64,7 +69,8 @@ MED_ERRORS:=
 MED_INTERFACES:=MedicinaAntennaInterface MedicinaReceiversInterface MedicinaActiveSurfaceInterface
 MED_LIBRARIES:=MedicinaVertexLibrary
 MED_SERVERS:=MedicinaMount MedicinaMinorServo WeatherStation MedicinaPyDMed MedicinaPyLocalOscillator MedicinaKBandDualFReceiver
-MED_CLIENTS:=MedicinaMountTextClient MedicinaActiveSurfaceGUIClient
+#TODO handle the clients
+MED_CLIENTS:=MedicinaMountTextClient #MedicinaActiveSurfaceGUIClient
 MED_MISC:=MedScripts
 
 NT_DOC:=NTDox
@@ -72,7 +78,8 @@ NT_ERRORS:=
 NT_INTERFACES:=NotoAntennaInterface NotoReceiversInterface NotoWeatherStationInterface NotoActiveSurfaceInterface
 NT_LIBRARIES:=
 NT_SERVERS:= NotoReceivers NotoMount NotoWeatherStation NotoMinorServo NotoPyLocalOscillator NotoPyIfDistributor
-NT_CLIENTS:=NotoMountTextClient NotoActiveSurfaceGUIClient
+#TODO handle the clients
+NT_CLIENTS:=NotoMountTextClient #NotoActiveSurfaceGUIClient
 NT_MISC:=NotoScripts
 
 ifeq ($(STATION),SRT)
@@ -249,8 +256,8 @@ ifneq (,$(filter $(MAKECMDGOALS),$(ALL_RELEVANT)))
 endif
 
 # This target cleans all the INTROOT so that a clean build process can be executed again
-.PHONY: clean-dist
-clean-dist:
+.PHONY: clean_dist
+clean_dist:
 	@echo -n "Cleaning INTROOT..."
 	@rm -rf $(INTROOT)/app-defaults/*
 	@rm -rf $(INTROOT)/bin/*

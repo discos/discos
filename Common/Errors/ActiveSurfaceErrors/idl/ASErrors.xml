@@ -19,13 +19,15 @@
  	<Member name="CammaLen" type="double" description="Length of camma-on window"/>
  	<Member name="CammaPos" type="double" description="Distance from top edge of the middle camma-on window"/>
  </ErrorCode>
- <ErrorCode name="LibrarySocketError" description=" " shortDescription="Error encountered while creating or accessing socket resource" />
+ <ErrorCode name="LibrarySocketError" description=" " shortDescription="Error encountered while creating or accessing socket" />
  <ErrorCode name="SocketReconn" description=" " shortDescription="Socket was broken. Reconnected successfully"/>
  <ErrorCode name="SocketFail" description=" " shortDescription="The socket connection could not be re established"/>
  <ErrorCode name="SocketTOut" description=" " shortDescription="Time out writing to socket. Critical"/>
  <ErrorCode name="SocketNotRdy" description=" " shortDescription="Unable to allocate socket resource. Error"/>
  <ErrorCode name="MemoryAllocation" description=" " shortDescription="Buffer can't be allocated. Error"/>
- <ErrorCode name="LANConnectionError" description=" " shortDescription="LAN/485 converter is not reachable or disconnected"/>
+ <ErrorCode name="LANConnectionError" description=" " shortDescription="LAN/485 converter is not reachable or disconnected">
+    <Member name="Reason" type="string" description="Detailed reason for the connection failure"/>
+ </ErrorCode>
  <ErrorCode name="LAN_Unavailable" description=" " shortDescription="The LAN component is unavailable"/>
  <ErrorCode name="sendCmdErr" description=" " shortDescription="sendCmd() returned a wrong code. Error"/>
  <ErrorCode name="Incomplete" description=" " shortDescription="Incomplete reply from USD. Warning"/>
@@ -47,5 +49,7 @@
  <ErrorCode name="USDStillRunning" description=" " shortDescription="USD still running while shouldn't be!.Error"/>
  <ErrorCode name="USDunCalibrated" description=" " shortDescription="USD not calibrated.Warning"/>
  <ErrorCode name="CannotGetUSD" description=" " shortDescription="USD not activated.Warning"/>
- <ErrorCode name="UnknownProfile" description=" " shortDescription="Set profile is unknown for this station.Error"/>
+ <ErrorCode name="UnknownProfile" description=" " shortDescription="Given profile is unknown for this station.Error"/>
+ <ErrorCode name="UnknownLUT" description=" " shortDescription="Given LUT is unknown for this station.Error"/>
+ <ErrorCode name="CoefficientsNotLoaded" description=" " shortDescription="Position coefficients not yet loaded for this USD.Error"/>
  </Type>

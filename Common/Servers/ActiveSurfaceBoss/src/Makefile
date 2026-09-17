@@ -83,8 +83,9 @@ LIBRARIES       = ActiveSurfaceBossImpl
 LIBRARIES_L     =
 #
 # <brief description of lllll library>
-ActiveSurfaceBossImpl_OBJECTS = ActiveSurfaceBossImpl ActiveSurfaceBossCore ActiveSurfaceBossWorkingThread ActiveSurfaceBossInitializationThread ActiveSurfaceBossSectorThread USDMap
-ActiveSurfaceBossImpl_LIBS = lanStubs usdStubs ActiveSurfaceBossStubs ActiveSurfaceBossStubs AntennaDefinitionsStubs ManagmentDefinitionsStubs AntennaBossStubs ComponentErrors ASErrors ManagementErrors AntennaErrors IRALibrary ParserErrors DiscosVersion ZMQLibrary boost_thread
+ActiveSurfaceBossImpl_OBJECTS = ActiveSurfaceBossImpl ActiveSurfaceBossWorkingThread
+ActiveSurfaceBossImpl_LIBS = ActiveSurfaceBossStubs ActiveSurfaceSectorStubs AntennaBossStubs ComponentErrors ASErrors ManagementErrors IRALibrary ParserErrors DiscosVersion ZMQLibrary
+
 
 #
 # Scripts (public and local)

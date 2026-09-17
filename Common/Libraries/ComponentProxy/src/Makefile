@@ -33,8 +33,9 @@ compilation_test_LIBS       = IRALibrary \
                               NoiseGeneratorStubs \
                               TotalPowerStubs \
                               ActiveSurfaceBossStubs \
-                              usdStubs \
-                              lanStubs \
+                              ActiveSurfaceUSDStubs \
+                              ActiveSurfaceLANStubs \
+                              ActiveSurfaceSectorStubs \
                               MinorServoBossStubs \
                               MinorServoStubs \
                               ReceiversBossStubs \
@@ -66,8 +67,8 @@ INCLUDES        = ActiveSurfaceProxy.h  \
                   ComponentProxies  \
                   ManagementProxy.h  \
                   ReceiversProxy.h \
-		  MountProxy.h
-		  
+                  MountProxy.h
+
 
 
 #
