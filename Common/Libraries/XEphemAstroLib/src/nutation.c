@@ -276,11 +276,11 @@ double mj,
 double *deps,	/* on input:  precision parameter in arc seconds */
 double *dpsi)
 {
-	static double lastmj = -10000, lastdeps, lastdpsi;
+	static XE_TLS double lastmj = -10000, lastdeps, lastdpsi;
 	double T, T2, T3, T10;			/* jul cent since J2000 */
 	double prec;				/* series precis in arc sec */
 	int i, isecul;				/* index in term table */
-	static double delcache[5][2*NUT_MAXMUL+1];
+	static XE_TLS double delcache[5][2*NUT_MAXMUL+1];
 			/* cache for multiples of delaunay args
 			 * [M',M,F,D,Om][-min*x, .. , 0, .., max*x]
 			 * make static to have unfilled fields cleared on init
@@ -372,8 +372,8 @@ double *dpsi)
 void
 nut_eq (double mj, double *ra, double *dec)
 {
-	static double lastmj = -10000;
-	static double a[3][3];		/* rotation matrix */
+	static XE_TLS double lastmj = -10000;
+	static XE_TLS double a[3][3];		/* rotation matrix */
 	double xold, yold, zold, x, y, z;
 
 	if (mj != lastmj) {

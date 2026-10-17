@@ -38,6 +38,7 @@ Constellation figures:
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
+#include <pthread.h>
 
 #include "astro.h"
 
@@ -1520,8 +1521,8 @@ cns_edges (double e, double **ra0p, double **dec0p, double **ra1p,
 double **dec1p)
 {
 #define	NEDGES	(NRA+NDEC)
-	static double *ra0, *dec0, *ra1, *dec1;
-	static double laste = -12345.6;		/* any bogus value */
+	static XE_TLS double *ra0, *dec0, *ra1, *dec1;
+	static XE_TLS double laste = -12345.6;		/* any bogus value */
 	double mjd0;
 	int i, n;
 
@@ -1627,6 +1628,9 @@ typedef struct {
 /* array of malloced lists of ConFigs, same order as cns_namemap[]
  */
 static ConFig *figmap[NCNS];
+
+/* figmap[] is process-wide: guard loads against concurrent cns_figure() */
+static pthread_mutex_t figmap_lock = PTHREAD_MUTEX_INITIALIZER;
 
 /* add one entry to the drawing code lists */
 static void
@@ -1756,11 +1760,13 @@ cns_loadfigs (FILE *fp, char *msg)
 		    free (new[c]);
 	} else {
 	    /* make temp lists persistent */
+	    pthread_mutex_lock (&figmap_lock);
 	    for (c = 0; c < NCNS; c++) {
 		if (figmap[c])
 		    free (figmap[c]);
 		figmap[c] = new[c];
 	    }
+	    pthread_mutex_unlock (&figmap_lock);
 	}
 
 	/* done with lists themselves regardless */
@@ -1783,10 +1789,17 @@ int
 cns_figure (int id, double e, double ra[], double dec[], int dcodes[])
 {
 	ConFig *cfp;
+	int n;
 
 	if (id < 0 || id >= NCNS)
 	    return (-1);
 
+	pthread_mutex_lock (&figmap_lock);
+	if (!figmap[id]) {
+	    /* figures not loaded yet */
+	    pthread_mutex_unlock (&figmap_lock);
+	    return (0);
+	}
 	for (cfp = figmap[id]; cfp->drawcode >= 0; cfp++) {
 	    *ra = (double)cfp->ra;
 	    *dec = (double)cfp->dec;
@@ -1795,8 +1808,10 @@ cns_figure (int id, double e, double ra[], double dec[], int dcodes[])
 	    dec++;
 	    *dcodes++ = cfp->drawcode;
 	}
+	n = cfp - figmap[id];
+	pthread_mutex_unlock (&figmap_lock);
 
-	return (cfp - figmap[id]);
+	return (n);
 }
 
 /* For RCS Only -- Do Not Edit */

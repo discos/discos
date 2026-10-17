@@ -61,8 +61,8 @@ static double JD2000 = 2451545.0;
 /* Conversion factors between degrees and radians */
 static double STR = 4.8481368110953599359e-6;	/* radians per arc second */
 
-static double ss[14][24];
-static double cc[14][24];
+static XE_TLS double ss[14][24];
+static XE_TLS double cc[14][24];
 
 /* Reduce arc seconds modulo 360 degrees,
    answer in arc seconds.  */
@@ -111,8 +111,8 @@ sscc (int k, double arg, int n)
 /* Mean elements.
    Copied from cmoon.c, DE404 version.  */
 
-static double Jlast = -1.0e38;
-static double T;
+static XE_TLS double Jlast = -1.0e38;
+static XE_TLS double T;
 
 static int
 dargs (double J, struct plantbl *plan)

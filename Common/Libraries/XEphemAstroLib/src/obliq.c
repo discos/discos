@@ -10,7 +10,7 @@
 void
 obliquity (double mj, double *eps)
 {
-	static double lastmj = -16347, lasteps;
+	static XE_TLS double lastmj = -16347, lasteps;
 
 	if (mj != lastmj) {
 	    double t = (mj - J2000)/36525.;	/* centuries from J2000 */

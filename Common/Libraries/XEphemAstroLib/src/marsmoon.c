@@ -17,13 +17,18 @@ static void moonPShad (Obj *sop, Obj *mop, MoonData md[M_NMOONS]);
 static void moonTrans (MoonData md[M_NMOONS]);
 
 /* moon table and a few other goodies and when it was last computed */
-static double mdmjd = -123456;
-static MoonData mmd[M_NMOONS] = {
+static XE_TLS double mdmjd = -123456;
+/* the cache is valid only for the same inputs, not just the same mjd:
+ * results depend on the Sun and planet positions (site, topo/geo pref)
+ * and on the helper files directory */
+static XE_TLS Obj mdsunobj, mdplanobj;
+static XE_TLS char *mddir;
+static XE_TLS MoonData mmd[M_NMOONS] = {
     {"Mars", NULL},
     {"Phobos", "I"},
     {"Deimos", "II"},
 };
-static double sizemjd;
+static XE_TLS double sizemjd;
 
 /* These values are from the Explanatory Supplement.
  * Precession degrades them gradually over time.
@@ -57,7 +62,9 @@ MoonData md[M_NMOONS])		/* return info */
 	if (poledec) *poledec = POLE_DEC;
 
 	/* nothing else if repeat call or just want names */
-	if (Mjd == mdmjd || !mop) {
+	if (!mop || (Mjd == mdmjd && dir == mddir
+	    && !memcmp (sop, &mdsunobj, sizeof(Obj))
+	    && !memcmp (mop, &mdplanobj, sizeof(Obj)))) {
 	    if (mop) {
 		*sizep = sizemjd;
 	    }
@@ -102,6 +109,9 @@ MoonData md[M_NMOONS])		/* return info */
 
 	/* save */
 	mdmjd = Mjd;
+	mddir = dir;
+	memcpy (&mdsunobj, sop, sizeof(Obj));
+	memcpy (&mdplanobj, mop, sizeof(Obj));
 	sizemjd = *sizep;
 	memcpy (mmd, md, sizeof(mmd));
 }

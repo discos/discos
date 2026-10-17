@@ -129,8 +129,8 @@ obj_description (Obj *op)
 	    }
 	    return ("Binary system");
 	case PLANET: {
-	    static char nsstr[16];
-	    static Obj *biop;
+	    static XE_TLS char nsstr[16];
+	    static XE_TLS Obj *biop;
 
 	    if (op->pl_code == SUN)
 		return ("Star");
@@ -157,7 +157,7 @@ obj_description (Obj *op)
 void
 now_lst (Now *np, double *lstp)
 {
-	static double last_mjd = -23243, last_lng = 121212, last_lst;
+	static XE_TLS double last_mjd = -23243, last_lng = 121212, last_lst;
 	double eps, lst, deps, dpsi;
 
 	if (last_mjd == mjd && last_lng == lng) {

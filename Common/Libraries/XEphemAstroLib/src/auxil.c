@@ -8,7 +8,7 @@
 #include "preferences.h"
 
 /* default preferences */
-static int prefs[NPREFS] = {
+static XE_TLS int prefs[NPREFS] = {
     PREF_TOPO, PREF_METRIC, PREF_MDY, PREF_UTCTZ, PREF_HIPREC, PREF_NOMSGBELL,
     PREF_PREFILL, PREF_TIPSON, PREF_CONFIRMON, PREF_SUN
 };

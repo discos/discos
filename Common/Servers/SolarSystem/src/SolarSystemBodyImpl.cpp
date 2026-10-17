@@ -32,7 +32,8 @@ SolarSystemBodyImpl::SolarSystemBodyImpl(const ACE_CString &CompName,maci::Conta
         m_el_off(0.0),m_el(0.),
         m_offsetFrame(Antenna::ANT_HORIZONTAL),
         m_dut1(0.),m_distance(0.),
-        m_glon(0.),m_glat(0.)         
+        m_glon(0.),m_glat(0.),
+        m_parallacticAngle(0.)
             
 {
         AUTO_TRACE("SolarSystemBodyImpl::SolarSystemBodyImpl()");
@@ -100,7 +101,7 @@ void SolarSystemBodyImpl::execute()
 	     m_latitude=site->latitude;
 	     m_height=site->height;
         m_sitex.reset(new xephemlib::Site());  //smart pointer std::uniq needs reset to initialize.  
-	     m_sitex-> setCoordinate(site->longitude,site->latitude,site->height); //coordinates in degrees.
+	     m_sitex-> setCoordinate(site->longitude,site->latitude,site->height); //radians, radians, meters
  
         m_body_xephem.reset(new xephemlib::SolarSystemBody());		  
 		   
@@ -216,7 +217,6 @@ void SolarSystemBodyImpl::getJ2000EquatorialCoordinate(ACS::Time time, CORBA::Do
 	  TIMEVALUE val(time);
 	  baci::ThreadSyncGuard guard(&m_mutex);
 	  BodyPosition(val);
-	  IRA::CDateTime ctime(val,m_dut1);	
      ra2000=slaDranrm(m_ra2000);
      dec2000=IRA::CIRATools::latRangeRad(m_dec2000);
 }
@@ -230,9 +230,7 @@ void SolarSystemBodyImpl::getHorizontalCoordinate(ACS::Time time, CORBA::Double_
         baci::ThreadSyncGuard guard(&m_mutex);
 
         TIMEVALUE val(time);
-	     IRA::CDateTime ctime(val,m_dut1);	
-        BodyPosition(val);
-	     m_source.process(ctime,m_site);
+        BodyPosition(val);   // it also processes m_source at the given time
 	     m_source.getApparentHorizontal(azi,ele);
 	     az=azi; el=ele;
 
@@ -250,9 +248,7 @@ void SolarSystemBodyImpl::getAllCoordinates(ACS::Time time,CORBA::Double_out az,
  	baci::ThreadSyncGuard guard(&m_mutex);
    TIMEVALUE val(time);
 
-	IRA::CDateTime ctime(val,m_dut1);
-	BodyPosition(val);
-	m_source.process(ctime,m_site);
+	BodyPosition(val);   // it also processes m_source at the given time
 	m_source.getApparentHorizontal(azi,ele);
 	m_source.getApparentEquatorial(rae,dece,jepoche);
 	m_source.getApparentGalactic(lone,late);
@@ -269,8 +265,7 @@ bool SolarSystemBodyImpl::checkTracking(ACS::Time time,CORBA::Double az,CORBA::D
 	   baci::ThreadSyncGuard guard(&m_mutex);  // obtain access
       
     	TIMEVALUE val(time);
-	   IRA::CDateTime refTime(val,m_dut1);
-   	m_source.process(refTime,m_site);
+	   BodyPosition(val);   // body position at the requested time, not at the last call
 	   m_source.getApparentHorizontal(computedAz,computedEl);
 	   elErr=computedEl-el;
 	   azErr=(computedAz-az)*cos(el);
@@ -284,42 +279,20 @@ void SolarSystemBodyImpl::setBodyName(const char* bodyName)
 {
 
         AUTO_TRACE("SolarSystemBodyImpl::setBodyName()");
-        PLCode  code; //planet code from xephem astrolib
+        PLCode code=xephemlib::SolarSystemBody::getPlanetCodeFromName(bodyName); //planet code from xephem astrolib
+        baci::ThreadSyncGuard guard(&m_mutex);
 
-
-        m_bodyName=CString(bodyName);
-        m_bodyName.MakeUpper();
-        code=xephemlib::SolarSystemBody::getPlanetCodeFromName(bodyName);
-        CUSTOM_LOG(LM_FULL_INFO,"SolarSystemBodyImpl::setBodyName()",
-					  (LM_INFO,"Solar System body name:%s",(const char *)m_bodyName));             
-
-
-        if (code!=NOBJ){
-             try{
-                  m_body_xephem ->setObject(code);
-             }
-         
-             
-             catch (std::exception& e)
-             {
-                       std::cout << e.what() << '\n';
-             }
-              catch (...)
-             {
-             	std::cout << "except" << std::endl;
-             
-             }
-        
-        } else
-       {
+        if (code==NOBJ || !m_body_xephem || !m_body_xephem->setObject(code)) {
+           // unknown body, or component not executed yet
            _EXCPT(AntennaErrors::SourceNotFoundExImpl, __dummy,"SolarSystemBodyImpl::setBodyName()");
            __dummy.setSourceName(bodyName);
 	         CUSTOM_EXCPT_LOG(__dummy,LM_DEBUG);
 	         throw __dummy.getAntennaErrorsEx();
-         	 
         }
-        
-
+        m_bodyName=CString(bodyName);
+        m_bodyName.MakeUpper();
+        CUSTOM_LOG(LM_FULL_INFO,"SolarSystemBodyImpl::setBodyName()",
+					  (LM_INFO,"Solar System body name:%s",(const char *)m_bodyName));
 }
 
 void SolarSystemBodyImpl::computeFlux(CORBA::Double freq, CORBA::Double fwhm, CORBA::Double_out flux)  
@@ -362,8 +335,14 @@ void SolarSystemBodyImpl::BodyPosition(TIMEVALUE &time)
         
         time_utc=  CDateTime::julianEpoch2JulianDay (date.getJulianEpoch()) - MJD_OFFSET;
 
-        m_sitex -> setTime(time_utc) ;  
-        m_body_xephem->compute(m_sitex.get() );
+        if (!m_sitex || !m_body_xephem) return;   // component not executed yet
+        m_sitex -> setTime(time_utc) ;
+        if (!m_body_xephem->compute(m_sitex.get())) {
+             // no body selected yet (setBodyName not called) or libastro failure: keep the last values
+             CUSTOM_LOG(LM_FULL_INFO,"SolarSystemBodyImpl::BodyPosition()",
+                     (LM_WARNING,"Cannot compute the position of body %s",(const char *)m_bodyName));
+             return;
+        }
 
 
         double ra2000,dec2000,az2000,el2000,range;

@@ -98,19 +98,19 @@ static int gecmoon (double J, struct plantbl *lrtab,
 #define MOSHIER_END   (2798525.5 - MJD0) /* 2950.0; from libration table */
 
 
-static double Args[NARGS];
-static double LP_equinox;
-static double NF_arcsec;
-static double Ea_arcsec;
-static double pA_precession;
+static XE_TLS double Args[NARGS];
+static XE_TLS double LP_equinox;
+static XE_TLS double NF_arcsec;
+static XE_TLS double Ea_arcsec;
+static XE_TLS double pA_precession;
 
 
 /* This storage ought to be allocated dynamically.  */
-double ss[NARGS][30];
-double cc[NARGS][30];
+static XE_TLS double ss[NARGS][30];
+static XE_TLS double cc[NARGS][30];
 
 /* Time, in units of 10,000 Julian years from JED 2451545.0.  */
-static double T;
+static XE_TLS double T;
 
 /* Conversion factors between degrees and radians */
 #define DTR 1.7453292519943295769e-2

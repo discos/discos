@@ -1,150 +1,77 @@
+#ifndef LIBASTROWRAPPER_H
+#define LIBASTROWRAPPER_H
+
 /*
+    C++ Wrapper for Xephem libastro.
 
-    C++ Wrapper for Xephem libastro. 
-    
-    
-
+    libastro keeps its caches and its preferences per thread, so different
+    instances of these classes can be used concurrently from different threads
+    without any global lock. A single instance is not synchronised: callers
+    sharing one between threads must protect it (SolarSystemBodyImpl does it
+    with its own mutex).
 */
 
-
-
-
-//#ifndef _LIBRWAPPER
-//#define  _LIBRWAPPER
-
-#include <iostream>
-#include <cstring>
+#include <map>
+#include <memory>
 #include <string>
 #include "astro.h"
 #include "preferences.h"
-#include <string>
-#include <map>
-#include <cctype>
-#include <algorithm>
-#include <locale>
-#include <memory>
-#include <mutex> // Import mutex
 
 namespace xephemlib
 {
 
+/* observing site and time, as required by libastro */
+class Site: public Now {
 
-class Site: public  Now {
+public:
 
-public:  
-      
-    Site(double mj, double lon, double lt, double height);
     Site();
+    /* mj: UTC as Modified Julian Date; lon, lt: radians; height: meters */
+    Site(double mj, double lon, double lt, double height);
 
+    /* lon, lt: radians; height: meters above sea level */
     void setCoordinate(double lon, double lt, double height);
+    /* mj: UTC as Modified Julian Date */
     void setTime(double mj);
-    
-    void stampa(void);
-    double getMjd();
 
-    
-private:
-       double m_lon,m_lat,m_height;
-       std::string name;
+    void stampa(void) const;
+    double getMjd() const;
 
 };
 
-class SolarSystemBody   {
+class SolarSystemBody {
 
 public:
-      
-      
-      SolarSystemBody(PLCode code)  ;
-      ~SolarSystemBody(){
-		std::cout << "destroyed"<<"\n";      
-      
-      //
-      };
-    
-      static std::string getPlanetNameFromCode(PLCode code);
-      static PLCode  getPlanetCodeFromName(std::string  name);
-      void compute (Site* site);
-      SolarSystemBody();
-      void setObject(PLCode code);
-       
-      static std::mutex astro_mutex; // Declaration     
-      Obj* getObject();
-      void report();
-      static std::map<std::string,PLCode> planet;
-      void getCoordinates(double& ra, double& dec,double& az,double& el, double& range);      
-      private:
-            
-            double _ra,_dec,_range,_az,_el;
-            PLCode _code;
-            
-    
-    
-protected:
-        
-            std::unique_ptr<Obj> obj; // Replaces Obj* obj
- 
-    
-    
-    
-};
 
-class Jupiter : public SolarSystemBody {
+    SolarSystemBody();
+    explicit SolarSystemBody(PLCode code);
 
-public:
-    
-     Jupiter() ;
-     
+    static std::string getPlanetNameFromCode(PLCode code);
+    static PLCode getPlanetCodeFromName(const std::string& name);
+
+    /* select the body; returns false if the code is not a valid body */
+    bool setObject(PLCode code);
+    PLCode getCode() const;
+
+    /* compute the astrometric (J2000) topocentric position at site.
+     * returns false if no valid body is set or libastro fails */
+    bool compute(Site* site);
+
+    Obj* getObject();
+    void report() const;
+    void getCoordinates(double& ra, double& dec, double& az, double& el, double& range) const;
+
+    /* upper case body names to codes */
+    static const std::map<std::string, PLCode> planet;
+
 private:
-   
-    
-    
-    
+
+    std::unique_ptr<Obj> obj;
+    PLCode _code;
+    double _ra, _dec, _range, _az, _el;
+
 };
 
 }
 
- 
-
-
-
-
-  
-
-
-
-//#endif   /*_LIBRWAPPER*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#endif /*LIBASTROWRAPPER_H*/

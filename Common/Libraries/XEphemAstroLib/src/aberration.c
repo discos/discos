@@ -79,10 +79,10 @@ ab_eq (double mj, double lsn, double *ra, double *dec)
 static void
 ab_aux (double mj, double *x, double *y, double lsn, int mode)
 {
-	static double lastmj = -10000;
-	static double eexc;	/* earth orbit excentricity */
-	static double leperi;	/* ... and longitude of perihelion */
-	static char dirty = 1;	/* flag for cached trig terms */
+	static XE_TLS double lastmj = -10000;
+	static XE_TLS double eexc;	/* earth orbit excentricity */
+	static XE_TLS double leperi;	/* ... and longitude of perihelion */
+	static XE_TLS char dirty = 1;	/* flag for cached trig terms */
 
 	if (mj != lastmj) {
 	    double T;		/* centuries since J2000 */
@@ -115,7 +115,7 @@ ab_aux (double mj, double *x, double *y, double lsn, int mode)
 	    {
 		double *ra = x, *dec = y;
 		double sr, cr, sd, cd, sls, cls;/* trig values coords */
-		static double cp, sp, ce, se;	/* .. and perihel/eclipic */
+		static XE_TLS double cp, sp, ce, se;	/* .. and perihel/eclipic */
 		double dra, ddec;		/* changes in ra and dec */
 
 		if (dirty) {

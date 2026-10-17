@@ -59,7 +59,7 @@ double lt,
 double x, double y,
 double *p, double *q)
 {
-	static double last_lt = -3434, slt, clt;
+	static XE_TLS double last_lt = -3434, slt, clt;
 	double cap, B;
 
 	if (lt != last_lt) {

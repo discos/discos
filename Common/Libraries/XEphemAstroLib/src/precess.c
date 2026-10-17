@@ -43,8 +43,8 @@ precess_hiprec (
 double mjd1, double mjd2,	/* initial and final epoch modified JDs */
 double *ra, double *dec)	/* ra/dec for mjd1 in, for mjd2 out */
 {
-	static double last_mjd1 = -213.432, last_from;
-	static double last_mjd2 = -213.432, last_to;
+	static XE_TLS double last_mjd1 = -213.432, last_from;
+	static XE_TLS double last_mjd2 = -213.432, last_to;
 	double zeta_A, z_A, theta_A;
 	double T;
 	double A, B, C;

@@ -9,8 +9,8 @@ static double gmst0 (double mj);
 void
 utc_gst (double mj, double utc, double *gst)
 {
-	static double lastmj = -18981;
-	static double t0;
+	static XE_TLS double lastmj = -18981;
+	static XE_TLS double t0;
 
 	if (mj != lastmj) {
 	    t0 = gmst0(mj);
@@ -27,8 +27,8 @@ utc_gst (double mj, double utc, double *gst)
 void
 gst_utc (double mj, double gst, double *utc)
 {
-	static double lastmj = -10000;
-	static double t0;
+	static XE_TLS double lastmj = -10000;
+	static XE_TLS double t0;
 
 	if (mj != lastmj) {
 	    t0 = gmst0 (mj);

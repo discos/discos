@@ -99,28 +99,28 @@ static void GetPrecession (double SemiMajorAxis, double Eccentricity,
 #define SunSemiMajorAxis  149598845.0  	    /* Kilometers 		   */
  
 /*  Keplerian Elements and misc. data for the satellite              */
-static double  EpochDay;                   /* time of epoch                 */
-static double EpochMeanAnomaly;            /* Mean Anomaly at epoch         */
-static long EpochOrbitNum;                 /* Integer orbit # of epoch      */
-static double EpochRAAN;                   /* RAAN at epoch                 */
-static double epochMeanMotion;             /* Revolutions/day               */
-static double OrbitalDecay;                /* Revolutions/day^2             */
-static double EpochArgPerigee;             /* argument of perigee at epoch  */
-static double Eccentricity;
-static double Inclination;
+static XE_TLS double  EpochDay;                   /* time of epoch                 */
+static XE_TLS double EpochMeanAnomaly;            /* Mean Anomaly at epoch         */
+static XE_TLS long EpochOrbitNum;                 /* Integer orbit # of epoch      */
+static XE_TLS double EpochRAAN;                   /* RAAN at epoch                 */
+static XE_TLS double epochMeanMotion;             /* Revolutions/day               */
+static XE_TLS double OrbitalDecay;                /* Revolutions/day^2             */
+static XE_TLS double EpochArgPerigee;             /* argument of perigee at epoch  */
+static XE_TLS double Eccentricity;
+static XE_TLS double Inclination;
  
 /* Site Parameters */
-static double SiteLat,SiteLong,SiteAltitude;
+static XE_TLS double SiteLat,SiteLong,SiteAltitude;
 
 
-static double SidDay,SidReference;	/* Date and sidereal time	*/
+static XE_TLS double SidDay,SidReference;	/* Date and sidereal time	*/
 
 /* Keplerian elements for the sun */
-static double SunEpochTime,SunInclination,SunRAAN,SunEccentricity,
+static XE_TLS double SunEpochTime,SunInclination,SunRAAN,SunEccentricity,
        SunArgPerigee,SunMeanAnomaly,SunMeanMotion;
 
 /* values for shadow geometry */
-static double SinPenumbra,CosPenumbra;
+static XE_TLS double SinPenumbra,CosPenumbra;
 
 
 /* given a Now and an Obj with info about an earth satellite in the es_* fields
@@ -614,10 +614,10 @@ GetSitPosition(double SiteLat, double SiteLong, double SiteElevation,
 double CrntTime, double *SiteX, double *SiteY, double *SiteZ, double *SiteVX,
 double *SiteVY, MAT3x3 SiteMatrix)
 {
-    static double G1,G2; /* Used to correct for flattening of the Earth */
-    static double CosLat,SinLat;
-    static double OldSiteLat = -100000;  /* Used to avoid unneccesary recomputation */
-    static double OldSiteElevation = -100000;
+    static XE_TLS double G1,G2; /* Used to correct for flattening of the Earth */
+    static XE_TLS double CosLat,SinLat;
+    static XE_TLS double OldSiteLat = -100000;  /* Used to avoid unneccesary recomputation */
+    static XE_TLS double OldSiteElevation = -100000;
     double Lat;
     double SiteRA;	/* Right Ascension of site			*/
     double CosRA,SinRA;

@@ -41,8 +41,8 @@ double mj,
 double x, double y,	/* sw==1: x==ra, y==dec.  sw==-1: x==lg, y==lt. */
 double *p, double *q)	/* sw==1: p==lg, q==lt. sw==-1: p==ra, q==dec. */
 {
-	static double lastmj = -10000;	/* last mj calculated */
-	static double seps, ceps;	/* sin and cos of mean obliquity */
+	static XE_TLS double lastmj = -10000;	/* last mj calculated */
+	static XE_TLS double seps, ceps;	/* sin and cos of mean obliquity */
 	double sx, cx, sy, cy, ty, sq;
 
 	if (mj != lastmj) {

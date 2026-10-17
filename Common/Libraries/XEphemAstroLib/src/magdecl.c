@@ -115,15 +115,15 @@ static int E0000(FILE *wmmdat, int IENTRY, int *maxdeg, float alt,
 float glat, float glon, float t, float *dec, float *mdp, float *ti,
 float *gv)
 {
-     static int maxord,i,icomp,n,m,j,D1,D2,D3,D4;
-     static float c[13][13],cd[13][13],tc[13][13],dp[13][13],snorm[169],
+     static XE_TLS int maxord,i,icomp,n,m,j,D1,D2,D3,D4;
+     static XE_TLS float c[13][13],cd[13][13],tc[13][13],dp[13][13],snorm[169],
 	  sp[13],cp[13],fn[13],fm[13],pp[13],k[13][13],pi,dtr,a,b,re,
 	  a2,b2,c2,a4,b4,c4,epoc,gnm,hnm,dgnm,dhnm,flnmj,otime,oalt,
 	  olat,olon,dt,rlon,rlat,srlon,srlat,crlon,crlat,srlat2,
 	  crlat2,q,q1,q2,ct,st,r2,r,d,ca,sa,aor,ar,br,bt,bp,bpp,
 	  par,temp1,temp2,parp,bx,by,bz,bh;
-     static char model[20], c_str[81], c_new[5];
-     static float *p = snorm;
+     static XE_TLS char model[20], c_str[81], c_new[5];
+     float *p = snorm;
 
      switch(IENTRY){case 0: goto GEOMAG; case 1: goto GEOMG1;}
 

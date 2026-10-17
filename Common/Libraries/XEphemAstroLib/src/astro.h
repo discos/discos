@@ -3,6 +3,28 @@
 
 #include <stdio.h>
 
+/* Thread safety.
+ * Every mutable cache, scratch area and returned static buffer inside the
+ * library is declared with XE_TLS, so each thread owns a private copy and
+ * concurrent calls from different threads never share state. Consequences:
+ *  - pref_set()/pref_get() act on the calling thread only; a thread starts
+ *    with the default preferences.
+ *  - pointers returned by functions that hand back static storage (e.g.
+ *    getBuiltInObjs(), msa_atlas(), obj_description()) are valid only in the
+ *    calling thread.
+ * The only process-wide settings are setMoonDir() and the constellation
+ * figures loaded by cns_loadfigs(); both are internally synchronised.
+ */
+#ifndef XE_TLS
+#if defined(__GNUC__) || defined(__clang__)
+#define XE_TLS __thread
+#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
+#define XE_TLS _Thread_local
+#else
+#error "XEphemAstroLib requires compiler support for thread-local storage"
+#endif
+#endif
+
 #ifndef PI
 #define	PI		3.141592653589793
 #endif

@@ -15,7 +15,7 @@ void
 ta_par (double tha, double tdec, double phi, double ht, double *rho,
 double *aha, double *adec)
 {
-	static double last_phi = 1000.0, last_ht = -1000.0, xobs, zobs;
+	static XE_TLS double last_phi = 1000.0, last_ht = -1000.0, xobs, zobs;
 	double x, y, z;	/* obj cartesian coord, in Earth radii */
 
 	/* avoid calcs involving the same phi and ht */

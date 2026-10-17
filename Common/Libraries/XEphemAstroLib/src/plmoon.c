@@ -6,22 +6,26 @@
 #include <math.h>
 
 #include "astro.h"
+#include "preferences.h"
 
 /* private cache of planet ephemerides and when they were computed
  * N.B. don't use ones in builtin[] -- they are the user's responsibility.
  */
-static ObjPl plobj[NOBJ];
-static Now plnow[NOBJ];
+static XE_TLS ObjPl plobj[NOBJ];
+static XE_TLS Now plnow[NOBJ];
+static XE_TLS int plpref[NOBJ];	/* PREF_EQUATORIAL used for plobj[] */
 
 /* public builtin storage
  */
-static Obj builtin[NBUILTIN];
+static XE_TLS Obj builtin[NBUILTIN];
 
+/* process-wide setting shared by all threads, accessed atomically */
 static char *moondir;
 
 static void setMoon (Now *np, Obj *moonop, Obj *planop, MoonData *mdp);
 static void init1BI (int idx, int pl, int moon, char *name);
 static void initPlobj(void);
+static void updatePlobj (Now *np, int code);
 static void rotate (double a, double *x, double *y);
 
 /* directory in which to look for auxil moon data files.
@@ -30,7 +34,7 @@ static void rotate (double a, double *x, double *y);
 void
 setMoonDir (char *dir)
 {
-	moondir = dir;
+	__atomic_store_n (&moondir, dir, __ATOMIC_RELEASE);
 }
 
 /* return set of builtin objects.
@@ -102,6 +106,7 @@ int
 plmoon_cir (Now *np, Obj *moonop)
 {
 	Obj *sunop = (Obj*)&plobj[SUN];
+	char *mdir = __atomic_load_n (&moondir, __ATOMIC_ACQUIRE);
 	MoonData md[X_MAXNMOONS];
 	double sz, t1, t2;
 	double pra, pdec;
@@ -113,10 +118,7 @@ plmoon_cir (Now *np, Obj *moonop)
 	    initPlobj();
 
 	/* get sun @ np */
-	if (memcmp (&plnow[SUN], np, sizeof(Now))) {
-	    obj_cir (np, (Obj*)&plobj[SUN]);
-	    memcpy (&plnow[SUN], np, sizeof(Now));
-	}
+	updatePlobj (np, SUN);
 
 	/* get parent planet and moon info @ np */
 	switch (moonop->pl_code) {
@@ -127,13 +129,10 @@ plmoon_cir (Now *np, Obj *moonop)
 
 	    planop = (Obj*)&plobj[MARS];
 
-	    if (memcmp (&plnow[MARS], np, sizeof(Now))) {
-		obj_cir (np, planop);
-		memcpy (&plnow[MARS], np, sizeof(Now));
-	    }
+	    updatePlobj (np, MARS);
 
-	    /* don't worry, this already caches based on same mjd */
-	    marsm_data (mjd, moondir, sunop, planop, &sz, &pra, &pdec, md);
+	    /* don't worry, this already caches based on the same inputs */
+	    marsm_data (mjd, mdir, sunop, planop, &sz, &pra, &pdec, md);
 	    mdp = &md[moonop->pl_moon];
 	    break;
 
@@ -145,13 +144,10 @@ plmoon_cir (Now *np, Obj *moonop)
 
 	    planop = (Obj*)&plobj[JUPITER];
 
-	    if (memcmp (&plnow[JUPITER], np, sizeof(Now))) {
-		obj_cir (np, planop);
-		memcpy (&plnow[JUPITER], np, sizeof(Now));
-	    }
+	    updatePlobj (np, JUPITER);
 
-	    /* don't worry, this already caches based on same mjd */
-	    jupiter_data (mjd,moondir,sunop,planop,&sz,&t1,&t2,&pra,&pdec,md);
+	    /* don't worry, this already caches based on the same inputs */
+	    jupiter_data (mjd,mdir,sunop,planop,&sz,&t1,&t2,&pra,&pdec,md);
 	    mdp = &md[moonop->pl_moon];
 	    moonop->pl_aux1 = t1;
 	    moonop->pl_aux2 = t2;
@@ -169,13 +165,10 @@ plmoon_cir (Now *np, Obj *moonop)
 
 	    planop = (Obj*)&plobj[SATURN];
 
-	    if (memcmp (&plnow[SATURN], np, sizeof(Now))) {
-		obj_cir (np, planop);
-		memcpy (&plnow[SATURN], np, sizeof(Now));
-	    }
+	    updatePlobj (np, SATURN);
 
-	    /* don't worry, this already caches based on same mjd */
-	    saturn_data (mjd,moondir,sunop,planop,&sz,&t1,&t2,&pra,&pdec,md);
+	    /* don't worry, this already caches based on the same inputs */
+	    saturn_data (mjd,mdir,sunop,planop,&sz,&t1,&t2,&pra,&pdec,md);
 	    mdp = &md[moonop->pl_moon];
 	    moonop->pl_aux1 = t1;
 	    moonop->pl_aux2 = t2;
@@ -190,13 +183,10 @@ plmoon_cir (Now *np, Obj *moonop)
 
 	    planop = (Obj*)&plobj[URANUS];
 
-	    if (memcmp (&plnow[URANUS], np, sizeof(Now))) {
-		obj_cir (np, planop);
-		memcpy (&plnow[URANUS], np, sizeof(Now));
-	    }
+	    updatePlobj (np, URANUS);
 
-	    /* don't worry, this already caches based on same mjd */
-	    uranus_data (mjd, moondir, sunop, planop, &sz, &pra, &pdec, md);
+	    /* don't worry, this already caches based on the same inputs */
+	    uranus_data (mjd, mdir, sunop, planop, &sz, &pra, &pdec, md);
 	    mdp = &md[moonop->pl_moon];
 	    break;
 
@@ -211,6 +201,21 @@ plmoon_cir (Now *np, Obj *moonop)
 	setMoon (np, moonop, planop, mdp);
 
 	return (0);
+}
+
+/* bring the cached plobj[code] up to date with np and the current
+ * PREF_EQUATORIAL preference, which obj_cir() also depends on.
+ */
+static void
+updatePlobj (Now *np, int code)
+{
+	int pref = pref_get (PREF_EQUATORIAL);
+
+	if (memcmp (&plnow[code], np, sizeof(Now)) || plpref[code] != pref) {
+	    obj_cir (np, (Obj*)&plobj[code]);
+	    memcpy (&plnow[code], np, sizeof(Now));
+	    plpref[code] = pref;
+	}
 }
 
 static void

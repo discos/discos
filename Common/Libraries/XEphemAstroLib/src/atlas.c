@@ -29,7 +29,7 @@ static int msa_charts[] = {
 char *
 msa_atlas(double ra, double dec)
 {
-	static char buf[512];
+	static XE_TLS char buf[512];
 	int zone, band;
 	int i, p;
 
@@ -72,7 +72,7 @@ static struct {
 char *
 um_atlas(double ra, double dec)
 {
-	static char buf[512];
+	static XE_TLS char buf[512];
 	int band, south;
 	int p;
 	double w;
@@ -137,7 +137,7 @@ static struct {
 char *
 u2k_atlas(double ra, double dec)
 {
-	static char buf[512];
+	static XE_TLS char buf[512];
 	static char err[] = "???";
 	int band; 		/* index to array */
 	int south;		/* flag for volume 2*/

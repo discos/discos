@@ -147,7 +147,7 @@ short dt[TABSIZ] = {
 double
 deltat(double mj)
 {
-	static double ans, lastmj;
+	static XE_TLS double ans, lastmj;
 	double Y, p, B;
 	int d[6];
 	int i, iy, k;

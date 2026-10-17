@@ -15,9 +15,9 @@ static void galeq_init (void);
 static double an = degrad(32.93192);    /* G lng of asc node on equator */
 static double gpr = degrad(192.85948);  /* RA of North Gal Pole, 2000 */
 static double gpd = degrad(27.12825);   /* Dec of  " */
-static double cgpd, sgpd;		/* cos() and sin() of gpd */
-static double mj2000;			/* mj of 2000 */
-static int before;			/* whether these have been set yet */
+static XE_TLS double cgpd, sgpd;		/* cos() and sin() of gpd */
+static XE_TLS double mj2000;			/* mj of 2000 */
+static XE_TLS int before;			/* whether these have been set yet */
 
 /* given ra and dec, each in radians, for the given epoch, find the
  * corresponding galactic latitude, *lt, and longititude, *lg, also each in

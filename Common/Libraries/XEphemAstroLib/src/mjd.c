@@ -12,8 +12,8 @@
 void
 cal_mjd (int mn, double dy, int yr, double *mjp)
 {
-	static double last_mjd, last_dy;
-	static int last_mn, last_yr;
+	static XE_TLS double last_mjd, last_dy;
+	static XE_TLS int last_mn, last_yr;
 	int b, d, m, y;
 	long c;
 
@@ -58,8 +58,8 @@ cal_mjd (int mn, double dy, int yr, double *mjp)
 void
 mjd_cal (double mj, int *mn, double *dy, int *yr)
 {
-	static double last_mj, last_dy;
-	static int last_mn, last_yr;
+	static XE_TLS double last_mj, last_dy;
+	static XE_TLS int last_mn, last_yr;
 	double d, f;
 	double i, a, b, ce, g;
 
@@ -174,7 +174,7 @@ mjd_dayno (double mj, int *yr, double *dy)
 void
 mjd_year (double mj, double *yr)
 {
-	static double last_mj, last_yr;
+	static XE_TLS double last_mj, last_yr;
 	int m, y;
 	double d;
 	double e0, e1;	/* mjd of start of this year, start of next year */
