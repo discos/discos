@@ -16,8 +16,20 @@ module Backends {
 	<h2>DBE Switch Matrix Interface </h2>
 	@
 	*/
-	interface SRTDBESM: ACS::CharacteristicComponent {
+	interface SRTDBESM: ACS::CharacteristicComponent, Backends::BackendAttenuation {
 
+	void setBackend(in string backendName) raises (BackendsErrors::BackendsErrorsEx);
+	
+	void setReceiver(in string receiverCode) raises (BackendsErrors::BackendsErrorsEx);
+
+	void load_dbeCfg() raises (BackendsErrors::BackendsErrorsEx);
+	
+        readonly attribute ACS::ROstring dbe_receiver;
+	
+        readonly attribute ACS::ROstring dbe_backend;
+
+        readonly attribute ACS::ROstring dbe_cfg_name;
+        
 	/*
 	 DBESM boards addresses 
         */

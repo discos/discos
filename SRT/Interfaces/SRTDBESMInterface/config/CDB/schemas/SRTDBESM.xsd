@@ -52,6 +52,10 @@
 	    <xs:element name="cfg_2" type="baci:ROstring" />
 	    <xs:element name="cfg_3" type="baci:ROstring" />
 	    <xs:element name="cfg_4" type="baci:ROstring" />
+	    <xs:element name="attenuation" type="baci:ROdoubleSeq" />
+	    <xs:element name="dbe_receiver" type="baci:ROstring" />
+	    <xs:element name="dbe_backend" type="baci:ROstring" />
+	    <xs:element name="dbe_cfg_name" type="baci:ROstring" />
       </xs:sequence>
        <xs:attribute name="addr_1" type="xs:long" use="required"/>
 	    <xs:attribute name="addr_2" type="xs:long" use="required"/>

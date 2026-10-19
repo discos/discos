@@ -5,6 +5,7 @@
 #include <IRA>
 #include <BackendsErrors.h>
 #include <ComponentErrors.h>
+#include <Socket.h>
 #include "Configuration.h"
 #include "DBESMprotocol.h"
 
@@ -33,7 +34,7 @@ public:
 	 * @throw ComponentErrors::SocketError
 	 * 		  @arg \c IRALibraryResource>
 	*/
-	void init(CConfiguration *config) throw (ComponentErrors::SocketErrorExImpl);
+	void init(CConfiguration *config); //throw (ComponentErrors::SocketErrorExImpl);
 	
 	/**
 	 * Called to close the socket and free everything.
@@ -46,7 +47,7 @@ public:
 	 * the command line state is set to <i>ACU::ACU_CNTDING</i>. It must be called by an external watchdog in order to keep the connection enstablished.
 	 * This is not synchronized because this method acts on the socket only by accessing the mutex for the <i>CCommonData</i> class as the background thread of this socket @sa <i>onconnect()</i> 
 	 */
-	void connectSocket() throw (ComponentErrors::SocketErrorExImpl);
+	void connectSocket(); //throw (ComponentErrors::SocketErrorExImpl);
 	
 		/**
 	 * This function can be used to send a command to the ACU.
@@ -56,7 +57,7 @@ public:
 	 * @throw TimeoutExImpl if the operation timeout before completing. 
 	 * @thorw SocketErrorExImpl if the connection fails before completing. In that case the status is set to <i>Antenna::ACU_NOTCNTD</i>
 	 */
-	void sendCommand(std::string cmd,std::string* outBuff, int all) throw (ComponentErrors::TimeoutExImpl,ComponentErrors::SocketErrorExImpl);
+	void sendCommand(std::string cmd,std::string* outBuff, int all); //throw (ComponentErrors::TimeoutExImpl,ComponentErrors::SocketErrorExImpl);
 		
 	void set_all(const char * cfg_name); //throw (BackendsErrors::BackendsErrorsEx);
 	
@@ -86,7 +87,7 @@ public:
    
    void parse_double_response(string status_str, string start, string end, double* val); //throw (BackendsErrors::BackendsErrorsEx);
    
-   void CCommandSocket::parse_long_response(string status_str, string start, string end, long* val); //throw (BackendsErrors::BackendsErrorsEx)
+   void parse_long_response(string status_str, string start, string end, long* val); //throw (BackendsErrors::BackendsErrorsEx)
    
    void parse_string_response(string status_str, string start, string end, string* val);
    
@@ -103,6 +104,8 @@ public:
    string set_dbebpf(const char * out_dbe, const char * bpf_val);
    
    string get_dbebpf(const char * out_dbe);
+   
+   void set_out_att(short out_ch, double att_val);
       
 protected:
 	/**
@@ -119,6 +122,14 @@ private:
 	CDBESMCommand m_dbesm_command;
 
 	bool m_bTimedout;
+	
+	CError m_error;
+	
+	DWORD m_timeout;
+	
+	enum SocketStatus { READY, NOTREADY, TIMEOUT } m_socket_status;
+	
+	double timeout = 3;
 		
 	/**
     * This member function is called to send a buffer to the DBESM.
@@ -131,8 +142,9 @@ private:
 
    int receiveBuffer(std::string *Msg,CError& error, int all=0);
 	
-	void createSocket() throw (ComponentErrors::SocketErrorExImpl);
+	void createSocket(); //throw (ComponentErrors::SocketErrorExImpl);
 	
+	const bool isConnected() const;
    
 	void set_all_command(const char * cfg_name); //throw (BackendsErrors::BackendsErrorsEx);
 	
@@ -169,6 +181,8 @@ private:
 	string set_dbebpf_command(const char * out_dbe, const char * bpf_val);
 	
 	string get_dbebpf_command(const char * out_dbe);	
+	
+	void set_out_att_command(short out_ch, double att_val);
 };
 
 #endif /*COMMANDSOCKET_H_*/

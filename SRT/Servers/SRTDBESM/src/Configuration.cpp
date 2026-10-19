@@ -49,7 +49,7 @@ CConfiguration::~CConfiguration()
 {
 }
 
-void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErrors::CDBAccessExImpl)
+void CConfiguration::init(maci::ContainerServices *Services) //throw (ComponentErrors::CDBAccessExImpl)
 {
 	_GET_LONG_ATTRIBUTE("addr_1","Board 1 address is ",m_addr_1);
 	_GET_LONG_ATTRIBUTE("addr_2","Board 2 address is ",m_addr_2);
@@ -131,16 +131,26 @@ void CConfiguration::init(maci::ContainerServices *Services) throw (ComponentErr
    m_cfg_2[19] = '\0';
    m_cfg_3[19] = '\0';
    m_cfg_4[19] = '\0';
+   /*
+   for (int i = 0; i < 2; ++i){
+   m_attenuation[i] = 0.0;
+   }
+   */
+   /*
+   for (int i=0; i<19; i++){
+   m_dbe_receiver[i] = '0';}
+   m_dbe_receiver[19] = '\0';
+   */
 }
 
-void CConfiguration::init() throw (ComponentErrors::CDBAccessExImpl)
+void CConfiguration::init() //throw (ComponentErrors::CDBAccessExImpl)
 {
 	m_addr_1 = 15;
 	m_addr_2 = 14;
 	m_addr_3 = 13;
 	m_addr_4 = 12;
-   m_DBESM_IPAddress = "127.0.0.1";
-	m_DBESM_Port = 11111;
+   m_DBESM_IPAddress = "192.168.60.42";  //127.0.0.1   192.168.60.42
+	m_DBESM_Port = 6344;                 //11111    6344
 	
 	for (int i = 0; i < 10; ++i)
     {
@@ -195,4 +205,9 @@ void CConfiguration::init() throw (ComponentErrors::CDBAccessExImpl)
    m_cfg_2[19] = '\0';
    m_cfg_3[19] = '\0';
    m_cfg_4[19] = '\0';
+   /*
+   for (int i=0; i<19; i++){
+   m_dbe_receiver[i] = '0';}
+   m_dbe_receiver[19] = '\0';
+   */
 }

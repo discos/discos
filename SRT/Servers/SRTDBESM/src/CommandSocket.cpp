@@ -8,10 +8,14 @@ using namespace BackendsErrors;
 
 _IRA_LOGFILTER_IMPORT;
 
-CCommandSocket::CCommandSocket()
+CCommandSocket::CCommandSocket() 
 {
+	
 	m_pConfiguration=NULL;
 	m_bTimedout=false;
+	m_timeout = (timeout * 1500000);
+	m_socket_status = NOTREADY;
+
 }
 
 CCommandSocket::~CCommandSocket()
@@ -24,7 +28,7 @@ void CCommandSocket::cleanUp()
 	Close(err);
 }
 
-void CCommandSocket::init(CConfiguration *config) throw (SocketErrorExImpl)
+void CCommandSocket::init(CConfiguration *config) //throw (SocketErrorExImpl)
 {
 	m_pConfiguration=config;
 	
@@ -32,52 +36,136 @@ void CCommandSocket::init(CConfiguration *config) throw (SocketErrorExImpl)
 }
 
 
-void CCommandSocket::connectSocket() throw (SocketErrorExImpl)
+void CCommandSocket::connectSocket() //throw (SocketErrorExImpl)
 {
-	IRA::CError error;
-	ACS_LOG(LM_FULL_INFO,"CCommandSocket::connectSocket()",(LM_NOTICE,"COMMAND_SOCKET_CREATING"));	
-	
-	createSocket(); // throw (SocketErrorExImpl)
-	
-	ACS_LOG(LM_FULL_INFO,"CCommandSocket::connectSocket()",(LM_NOTICE,"COMMAND_SOCKET_CONNECTING"));
-   CSocket::OperationResult res=Connect(error,m_pConfiguration->DBESMAddress(),m_pConfiguration->DBESMPort());
    
-		if (res==FAIL) {
-			ACS_LOG(LM_FULL_INFO,"CCommandSocket::connectSocket()",(LM_NOTICE,"COMMAND_SOCKET_FAIL"));
-			_EXCPT_FROM_ERROR(IRALibraryResourceExImpl,dummy,error);
-			dummy.setCode(error.getErrorCode());
-			dummy.setDescription((const char*)error.getDescription());
-			_THROW_EXCPT_FROM_EXCPT(SocketErrorExImpl,dummy,"CCommandSocket::connectSocket()");
-		}	
-		else if (res==WOULDBLOCK) {
-			ACS_LOG(LM_FULL_INFO,"CCommandSocket::connectSocket()",(LM_NOTICE,"COMMAND_SOCKET_WOULDBLOCK"));
-		}
-		else {
-			ACS_LOG(LM_FULL_INFO,"CCommandSocket::connectSocket()",(LM_NOTICE,"COMMAND_SOCKET_SUCCESS"));
-		}
+   if(isConnected())
+    {
+        return;
+    }
+
+    Close(m_error);
+    m_error.Reset();
+    
+    ACS_LOG(LM_FULL_INFO,"CCommandSocket::connectSocket()",(LM_NOTICE,"COMMAND_SOCKET_CREATING"));
+    
+    if(Create(m_error, STREAM) == FAIL)
+    {
+        Close(m_error);
+        _EXCPT_FROM_ERROR(IRALibraryResourceExImpl,dummy,m_error);
+		dummy.setCode(m_error.getErrorCode());
+		dummy.setDescription((const char*)m_error.getDescription());
+		_THROW_EXCPT_FROM_EXCPT(SocketErrorExImpl,dummy,"CCommandSocket::createSocket()");
+    }
+
+    if(setSockMode(m_error, BLOCKINGTIMEO, m_timeout, m_timeout) != SUCCESS)
+    {
+        m_socket_status = NOTREADY;
+        Close(m_error);
+        _EXCPT_FROM_ERROR(IRALibraryResourceExImpl,dummy,m_error);
+		dummy.setCode(m_error.getErrorCode());
+		dummy.setDescription((const char*)m_error.getDescription());
+		_THROW_EXCPT_FROM_EXCPT(SocketErrorExImpl,dummy,"CCommandSocket::createSocket()");
+    }
+    
+    ACS_LOG(LM_FULL_INFO,"CCommandSocket::connectSocket()",(LM_NOTICE,"COMMAND_SOCKET_CONNECTING"));
+    
+    if(Connect(m_error, m_pConfiguration->DBESMAddress(),m_pConfiguration->DBESMPort()) == FAIL)
+    {
+    	  cout << "if connect fail" << endl;
+        m_socket_status = TIMEOUT;
+        Close(m_error);
+        _EXCPT_FROM_ERROR(IRALibraryResourceExImpl,dummy,m_error);
+		dummy.setCode(m_error.getErrorCode());
+		dummy.setDescription((const char*)m_error.getDescription());
+		_THROW_EXCPT_FROM_EXCPT(SocketErrorExImpl,dummy,"CCommandSocket::createSocket()");
+    }
+
+    m_socket_status = READY;
 }
 
-void CCommandSocket::sendCommand(std::string cmd,std::string* outBuff, int all = 0) throw (TimeoutExImpl,SocketErrorExImpl)
+const bool CCommandSocket::isConnected() const
 {
-	OperationResult res;
-	CError err;
-	res = sendBuffer(cmd,err);
-	
-	if (res==FAIL) {
-		_EXCPT_FROM_ERROR(SocketErrorExImpl,dummy,err);
-		throw dummy;
-	} 
-	else if (res==WOULDBLOCK) {
-		if (m_bTimedout) { // this is at least the second time the socket times out
-			ACS_LOG(LM_FULL_INFO,"CCommandSocket::sendCommand()",(LM_CRITICAL,"COMMAND_SOCKET_DISCONNECTED_ON_TIMEOUT"));
-		}
-		m_bTimedout=true;
-		_THROW_EXCPT(TimeoutExImpl,"CCommandSocket::sendCommand()");
-	}
-	else if (res==SUCCESS) {	
-		m_bTimedout=false;
-		receiveBuffer(outBuff, err, all);
-	}
+    return m_socket_status == READY ? true : false;
+}
+
+
+void CCommandSocket::sendCommand(std::string command,std::string* answer, int all = 0) //throw (TimeoutExImpl,SocketErrorExImpl)
+{
+	 connectSocket();
+
+    size_t sent_bytes = 0;
+    while(sent_bytes < command.size())
+    {
+        int res = Send(m_error, command.data() + sent_bytes, command.size() - sent_bytes);
+
+        if(res > 0)
+        {
+            sent_bytes += static_cast<size_t>(res);
+        }
+        else if(res == WOULDBLOCK)
+        {
+        	   cout << "if send wouldblock" << endl;
+            m_socket_status = TIMEOUT;
+            Close(m_error);
+            _EXCPT_FROM_ERROR(IRALibraryResourceExImpl,dummy,m_error);
+		     dummy.setCode(m_error.getErrorCode());
+		     dummy.setDescription((const char*)m_error.getDescription());
+		     _THROW_EXCPT_FROM_EXCPT(SocketErrorExImpl,dummy,"CCommandSocket::sendCommand");
+        }
+        else
+        {
+        	   cout << "if send else" << endl;
+            m_socket_status = NOTREADY;
+            Close(m_error);
+            _EXCPT_FROM_ERROR(IRALibraryResourceExImpl,dummy,m_error);
+		    dummy.setCode(m_error.getErrorCode());
+		    dummy.setDescription((const char*)m_error.getDescription());
+		    _THROW_EXCPT_FROM_EXCPT(SocketErrorExImpl,dummy,"CCommandSocket::sendCommand()");
+        }
+    }
+    
+
+    while(answer->size() < 2 || !(answer->rfind("\r\n") == answer->size() - string("\r\n").size()))
+    {
+        char buf;
+
+        int res = Receive(m_error, &buf, 1);
+
+        if(res == 1)
+        {
+            (*answer) += buf;
+        }
+        else if(res == WOULDBLOCK)
+        {
+        	   cout << "if wouldblock" << endl;
+            m_socket_status = TIMEOUT;
+            Close(m_error);
+            _EXCPT_FROM_ERROR(IRALibraryResourceExImpl,dummy,m_error);
+		      dummy.setCode(m_error.getErrorCode());
+		      dummy.setDescription((const char*)m_error.getDescription());
+		      _THROW_EXCPT_FROM_EXCPT(SocketErrorExImpl,dummy,"CCommandSocket::sendCommand()");
+        }
+        else
+        {
+        	   cout << "if notready" << endl;
+            m_socket_status = NOTREADY;
+            Close(m_error);
+            _EXCPT_FROM_ERROR(IRALibraryResourceExImpl,dummy,m_error);
+		      dummy.setCode(m_error.getErrorCode());
+		      
+            if(res == 0)
+            {
+            	 cout << "if res == 0" << endl;
+                dummy.setDescription((const char*)m_error.getDescription());
+            }
+            else
+            {
+                dummy.setDescription((const char*)m_error.getDescription());
+            }
+            _THROW_EXCPT_FROM_EXCPT(SocketErrorExImpl,dummy,"CCommandSocket::sendCommand()");
+        }
+    }
 }
 
 void CCommandSocket::set_all(const char * cfg_name) //throw (BackendsErrors::BackendsErrorsEx)
@@ -175,6 +263,12 @@ string CCommandSocket::get_dbebpf(const char * out_dbe) //throw (BackendsErrors:
 {
     return get_dbebpf_command(out_dbe);
 }
+
+void CCommandSocket::set_out_att(short out_ch, double att_val) //throw (BackendsErrors::BackendsErrorsEx)
+{
+      set_out_att_command(out_ch, att_val);
+}
+
 void CCommandSocket::parse_longSeq_response(string status_str, string start, string end, ACS::longSeq* vals) //throw (BackendsErrors::BackendsErrorsEx)
 {
    unsigned start_pos = status_str.find(start);
@@ -191,7 +285,7 @@ void CCommandSocket::parse_longSeq_response(string status_str, string start, str
            }
         }
    }
-    catch (std::out_of_range outofrange) { //if the index is out of range
+    catch (std::out_of_range& outofrange) { //if the index is out of range
        throw outofrange;            //throw this exception
     }
 
@@ -214,7 +308,7 @@ void CCommandSocket::parse_doubleSeq_response(string status_str, string start, s
            }
         }
     }    
-    catch (std::out_of_range outofrange) { //if the index is out of range
+    catch (std::out_of_range& outofrange) { //if the index is out of range
     throw outofrange;                      //throw this exception
     }     
 }
@@ -230,7 +324,7 @@ void CCommandSocket::parse_double_response(string status_str, string start, stri
       in >> temp;
       *val=temp;
    }    
-   catch (std::out_of_range outofrange) { //if the index is out of range
+   catch (std::out_of_range& outofrange) { //if the index is out of range
    throw outofrange;                      //throw this exception
    }
 
@@ -247,7 +341,7 @@ void CCommandSocket::parse_long_response(string status_str, string start, string
       in >> temp;
       *val=temp;
    }    
-   catch (std::out_of_range outofrange) { //if the index is out of range
+   catch (std::out_of_range& outofrange) { //if the index is out of range
    throw outofrange;                      //throw this exception
    }
 
@@ -261,7 +355,7 @@ void CCommandSocket::parse_string_response(string status_str, string start, stri
    try {
    *val = status_str.substr(start_pos + start.length(), end_pos - (start_pos + start.length()));
    }    
-   catch (std::out_of_range outofrange) { //if the index is out of range
+   catch (std::out_of_range& outofrange) { //if the index is out of range
    throw outofrange;                      //throw this exception
    }
 }
@@ -284,21 +378,47 @@ void CCommandSocket::onConnect(int ErrorCode)
 }
 
 // ********************* PRIVATE **************************************/
-
-void CCommandSocket::createSocket() throw (SocketErrorExImpl)
+/*
+void CCommandSocket::createSocket() //throw (SocketErrorExImpl)
 {
 	CError error;
 	// first of all close the socket.....just to be sure there is nothing pending
 	Close(error);
 	error.Reset();
 	// this will create the socket in blocking mode.....
-	if (Create(error,STREAM)==FAIL) {
+	if (Create(error, STREAM) == FAIL) {
+		cout << "failed creating socket" << endl;
 		_EXCPT_FROM_ERROR(IRALibraryResourceExImpl,dummy,error);
 		dummy.setCode(error.getErrorCode());
 		dummy.setDescription((const char*)error.getDescription());
 		error.Reset();
 		_THROW_EXCPT_FROM_EXCPT(SocketErrorExImpl,dummy,"CCommandSocket::createSocket()");
 	}
+	
+   cout << m_timeout << endl;	
+	
+	if (setSockMode(error, BLOCKINGTIMEO, m_timeout, m_timeout) != SUCCESS)
+	{
+		cout << "timeout setsocketmode" << endl;
+      m_socket_status = NOTREADY;
+      Close(m_error);
+      _EXCPT(IRALibraryResourceExImpl, impl, "CommandSocket::CreateSocket()");
+        //impl.setReason("Cannot set the socket to non-blocking.");
+        throw impl;	
+	}
+	*/
+	/*
+	if (Connect(m_error, m_ip_address.c_str(), m_port) == FAIL)
+	{
+      m_socket_status = TIMEOUT;
+      Close(m_error);
+      _EXCPT_FROM_ERROR(IRALibraryResourceExImpl,dummy,error);
+      throw impl;
+	}
+	
+	m_socket_status = READY;
+	
+	
 	// set socket send buffer!!!!
 	int Val= 64; //CACUProtocol::SOCKET_SEND_BUFFER
 	if (setSockOption(error,SO_SNDBUF,&Val,sizeof(int))==FAIL) {
@@ -308,8 +428,9 @@ void CCommandSocket::createSocket() throw (SocketErrorExImpl)
 		error.Reset();
 		_THROW_EXCPT_FROM_EXCPT(SocketErrorExImpl,dummy,"CCommandSocket::createSocket()");
 	}
+	*/
 	// set socket in non-blocking mode.
-	if (setSockMode(error,NONBLOCKING)==FAIL) {
+	/*if (setSockMode(error,NONBLOCKING)==FAIL) {
 		_EXCPT_FROM_ERROR(IRALibraryResourceExImpl,dummy,error);
 		dummy.setCode(error.getErrorCode());
 		dummy.setDescription((const char*)error.getDescription());
@@ -324,26 +445,33 @@ void CCommandSocket::createSocket() throw (SocketErrorExImpl)
 		_THROW_EXCPT_FROM_EXCPT(SocketErrorExImpl,dummy,"CCommandSocket::createSocket()");
 	}	
 }
-
-
+*/
+/*
 CSocket::OperationResult CCommandSocket::sendBuffer(std::string Msg,CError& error)
 {
 
 	CSocket::OperationResult res;
    size_t sent_bytes = 0;
-   
 	while(sent_bytes < Msg.size())
     {
       size_t sent_now = Send(error, Msg.substr(sent_bytes, Msg.size() - sent_bytes).c_str(), Msg.size() - sent_bytes);
       sent_bytes += sent_now;
 		
-		if (sent_now==CSocket::WOULDBLOCK) {res=CSocket::WOULDBLOCK;}
-		if(sent_bytes == Msg.size()){res=CSocket::SUCCESS;}
-		else {res=CSocket::FAIL;}
+		if (sent_now==CSocket::WOULDBLOCK) 
+			{
+				res=CSocket::WOULDBLOCK;
+			}
+		if(sent_bytes == Msg.size())
+			{
+				res=CSocket::SUCCESS;
+			}
+		else 
+			{
+				res=CSocket::FAIL;
+			}
 		
-	   return res;
     }
-
+   return res;
 }
 
 int CCommandSocket::receiveBuffer(std::string* Msg,CError& error, int all)
@@ -356,32 +484,35 @@ int CCommandSocket::receiveBuffer(std::string* Msg,CError& error, int all)
 	 
     while(true)
     { 
+    //cout << "dentro al while" << endl;
         char buf;
         CIRATools::getTime(Now);
         if(Receive(error, &buf, 1) == 1)
          {
+         	//cout << "dentro if receive" << endl;
             (*Msg) += buf;
-			  //cout << "buf " << buf << endl;
+			  cout << "buf " << buf << endl;
             // Reset the timer
             CIRATools::getTime(Start);
                                  }
-			if( (*Msg).back() == '\n' && (*Msg)[(*Msg).size()-2] == '\r') { // if return \r\n (=CRLF))
+			if( (*Msg).back() == '\n' && (*Msg)[(*Msg).size()-2] == '\r') 
+			  { // if return \r\n (=CRLF))
+			  cout << "dentro if fine risposta" << endl;
 			   i++;
-			   if (all == 0) {
-                  cout << *Msg << endl;				
+			   if (all == 0) {				
 				      return SUCCESS;
 				        }
 				else {
-					if (i == 4) {
-                  cout << *Msg << endl;				
+					if (i == 4) {				
 				      return SUCCESS;
 				      i = 0;
-				        }
+				               }
 				     }
-			}
+			   }
 
-        else if(CIRATools::timeDifference(Start,Now)>5000000)
+        else if(CIRATools::timeDifference(Start,Now)>3000000)
         {
+        	cout << "dentro if timeout" << endl;
         	   m_bTimedout=true;
             Close(error);
             ComponentErrors::SocketErrorExImpl exImpl(__FILE__, __LINE__, "CCommandSocketSocket::sendCommand()");
@@ -390,8 +521,9 @@ int CCommandSocket::receiveBuffer(std::string* Msg,CError& error, int all)
             throw exImpl;
 			return FAIL;
         }
-     }        
+     }   
 }
+*/
 
 void CCommandSocket::set_all_command(const char * cfg_name) //throw (BackendsErrors::BackendsErrorsEx)
 {
@@ -400,7 +532,7 @@ void CCommandSocket::set_all_command(const char * cfg_name) //throw (BackendsErr
     //cout << "Message to send is: " << msg << endl;
     //ACS_LOG(LM_FULL_INFO,"CCommandSocket::set_all_command()",(LM_INFO,msg));	
     
-    sendCommand(msg, &outBuff, 1);
+    sendCommand(msg, &outBuff, 0);
 
     if (outBuff.find("unreachable") != string::npos) {
 		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::set_all_command()");
@@ -657,7 +789,8 @@ string CCommandSocket::get_firm_command(short b_addr) //throw (BackendsErrors::B
 		impl.setReason("Error in getting dbesm firmware info, check parameters");
 		throw impl;
 	}
-    return response;
+	
+   return response;
 }
 
 string CCommandSocket::set_dbeamp_command(const char * out_dbe, const char * amp_val) //throw (BackendsErrors::BackendsErrorsEx)
@@ -779,3 +912,27 @@ string CCommandSocket::get_dbebpf_command(const char * out_dbe) //throw (Backend
 	  }
 	return response; 
 }
+
+void CCommandSocket::set_out_att_command(short out_ch, double att_val) //throw (BackendsErrors::BackendsErrorsEx)
+{
+    string outBuff;
+    string msg = CDBESMCommand::comm_set_out_att(to_string(out_ch), to_string(att_val));
+    //cout << "Message to send is: " << msg << endl;
+    sendCommand(msg, &outBuff, 0);
+    
+    if (outBuff.find("not existing") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::set_out_att_command()");
+		impl.setReason("Output to backend entered not valid");
+		throw impl;
+	   }
+    if (outBuff.find("unreachable") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::set_out_att_command()");
+		impl.setReason("DBESM board unreachable, timeout error");
+		throw impl;
+	   }       
+	 else if (outBuff.find("ERR") != string::npos) {
+		_EXCPT(BackendsErrors::BackendFailExImpl,impl,"CCommandSocket::set_out_att_command()");
+		impl.setReason("Error in setting dbesm attenuator, check parameters");
+		throw impl;
+	}    
+} 

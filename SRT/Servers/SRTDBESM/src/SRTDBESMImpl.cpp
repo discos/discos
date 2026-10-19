@@ -63,7 +63,11 @@ SRTDBESMImpl::SRTDBESMImpl(const ACE_CString &CompName,maci::ContainerServices *
    m_pcfg_1(this),
    m_pcfg_2(this),
    m_pcfg_3(this),
-   m_pcfg_4(this)
+   m_pcfg_4(this),
+   m_pattenuation(this),
+   m_pdbe_receiver(this),
+   m_pdbe_backend(this),
+   m_pdbe_cfg_name(this)
 {	
 	AUTO_TRACE("SRTDBESMImpl::SRTDBESMImpl()");
 }
@@ -73,7 +77,7 @@ SRTDBESMImpl::~SRTDBESMImpl()
 	AUTO_TRACE("SRTDBESMImpl::~SRTDBESMImpl()");
 }
 
-void SRTDBESMImpl::initialize() throw (ACSErr::ACSbaseExImpl)
+void SRTDBESMImpl::initialize() //throw (ACSErr::ACSbaseExImpl)
 {
 	AUTO_TRACE("SRTDBESMImpl::initialize()");
 	ACS_LOG(LM_FULL_INFO,"SRTDBESMImpl::initialize()",(LM_INFO,"COMPSTATE_INITIALIZING"));
@@ -130,6 +134,13 @@ void SRTDBESMImpl::initialize() throw (ACSErr::ACSbaseExImpl)
       m_pcfg_2=new ROstring(getContainerServices()->getName()+":cfg_2",getComponent());
       m_pcfg_3=new ROstring(getContainerServices()->getName()+":cfg_3",getComponent());
       m_pcfg_4=new ROstring(getContainerServices()->getName()+":cfg_4",getComponent());
+      
+      m_pattenuation=new ROdoubleSeq(getContainerServices()->getName()+":attenuation",getComponent());
+      
+      m_pdbe_receiver=new ROstring(getContainerServices()->getName()+":dbe_receiver",getComponent());
+      m_pdbe_backend=new ROstring(getContainerServices()->getName()+":dbe_backend",getComponent());
+      m_pdbe_cfg_name=new ROstring(getContainerServices()->getName()+":dbe_cfg_name",getComponent());
+
 	}
 	catch (std::bad_alloc& ex) {
 		_EXCPT(MemoryAllocationExImpl,dummy,"SRTDBESMImpl::initialize()");
@@ -190,6 +201,7 @@ void SRTDBESMImpl::execute() //throw (ACSErr::ACSbaseExImpl)
    		m_pcfg_2->getDevIO()->write( m_compConfiguration.cfg_2(),timestamp);
    		m_pcfg_3->getDevIO()->write( m_compConfiguration.cfg_3(),timestamp);
    		m_pcfg_4->getDevIO()->write( m_compConfiguration.cfg_4(),timestamp);
+   		
    		}
 			catch (ACSErr::ACSbaseExImpl& ex) {
 		   	_ADD_BACKTRACE(ComponentErrors::InitializationProblemExImpl,impl,ex,"SRTDBESMImpl::execute()");
@@ -238,6 +250,57 @@ void SRTDBESMImpl::aboutToAbort()
 	
 	_IRA_LOGFILTER_FLUSH;
 	_IRA_LOGFILTER_DESTROY;
+}
+
+void SRTDBESMImpl::setBackend(const char * backendName)
+{
+	AUTO_TRACE("SRTDBESMImpl::setBackend()");
+	
+	ACS::Time timestamp;
+	
+	m_dbe_backend = backendName;
+	m_pdbe_backend->getDevIO()->write(backendName,timestamp);
+}
+
+void SRTDBESMImpl::setReceiver(const char * receiverName)
+{
+	AUTO_TRACE("SRTDBESMImpl::setReceiver()");
+	
+	ACS::Time timestamp;
+	
+	m_dbe_receiver = receiverName;
+	m_pdbe_receiver->getDevIO()->write(receiverName,timestamp);
+}
+
+void SRTDBESMImpl::load_dbeCfg()
+{
+   AUTO_TRACE("SRTDBESMImpl::load_dbeCfg()");
+   ACS::Time timestamp;
+   char *temp_cfg_1, *temp_cfg_2, *temp_cfg_3, *temp_cfg_4;
+   
+   if (m_dbe_backend.IsEmpty() || m_dbe_receiver.IsEmpty()){
+      _EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"SRTDBESMImpl::load_dbeCfg()");
+		dummy.log(LM_DEBUG);
+		throw dummy.getComponentErrorsEx();
+      }
+   else {
+      m_dbe_cfg_name = m_dbe_receiver + "_" + m_dbe_backend;
+      
+      m_pdbe_cfg_name->getDevIO()->write((const char*)m_dbe_cfg_name,timestamp);
+     
+      get_cfg();
+      
+      temp_cfg_1 = const_cast<char*>(m_pcfg_1->getDevIO()->read(timestamp).c_str());
+      temp_cfg_2 = const_cast<char*>(m_pcfg_2->getDevIO()->read(timestamp).c_str());
+      temp_cfg_3 = const_cast<char*>(m_pcfg_3->getDevIO()->read(timestamp).c_str());
+      temp_cfg_4 = const_cast<char*>(m_pcfg_4->getDevIO()->read(timestamp).c_str());
+      
+      if (temp_cfg_1 != m_dbe_cfg_name || temp_cfg_2 != m_dbe_cfg_name || temp_cfg_3 != m_dbe_cfg_name || temp_cfg_4 != m_dbe_cfg_name)
+         {
+         	set_all(m_dbe_cfg_name); 
+         }
+      }
+      CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::load_dbeCfg()",(LM_INFO,"DBESM configuration is %s", (const char*)m_dbe_cfg_name));
 }
 
 void SRTDBESMImpl::handle_addr(short * b_addr)
@@ -311,6 +374,51 @@ void SRTDBESMImpl::set_mode(short b_addr, const char * cfg_name) //throw (Backen
 			throw dummy.getComponentErrorsEx();
 		}
 	CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::set_mode()",(LM_INFO,"Single board configuration set"));
+}
+
+void SRTDBESMImpl::setAttenuation(CORBA::Long out_ch, CORBA::Double att_val)
+{
+	AUTO_TRACE("SRTDBESMImpl::setAttenuation()");
+	
+	ACS::Time timestamp;
+   /*
+   int board_address;
+   int attenuator_channel;
+   
+   board_address = ((out_ch / 17) + 1);   //17 attenuators per board, 4 boards
+   attenuator_channel = (out_ch - ((out_ch / 17) * 17));   
+   */
+   
+	m_pattenuation->getDevIO()->write(att_val,timestamp);
+	
+	set_out_att(out_ch, att_val);
+	
+	CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::setAttenuation()",(LM_INFO,"Setting attenuation"));
+}
+
+void SRTDBESMImpl::set_out_att(short out_ch, double att_val) //throw (BackendsErrors::BackendsErrorsEx)
+{
+	AUTO_TRACE("SRTDBESMImpl::set_out_att()");
+	
+	try {
+		
+    	m_commandSocket.set_out_att(out_ch, att_val);
+    	
+   	 }
+		catch (ComponentErrors::ComponentErrorsExImpl& ex) {
+			ex.log(LM_DEBUG);
+			throw ex.getComponentErrorsEx();
+	 	}
+ 		catch (BackendsErrors::BackendsErrorsExImpl& ex) {
+			ex.log(LM_DEBUG);
+			throw ex.getBackendsErrorsEx();		
+		}	
+		catch (...) {
+			_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"SRTDBESMImpl::set_att()");
+			dummy.log(LM_DEBUG);
+			throw dummy.getComponentErrorsEx();
+		}
+	CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::set_out_att()",(LM_INFO,"Attenuator set"));	
 }
 
 void SRTDBESMImpl::set_att(short b_addr, short out_ch, double att_val) //throw (BackendsErrors::BackendsErrorsEx)
@@ -419,15 +527,15 @@ void SRTDBESMImpl::get_status(short b_addr)// throw (BackendsErrors::BackendsErr
 			throw dummy.getComponentErrorsEx();
 		}
     
-    char *c = new char[output.length()-2 + 1];  // discard \r\n
-    std::copy(output.begin(), (output.end()-2), c);
-    c[output.length()-2] = '\0';
-    
+    std::string c = output;
+	 while (!c.empty() && (c.back() == '\r' || c.back() == '\n')) {
+	    c.pop_back();
+       }
     try {
     	m_commandSocket.parse_longSeq_response(output, "REG=[ ", " ]\n\n", &new_reg_vals);    // parsing errors are thrown
     	m_commandSocket.parse_doubleSeq_response(output, "ATT=[ ", " ]\r\n", &new_att_vals);  // by the CommandSocket
     }
-    catch (std::out_of_range) {
+    catch (std::out_of_range&) {
 			_EXCPT(BackendsErrors::MalformedAnswerExImpl,impl,"SRTDBESMImpl::get_status()");
 			throw impl; }
  
@@ -463,7 +571,7 @@ void SRTDBESMImpl::get_status(short b_addr)// throw (BackendsErrors::BackendsErr
 		_ADD_BACKTRACE(ComponentErrors::InitializationProblemExImpl,impl,ex,"SRTDBESMImpl::get_status()");
 		throw impl;
 				}	    
-	 CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::get_status()",(LM_INFO,c));
+	 CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::get_status()",(LM_INFO,c.c_str()));
 }
 
 void SRTDBESMImpl::get_comp(short b_addr) //throw (BackendsErrors::BackendsErrorsEx)
@@ -492,21 +600,22 @@ void SRTDBESMImpl::get_comp(short b_addr) //throw (BackendsErrors::BackendsError
 			throw ex.getBackendsErrorsEx();		
 	 	}	
 		 catch (...) {
-			_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"SRTDBESMImpl::get_diag()");
+			_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"SRTDBESMImpl::get_comp()");
 			dummy.log(LM_DEBUG);
 			throw dummy.getComponentErrorsEx();
 	  	}
     
-    char *c = new char[output.length()-2 + 1];  // discard \r\n
-    std::copy(output.begin(), (output.end()-2), c);
-    c[output.length()-2] = '\0';
+    std::string c = output;
+	 while (!c.empty() && (c.back() == '\r' || c.back() == '\n')) {
+	    c.pop_back();
+	    }	 
     
     try {
     	m_commandSocket.parse_longSeq_response(output, "AMP=[ ", " ]\n", &new_amp_vals);    
  		m_commandSocket.parse_longSeq_response(output, "EQ=[ ", " ]\nBPF", &new_eq_vals);
   		m_commandSocket.parse_longSeq_response(output, "BPF=[ ", " ]\r\n", &new_bpf_vals);
   	 } 
-  	 catch (std::out_of_range) {
+  	 catch (std::out_of_range&) {
 			_EXCPT(BackendsErrors::MalformedAnswerExImpl,impl,"SRTDBESMImpl::get_comp()");
 			throw impl; }
     
@@ -546,7 +655,8 @@ void SRTDBESMImpl::get_comp(short b_addr) //throw (BackendsErrors::BackendsError
 			_ADD_BACKTRACE(ComponentErrors::InitializationProblemExImpl,impl,ex,"SRTDBESMImpl::get_comp()");
 			throw impl;
 					}	        	
-	 CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::get_comp()",(LM_INFO,c));
+	 CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::get_comp()",(LM_INFO,c.c_str()));
+	 cout << c << endl;
 }
 
 void SRTDBESMImpl::get_diag(short b_addr) //throw (BackendsErrors::BackendsErrorsEx)
@@ -580,25 +690,26 @@ void SRTDBESMImpl::get_diag(short b_addr) //throw (BackendsErrors::BackendsError
 			throw dummy.getComponentErrorsEx();
 	 	 }
     
-    char *c = new char[output.length()-2 + 1];  // discard \r\n
-    std::copy(output.begin(), (output.end()-2), c);
-    c[output.length()-2] = '\0';
+    std::string c = output;
+	 while (!c.empty() && (c.back() == '\r' || c.back() == '\n')) {
+	    c.pop_back();
+	    }	 
     
     try {
-    	 m_commandSocket.parse_double_response(output, "5V ", " 3V3", &new_volt_val);
+    	 m_commandSocket.parse_double_response(output, "5V=", "  3V3", &new_volt_val);
   		 new_volt_vals[0] = new_volt_val;  														
          
-   	 m_commandSocket.parse_double_response(output, "3V3 ", "\n", &new_volt_val2);
+   	 m_commandSocket.parse_double_response(output, "3V3=", "\n", &new_volt_val2);
        new_volt_vals[1] = new_volt_val2;
     }
-    catch (std::out_of_range) {
+    catch (std::out_of_range&) {
 			_EXCPT(BackendsErrors::MalformedAnswerExImpl,impl,"SRTDBESMImpl::get_diag()");
 			throw impl; }
 			
     try {  
-   	 m_commandSocket.parse_double_response(output, "T0 ", "\r\n", &new_temp_val);
+   	 m_commandSocket.parse_double_response(output, "T 0=", "\r\n", &new_temp_val);
     }
-    catch (std::out_of_range) {
+    catch (std::out_of_range&) {
    	    if (output.find("temp sensor not present") != std::string::npos) {
              new_temp_val = 0.0;
              }
@@ -642,7 +753,8 @@ void SRTDBESMImpl::get_diag(short b_addr) //throw (BackendsErrors::BackendsError
 			_ADD_BACKTRACE(ComponentErrors::InitializationProblemExImpl,impl,ex,"SRTDBESMImpl::get_diag()");
 			throw impl;
 					}	    
-	 CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::get_diag()",(LM_INFO,c));
+	 CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::get_diag()",(LM_INFO,c.c_str()));
+	 cout << c << endl;
 }
 
 void SRTDBESMImpl::get_cfg()
@@ -669,35 +781,41 @@ void SRTDBESMImpl::get_cfg()
 			dummy.log(LM_DEBUG);
 			throw dummy.getComponentErrorsEx();
 	 	 }
+	 
+	 std::string c = cfg_message;
+	 while (!c.empty() && (c.back() == '\r' || c.back() == '\n')) {
+	    c.pop_back();
+	    }	 
     
-    char *c = new char[cfg_message.length()+ 1];  // here we keep \r\n
-    std::copy(cfg_message.begin(), (cfg_message.end()), c);
-    c[cfg_message.length()] = '\0';
+    std::vector<int> v;
+    v.push_back(0);
     
-    int i =0; 
-    int v[5];
-    v[0] = 0;
-    
-    while (c[i] != '\0'){
-    		if (( c[i] == '\n' && c[i+1] == '\n' ) || ( c[i] == '\r' && c[i+1] == '\n' )){
-    			 v[newlines+1] = i;
+    for (std::size_t i=0; i < c.length(); ++i){
+    		if ( c[i] == '\n' ){
+    			 v.push_back(i+1);
     		    newlines++;
-    		    }
-    		i++;    
+    		    }  
     		 }
-    
-    for (int j=0; j< newlines; j++) {
+
+    v[newlines + 1] = c.length();
+
+    for (int j=0; j<= newlines; j++) {
     	
 	 	string new_str;
 	 	ACS::Time timestamp, timestamp2;
 	 	double b_addr=0;
-	   string str = "BOARD xx";
+	   string str = "BOARD x";
+	   size_t row_start = v[j];
+	   size_t row_len = v[j+1] - v[j];
+	   string current_row = cfg_message.substr(row_start, row_len);
+	   
+	   if (current_row.find("BOARD") == string::npos) continue;
 	   
     	try {
-    			m_commandSocket.parse_double_response(cfg_message.substr(v[j],v[j+1]), "BOARD ", " ", &b_addr);
-   	 		m_commandSocket.parse_string_response(cfg_message.substr(str.length()+2,v[j+1]), " ", "\n", &new_str);
+    			m_commandSocket.parse_double_response(current_row, "BOARD ", " ", &b_addr);
+   	 		m_commandSocket.parse_string_response(current_row.substr(str.length()), " ", "\n", &new_str);
     		 }
-    		 catch (std::out_of_range) {
+    		 catch (std::out_of_range&) {
 			 _EXCPT(BackendsErrors::MalformedAnswerExImpl,impl,"SRTDBESMImpl::get_cfg()");
 			 throw impl; }
 			 
@@ -737,7 +855,8 @@ void SRTDBESMImpl::get_cfg()
 			throw impl;
 				}		    
 		}
-    CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::get_cfg()",(LM_INFO,c));
+    CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::get_cfg()",(LM_INFO,c.c_str()));
+    cout << c << endl;
 }
 
 void SRTDBESMImpl::set_dbeatt(const char * out_dbe, const char * att_val)
@@ -763,11 +882,12 @@ void SRTDBESMImpl::set_dbeatt(const char * out_dbe, const char * att_val)
 			throw dummy.getComponentErrorsEx();
 	 	 }
     
-    char *c = new char[out_dbe_message.length()-2 + 1];  // discard \r\n
-    std::copy(out_dbe_message.begin(), (out_dbe_message.end()-2), c);
-    c[out_dbe_message.length()-2] = '\0';
+    std::string c = out_dbe_message;
+	 while (!c.empty() && (c.back() == '\r' || c.back() == '\n')) {
+	    c.pop_back();
+	    }
     
-    CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::set_dbeatt()",(LM_INFO,c));
+    CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::set_dbeatt()",(LM_INFO,c.c_str()));
 }
 
 void SRTDBESMImpl::get_dbeatt(const char * out_dbe)
@@ -793,22 +913,25 @@ void SRTDBESMImpl::get_dbeatt(const char * out_dbe)
 			dummy.log(LM_DEBUG);
 			throw dummy.getComponentErrorsEx();
 	 	 }
-	 char *c = new char[out_dbe_message.length() + 1];  // here we keep \r\n
-    std::copy(out_dbe_message.begin(), (out_dbe_message.end()), c);
-    c[out_dbe_message.length()] = '\0';
-    	 
-    int i =0; 
-    int v[5];
-    v[0] = 0;
-    while (c[i] != '\0'){
-    		if ( c[i] == '\n' ){
-    			 v[newlines+1] = i;
-    		    newlines++;
-    		    }
-    		i++;    
-    		 }
+	 
+	 std::string c = out_dbe_message;
+	 while (!c.empty() && (c.back() == '\r' || c.back() == '\n')) {
+	    c.pop_back();
+	    }	 
     
-    for (int j=0; j< newlines; j++) {
+    std::vector<int> v;
+    v.push_back(0);
+    
+    for (std::size_t i=0; i < c.length(); ++i){
+    		if ( c[i] == '\n' ){
+    			 v.push_back(i+1);
+    		    newlines++;
+    		    }  
+    		 }
+
+    v[newlines + 1] = c.length();
+    
+    for (int j=0; j<= newlines; j++) {
 	 	ACS::doubleSeq new_seq;
 	 	ACS::Time timestamp, timestamp2, timestamp3;
 	 	double b_addr=0, att_ch=0, new_att_val=0;
@@ -818,7 +941,7 @@ void SRTDBESMImpl::get_dbeatt(const char * out_dbe)
    	 	m_commandSocket.parse_double_response(out_dbe_message.substr(v[j],v[j+1]), "ATT ", " VALUE", &att_ch);
    	 	m_commandSocket.parse_double_response(out_dbe_message.substr(v[j],v[j+1]), "VALUE ", "\n", &new_att_val);
     		 }
-    		catch (std::out_of_range) {
+    		catch (std::out_of_range&) {
 			_EXCPT(BackendsErrors::MalformedAnswerExImpl,impl,"SRTDBESMImpl::get_dbeatt()");
 			throw impl; }
    	try {
@@ -862,7 +985,8 @@ void SRTDBESMImpl::get_dbeatt(const char * out_dbe)
 				}		    
 		}
 		
-    CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::get_dbeatt()",(LM_INFO,c));
+    CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::get_dbeatt()",(LM_INFO,c.c_str()));
+    cout << c << endl;
 }
 
 void SRTDBESMImpl::get_firm(short b_addr) //throw (BackendsErrors::BackendsErrorsEx)
@@ -886,18 +1010,20 @@ void SRTDBESMImpl::get_firm(short b_addr) //throw (BackendsErrors::BackendsError
 			throw ex.getBackendsErrorsEx();		
 		 }	
 		 catch (...) {
-			_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"SRTDBESMImpl::get_diag()");
+			_EXCPT(ComponentErrors::UnexpectedExImpl,dummy,"SRTDBESMImpl::get_firm()");
 			dummy.log(LM_DEBUG);
 			throw dummy.getComponentErrorsEx();
 	 	 }
     
-    char *c = new char[output.length()-2 + 1];  // discard \r\n
-    std::copy(output.begin(), (output.end()-2), c);
-    c[output.length()-2] = '\0';
-
-	 CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::get_firm()",(LM_INFO,c));
+    std::string c = output;
+	 while (!c.empty() && (c.back() == '\r' || c.back() == '\n')) {
+	    c.pop_back();
+	    }
+	    	 
+	 CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::get_firm()",(LM_INFO,c.c_str()));
 	 
-	 return c;
+	 cout << c << endl;
+	     
 }
 
 void SRTDBESMImpl::set_dbeamp(const char * out_dbe, const char * amp_val)
@@ -923,11 +1049,12 @@ void SRTDBESMImpl::set_dbeamp(const char * out_dbe, const char * amp_val)
 			throw dummy.getComponentErrorsEx();
 	 	 }
     
-    char *c = new char[out_dbe_message.length()-2 + 1];  // discard \r\n
-    std::copy(out_dbe_message.begin(), (out_dbe_message.end()-2), c);
-    c[out_dbe_message.length()-2] = '\0';
+    std::string c = out_dbe_message;
+	 while (!c.empty() && (c.back() == '\r' || c.back() == '\n')) {
+	    c.pop_back();
+	    }	 
     
-    CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::set_dbeamp()",(LM_INFO,c));
+    CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::set_dbeamp()",(LM_INFO,c.c_str()));
 }
 
 void SRTDBESMImpl::get_dbeamp(const char * out_dbe)
@@ -953,22 +1080,25 @@ void SRTDBESMImpl::get_dbeamp(const char * out_dbe)
 			dummy.log(LM_DEBUG);
 			throw dummy.getComponentErrorsEx();
 	 	 }
-	 char *c = new char[out_dbe_message.length() + 1];  // here we keep \r\n
-    std::copy(out_dbe_message.begin(), (out_dbe_message.end()), c);
-    c[out_dbe_message.length()] = '\0';
-    	 
-    int i =0; 
-    int v[5];
-    v[0] = 0;
-    while (c[i] != '\0'){
-    		if ( c[i] == '\n' ){
-    			 v[newlines+1] = i;
-    		    newlines++;
-    		    }
-    		i++;    
-    		 }
+	 	 
+	 std::string c = out_dbe_message;
+	 while (!c.empty() && (c.back() == '\r' || c.back() == '\n')) {
+	    c.pop_back();
+	    }	 
     
-    for (int j=0; j< newlines; j++) {
+    std::vector<int> v;
+    v.push_back(0);
+    
+    for (std::size_t i=0; i < c.length(); ++i){
+    		if ( c[i] == '\n' ){
+    			 v.push_back(i+1);
+    		    newlines++;
+    		    }  
+    		 }
+
+    v[newlines + 1] = c.length();
+    
+    for (int j=0; j<= newlines; j++) {
 	 	ACS::longSeq new_seq;
 	 	ACS::Time timestamp, timestamp2, timestamp3;
 	 	double b_addr=0, amp_ch=0;
@@ -979,7 +1109,7 @@ void SRTDBESMImpl::get_dbeamp(const char * out_dbe)
    	 	m_commandSocket.parse_double_response(out_dbe_message.substr(v[j],v[j+1]), "AMP ", " VALUE", &amp_ch);
    	 	m_commandSocket.parse_long_response(out_dbe_message.substr(v[j],v[j+1]), "VALUE ", "\n", &new_amp_val);
     		 }
-    		catch (std::out_of_range) {
+    		catch (std::out_of_range&) {
 			_EXCPT(BackendsErrors::MalformedAnswerExImpl,impl,"SRTDBESMImpl::get_dbeamp()");
 			throw impl; }
    	try {
@@ -1023,7 +1153,8 @@ void SRTDBESMImpl::get_dbeamp(const char * out_dbe)
 				}		    
 		}
 		
-    CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::get_dbeamp()",(LM_INFO,c));
+    CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::get_dbeamp()",(LM_INFO,c.c_str()));
+    cout << c << endl;
 }
 
 void SRTDBESMImpl::set_dbeeq(const char * out_dbe, const char * eq_val)
@@ -1049,11 +1180,12 @@ void SRTDBESMImpl::set_dbeeq(const char * out_dbe, const char * eq_val)
 			throw dummy.getComponentErrorsEx();
 	 	 }
     
-    char *c = new char[out_dbe_message.length()-2 + 1];  // discard \r\n
-    std::copy(out_dbe_message.begin(), (out_dbe_message.end()-2), c);
-    c[out_dbe_message.length()-2] = '\0';
+    std::string c = out_dbe_message;
+	 while (!c.empty() && (c.back() == '\r' || c.back() == '\n')) {
+	    c.pop_back();
+	    }	 
     
-    CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::set_dbeeq()",(LM_INFO,c));
+    CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::set_dbeeq()",(LM_INFO,c.c_str()));
 }
 
 void SRTDBESMImpl::get_dbeeq(const char * out_dbe)
@@ -1079,32 +1211,35 @@ void SRTDBESMImpl::get_dbeeq(const char * out_dbe)
 			dummy.log(LM_DEBUG);
 			throw dummy.getComponentErrorsEx();
 	 	 }
-	 char *c = new char[out_dbe_message.length() + 1];  // here we keep \r\n
-    std::copy(out_dbe_message.begin(), (out_dbe_message.end()), c);
-    c[out_dbe_message.length()] = '\0';
-    	 
-    int i =0; 
-    int v[5];
-    v[0] = 0;
-    while (c[i] != '\0'){
-    		if ( c[i] == '\n' ){
-    			 v[newlines+1] = i;
-    		    newlines++;
-    		    }
-    		i++;    
-    		 }
+	 	 
+	 std::string c = out_dbe_message;
+	 while (!c.empty() && (c.back() == '\r' || c.back() == '\n')) {
+	    c.pop_back();
+	    }	 
     
-    for (int j=0; j< newlines; j++) {
+    std::vector<int> v;
+    v.push_back(0);
+    
+    for (std::size_t i=0; i < c.length(); ++i){
+    		if ( c[i] == '\n' ){
+    			 v.push_back(i+1);
+    		    newlines++;
+    		    }  
+    		 }
+
+    v[newlines + 1] = c.length();
+    
+    for (int j=0; j<= newlines; j++) {
 	 	ACS::longSeq new_seq;
 	 	ACS::Time timestamp, timestamp2, timestamp3;
 	 	double b_addr=0, eq_ch=0, new_eq_val=0;
 	 
     	try {
    	 	m_commandSocket.parse_double_response(out_dbe_message.substr(v[j],v[j+1]), "BOARD ", " EQ", &b_addr);
-   	 	m_commandSocket.parse_double_response(out_dbe_message.substr(v[j],v[j+1]), "AMP ", " VALUE", &eq_ch);
+   	 	m_commandSocket.parse_double_response(out_dbe_message.substr(v[j],v[j+1]), "EQ ", " VALUE", &eq_ch);
    	 	m_commandSocket.parse_double_response(out_dbe_message.substr(v[j],v[j+1]), "VALUE ", "\n", &new_eq_val);
     		 }
-    		catch (std::out_of_range) {
+    		catch (std::out_of_range&) {
 			_EXCPT(BackendsErrors::MalformedAnswerExImpl,impl,"SRTDBESMImpl::get_dbeeq()");
 			throw impl; }
    	try {
@@ -1148,7 +1283,8 @@ void SRTDBESMImpl::get_dbeeq(const char * out_dbe)
 				}		    
 		}
 		
-    CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::get_dbeeq()",(LM_INFO,c));
+    CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::get_dbeeq()",(LM_INFO,c.c_str()));
+    cout << c << endl;
 }
 
 
@@ -1175,11 +1311,12 @@ void SRTDBESMImpl::set_dbebpf(const char * out_dbe, const char * bpf_val)
 			throw dummy.getComponentErrorsEx();
 	 	 }
     
-    char *c = new char[out_dbe_message.length()-2 + 1];  // discard \r\n
-    std::copy(out_dbe_message.begin(), (out_dbe_message.end()-2), c);
-    c[out_dbe_message.length()-2] = '\0';
+    std::string c = out_dbe_message;
+	 while (!c.empty() && (c.back() == '\r' || c.back() == '\n')) {
+	    c.pop_back();
+	    }	 
     
-    CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::set_dbebpf()",(LM_INFO,c));
+    CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::set_dbebpf()",(LM_INFO,c.c_str()));
 }
 
 void SRTDBESMImpl::get_dbebpf(const char * out_dbe)
@@ -1205,22 +1342,25 @@ void SRTDBESMImpl::get_dbebpf(const char * out_dbe)
 			dummy.log(LM_DEBUG);
 			throw dummy.getComponentErrorsEx();
 	 	 }
-	 char *c = new char[out_dbe_message.length() + 1];  // here we keep \r\n
-    std::copy(out_dbe_message.begin(), (out_dbe_message.end()), c);
-    c[out_dbe_message.length()] = '\0';
-    	 
-    int i =0; 
-    int v[5];
-    v[0] = 0;
-    while (c[i] != '\0'){
-    		if ( c[i] == '\n' ){
-    			 v[newlines+1] = i;
-    		    newlines++;
-    		    }
-    		i++;    
-    		 }
+	 	 
+	 std::string c = out_dbe_message;
+	 while (!c.empty() && (c.back() == '\r' || c.back() == '\n')) {
+	    c.pop_back();
+	    }	 
     
-    for (int j=0; j< newlines; j++) {
+    std::vector<int> v;
+    v.push_back(0);
+    
+    for (std::size_t i=0; i < c.length(); ++i){
+    		if ( c[i] == '\n' ){
+    			 v.push_back(i+1);
+    		    newlines++;
+    		    }  
+    		 }
+
+    v[newlines + 1] = c.length();
+    
+    for (int j=0; j<= newlines; j++) {
 	 	ACS::longSeq new_seq;
 	 	ACS::Time timestamp, timestamp2, timestamp3;
 	 	double b_addr=0, bpf_ch=0, new_bpf_val=0;
@@ -1230,7 +1370,7 @@ void SRTDBESMImpl::get_dbebpf(const char * out_dbe)
    	 	m_commandSocket.parse_double_response(out_dbe_message.substr(v[j],v[j+1]), "BPF ", " VALUE", &bpf_ch);
    	 	m_commandSocket.parse_double_response(out_dbe_message.substr(v[j],v[j+1]), "VALUE ", "\n", &new_bpf_val);
     		 }
-    		catch (std::out_of_range) {
+    		catch (std::out_of_range&) {
 			_EXCPT(BackendsErrors::MalformedAnswerExImpl,impl,"SRTDBESMImpl::get_dbebpf()");
 			throw impl; }
    	try {
@@ -1274,7 +1414,8 @@ void SRTDBESMImpl::get_dbebpf(const char * out_dbe)
 				}		    
 		}
 		
-    CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::get_dbebpf()",(LM_INFO,c));
+    CUSTOM_LOG(LM_FULL_INFO,"SRTDBESMImpl::get_dbebpf()",(LM_INFO,c.c_str()));
+    cout << c << endl;
 }
 
 GET_PROPERTY_REFERENCE(ACS::ROlong,m_paddr_1,addr_1);
@@ -1313,6 +1454,10 @@ GET_PROPERTY_REFERENCE(ACS::ROstring,m_pcfg_1,cfg_1);
 GET_PROPERTY_REFERENCE(ACS::ROstring,m_pcfg_2,cfg_2);
 GET_PROPERTY_REFERENCE(ACS::ROstring,m_pcfg_3,cfg_3);
 GET_PROPERTY_REFERENCE(ACS::ROstring,m_pcfg_4,cfg_4);
+GET_PROPERTY_REFERENCE(ACS::ROdoubleSeq,m_pattenuation,attenuation);
+GET_PROPERTY_REFERENCE(ACS::ROstring,m_pdbe_receiver,dbe_receiver);
+GET_PROPERTY_REFERENCE(ACS::ROstring,m_pdbe_backend,dbe_backend);
+GET_PROPERTY_REFERENCE(ACS::ROstring,m_pdbe_cfg_name,dbe_cfg_name);
 
 /* --------------- [ MACI DLL support functions ] -----------------*/
 #include <maciACSComponentDefines.h>

@@ -81,6 +81,10 @@ LIBRARIES       =   SRTDBESMImpl
 LIBRARIES_L     =
 SRTDBESMImpl_OBJECTS = DBESMprotocol CommandSocket Configuration SRTDBESMImpl
 SRTDBESMImpl_LIBS = SRTDBESMStubs IRALibrary BackendsDefinitionsStubs ComponentErrors BackendsErrors ManagementErrors ManagmentDefinitionsStubs
+SRTDBESMImpl_CFLAGS = -std=c++17 -fconcepts
+DBESMprotocol_CFLAGS = -std=c++17 -fconcepts
+CommandSocket_CFLAGS = -std=c++17 -fconcepts
+Configuration_CFLAGS = -std=c++17 -fconcepts
 
 #
 # <brief description of lllll library>

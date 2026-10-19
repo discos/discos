@@ -134,7 +134,7 @@ IDL_FILES = SRTDBESM
 IDL_TAO_FLAGS =
 USER_IDL =
 
-SRTDBESMStubs_LIBS = baciStubs ComponentErrorsStubs BackendsErrorsStubs ManagmentDefinitionsStubs BackendsDefinitionsStubs
+SRTDBESMStubs_LIBS = baciStubs ComponentErrorsStubs BackendsErrorsStubs BackendsDefinitionsStubs GenericBackendStubs
 
 #
 # Jarfiles and their directories

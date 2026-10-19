@@ -28,9 +28,9 @@ public:
 	 * @throwCDBAccess
 	 * @param Services pointer to the container services object
 	*/
-	void init(maci::ContainerServices *Services) throw (ComponentErrors::CDBAccessExImpl);
+	void init(maci::ContainerServices *Services); //throw (ComponentErrors::CDBAccessExImpl);
 	
-	void init() throw (ComponentErrors::CDBAccessExImpl);
+	void init(); //throw (ComponentErrors::CDBAccessExImpl);
 	
 	/** Gets W band LO ip address */
 	inline CString DBESMAddress() const { return m_DBESM_IPAddress; }
@@ -81,7 +81,11 @@ public:
 	inline char * cfg_1() const { return m_cfg_1; }
 	inline char * cfg_2() const { return m_cfg_2; } 
 	inline char * cfg_3() const { return m_cfg_3; } 
-   inline char * cfg_4() const { return m_cfg_4; } 
+   inline char * cfg_4() const { return m_cfg_4; }
+   
+   //inline ACS::doubleSeq& attenuation() { return m_attenuation; }
+   
+   //inline char * dbe_receiver() const { return m_dbe_receiver; }
                     
 private:
 
@@ -127,10 +131,14 @@ private:
    double m_temps_3;
    double m_temps_4;
 
-   char * m_cfg_1 = new char[20];
+   char * m_cfg_1= new char[20];
    char * m_cfg_2= new char[20];
    char * m_cfg_3= new char[20];
    char * m_cfg_4= new char[20];
+   
+   //ACS::doubleSeq m_attenuation;
+   
+   //char * m_dbe_receiver = new char[20];
    
 };
 

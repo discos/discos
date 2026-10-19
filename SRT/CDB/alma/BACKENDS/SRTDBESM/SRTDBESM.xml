@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='ISO-8859-1'?>
 
-<SRTDBESM xmlns="urn:schemas-cosylab-com:SRTDBESM:1.0" xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" addr_1="0" addr_2="1" addr_3="2" addr_4="3" DBESM_IPAddress="127.0.0.1" DBESM_Port="11111">
+<SRTDBESM xmlns="urn:schemas-cosylab-com:SRTDBESM:1.0" xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" addr_1="1" addr_2="2" addr_3="3" addr_4="4" DBESM_IPAddress="192.168.60.42" DBESM_Port="6344">
     <addr_1 description="address of board 1" />	
     <addr_2 description="address of board 2" />
     <addr_3 description="address of board 3" />	
@@ -37,4 +37,8 @@
 	<cfg_2 description="configuration on board 2" />
 	<cfg_3 description="configuration on board 3" />
 	<cfg_4 description="configuration on board 4" />
+		<attenuation description="attenuation" />
+		<dbe_receiver description="receiver input to dbesm" />
+	   <dbe_backend description="backend destination from dbesm" />
+	   <dbe_cfg_name description="configuration filename for dbesm" />
 </SRTDBESM>

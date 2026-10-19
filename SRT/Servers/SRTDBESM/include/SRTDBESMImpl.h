@@ -42,7 +42,7 @@ public:
 	 * @throw ACSErr::ACSbaseExImpl
 	 * 		  @arg \c ComponentErrors::MemoryAllocation
 	*/
-	virtual void initialize() throw (ACSErr::ACSbaseExImpl);
+	virtual void initialize(); //throw (ACSErr::ACSbaseExImpl);
 
 	/**
  	 * Called after <i>initialize()</i> to tell the component that it has to be ready to accept incoming functional calls any time. 
@@ -101,7 +101,16 @@ public:
  	virtual void set_dbebpf(const char * out_dbe, const char * bpf_val); //throw (BackendsErrors::BackendsErrorsEx);
  	
  	virtual void get_dbebpf(const char * out_dbe); //throw (BackendsErrors::BackendsErrorsEx);
+ 	
+ 	virtual void setAttenuation(CORBA::Long out_ch, CORBA::Double att_val);
+ 	
+ 	virtual void setBackend(const char * backendName);
 
+   virtual void setReceiver(const char * receiverName);
+   
+   virtual void load_dbeCfg();
+   
+   virtual void set_out_att(short out_ch, double att_val);
 	/** 
 	 * Returns a reference to addr_1.
 	 * @return pointer to long property addr_1
@@ -119,7 +128,11 @@ public:
    virtual ACS::ROstring_ptr cfg_2();
    virtual ACS::ROstring_ptr cfg_3();
    virtual ACS::ROstring_ptr cfg_4();
-
+   virtual ACS::ROdoubleSeq_ptr attenuation();
+   virtual ACS::ROstring_ptr dbe_receiver();
+   virtual ACS::ROstring_ptr dbe_backend();
+   virtual ACS::ROstring_ptr dbe_cfg_name();
+   
 private:
 		
 	/** Component configuration data */
@@ -128,6 +141,10 @@ private:
 	 *  socket used to issue commands to the ACU
 	 */
 	CCommandSocket m_commandSocket;
+	
+	IRA::CString m_dbe_receiver = "";
+	IRA::CString m_dbe_backend = "";
+	IRA::CString m_dbe_cfg_name = "";
 	
 	SmartPropertyPointer<ROlong> m_paddr_1, m_paddr_2, m_paddr_3, m_paddr_4;
 	SmartPropertyPointer<ROlongSeq> m_pregs_1, m_pregs_2, m_pregs_3, m_pregs_4;
@@ -139,6 +156,10 @@ private:
 	SmartPropertyPointer<ROdouble> m_ptemps_1, m_ptemps_2, m_ptemps_3, m_ptemps_4;
 	SmartPropertyPointer<ROstring> m_pcfg_1;
 	SmartPropertyPointer<ROstring> m_pcfg_2, m_pcfg_3, m_pcfg_4;
+	SmartPropertyPointer<ROdoubleSeq> m_pattenuation;
+	SmartPropertyPointer<ROstring> m_pdbe_receiver;
+	SmartPropertyPointer<ROstring> m_pdbe_backend;
+   SmartPropertyPointer<ROstring> m_pdbe_cfg_name;
 	
 };
 
