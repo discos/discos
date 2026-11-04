@@ -6,7 +6,9 @@ namespace ZMQLibrary
         topic(topic),
         m_topic(this->topic.data(), this->topic.size()),
         m_context(ZMQContext::getInstance()),
-        m_socket(create_socket(m_context))
+        m_socket(create_socket(m_context)),
+        m_stopping(false),
+        m_worker(&ZMQPublisher::workerLoop, this)
     {
         m_socket->set(zmq::sockopt::linger, 0);
         m_socket->set(zmq::sockopt::immediate, true);
@@ -15,12 +17,47 @@ namespace ZMQLibrary
 
     ZMQPublisher::~ZMQPublisher()
     {
+        {
+            std::lock_guard<std::mutex> lock(m_queueMutex);
+            m_stopping = true;
+        }
+        m_queueCV.notify_one();
+        if(m_worker.joinable())
+        {
+            m_worker.join();
+        }
         m_socket->close();
     }
 
     void ZMQPublisher::publish(const ZMQDictionary& dictionary)
     {
-        publish(dictionary.dump());
+        {
+            std::lock_guard<std::mutex> lock(m_queueMutex);
+            m_pendingDictionaries.push(dictionary);
+        }
+        m_queueCV.notify_one();
+    }
+
+    void ZMQPublisher::workerLoop()
+    {
+        while(true)
+        {
+            ZMQDictionary dictionary;
+            {
+                std::unique_lock<std::mutex> lock(m_queueMutex);
+                m_queueCV.wait(lock, [this]() { return m_stopping || !m_pendingDictionaries.empty(); });
+
+                if(m_stopping && m_pendingDictionaries.empty())
+                {
+                    return;
+                }
+
+                dictionary = std::move(m_pendingDictionaries.front());
+                m_pendingDictionaries.pop();
+            }
+
+            publish(dictionary.dump());
+        }
     }
 
     void ZMQPublisher::publish(const std::string& payload_str)

@@ -60,7 +60,7 @@ PyZMQTimeStamp_OBJECTS = PyZMQTimeStamp
 PyZMQTimeStamp_LIBS = ZMQLibrary boost_python3
 
 bulkDataZMQLibrary_OBJECTS = bulkDataZMQReceiverImpl bulkDataZMQSenderImpl bulkDataZMQ bulkDataZMQConfiguration bulkDataZMQPubSub bulkDataZMQCallback
-bulkDataZMQLibrary_LIBS = baci IRALibrary ACSBulkDataError ComponentErrors bulkDataZMQReceiverStubs bulkDataZMQSenderStubs
+bulkDataZMQLibrary_LIBS = baci IRALibrary ACSBulkDataError ComponentErrors bulkDataZMQReceiverStubs bulkDataZMQSenderStubs ZMQLibrary
 
 #
 # Configuration Database Files
